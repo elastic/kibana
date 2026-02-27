@@ -116,13 +116,16 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.info(`Setting up TrialCompanionMilestoneService: ${setup.enabled}`);
     this.enabled = setup.enabled;
     this.telemetry = setup.telemetry;
-    this.registerTask(setup.taskManager);
+    if (this.enabled) {
+      this.registerTask(setup.taskManager);
+    }
   }
 
   public async start(start: TrialCompanionMilestoneServiceStart) {
     this.logger.debug('Starting TrialCompanionMilestoneService');
     if (!this.enabled) {
       this.logger.info('TrialCompanionMilestoneService is disabled, skipping start');
+      await this.removeTask(start.taskManager);
       return;
     }
     this.repo = start.repo;
@@ -195,7 +198,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
-    this.logger.debug('About to register task');
+    this.logger.debug(`About to register ${TASK_TYPE} task`);
 
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
@@ -217,8 +220,13 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     });
   }
 
+  private async removeTask(taskManager: TaskManagerStartContract) {
+    this.logger.debug(`About to remove ${TASK_ID} task`);
+    await taskManager.removeIfExists(TASK_ID);
+  }
+
   private async scheduleTask(taskManager: TaskManagerStartContract): Promise<void> {
-    this.logger.debug('About to schedule task');
+    this.logger.debug(`About to schedule task ${TASK_ID}`);
 
     await taskManager.ensureScheduled({
       id: TASK_ID,

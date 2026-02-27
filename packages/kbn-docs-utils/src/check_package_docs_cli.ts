@@ -28,9 +28,9 @@ import {
 import type { PluginOrPackage, MissingApiItemMap } from './types';
 import type { AllPluginStats } from './cli/types';
 
-type ValidationCheck = 'any' | 'comments' | 'exports';
+type ValidationCheck = 'any' | 'comments' | 'exports' | 'unnamed';
 
-const DEFAULT_VALIDATION_CHECKS: ValidationCheck[] = ['any', 'comments', 'exports'];
+const DEFAULT_VALIDATION_CHECKS: ValidationCheck[] = ['any', 'comments', 'exports', 'unnamed'];
 
 const rootDir = Path.join(__dirname, '../../..');
 
@@ -62,6 +62,7 @@ export const getValidationResults = (
   const shouldCheckAny = checks.includes('any');
   const shouldCheckComments = checks.includes('comments');
   const shouldCheckExports = checks.includes('exports');
+  const shouldCheckUnnamed = checks.includes('unnamed');
 
   const hasPluginFilter = pluginFilter && pluginFilter.length > 0;
   const hasPackageFilter = packageFilter && packageFilter.length > 0;
@@ -96,10 +97,11 @@ export const getValidationResults = (
           pluginStats.missingComplexTypeInfo.length > 0 ||
           pluginStats.missingReturns.length > 0);
       const hasExportIssues = shouldCheckExports && missingExports > 0;
+      const hasUnnamedIssues = shouldCheckUnnamed && pluginStats.unnamedExports.length > 0;
 
       return {
         pluginId: plugin.id,
-        passed: !(hasAnyIssues || hasCommentIssues || hasExportIssues),
+        passed: !(hasAnyIssues || hasCommentIssues || hasExportIssues || hasUnnamedIssues),
       };
     });
 };

@@ -102,7 +102,7 @@ describe('TS Autocomplete', () => {
     test('discriminates between indices and aliases', async () => {
       const suggestions = await suggest('TS ');
       const indices: string[] = suggestions
-        .filter((s) => s.detail === 'Index')
+        .filter((s) => s.detail === 'Timeseries')
         .map((s) => s.label)
         .sort();
       const aliases: string[] = suggestions
@@ -150,6 +150,46 @@ describe('TS Autocomplete', () => {
 
     test('filters out already used metadata fields', async () => {
       await tsExpectSuggestions('ts time_series_index metadata _index, ', metadataFieldsAndIndex);
+    });
+  });
+
+  describe('standalone (isStandalone) queries', () => {
+    const standaloneExtensions = {
+      recommendedQueries: [
+        {
+          name: 'Search all metrics',
+          query: 'TS metrics-*',
+          description: 'Searches all available metrics',
+          isStandalone: true,
+        },
+        {
+          name: 'Timeseries rate',
+          query: 'TS logs* | STATS SUM(RATE(bytes)',
+        },
+      ],
+      recommendedFields: [],
+    };
+
+    const contextWithStandalone = {
+      ...mockContext,
+      editorExtensions: standaloneExtensions,
+    };
+
+    const extensionSuggestions = getRecommendedQueriesTemplatesFromExtensions(
+      standaloneExtensions.recommendedQueries
+    );
+
+    test('standalone suggestion appears after space alongside other suggestions', async () => {
+      const expected = ['METADATA ', ',', '| ', ...extensionSuggestions.map((s) => s.text)].sort();
+
+      await expectSuggestions(
+        'ts timeseries_index ',
+        expected,
+        contextWithStandalone,
+        'ts',
+        mockCallbacks,
+        autocomplete
+      );
     });
   });
 });

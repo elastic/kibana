@@ -58,6 +58,7 @@ const createBaseStats = (pluginId: string): AllPluginStats => ({
     eslintDisableFileCount: 0,
     eslintDisableLineCount: 0,
     enzymeImportCount: 0,
+    unnamedExports: [],
   },
 });
 
