@@ -2,6 +2,16 @@
 
 This example plugin demonstrates how to register a custom workflow step using the workflows extensions API.
 
+## How to run
+
+Example plugins are only loaded when Kibana is started with the `--run-examples` flag. Start Kibana with:
+
+```bash
+yarn start --run-examples
+```
+
+Then open **Developer examples** in the sidebar and click **Workflows Extensions Example**.
+
 ## Overview
 
 The plugin registers a `setvar` step that allows you to set variables in the workflow context. These variables can then be referenced in subsequent steps using template syntax.
@@ -51,6 +61,29 @@ steps:
     with:
       message: "{{ steps.set_vars.output.variables.myVar }}"
 ```
+
+## Event-driven trigger and emitEvent
+
+The plugin registers a custom trigger `example.custom_trigger` and exposes a route to emit events for it. Workflows that subscribe to this trigger in the same space will run when an event is emitted.
+
+### Emit an event
+
+From a route handler the example uses the request-scoped workflows context (your plugin must depend on `workflows_extensions`):
+
+```ts
+const client = context.workflows.getWorkflowsClient();
+await client.emitEvent(CUSTOM_TRIGGER_ID, { message: 'Hello', source: 'example' });
+```
+
+To try it via HTTP (example only; authz disabled for demo):
+
+```bash
+curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
+  'http://localhost:5601/api/workflows_extensions_example/emit' \
+  -d '{"message":"Hello from example","source":"curl"}'
+```
+
+The trigger id is `example.custom_trigger`. The event payload must match the trigger’s `eventSchema` (`message` required, `source` optional).
 
 ## Key Points
 

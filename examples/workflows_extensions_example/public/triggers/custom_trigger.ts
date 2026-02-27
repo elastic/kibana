@@ -30,9 +30,22 @@ export const customTriggerPublicDefinition: PublicTriggerDefinition = {
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.customTrigger.documentation.details', {
       defaultMessage:
-        'Emitted when a custom event occurs. Used by the workflows extensions example plugin. In the `with` block, add a condition (KQL) to filter when this workflow runs using event properties such as `event.message` and `event.source`.',
+        'Emitted when a custom event occurs. Events can include an optional category (e.g. alerts, notifications, audit, demo). In the `with` block, add a condition (KQL) to filter when this workflow runs using event properties: `event.category`, `event.message`, `event.source`.',
     }),
     examples: [
+      i18n.translate(
+        'workflowsExtensionsExample.customTrigger.documentation.exampleMatchCategory',
+        {
+          defaultMessage: `## Match by category (conditional subscription)
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    with:
+      condition: 'event.category: "alerts"'
+\`\`\``,
+          values: { triggerId: CUSTOM_TRIGGER_ID },
+        }
+      ),
       i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchMessage', {
         defaultMessage: `## Match any message
 \`\`\`yaml
@@ -66,6 +79,6 @@ triggers:
     ],
   },
   snippets: {
-    condition: 'event.source:ui and event.message:*important*',
+    condition: 'event.category: "alerts"',
   },
 };

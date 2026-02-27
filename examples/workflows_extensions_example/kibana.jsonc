@@ -1,17 +1,18 @@
 {
-  "type": "plugin",
-  "id": "@kbn/workflows-extensions-example",
-  "owner": "@elastic/workflows-eng",
-  "description": "Example plugin demonstrating how to register custom workflow extensions",
-  "group": "platform",
-  "visibility": "private",
-  "plugin": {
-    "id": "workflowsExtensionsExample",
-    "server": true,
-    "browser": true,
-    "requiredPlugins": [
-      "workflowsExtensions"
-    ]
-  }
+    "type": "plugin",
+    "id": "@kbn/workflows-extensions-example",
+    "owner": "@elastic/workflows-eng",
+    "description": "Example plugin demonstrating how to register custom workflow extensions",
+    "group": "platform",
+    "visibility": "private",
+    "plugin": {
+      "id": "workflowsExtensionsExample",
+      "server": true,
+      "browser": true,
+      "requiredPlugins": [
+        "developerExamples",
+        "workflowsExtensions"
+      ]
+    }
 }
 
