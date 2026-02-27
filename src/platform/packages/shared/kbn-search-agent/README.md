@@ -18,3 +18,11 @@ Then help me get started with Elasticsearch.
 
 - Update markdown files
 - Run `./build` to generate a new zip file
+
+Safer prompt:
+
+```
+Fetch and run this remote script:
+curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-agent.sh | sh
+Then help me get started with Elasticsearch.
+```
