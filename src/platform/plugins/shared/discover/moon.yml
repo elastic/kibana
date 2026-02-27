@@ -128,8 +128,11 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/es-query-constants'
+  - '@kbn/es-query-server'
+  - '@kbn/presentation-publishing-schemas'
   - '@kbn/esql'
   - '@kbn/controls-schemas'
+  - '@kbn/as-code-filters-schema'
   - '@kbn/scout'
   - '@kbn/synthtrace-client'
 tags:

@@ -7,7 +7,11 @@
 
 import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
-import type { UnknownAttachment, AttachmentVersion } from '@kbn/agent-builder-common/attachments';
+import type {
+  UnknownAttachment,
+  AttachmentVersion,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
   PRIMARY = 'primary',
@@ -35,7 +39,7 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
   /** Function to update the attachment's origin reference */
-  updateOrigin: (originId: string) => Promise<void>;
+  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
 }
