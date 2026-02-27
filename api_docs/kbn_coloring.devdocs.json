@@ -4452,7 +4452,7 @@
         "label": "PaletteContinuity",
         "description": [],
         "signature": [
-          "\"none\" | \"above\" | \"below\" | \"all\""
+          "\"none\" | \"all\" | \"above\" | \"below\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "lineNumber": 13,
