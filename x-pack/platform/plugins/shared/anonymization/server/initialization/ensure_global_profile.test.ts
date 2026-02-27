@@ -16,7 +16,7 @@ jest.mock('./global_profile_initializer', () => ({
 }));
 
 jest.mock('./legacy_ui_settings_migration', () => ({
-  migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(undefined),
+  migrateLegacyUiSettingsIntoGlobalProfile: jest.fn().mockResolvedValue(true),
 }));
 
 describe('ensureGlobalProfileForNamespace', () => {
@@ -67,5 +67,29 @@ describe('ensureGlobalProfileForNamespace', () => {
 
     expect(ensureGlobalAnonymizationProfile).toHaveBeenCalledTimes(2);
     expect(migrateLegacyUiSettingsIntoGlobalProfile).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries legacy migration on next ensure when migration fails', async () => {
+    const namespace = `test-retry-migration-${Date.now()}`;
+    (migrateLegacyUiSettingsIntoGlobalProfile as jest.Mock)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+
+    await ensureGlobalProfileForNamespace({
+      namespace,
+      profilesRepo,
+      logger,
+      getLegacySettingsString: async () => '{"rules":[]}',
+    });
+
+    await ensureGlobalProfileForNamespace({
+      namespace,
+      profilesRepo,
+      logger,
+      getLegacySettingsString: async () => '{"rules":[]}',
+    });
+
+    expect(ensureGlobalAnonymizationProfile).toHaveBeenCalledTimes(2);
+    expect(migrateLegacyUiSettingsIntoGlobalProfile).toHaveBeenCalledTimes(2);
   });
 });

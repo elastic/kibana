@@ -38,7 +38,7 @@ export const ensureGlobalProfileForNamespace = async ({
   if (!currentState?.migratedLegacySettings && getLegacySettingsString) {
     const settingsString = await getLegacySettingsString();
     await ensureGlobalAnonymizationProfile({ namespace, profilesRepo, logger });
-    await migrateLegacyUiSettingsIntoGlobalProfile({
+    const migratedLegacySettings = await migrateLegacyUiSettingsIntoGlobalProfile({
       namespace,
       settingsString,
       profilesRepo,
@@ -47,7 +47,7 @@ export const ensureGlobalProfileForNamespace = async ({
 
     ensuredStateByNamespace.set(namespace, {
       lastEnsuredAt: now,
-      migratedLegacySettings: true,
+      migratedLegacySettings,
     });
     return;
   }

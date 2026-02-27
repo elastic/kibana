@@ -55,7 +55,7 @@ describe('legacy_ui_settings_migration', () => {
   });
 
   it('migrates parsed rules into the global profile', async () => {
-    await migrateLegacyUiSettingsIntoGlobalProfile({
+    const result = await migrateLegacyUiSettingsIntoGlobalProfile({
       namespace: 'default',
       settingsString: JSON.stringify({
         rules: [
@@ -71,6 +71,30 @@ describe('legacy_ui_settings_migration', () => {
       logger: logger as Logger,
     });
 
+    expect(result).toBe(true);
     expect(ensureGlobalAnonymizationProfile).toHaveBeenCalled();
+  });
+
+  it('returns false when migration fails and logs warning', async () => {
+    (ensureGlobalAnonymizationProfile as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+
+    const result = await migrateLegacyUiSettingsIntoGlobalProfile({
+      namespace: 'default',
+      settingsString: JSON.stringify({
+        rules: [
+          {
+            type: 'RegExp',
+            enabled: true,
+            pattern: 'host-[0-9]+',
+            entityClass: 'HOST_NAME',
+          },
+        ],
+      }),
+      profilesRepo: {} as ProfilesRepository,
+      logger: logger as Logger,
+    });
+
+    expect(result).toBe(false);
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

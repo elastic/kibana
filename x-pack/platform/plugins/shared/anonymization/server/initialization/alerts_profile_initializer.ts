@@ -90,5 +90,6 @@ export const ensureAlertsDataViewProfile = async ({
     logger.error(
       `Failed to initialize security alerts data view anonymization profile in space ${namespace}: ${err.message}`
     );
+    throw err;
   }
 };

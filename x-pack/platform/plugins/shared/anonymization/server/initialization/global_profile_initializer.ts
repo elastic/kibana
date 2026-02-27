@@ -23,6 +23,18 @@ export const isGlobalProfileTarget = (targetType: string, targetId: string): boo
   targetType === INTERNAL_GLOBAL_PROFILE_TARGET_TYPE &&
   targetId === INTERNAL_GLOBAL_PROFILE_TARGET_ID;
 
+const mergeRulesById = <T extends { id: string }>(existingRules: T[], incomingRules: T[]): T[] => {
+  const merged = new Map(existingRules.map((rule) => [rule.id, rule]));
+
+  for (const rule of incomingRules) {
+    if (!merged.has(rule.id)) {
+      merged.set(rule.id, rule);
+    }
+  }
+
+  return [...merged.values()];
+};
+
 export const ensureGlobalAnonymizationProfile = async ({
   namespace,
   profilesRepo,
@@ -63,7 +75,26 @@ export const ensureGlobalAnonymizationProfile = async ({
       return;
     }
 
-    return;
+    const mergedRegexRules = mergeRulesById(existing.rules.regexRules ?? [], regexRules);
+    const mergedNerRules = mergeRulesById(existing.rules.nerRules ?? [], nerRules);
+    const shouldNormalizeFieldRules = existing.rules.fieldRules.length > 0;
+    const shouldUpdate =
+      shouldNormalizeFieldRules ||
+      mergedRegexRules.length !== (existing.rules.regexRules ?? []).length ||
+      mergedNerRules.length !== (existing.rules.nerRules ?? []).length;
+
+    if (!shouldUpdate) {
+      return;
+    }
+
+    await profilesRepo.update(namespace, existing.id, {
+      updatedBy: createdBy,
+      rules: {
+        fieldRules: [],
+        regexRules: mergedRegexRules,
+        nerRules: mergedNerRules,
+      },
+    });
   } catch (err) {
     if ((err as { statusCode?: number }).statusCode === 409) {
       logger.debug(

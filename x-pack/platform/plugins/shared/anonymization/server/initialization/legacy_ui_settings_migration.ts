@@ -116,15 +116,15 @@ export const migrateLegacyUiSettingsIntoGlobalProfile = async ({
   settingsString?: string;
   profilesRepo: ProfilesRepository;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<boolean> => {
   if (!settingsString) {
-    return;
+    return true;
   }
 
   try {
     const { regexRules, nerRules } = extractEnabledLegacyRules(settingsString);
     if (!regexRules.length && !nerRules.length) {
-      return;
+      return true;
     }
 
     await ensureGlobalAnonymizationProfile({
@@ -135,11 +135,13 @@ export const migrateLegacyUiSettingsIntoGlobalProfile = async ({
       regexRules,
       nerRules,
     });
+    return true;
   } catch (err) {
     logger.warn(
       `Failed migrating legacy anonymization UI settings in space ${namespace}: ${
         (err as Error).message
       }`
     );
+    return false;
   }
 };

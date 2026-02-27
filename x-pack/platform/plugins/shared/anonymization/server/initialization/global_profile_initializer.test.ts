@@ -48,7 +48,7 @@ describe('ensureGlobalAnonymizationProfile', () => {
     );
   });
 
-  it('does nothing when the global profile already exists', async () => {
+  it('normalizes existing global profile field rules to empty', async () => {
     mockProfilesRepo.findByTarget.mockResolvedValue({
       id: 'global-profile',
       name: 'global',
@@ -74,6 +74,133 @@ describe('ensureGlobalAnonymizationProfile', () => {
     });
 
     expect(mockProfilesRepo.create).not.toHaveBeenCalled();
-    expect(mockProfilesRepo.update).not.toHaveBeenCalled();
+    expect(mockProfilesRepo.update).toHaveBeenCalledWith(
+      'default',
+      'global-profile',
+      expect.objectContaining({
+        rules: {
+          fieldRules: [],
+          regexRules: [],
+          nerRules: [],
+        },
+      })
+    );
+  });
+
+  it('merges incoming regex/NER rules by id into existing global profile', async () => {
+    mockProfilesRepo.findByTarget.mockResolvedValue({
+      id: 'global-profile',
+      name: 'global',
+      targetType: GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
+      targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+      rules: {
+        fieldRules: [],
+        regexRules: [
+          {
+            id: 'existing-regex',
+            type: 'regex',
+            pattern: 'foo',
+            entityClass: 'HOST_NAME',
+            enabled: true,
+          },
+        ],
+        nerRules: [
+          {
+            id: 'existing-ner',
+            type: 'ner',
+            modelId: 'model-1',
+            allowedEntityClasses: ['PER'],
+            enabled: true,
+          },
+        ],
+      },
+      saltId: 'salt-default',
+      namespace: 'default',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'system',
+      updatedBy: 'system',
+    });
+
+    await ensureGlobalAnonymizationProfile({
+      namespace: 'default',
+      profilesRepo: mockProfilesRepo,
+      logger,
+      regexRules: [
+        {
+          id: 'existing-regex',
+          type: 'regex',
+          pattern: 'foo',
+          entityClass: 'HOST_NAME',
+          enabled: true,
+        },
+        {
+          id: 'incoming-regex',
+          type: 'regex',
+          pattern: 'bar',
+          entityClass: 'EMAIL',
+          enabled: true,
+        },
+      ],
+      nerRules: [
+        {
+          id: 'existing-ner',
+          type: 'ner',
+          modelId: 'model-1',
+          allowedEntityClasses: ['PER'],
+          enabled: true,
+        },
+        {
+          id: 'incoming-ner',
+          type: 'ner',
+          modelId: 'model-2',
+          allowedEntityClasses: ['ORG'],
+          enabled: true,
+        },
+      ],
+    });
+
+    expect(mockProfilesRepo.create).not.toHaveBeenCalled();
+    expect(mockProfilesRepo.update).toHaveBeenCalledWith(
+      'default',
+      'global-profile',
+      expect.objectContaining({
+        rules: {
+          fieldRules: [],
+          regexRules: [
+            {
+              id: 'existing-regex',
+              type: 'regex',
+              pattern: 'foo',
+              entityClass: 'HOST_NAME',
+              enabled: true,
+            },
+            {
+              id: 'incoming-regex',
+              type: 'regex',
+              pattern: 'bar',
+              entityClass: 'EMAIL',
+              enabled: true,
+            },
+          ],
+          nerRules: [
+            {
+              id: 'existing-ner',
+              type: 'ner',
+              modelId: 'model-1',
+              allowedEntityClasses: ['PER'],
+              enabled: true,
+            },
+            {
+              id: 'incoming-ner',
+              type: 'ner',
+              modelId: 'model-2',
+              allowedEntityClasses: ['ORG'],
+              enabled: true,
+            },
+          ],
+        },
+      })
+    );
   });
 });

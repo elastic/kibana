@@ -126,4 +126,18 @@ describe('ensureAlertsDataViewProfile', () => {
       })
     ).resolves.toBeUndefined();
   });
+
+  it('rethrows non-409 errors', async () => {
+    (mockProfilesRepo.findByTarget as jest.Mock).mockRejectedValue(new Error('boom'));
+
+    await expect(
+      ensureAlertsDataViewProfile({
+        namespace: 'default',
+        profilesRepo: mockProfilesRepo,
+        saltService: mockSaltService,
+        logger,
+        checkDataViewExists,
+      })
+    ).rejects.toThrow('boom');
+  });
 });
