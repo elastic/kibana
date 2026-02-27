@@ -14,10 +14,33 @@ import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 
+interface OsquerySchemaColumn {
+  name: string;
+  type: string;
+  description: string;
+}
+
+interface OsquerySchemaTable {
+  name: string;
+  description: string;
+  platforms: string[];
+  columns: OsquerySchemaColumn[];
+}
+
+let osquerySchemaCache: OsquerySchemaTable[] | null = null;
+
+const getOsquerySchema = (): OsquerySchemaTable[] => {
+  if (!osquerySchemaCache) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    osquerySchemaCache = require('../../../../../../../platform/plugins/shared/osquery/public/common/schemas/osquery/v5.20.0.json');
+  }
+  return osquerySchemaCache!;
+};
+
 const OSQUERY_RESULTS_INDEX = 'logs-osquery_manager.result*';
 const OSQUERY_ACTION_RESPONSES_INDEX = 'logs-osquery_manager.action.responses*';
-const MAX_POLL_DURATION_MS = 5 * 60 * 1000;
-const POLL_INTERVAL_MS = 15_000;
+const MAX_POLL_DURATION_MS = 10 * 60 * 1000;
+const POLL_INTERVAL_MS = 10_000;
 
 const SKILL_CONTENT = `# Osquery
 
@@ -33,6 +56,16 @@ You MUST use osquery tools when the user mentions ANY of these:
 **CRITICAL: If the question contains the word "osquery", you MUST call the relevant tool.**
 **NEVER answer an osquery question without calling a tool first.**
 **Even for "Is osquery installed?", you MUST call osquery_get_status first.**
+
+## CRITICAL: Never Pause — Always Complete the Full Workflow
+
+**After dispatching a live query, you MUST immediately call osquery_get_results to fetch the results.** Do NOT:
+- Ask the user if they want to wait for results
+- Tell the user the query is running and ask what to do next
+- Pause to describe what you plan to do with the results
+- Output intermediate status updates before fetching results
+
+The get_results tool automatically polls until results arrive (up to 10 minutes). Always call it immediately after run_live_query, then analyze and present the findings in a single response.
 
 ## RESPONSE FORMAT (MANDATORY)
 
@@ -53,14 +86,19 @@ List or search for osquery-enabled agents. Use this to find agent IDs by hostnam
 - List all: \`osquery_get_agents({})\`
 Returns: id (agent ID), hostname, status, platform, policy_id, policy_name
 
-### osquery_get_table_schema (REQUIRED for elastic_* tables)
-Discover columns and types for any osquery table. Call \`security.osquery.get_table_schema({ tableName: "<table>", agentId: "<id>" })\`.
-- Returns: column names and types for the specified table
+### osquery_get_table_schema (REQUIRED before querying unknown tables)
+Discover available tables and their schemas. Two modes:
+- **List tables:** \`osquery_get_table_schema({})\` — returns ALL available osquery tables. Filter with \`platform\` (linux/darwin/windows) and/or \`search\` (keyword to match table names/descriptions, e.g., "browser", "chrome", "process", "network").
+- **Get columns for a table:** \`osquery_get_table_schema({ tableName: "<table>", agentId: "<id>" })\` — returns columns and types via live PRAGMA query on the agent.
+- **IMPORTANT: If you don't know the exact table name, LIST tables first with a search keyword.** Do NOT guess table names — search for them.
 - **You MUST call this before querying ANY table starting with \`elastic_\` (e.g., \`elastic_browser_history\`). Do NOT guess columns.**
 
 ### osquery_run_live_query (requires explicit confirmation from user)
 Execute a live osquery SQL query against agents.
 - **ALWAYS use agent IDs from osquery_get_agents, NOT hostnames!**
+- **For cross-endpoint sweeps, use \`agentAll: true\` instead of listing every agent ID** — this is simpler and targets all osquery-enabled agents automatically.
+- **For targeted queries on specific hosts**, pass \`agentIds\` with UUIDs.
+- **For policy-scoped queries**, pass \`agentPolicyIds\` to target agents in specific policies.
 - Returns: action_id, queries[].action_id, agents
 - **Use queries[].action_id for fetching results**
 
@@ -78,16 +116,26 @@ List osquery packs with pagination.
 ## Live Query Workflow (MANDATORY ORDER)
 
 1. **Get agent ID first:** \`osquery_get_agents({ hostname: "..." })\`
-2. **MANDATORY - Get table schema for custom/Elastic tables:** Before querying any custom or Elastic-specific table (e.g., \`elastic_browser_history\`, \`elastic_*\`), you MUST first discover the actual columns using \`osquery_get_table_schema({ tableName: "<table_name>", agentId: "<agent_id>" })\`. Standard osquery tables (e.g., \`processes\`, \`users\`, \`file\`) can be queried directly.
-3. **Run query:** \`osquery_run_live_query({ query: "SELECT ...", agentIds: ["<agent_id>"] })\`
+2. **MANDATORY - Discover the right table:** If you're unsure of the exact table name, search for it: \`osquery_get_table_schema({ search: "browser", platform: "linux" })\`. This returns matching table names so you don't have to guess.
+3. **MANDATORY - Get table schema for custom/Elastic tables:** Before querying any custom or Elastic-specific table (e.g., \`elastic_browser_history\`, \`elastic_*\`), you MUST first discover the actual columns using \`osquery_get_table_schema({ tableName: "<table_name>", agentId: "<agent_id>" })\`. Standard osquery tables (e.g., \`processes\`, \`users\`, \`file\`) can be queried directly.
+4. **Run query:** \`osquery_run_live_query({ query: "SELECT ...", agentIds: ["<agent_id>"] })\`
    - Response includes queries[].action_id
-4. **MANDATORY - Fetch results:** \`osquery_get_results({ actionId: "<queries[0].action_id>" })\`
+5. **MANDATORY - Fetch results IMMEDIATELY:** \`osquery_get_results({ actionId: "<queries[0].action_id>" })\`
+   - **Do NOT stop to ask the user if they want to wait — ALWAYS fetch results immediately.**
+   - The tool polls automatically until results are ready (up to 10 minutes).
    - If the result status is "error", analyze the error message and fix the query (e.g., wrong column name, table not found). Do NOT ask the user to rerun — fix it yourself and rerun.
-5. **Analyze results:** Report findings from actual data
+6. **Analyze results:** Report findings from actual data. Never output partial status — wait for complete results then present analysis.
 
 ## CRITICAL: Table Schema Discovery
 
-**Before querying ANY table that starts with \`elastic_\` (e.g., \`elastic_browser_history\`), you MUST call \`security.osquery.get_table_schema\` first to discover the actual columns.**
+**If you don't know the exact table name, SEARCH first:**
+\`\`\`
+osquery_get_table_schema({ search: "browser" })          // Find tables related to browsers
+osquery_get_table_schema({ search: "chrome", platform: "linux" })  // Chrome tables on Linux
+osquery_get_table_schema({})                              // List ALL tables
+\`\`\`
+
+**Before querying ANY table that starts with \`elastic_\` (e.g., \`elastic_browser_history\`), you MUST call \`security.osquery.get_table_schema\` with the tableName and agentId to discover the actual columns.**
 - These are custom Elastic tables whose columns are NOT standard osquery columns
 - Do NOT guess column names — they WILL fail with "no such column" errors
 - Only standard osquery tables (processes, users, file, hash, etc.) can be queried without schema discovery
@@ -133,8 +181,18 @@ List osquery packs with pagination.
 
 When investigating whether other endpoints are affected (e.g., "did other users visit this domain?"), use these patterns:
 
-### Querying Multiple Agents at Once
-\`osquery_run_live_query\` accepts an array of \`agentIds\`. Pass ALL relevant agent IDs to run a single query across multiple endpoints simultaneously:
+### Sweeping ALL Agents (preferred for blast radius analysis)
+Use \`agentAll: true\` to query every osquery-enabled agent in a single call:
+\`\`\`
+osquery_run_live_query({
+  query: "SELECT ... FROM elastic_browser_history WHERE url LIKE '%malicious.com%'",
+  agentAll: true
+})
+\`\`\`
+This is simpler and more reliable than collecting and passing all agent IDs manually.
+
+### Querying Specific Agents
+For targeted queries on specific hosts, pass their UUIDs:
 \`\`\`
 osquery_run_live_query({
   query: "SELECT ... FROM elastic_browser_history WHERE url LIKE '%malicious.com%'",
@@ -158,6 +216,9 @@ This skill cannot create, modify, or delete packs, saved queries, or configurati
 ## FORBIDDEN RESPONSES
 - "Osquery is a tool that allows you to..."
 - "To configure osquery, you need to..."
+- "Would you like me to retrieve the results now?"
+- "The query is running. Would you like to wait?"
+- Any message that pauses execution to ask the user whether to continue
 - Any explanation not directly from tool results
 - Any setup instructions or suggestions`;
 
@@ -343,17 +404,114 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
   id: 'security.osquery.get_table_schema',
   type: ToolType.builtin,
   description:
-    'Discover columns and types for any osquery table. ALWAYS use before querying custom or Elastic-specific tables (e.g., elastic_browser_history) to avoid "no such column" errors.',
+    'Discover osquery tables and their schemas. Call WITHOUT tableName to list all available tables (filtered by platform/search). Call WITH tableName + agentId to get live column details for a specific table.',
   schema: z.object({
     tableName: z
       .string()
-      .describe('The osquery table name (e.g., "elastic_browser_history", "processes")'),
+      .optional()
+      .describe(
+        'Table name to get schema for (e.g., "elastic_browser_history", "processes"). Omit to list all available tables.'
+      ),
     agentId: z
       .string()
-      .describe('Agent ID (UUID) to query schema from. Use osquery_get_agents to find IDs first.'),
+      .optional()
+      .describe(
+        'Agent ID (UUID) to query live schema from. Required when tableName is provided. Use osquery_get_agents to find IDs first.'
+      ),
+    platform: z
+      .enum(['linux', 'darwin', 'windows'])
+      .optional()
+      .describe('Filter tables by OS platform. Only used when listing tables (no tableName).'),
+    search: z
+      .string()
+      .optional()
+      .describe(
+        'Search keyword to filter table names and descriptions (e.g., "browser", "chrome", "process"). Only used when listing tables (no tableName).'
+      ),
   }),
-  handler: async ({ tableName, agentId }, { esClient, spaceId, logger }) => {
+  handler: async ({ tableName, agentId, platform, search }, { esClient, spaceId, logger }) => {
     try {
+      if (!tableName) {
+        const schema = getOsquerySchema();
+        let tables = schema;
+
+        if (platform) {
+          tables = tables.filter((t) => t.platforms.includes(platform));
+        }
+
+        if (search) {
+          const term = search.toLowerCase();
+          tables = tables.filter(
+            (t) =>
+              t.name.toLowerCase().includes(term) ||
+              t.description.toLowerCase().includes(term)
+          );
+        }
+
+        const result = tables.map((t) => ({
+          name: t.name,
+          description: t.description,
+          platforms: t.platforms,
+          columns_count: t.columns?.length ?? 0,
+        }));
+
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                message: JSON.stringify({
+                  total: result.length,
+                  tables: result,
+                  message: result.length > 0
+                    ? `Found ${result.length} table(s).${search ? ` Filtered by "${search}".` : ''}${platform ? ` Platform: ${platform}.` : ''} Call again with tableName and agentId to get full column details for a specific table.`
+                    : `No tables found${search ? ` matching "${search}"` : ''}${platform ? ` for platform ${platform}` : ''}.`,
+                }),
+              },
+            },
+          ],
+        };
+      }
+
+      if (!agentId) {
+        const schema = getOsquerySchema();
+        const staticTable = schema.find((t) => t.name === tableName);
+        if (staticTable) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: JSON.stringify({
+                    table: staticTable.name,
+                    description: staticTable.description,
+                    platforms: staticTable.platforms,
+                    columns: staticTable.columns.map((c) => ({
+                      name: c.name,
+                      type: c.type,
+                      description: c.description,
+                    })),
+                    source: 'static_schema',
+                    message: `Table "${staticTable.name}" has ${staticTable.columns.length} columns (from static schema v5.20.0). For custom/Elastic tables, provide an agentId to query live schema.`,
+                  }),
+                },
+              },
+            ],
+          };
+        }
+
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Table "${tableName}" not found in static schema. If this is a custom/Elastic table (e.g., elastic_browser_history), provide an agentId to query the live schema from an agent.`,
+              },
+            },
+          ],
+        };
+      }
+
       const sanitized = tableName.replace(/[^a-zA-Z0-9_]/g, '');
       const { response: osqueryAction } = await osquerySetup.createActionService.create(
         {
@@ -366,7 +524,7 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
       const queryActionId = osqueryAction.queries?.[0]?.action_id ?? osqueryAction.action_id;
 
       const startTime = Date.now();
-      const schemaTimeoutMs = 30_000;
+      const schemaTimeoutMs = 120_000;
 
       while (Date.now() - startTime < schemaTimeoutMs) {
         const [resultCount, responseCount] = await Promise.all([
@@ -436,9 +594,10 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
               message: JSON.stringify({
                 table: sanitized,
                 columns,
+                source: 'live_agent',
                 message:
                   columns.length > 0
-                    ? `Table "${sanitized}" has ${columns.length} columns. Use ONLY these column names in your queries.`
+                    ? `Table "${sanitized}" has ${columns.length} columns (live from agent). Use ONLY these column names in your queries.`
                     : `No schema found for table "${sanitized}". The table may not exist on this agent.`,
               }),
             },
@@ -464,33 +623,62 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
   id: 'security.osquery.run_live_query',
   type: ToolType.builtin,
   description:
-    'Run a live osquery query against agents. IMPORTANT: agentIds must be UUIDs from osquery_get_agents, not hostnames.',
+    'Run a live osquery query against agents. Use agentIds for specific agents, or agentAll=true to target every agent. IMPORTANT: agentIds must be UUIDs from osquery_get_agents, not hostnames.',
   schema: z.object({
     query: z.string().describe('Osquery SQL query string'),
     agentIds: z
       .array(z.string())
-      .describe('Agent IDs (UUIDs) to target. Use osquery_get_agents to find IDs first.'),
+      .optional()
+      .describe(
+        'Agent IDs (UUIDs) to target. Use osquery_get_agents to find IDs first. Omit if using agentAll.'
+      ),
+    agentAll: z
+      .boolean()
+      .optional()
+      .describe('Run query on ALL osquery-enabled agents. Use for cross-endpoint sweeps.'),
+    agentPolicyIds: z
+      .array(z.string())
+      .optional()
+      .describe('Filter agents by policy IDs. Useful for targeting specific policy groups.'),
     timeout: z.number().optional().describe('Query timeout in seconds'),
   }),
-  handler: async ({ query, agentIds, timeout }, { spaceId, logger }) => {
+  handler: async ({ query, agentIds, agentAll, agentPolicyIds, timeout }, { spaceId, logger }) => {
     try {
+      const actionParams: Record<string, unknown> = { query, timeout };
+
+      if (agentAll) {
+        actionParams.agent_all = true;
+      } else if (agentPolicyIds?.length) {
+        actionParams.agent_policy_ids = agentPolicyIds;
+      } else if (agentIds?.length) {
+        actionParams.agent_ids = agentIds;
+      } else {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  'You must specify agentIds, agentAll, or agentPolicyIds to target agents.',
+              },
+            },
+          ],
+        };
+      }
+
       const { response: osqueryAction } = await osquerySetup.createActionService.create(
-        {
-          query,
-          agent_ids: agentIds,
-          timeout,
-        },
+        actionParams,
         { space: { id: spaceId } }
       );
 
       const agentCount = osqueryAction.agents?.length ?? 0;
       const queryActionIds =
         osqueryAction.queries?.map(
-          (q: { action_id: string; id?: string; query?: string; agents?: string[] }) => ({
-            action_id: q.action_id,
-            query_id: q.id,
-            query: q.query,
-            agent_count: q.agents?.length ?? agentCount,
+          (q: Record<string, unknown>) => ({
+            action_id: q.action_id as string,
+            query_id: q.id as string | undefined,
+            query: q.query as string | undefined,
+            agent_count: (q.agents as string[] | undefined)?.length ?? agentCount,
           })
         ) ?? [];
 
@@ -508,8 +696,8 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
                 queries: queryActionIds,
                 message: `Live query dispatched to ${agentCount} agent(s).`,
                 next_step: primaryQueryActionId
-                  ? `Now call osquery_get_results with actionId="${primaryQueryActionId}" to fetch the results.`
-                  : `This dispatched ${queryActionIds.length} queries. For each, call osquery_get_results with the corresponding action_id.`,
+                  ? `IMMEDIATELY call osquery_get_results with actionId="${primaryQueryActionId}" to fetch the results. Do NOT ask the user — fetch now.`
+                  : `This dispatched ${queryActionIds.length} queries. For each, IMMEDIATELY call osquery_get_results with the corresponding action_id. Do NOT ask the user — fetch now.`,
               }),
             },
           },
@@ -665,8 +853,8 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
                 warning:
                   status === 'timeout'
                     ? `Query timed out after ${Math.round(
-                        (Date.now() - startTime) / 1000
-                      )}s. Some agents may not have responded.`
+                      (Date.now() - startTime) / 1000
+                    )}s. Some agents may not have responded.`
                     : undefined,
               }),
             },

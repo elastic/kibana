@@ -61,9 +61,10 @@ Every forensic investigation MUST include a query against the \\\`elastic_browse
 - For the RSA 2026 demo: this is how the forensic agent **discovers hidden compromised endpoints** that had no network alert — they only have browser history on disk
 
 **Required steps for every investigation:**
-1. Call \\\`security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id>" })\\\` to discover the current column names
-2. Query the table using the discovered schema to collect browser history evidence
-3. Include the browser history findings in your investigation timeline and correlation analysis
+1. If unsure of table name, search first: \\\`security.osquery.get_table_schema({ search: "browser", platform: "linux" })\\\` to find the correct table
+2. Call \\\`security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id>" })\\\` to discover the current column names
+3. Query the table using the discovered schema to collect browser history evidence
+4. Include the browser history findings in your investigation timeline and correlation analysis
 
 ## MANDATORY: Correlate with Threat Intelligence
 
@@ -386,7 +387,7 @@ Pass ALL online agent IDs in a single query:
 \\\`\\\`\\\`
 security.osquery.run_live_query({
   query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<malicious_domain>%'",
-  agentIds: ["<agent_id_1>", "<agent_id_2>", "<agent_id_3>", ...]
+  agentAll: true
 })
 \\\`\\\`\\\`
 

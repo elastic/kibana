@@ -166,7 +166,11 @@ Examine \`policy_name\` for each agent:
 - Policy contains "Defend" → Elastic Defend + Osquery (full protection)
 - Policy does NOT contain "Defend" → Osquery only (browser history queryable, but no real-time protection)
 
-**Step 2: Discover the browser history schema (required — columns vary by version):**
+**Step 2: Discover the browser history table (search if unsure of the name):**
+\`\`\`
+security.osquery.get_table_schema({ search: "browser", platform: "linux" })
+\`\`\`
+This returns matching table names — look for \`elastic_browser_history\`. Then get full column details:
 \`\`\`
 security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id_from_alert>" })
 \`\`\`
@@ -185,11 +189,11 @@ security.osquery.get_results({ actionId: "<queries[0].action_id>" })
 \`\`\`
 
 **Step 5: Sweep ALL endpoints for the same domain:**
-Pass ALL agent IDs from Step 1 to check every endpoint in a single query:
+Use \`agentAll: true\` to query every osquery-enabled agent at once:
 \`\`\`
 security.osquery.run_live_query({
   query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<domain_from_alert>%'",
-  agentIds: ["<id1>", "<id2>", "<id3>", ...]
+  agentAll: true
 })
 \`\`\`
 Then fetch results — each row includes \`_agent_id\` to identify which endpoint returned it.
