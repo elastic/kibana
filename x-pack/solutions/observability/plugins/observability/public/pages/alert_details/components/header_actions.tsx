@@ -91,7 +91,7 @@ export function HeaderActions({
               href={discoverUrl}
               iconType="discoverApp"
               target="_blank"
-              data-test-subj="view-in-discover-button"
+              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
             >
               <EuiText size="s">
                 {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {

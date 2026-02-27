@@ -23,13 +23,16 @@ import type {
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { SidebarStart, SidebarSetup } from './sidebar';
 
 /**
  * ChromeSetup exposes APIs available during the setup phase.
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChromeSetup {}
+export interface ChromeSetup {
+  /** {@link SidebarSetup} */
+  sidebar: SidebarSetup;
+}
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -98,6 +101,11 @@ export interface ChromeStart {
    * Get an observable of the current list of breadcrumbs
    */
   getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+
+  /**
+   * Get the current list of breadcrumbs synchronously
+   */
+  getBreadcrumbs(): ChromeBreadcrumb[];
 
   /**
    * Override the current set of breadcrumbs
@@ -255,21 +263,20 @@ export interface ChromeStart {
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
-
-    /**
-     * Get an observable of the visibility state of the feedback button in the side nav.
-     */
-    getIsFeedbackBtnVisible$: () => Observable<boolean>;
-
-    /**
-     * Set the visibility state of the feedback button in the side nav.
-     * @param isVisible The visibility state of the feedback button in the side nav.
-     */
-    setIsFeedbackBtnVisible: (isVisible: boolean) => void;
   };
+
+  /**
+   * {@link SidebarStart}
+   */
+  sidebar: SidebarStart;
 
   /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
+   */
+  withProvider(component: ReactNode): ReactNode;
 }

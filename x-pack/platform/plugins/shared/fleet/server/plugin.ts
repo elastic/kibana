@@ -50,6 +50,7 @@ import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { ReportingStart } from '@kbn/reporting-plugin/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -166,6 +167,7 @@ import {
   AgentlessPoliciesServiceImpl,
 } from './services/agentless/agentless_policies';
 import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
+import { VersionSpecificPolicyAssignmentTask } from './tasks/version_specific_policy_assignment_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -189,6 +191,7 @@ export interface FleetStartDeps {
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
   alerting: AlertingServerStart;
+  reporting: ReportingStart;
 }
 
 export interface FleetAppContext {
@@ -228,6 +231,7 @@ export interface FleetAppContext {
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
+  reportingStart?: ReportingStart;
 }
 
 export type FleetSetupContract = void;
@@ -339,6 +343,7 @@ export class FleetPlugin
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
   private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
+  private versionSpecificPolicyAssignmentTask?: VersionSpecificPolicyAssignmentTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -507,6 +512,28 @@ export class FleetPlugin
                     },
                     includeIn: 'read',
                     alerting: {},
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: 'Generate reports',
+            requireAllSpaces,
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    id: `generate_report`,
+                    api: [`${PLUGIN_ID}-generate-report`],
+                    name: 'All',
+                    ui: ['generate_report'],
+                    savedObject: {
+                      all: allSavedObjectTypes,
+                      read: allSavedObjectTypes,
+                    },
+                    includeIn: 'all',
                   },
                 ],
               },
@@ -738,6 +765,14 @@ export class FleetPlugin
         maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
       },
     });
+    this.versionSpecificPolicyAssignmentTask = new VersionSpecificPolicyAssignmentTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.versionSpecificPolicyAssignment?.taskInterval,
+      },
+    });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
@@ -799,6 +834,7 @@ export class FleetPlugin
       agentStatusChangeTask: this.agentStatusChangeTask,
       fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
+      reportingStart: plugins.reporting,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -826,6 +862,9 @@ export class FleetPlugin
       this.configInitialValue as FleetConfigType
     ).catch(() => {});
     this.fleetPolicyRevisionsCleanupTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
+    this.versionSpecificPolicyAssignmentTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
 

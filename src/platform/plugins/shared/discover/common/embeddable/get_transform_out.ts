@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { flow, omit } from 'lodash';
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type {
@@ -17,7 +19,6 @@ import type {
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
-import { inject } from './search_inject_extract';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 
 function isByValue(
@@ -29,29 +30,46 @@ function isByValue(
   );
 }
 
-export function getTransformOut(
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
-) {
+export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(
     storedState: StoredSearchEmbeddableState,
     references?: SavedObjectReference[]
   ) {
-    const state = transformTitlesOut(storedState);
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
-      : undefined;
+    const transformsFlow = flow(
+      transformTitlesOut<StoredSearchEmbeddableState>,
+      (state: StoredSearchEmbeddableState) => transformDrilldownsOut(state, references)
+    );
+    const state = transformsFlow(storedState);
 
-    const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
     if (isByValue(state)) {
-      const tabsState = {
-        ...state,
-        attributes: extractTabs(state.attributes),
-      };
-      const { attributes } = inject({ type: SavedSearchType, ...tabsState }, references ?? []);
+      const tabsState = { ...state, attributes: extractTabs(state.attributes) };
+      const tabs = tabsState.attributes.tabs.map((tab) => {
+        try {
+          const searchSourceValues = parseSearchSourceJSON(
+            tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+          );
+          const searchSourceFields = injectReferences(searchSourceValues, references ?? []);
+          return {
+            ...tab,
+            attributes: {
+              ...omit(tab.attributes, 'references'),
+              kibanaSavedObjectMeta: {
+                ...tab.attributes.kibanaSavedObjectMeta,
+                searchSourceJSON: JSON.stringify(searchSourceFields),
+              },
+            },
+          };
+        } catch (e) {
+          return tab;
+        }
+      });
+
       return {
         ...state,
-        attributes,
-        ...enhancements,
+        attributes: {
+          ...state.attributes,
+          tabs,
+        },
       } as SearchEmbeddableByValueState;
     }
 
@@ -60,7 +78,6 @@ export function getTransformOut(
     );
     return {
       ...state,
-      ...enhancements,
       ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
     } as SearchEmbeddableByReferenceState;
   }

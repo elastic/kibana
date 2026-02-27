@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/visualization-listing-components",
+  "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "shared"
+}

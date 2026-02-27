@@ -178,7 +178,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
-  const { to, cc, bcc } = params;
+  const { to, cc, bcc, replyTo } = params;
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
@@ -189,16 +189,23 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
     emailSchema.parse(to);
     emailSchema.parse(cc);
     emailSchema.parse(bcc);
+
+    if (replyTo) {
+      emailSchema.parse(replyTo);
+    }
   } catch (error) {
     throw new Error(`Invalid email addresses: ${error}`);
   }
 
-  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc)).concat(replyTo ?? []);
+
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    throw new Error(`[to/cc/bcc]: ${invalidEmailsMessage}`);
+    const labels = ['to', 'cc', 'bcc'];
+    if (params.replyTo && params.replyTo.length) labels.push('replyTo');
+    throw new Error(`[${labels.join('/')}]: ${invalidEmailsMessage}`);
   }
 }
 
@@ -400,6 +407,7 @@ async function executor(
       to: params.to,
       cc: params.cc,
       bcc: params.bcc,
+      ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     },
     content: {
       subject: params.subject,

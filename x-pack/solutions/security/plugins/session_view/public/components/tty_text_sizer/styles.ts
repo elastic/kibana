@@ -16,7 +16,7 @@ export const useStyles = () => {
 
     const ratio: CSSObject = {
       fontSize: size.m,
-      color: colors.ghost,
+      color: colors.textGhost,
     };
 
     const separator: CSSObject = {

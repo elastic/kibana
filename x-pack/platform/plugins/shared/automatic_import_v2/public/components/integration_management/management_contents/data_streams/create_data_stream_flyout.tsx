@@ -40,6 +40,7 @@ import {
   useValidateIndex,
   useCreateUpdateIntegration,
   useGetIntegrationById,
+  useUploadSamples,
   generateId,
 } from '../../../../common';
 
@@ -125,8 +126,8 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
-  // React Query has a cache but needs to integration ID to find it.
-  const { integration } = useGetIntegrationById(currentIntegrationId);
+
+  const { integration, refetch: refetchIntegration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
 
   const { indices, isLoading: isLoadingIndices } = useFetchIndices();
@@ -137,9 +138,11 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     clearValidationError: clearIndexValidationError,
   } = useValidateIndex();
   const { createUpdateIntegrationMutation, isLoading } = useCreateUpdateIntegration();
+  const { uploadSamplesMutation, isLoading: isUploadingSamples } = useUploadSamples();
 
   const [isParsing, setIsParsing] = useState(false);
   const [fileError, setFileError] = useState<string | undefined>(undefined);
+  const [uploadedFileName, setUploadedFileName] = useState<string | undefined>(undefined);
 
   const logsSourceOption = formData?.logsSourceOption ?? 'upload';
   const logSample = formData?.logSample;
@@ -154,7 +157,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       })),
     ];
 
-    // Filter Indices logic here
     return rawOptions.filter((option) => option.value !== '' && !option.value?.startsWith('.'));
   }, [indices]);
 
@@ -162,6 +164,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     async (files: FileList | null) => {
       if (!files || files.length === 0) {
         setFileError(undefined);
+        setUploadedFileName(undefined);
         form.setFieldValue('logSample', undefined);
         return;
       }
@@ -171,10 +174,12 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
       try {
         const file = files[0];
+        setUploadedFileName(file.name);
         const content = await readFileAsText(file);
         form.setFieldValue('logSample', content);
       } catch (error) {
         setFileError(error instanceof Error ? error.message : i18n.LOG_FILE_ERROR.CAN_NOT_READ);
+        setUploadedFileName(undefined);
         form.setFieldValue('logSample', undefined);
       } finally {
         setIsParsing(false);
@@ -214,8 +219,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const isIntegrationFieldsValid =
     !!formData?.title?.trim() && !!formData?.description?.trim() && !!formData?.connectorId?.trim();
 
+  const existingDataStreamNames = useMemo(
+    () => new Set((integration?.dataStreams ?? []).map((ds) => ds.title.toLowerCase())),
+    [integration?.dataStreams]
+  );
+
+  const hasDuplicateDataStreamName =
+    !!formData?.dataStreamTitle?.trim() &&
+    existingDataStreamNames.has(formData.dataStreamTitle.trim().toLowerCase());
+
   const isDataStreamFieldsValid =
     !!formData?.dataStreamTitle?.trim() &&
+    !hasDuplicateDataStreamName &&
     formData?.dataCollectionMethod != null &&
     formData.dataCollectionMethod.length > 0;
 
@@ -229,13 +244,14 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     !isLogSourceValid ||
     isParsing ||
     isValidatingIndex ||
-    isLoading;
+    isLoading ||
+    isUploadingSamples;
 
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
 
     const integrationId = currentIntegrationId ?? generateId();
-    const dataStreamId = integrationId + '-' + generateId();
+    const dataStreamId = generateId();
     const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
       name: method as InputType['name'],
     }));
@@ -247,6 +263,26 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       inputTypes,
     };
 
+    if (logsSourceOption === 'upload' && logSample) {
+      const samples = logSample
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+      await uploadSamplesMutation.mutateAsync({
+        integrationId,
+        dataStreamId,
+        samples,
+        originalSource: {
+          sourceType: 'file',
+          sourceValue: uploadedFileName ?? 'uploaded-file.log',
+        },
+      });
+    } else if (logsSourceOption === 'index' && selectedIndex) {
+      // For index source, we don't need to upload
+      // TODO: Add logic to fetch samples from the index.
+    }
+
     await createUpdateIntegrationMutation.mutateAsync({
       connectorId: formData.connectorId,
       integrationId,
@@ -255,7 +291,21 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       ...(formData.logo ? { logo: formData.logo } : {}),
       dataStreams: [newDataStream],
     });
-  }, [formData, createUpdateIntegrationMutation, currentIntegrationId]);
+
+    refetchIntegration();
+    onClose();
+  }, [
+    formData,
+    createUpdateIntegrationMutation,
+    uploadSamplesMutation,
+    currentIntegrationId,
+    logsSourceOption,
+    logSample,
+    selectedIndex,
+    uploadedFileName,
+    refetchIntegration,
+    onClose,
+  ]);
 
   return (
     <EuiFlyout
@@ -380,10 +430,9 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               initialPromptText={i18n.FILE_PICKER_PROMPT}
               onChange={onChangeLogFile}
               display="large"
-              aria-label="Upload log file"
+              aria-label={i18n.ARIA_LABELS.uploadLogFile}
               isLoading={isParsing}
               isInvalid={fileError != null}
-              data-test-subj="logFileUpload"
               disabled={logsSourceOption !== 'upload'}
             />
           </EuiFormRow>
@@ -407,7 +456,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   fullWidth
                   isInvalid={!!indexValidationError}
                   error={indexValidationError}
-                  aria-label="Select an index"
+                  aria-label={i18n.ARIA_LABELS.selectIndex}
                 >
                   <EuiComboBox
                     key={field.value ?? ''}
@@ -446,7 +495,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               fill
               onClick={handleAnalyzeLogs}
               disabled={isAnalyzeDisabled}
-              isLoading={isParsing || isLoading}
+              isLoading={isParsing || isLoading || isUploadingSamples}
               data-test-subj="analyzeLogsButton"
             >
               {i18n.ANALYZE_LOGS_BUTTON}

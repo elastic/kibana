@@ -23,11 +23,13 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   UppercaseProcessor,
   LowercaseProcessor,
   TrimProcessor,
   JoinProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -41,10 +43,12 @@ import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_pre
 import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
 import { convertReplaceProcessorToESQL } from './processors/replace';
+import { convertRedactProcessorToESQL } from './processors/redact';
 import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
 import { convertConcatProcessorToESQL } from './processors/concat';
+import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -84,6 +88,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
     case 'replace':
       return convertReplaceProcessorToESQL(processor as ReplaceProcessor);
 
+    case 'redact':
+      return convertRedactProcessorToESQL(processor as RedactProcessor);
+
     case 'uppercase':
       const convertUppercaseProcessorToESQL = createTransformStringESQL('TO_UPPER');
       return convertUppercaseProcessorToESQL(processor as UppercaseProcessor);
@@ -101,6 +108,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'concat':
       return convertConcatProcessorToESQL(processor as ConcatProcessor);
+
+    case 'network_direction':
+      return convertNetworkDirectionProcessorToESQL(processor as NetworkDirectionProcessor);
 
     case 'manual_ingest_pipeline':
       return [

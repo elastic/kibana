@@ -18,6 +18,7 @@ import { validateCustomProperties } from './validate_custom_properties';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
+import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
@@ -35,7 +36,7 @@ import { CUSTOM_YAML_VALIDATION_MARKER_OWNERS, type YamlValidationResult } from 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
   warning: MarkerSeverity.Warning,
-  info: MarkerSeverity.Hint,
+  info: MarkerSeverity.Info,
 };
 
 export interface UseYamlValidationResult {
@@ -111,8 +112,8 @@ export function useYamlValidation(
       const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
       // Generate the connectors management URL
-      const connectorsManagementUrl = application?.getUrlForApp('management', {
-        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      const connectorsManagementUrl = application.getUrlForApp('management', {
+        deepLinkId: 'triggersActionsConnectors',
         absolute: true,
       });
 
@@ -129,11 +130,13 @@ export function useYamlValidation(
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(
+          ...validateTriggerConditions(workflowDefinition, yamlDocument),
           ...validateVariablesInternal(
             variableItems,
             workflowGraph,
             workflowDefinition,
-            yamlDocument
+            yamlDocument,
+            model
           ),
           ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
         );
@@ -263,7 +266,7 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
         markers.push({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
+          message: validationResult.message ?? '',
           source: 'connector-id-validation',
         });
       }

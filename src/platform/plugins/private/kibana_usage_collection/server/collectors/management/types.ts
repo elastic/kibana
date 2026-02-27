@@ -50,9 +50,9 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
+  'agentBuilder:experimentalFeatures': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -173,10 +173,12 @@ export interface UsageStats {
   'observability:profilingAzureCostDiscountRate': number;
   'data_views:fields_excluded_data_tiers': string;
   'observability:apmEnableTransactionProfiling': boolean;
+  'observability:apmUseUnifiedTraceWaterfall': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
   'aiAssistant:preferredChatExperience': string;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
   'cases:incrementalIdDisplay:enabled': boolean;
@@ -185,7 +187,9 @@ export interface UsageStats {
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
+  'agentBuilder:prePromptWorkflowIds': string[];
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'observability:streamsEnableQueryStreams': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
 }

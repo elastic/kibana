@@ -24,7 +24,7 @@ const generator: SynthGenerator<ESQLAstHeaderCommand> = (
 
   // The parser returns the header command as ESQLCommand type, but it's actually
   // an ESQLAstSetHeaderCommand at runtime
-  const node = SynthNode.from(root as any);
+  const node = SynthNode.from(root);
 
   return node;
 };

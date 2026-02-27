@@ -143,7 +143,7 @@
               "AuditRequestHandlerContext"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
-            "lineNumber": 56,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -163,7 +163,7 @@
           " implements ",
           "CoreService",
           "<",
-          "SecurityServiceSetup",
+          "InternalSecurityServiceSetup",
           ", ",
           "SecurityServiceStart",
           ">"
@@ -219,7 +219,7 @@
             "description": [],
             "signature": [
               "() => ",
-              "SecurityServiceSetup"
+              "InternalSecurityServiceSetup"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
             "lineNumber": 47,
@@ -241,7 +241,7 @@
               "SecurityServiceStart"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
-            "lineNumber": 68,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -259,7 +259,7 @@
               "() => void"
             ],
             "path": "src/core/packages/security/server-internal/src/security_service.ts",
-            "lineNumber": 76,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -271,26 +271,50 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+    "interfaces": [
       {
         "parentPluginId": "@kbn/core-security-server-internal",
         "id": "def-server.InternalSecurityServiceSetup",
-        "type": "Type",
+        "type": "Interface",
         "tags": [],
         "label": "InternalSecurityServiceSetup",
         "description": [],
         "signature": [
+          "InternalSecurityServiceSetup",
+          " extends ",
           "SecurityServiceSetup"
         ],
         "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server-internal",
+            "id": "def-server.InternalSecurityServiceSetup.uiam",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "uiam",
+            "description": [
+              "\nThe {@link CoreUiamService | UIAM service}"
+            ],
+            "signature": [
+              "CoreUiamService",
+              " | null"
+            ],
+            "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
-      },
+      }
+    ],
+    "enums": [],
+    "misc": [
       {
         "parentPluginId": "@kbn/core-security-server-internal",
         "id": "def-server.InternalSecurityServiceStart",
@@ -302,7 +326,7 @@
           "SecurityServiceStart"
         ],
         "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
-        "lineNumber": 13,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

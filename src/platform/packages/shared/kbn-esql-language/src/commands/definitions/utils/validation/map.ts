@@ -14,7 +14,7 @@ import { getMessageFromId } from '../errors';
 import { isMap } from '../../../../ast/is';
 import { parseMapParams } from '../maps';
 
-// the setting 'approximate' uses 'map_param' as a type,
+// the setting 'approximation' uses 'map_param' as a type,
 // whereas the expression type in the AST is 'function_named_parameters'.
 export const TypeMap: Record<SupportedDataType, string> = {
   function_named_parameters: 'map_param',

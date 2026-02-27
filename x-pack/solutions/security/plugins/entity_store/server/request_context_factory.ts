@@ -16,13 +16,18 @@ import type {
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
+import { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
+import { CRUDClient } from './domain/crud_client';
+import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
   request: KibanaRequest;
+  isServerless: boolean;
+  analytics: TelemetryReporter;
 }
 
 export async function createRequestHandlerContext({
@@ -30,11 +35,12 @@ export async function createRequestHandlerContext({
   context,
   coreSetup,
   request,
+  isServerless,
+  analytics,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const [, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
-
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
   const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
@@ -49,6 +55,22 @@ export async function createRequestHandlerContext({
     logger
   );
 
+  const esClient = core.elasticsearch.client.asCurrentUser;
+  const crudClient = new CRUDClient({
+    logger,
+    esClient,
+    namespace,
+  });
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const logsExtractionClient = new LogsExtractionClient({
+    logger,
+    namespace,
+    esClient,
+    dataViewsService,
+    engineDescriptorClient,
+    ccsLogsExtractionClient,
+  });
+
   return {
     core,
     logger,
@@ -58,14 +80,16 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       engineDescriptorClient,
       namespace,
+      isServerless,
+      logsExtractionClient,
+      security: startPlugins.security,
+      analytics,
     }),
+    crudClient,
+    ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
-    logsExtractionClient: new LogsExtractionClient(
-      logger,
-      namespace,
-      core.elasticsearch.client.asCurrentUser,
-      dataViewsService,
-      engineDescriptorClient
-    ),
+    logsExtractionClient,
+    security: startPlugins.security,
+    namespace,
   };
 }

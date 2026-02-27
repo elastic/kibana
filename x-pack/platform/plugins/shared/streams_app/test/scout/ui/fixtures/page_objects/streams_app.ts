@@ -13,9 +13,9 @@ import {
   EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -150,46 +150,6 @@ export class StreamsApp {
       this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
-  }
-
-  /**
-   * Set absolute time range using the first date picker on the page.
-   * Uses .first() to handle pages with multiple date pickers (e.g., Retention tab).
-   * For pages with single date picker, prefer using pageObjects.datePicker.setAbsoluteRange().
-   */
-  async setAbsoluteTimeRange(range: { from: string; to: string }) {
-    const showDatesBtn = this.page.testSubj.locator('superDatePickerShowDatesButton').first();
-    const endBtn = this.page.testSubj.locator('superDatePickerendDatePopoverButton').first();
-    const startBtn = this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first();
-    const dateInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-
-    // Expand the date picker if it's in compact mode
-    if (await showDatesBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await showDatesBtn.click();
-    }
-
-    await expect(endBtn).toBeVisible();
-
-    // Set end date
-    await endBtn.click();
-    await this.page.testSubj.click('superDatePickerAbsoluteTab');
-    await dateInput.click();
-    await dateInput.clear();
-    await dateInput.fill(range.to);
-    await dateInput.press('Enter');
-    await endBtn.click();
-
-    // Set start date
-    await startBtn.click();
-    await this.page.testSubj.click('superDatePickerAbsoluteTab');
-    await dateInput.click();
-    await dateInput.clear();
-    await dateInput.fill(range.from);
-    await dateInput.press('Enter');
-    await this.page.keyboard.press('Escape');
-
-    // Apply the time range
-    await this.page.testSubj.locator('querySubmitButton').first().click();
   }
 
   async verifyDocCount(streamName: string, expectedCount: number) {
@@ -329,7 +289,7 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('columns').click();
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
   }
 
   async saveRoutingRule() {
@@ -392,18 +352,42 @@ export class StreamsApp {
   }
 
   async fillConditionEditorWithSyntax(condition: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppConditionEditorCodeEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppConditionEditorCodeEditor')
-      .getByRole('textbox')
-      .fill(condition);
-    // Clean trailing content
-    await this.page.keyboard.press('Shift+Control+ArrowDown');
-    await this.page.keyboard.press('Backspace');
+    const editor = this.page.getByTestId('streamsAppConditionEditorCodeEditor');
+
+    // CodeEditor can start in "read mode". Activate edit mode when needed.
+    const activateEditModeButton = editor.getByRole('button', { name: /activate edit mode/i });
+    try {
+      await activateEditModeButton.click({ timeout: 1000 });
+    } catch {
+      // Button is not present when already in edit mode
+    }
+
+    // Use Monaco's model API to set value reliably (keyboard interactions can be flaky).
+    // There can be multiple Monaco models on the page (e.g. YAML editor), so target the condition model.
+    const conditionModelIndex = await this.page.evaluate(() => {
+      interface MonacoModel {
+        getValue(): string;
+      }
+      interface MonacoEditorApi {
+        getModels(): MonacoModel[];
+      }
+      interface MonacoEnv {
+        monaco?: { editor?: MonacoEditorApi };
+      }
+      const monacoEnv = (window as Window & { MonacoEnvironment?: MonacoEnv }).MonacoEnvironment;
+      const editorApi = monacoEnv?.monaco?.editor;
+      if (!editorApi) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const values: string[] = editorApi.getModels().map((model) => model.getValue());
+      return values.findIndex((value) => value.trim().startsWith('{') && value.includes('"field"'));
+    });
+
+    await this.kibanaMonacoEditor.setCodeEditorValue(
+      condition,
+      conditionModelIndex >= 0 ? conditionModelIndex : undefined
+    );
   }
 
   async toggleConditionEditorWithSyntaxSwitch() {
@@ -490,25 +474,44 @@ export class StreamsApp {
   async clickAddProcessor(handleContextMenuClick: boolean = true) {
     if (handleContextMenuClick) {
       // New UI has direct button instead of context menu
-      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton').click();
+      const button = this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton');
+      await expect(button).toBeVisible({ timeout: 60000 });
+      // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
+      await button.evaluate((el) => (el as HTMLElement).click());
     } else {
       // When called from within a condition's context menu, use the old menu item
-      await this.page
-        .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
-        .click();
+      const menuItem = this.page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor'
+      );
+      await expect(menuItem).toBeVisible({ timeout: 60000 });
+      await menuItem.evaluate((el) => (el as HTMLElement).click());
     }
+
+    // Wait for the processor configuration panel to be ready before interacting with inputs.
+    await expect(
+      this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton')
+    ).toBeVisible({ timeout: 30000 });
   }
 
   async clickAddCondition(handleContextMenuClick: boolean = true) {
     if (handleContextMenuClick) {
       // New UI has direct button instead of context menu
-      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton').click();
+      const button = this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton');
+      await expect(button).toBeVisible({ timeout: 60000 });
+      await button.evaluate((el) => (el as HTMLElement).click());
     } else {
       // When called from within a condition's context menu, use the old menu item
-      await this.page
-        .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
-        .click();
+      const menuItem = this.page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition'
+      );
+      await expect(menuItem).toBeVisible({ timeout: 60000 });
+      await menuItem.evaluate((el) => (el as HTMLElement).click());
     }
+
+    // Wait for the condition configuration panel to be ready before interacting.
+    await expect(
+      this.page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+    ).toBeVisible({ timeout: 30000 });
   }
   async getProcessorPatternText() {
     return await this.page.getByTestId('fullText').locator('.euiText').textContent();
@@ -669,7 +672,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.page.getByLabel('Source Field').fill(value);
+    await this.processorFieldComboBox.setCustomSingleOption(value);
   }
 
   async fillDateProcessorFormatInput(value: string) {
@@ -720,8 +723,22 @@ export class StreamsApp {
   }
 
   async waitForModifiedFieldsDetection() {
-    const badge = this.page.getByTestId('streamsAppModifiedFieldsBadge');
-    await expect(badge).toBeVisible({ timeout: 30_000 });
+    // "Modified fields" badge only renders when there are detected fields; it's not a reliable
+    // signal that the Processing tab has finished initializing. Instead, wait for stable UI
+    // primitives that are always present once the tab is ready.
+    await expect(this.page.getByTestId('streamsAppProcessingDataSourcesList')).toBeVisible({
+      timeout: 60_000,
+    });
+
+    const readySignal = this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentRootSteps')
+      .or(this.page.getByTestId('streamsAppProcessingPreviewEmptyPrompt'))
+      .or(this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton'))
+      .or(this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton'));
+
+    // `readySignal` can legitimately match multiple elements (e.g. both create buttons),
+    // so avoid strict-locator assertions like `toBeVisible()` which require a single match.
+    await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
   async saveStepsListChanges() {

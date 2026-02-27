@@ -44,7 +44,7 @@ import {
 } from '../ast/is';
 import { replaceProperties } from '../ast/walker/helpers';
 import { resolveItem } from '../ast/visitor/utils';
-import { printAst } from '../shared/debug';
+import { printAst } from '../debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -73,7 +73,7 @@ export class ComposerQuery {
     ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
       const tagOrGeneratorWithParams =
         (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
-        (templateOrQuery: any, ...holes: unknown[]) => {
+        (templateOrQuery: string | TemplateStringsArray, ...holes: unknown[]) => {
           const params: Record<string, unknown> = { ...initialParamValues };
           let command: ESQLCommand | ESQLAstHeaderCommand;
 

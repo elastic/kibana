@@ -31,7 +31,7 @@ describe('EditPolicyModal', () => {
     );
 
     expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent(
-      '3 streams and 2 indices will be affected'
+      'This update affects 3 streams and 2 indices'
     );
     expect(screen.getByTestId('editPolicyModal-affectedResourcesList-index-1')).toBeInTheDocument();
     expect(screen.getByTestId('editPolicyModal-affectedResourcesList-index-2')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('EditPolicyModal', () => {
     );
 
     expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent(
-      '2 streams will be affected'
+      'This update affects 2 streams'
     );
   });
 
@@ -78,7 +78,7 @@ describe('EditPolicyModal', () => {
     );
 
     expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent(
-      '2 indices will be affected'
+      'This update affects 2 indices'
     );
   });
 

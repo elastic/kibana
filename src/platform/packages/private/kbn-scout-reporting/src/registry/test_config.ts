@@ -83,7 +83,6 @@ export const testConfig = {
       }
     } else {
       manifestFileData = {
-        lastModified: new Date(0).toISOString(),
         sha1: '000000000000000-000000000000000',
         tests: [],
       };

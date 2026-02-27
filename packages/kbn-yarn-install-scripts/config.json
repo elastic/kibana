@@ -91,46 +91,10 @@
       "reason": "Prints version scheme warning - not needed"
     },
     {
-      "path": "@opentelemetry/exporter-metrics-otlp-grpc/node_modules/protobufjs",
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
       "lifecycle": "postinstall",
       "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-metrics-otlp-http/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-metrics-otlp-proto/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-trace-otlp-grpc/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-trace-otlp-http/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-trace-otlp-proto/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/otlp-exporter-base/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
+      "reason": "Prints version scheme warning - not needed"
     },
     {
       "path": "puppeteer",
@@ -143,6 +107,12 @@
       "lifecycle": "install",
       "required": false,
       "reason": "Builds from source if required.  Prebuilds are sufficient."
+    },
+    {
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints warnings about potential dependency version mismatches. Not needed."
     },
     {
       "path": "@parcel/watcher",

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 import {
@@ -15,19 +16,19 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, () => {
+test.describe('Stream data routing - AI suggestions button', { tag: tags.stateful.classic }, () => {
   let llmSetup: LlmProxySetup;
 
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
     await logsSynthtraceEsClient.clean();
-    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
 
     llmSetup = await setupLlmProxyAndConnector(log, apiServices);
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.streams.gotoPartitioningTab('logs.otel');
     await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
     await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
@@ -81,7 +82,7 @@ test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, 
 
     await page.reload();
 
-    const moreButton = page.getByTestId('streamsAppGenerateSuggestionButtonMoreButton');
+    const moreButton = page.getByTestId('streamsAppAiPickConnectorButton');
     await expect(moreButton).toBeVisible();
   });
 });
