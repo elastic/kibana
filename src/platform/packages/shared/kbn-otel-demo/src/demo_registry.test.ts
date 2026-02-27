@@ -271,6 +271,23 @@ describe('demo_registry', () => {
       collectorConfigYaml: 'receivers:\n  otlp:\n    protocols:\n      grpc:\n',
     };
 
+    describe('bank-of-anthos JWT key mounting', () => {
+      it('should mount jwt-key secret for services needing authentication', () => {
+        const config = DEMO_CONFIGS['bank-of-anthos'];
+        const manifestGenerator = DEMO_MANIFESTS['bank-of-anthos'];
+        const yaml = manifestGenerator.generate({
+          ...mockOptions,
+          config,
+        });
+
+        expect(yaml).toContain('jwt-key');
+        expect(yaml).toContain('secretName: jwt-key');
+        expect(yaml).toContain('path: privatekey');
+        expect(yaml).toContain('path: publickey');
+        expect(yaml).toContain('mountPath: /tmp/.ssh');
+      });
+    });
+
     describe.each(ALL_DEMO_TYPES)('%s manifests', (demoType) => {
       it('should generate valid YAML', () => {
         const config = DEMO_CONFIGS[demoType];

@@ -282,10 +282,44 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
+  mountJwtKeys?: boolean;
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
     : [];
+
+  const container: Record<string, unknown> = {
+    name: opts.name,
+    image: opts.image,
+    ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
+    ...(envList.length > 0 && { env: envList }),
+  };
+
+  const podSpec: Record<string, unknown> = {
+    containers: [container],
+  };
+
+  if (opts.mountJwtKeys) {
+    container.volumeMounts = [
+      {
+        name: 'keys',
+        mountPath: '/tmp/.ssh',
+        readOnly: true,
+      },
+    ];
+    podSpec.volumes = [
+      {
+        name: 'keys',
+        secret: {
+          secretName: 'jwt-key',
+          items: [
+            { key: 'jwtRS256.key', path: 'privatekey' },
+            { key: 'jwtRS256.key.pub', path: 'publickey' },
+          ],
+        },
+      },
+    ];
+  }
 
   return {
     apiVersion: 'apps/v1',
@@ -314,16 +348,7 @@ function createDeployment(opts: {
             'app.kubernetes.io/part-of': opts.demoId,
           },
         },
-        spec: {
-          containers: [
-            {
-              name: opts.name,
-              image: opts.image,
-              ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
-              ...(envList.length > 0 && { env: envList }),
-            },
-          ],
-        },
+        spec: podSpec,
       },
     },
   };
@@ -464,6 +489,16 @@ export const bankOfAnthosManifests: DemoManifestGenerator = {
     // Get all services for this demo
     const services = options.config.getServices(options.version);
 
+    // Services that need JWT keys mounted for authentication
+    const servicesNeedingJwtKeys = new Set([
+      'userservice',
+      'contacts',
+      'ledgerwriter',
+      'balancereader',
+      'transactionhistory',
+      'frontend',
+    ]);
+
     // Deploy each service
     for (const svc of services) {
       let finalEnv = { ...svc.env };
@@ -480,6 +515,7 @@ export const bankOfAnthosManifests: DemoManifestGenerator = {
           image: svc.image,
           ports: svc.port ? [svc.port] : [],
           env: finalEnv,
+          mountJwtKeys: servicesNeedingJwtKeys.has(svc.name),
         })
       );
 
