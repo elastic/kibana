@@ -37,7 +37,6 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
             .send(
               getTestRuleData({
                 enabled: false,
-                rule_type_id: 'test.always-firing',
                 schedule: { interval: '1m' },
                 actions: [],
               })
@@ -56,7 +55,7 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
                 error: 'Forbidden',
                 message: getUnauthorizedErrorMessage(
                   'muteAlert',
-                  'test.always-firing',
+                  'test.noop',
                   'alertsFixture'
                 ),
                 statusCode: 403,
@@ -99,7 +98,6 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
             .send(
               getTestRuleData({
                 enabled: false,
-                rule_type_id: 'test.always-firing',
                 schedule: { interval: '1m' },
                 actions: [],
               })
