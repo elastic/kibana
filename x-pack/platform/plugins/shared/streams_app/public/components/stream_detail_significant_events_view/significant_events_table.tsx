@@ -80,11 +80,15 @@ export function SignificantEventsTable({
         defaultMessage: 'Query',
       }),
       render: (query: StreamQuery) => {
-        if (!query.kql.query) {
+        if (!query.esql.query) {
           return '--';
         }
 
-        return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
+        return (
+          <EuiCodeBlock language="esql" paddingSize="none">
+            {query.esql.query}
+          </EuiCodeBlock>
+        );
       },
     },
     {

@@ -38,7 +38,7 @@ describe('verifyQueries', () => {
     abortCtrl = new AbortController();
   });
 
-  it('filters out the invalid queries', async () => {
+  it('filters out the invalid KQL queries', async () => {
     esClientMock.search.mockResolvedValue({
       took: 10,
       timed_out: false,
@@ -91,6 +91,179 @@ describe('verifyQueries', () => {
     expect(result).toEqual({
       totalCount: 0,
       queries: [{ kql: 'message:irrelevant', title: 'irrelevant', count: 0 }],
+    });
+  });
+
+  describe('ES|QL queries', () => {
+    it('validates and executes native ES|QL queries', async () => {
+      esClientMock.search.mockResolvedValue({
+        took: 5,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 100, relation: 'eq' }, hits: [] },
+      });
+      esClientMock.esql.query.mockResolvedValue({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [[15]],
+      } as any);
+
+      const esClient = createTracedEsClient({
+        client: esClientMock,
+        logger: loggerMock,
+        abortSignal: abortCtrl.signal,
+      });
+
+      const result = await verifyQueries(
+        {
+          definition: logsStreamDefinition,
+          end: 1000,
+          start: 0,
+          queries: [
+            {
+              kql: '',
+              esql: 'FROM logs,logs.* | WHERE status_code >= 500',
+              title: 'server errors',
+            },
+          ],
+        },
+        { esClient, logger: loggerMock }
+      );
+
+      expect(result).toEqual({
+        totalCount: 100,
+        queries: [
+          {
+            kql: '',
+            esql: 'FROM logs,logs.* | WHERE status_code >= 500',
+            title: 'server errors',
+            count: 15,
+          },
+        ],
+      });
+    });
+
+    it('filters out invalid ES|QL queries', async () => {
+      esClientMock.search.mockResolvedValue({
+        took: 5,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 100, relation: 'eq' }, hits: [] },
+      });
+
+      const esClient = createTracedEsClient({
+        client: esClientMock,
+        logger: loggerMock,
+        abortSignal: abortCtrl.signal,
+      });
+
+      const result = await verifyQueries(
+        {
+          definition: logsStreamDefinition,
+          end: 1000,
+          start: 0,
+          queries: [
+            {
+              kql: '',
+              esql: 'INVALID QUERY %%% SYNTAX ERROR',
+              title: 'broken query',
+            },
+          ],
+        },
+        { esClient, logger: loggerMock }
+      );
+
+      expect(result).toEqual({
+        totalCount: 0,
+        queries: [],
+      });
+    });
+
+    it('handles mixed KQL and ES|QL queries', async () => {
+      esClientMock.search.mockResolvedValue({
+        took: 5,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 200, relation: 'eq' }, hits: [] },
+      });
+      esClientMock.esql.query.mockResolvedValue({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [[33]],
+      } as any);
+
+      const esClient = createTracedEsClient({
+        client: esClientMock,
+        logger: loggerMock,
+        abortSignal: abortCtrl.signal,
+      });
+
+      const result = await verifyQueries(
+        {
+          definition: logsStreamDefinition,
+          end: 1000,
+          start: 0,
+          queries: [
+            { kql: 'status:error', title: 'kql query' },
+            {
+              kql: '',
+              esql: 'FROM logs,logs.* | WHERE http.response.status_code >= 500',
+              title: 'esql query',
+            },
+          ],
+        },
+        { esClient, logger: loggerMock }
+      );
+
+      expect(result.totalCount).toBe(200);
+      expect(result.queries).toHaveLength(2);
+      expect(result.queries[0]).toMatchObject({ kql: 'status:error', count: 200 });
+      expect(result.queries[1]).toMatchObject({
+        esql: 'FROM logs,logs.* | WHERE http.response.status_code >= 500',
+        count: 33,
+      });
+    });
+
+    it('handles ES|QL execution errors gracefully', async () => {
+      esClientMock.search.mockResolvedValue({
+        took: 5,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 50, relation: 'eq' }, hits: [] },
+      });
+      esClientMock.esql.query.mockRejectedValue(new Error('esql execution timeout'));
+
+      const esClient = createTracedEsClient({
+        client: esClientMock,
+        logger: loggerMock,
+        abortSignal: abortCtrl.signal,
+      });
+
+      const result = await verifyQueries(
+        {
+          definition: logsStreamDefinition,
+          end: 1000,
+          start: 0,
+          queries: [
+            {
+              kql: '',
+              esql: 'FROM logs,logs.* | WHERE status_code >= 500',
+              title: 'failing query',
+            },
+          ],
+        },
+        { esClient, logger: loggerMock }
+      );
+
+      expect(result).toEqual({
+        totalCount: 50,
+        queries: [
+          {
+            kql: '',
+            esql: 'FROM logs,logs.* | WHERE status_code >= 500',
+            title: 'failing query',
+            count: 0,
+          },
+        ],
+      });
     });
   });
 });

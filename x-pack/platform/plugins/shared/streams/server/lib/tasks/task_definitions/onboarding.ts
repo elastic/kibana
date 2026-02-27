@@ -273,7 +273,7 @@ export async function saveQueries(
     queries.map((query) => ({
       index: {
         id: v4(),
-        kql: { query: query.kql },
+        esql: query.esql,
         title: query.title,
         feature: query.feature,
         severity_score: query.severity_score,

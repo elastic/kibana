@@ -24,6 +24,7 @@
     "@kbn/zod",
     "@kbn/inference-prompt-utils",
     "@kbn/es-query",
+    "@kbn/esql-language",
     "@kbn/zod-helpers",
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-utils",

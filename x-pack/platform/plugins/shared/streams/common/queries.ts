@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamQuery, StreamQueryInput } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 
 // Legacy stored query links may not include rule_backed and should be treated as already backed.
 export const LEGACY_RULE_BACKED_FALLBACK = true;
@@ -22,9 +22,7 @@ export interface QueryLink {
   rule_id: string;
 }
 
-export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name' | 'query'> & {
-  query: StreamQueryInput;
-};
+export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 

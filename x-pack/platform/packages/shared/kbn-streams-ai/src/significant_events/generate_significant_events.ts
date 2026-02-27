@@ -13,7 +13,8 @@ import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { dateRangeQuery, fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
+import { dateRangeQuery } from '@kbn/es-query';
+import { Parser, Walker } from '@kbn/esql-language';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -31,7 +32,7 @@ import {
 } from './tools/tool_usage';
 
 interface Query {
-  kql: string;
+  esql: string;
   title: string;
   category: SignificantEventType;
   severity_score: number;
@@ -43,10 +44,10 @@ function getErrorMessage(error: unknown): string {
 }
 
 /**
- * Given a list of field names extracted from a KQL expression and a set of
- * mapped fields, returns the subset of field names that do not match any
- * mapped field. Wildcard patterns (e.g. `server.*`) are matched against all
- * mapped fields using regex conversion.
+ * Given a list of field names and a set of mapped fields, returns the subset
+ * of field names that do not match any mapped field. Wildcard patterns
+ * (e.g. `server.*`) are matched against all mapped fields using regex
+ * conversion.
  */
 export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string>): string[] => {
   return fieldNames.filter((fieldName) => {
@@ -198,10 +199,26 @@ export async function generateSignificantEvents({
 
           const queryValidationResults = queries.map((query) => {
             try {
-              fromKueryExpression(query.kql);
+              const { root, errors } = Parser.parse(query.esql);
 
-              const fieldNames = getKqlFieldNamesFromExpression(query.kql);
-              const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
+              if (errors.length > 0) {
+                hasFailures = true;
+                return {
+                  query,
+                  valid: false,
+                  status: 'Failed to add',
+                  error: `ES|QL syntax error: ${errors[0].message}`,
+                };
+              }
+
+              const fieldNames: string[] = [];
+              Walker.walk(root, {
+                visitColumn: (node) => {
+                  fieldNames.push(node.parts.join('.'));
+                },
+              });
+              const uniqueFieldNames = [...new Set(fieldNames)];
+              const unmappedFields = getUnmappedFields(uniqueFieldNames, mappedFields);
 
               if (unmappedFields.length > 0) {
                 hasFailures = true;
