@@ -14,5 +14,5 @@ try {
 } catch (error) {
   console.error('Error loading or running CLI:');
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 }

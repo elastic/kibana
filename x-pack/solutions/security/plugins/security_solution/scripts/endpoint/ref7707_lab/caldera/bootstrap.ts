@@ -86,9 +86,10 @@ export const ensureRef7707CalderaPack = async ({
       await client.createAbility(ability);
       log.info(`[caldera] created ability: ${ability.name} (${abilityId})`);
       abilityIds.push(abilityId);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const err = e as { message?: string };
       log.warning(
-        `[caldera] ability create may have failed (skipping): ${abilityId} - ${e?.message ?? e}`
+        `[caldera] ability create may have failed (skipping): ${abilityId} - ${err?.message ?? e}`
       );
     }
   }
@@ -102,22 +103,25 @@ export const ensureRef7707CalderaPack = async ({
 
   let adversaryId: string | undefined;
   try {
-    const created = await client.createAdversary(adversaryPayload);
-    adversaryId = created?.adversary_id;
+    const created = (await client.createAdversary(adversaryPayload)) as Record<string, unknown>;
+    adversaryId = created?.adversary_id as string | undefined;
     log.info(
       `[caldera] created adversary: ${adversaryPayload.name}${
         adversaryId ? ` (${adversaryId})` : ''
       }`
     );
-  } catch (e: any) {
-    log.warning(`[caldera] adversary create may have failed (continuing): ${e?.message ?? e}`);
+  } catch (e: unknown) {
+    const err = e as { message?: string };
+    log.warning(`[caldera] adversary create may have failed (continuing): ${err?.message ?? e}`);
   }
 
   if (!adversaryId) {
-    const adversaries = await client.getAdversaries();
+    const adversaries = (await client.getAdversaries()) as Array<
+      Record<string, unknown> | undefined
+    >;
     const existing = adversaries.find((a) => a?.name === adversaryPayload.name);
     if (existing?.adversary_id) {
-      adversaryId = existing.adversary_id;
+      adversaryId = existing.adversary_id as string;
       log.info(`[caldera] using existing adversary: ${adversaryPayload.name} (${adversaryId})`);
     }
   }

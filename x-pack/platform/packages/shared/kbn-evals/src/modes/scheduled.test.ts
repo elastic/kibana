@@ -17,7 +17,7 @@ import {
 const mockTask = {
   stop: jest.fn(),
 };
-
+/* eslint-disable @kbn/imports/no_unresolvable_imports */
 jest.mock(
   'node-cron',
   () => ({
@@ -29,6 +29,7 @@ jest.mock(
   }),
   { virtual: true }
 );
+/* eslint-enable @kbn/imports/no_unresolvable_imports */
 
 const createMockLog = (): jest.Mocked<SomeDevLog> => ({
   info: jest.fn(),

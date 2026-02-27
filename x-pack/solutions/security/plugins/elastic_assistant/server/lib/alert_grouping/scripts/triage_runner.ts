@@ -32,7 +32,8 @@
  */
 
 import { writeFileSync } from 'fs';
-import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
+import { ESClient, parseConnectionArgs, checkCluster } from './es_client';
+import { KibanaClient } from './kibana_client';
 
 // ── Types ──
 

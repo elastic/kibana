@@ -34,8 +34,9 @@ export const getLocalTailscaleMagicDnsName = async (): Promise<string | undefine
   // This requires MagicDNS enabled in the tailnet and accept-dns=true on the client.
   try {
     const { stdout } = await execa('tailscale', ['status', '--json']);
-    const parsed = JSON.parse(stdout) as any;
-    const dnsName = (parsed?.Self?.DNSName as string | undefined) || '';
+    const parsed = JSON.parse(stdout) as Record<string, unknown>;
+    const self = parsed?.Self as Record<string, unknown> | undefined;
+    const dnsName = (self?.DNSName as string | undefined) || '';
     const cleaned = dnsName.trim().replace(/\.$/, '');
     return cleaned || undefined;
   } catch {

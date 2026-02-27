@@ -118,11 +118,11 @@ export const createVirusTotalWorkflow = async (
 
         const hit = result.hits.hits[0];
         return hit?._id;
-      } catch (e: any) {
-        // Ignore missing index / not found situations
-        if (e?.statusCode === 404 || e?.meta?.statusCode === 404) return;
+      } catch (e: unknown) {
+        const err = e as { statusCode?: number; meta?: { statusCode?: number }; message?: string };
+        if (err?.statusCode === 404 || err?.meta?.statusCode === 404) return;
         logger.warning(
-          `Failed to search workflows index for existing workflow: ${e?.message ?? e}`
+          `Failed to search workflows index for existing workflow: ${err?.message ?? e}`
         );
       }
     };

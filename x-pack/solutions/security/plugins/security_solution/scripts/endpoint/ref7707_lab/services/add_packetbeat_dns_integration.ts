@@ -114,7 +114,7 @@ export const addPacketbeatDnsIntegrationToAgentPolicy = async ({
     query: { format: 'json' },
   });
 
-  const inputsRaw = (inputsTemplatesResponse.data as any)?.inputs;
+  const inputsRaw = (inputsTemplatesResponse.data as Record<string, unknown>)?.inputs;
   const inputs = Array.isArray(inputsRaw) ? (inputsRaw as PackagePolicyInput[]) : [];
 
   if (!inputs.length) {
@@ -140,7 +140,7 @@ export const addPacketbeatDnsIntegrationToAgentPolicy = async ({
     policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
     enabled: true,
-    inputs: dnsOnlyInputs as any,
+    inputs: dnsOnlyInputs as Parameters<typeof createIntegrationPolicy>[1]['inputs'],
     package: {
       name: packageName,
       title: packageTitle,

@@ -92,8 +92,12 @@ export const resolveElasticAgentDownloadUrl = async (
     const manifestUrl = await getSnapshotManifestUrl(version);
     const filename = getSnapshotAgentFilename(version, platform);
 
-    const { data } = await axios.get<any>(manifestUrl, { timeout: 20_000 });
-    const url = data?.projects?.['elastic-agent-package']?.packages?.[filename]?.url;
+    const { data } = await axios.get<Record<string, unknown>>(manifestUrl, { timeout: 20_000 });
+    const projects = data?.projects as Record<string, unknown> | undefined;
+    const agentPkg = projects?.['elastic-agent-package'] as Record<string, unknown> | undefined;
+    const packages = agentPkg?.packages as Record<string, unknown> | undefined;
+    const pkg = packages?.[filename] as Record<string, unknown> | undefined;
+    const url = pkg?.url as string | undefined;
     if (!url) {
       throw new Error(
         `Unable to find Elastic Agent package URL in snapshot manifest.\n` +
@@ -101,7 +105,7 @@ export const resolveElasticAgentDownloadUrl = async (
           `filename: ${filename}`
       );
     }
-    return url as string;
+    return url;
   }
 
   // Release builds: use artifacts.elastic.co

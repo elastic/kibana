@@ -14,6 +14,7 @@ export {
   getExplicitSkillIds,
 } from './skill_selection';
 export {
+  type Skill,
   type PublicSkillDefinition,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,

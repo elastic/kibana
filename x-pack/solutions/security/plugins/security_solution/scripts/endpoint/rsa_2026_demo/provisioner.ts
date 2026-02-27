@@ -38,6 +38,13 @@ import {
   updateRsa2026DemoState,
 } from './state';
 
+const inferPolicyType = (hostname: string): 'defend-osquery' | 'osquery-only' => {
+  if (hostname.includes('defend-osquery') || hostname.includes('ubuntu')) {
+    return 'defend-osquery';
+  }
+  return 'osquery-only';
+};
+
 /**
  * Main provisioning function for RSA 2026 demo
  * Can run all steps or specific steps based on the steps parameter
@@ -87,7 +94,13 @@ export const provisionRsa2026Demo = async (
 
   const stepsToRun = steps && steps.length > 0 ? steps : allSteps;
 
-  return logger.indent(4, async () => {
+  const result = await logger.indent(4, async () => {
+    const policyIds = { ...context.policyIds };
+    let { endpoints } = context;
+    let detectionRuleId = context.detectionRuleId;
+    let workflowId = context.workflowId;
+    let virusTotalConnectorId = context.virusTotalConnectorId;
+
     // Persist a minimal state file as we go so cleanup can work across separate runs/steps
     await updateRsa2026DemoState({}, DEFAULT_RSA_2026_STATE_FILE);
 
@@ -98,28 +111,32 @@ export const provisionRsa2026Demo = async (
 
     // Step 2: Policies
     if (stepsToRun.includes('policies')) {
-      context.policyIds = await stepPolicies(kbnClient, logger);
+      const policyResult = await stepPolicies(kbnClient, logger);
+      policyIds.defendOsquery = policyResult.defendOsquery;
+      policyIds.osqueryOnly = policyResult.osqueryOnly;
       await updateRsa2026DemoState(
-        { agentPolicyIds: [context.policyIds.defendOsquery, context.policyIds.osqueryOnly] },
+        { agentPolicyIds: [policyIds.defendOsquery, policyIds.osqueryOnly] },
         DEFAULT_RSA_2026_STATE_FILE
       );
     }
 
     // Step 3: Endpoints (requires policies)
     if (stepsToRun.includes('endpoints')) {
-      if (!context.policyIds.defendOsquery || !context.policyIds.osqueryOnly) {
+      if (!policyIds.defendOsquery || !policyIds.osqueryOnly) {
         // If policies weren't created in this run, try to get them
         if (stepsToRun.includes('policies')) {
           throw new Error('Policies must be created before endpoints');
         }
         // Try to fetch existing policies (simplified - in production you'd query by name pattern)
-        context.policyIds = await stepPolicies(kbnClient, logger);
+        const policyResult = await stepPolicies(kbnClient, logger);
+        policyIds.defendOsquery = policyResult.defendOsquery;
+        policyIds.osqueryOnly = policyResult.osqueryOnly;
       }
-      context.endpoints = await stepEndpoints(kbnClient, logger, config, context.policyIds);
+      endpoints = await stepEndpoints(kbnClient, logger, config, policyIds);
       await updateRsa2026DemoState(
         {
-          vmNames: context.endpoints.map((e) => e.hostname),
-          agentIds: context.endpoints.map((e) => e.agentId).filter((id) => id && id !== 'unknown'),
+          vmNames: endpoints.map((e) => e.hostname),
+          agentIds: endpoints.map((e) => e.agentId).filter((id) => id && id !== 'unknown'),
         },
         DEFAULT_RSA_2026_STATE_FILE
       );
@@ -127,13 +144,13 @@ export const provisionRsa2026Demo = async (
 
     // Step 4: Browser History (requires endpoints)
     if (stepsToRun.includes('gui')) {
-      if (context.endpoints.length === 0) {
+      if (endpoints.length === 0) {
         if (stepsToRun.includes('endpoints')) {
           throw new Error('Endpoints must be created before GUI setup');
         }
         const vmType = config.vmType;
         if (vmType === 'gcp' && config.gcpVmNames) {
-          context.endpoints = config.gcpVmNames
+          endpoints = config.gcpVmNames
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean)
@@ -141,36 +158,34 @@ export const provisionRsa2026Demo = async (
               hostname,
               agentId: 'unknown',
               hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-              policyType: (hostname.includes('defend-osquery')
-                ? 'defend-osquery'
-                : 'osquery-only') as const,
+              policyType: inferPolicyType(hostname),
             }));
         } else {
           const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
           if (existingVms.data.length === 0) {
             throw new Error('No existing endpoints found. Please run endpoints step first.');
           }
-          context.endpoints = existingVms.data.map((hostname) => ({
+          endpoints = existingVms.data.map((hostname) => ({
             hostname,
             agentId: 'unknown',
             hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-            policyType: hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only',
+            policyType: inferPolicyType(hostname),
           }));
         }
       }
 
-      await stepGui(context.endpoints, logger, config);
+      await stepGui(endpoints, logger, config);
     }
 
     // Step 5: Browser History (requires endpoints)
     if (stepsToRun.includes('browser-history')) {
-      if (context.endpoints.length === 0) {
+      if (endpoints.length === 0) {
         if (stepsToRun.includes('endpoints')) {
           throw new Error('Endpoints must be created before browser history');
         }
         const vmType = config.vmType;
         if (vmType === 'gcp' && config.gcpVmNames) {
-          context.endpoints = config.gcpVmNames
+          endpoints = config.gcpVmNames
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean)
@@ -178,32 +193,30 @@ export const provisionRsa2026Demo = async (
               hostname,
               agentId: 'unknown',
               hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-              policyType: (hostname.includes('defend-osquery')
-                ? 'defend-osquery'
-                : 'osquery-only') as const,
+              policyType: inferPolicyType(hostname),
             }));
         } else {
           const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
           if (existingVms.data.length === 0) {
             throw new Error('No existing endpoints found. Please run endpoints step first.');
           }
-          context.endpoints = existingVms.data.map((hostname) => ({
+          endpoints = existingVms.data.map((hostname) => ({
             hostname,
             agentId: 'unknown',
             hostVm: getHostVmClient(hostname, vmType, undefined, logger),
-            policyType: hostname.includes('defend-osquery') ? 'defend-osquery' : 'osquery-only',
+            policyType: inferPolicyType(hostname),
           }));
         }
       }
-      await stepBrowserHistory(context.endpoints, logger, config);
+      await stepBrowserHistory(endpoints, logger, config);
     }
 
     // Step 6: Detection Rule
     if (stepsToRun.includes('detection-rule') && config.createDetectionRule) {
-      context.detectionRuleId = await stepDetectionRule(kbnClient, logger);
-      if (context.detectionRuleId) {
+      detectionRuleId = await stepDetectionRule(kbnClient, logger);
+      if (detectionRuleId) {
         await updateRsa2026DemoState(
-          { detectionRuleIds: [context.detectionRuleId] },
+          { detectionRuleIds: [detectionRuleId] },
           DEFAULT_RSA_2026_STATE_FILE
         );
       }
@@ -218,8 +231,8 @@ export const provisionRsa2026Demo = async (
         config.virustotalApiKey || ''
       );
       if (workflowResult) {
-        context.workflowId = workflowResult.workflowId;
-        context.virusTotalConnectorId = workflowResult.connectorId;
+        workflowId = workflowResult.workflowId;
+        virusTotalConnectorId = workflowResult.connectorId;
         await updateRsa2026DemoState(
           { workflowIds: [workflowResult.workflowId], connectorIds: [workflowResult.connectorId] },
           DEFAULT_RSA_2026_STATE_FILE
@@ -227,17 +240,25 @@ export const provisionRsa2026Demo = async (
       }
     }
 
-    logger.info('RSA 2026 demo provisioning completed successfully');
-    logger.info(`Created ${context.endpoints.length} endpoints`);
-    if (context.detectionRuleId) {
-      logger.info(`Detection rule ID: ${context.detectionRuleId}`);
-    }
-    if (context.workflowId) {
-      logger.info(`Workflow ID: ${context.workflowId}`);
-    }
-
-    return context;
+    return { policyIds, endpoints, detectionRuleId, workflowId, virusTotalConnectorId };
   });
+
+  context.policyIds = result.policyIds;
+  context.endpoints = result.endpoints;
+  context.detectionRuleId = result.detectionRuleId;
+  context.workflowId = result.workflowId;
+  context.virusTotalConnectorId = result.virusTotalConnectorId;
+
+  logger.info('RSA 2026 demo provisioning completed successfully');
+  logger.info(`Created ${context.endpoints.length} endpoints`);
+  if (context.detectionRuleId) {
+    logger.info(`Detection rule ID: ${context.detectionRuleId}`);
+  }
+  if (context.workflowId) {
+    logger.info(`Workflow ID: ${context.workflowId}`);
+  }
+
+  return context;
 };
 
 /**
@@ -274,25 +295,25 @@ export const cleanupRsa2026Demo = async (
       // Prefer agent ids from persisted state if present
       const agentIdsFromState = persistedState?.agentIds ?? [];
       for (const agentId of agentIdsFromState) {
-        if (deleted.agents.has(agentId)) continue;
-        logger.info(`Unenrolling Fleet agent from state: ${agentId}`);
-        try {
-          await unEnrollFleetAgent(context.kbnClient, agentId, true);
-          deleted.agents.add(agentId);
-        } catch (error) {
-          logger.warning(`Failed to unenroll agent ${agentId}: ${error}`);
+        if (!deleted.agents.has(agentId)) {
+          logger.info(`Unenrolling Fleet agent from state: ${agentId}`);
+          try {
+            await unEnrollFleetAgent(context.kbnClient, agentId, true);
+            deleted.agents.add(agentId);
+          } catch (error) {
+            logger.warning(`Failed to unenroll agent ${agentId}: ${error}`);
+          }
         }
       }
 
       for (const endpoint of context.endpoints) {
-        if (!endpoint.agentId || endpoint.agentId === 'unknown') {
-          continue;
-        }
-        logger.info(`Unenrolling Fleet agent: ${endpoint.agentId} (${endpoint.hostname})`);
-        try {
-          await unEnrollFleetAgent(context.kbnClient, endpoint.agentId, true);
-        } catch (error) {
-          logger.warning(`Failed to unenroll agent ${endpoint.agentId}: ${error}`);
+        if (endpoint.agentId && endpoint.agentId !== 'unknown') {
+          logger.info(`Unenrolling Fleet agent: ${endpoint.agentId} (${endpoint.hostname})`);
+          try {
+            await unEnrollFleetAgent(context.kbnClient, endpoint.agentId, true);
+          } catch (error) {
+            logger.warning(`Failed to unenroll agent ${endpoint.agentId}: ${error}`);
+          }
         }
       }
     }
@@ -322,68 +343,72 @@ export const cleanupRsa2026Demo = async (
     if (cleanupAll) {
       // Delete by persisted IDs first (more deterministic)
       for (const ruleId of persistedState?.detectionRuleIds ?? []) {
-        if (deleted.rules.has(ruleId)) continue;
-        try {
-          await context.kbnClient
-            .request({
-              method: 'DELETE',
-              path: DETECTION_ENGINE_RULES_URL,
-              headers: { 'elastic-api-version': '2023-10-31' },
-              query: { id: ruleId },
-            })
-            .catch(catchAxiosErrorFormatAndThrow);
-          deleted.rules.add(ruleId);
-        } catch (error) {
-          if (!isNotFoundError(error)) {
-            logger.warning(`Failed to delete detection rule from state ${ruleId}: ${error}`);
+        if (!deleted.rules.has(ruleId)) {
+          try {
+            await context.kbnClient
+              .request({
+                method: 'DELETE',
+                path: DETECTION_ENGINE_RULES_URL,
+                headers: { 'elastic-api-version': '2023-10-31' },
+                query: { id: ruleId },
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
+            deleted.rules.add(ruleId);
+          } catch (error) {
+            if (!isNotFoundError(error)) {
+              logger.warning(`Failed to delete detection rule from state ${ruleId}: ${error}`);
+            }
           }
         }
       }
 
       for (const workflowId of persistedState?.workflowIds ?? []) {
-        if (deleted.workflows.has(workflowId)) continue;
-        try {
-          await context.kbnClient
-            .request({
-              method: 'DELETE',
-              path: `/api/workflows/${workflowId}`,
-              headers: { 'elastic-api-version': '2023-10-31' },
-            })
-            .catch(catchAxiosErrorFormatAndThrow);
-          deleted.workflows.add(workflowId);
-        } catch (error) {
-          if (!isNotFoundError(error)) {
-            logger.warning(`Failed to delete workflow from state ${workflowId}: ${error}`);
+        if (!deleted.workflows.has(workflowId)) {
+          try {
+            await context.kbnClient
+              .request({
+                method: 'DELETE',
+                path: `/api/workflows/${workflowId}`,
+                headers: { 'elastic-api-version': '2023-10-31' },
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
+            deleted.workflows.add(workflowId);
+          } catch (error) {
+            if (!isNotFoundError(error)) {
+              logger.warning(`Failed to delete workflow from state ${workflowId}: ${error}`);
+            }
           }
         }
       }
 
       for (const connectorId of persistedState?.connectorIds ?? []) {
-        if (deleted.connectors.has(connectorId)) continue;
-        try {
-          await context.kbnClient
-            .request({
-              method: 'DELETE',
-              path: `/api/actions/connector/${connectorId}`,
-              headers: { 'elastic-api-version': '2023-10-31' },
-            })
-            .catch(catchAxiosErrorFormatAndThrow);
-          deleted.connectors.add(connectorId);
-        } catch (error) {
-          if (!isNotFoundError(error)) {
-            logger.warning(`Failed to delete connector from state ${connectorId}: ${error}`);
+        if (!deleted.connectors.has(connectorId)) {
+          try {
+            await context.kbnClient
+              .request({
+                method: 'DELETE',
+                path: `/api/actions/connector/${connectorId}`,
+                headers: { 'elastic-api-version': '2023-10-31' },
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
+            deleted.connectors.add(connectorId);
+          } catch (error) {
+            if (!isNotFoundError(error)) {
+              logger.warning(`Failed to delete connector from state ${connectorId}: ${error}`);
+            }
           }
         }
       }
 
       for (const policyId of persistedState?.agentPolicyIds ?? []) {
-        if (deleted.policies.has(policyId)) continue;
-        try {
-          await deleteAgentPolicy(context.kbnClient, policyId);
-          deleted.policies.add(policyId);
-        } catch (error) {
-          if (!isNotFoundError(error)) {
-            logger.warning(`Failed to delete agent policy from state ${policyId}: ${error}`);
+        if (!deleted.policies.has(policyId)) {
+          try {
+            await deleteAgentPolicy(context.kbnClient, policyId);
+            deleted.policies.add(policyId);
+          } catch (error) {
+            if (!isNotFoundError(error)) {
+              logger.warning(`Failed to delete agent policy from state ${policyId}: ${error}`);
+            }
           }
         }
       }
@@ -517,7 +542,7 @@ export const cleanupRsa2026Demo = async (
         const connectors: Array<{ id: string; name: string; connector_type_id: string }> =
           Array.isArray(connectorsResponse)
             ? connectorsResponse
-            : (connectorsResponse as any)?.data ?? [];
+            : (connectorsResponse as Record<string, unknown>)?.data ?? [];
 
         const vtConnectors =
           connectors.filter(
@@ -525,21 +550,22 @@ export const cleanupRsa2026Demo = async (
           ) ?? [];
 
         for (const c of vtConnectors) {
-          if (deleted.connectors.has(c.id)) continue;
-          logger.info(`Deleting VirusTotal connector: ${c.name} (${c.id})`);
-          try {
-            await context.kbnClient
-              .request({
-                method: 'DELETE',
-                path: `/api/actions/connector/${c.id}`,
-                headers: { 'elastic-api-version': '2023-10-31' },
-              })
-              .catch(catchAxiosErrorFormatAndThrow);
-            logger.info(`Deleted connector: ${c.id}`);
-            deleted.connectors.add(c.id);
-          } catch (error) {
-            if (!isNotFoundError(error)) {
-              logger.warning(`Failed to delete connector ${c.id}: ${error}`);
+          if (!deleted.connectors.has(c.id)) {
+            logger.info(`Deleting VirusTotal connector: ${c.name} (${c.id})`);
+            try {
+              await context.kbnClient
+                .request({
+                  method: 'DELETE',
+                  path: `/api/actions/connector/${c.id}`,
+                  headers: { 'elastic-api-version': '2023-10-31' },
+                })
+                .catch(catchAxiosErrorFormatAndThrow);
+              logger.info(`Deleted connector: ${c.id}`);
+              deleted.connectors.add(c.id);
+            } catch (error) {
+              if (!isNotFoundError(error)) {
+                logger.warning(`Failed to delete connector ${c.id}: ${error}`);
+              }
             }
           }
         }
@@ -551,16 +577,16 @@ export const cleanupRsa2026Demo = async (
 
       // Delete agent policies created by this run (best-effort)
       for (const policyId of [context.policyIds.defendOsquery, context.policyIds.osqueryOnly]) {
-        if (!policyId) continue;
-        if (deleted.policies.has(policyId)) continue;
-        logger.info(`Deleting agent policy: ${policyId}`);
-        try {
-          await deleteAgentPolicy(context.kbnClient, policyId);
-          logger.info(`Deleted agent policy: ${policyId}`);
-          deleted.policies.add(policyId);
-        } catch (error) {
-          if (!isNotFoundError(error)) {
-            logger.warning(`Failed to delete agent policy ${policyId}: ${error}`);
+        if (policyId && !deleted.policies.has(policyId)) {
+          logger.info(`Deleting agent policy: ${policyId}`);
+          try {
+            await deleteAgentPolicy(context.kbnClient, policyId);
+            logger.info(`Deleted agent policy: ${policyId}`);
+            deleted.policies.add(policyId);
+          } catch (error) {
+            if (!isNotFoundError(error)) {
+              logger.warning(`Failed to delete agent policy ${policyId}: ${error}`);
+            }
           }
         }
       }
@@ -572,26 +598,21 @@ export const cleanupRsa2026Demo = async (
           withAgentCount: true,
         });
         for (const item of list.items) {
-          if (!item.name?.startsWith('RSA 2026 -')) {
-            continue;
-          }
           if (
-            item.id === context.policyIds.defendOsquery ||
-            item.id === context.policyIds.osqueryOnly
+            item.name?.startsWith('RSA 2026 -') &&
+            item.id !== context.policyIds.defendOsquery &&
+            item.id !== context.policyIds.osqueryOnly &&
+            !deleted.policies.has(item.id)
           ) {
-            continue;
-          }
-          if (deleted.policies.has(item.id)) {
-            continue;
-          }
-          logger.info(`Deleting RSA 2026 agent policy: ${item.name} (${item.id})`);
-          try {
-            await deleteAgentPolicy(context.kbnClient, item.id);
-            logger.info(`Deleted agent policy: ${item.id}`);
-            deleted.policies.add(item.id);
-          } catch (error) {
-            if (!isNotFoundError(error)) {
-              logger.warning(`Failed to delete agent policy ${item.id}: ${error}`);
+            logger.info(`Deleting RSA 2026 agent policy: ${item.name} (${item.id})`);
+            try {
+              await deleteAgentPolicy(context.kbnClient, item.id);
+              logger.info(`Deleted agent policy: ${item.id}`);
+              deleted.policies.add(item.id);
+            } catch (error) {
+              if (!isNotFoundError(error)) {
+                logger.warning(`Failed to delete agent policy ${item.id}: ${error}`);
+              }
             }
           }
         }

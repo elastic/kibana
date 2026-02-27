@@ -245,7 +245,7 @@ const getOrCreateAgentPolicyByName = async ({
       name,
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
-    } as any,
+    } as Parameters<typeof createAgentPolicy>[0]['policy'],
   });
 };
 
@@ -291,7 +291,7 @@ const ensureFleetServerPolicyId = async (
       },
     ],
     package: { name: 'fleet_server', title: pkg.title, version: pkg.version },
-  } as any);
+  } as Parameters<typeof createIntegrationPolicy>[1]);
 
   return agentPolicy.id;
 };
@@ -348,7 +348,7 @@ const ensureOsqueryIntegrationOnPolicy = async (
       },
     ],
     package: { name: 'osquery_manager', title: osqueryPkg.title, version: osqueryPkg.version },
-  } as any);
+  } as Parameters<typeof createIntegrationPolicy>[1]);
 };
 
 const createUbuntuInstance = async ({
@@ -535,8 +535,9 @@ const fetchFleetServerTailscaleMagicDnsName = async (
         instance: cfg.fleetServerName,
         command: `sudo tailscale status --json 2>/dev/null`,
       });
-      const parsed = JSON.parse(raw) as any;
-      const dnsName = (parsed?.Self?.DNSName as string | undefined) || '';
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const self = parsed?.Self as Record<string, unknown> | undefined;
+      const dnsName = (self?.DNSName as string | undefined) || '';
       const cleaned = dnsName.trim().replace(/\.$/, '');
       if (!cleaned) {
         throw new Error(`Missing Self.DNSName in tailscale status json`);
@@ -1061,18 +1062,19 @@ export const cleanupGcpFleetVm = async (
   log.info(`Cleaning up GCP VMs`);
   const toDelete = [ctx.fleetServerVm, ...ctx.agentVms];
   for (const vm of toDelete) {
-    try {
-      if (vm.name === 'local-docker') {
-        continue;
+    if (vm.name === 'local-docker') {
+      // Skip the local-docker placeholder entry
+    } else {
+      try {
+        await gcloudDeleteInstance({
+          log,
+          project: cfg.gcpProject,
+          zone: cfg.gcpZone,
+          instance: vm.name,
+        });
+      } catch (e) {
+        log.warning(`Failed to delete VM [${vm.name}]: ${e}`);
       }
-      await gcloudDeleteInstance({
-        log,
-        project: cfg.gcpProject,
-        zone: cfg.gcpZone,
-        instance: vm.name,
-      });
-    } catch (e) {
-      log.warning(`Failed to delete VM [${vm.name}]: ${e}`);
     }
   }
 

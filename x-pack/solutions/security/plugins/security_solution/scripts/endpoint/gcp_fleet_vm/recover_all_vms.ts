@@ -292,11 +292,11 @@ const runRecovery: RunFn = async ({ log, flags }) => {
   let filter = vmFilter;
   if (!filter) {
     const { stdout: whoami } = await execa('whoami');
-    const username = whoami
+    const inferredUser = whoami
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '');
-    filter = `name~"^${username}-"`;
+    filter = `name~"^${inferredUser}-"`;
     log.info(`No --vmFilter provided, using default: ${filter}`);
   }
 

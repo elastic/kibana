@@ -31,7 +31,8 @@
 
 import { execSync } from 'child_process';
 import { resolve } from 'path';
-import { ESClient, KibanaClient, parseConnectionArgs, checkCluster } from './es_client';
+import { ESClient, parseConnectionArgs, checkCluster } from './es_client';
+import { KibanaClient } from './kibana_client';
 
 const SCRIPT_DIR = __dirname;
 const INJECTED_TAG = 'demo-recreated';

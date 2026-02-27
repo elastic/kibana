@@ -43,7 +43,9 @@ export const loadRsa2026DemoState = async (
       workflowIds: unique(parsed.workflowIds ?? []),
       connectorIds: unique(parsed.connectorIds ?? []),
     };
-  } catch {}
+  } catch {
+    // State file doesn't exist or is invalid JSON — return undefined
+  }
 };
 
 export const saveRsa2026DemoState = async (

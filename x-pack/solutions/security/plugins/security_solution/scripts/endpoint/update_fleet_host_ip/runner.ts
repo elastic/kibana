@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0.
- */
-
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -43,7 +37,7 @@ const findFleetAgentByHostname = async (kbnClient: KbnClient, hostname: string) 
     perPage: 1,
     kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
     showInactive: true,
-  } as any);
+  } as Parameters<typeof fetchFleetAgents>[1]);
   return response.items?.[0];
 };
 
@@ -143,18 +137,16 @@ export const runUpdateFleetHostIp = async (options: RunUpdateFleetHostIpOptions)
 
           if (!agentPolicyId) {
             log.warning(`Skipping VM [${vmName}] (no matching Fleet agent policy id found)`);
-            continue;
+          } else {
+            const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
+            if (!enrollmentToken) {
+              log.warning(
+                `Skipping VM [${vmName}] (no enrollment token found for policy [${agentPolicyId}])`
+              );
+            } else {
+              await reEnrollMultipassAgent({ vmName, fleetServerUrl, enrollmentToken, log });
+            }
           }
-
-          const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
-          if (!enrollmentToken) {
-            log.warning(
-              `Skipping VM [${vmName}] (no enrollment token found for policy [${agentPolicyId}])`
-            );
-            continue;
-          }
-
-          await reEnrollMultipassAgent({ vmName, fleetServerUrl, enrollmentToken, log });
         } catch (e) {
           log.error(`Failed to update VM [${vmName}]: ${(e as Error).message}`);
           log.verbose(e);

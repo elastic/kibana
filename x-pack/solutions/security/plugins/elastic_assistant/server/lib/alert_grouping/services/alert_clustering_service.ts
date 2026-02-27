@@ -252,36 +252,35 @@ export class AlertClusteringService {
       if (!enabled || alerts.length <= 1) {
         // No temporal clustering: one cluster per host
         clusters.push(this.createCluster(++clusterCounter, hostName, alerts));
-        continue;
-      }
+      } else {
+        // Sort alerts by timestamp
+        const sorted = [...alerts].sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
 
-      // Sort alerts by timestamp
-      const sorted = [...alerts].sort(
-        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
+        const temporalGroups: AlertWithMetadata[][] = [];
+        let currentGroup: AlertWithMetadata[] = [sorted[0]];
 
-      const temporalGroups: AlertWithMetadata[][] = [];
-      let currentGroup: AlertWithMetadata[] = [sorted[0]];
+        for (let i = 1; i < sorted.length; i++) {
+          const prevTime = new Date(sorted[i - 1].timestamp).getTime();
+          const currTime = new Date(sorted[i].timestamp).getTime();
+          const gap = currTime - prevTime;
 
-      for (let i = 1; i < sorted.length; i++) {
-        const prevTime = new Date(sorted[i - 1].timestamp).getTime();
-        const currTime = new Date(sorted[i].timestamp).getTime();
-        const gap = currTime - prevTime;
-
-        if (gap > gapThresholdMs) {
-          temporalGroups.push(currentGroup);
-          currentGroup = [sorted[i]];
-        } else {
-          currentGroup.push(sorted[i]);
+          if (gap > gapThresholdMs) {
+            temporalGroups.push(currentGroup);
+            currentGroup = [sorted[i]];
+          } else {
+            currentGroup.push(sorted[i]);
+          }
         }
-      }
-      temporalGroups.push(currentGroup);
+        temporalGroups.push(currentGroup);
 
-      // Merge small clusters with their nearest neighbor
-      const mergedGroups = this.mergeSmallClusters(temporalGroups, minClusterSize);
+        // Merge small clusters with their nearest neighbor
+        const mergedGroups = this.mergeSmallClusters(temporalGroups, minClusterSize);
 
-      for (const group of mergedGroups) {
-        clusters.push(this.createCluster(++clusterCounter, hostName, group));
+        for (const group of mergedGroups) {
+          clusters.push(this.createCluster(++clusterCounter, hostName, group));
+        }
       }
     }
 
@@ -382,6 +381,7 @@ export class AlertClusteringService {
       // Enable via config.tacticSubGrouping.enabled = true for environments where
       // alerts on a single host represent truly independent operations.
       const tacticSplitEnabled = this.config.tacticSubGrouping?.enabled === true;
+      let pushed = false;
       if (tacticSplitEnabled && alertsWithTactics.length > 200 && allTactics.size >= 8) {
         const subClusters = this.splitByTacticPhase(cluster, alertsWithTactics);
         if (subClusters.length > 1 && subClusters.every((s) => s.alertIds.length >= 30)) {
@@ -389,11 +389,13 @@ export class AlertClusteringService {
             sub.id = `${cluster.id}-sub-${++subClusterCounter}`;
             result.push(sub);
           }
-          continue;
+          pushed = true;
         }
       }
 
-      result.push(cluster);
+      if (!pushed) {
+        result.push(cluster);
+      }
     }
 
     return result;
@@ -559,8 +561,8 @@ export class AlertClusteringService {
     const lateralHosts = [...lateralByHost.keys()];
     for (let i = 0; i < lateralHosts.length; i++) {
       for (let j = i + 1; j < lateralHosts.length; j++) {
-        const alertsA = lateralByHost.get(lateralHosts[i])!;
-        const alertsB = lateralByHost.get(lateralHosts[j])!;
+        const alertsA = lateralByHost.get(lateralHosts[i]) ?? [];
+        const alertsB = lateralByHost.get(lateralHosts[j]) ?? [];
 
         const temporalMatches = this.findTemporalMatches(alertsA, alertsB, timeWindowMs);
         if (temporalMatches.length > 0) {
@@ -570,10 +572,9 @@ export class AlertClusteringService {
             linkType: 'lateral_movement_rule',
             confidence: Math.min(0.9, 0.5 + temporalMatches.length * 0.1),
             alertIds: temporalMatches.flatMap(([a, b]) => [a._id, b._id]),
-            description:
-              `Lateral movement techniques detected on both hosts within ${
-                crossHostConfig?.timeWindowMinutes ?? 5
-              }min: ` + `${temporalMatches.length} temporal matches`,
+            description: `Lateral movement techniques detected on both hosts within ${
+              crossHostConfig?.timeWindowMinutes ?? 5
+            }min: ${temporalMatches.length} temporal matches`,
           });
         }
       }
@@ -590,14 +591,14 @@ export class AlertClusteringService {
     const alertsByRuleAndTime = new Map<string, AlertWithMetadata[]>();
     for (const alert of enrichedAlerts) {
       const ruleName = get('kibana.alert.rule.name', alert._source) as string | undefined;
-      if (!ruleName) continue;
-
-      // Round timestamp to 2-minute buckets for matching
-      const timeBucket = Math.floor(new Date(alert.timestamp).getTime() / (2 * 60 * 1000));
-      const key = `${ruleName}:${timeBucket}`;
-      const existing = alertsByRuleAndTime.get(key) ?? [];
-      existing.push(alert);
-      alertsByRuleAndTime.set(key, existing);
+      if (ruleName) {
+        // Round timestamp to 2-minute buckets for matching
+        const timeBucket = Math.floor(new Date(alert.timestamp).getTime() / (2 * 60 * 1000));
+        const key = `${ruleName}:${timeBucket}`;
+        const existing = alertsByRuleAndTime.get(key) ?? [];
+        existing.push(alert);
+        alertsByRuleAndTime.set(key, existing);
+      }
     }
 
     for (const [_key, groupAlerts] of alertsByRuleAndTime) {
@@ -692,30 +693,30 @@ export class AlertClusteringService {
     // Find alerts with destination IPs that belong to other hosts
     for (const alert of alerts) {
       const destIp = get('destination.ip', alert._source) as string | undefined;
-      if (!destIp) continue;
+      if (destIp) {
+        const targetHost = ipToHost.get(destIp);
+        if (targetHost && targetHost !== alert.hostName) {
+          // This alert shows a connection from one host to another
+          const existingLink = links.find(
+            (l) =>
+              l.sourceHost === alert.hostName &&
+              l.targetHost === targetHost &&
+              l.linkType === 'network_connection'
+          );
 
-      const targetHost = ipToHost.get(destIp);
-      if (targetHost && targetHost !== alert.hostName) {
-        // This alert shows a connection from one host to another
-        const existingLink = links.find(
-          (l) =>
-            l.sourceHost === alert.hostName &&
-            l.targetHost === targetHost &&
-            l.linkType === 'network_connection'
-        );
-
-        if (existingLink) {
-          existingLink.alertIds.push(alert._id);
-          existingLink.confidence = Math.min(0.95, existingLink.confidence + 0.1);
-        } else {
-          links.push({
-            sourceHost: alert.hostName,
-            targetHost,
-            linkType: 'network_connection',
-            confidence: 0.8,
-            alertIds: [alert._id],
-            description: `Network connection from ${alert.hostName} to ${targetHost} (${destIp})`,
-          });
+          if (existingLink) {
+            existingLink.alertIds.push(alert._id);
+            existingLink.confidence = Math.min(0.95, existingLink.confidence + 0.1);
+          } else {
+            links.push({
+              sourceHost: alert.hostName,
+              targetHost,
+              linkType: 'network_connection',
+              confidence: 0.8,
+              alertIds: [alert._id],
+              description: `Network connection from ${alert.hostName} to ${targetHost} (${destIp})`,
+            });
+          }
         }
       }
     }

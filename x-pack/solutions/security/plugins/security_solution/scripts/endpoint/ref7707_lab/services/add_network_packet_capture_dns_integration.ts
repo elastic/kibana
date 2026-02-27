@@ -53,7 +53,7 @@ const sanitizeInputsForCreate = (inputs: PackagePolicyInput[]): PackagePolicyInp
   return inputs.map((input) => {
     const sanitizedStreams = (input.streams ?? []).map((s) => {
       const dataset = s.data_stream?.dataset;
-      const vars = { ...((s as any).vars ?? {}) } as Record<string, any>;
+      const vars = { ...((s as Record<string, unknown>).vars ?? {}) } as Record<string, unknown>;
 
       // network_traffic.dns requires these vars (manifest.yml defaults: port=[53], geoip_enrich=true)
       if (dataset === 'network_traffic.dns') {
@@ -62,7 +62,7 @@ const sanitizeInputsForCreate = (inputs: PackagePolicyInput[]): PackagePolicyInp
       }
 
       return {
-        enabled: Boolean((s as any).enabled),
+        enabled: Boolean((s as Record<string, unknown>).enabled),
         data_stream: s.data_stream,
         vars,
       };
@@ -70,10 +70,10 @@ const sanitizeInputsForCreate = (inputs: PackagePolicyInput[]): PackagePolicyInp
 
     return {
       type: input.type,
-      enabled: Boolean((input as any).enabled),
-      vars: (input as any).vars,
-      streams: sanitizedStreams as any,
-    } as any;
+      enabled: Boolean((input as Record<string, unknown>).enabled),
+      vars: (input as Record<string, unknown>).vars,
+      streams: sanitizedStreams as PackagePolicyInput['streams'],
+    } as PackagePolicyInput;
   });
 };
 
@@ -147,7 +147,7 @@ export const addNetworkPacketCaptureDnsIntegrationToAgentPolicy = async ({
         query: { format: 'json' },
       });
 
-      const inputsRaw = (inputsTemplatesResponse.data as any)?.inputs;
+      const inputsRaw = (inputsTemplatesResponse.data as Record<string, unknown>)?.inputs;
       const inputs = Array.isArray(inputsRaw) ? (inputsRaw as PackagePolicyInput[]) : [];
       if (!inputs.length) {
         throw new Error(
@@ -172,7 +172,7 @@ export const addNetworkPacketCaptureDnsIntegrationToAgentPolicy = async ({
         description: `Network packet capture DNS-only integration. Created by script: ${__filename}`,
         policy_id: agentPolicyId,
         enabled: true,
-        inputs: sanitizedInputs as any,
+        inputs: sanitizedInputs as Parameters<typeof createIntegrationPolicy>[1]['inputs'],
         package: {
           name: packageName,
           title: packageTitle,

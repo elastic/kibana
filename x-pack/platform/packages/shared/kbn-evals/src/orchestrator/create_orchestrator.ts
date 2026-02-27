@@ -152,7 +152,7 @@ export function createFeedbackLoopOrchestrator(config: FeedbackLoopOrchestratorC
     }
 
     const scores = evaluationRuns
-      .map((run) => run.result?.score)
+      .map((evalRun) => evalRun.result?.score)
       .filter((score): score is number => typeof score === 'number');
 
     if (scores.length === 0) {

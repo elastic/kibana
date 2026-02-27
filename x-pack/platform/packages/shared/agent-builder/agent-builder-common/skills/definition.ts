@@ -15,6 +15,18 @@ export interface SkillReferencedContent {
 }
 
 /**
+ * Runtime representation of a skill with resolved LangChain tools.
+ * Used by skill-aware agent graphs for discovery and invocation.
+ */
+export interface Skill {
+  namespace: string;
+  name: string;
+  description: string;
+  content: string;
+  tools: import('@langchain/core/tools').StructuredTool[];
+}
+
+/**
  * Public-facing skill definition exposed via API responses.
  * Includes a `readonly` field to distinguish built-in from user-created skills.
  */

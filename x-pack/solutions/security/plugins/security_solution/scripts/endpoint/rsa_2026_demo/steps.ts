@@ -115,7 +115,7 @@ export const stepPolicies = async (
     // Check if policies already exist by looking for agents with RSA 2026 policies
     // For now, we'll always create new policies (they're idempotent via random names)
     // In the future, we could add a check to find existing policies by name pattern
-    return await setupPolicies(kbnClient, logger);
+    return setupPolicies(kbnClient, logger);
   });
 };
 
@@ -329,7 +329,7 @@ export const stepDetectionRule = async (
 
   return logger.indent(4, async () => {
     // Detection rule creation checks for existing rules with same query
-    return await createDetectionRule(kbnClient, logger);
+    return createDetectionRule(kbnClient, logger);
   });
 };
 
@@ -353,6 +353,6 @@ export const stepWorkflow = async (
     }
 
     // Workflow creation checks for existing workflows
-    return await createVirusTotalWorkflow(esClient, kbnClient, logger, virustotalApiKey);
+    return createVirusTotalWorkflow(esClient, kbnClient, logger, virustotalApiKey);
   });
 };

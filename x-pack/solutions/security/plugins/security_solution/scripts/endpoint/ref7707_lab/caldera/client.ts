@@ -39,67 +39,67 @@ export class CalderaClient {
     }
   }
 
-  public async getAgents(): Promise<any[]> {
-    return await this.authedJson('GET', '/api/v2/agents');
+  public async getAgents(): Promise<unknown[]> {
+    return this.authedJson('GET', '/api/v2/agents');
   }
 
-  public async getAgentByPaw(paw: string): Promise<any> {
-    return await this.authedJson('GET', `/api/v2/agents/${paw}`);
+  public async getAgentByPaw(paw: string): Promise<unknown> {
+    return this.authedJson('GET', `/api/v2/agents/${paw}`);
   }
 
-  public async updateAgent(paw: string, payload: any): Promise<any> {
-    return await this.authedJson('PUT', `/api/v2/agents/${paw}`, payload);
+  public async updateAgent(paw: string, payload: unknown): Promise<unknown> {
+    return this.authedJson('PUT', `/api/v2/agents/${paw}`, payload);
   }
 
-  public async getAdversaries(): Promise<any[]> {
-    return await this.authedJson('GET', '/api/v2/adversaries');
+  public async getAdversaries(): Promise<unknown[]> {
+    return this.authedJson('GET', '/api/v2/adversaries');
   }
 
-  public async getAbilities(): Promise<any[]> {
-    return await this.authedJson('GET', '/api/v2/abilities');
+  public async getAbilities(): Promise<unknown[]> {
+    return this.authedJson('GET', '/api/v2/abilities');
   }
 
-  public async getSources(): Promise<any[]> {
-    return await this.authedJson('GET', '/api/v2/sources');
+  public async getSources(): Promise<unknown[]> {
+    return this.authedJson('GET', '/api/v2/sources');
   }
 
-  public async createSource(payload: any): Promise<any> {
-    return await this.authedJson('POST', '/api/v2/sources', payload);
+  public async createSource(payload: unknown): Promise<unknown> {
+    return this.authedJson('POST', '/api/v2/sources', payload);
   }
 
-  public async createAbility(payload: any): Promise<any> {
-    return await this.authedJson('POST', '/api/v2/abilities', payload);
+  public async createAbility(payload: unknown): Promise<unknown> {
+    return this.authedJson('POST', '/api/v2/abilities', payload);
   }
 
-  public async createAdversary(payload: any): Promise<any> {
-    return await this.authedJson('POST', '/api/v2/adversaries', payload);
+  public async createAdversary(payload: unknown): Promise<unknown> {
+    return this.authedJson('POST', '/api/v2/adversaries', payload);
   }
 
-  public async createOperation(payload: any): Promise<any> {
-    return await this.authedJson('POST', '/api/v2/operations', payload);
+  public async createOperation(payload: unknown): Promise<unknown> {
+    return this.authedJson('POST', '/api/v2/operations', payload);
   }
 
-  public async getOperations(): Promise<any[]> {
-    return await this.authedJson('GET', '/api/v2/operations');
+  public async getOperations(): Promise<unknown[]> {
+    return this.authedJson('GET', '/api/v2/operations');
   }
 
-  public async getOperationLinks(operationId: string): Promise<any[]> {
-    return await this.authedJson('GET', `/api/v2/operations/${operationId}/links`);
+  public async getOperationLinks(operationId: string): Promise<unknown[]> {
+    return this.authedJson('GET', `/api/v2/operations/${operationId}/links`);
   }
 
-  public async getOperationLink(operationId: string, linkId: string): Promise<any> {
-    return await this.authedJson('GET', `/api/v2/operations/${operationId}/links/${linkId}`);
+  public async getOperationLink(operationId: string, linkId: string): Promise<unknown> {
+    return this.authedJson('GET', `/api/v2/operations/${operationId}/links/${linkId}`);
   }
 
   /**
    * Best-effort fetch of a link's result payload (stdout/stderr/etc).
    * Endpoint availability can vary by Caldera version/plugins; callers should catch errors.
    */
-  public async getOperationLinkResult(operationId: string, linkId: string): Promise<any> {
-    return await this.authedJson('GET', `/api/v2/operations/${operationId}/links/${linkId}/result`);
+  public async getOperationLinkResult(operationId: string, linkId: string): Promise<unknown> {
+    return this.authedJson('GET', `/api/v2/operations/${operationId}/links/${linkId}/result`);
   }
 
-  private async authedJson(method: string, path: string, body?: unknown): Promise<any> {
+  private async authedJson(method: string, path: string, body?: unknown): Promise<unknown> {
     if (!this.apiKey) {
       throw new Error(`Caldera API key is required for ${method} ${path} (pass --calderaApiKey)`);
     }
