@@ -43,7 +43,7 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 
 interface UnsanitizedComment {
   comment: string;

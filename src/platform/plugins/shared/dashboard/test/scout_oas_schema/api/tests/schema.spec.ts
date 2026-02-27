@@ -78,7 +78,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
     // 2) run test
     // 3) replace snapshot file contents with copy of consoled output
     // console.log(JSON.stringify(configSchema.anyOf, null, ' '));
-    expect(configSchema.anyOf).toHaveLength(4);
+    expect(configSchema.anyOf).toHaveLength(8);
     expect(configSchema.anyOf).toStrictEqual(snapshot);
   });
 });
