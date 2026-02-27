@@ -37,6 +37,7 @@ plugins:
     - streams_app
     - synthetics
     - transform
+    - uptime
     - ux
     - workflows_extensions
     - workflows_management
