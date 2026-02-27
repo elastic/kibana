@@ -66,8 +66,6 @@ describe('buildEsQuery', () => {
           name: 'kibana.alert.rule.name',
           type: 'string',
           esTypes: ['keyword'],
-          searchable: true,
-          aggregatable: true,
         },
       ],
     };
@@ -80,7 +78,7 @@ describe('buildEsQuery', () => {
     });
 
     const filterClauses = result.bool.filter;
-    const kueryClause = filterClauses.find((clause) => !('range' in clause));
+    const kueryClause = filterClauses.find((clause) => clause && !('range' in clause));
 
     expect(kueryClause).toEqual({
       bool: {
@@ -106,7 +104,7 @@ describe('buildEsQuery', () => {
     });
 
     const filterClauses = result.bool.filter;
-    const kueryClause = filterClauses.find((clause) => !('range' in clause));
+    const kueryClause = filterClauses.find((clause) => clause && !('range' in clause));
 
     expect(kueryClause).toEqual({
       bool: {
