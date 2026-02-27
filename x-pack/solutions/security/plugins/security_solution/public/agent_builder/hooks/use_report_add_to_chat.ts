@@ -15,6 +15,7 @@ export interface AgentBuilderAddToChatTelemetry {
   pathway:
     | 'alerts_flyout'
     | 'alerts_flyout_rule_summary'
+    | 'alerts_table_rule_flyout'
     | 'entity_highlights'
     | 'entity_risk_contribution'
     | 'rules_table'

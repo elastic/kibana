@@ -39,7 +39,10 @@ export const PreviewFooter = memo(({ rule, isPreviewMode }: PreviewFooterProps) 
       <EuiFlexGroup justifyContent={showAddToChat ? 'spaceBetween' : 'center'} alignItems="center">
         {showAddToChat ? (
           <EuiFlexItem grow={false}>
-            <AddRuleAttachmentToChatButton rule={rule} pathway="alerts_flyout_rule_summary" />
+            <AddRuleAttachmentToChatButton
+              rule={rule}
+              pathway={isPreviewMode ? 'alerts_flyout_rule_summary' : 'alerts_table_rule_flyout'}
+            />
           </EuiFlexItem>
         ) : null}
         {showLink ? (
