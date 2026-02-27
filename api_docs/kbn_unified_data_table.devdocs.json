@@ -21,10 +21,10 @@
           },
           ", consumer: string) => ",
           {
-            "pluginId": "@kbn/unified-data-table",
-            "scope": "public",
-            "docId": "kibKbnUnifiedDataTablePluginApi",
-            "section": "def-public.DataGridDensity",
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataGridDensity",
             "text": "DataGridDensity"
           }
         ],
@@ -1822,10 +1822,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/unified-data-table",
-                "scope": "public",
-                "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-public.DataGridDensity",
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataGridDensity",
                 "text": "DataGridDensity"
               }
             ],
@@ -2209,8 +2209,8 @@
         "tags": [],
         "label": "DataGridDensity",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-unified-data-table/src/constants.ts",
-        "lineNumber": 66,
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2402,7 +2402,7 @@
           "\"multiPage\""
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2652,7 +2652,7 @@
           "{ readonly auto: -1; readonly single: 1; readonly default: 3; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

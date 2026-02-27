@@ -13,7 +13,8 @@ import { generateLogsData } from '../../../fixtures/generators';
 // Note: Processor creation, conditional steps, and nested steps API correctness is covered by
 // API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/254435
+test.describe.skip(
   'Stream data processing - creating steps',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
