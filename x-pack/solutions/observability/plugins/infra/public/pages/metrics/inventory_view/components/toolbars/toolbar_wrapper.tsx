@@ -39,7 +39,7 @@ export const ToolbarWrapper = (props: Props) => {
   } = useWaffleOptionsContext();
 
   return (
-    <EuiFlexGroup responsive={false} wrap gutterSize="m">
+    <EuiFlexGroup responsive={false} wrap gutterSize="s">
       <EuiFlexItem grow={false}>
         <WaffleInventorySwitcher />
       </EuiFlexItem>

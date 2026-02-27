@@ -76,8 +76,8 @@ export const SearchBar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="s">
-            <EuiFlexItem>
+          <EuiFlexGroup direction="row" alignItems="flexStart" wrap gutterSize="s">
+            <EuiFlexItem grow={true}>
               <ControlsContent
                 timeRange={searchCriteria.dateRange}
                 dataView={metricsView?.dataViewReference}
@@ -117,8 +117,8 @@ const StickyContainer = ({ children }: { children: React.ReactNode }) => {
         top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
         z-index: ${euiTheme.levels.navigation};
         background: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.l} ${euiTheme.size.l} 0px;
-        margin: -${euiTheme.size.l} -${euiTheme.size.l} 0px;
+        padding: ${euiTheme.size.m} ${euiTheme.size.m} 0px;
+        margin: -${euiTheme.size.m} -${euiTheme.size.m} 0px;
         min-height: calc(${euiTheme.size.xxxl} * 2);
       `}
     >
