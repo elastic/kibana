@@ -7,27 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
+import type {
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout/src/playwright/test/ui/parallel_run_fixtures';
+import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout';
 import { MetricsExperiencePage } from './page_objects';
 
-export interface MetricsExperienceTestFixtures extends ScoutTestFixtures {
+export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     metricsExperience: MetricsExperiencePage;
   };
 }
 
-export const test = baseTest.extend<MetricsExperienceTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: MetricsExperienceTestFixtures['pageObjects'];
-      page: MetricsExperienceTestFixtures['page'];
-    },
-    use: (pageObjects: MetricsExperienceTestFixtures['pageObjects']) => Promise<void>
-  ) => {
+export const spaceTest = baseSpaceTest.extend<
+  MetricsExperienceTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async ({ pageObjects, page }, use) => {
     const extendedPageObjects = {
       ...pageObjects,
       metricsExperience: createLazyPageObject(MetricsExperiencePage, page),

@@ -8,7 +8,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { createMetricsTestIndexIfNeeded } from '../../fixtures/metrics_experience';
+import { createMetricsTestIndexIfNeeded } from '../fixtures';
 
 globalSetupHook('Ingest metrics data to Elasticsearch', async ({ esClient, log }) => {
   log.debug('[setup] creating metrics test index (only if it does not exist)...');

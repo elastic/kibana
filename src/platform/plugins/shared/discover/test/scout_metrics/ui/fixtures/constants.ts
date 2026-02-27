@@ -19,7 +19,7 @@ export const ESQL_QUERIES = {
 export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 
 export const KBN_ARCHIVE =
-  'src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/kbn_archives/metrics_data_view.json';
+  'src/platform/plugins/shared/discover/test/scout_metrics/ui/fixtures/kbn_archives/metrics_data_view.json';
 
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,

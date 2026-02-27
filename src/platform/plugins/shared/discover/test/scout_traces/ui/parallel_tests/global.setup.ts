@@ -9,7 +9,7 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
-import { TRACES, simpleTrace } from '../../fixtures/traces_experience';
+import { TRACES, simpleTrace } from '../fixtures';
 
 globalSetupHook(
   'Ingest trace data to Elasticsearch',
