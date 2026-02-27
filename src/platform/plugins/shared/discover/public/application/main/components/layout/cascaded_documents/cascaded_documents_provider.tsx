@@ -29,6 +29,7 @@ export type CascadedDocumentsDataGridUiState = UnifiedDataTableRestorableState &
   virtualizationMetadata: {
     initialDisplayedItemIndex: number;
     scrollRect: { width: number; height: number };
+    measuredRowHeight?: number;
   };
 };
 

@@ -186,9 +186,60 @@ const getLightweightTableStyles = (euiTheme: ReturnType<typeof useEuiTheme>['eui
       display: '-webkit-box',
       WebkitBoxOrient: 'vertical',
       overflow: 'hidden',
+      minHeight: '4.5em',
       maxHeight: '4.5em',
     },
   }),
+});
+
+const LightweightRowContent = React.memo(function LightweightRowContent({
+  row,
+  expandedDocStore,
+  cellId,
+  onToggleExpand,
+  controlCellCss,
+  summaryCellCss,
+  children,
+}: {
+  row: DataTableRecord;
+  expandedDocStore?: ExpandedDocStore;
+  cellId: string;
+  onToggleExpand?: (doc: DataTableRecord | undefined) => void;
+  controlCellCss: ReturnType<typeof getLightweightTableStyles>['controlCell'];
+  summaryCellCss: ReturnType<typeof getLightweightTableStyles>['summaryCell'];
+  children: React.ReactNode;
+}) {
+  const subscribe = useCallback(
+    (cb: () => void) => expandedDocStore?.subscribe(cellId, cb) ?? (() => {}),
+    [expandedDocStore, cellId]
+  );
+  const getIsExpanded = useCallback(
+    () => expandedDocStore?.getDoc(cellId)?.id === row.id,
+    [expandedDocStore, cellId, row.id]
+  );
+  const isExpanded = useSyncExternalStore(subscribe, getIsExpanded);
+
+  return (
+    <>
+      <div css={controlCellCss}>
+        {onToggleExpand && (
+          <ExpandButtonLight
+            isExpanded={isExpanded}
+            onToggle={(event) => {
+              event.stopPropagation();
+              onToggleExpand(isExpanded ? undefined : row);
+            }}
+          />
+        )}
+      </div>
+      <div
+        css={summaryCellCss}
+        className={isExpanded ? 'unifiedDataTable__cell--expanded' : undefined}
+      >
+        {children}
+      </div>
+    </>
+  );
 });
 
 const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
@@ -196,8 +247,9 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   dataView,
   isPlainRecord,
   services,
-  expandedDoc,
-  setExpandedDoc,
+  expandedDocStore,
+  cellId,
+  onExpandDoc,
   dataGridDensityState,
   getScrollElement,
   getScrollMargin,
@@ -211,8 +263,9 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   dataView: NonNullable<UnifiedDataTableProps['dataView']>;
   isPlainRecord?: boolean;
   services: NonNullable<UnifiedDataTableProps['services']>;
-  expandedDoc?: DataTableRecord;
-  setExpandedDoc?: UnifiedDataTableProps['setExpandedDoc'];
+  expandedDocStore?: ExpandedDocStore;
+  cellId: string;
+  onExpandDoc?: ESQLDataCascadeLeafCellProps['onExpandDoc'];
   dataGridDensityState: DataGridDensity;
   getScrollElement: () => Element | null;
   getScrollMargin: () => number;
@@ -229,14 +282,29 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   const maxDocFieldsDisplayed = services.uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
   const showMultiFields = services.uiSettings.get<boolean>(SHOW_MULTIFIELDS);
   const isCompressed = dataGridDensityState === DataGridDensity.COMPACT;
-  const canExpand = Boolean(setExpandedDoc);
-  const [measuredRowHeight, setMeasuredRowHeight] = useState<number | undefined>();
-  const hasMeasuredRowHeightRef = useRef(false);
+  const [measuredRowHeight, setMeasuredRowHeight] = useState<number | undefined>(undefined);
+  const hasMeasuredRef = useRef(false);
+
+  const measureRowHeightOnce = useCallback((element: HTMLDivElement | null) => {
+    if (!element || hasMeasuredRef.current) return;
+    const height = Math.ceil(element.getBoundingClientRect().height);
+    if (height > 0) {
+      hasMeasuredRef.current = true;
+      setMeasuredRowHeight(height);
+    }
+  }, []);
+
+  const onToggleExpand = useMemo(() => {
+    if (!onExpandDoc) return undefined;
+    return (doc: DataTableRecord | undefined) => onExpandDoc(cellId, doc, rows);
+  }, [onExpandDoc, cellId, rows]);
 
   const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((field) => field.name);
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
+
+  const [stableScrollMargin] = useState(() => getScrollMargin());
 
   const virtualizer = useCascadeVirtualizer<DataTableRecord>({
     // @ts-expect-error -- sticky headers are not used in this table
@@ -245,7 +313,7 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
     estimatedRowHeight: measuredRowHeight ?? LIGHTWEIGHT_SUMMARY_ROW_HEIGHT,
     overscan: 10,
     initialOffset: getScrollOffset,
-    scrollMargin: getScrollMargin(),
+    scrollMargin: stableScrollMargin,
     getScrollElement,
     onStateChange: undefined,
     initialRect: initialVirtualizationMetadata?.scrollRect,
@@ -253,7 +321,7 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   });
 
   const items = virtualizer.getVirtualItems();
-  const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
+  const translateY = items.length > 0 ? items[0].start - stableScrollMargin : 0;
 
   const firstVisibleIndexRef = useRef(0);
   if (items.length > 0) {
@@ -275,17 +343,6 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
     },
     [getScrollElement]
   );
-  const measureRowHeightOnce = useCallback((element: HTMLDivElement | null) => {
-    if (!element || hasMeasuredRowHeightRef.current) {
-      return;
-    }
-
-    const nextHeight = Math.ceil(element.getBoundingClientRect().height);
-    if (nextHeight > 0) {
-      hasMeasuredRowHeightRef.current = true;
-      setMeasuredRowHeight(nextHeight);
-    }
-  }, []);
 
   return (
     <div css={styles.wrapper} data-test-subj="discoverCascadeLightDataTable">
@@ -327,7 +384,6 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
           <div style={{ transform: `translateY(${translateY}px)` }}>
             {items.map((virtualRow) => {
               const row = rows[virtualRow.index];
-              const isCurrentRowExpanded = expandedDoc?.id === row?.id;
               const isStriped = virtualRow.index % 2 === 1;
 
               return (
@@ -338,22 +394,13 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
                   style={measuredRowHeight ? { height: measuredRowHeight } : undefined}
                   css={isStriped ? styles.rowStriped : styles.row}
                 >
-                  <div css={styles.controlCell}>
-                    {canExpand ? (
-                      <ExpandButtonLight
-                        isExpanded={Boolean(isCurrentRowExpanded)}
-                        onToggle={(event) => {
-                          event.stopPropagation();
-                          setExpandedDoc?.(isCurrentRowExpanded ? undefined : row);
-                        }}
-                      />
-                    ) : null}
-                  </div>
-                  <div
-                    css={styles.summaryCell}
-                    className={
-                      isCurrentRowExpanded ? 'unifiedDataTable__cell--expanded' : undefined
-                    }
+                  <LightweightRowContent
+                    row={row}
+                    expandedDocStore={expandedDocStore}
+                    cellId={cellId}
+                    onToggleExpand={onToggleExpand}
+                    controlCellCss={styles.controlCell}
+                    summaryCellCss={styles.summaryCell}
                   >
                     <SourceDocument
                       useTopLevelObjectColumns={false}
@@ -366,7 +413,7 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
                       fieldFormats={services.fieldFormats}
                       isCompressed={isCompressed}
                     />
-                  </div>
+                  </LightweightRowContent>
                 </div>
               );
             })}
@@ -631,6 +678,20 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [cellId, cellData, onExpandDoc]
     );
 
+    const openInDiscoverTab = useCallback(() => {
+      const query = constructCascadeQuery({
+        query: esqlQuery,
+        dataView,
+        esqlVariables,
+        nodeType: 'leaf',
+        nodePath,
+        nodePathMap,
+      });
+      if (query) {
+        openInNewTab({ appState: { query } });
+      }
+    }, [esqlQuery, dataView, esqlVariables, nodePath, nodePathMap, openInNewTab]);
+
     const renderCustomToolbarWithElements = useMemo(
       () =>
         getRenderCustomToolbarWithElements({
@@ -699,8 +760,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
             dataView={dataView}
             isPlainRecord
             services={services}
-            expandedDoc={expandedDoc}
-            setExpandedDoc={setExpandedDocFn}
+            expandedDocStore={expandedDocStore}
+            cellId={cellId}
+            onExpandDoc={onExpandDoc}
             dataGridDensityState={cascadeDataGridDensityState}
             getScrollElement={getScrollElement}
             getScrollMargin={getScrollMargin}
@@ -708,19 +770,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
             initialVirtualizationMetadata={initialGridState?.virtualizationMetadata}
             propagateVirtualizationMetadata={setInitialInViewVirtualItemIndex}
             resultsCount={cellData.length}
-            onOpenInDiscoverTab={() => {
-              const query = constructCascadeQuery({
-                query: esqlQuery,
-                dataView,
-                esqlVariables,
-                nodeType: 'leaf',
-                nodePath,
-                nodePathMap,
-              });
-              if (query) {
-                openInNewTab({ appState: { query } });
-              }
-            }}
+            onOpenInDiscoverTab={openInDiscoverTab}
           />
         ) : (
           <UnifiedDataTable
