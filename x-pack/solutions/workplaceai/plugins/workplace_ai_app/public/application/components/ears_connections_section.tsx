@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import crypto from 'crypto';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,7 +40,8 @@ const GOOGLE_SCOPES = [
 
 function getEARSAuthUrl(
   config: WorkplaceAIClientConfig,
-  kibanaBasePath: string | undefined
+  kibanaBasePath: string | undefined,
+  state: string
 ): string | undefined {
   if (!kibanaBasePath) {
     return undefined;
@@ -50,6 +52,7 @@ function getEARSAuthUrl(
   const params = new URLSearchParams();
   GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
   params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
+  params.set('state', state);
 
   const authUrl = earsUrl
     ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
@@ -63,11 +66,24 @@ export const EarsConnectionsSection: React.FC = () => {
   const { http } = useKibana().services;
   const basePath = http.basePath.publicBaseUrl;
 
-  const earsAuthUrl = getEARSAuthUrl(config, basePath);
+  const [oauthState] = useState(() => crypto.randomBytes(32).toString('base64url'));
+  const earsAuthUrl = getEARSAuthUrl(config, basePath, oauthState);
 
   const urlParams = new URLSearchParams(window.location.search);
 
   const code = urlParams.get('code');
+
+  useEffect(() => {
+    if (!code) {
+      sessionStorage.setItem('ears_oauth_state', oauthState);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const urlState = urlParams.get('state');
+  const storedState = sessionStorage.getItem('ears_oauth_state');
+  const isStateMismatch = Boolean(code) && urlState !== storedState;
+
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [earsLoading, setEarsLoading] = useState(false);
@@ -93,6 +109,7 @@ export const EarsConnectionsSection: React.FC = () => {
             return;
           }
 
+          sessionStorage.removeItem('ears_oauth_state');
           setAccessToken(data.access_token);
           if (data.refresh_token) {
             setRefreshToken(data.refresh_token);
@@ -281,9 +298,34 @@ export const EarsConnectionsSection: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
+                {isStateMismatch && (
+                  <EuiFlexItem>
+                    <EuiCallOut
+                      announceOnMount
+                      title={
+                        <FormattedMessage
+                          id="xpack.workplaceai.gettingStarted.earsSection.stateMismatchTitle"
+                          defaultMessage="OAuth state mismatch"
+                        />
+                      }
+                      color="danger"
+                      iconType="error"
+                    >
+                      <FormattedMessage
+                        id="xpack.workplaceai.gettingStarted.earsSection.stateMismatchDescription"
+                        defaultMessage="The state parameter returned by the OAuth provider does not match the one sent. This request may have been tampered with. Please restart the connection flow."
+                      />
+                    </EuiCallOut>
+                  </EuiFlexItem>
+                )}
                 {!accessToken && (
                   <EuiFlexItem>
-                    <EuiButton color="success" onClick={handleExchangeCode} isLoading={earsLoading}>
+                    <EuiButton
+                      color="success"
+                      onClick={handleExchangeCode}
+                      isLoading={earsLoading}
+                      isDisabled={isStateMismatch}
+                    >
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.earsSection.exchangeCodeButton"
                         defaultMessage="Exchange code for token"
@@ -294,6 +336,7 @@ export const EarsConnectionsSection: React.FC = () => {
                 {accessToken && (
                   <EuiFlexItem>
                     <EuiCallOut
+                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.workplaceai.gettingStarted.earsSection.gotAccessToken"
