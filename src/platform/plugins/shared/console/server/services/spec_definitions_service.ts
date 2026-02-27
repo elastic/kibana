@@ -46,7 +46,7 @@ export class SpecDefinitionsService {
   public addEndpointDescription(
     endpoint: string,
     description: EndpointDescription = {},
-    docsLinkToApiReference: boolean = false
+    isServerless: boolean = false
   ) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
@@ -74,8 +74,16 @@ export class SpecDefinitionsService {
       _.defaults(description.url_params, urlParamsDef);
     }
 
-    if (docsLinkToApiReference) {
-      description.documentation = API_DOCS_LINK;
+    if (isServerless) {
+      const serverlessDocUrl =
+        typeof description.documentation_serverless === 'string'
+          ? description.documentation_serverless.trim()
+          : undefined;
+      description.documentation = serverlessDocUrl || API_DOCS_LINK;
+
+      if (!serverlessDocUrl) {
+        delete description.documentation_serverless;
+      }
     }
 
     _.assign(copiedDescription, description);
