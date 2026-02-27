@@ -66,6 +66,14 @@ Every forensic investigation MUST include a query against the \\\`elastic_browse
 3. Query the table using the discovered schema to collect browser history evidence
 4. Include the browser history findings in your investigation timeline and correlation analysis
 
+## CRITICAL: Cross-Endpoint Queries Use agentAll
+
+**When sweeping across endpoints (IOC hunts, blast radius analysis, browser history sweeps), ALWAYS use \\\`agentAll: true\\\`. Do NOT collect individual agent IDs and pass them as \\\`agentIds\\\`.**
+- Single-endpoint queries (targeted analysis of a specific host): use \\\`agentIds: ["<agent_id>"]\\\`
+- Multi-endpoint sweeps (IOC hunts, blast radius, cross-endpoint discovery): use \\\`agentAll: true\\\`
+
+**When fetching results, ALWAYS pass \\\`expectedAgents\\\`** (the \\\`online_agent_count\\\` from run_live_query response) so get_results knows when all online agents have responded, even if they return 0 rows. The tool waits internally — no manual retries needed.
+
 ## MANDATORY: Correlate with Threat Intelligence
 
 When investigating domains, IPs, or file hashes, **always check for existing VirusTotal enrichments**:
@@ -325,30 +333,30 @@ security.osquery.run_live_query({
 
 ### Playbook 7: IOC Hunting
 
-Search for specific Indicators of Compromise across the environment.
+Search for specific Indicators of Compromise across the environment. **ALWAYS use \\\`agentAll: true\\\` for IOC hunts — do NOT collect individual agent IDs.**
 
-**Hunt for File Hash**
+**Hunt for File Hash (across ALL endpoints)**
 \\\`\\\`\\\`
 security.osquery.run_live_query({
   query: "SELECT path, filename, sha256 FROM hash WHERE sha256 = '<malicious_hash>'",
-  agentIds: ["<agent_id>"]
+  agentAll: true
 })
 \\\`\\\`\\\`
 
-**Hunt for Malicious Domain Access**
+**Hunt for Malicious Domain Access (across ALL endpoints)**
 First call \\\`security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id>" })\\\`, then use the actual columns:
 \\\`\\\`\\\`
 security.osquery.run_live_query({
   query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<malicious_domain>%'",
-  agentIds: ["<agent_id>"]
+  agentAll: true
 })
 \\\`\\\`\\\`
 
-**Hunt for Suspicious Process Name**
+**Hunt for Suspicious Process Name (across ALL endpoints)**
 \\\`\\\`\\\`
 security.osquery.run_live_query({
   query: "SELECT pid, name, path, cmdline, uid, start_time FROM processes WHERE name = '<suspicious_name>' OR cmdline LIKE '%<suspicious_pattern>%'",
-  agentIds: ["<agent_id>"]
+  agentAll: true
 })
 \\\`\\\`\\\`
 
@@ -383,7 +391,7 @@ security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentI
 \\\`\\\`\\\`
 
 **Step 3: Query ALL Agents for the Malicious Domain**
-Pass ALL online agent IDs in a single query:
+**ALWAYS use \\\`agentAll: true\\\` — do NOT collect individual agent IDs:**
 \\\`\\\`\\\`
 security.osquery.run_live_query({
   query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<malicious_domain>%'",
@@ -393,8 +401,9 @@ security.osquery.run_live_query({
 
 **Step 4: Fetch and Correlate Results**
 \\\`\\\`\\\`
-security.osquery.get_results({ actionId: "<queries[0].action_id>" })
+security.osquery.get_results({ actionId: "<queries[0].action_id>", expectedAgents: <online_agent_count> })
 \\\`\\\`\\\`
+The tool waits up to 90 seconds for all online agents to respond. It returns final results directly.
 Each result row includes an \\\`_agent_id\\\` field. Match each \\\`_agent_id\\\` back to the agent list from Step 1 to determine:
 - Which additional endpoints visited the malicious domain
 - Whether those endpoints have Elastic Defend or only Osquery

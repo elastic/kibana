@@ -169,11 +169,11 @@ const injectChromeHistory = async (
   // Create a SQL script to inject history (idempotent per-domain)
   const sqlScript = `
 -- Chrome History injection script
--- Create History database if it doesn't exist
+-- Full schema matching what elastic_browser_history extension expects
 CREATE TABLE IF NOT EXISTS urls (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   url TEXT NOT NULL,
-  title TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
   visit_count INTEGER DEFAULT 1,
   typed_count INTEGER DEFAULT 0,
   last_visit_time INTEGER NOT NULL,
@@ -185,22 +185,70 @@ CREATE TABLE IF NOT EXISTS visits (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   url INTEGER NOT NULL,
   visit_time INTEGER NOT NULL,
-  visit_duration INTEGER DEFAULT 0,
   from_visit INTEGER DEFAULT 0,
   transition INTEGER DEFAULT 0,
   segment_id INTEGER DEFAULT 0,
+  visit_duration INTEGER DEFAULT 0,
+  incremented_omnibox_typed_score INTEGER DEFAULT 0,
+  opener_visit INTEGER DEFAULT 0,
+  originator_cache_guid TEXT DEFAULT '',
+  originator_visit_id INTEGER DEFAULT 0,
+  originator_from_visit INTEGER DEFAULT 0,
+  originator_opener_visit INTEGER DEFAULT 0,
+  is_known_to_sync INTEGER DEFAULT 0,
+  consider_for_ntp_most_visited INTEGER DEFAULT 0,
+  visited_link_id INTEGER DEFAULT 0,
+  app_id TEXT DEFAULT '',
+  external_referrer_url TEXT DEFAULT '',
   FOREIGN KEY (url) REFERENCES urls(id)
 );
 
--- Insert URL entry
+CREATE TABLE IF NOT EXISTS visit_source (
+  id INTEGER NOT NULL,
+  source INTEGER NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS keyword_search_terms (
+  keyword_id INTEGER NOT NULL,
+  url_id INTEGER NOT NULL,
+  term TEXT NOT NULL,
+  normalized_term TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS segments (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  url_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS segment_usage (
+  id INTEGER PRIMARY KEY,
+  segment_id INTEGER NOT NULL,
+  time_slot INTEGER NOT NULL,
+  visit_count INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS meta (
+  key TEXT NOT NULL UNIQUE PRIMARY KEY,
+  value TEXT
+);
+
+INSERT OR IGNORE INTO meta (key, value) VALUES ('version', '46');
+
+-- Insert URL entry (idempotent)
+DELETE FROM visit_source WHERE id IN (SELECT v.id FROM visits v JOIN urls u ON v.url = u.id WHERE u.url = 'https://${domain}');
 DELETE FROM visits WHERE url IN (SELECT id FROM urls WHERE url = 'https://${domain}');
 DELETE FROM urls WHERE url = 'https://${domain}';
 INSERT INTO urls (url, title, visit_count, typed_count, last_visit_time, hidden, favicon_id)
 VALUES ('https://${domain}', '${domain}', 1, 0, ${timestamp}, 0, 0);
 
--- Insert visit entry
-INSERT INTO visits (url, visit_time, visit_duration, from_visit, transition, segment_id)
-SELECT id, ${timestamp}, 0, 0, 805306368, 0 FROM urls WHERE url = 'https://${domain}';
+-- Insert visit entry (source=1 means locally browsed)
+INSERT INTO visits (url, visit_time, from_visit, transition, visit_duration)
+SELECT id, ${timestamp}, 0, 805306368, 0 FROM urls WHERE url = 'https://${domain}';
+
+INSERT INTO visit_source (id, source)
+SELECT v.id, 1 FROM visits v JOIN urls u ON v.url = u.id WHERE u.url = 'https://${domain}';
 `;
 
   // Use sqlite3 to inject history (install if needed)
@@ -266,34 +314,64 @@ const injectFirefoxHistory = async (
 
   const sqlScript = `
 -- Firefox History injection script
+-- Full schema matching what elastic_browser_history extension expects
 CREATE TABLE IF NOT EXISTS moz_places (
   id INTEGER PRIMARY KEY,
   url TEXT NOT NULL,
   title TEXT,
+  rev_host TEXT,
   visit_count INTEGER DEFAULT 1,
-  last_visit_date INTEGER NOT NULL,
   hidden INTEGER DEFAULT 0,
-  typed INTEGER DEFAULT 0
+  typed INTEGER DEFAULT 0,
+  frecency INTEGER DEFAULT -1,
+  last_visit_date INTEGER,
+  guid TEXT,
+  foreign_count INTEGER DEFAULT 0,
+  url_hash INTEGER DEFAULT 0,
+  description TEXT,
+  preview_image_url TEXT,
+  site_name TEXT,
+  origin_id INTEGER,
+  recalc_frecency INTEGER DEFAULT 0,
+  alt_frecency INTEGER DEFAULT -1,
+  recalc_alt_frecency INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS moz_historyvisits (
   id INTEGER PRIMARY KEY,
+  from_visit INTEGER DEFAULT 0,
   place_id INTEGER NOT NULL,
   visit_date INTEGER NOT NULL,
   visit_type INTEGER DEFAULT 1,
-  session INTEGER,
+  session INTEGER DEFAULT 0,
+  source INTEGER DEFAULT 0,
+  triggeringPlaceId INTEGER DEFAULT 0,
   FOREIGN KEY (place_id) REFERENCES moz_places(id)
 );
 
--- Insert place entry
+CREATE TABLE IF NOT EXISTS moz_origins (
+  id INTEGER PRIMARY KEY,
+  prefix TEXT NOT NULL,
+  host TEXT NOT NULL,
+  frecency INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS moz_meta (
+  key TEXT PRIMARY KEY,
+  value NOT NULL
+);
+
+INSERT OR IGNORE INTO moz_meta (key, value) VALUES ('origin_frecency_count', 0);
+
+-- Insert place entry (idempotent)
 DELETE FROM moz_historyvisits WHERE place_id IN (SELECT id FROM moz_places WHERE url = 'https://${domain}');
 DELETE FROM moz_places WHERE url = 'https://${domain}';
-INSERT INTO moz_places (url, title, visit_count, last_visit_date, hidden, typed)
-VALUES ('https://${domain}', '${domain}', 1, ${firefoxTimestamp}, 0, 0);
+INSERT INTO moz_places (url, title, visit_count, hidden, typed, frecency, last_visit_date, guid)
+VALUES ('https://${domain}', '${domain}', 1, 0, 0, 100, ${firefoxTimestamp}, lower(hex(randomblob(16))));
 
--- Insert visit entry
-INSERT INTO moz_historyvisits (place_id, visit_date, visit_type, session)
-SELECT id, ${firefoxTimestamp}, 1, NULL FROM moz_places WHERE url = 'https://${domain}';
+-- Insert visit entry (source=0 means organic/local browsing)
+INSERT INTO moz_historyvisits (place_id, visit_date, visit_type, session, source)
+SELECT id, ${firefoxTimestamp}, 1, 0, 0 FROM moz_places WHERE url = 'https://${domain}';
 `;
 
   // Use sqlite3 to inject history

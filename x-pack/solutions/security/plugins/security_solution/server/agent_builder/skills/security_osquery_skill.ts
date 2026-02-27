@@ -33,13 +33,12 @@ const getOsquerySchema = (): OsquerySchemaTable[] => {
   if (!osquerySchemaCache) {
     osquerySchemaCache = require('@kbn/osquery-plugin/public/common/schemas/osquery/v5.20.0.json');
   }
-  return osquerySchemaCache!;
+  return osquerySchemaCache as OsquerySchemaTable[];
 };
 
 const OSQUERY_RESULTS_INDEX = 'logs-osquery_manager.result*';
-const OSQUERY_ACTION_RESPONSES_INDEX = 'logs-osquery_manager.action.responses*';
-const MAX_POLL_DURATION_MS = 10 * 60 * 1000;
-const POLL_INTERVAL_MS = 10_000;
+const OSQUERY_ACTION_RESPONSES_INDEX =
+  'logs-osquery_manager.action.responses*,.logs-osquery_manager.action.responses*,.fleet-actions-results*';
 
 const SKILL_CONTENT = `# Osquery
 
@@ -63,8 +62,9 @@ You MUST use osquery tools when the user mentions ANY of these:
 - Tell the user the query is running and ask what to do next
 - Pause to describe what you plan to do with the results
 - Output intermediate status updates before fetching results
+- Output a summary of "what's happening now" or "next steps after results"
 
-The get_results tool automatically polls until results arrive (up to 10 minutes). Always call it immediately after run_live_query, then analyze and present the findings in a single response.
+The get_results tool handles all waiting internally (up to 90 seconds). It will return final results directly. Call it, then analyze the results in your response. The user expects a complete answer, not a status update.
 
 ## RESPONSE FORMAT (MANDATORY)
 
@@ -98,13 +98,17 @@ Execute a live osquery SQL query against agents.
 - **For cross-endpoint sweeps, use \`agentAll: true\` instead of listing every agent ID** — this is simpler and targets all osquery-enabled agents automatically.
 - **For targeted queries on specific hosts**, pass \`agentIds\` with UUIDs.
 - **For policy-scoped queries**, pass \`agentPolicyIds\` to target agents in specific policies.
-- Returns: action_id, queries[].action_id, agents
-- **Use queries[].action_id for fetching results**
+- Returns: **action_id** (parent), queries[].action_id (per-query), agent_count, **online_agent_count**, agents
+- **Use online_agent_count (not agent_count) as expectedAgents** when calling get_results — agent_count includes offline agents that will never respond.
+- **Use queries[].action_id as actionId AND action_id as parentActionId** when calling get_results
 
 ### osquery_get_results
-Fetch results from a live query. Automatically polls until results are ready.
-- Pass the per-query action_id from queries[].action_id
-- Returns: rows of query data, status, aggregations
+Fetch results from a live query. Waits internally for up to 90 seconds for all online agents to respond — no need to retry manually.
+- Pass the per-query action_id from queries[].action_id as \`actionId\`
+- **ALWAYS pass parentActionId** (the top-level action_id from run_live_query response) — this is needed to track agent responses.
+- **ALWAYS pass expectedAgents using online_agent_count from run_live_query response** (NOT agent_count — that includes offline agents).
+- The tool handles waiting internally — just call it once and it returns final results.
+- Returns: rows of query data, status, agents_responded, agents_expected, errors
 
 ### osquery_list_saved_queries
 List saved osquery queries with pagination.
@@ -117,13 +121,18 @@ List osquery packs with pagination.
 1. **Get agent ID first:** \`osquery_get_agents({ hostname: "..." })\`
 2. **MANDATORY - Discover the right table:** If you're unsure of the exact table name, search for it: \`osquery_get_table_schema({ search: "browser", platform: "linux" })\`. This returns matching table names so you don't have to guess.
 3. **MANDATORY - Get table schema for custom/Elastic tables:** Before querying any custom or Elastic-specific table (e.g., \`elastic_browser_history\`, \`elastic_*\`), you MUST first discover the actual columns using \`osquery_get_table_schema({ tableName: "<table_name>", agentId: "<agent_id>" })\`. Standard osquery tables (e.g., \`processes\`, \`users\`, \`file\`) can be queried directly.
-4. **Run query:** \`osquery_run_live_query({ query: "SELECT ...", agentIds: ["<agent_id>"] })\`
-   - Response includes queries[].action_id
-5. **MANDATORY - Fetch results IMMEDIATELY:** \`osquery_get_results({ actionId: "<queries[0].action_id>" })\`
+4. **Run query:**
+   - **For cross-endpoint sweeps / IOC hunts**: \`osquery_run_live_query({ query: "SELECT ...", agentAll: true })\` — **ALWAYS prefer agentAll for multi-endpoint queries**
+   - **For single-endpoint analysis**: \`osquery_run_live_query({ query: "SELECT ...", agentIds: ["<agent_id>"] })\`
+   - Response includes queries[].action_id (per-query), action_id (parent), and **online_agent_count**
+5. **MANDATORY - Fetch results IMMEDIATELY:** \`osquery_get_results({ actionId: "<queries[0].action_id>", parentActionId: "<action_id>", expectedAgents: <online_agent_count> })\`
+   - **ALWAYS pass parentActionId** (the top-level action_id) — agent responses are tracked under this ID.
+   - **ALWAYS pass expectedAgents using online_agent_count (NOT agent_count)** — agent_count includes offline agents that will never respond, causing the tool to wait forever.
    - **Do NOT stop to ask the user if they want to wait — ALWAYS fetch results immediately.**
-   - The tool polls automatically until results are ready (up to 10 minutes).
+   - The tool waits internally for up to 90 seconds for all agents to respond. Just call it once.
    - If the result status is "error", analyze the error message and fix the query (e.g., wrong column name, table not found). Do NOT ask the user to rerun — fix it yourself and rerun.
 6. **Analyze results:** Report findings from actual data. Never output partial status — wait for complete results then present analysis.
+   - **CRITICAL: Check unique_agents_with_results** — this tells you how many DISTINCT hosts returned data. If > 1, multiple hosts are affected. Do NOT claim "no spread" when multiple agents have results.
 
 ## CRITICAL: Table Schema Discovery
 
@@ -178,20 +187,19 @@ osquery_get_table_schema({})                              // List ALL tables
 
 ## Cross-Endpoint Queries
 
-When investigating whether other endpoints are affected (e.g., "did other users visit this domain?"), use these patterns:
+When investigating whether other endpoints are affected (e.g., "did other users visit this domain?"), **ALWAYS use \`agentAll: true\`**. Do NOT collect individual agent IDs and pass them as \`agentIds\` — that is slower, error-prone, and unnecessary.
 
-### Sweeping ALL Agents (preferred for blast radius analysis)
-Use \`agentAll: true\` to query every osquery-enabled agent in a single call:
+### Sweeping ALL Agents (REQUIRED for blast radius / IOC hunts)
+**ALWAYS use \`agentAll: true\` for any multi-endpoint query:**
 \`\`\`
 osquery_run_live_query({
   query: "SELECT ... FROM elastic_browser_history WHERE url LIKE '%malicious.com%'",
   agentAll: true
 })
 \`\`\`
-This is simpler and more reliable than collecting and passing all agent IDs manually.
 
-### Querying Specific Agents
-For targeted queries on specific hosts, pass their UUIDs:
+### Querying a Single Specific Agent
+For targeted queries on a known specific host, pass its UUID:
 \`\`\`
 osquery_run_live_query({
   query: "SELECT ... FROM elastic_browser_history WHERE url LIKE '%malicious.com%'",
@@ -217,6 +225,9 @@ This skill cannot create, modify, or delete packs, saved queries, or configurati
 - "To configure osquery, you need to..."
 - "Would you like me to retrieve the results now?"
 - "The query is running. Would you like to wait?"
+- "The query has been dispatched, let me know when you'd like to check results"
+- "What's happening now..." / "Current status..." / "Next steps after results..."
+- Any message that describes what the tool is doing instead of calling it
 - Any message that pauses execution to ask the user whether to continue
 - Any explanation not directly from tool results
 - Any setup instructions or suggestions`;
@@ -526,9 +537,10 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
       );
 
       const queryActionId = osqueryAction.queries?.[0]?.action_id ?? osqueryAction.action_id;
+      const parentSchemaActionId = osqueryAction.action_id;
 
       const startTime = Date.now();
-      const schemaTimeoutMs = 120_000;
+      const schemaTimeoutMs = 60_000;
 
       while (Date.now() - startTime < schemaTimeoutMs) {
         const [resultCount, responseCount] = await Promise.all([
@@ -540,7 +552,7 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
           esClient.asInternalUser.count({
             index: OSQUERY_ACTION_RESPONSES_INDEX,
             ignore_unavailable: true,
-            query: { bool: { filter: [{ term: { action_id: queryActionId } }] } },
+            query: { bool: { filter: [{ term: { action_id: parentSchemaActionId } }] } },
           }),
         ]);
 
@@ -548,7 +560,7 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
         const responses = typeof responseCount.count === 'number' ? responseCount.count : 0;
 
         if (responses > 0 && results === 0) {
-          const errors = await fetchActionErrors(esClient, queryActionId);
+          const errors = await fetchActionErrors(esClient, parentSchemaActionId);
           if (errors.length > 0) {
             return {
               results: [
@@ -565,6 +577,22 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
               ],
             };
           }
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: JSON.stringify({
+                    table: sanitized,
+                    columns: [],
+                    source: 'live_agent',
+                    message: `Agent responded but returned no schema for table "${sanitized}". The table may not exist on this agent.`,
+                  }),
+                },
+              },
+            ],
+          };
         }
 
         if (results > 0) break;
@@ -623,7 +651,10 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
   },
 });
 
-const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillBoundedTool => ({
+const createRunLiveQueryTool = (
+  osquerySetup: OsqueryPluginSetup,
+  endpointAppContextService: EndpointAppContextService
+): BuiltinSkillBoundedTool => ({
   id: 'security.osquery.run_live_query',
   type: ToolType.builtin,
   description:
@@ -683,6 +714,22 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
           agent_count: (q.agents as string[] | undefined)?.length ?? agentCount,
         })) ?? [];
 
+      let onlineAgentCount = agentCount;
+      if (agentAll && agentCount > 0) {
+        try {
+          const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
+          const agentClient = fleetServices.agent;
+          const onlineResult = await agentClient.listAgents({
+            perPage: 0,
+            kuery: 'status:"online"',
+            showInactive: false,
+          });
+          onlineAgentCount = Math.min(onlineResult.total, agentCount);
+        } catch (e) {
+          logger.warn(`Could not determine online agent count: ${e}`);
+        }
+      }
+
       const primaryQueryActionId = queryActionIds.length === 1 ? queryActionIds[0].action_id : null;
 
       return {
@@ -694,11 +741,14 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
                 action_id: osqueryAction.action_id,
                 agents: osqueryAction.agents,
                 agent_count: agentCount,
+                online_agent_count: onlineAgentCount,
                 queries: queryActionIds,
-                message: `Live query dispatched to ${agentCount} agent(s).`,
+                message: agentAll
+                  ? `Live query dispatched to ${agentCount} agent(s) (${onlineAgentCount} online). Use online_agent_count (${onlineAgentCount}) as expectedAgents — offline agents will never respond.`
+                  : `Live query dispatched to ${agentCount} agent(s).`,
                 next_step: primaryQueryActionId
-                  ? `IMMEDIATELY call osquery_get_results with actionId="${primaryQueryActionId}" to fetch the results. Do NOT ask the user — fetch now.`
-                  : `This dispatched ${queryActionIds.length} queries. For each, IMMEDIATELY call osquery_get_results with the corresponding action_id. Do NOT ask the user — fetch now.`,
+                  ? `IMMEDIATELY call osquery_get_results with actionId="${primaryQueryActionId}", parentActionId="${osqueryAction.action_id}", and expectedAgents=${onlineAgentCount} to fetch the results. Do NOT ask the user — fetch now.`
+                  : `This dispatched ${queryActionIds.length} queries. For each, IMMEDIATELY call osquery_get_results with the corresponding action_id, parentActionId="${osqueryAction.action_id}", and expectedAgents=${onlineAgentCount}. Do NOT ask the user — fetch now.`,
               }),
             },
           },
@@ -748,23 +798,41 @@ const fetchActionErrors = async (
   return errors;
 };
 
+const POLL_TIMEOUT_MS = 90_000;
+const POLL_INTERVAL_MS = 5_000;
+
 const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
   id: 'security.osquery.get_results',
   type: ToolType.builtin,
   description:
-    'Fetch results from a live osquery query. Polls until results are ready (up to 5 minutes). Returns errors immediately if the query failed on the agent.',
+    'Fetch results from a live osquery query. Waits up to 90 seconds for all online agents to respond, then returns final results. Always call this immediately after run_live_query — it handles the waiting internally.',
   schema: z.object({
     actionId: z
       .string()
       .describe('The per-query action_id from queries[].action_id in the run_live_query response'),
+    parentActionId: z
+      .string()
+      .optional()
+      .describe(
+        'The parent action_id from run_live_query response (top-level action_id, NOT queries[].action_id). Required for tracking agent responses.'
+      ),
+    expectedAgents: z
+      .number()
+      .optional()
+      .describe(
+        'Number of ONLINE agents expected to respond (use online_agent_count from run_live_query, NOT agent_count which includes offline agents).'
+      ),
     pageSize: z.number().optional().describe('Number of results per page (default: 100)'),
   }),
-  handler: async ({ actionId, pageSize = 100 }, { esClient, logger }) => {
+  handler: async (
+    { actionId, parentActionId, expectedAgents, pageSize = 100 },
+    { esClient, logger }
+  ) => {
     try {
       const startTime = Date.now();
-      let settled = false;
+      const responseActionId = parentActionId ?? actionId;
 
-      while (Date.now() - startTime < MAX_POLL_DURATION_MS) {
+      while (Date.now() - startTime < POLL_TIMEOUT_MS) {
         const [resultCount, responseCount] = await Promise.all([
           esClient.asInternalUser.count({
             index: OSQUERY_RESULTS_INDEX,
@@ -774,16 +842,42 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
           esClient.asInternalUser.count({
             index: OSQUERY_ACTION_RESPONSES_INDEX,
             ignore_unavailable: true,
-            query: { bool: { filter: [{ term: { action_id: actionId } }] } },
+            query: { bool: { filter: [{ term: { action_id: responseActionId } }] } },
           }),
         ]);
 
         const results = typeof resultCount.count === 'number' ? resultCount.count : 0;
         const responses = typeof responseCount.count === 'number' ? responseCount.count : 0;
+        const allAgentsResponded = expectedAgents ? responses >= expectedAgents : false;
+
+        if (responses > 0 && results === 0 && allAgentsResponded) {
+          const errors = await fetchActionErrors(esClient, responseActionId);
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: JSON.stringify({
+                    status: errors.length > 0 ? 'partial_error' : 'completed',
+                    total_rows: 0,
+                    rows: [],
+                    agents_responded: responses,
+                    agents_expected: expectedAgents ?? 'unknown',
+                    errors: errors.length > 0 ? errors : undefined,
+                    message:
+                      errors.length > 0
+                        ? `All ${responses} agent(s) responded. ${errors.length} had errors, the rest returned 0 rows.`
+                        : `All ${responses} agent(s) responded with 0 results. The queried data does not exist on any agent.`,
+                  }),
+                },
+              },
+            ],
+          };
+        }
 
         if (responses > 0 && results === 0) {
-          const errors = await fetchActionErrors(esClient, actionId);
-          if (errors.length > 0) {
+          const errors = await fetchActionErrors(esClient, responseActionId);
+          if (errors.length > 0 && errors.length >= responses) {
             return {
               results: [
                 {
@@ -793,7 +887,10 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
                       status: 'error',
                       total_rows: 0,
                       rows: [],
+                      agents_responded: responses,
+                      agents_expected: expectedAgents ?? 'unknown',
                       errors,
+                      message: `All ${responses} responding agent(s) returned errors.`,
                     }),
                   },
                 },
@@ -802,61 +899,75 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
           }
         }
 
-        if (results > 0 && responses > 0) {
-          settled = true;
-          break;
+        if (results > 0 && responses > 0 && allAgentsResponded) {
+          return await fetchAndReturnResults(
+            esClient,
+            actionId,
+            responseActionId,
+            expectedAgents,
+            responses,
+            pageSize
+          );
+        }
+
+        if (results > 0 && responses > 0 && !expectedAgents) {
+          return await fetchAndReturnResults(
+            esClient,
+            actionId,
+            responseActionId,
+            expectedAgents,
+            responses,
+            pageSize
+          );
         }
 
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
       }
 
-      const searchResponse = await esClient.asInternalUser.search({
+      const finalResponseCount = await esClient.asInternalUser.count({
+        index: OSQUERY_ACTION_RESPONSES_INDEX,
+        ignore_unavailable: true,
+        query: { bool: { filter: [{ term: { action_id: responseActionId } }] } },
+      });
+      const finalResponses =
+        typeof finalResponseCount.count === 'number' ? finalResponseCount.count : 0;
+
+      const finalResultCount = await esClient.asInternalUser.count({
         index: OSQUERY_RESULTS_INDEX,
         ignore_unavailable: true,
-        size: Math.min(pageSize, 500),
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        query: {
-          bool: {
-            filter: [{ term: { action_id: actionId } }],
-          },
-        },
+        query: { bool: { filter: [{ term: { action_id: actionId } }] } },
       });
+      const finalResults =
+        typeof finalResultCount.count === 'number' ? finalResultCount.count : 0;
 
-      const hits = searchResponse.hits.hits;
-      const total =
-        typeof searchResponse.hits.total === 'number'
-          ? searchResponse.hits.total
-          : searchResponse.hits.total?.value ?? 0;
+      if (finalResults > 0) {
+        return await fetchAndReturnResults(
+          esClient,
+          actionId,
+          responseActionId,
+          expectedAgents,
+          finalResponses,
+          pageSize
+        );
+      }
 
-      const rows = hits.map((hit) => {
-        const source = hit._source as Record<string, unknown> | undefined;
-        const osqueryData = (source?.osquery as Record<string, unknown>) ?? {};
-        return {
-          ...osqueryData,
-          _agent_id: source?.agent_id,
-        };
-      });
-
-      const errors = await fetchActionErrors(esClient, actionId);
-
-      const status = settled ? (errors.length > 0 ? 'error' : 'completed') : 'timeout';
-
+      const errors = await fetchActionErrors(esClient, responseActionId);
       return {
         results: [
           {
             type: ToolResultType.other,
             data: {
               message: JSON.stringify({
-                status,
-                total_rows: total,
-                rows,
+                status: finalResponses > 0 ? 'completed' : 'timeout',
+                total_rows: 0,
+                rows: [],
+                agents_responded: finalResponses,
+                agents_expected: expectedAgents ?? 'unknown',
                 errors: errors.length > 0 ? errors : undefined,
-                warning:
-                  status === 'timeout'
-                    ? `Query timed out after ${Math.round(
-                        (Date.now() - startTime) / 1000
-                      )}s. Some agents may not have responded.`
-                    : undefined,
+                message:
+                  finalResponses > 0
+                    ? `${finalResponses} agent(s) responded with 0 results after ${Math.round((Date.now() - startTime) / 1000)}s.`
+                    : `Timed out after ${Math.round((Date.now() - startTime) / 1000)}s. ${finalResponses}/${expectedAgents ?? '?'} agents responded. Call again to check if more results arrived.`,
               }),
             },
           },
@@ -876,6 +987,66 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
     }
   },
 });
+
+const fetchAndReturnResults = async (
+  esClient: Pick<IScopedClusterClient, 'asInternalUser'>,
+  actionId: string,
+  responseActionId: string,
+  expectedAgents: number | undefined,
+  agentsResponded: number,
+  pageSize: number
+) => {
+  const searchResponse = await esClient.asInternalUser.search({
+    index: OSQUERY_RESULTS_INDEX,
+    ignore_unavailable: true,
+    size: Math.min(pageSize, 500),
+    sort: [{ '@timestamp': { order: 'desc' } }],
+    query: {
+      bool: {
+        filter: [{ term: { action_id: actionId } }],
+      },
+    },
+  });
+
+  const hits = searchResponse.hits.hits;
+  const total =
+    typeof searchResponse.hits.total === 'number'
+      ? searchResponse.hits.total
+      : searchResponse.hits.total?.value ?? 0;
+
+  const rows = hits.map((hit) => {
+    const source = hit._source as Record<string, unknown> | undefined;
+    const osqueryData = (source?.osquery as Record<string, unknown>) ?? {};
+    const agentObj = source?.agent as Record<string, unknown> | undefined;
+    return {
+      ...osqueryData,
+      _agent_id: agentObj?.id ?? source?.agent_id,
+    };
+  });
+
+  const uniqueAgentIds = [...new Set(rows.map((r) => r._agent_id).filter(Boolean))];
+  const errors = await fetchActionErrors(esClient, responseActionId);
+
+  return {
+    results: [
+      {
+        type: ToolResultType.other,
+        data: {
+          message: JSON.stringify({
+            status: errors.length > 0 ? 'partial_error' : 'completed',
+            total_rows: total,
+            unique_agents_with_results: uniqueAgentIds.length,
+            agent_ids_with_results: uniqueAgentIds,
+            rows,
+            agents_responded: agentsResponded,
+            agents_expected: expectedAgents ?? 'unknown',
+            errors: errors.length > 0 ? errors : undefined,
+          }),
+        },
+      },
+    ],
+  };
+};
 
 const createListSavedQueriesTool = (): BuiltinSkillBoundedTool => ({
   id: 'security.osquery.list_saved_queries',
@@ -1015,7 +1186,7 @@ export const createSecurityOsquerySkill = ({
 
       if (osquerySetup) {
         tools.push(createGetTableSchemaTool(osquerySetup));
-        tools.push(createRunLiveQueryTool(osquerySetup));
+        tools.push(createRunLiveQueryTool(osquerySetup, endpointAppContextService));
       }
 
       return tools;

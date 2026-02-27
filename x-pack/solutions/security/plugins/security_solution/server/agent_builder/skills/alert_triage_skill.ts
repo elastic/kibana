@@ -183,20 +183,21 @@ security.osquery.run_live_query({
 })
 \`\`\`
 
-**Step 4: Fetch results (MANDATORY — live queries return an action_id, not data):**
+**Step 4: Fetch results (MANDATORY — the tool waits internally for all agents):**
 \`\`\`
-security.osquery.get_results({ actionId: "<queries[0].action_id>" })
+security.osquery.get_results({ actionId: "<queries[0].action_id>", expectedAgents: <online_agent_count> })
 \`\`\`
+The tool waits up to 90 seconds for all online agents to respond. It returns final results directly — no manual retries needed.
 
 **Step 5: Sweep ALL endpoints for the same domain:**
-Use \`agentAll: true\` to query every osquery-enabled agent at once:
+**ALWAYS use \`agentAll: true\` for cross-endpoint sweeps — do NOT collect individual agent IDs:**
 \`\`\`
 security.osquery.run_live_query({
   query: "SELECT <columns_from_schema> FROM elastic_browser_history WHERE <url_column> LIKE '%<domain_from_alert>%'",
   agentAll: true
 })
 \`\`\`
-Then fetch results — each row includes \`_agent_id\` to identify which endpoint returned it.
+Then fetch results with expectedAgents — each row includes \`_agent_id\` to identify which endpoint returned it.
 
 **Analyzing cross-host results:**
 - Match \`_agent_id\` back to the agent list to identify hostnames and policy types
@@ -297,7 +298,7 @@ This is the primary scenario for the RSA 2026 AI Forensics Agent demo. It showca
 4. **Enrich with VirusTotal** — query \`logs-threatintel.virustotal-default\` or trigger the workflow
 5. **Discover \`elastic_browser_history\` schema** — call \`security.osquery.get_table_schema({ tableName: "elastic_browser_history", agentId: "<agent_id>" })\`
 6. **Query browser history on the alerted endpoint** — confirm the user's Chrome/Firefox visited the domain
-7. **Sweep ALL endpoints via \`elastic_browser_history\`** — this is the key step: query every osquery-enabled agent to discover which other hosts also visited the domain. Endpoints that had no network alert but DO have browser history are the hidden compromised hosts the forensic agent uncovers.
+7. **Sweep ALL endpoints via \`elastic_browser_history\` using \`agentAll: true\`** — this is the key step: query every osquery-enabled agent to discover which other hosts also visited the domain. **ALWAYS use agentAll: true, NOT individual agentIds.** Endpoints that had no network alert but DO have browser history are the hidden compromised hosts the forensic agent uncovers.
 8. **Escalate to forensics_analytics** for full process tree analysis, persistence checks, and blast radius report
 9. **Key findings to report**: which hosts are affected, which browsers were used (Chrome vs Firefox), which hosts have Elastic Defend vs Osquery-only, and recommended remediation
 
