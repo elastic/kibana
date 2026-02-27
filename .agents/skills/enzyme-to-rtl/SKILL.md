@@ -227,7 +227,7 @@ yarn test:jest <path-to-test-file> --updateSnapshot
 - [ ] All `enzyme` imports removed
 - [ ] All `shallow()` / `mount()` replaced with `render()`
 - [ ] `shallowWithIntl` / `mountWithIntl` replaced with `render()` + `I18nProvider` wrapper
-- [ ] `findTestSubject` replaced with `screen.getByTestId`
+- [ ] `findTestSubject` replaced with equivalent selector semantics (exact vs token `~=` match)
 - [ ] Selectors migrated to RTL queries or `container.querySelector`
 - [ ] `.simulate()` replaced with `userEvent` or `fireEvent`
 - [ ] `.prop()` / `.props()` replaced with mock-based pattern
