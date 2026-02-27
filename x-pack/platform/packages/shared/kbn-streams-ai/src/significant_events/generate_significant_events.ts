@@ -11,8 +11,6 @@ import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/infere
 import { MessageRole } from '@kbn/inference-common';
 import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { dateRangeQuery } from '@kbn/es-query';
-import { Parser, Walker } from '@kbn/esql-language';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -40,22 +38,6 @@ interface Query {
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
-
-/**
- * Given a list of field names and a set of mapped fields, returns the subset
- * of field names that do not match any mapped field. Wildcard patterns
- * (e.g. `server.*`) are matched against all mapped fields using regex
- * conversion.
- */
-export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string>): string[] => {
-  return fieldNames.filter((fieldName) => {
-    if (fieldName.includes('*')) {
-      const regex = new RegExp('^' + fieldName.replace(/\*/g, '.*') + '$');
-      return !Array.from(mappedFields).some((mapped) => regex.test(mapped));
-    }
-    return !mappedFields.has(fieldName);
-  });
-};
 
 /**
  * Generate significant event definitions, based on:
@@ -97,23 +79,6 @@ export async function generateSignificantEvents({
   const toolUsage = createDefaultSignificantEventsToolUsage();
   let formattedAnalysis: FormattedDocumentAnalysis | undefined;
 
-  const fieldCapsResponse = await esClient
-    .fieldCaps({
-      index: stream.name,
-      fields: '*',
-      index_filter: {
-        bool: {
-          filter: dateRangeQuery(start, end),
-        },
-      },
-    })
-    .catch((error) => {
-      throw new Error(
-        `Failure to retrieve mappings to determine field eligibility: ${error.message}`
-      );
-    });
-
-  const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
@@ -176,57 +141,31 @@ export async function generateSignificantEvents({
           const queries = toolCall.function.arguments.queries;
           let hasFailures = false;
 
-          const queryValidationResults = queries.map((query) => {
-            try {
-              const { root, errors } = Parser.parse(query.esql);
+          const queryValidationResults = await Promise.all(
+            queries.map(async (query) => {
+              try {
+                await esClient.esql.query({
+                  query: `${query.esql}\n| LIMIT 0`,
+                  format: 'json',
+                });
 
-              if (errors.length > 0) {
+                return {
+                  query,
+                  valid: true,
+                  status: 'Added',
+                  error: undefined,
+                };
+              } catch (error) {
                 hasFailures = true;
                 return {
                   query,
                   valid: false,
                   status: 'Failed to add',
-                  error: `ES|QL syntax error: ${errors[0].message}`,
+                  error: getErrorMessage(error),
                 };
               }
-
-              const fieldNames: string[] = [];
-              Walker.walk(root, {
-                visitColumn: (node) => {
-                  fieldNames.push(node.parts.join('.'));
-                },
-              });
-              const uniqueFieldNames = [...new Set(fieldNames)];
-              const unmappedFields = getUnmappedFields(uniqueFieldNames, mappedFields);
-
-              if (unmappedFields.length > 0) {
-                hasFailures = true;
-                return {
-                  query,
-                  valid: false,
-                  status: 'Failed to add',
-                  error: `Query references unmapped fields: ${unmappedFields.join(
-                    ', '
-                  )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
-                };
-              }
-
-              return {
-                query,
-                valid: true,
-                status: 'Added',
-                error: undefined,
-              };
-            } catch (error) {
-              hasFailures = true;
-              return {
-                query,
-                valid: false,
-                status: 'Failed to add',
-                error: getErrorMessage(error),
-              };
-            }
-          });
+            })
+          );
           if (hasFailures) {
             toolUsage.add_queries.failures += 1;
           }
