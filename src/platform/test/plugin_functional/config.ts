@@ -70,5 +70,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
+    uiSettings: functionalConfig.get('uiSettings'),
   };
 }
