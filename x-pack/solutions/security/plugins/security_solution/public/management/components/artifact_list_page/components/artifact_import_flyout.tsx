@@ -47,10 +47,6 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
 
   const { isLoading, mutate } = useImportArtifactList(apiClient);
 
-  const handleOnCancel = useCallback(() => {
-    onCancel();
-  }, [onCancel]);
-
   const handleOnSubmit = useCallback(() => {
     if (file !== null) {
       mutate(
@@ -95,7 +91,7 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
     <EuiFlyout
       ownFocus
       size="s"
-      onClose={handleOnCancel}
+      onClose={onCancel}
       aria-labelledby={importEndpointArtifactListFlyoutTitleId}
       data-test-subj={getTestId()}
     >
@@ -115,7 +111,7 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty onClick={handleOnCancel} data-test-subj={getTestId('cancelButton')}>
+          <EuiButtonEmpty onClick={onCancel} data-test-subj={getTestId('cancelButton')}>
             {labels.flyoutCancelButtonLabel}
           </EuiButtonEmpty>
 
