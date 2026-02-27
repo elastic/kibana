@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -16,7 +16,7 @@ import type { AttachmentToolsOptions } from './types';
 const attachmentAddSchema = z.object({
   id: z.string().optional().describe('Optional custom ID for the attachment'),
   type: z.string().describe('Type of attachment (e.g., "text", "json", "code")'),
-  data: z.unknown().describe('The attachment data/content'),
+  data: z.record(z.any()).describe('The attachment data/content as a JSON object, required'),
   description: z.string().optional().describe('Human-readable description of the attachment'),
 });
 
@@ -28,10 +28,10 @@ export const createAttachmentAddTool = ({
   attachmentManager,
   attachmentsService,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentAddSchema> => ({
-  id: platformCoreTools.attachmentAdd,
+  id: attachmentTools.add,
   type: ToolType.builtin,
   description:
-    'Create a new attachment to store data for later use in the conversation. Attachments persist across conversation rounds and can be read, updated, or deleted.',
+    'Create a new attachment to store data for later use in the conversation. The "data" field is required and must contain the content to store. Attachments persist across conversation rounds and can be read, updated, or deleted.',
   schema: attachmentAddSchema,
   tags: ['attachment'],
   handler: async ({ id, type, data, description }, _context) => {
