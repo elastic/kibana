@@ -8,13 +8,13 @@
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseTestConfig = await readConfigFile(require.resolve('../../config.security.base.ts'));
+  const baseTestConfig = await readConfigFile(require.resolve('../../config.search.base.ts'));
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [require.resolve('../../test_suites/management/index_1')],
+    testFiles: [require.resolve('../../test_suites/discover/esql')],
     junit: {
-      reportName: 'Serverless Security Functional Tests - Common Group 1 (Management Part 1)',
+      reportName: 'Serverless Search Functional Tests - Common Group 16 (Discover ES|QL)',
     },
   };
 }
