@@ -207,6 +207,8 @@ export const oauthAuthorizeRoute = (
               ? (err as Error & { statusCode: number }).statusCode
               : 500;
 
+          logger.error('Failed to initiate OAuth authorization', { error: err });
+
           return res.customError({
             statusCode,
             body: {

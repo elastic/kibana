@@ -21,7 +21,6 @@ export async function get({
   throwIfSystemAction = true,
 }: GetParams): Promise<Connector> {
   const { actionTypeRegistry } = context;
-  const authorizationCodeEnabled = context.authorizationCodeEnabled ?? false;
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -66,7 +65,6 @@ export async function get({
       id,
       inMemoryConnector: foundInMemoryConnector,
       actionTypeRegistry,
-      authorizationCodeEnabled,
     });
   } else {
     const result = await getConnectorSo({
@@ -81,10 +79,7 @@ export async function get({
       })
     );
 
-    const authMode = getAuthMode(
-      result.attributes.authMode as Connector['authMode'] | undefined,
-      authorizationCodeEnabled
-    );
+    const authMode = getAuthMode(result.attributes.authMode as Connector['authMode'] | undefined);
 
     connector = {
       id,
@@ -96,7 +91,7 @@ export async function get({
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
-      ...(authMode !== undefined ? { authMode } : {}),
+      authMode,
     };
   }
 

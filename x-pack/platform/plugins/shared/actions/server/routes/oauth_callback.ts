@@ -25,7 +25,6 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { requestEarsToken } from '../lib/request_ears_token';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 

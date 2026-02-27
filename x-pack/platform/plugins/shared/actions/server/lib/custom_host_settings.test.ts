@@ -84,11 +84,6 @@ describe('custom_host_settings', () => {
         authorize: { lookbackWindow: '1h', limit: 100 },
         callback: { lookbackWindow: '1h', limit: 100 },
       },
-      auth: {
-        oauth_authorization_code: {
-          enabled: false,
-        },
-      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

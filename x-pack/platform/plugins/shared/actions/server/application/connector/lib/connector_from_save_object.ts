@@ -13,14 +13,10 @@ import { getAuthMode } from './get_auth_mode';
 export function connectorFromSavedObject(
   savedObject: SavedObject<RawAction>,
   isDeprecated: boolean,
-  isConnectorTypeDeprecated: boolean,
-  authorizationCodeEnabled: boolean
+  isConnectorTypeDeprecated: boolean
 ): Connector {
   const { authMode: savedAuthMode, ...restAttributes } = savedObject.attributes;
-  const authMode = getAuthMode(
-    savedAuthMode as Connector['authMode'] | undefined,
-    authorizationCodeEnabled
-  );
+  const authMode = getAuthMode(savedAuthMode as Connector['authMode'] | undefined);
   return {
     id: savedObject.id,
     ...restAttributes,
@@ -28,6 +24,6 @@ export function connectorFromSavedObject(
     isDeprecated,
     isSystemAction: false,
     isConnectorTypeDeprecated,
-    ...(authMode !== undefined ? { authMode } : {}),
+    authMode,
   };
 }

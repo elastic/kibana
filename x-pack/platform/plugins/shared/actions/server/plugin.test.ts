@@ -118,11 +118,6 @@ describe('Actions Plugin', () => {
           authorize: { lookbackWindow: '1h', limit: 100 },
           callback: { lookbackWindow: '1h', limit: 100 },
         },
-        auth: {
-          oauth_authorization_code: {
-            enabled: false,
-          },
-        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -530,11 +525,6 @@ describe('Actions Plugin', () => {
         oAuthRateLimit: {
           authorize: { lookbackWindow: '1h', limit: 100 },
           callback: { lookbackWindow: '1h', limit: 100 },
-        },
-        auth: {
-          oauth_authorization_code: {
-            enabled: false,
-          },
         },
       });
       plugin = new ActionsPlugin(context);

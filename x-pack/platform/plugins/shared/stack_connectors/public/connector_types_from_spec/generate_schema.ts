@@ -9,16 +9,9 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 
-export const generateSchema = (
-  spec: ConnectorSpec,
-  { authorizationCodeEnabled }: { authorizationCodeEnabled?: boolean } = {
-    authorizationCodeEnabled: false,
-  }
-) => {
+export const generateSchema = (spec: ConnectorSpec) => {
   return z.object({
     config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.auth, {
-      authorizationCodeEnabled,
-    }),
+    secrets: generateSecretsSchemaFromSpec(spec.auth),
   });
 };
