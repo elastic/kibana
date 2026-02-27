@@ -80,7 +80,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1000,
       _source: {
-        excludes: ['rounds'],
+        excludes: ['rounds', 'conversation_rounds', 'attachments', 'state'],
       },
       query: {
         bool: {
