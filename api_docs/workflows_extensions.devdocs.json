@@ -954,7 +954,7 @@
           "<Input, Output, Config>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 60,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -977,7 +977,7 @@
               "<Input, Output, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1075,12 +1075,37 @@
                   "<Input, Config>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-                "lineNumber": 100,
+                "lineNumber": 112,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.ServerStepDefinition.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [
+              "\nOptional cancellation cleanup handler.\n\nCalled after the step's abort signal fires and `run()` completes, giving the\nstep a guaranteed cleanup entry point (e.g. cancelling spawned child operations).\nOnly invoked when the workflow is being cancelled — normal completions skip it.\n\nImplementations must be idempotent. Errors thrown here are logged but do not\ndisrupt the cancellation flow."
+            ],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.OnCancelHandler",
+                "text": "OnCancelHandler"
+              },
+              "<Input, Config> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1105,7 +1130,7 @@
           "<TInput, TConfig>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 102,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1123,7 +1148,7 @@
               "z.infer<TInput>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1141,7 +1166,7 @@
               "z.infer<TConfig>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 112,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1159,7 +1184,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 117,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1177,7 +1202,7 @@
               "ContextManager"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1195,7 +1220,7 @@
               "{ debug(message: string, meta?: object | undefined): void; info(message: string, meta?: object | undefined): void; warn(message: string, meta?: object | undefined): void; error(message: string, error?: Error | undefined): void; }"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 128,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1213,7 +1238,7 @@
               "AbortSignal"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 138,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1228,7 +1253,7 @@
               "\nCurrent step's ID"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 143,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1243,7 +1268,7 @@
               "\nCurrent step's type"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 148,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1271,7 +1296,7 @@
           "<TOutput>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 181,
+        "lineNumber": 203,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1289,7 +1314,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 185,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1307,7 +1332,7 @@
               "Error | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 190,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1399,6 +1424,59 @@
     "misc": [
       {
         "parentPluginId": "workflowsExtensions",
+        "id": "def-server.OnCancelHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "OnCancelHandler",
+        "description": [
+          "\nCancellation cleanup handler for custom workflow steps.\nReceives the same context as the main handler so it has access to input,\nconfig, and runtime services needed for cleanup."
+        ],
+        "signature": [
+          "(context: ",
+          {
+            "pluginId": "workflowsExtensions",
+            "scope": "server",
+            "docId": "kibWorkflowsExtensionsPluginApi",
+            "section": "def-server.StepHandlerContext",
+            "text": "StepHandlerContext"
+          },
+          "<Input, Config>) => void | Promise<void>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-server.OnCancelHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "server",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-server.StepHandlerContext",
+                "text": "StepHandlerContext"
+              },
+              "<Input, Config>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 6,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
         "id": "def-server.ServerTriggerDefinition",
         "type": "Type",
         "tags": [],
@@ -1452,7 +1530,7 @@
           "<Output>>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-        "lineNumber": 89,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1480,7 +1558,7 @@
               "<Input, Config>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 112,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
