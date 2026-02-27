@@ -95,8 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   let transformHelper: TransformHelper;
 
-  // Failing: See https://github.com/elastic/kibana/issues/251364
-  describe.skip('Health Scan', function () {
+  describe('Health Scan', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
@@ -151,13 +150,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(firstResponse).to.have.property('scanId');
 
         await retry.tryWithRetries(
-          'return existing scan',
+          'wait for health scan to complete',
           async () => {
-            const secondResponse = await sloApi.scheduleHealthScan(adminRoleAuthc);
-            expect(secondResponse.scanId).to.eql(firstResponse.scanId);
+            const results = await sloApi.getHealthScanResults(firstResponse.scanId, adminRoleAuthc);
+            expect(results.scan.status).to.eql('completed');
           },
-          { timeout: 2000, retryCount: 5, retryDelay: 3000 }
+          { retryCount: 10, retryDelay: 3000 }
         );
+
+        const secondResponse = await sloApi.scheduleHealthScan(adminRoleAuthc);
+        expect(secondResponse.scanId).to.eql(firstResponse.scanId);
       });
 
       it('forces a new scan when force parameter is true', async () => {
