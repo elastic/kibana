@@ -6,4 +6,3 @@
  */
 
 export * from './field_map';
-export * from './field_names';

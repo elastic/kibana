@@ -39,7 +39,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
-} from '../../../schedules/fields/field_names';
+} from '@kbn/elastic-assistant-common/impl/schedules/field_names';
 
 describe('Transform attack discoveries to alert documents', () => {
   describe('transformToAlertDocuments', () => {

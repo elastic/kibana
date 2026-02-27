@@ -13,6 +13,7 @@ import type {
   AttackDiscovery,
   Replacements,
   CreateAttackDiscoveryAlertsParams,
+  AttackDiscoveryAlertDocument,
 } from '@kbn/elastic-assistant-common';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
@@ -41,7 +42,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
-import { getAlertRiskScore } from './get_alert_risk_score';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
@@ -61,8 +61,9 @@ import {
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_ATTACK_IDS,
   ALERT_RISK_SCORE,
-} from '../../../schedules/fields/field_names';
-import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+} from '@kbn/elastic-assistant-common/impl/schedules/field_names';
+import { getAlertRiskScore } from './get_alert_risk_score';
+
 import { getAlertUrl } from './get_alert_url';
 
 type AttackDiscoveryAlertDocumentBase = Omit<
