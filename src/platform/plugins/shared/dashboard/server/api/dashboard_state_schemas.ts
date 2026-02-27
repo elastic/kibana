@@ -50,7 +50,7 @@ export const panelGridSchema = schema.object({
   }),
 });
 
-export function getPanelSchema() {
+export function getPanelSchema(isDashboardAppRequest: boolean) {
   const basePanelProps = {
     grid: panelGridSchema,
     /**
@@ -73,6 +73,22 @@ export function getPanelSchema() {
       })
     ),
   };
+
+  // TODO looser route validation for dashboard application requests
+  // when all embeddables register schemas
+  if (isDashboardAppRequest) {
+    return schema.object({
+      ...basePanelProps,
+      type: schema.string(),
+      config: schema.object(
+        {},
+        {
+          unknowns: 'allow',
+        }
+      ),
+    });
+  }
+
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
   const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
     schema.object({
@@ -82,27 +98,25 @@ export function getPanelSchema() {
     })
   );
 
-  return schema.discriminatedUnion('type', [
-    ...panelSchemas,
-    // TODO remove fallback when all embeddables register schemas
-    schema.object({
-      ...basePanelProps,
-      type: schema.string(),
-      config: schema.object(
-        {},
-        {
-          unknowns: 'allow',
-        }
-      ),
-    }),
-  ] as [ObjectType<{ grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>; uid: Type<string | undefined>; version: Type<string | undefined>; type: Type<string>; config: ObjectType<{}> }>]);
+  return schema.discriminatedUnion(
+    'type',
+    panelSchemas as [
+      ObjectType<{
+        grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
+        uid: Type<string | undefined>;
+        version: Type<string | undefined>;
+        type: Type<string>;
+        config: ObjectType<{}>;
+      }>
+    ]
+  );
 }
 
 const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
 });
 
-export function getSectionSchema() {
+export function getSectionSchema(isDashboardAppRequest: boolean) {
   return schema.object({
     title: schema.string({
       meta: { description: 'The title of the section.' },
@@ -114,7 +128,7 @@ export function getSectionSchema() {
       })
     ),
     grid: sectionGridSchema,
-    panels: schema.arrayOf(getPanelSchema(), {
+    panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
       meta: { description: 'The panels that belong to the section.' },
       defaultValue: [],
     }),
@@ -182,16 +196,22 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema() {
+export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object({
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: schema.maybe(optionsSchema),
     panels: schema.maybe(
-      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
-        defaultValue: [],
-      })
+      schema.arrayOf(
+        schema.oneOf([
+          getPanelSchema(isDashboardAppRequest),
+          getSectionSchema(isDashboardAppRequest),
+        ]),
+        {
+          defaultValue: [],
+        }
+      )
     ),
     project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),

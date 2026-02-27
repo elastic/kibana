@@ -16,11 +16,11 @@ import {
   getCreateResponseBodySchema,
 } from './schemas';
 import { create } from './create';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerDashboardAppCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/{id?}`,
+    path: `${DASHBOARD_APP_API_PATH}/{id?}`,
     summary: 'Create a dashboard with an auto-generated ID or a specified ID',
     ...commonRouteConfig,
   });
@@ -31,18 +31,18 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       validate: () => ({
         request: {
           params: createRequestParamsSchema,
-          body: getCreateRequestBodySchema(false),
+          body: getCreateRequestBodySchema(true),
         },
         response: {
           200: {
-            body: () => getCreateResponseBodySchema(false),
+            body: () => getCreateResponseBodySchema(true),
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body, req.params, false);
+        const result = await create(ctx, req.body, req.params, true);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {

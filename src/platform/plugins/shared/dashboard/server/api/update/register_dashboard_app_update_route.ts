@@ -10,50 +10,47 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { getReadResponseBodySchema } from './schemas';
-import { read } from './read';
-import { stripUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
+import { update } from './update';
+import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
-export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const readRoute = router.get({
-    path: `${DASHBOARD_API_PATH}/{id}`,
-    summary: `Get a dashboard`,
+export function registerDashboardAppUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const updateRoute = router.put({
+    path: `${DASHBOARD_APP_API_PATH}/{id}`,
+    summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...commonRouteConfig,
   });
 
-  readRoute.addVersion(
+  updateRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
           params: schema.object({
             id: schema.string({
-              meta: {
-                description: 'A unique identifier for the dashboard.',
-              },
+              meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
+          query: schema.maybe(
+            schema.object({
+              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
+            })
+          ),
+          body: getUpdateRequestBodySchema(true),
         },
         response: {
           200: {
-            body: () => getReadResponseBodySchema(false),
+            body: () => getUpdateResponseBodySchema(true),
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(ctx, req.params.id);
-        const { data, warnings } = stripUnmappedKeys(result.data);
-        return res.ok({
-          body: {
-            ...result,
-            data,
-            ...(warnings?.length && { warnings }),
-          },
-        });
+        const result = await update(ctx, req.params.id, req.body, true);
+        return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
@@ -62,12 +59,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
             },
           });
         }
-
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-
-        return res.badRequest(e.message);
+        return res.badRequest({ body: e.output.payload });
       }
     }
   );

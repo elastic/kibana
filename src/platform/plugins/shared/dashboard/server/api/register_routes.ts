@@ -9,17 +9,34 @@
 
 import type { HttpServiceSetup } from '@kbn/core/server';
 
-import { registerCreateRoute } from './create';
-import { registerUpdateRoute } from './update';
+import { registerCreateRoute, registerDashboardAppCreateRoute } from './create';
+import { registerDashboardAppUpdateRoute, registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
-import { registerReadRoute } from './read';
+import { registerDashboardAppReadRoute, registerReadRoute } from './read';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter();
+
+  //
+  // REST API routes
+  // Only allows panel.type value with registered embeddable schema
+  // Validate panel.config at route level
+  //
   registerCreateRoute(versionedRouter);
   registerReadRoute(versionedRouter);
   registerUpdateRoute(versionedRouter);
   registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
+
+  //
+  // Dashboard application specific routes
+  // Allow any panel.type value
+  // Validate panel.config in handler
+  //
+  // TODO remove these routes when all embeddable schemas are registered
+  //
+  registerDashboardAppCreateRoute(versionedRouter);
+  registerDashboardAppReadRoute(versionedRouter);
+  registerDashboardAppUpdateRoute(versionedRouter);
 }

@@ -13,12 +13,11 @@ import { schema } from '@kbn/config-schema';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
-import { stripUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
-export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerDashboardAppReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${DASHBOARD_APP_API_PATH}/{id}`,
     summary: `Get a dashboard`,
     ...commonRouteConfig,
   });
@@ -38,7 +37,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         },
         response: {
           200: {
-            body: () => getReadResponseBodySchema(false),
+            body: () => getReadResponseBodySchema(true),
           },
         },
       }),
@@ -46,12 +45,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     async (ctx, req, res) => {
       try {
         const result = await read(ctx, req.params.id);
-        const { data, warnings } = stripUnmappedKeys(result.data);
         return res.ok({
           body: {
             ...result,
-            data,
-            ...(warnings?.length && { warnings }),
+            data: result.data,
           },
         });
       } catch (e) {
