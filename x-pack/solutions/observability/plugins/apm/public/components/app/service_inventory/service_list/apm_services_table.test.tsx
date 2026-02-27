@@ -893,7 +893,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       expect(sloBadge).toBeInTheDocument();
       expect(sloBadge).toHaveAttribute('data-slo-status', 'violated');
       expect(screen.getByText('2 Violated')).toBeInTheDocument();
@@ -912,7 +912,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       expect(sloBadge).toBeInTheDocument();
       expect(sloBadge).toHaveAttribute('data-slo-status', 'degrading');
       expect(screen.getByText('3 Degrading')).toBeInTheDocument();
@@ -931,12 +931,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       expect(sloBadge).toBeInTheDocument();
-      expect(screen.getByTestId('serviceInventorySloBadge')).toHaveAttribute(
-        'data-slo-status',
-        'healthy'
-      );
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'healthy');
       expect(screen.getByText('Healthy')).toBeInTheDocument();
     });
 
@@ -953,7 +950,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const badge = screen.getByTestId('serviceInventorySloBadge');
+      const badge = screen.getByTestId('apmSloBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveAttribute('data-slo-status', 'noData');
       expect(screen.getByText('No data')).toBeInTheDocument();
@@ -972,7 +969,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const badge = screen.queryByTestId('serviceInventorySloBadge');
+      const badge = screen.queryByTestId('apmSloBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveAttribute('data-slo-status', 'noSLOs');
     });
@@ -990,7 +987,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       fireEvent.click(sloBadge);
 
       await waitFor(() => {

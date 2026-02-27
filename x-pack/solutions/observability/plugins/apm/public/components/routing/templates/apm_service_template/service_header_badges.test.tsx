@@ -148,7 +148,7 @@ describe('ServiceHeaderBadges', () => {
     setupMocks({ mostCriticalSloStatus: { status: 'violated', count: 2 } });
     renderBadges();
 
-    const badge = screen.getByTestId('serviceInventorySloBadge');
+    const badge = screen.getByTestId('apmSloBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('data-slo-status', 'violated');
   });
@@ -158,7 +158,7 @@ describe('ServiceHeaderBadges', () => {
 
     renderBadges();
 
-    const badge = screen.getByTestId('serviceInventorySloBadge');
+    const badge = screen.getByTestId('apmSloBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('data-slo-status', 'healthy');
   });
@@ -167,7 +167,7 @@ describe('ServiceHeaderBadges', () => {
     setupMocks({ mostCriticalSloStatus: { status: 'degrading', count: 1 } });
     renderBadges();
 
-    const badge = screen.getByTestId('serviceInventorySloBadge');
+    const badge = screen.getByTestId('apmSloBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('data-slo-status', 'degrading');
   });
@@ -176,7 +176,7 @@ describe('ServiceHeaderBadges', () => {
     setupMocks({ alertsCount: 1, sloFetchStatus: FETCH_STATUS.LOADING });
     renderBadges();
 
-    expect(screen.queryByTestId('serviceInventorySloBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
   });
 
   it('hides SLO badge when user cannot read SLOs', () => {
@@ -187,7 +187,7 @@ describe('ServiceHeaderBadges', () => {
     });
     renderBadges();
 
-    expect(screen.queryByTestId('serviceInventorySloBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
   });
 
   it('returns null when no badges should be shown', () => {
@@ -209,7 +209,7 @@ describe('ServiceHeaderBadges', () => {
     renderBadges();
 
     expect(screen.getByTestId('serviceHeaderAlertsBadge')).toBeInTheDocument();
-    const badge = screen.getByTestId('serviceInventorySloBadge');
+    const badge = screen.getByTestId('apmSloBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('data-slo-status', 'violated');
   });

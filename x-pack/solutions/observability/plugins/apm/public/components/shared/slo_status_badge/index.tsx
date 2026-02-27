@@ -134,7 +134,7 @@ export function SloStatusBadge({
   return (
     <EuiToolTip position="bottom" content={config.tooltipContent}>
       <EuiBadge
-        data-test-subj="serviceInventorySloBadge"
+        data-test-subj="apmSloBadge"
         data-slo-status={sloStatus}
         color={config.color}
         onClick={onClick}
