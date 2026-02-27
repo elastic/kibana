@@ -1,2 +1,2 @@
-node scripts/generate_agents_md.js
+node scripts/generate.js
 zip -r -FS elastic-agent.zip AGENTS-elasticsearch-append.md .elasticsearch-agent

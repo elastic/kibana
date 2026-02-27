@@ -36,13 +36,13 @@ export const registerSearchAgent = ({
       'Guides developers from intent to a working search experience with Elasticsearch — recommending approaches, designing mappings, and generating production-ready code.',
     avatar_icon: 'logoElasticsearch',
     labels: ['search'],
+    // TODO: register the skills with agent builder when they release that feature
     configuration: {
       replace_default_instructions: true,
       instructions: searchAgentInstructions,
       tools: [{ tool_ids: SEARCH_AGENT_TOOL_IDS }],
     },
   };
-
   plugins.agentBuilder?.agents.register(definition);
   logger.debug('Successfully registered search agent in agent-builder');
 };

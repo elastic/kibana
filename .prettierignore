@@ -1,5 +1,2 @@
 # use stylelint
 *.scss
-
-# generated from search_agent_instructions.ts
-src/platform/packages/shared/kbn-search-agent/.elasticsearch-agent/AGENTS.md

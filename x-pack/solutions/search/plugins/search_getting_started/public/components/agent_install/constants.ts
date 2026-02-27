@@ -16,6 +16,8 @@ export type UseCaseId =
   | 'hybrid-search'
   | 'catalog-ecommerce';
 
+export type Environment = 'cursor' | 'cli' | 'agent-builder';
+
 interface UseCaseOption {
   id: UseCaseId;
   label: string;
@@ -66,19 +68,18 @@ export const USE_CASE_OPTIONS: UseCaseOption[] = [
   },
 ];
 
-export const BASE_PROMPT_LINES_CURSOR = [
+// TODO @wildemat: These scripts should point to the correct elastic/kibana location before merging
+export const INSTALL_LINES_CURSOR = [
   'Fetch and run this remote script:',
   'curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-cursor.sh | sh',
-  'Then help me get started with Elasticsearch.',
 ];
 
-export const BASE_PROMPT_LINES_CLI = [
+export const INSTALL_LINES_CLI = [
   'Fetch and run this remote script:',
   'curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-agent.sh | sh',
-  'Then help me get started with Elasticsearch.',
 ];
 
-export const USE_CASE_INITIAL_MESSAGES: Record<UseCaseId, string> = {
+export const USE_CASE_MESSAGES: Record<UseCaseId, string> = {
   'general-search': 'Help me get started with Elasticsearch.',
   'semantic-search': 'I want to build semantic search with Elasticsearch.',
   'vector-database': 'I want to use Elasticsearch as a vector database for my AI app.',

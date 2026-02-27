@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -27,22 +27,26 @@ import { PromptModal } from './prompt_modal';
 import { USE_CASE_OPTIONS, type UseCaseId } from './constants';
 import { buildPrompt } from './util';
 
+const selectOptions = USE_CASE_OPTIONS.map((option) => ({
+  value: option.id,
+  inputDisplay: option.label,
+  'data-test-subj': `useCase-option-${option.id}`,
+}));
+
 export const AgentInstallSection = () => {
   const { services } = useKibana();
   const [selectedUseCase, setSelectedUseCase] = useState<UseCaseId>('general-search');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
+  const [isAgentBuilderAvailable, setIsAgentBuilderAvailable] = useState(false);
 
-  const selectOptions = useMemo(
-    () =>
-      USE_CASE_OPTIONS.map((option) => ({
-        value: option.id,
-        inputDisplay: option.label,
-        'data-test-subj': `useCase-option-${option.id}`,
-      })),
-    []
-  );
+  useEffect(() => {
+    const sub = services.application.applications$.subscribe((apps) => {
+      setIsAgentBuilderAvailable(apps.has(AGENT_BUILDER_APP_ID));
+    });
+    return () => sub.unsubscribe();
+  }, [services.application.applications$]);
 
   const cursorDeeplinkUrl = useMemo(
     () =>
@@ -158,16 +162,20 @@ export const AgentInstallSection = () => {
                     defaultMessage: 'Claude / CLI',
                   })}
                 </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key="agent-builder"
-                  icon="wrench"
-                  onClick={handleOpenInAgentBuilder}
-                  data-test-subj="agentInstallOpenInAgentBuilder"
-                >
-                  {i18n.translate('xpack.gettingStarted.agentInstall.menuAgentBuilder', {
-                    defaultMessage: 'Kibana Agent Builder',
-                  })}
-                </EuiContextMenuItem>,
+                ...(isAgentBuilderAvailable
+                  ? [
+                      <EuiContextMenuItem
+                        key="agent-builder"
+                        icon="wrench"
+                        onClick={handleOpenInAgentBuilder}
+                        data-test-subj="agentInstallOpenInAgentBuilder"
+                      >
+                        {i18n.translate('xpack.gettingStarted.agentInstall.menuAgentBuilder', {
+                          defaultMessage: 'Kibana Agent Builder',
+                        })}
+                      </EuiContextMenuItem>,
+                    ]
+                  : []),
               ]}
             />
           </EuiPopover>

@@ -7,10 +7,11 @@ an approach, designing mappings, and generating production-ready code.
 ## Package contents
 
 ```
-search_agent_instructions.ts    ← source of truth for all instructions
+search_agent_instructions.md    ← source of truth for all instructions (plain markdown)
+search_agent_instructions.ts    ← generated — do not edit directly
 index.ts                        ← exports searchAgentInstructions
-build                           ← regenerates AGENTS.md + packages zip
-scripts/generate_agents_md.js   ← extracts the template literal → markdown
+build                           ← regenerates .ts, AGENTS.md + packages zip
+scripts/generate.js             ← reads .md → generates .ts + copies to .elasticsearch-agent/
 install-agent.sh                ← remote installer (AGENTS.md workflow)
 install-cursor.sh               ← remote installer (Cursor rules + skills)
 AGENTS-elasticsearch-append.md  ← appended to the project's AGENTS.md on install
@@ -26,7 +27,11 @@ canonical conversational playbook for the Elasticsearch onboarding agent. It cov
 discovery, data understanding, approach recommendation, mapping design, code generation,
 testing, and iteration.
 
-This same export is consumed by two runtimes:
+The source of truth is `search_agent_instructions.md`. Running `./build` generates both
+the TypeScript export (`search_agent_instructions.ts`) and the distributable markdown
+(`.elasticsearch-agent/AGENTS.md`) from it.
+
+This export is consumed by two runtimes:
 
 ### External LLM agents (Cursor, CLI)
 
@@ -67,10 +72,11 @@ Then help me get started with Elasticsearch.
 
 ## Development
 
-- `search_agent_instructions.ts` is the **source of truth**. The
-  `.elasticsearch-agent/AGENTS.md` file is generated — do not edit it directly.
-- Run `./build` to regenerate `AGENTS.md` from the TypeScript source and
-  package the zip file for usage outside of Kibana.
+- `search_agent_instructions.md` is the **source of truth**. Both
+  `search_agent_instructions.ts` and `.elasticsearch-agent/AGENTS.md` are generated — do
+  not edit them directly.
+- Run `./build` to regenerate the TypeScript export and markdown distribution,
+  then package the zip file for usage outside of Kibana.
 
 Prompt during development (points to PR branch):
 

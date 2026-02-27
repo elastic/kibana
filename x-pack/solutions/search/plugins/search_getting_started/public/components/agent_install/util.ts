@@ -6,32 +6,40 @@
  */
 
 import {
-  BASE_PROMPT_LINES_CURSOR,
-  BASE_PROMPT_LINES_CLI,
-  USE_CASE_INITIAL_MESSAGES,
+  INSTALL_LINES_CURSOR,
+  INSTALL_LINES_CLI,
+  USE_CASE_MESSAGES,
+  type Environment,
   type UseCaseId,
 } from './constants';
 
-type Environment = 'cursor' | 'cli' | 'agent-builder';
+export const buildPrompt = (useCaseId: UseCaseId, environment: Environment): string => {
+  const message = USE_CASE_MESSAGES[useCaseId];
+  const skillLine =
+    useCaseId === 'general-search' ? undefined : `Follow the /${useCaseId} skill for my use case.`;
 
-export const buildPrompt = (useCaseId: UseCaseId, environment: Environment) => {
   switch (environment) {
     case 'cursor':
-      return addUseCaseSkill(useCaseId, BASE_PROMPT_LINES_CURSOR);
+      return joinLines(INSTALL_LINES_CURSOR, message, skillLine);
     case 'cli':
-      return addUseCaseSkill(useCaseId, BASE_PROMPT_LINES_CLI);
+      return joinLines(INSTALL_LINES_CLI, message, skillLine);
     case 'agent-builder':
-      return USE_CASE_INITIAL_MESSAGES[useCaseId];
+      // Agent builder already has the full instructions (except skills) registered server-side
+      // via registerSearchAgent, so we only send the use-case message.
+      return message;
     default:
       throw new Error(`Unsupported environment: ${environment}`);
   }
 };
 
-export const addUseCaseSkill = (useCaseId: UseCaseId, basePromptLines: string[]): string => {
-  const skillLine =
-    useCaseId === 'general-search'
-      ? ''
-      : `Finally, follow the /${useCaseId} skill for my use case.`;
-  const promptLines = skillLine ? [...basePromptLines, skillLine] : basePromptLines;
-  return promptLines.join('\n');
+const joinLines = (
+  installLines: readonly string[],
+  message: string,
+  skillLine: string | undefined
+): string => {
+  const parts = [...installLines, message];
+  if (skillLine) {
+    parts.push(skillLine);
+  }
+  return parts.join('\n');
 };
