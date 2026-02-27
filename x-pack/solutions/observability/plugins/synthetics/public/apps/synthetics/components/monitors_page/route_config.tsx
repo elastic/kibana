@@ -52,8 +52,9 @@ export const getMonitorsRoute = (
       path: MONITORS_ROUTE,
       component: MonitorManagementPage,
       dataTestSubj: 'syntheticsMonitorManagementPage',
+      contentAboveTemplate: <AlertingCallout />,
       pageHeader: {
-        ...sharedProps,
+        // ...sharedProps,
         tabs: getMonitorsTabs(syntheticsPath, 'management', location),
       },
     },
