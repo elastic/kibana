@@ -93,17 +93,36 @@ node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/run_rs
 
 ## Demo Scenario
 
-1. **Detection rule triggers** when traffic to malicious domain is detected
+### Setup: Selective Compromise (Important!)
+
+**Only 1 endpoint generates live network traffic** to the malicious domain (via headless Chrome
+in the `trigger-alert` step). The remaining endpoints have browser history injected on disk but
+produce NO network events. This is by design — the forensic analysis skill should **discover**
+the additional compromised hosts through Osquery cross-endpoint investigation, proving its
+analytical value.
+
+| Endpoint type | Count | Browser history | Network traffic | Alert |
+|---|---|---|---|---|
+| Defend+Osquery #1 | 1 | Chrome | Yes (headless Chrome) | Yes |
+| Defend+Osquery #2–N | N-1 | Chrome | None | None |
+| Osquery-only (compromised) | 2 | Firefox | None | None |
+| Osquery-only (clean) | remaining | None | None | None |
+
+### Flow
+
+1. **Detection rule triggers** on the single endpoint that generated traffic
 2. **VirusTotal workflow** can be manually triggered to enrich the alert
 3. **AI Forensics Agent** investigates:
    - Queries Osquery browser history on alert source endpoint
    - Finds browser history entry showing user visited the domain
    - Reviews VirusTotal enrichment results
-   - Performs cross-endpoint query to find other exposed endpoints
+   - Performs **cross-endpoint Osquery query** to discover other compromised endpoints
+   - Finds Chrome history on Defend+Osquery hosts and Firefox history on Osquery-only hosts
 4. **Agent provides explanation**:
    - Root cause: Phishing email leading to malicious link click
-   - Typosquatting indicator
-   - APT/threat group association
+   - Typosquatting indicator (e.g., `ictnsc.com` → `ictsec.com`)
+   - APT/threat group association (REF7707)
+   - Full list of affected endpoints discovered via forensic analysis
    - Recommendations for remediation
 
 ## Cleanup

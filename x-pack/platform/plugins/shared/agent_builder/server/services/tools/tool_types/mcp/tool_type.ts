@@ -222,9 +222,8 @@ export const getMcpToolType = ({
                   {
                     type: ToolResultType.error,
                     data: {
-                      message: `Failed to execute MCP tool: ${
-                        error instanceof Error ? error.message : String(error)
-                      }`,
+                      message: `Failed to execute MCP tool: ${error instanceof Error ? error.message : String(error)
+                        }`,
                     },
                   },
                 ],
@@ -234,7 +233,6 @@ export const getMcpToolType = ({
         },
 
         getSchema: async () => {
-          // Retrieve input schema by calling listTools on the MCP connector
           const inputSchema = await getMcpToolInputSchema({
             actions,
             request,
@@ -243,8 +241,15 @@ export const getMcpToolType = ({
           });
 
           if (inputSchema) {
-            const zodSchema = jsonSchemaToZod(inputSchema);
-            return zodSchema as z.ZodObject<any>;
+            const normalizedSchema =
+              !inputSchema.type || inputSchema.type === 'object'
+                ? { type: 'object' as const, ...inputSchema }
+                : { type: 'object' as const, properties: { input: inputSchema } };
+
+            const zodSchema = jsonSchemaToZod(normalizedSchema);
+            if (zodSchema instanceof z.ZodObject) {
+              return zodSchema;
+            }
           }
 
           return z.object({});

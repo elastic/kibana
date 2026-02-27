@@ -33,7 +33,8 @@ export type ProvisioningStep =
   | 'gui'
   | 'browser-history'
   | 'detection-rule'
-  | 'workflow';
+  | 'workflow'
+  | 'trigger-alert';
 
 /**
  * Step 1: Ensure Fleet Server is configured and running
@@ -354,5 +355,63 @@ export const stepWorkflow = async (
 
     // Workflow creation checks for existing workflows
     return createVirusTotalWorkflow(esClient, kbnClient, logger, virustotalApiKey);
+  });
+};
+
+/**
+ * Step 7: Trigger alert by generating real browser traffic to the malicious domain.
+ *
+ * IMPORTANT: Only targets the FIRST Defend+Osquery endpoint, NOT all of them.
+ * This is intentional — the forensic analysis skill should discover the remaining
+ * compromised endpoints (which have browser history but no network alert) through
+ * cross-endpoint Osquery investigation.
+ *
+ * Traffic flow:
+ *  - 1 Defend+Osquery endpoint: headless Chrome visits the domain → Elastic Defend
+ *    captures DNS lookup with process=chrome → detection rule fires an alert
+ *  - Remaining endpoints: browser history exists on disk (injected in browser-history step)
+ *    but NO network traffic → no alert → forensic agent discovers them via Osquery
+ */
+export const stepTriggerAlert = async (
+  endpoints: ProvisionedEndpoint[],
+  log: ToolingLog,
+  config: Rsa2026DemoConfig
+): Promise<void> => {
+  const logger = prefixedOutputLogger('stepTriggerAlert()', log);
+
+  logger.info('Triggering alert via headless browser traffic on a single endpoint');
+
+  return logger.indent(4, async () => {
+    const defendEndpoints = endpoints.filter((e) => e.policyType === 'defend-osquery');
+
+    if (defendEndpoints.length === 0) {
+      logger.warning('No Defend+Osquery endpoints found, skipping alert trigger');
+      return;
+    }
+
+    const target = defendEndpoints[0];
+    logger.info(
+      `Launching headless Chrome on ${target.hostname} to visit https://${config.maliciousDomain}`
+    );
+    logger.info(
+      `Only targeting 1 of ${defendEndpoints.length} Defend endpoints — ` +
+        `forensic skill should discover the rest via Osquery cross-endpoint query`
+    );
+
+    const chromeCmd = [
+      'google-chrome-stable --headless --disable-gpu --no-sandbox',
+      `--disable-software-rasterizer --timeout=5000 'https://${config.maliciousDomain}'`,
+      '2>/dev/null || chromium-browser --headless --disable-gpu --no-sandbox',
+      `--disable-software-rasterizer --timeout=5000 'https://${config.maliciousDomain}'`,
+      '2>/dev/null || true',
+    ].join(' ');
+
+    await target.hostVm.exec(chromeCmd, { silent: true });
+
+    logger.info(`Browser traffic generated on ${target.hostname}`);
+    logger.info(
+      'Detection rule should fire within ~5 minutes. ' +
+        'The alert will show process=chrome as the source.'
+    );
   });
 };

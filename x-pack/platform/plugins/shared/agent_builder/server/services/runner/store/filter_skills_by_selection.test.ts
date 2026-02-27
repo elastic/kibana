@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { filterSkillsBySelection } from './create_store';
 
-const createMockSkill = (id: string): SkillDefinition => ({
+const createMockSkill = (id: string): InternalSkillDefinition => ({
   id,
-  name: `${id}-name` as any,
-  basePath: 'skills/platform' as any,
+  name: `${id}-name`,
   description: `Description for ${id}`,
   content: `Content for ${id}`,
-  getAllowedTools: () => [],
+  readonly: true,
+  basePath: 'skills/platform',
+  getRegistryTools: () => [],
 });
 
 describe('filterSkillsBySelection', () => {

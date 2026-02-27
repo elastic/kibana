@@ -9,9 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SkillsService, ExecutableTool } from '@kbn/agent-builder-server/runner';
 import type { Runner, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { ToolType } from '@kbn/agent-builder-common';
-import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { SkillBoundedTool, InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillRegistry } from '../../skills';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../../tools/tool_types';
 import { convertTool } from '../../tools/builtin/converter';
@@ -22,14 +20,8 @@ import { isDisabledDefinition } from '../../tools/tool_types/definitions';
 import { ToolAvailabilityCache } from '../../tools/builtin/availability_cache';
 import type { ToolsServiceStart } from '../../tools';
 
-/**
- * Type guard to determine if a skill result is a SkillDefinition (built-in)
- * vs a PublicSkillDefinition (persisted).
- */
-const isSkillDefinition = (
-  skill: SkillDefinition | PublicSkillDefinition
-): skill is SkillDefinition => {
-  return 'basePath' in skill;
+const isBuiltinSkill = (skill: InternalSkillDefinition): boolean => {
+  return 'basePath' in skill && skill.basePath !== undefined;
 };
 
 export const createSkillsService = async ({
@@ -58,7 +50,7 @@ export const createSkillsService = async ({
     },
     getSkillDefinition: async (skillId) => {
       const skill = await skillRegistry.get(skillId);
-      if (skill && isSkillDefinition(skill)) {
+      if (skill && isBuiltinSkill(skill)) {
         return skill;
       }
       return undefined;

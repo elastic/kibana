@@ -160,7 +160,7 @@ export const cli = () => {
         --create-detection-rule    Create detection rule for malicious domains (default: true)
         --create-workflow          Create VirusTotal workflow (default: true)
         --steps                    Comma-separated list of steps to run (default: all)
-                                   Available steps: fleet-server, policies, endpoints, gui, browser-history, detection-rule, workflow
+                                   Available steps: fleet-server, policies, endpoints, gui, browser-history, detection-rule, workflow, trigger-alert
                                    Example: --steps=fleet-server,policies,endpoints
         --enableGui                Install XFCE + XRDP on Multipass VMs (default: true)
         --vmGuiUser                VM GUI user (default: ubuntu)

@@ -11,6 +11,9 @@ import {
   createBadRequestError,
   createSkillNotFoundError,
   validateSkillId,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
+  type SkillSelection,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
@@ -21,6 +24,14 @@ export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
   get(skillId: string): Promise<InternalSkillDefinition>;
   list(): Promise<InternalSkillDefinition[]>;
+  /** Alias for `list()` — returns all skill definitions from all providers. */
+  listSkillDefinitions(): Promise<InternalSkillDefinition[]>;
+  /**
+   * Resolves a skill selection to a concrete list of skill definitions.
+   * - Wildcard (`*`): returns all skills from all providers
+   * - Explicit IDs: returns matching skills
+   */
+  resolveSkillSelection(skillSelection: SkillSelection[]): Promise<InternalSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
   update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
   /** Deletes a skill. Throws if the skill does not exist or is read-only. */
@@ -80,6 +91,27 @@ class SkillRegistryImpl implements SkillRegistry {
       allSkills.push(...skills);
     }
     return allSkills;
+  }
+
+  async listSkillDefinitions(): Promise<InternalSkillDefinition[]> {
+    return this.list();
+  }
+
+  async resolveSkillSelection(
+    skillSelection: SkillSelection[]
+  ): Promise<InternalSkillDefinition[]> {
+    if (skillSelection.length === 0) {
+      return [];
+    }
+
+    const allSkills = await this.list();
+
+    if (hasSkillSelectionWildcard(skillSelection)) {
+      return allSkills;
+    }
+
+    const selectedIds = new Set(getExplicitSkillIds(skillSelection));
+    return allSkills.filter((skill) => selectedIds.has(skill.id));
   }
 
   async create(createRequest: PersistedSkillCreateRequest): Promise<InternalSkillDefinition> {

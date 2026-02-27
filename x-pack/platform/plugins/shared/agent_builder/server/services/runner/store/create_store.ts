@@ -7,7 +7,7 @@
 
 import type { Conversation, SkillSelection } from '@kbn/agent-builder-common';
 import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
@@ -22,10 +22,9 @@ import type { SkillRegistry } from '../../skills';
  * - If explicit IDs: returns matching skills from the provided list
  */
 export const filterSkillsBySelection = (
-  allSkills: SkillDefinition[],
+  allSkills: InternalSkillDefinition[],
   skillSelection?: SkillSelection[]
-): SkillDefinition[] => {
-  // If no selection is specified, return all skills (backward compat)
+): InternalSkillDefinition[] => {
   if (skillSelection === undefined) {
     return allSkills;
   }
@@ -35,11 +34,9 @@ export const filterSkillsBySelection = (
   }
 
   if (hasSkillSelectionWildcard(skillSelection)) {
-    // Wildcard means all built-in skills, plus any explicitly listed ones
     return allSkills;
   }
 
-  // No wildcard: only return explicitly selected skills
   const selectedIds = new Set(getExplicitSkillIds(skillSelection));
   return allSkills.filter((skill) => selectedIds.has(skill.id));
 };
@@ -47,7 +44,7 @@ export const filterSkillsBySelection = (
 /**
  * Resolves skills using the skill registry.
  * When a skill selection is provided, uses resolveSkillSelection (includes user-created skills).
- * Otherwise, returns all built-in skills for backward compatibility.
+ * Otherwise, returns all skills for backward compatibility.
  */
 const resolveSkills = async ({
   skillSelection,
@@ -55,13 +52,12 @@ const resolveSkills = async ({
 }: {
   skillSelection?: SkillSelection[];
   skillRegistry: SkillRegistry;
-}): Promise<SkillDefinition[]> => {
+}): Promise<InternalSkillDefinition[]> => {
   if (skillSelection) {
     return skillRegistry.resolveSkillSelection(skillSelection);
   }
 
-  // No selection: return all built-in skills (backward compat)
-  return skillRegistry.listSkillDefinitions();
+  return skillRegistry.list();
 };
 
 export const createStore = async ({

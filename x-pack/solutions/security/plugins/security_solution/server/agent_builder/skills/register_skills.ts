@@ -16,6 +16,7 @@ import {
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
+import { ALERT_TRIAGE_SKILL } from './alert_triage_skill';
 import { SECURITY_ALERT_SUPPRESSION_READONLY_SKILL } from './security_alert_suppression_readonly_skill';
 import { SECURITY_ATTACK_DISCOVERY_SKILL } from './security_attack_discovery_skill';
 import { SECURITY_CASES_SKILL } from './security_cases_skill';
@@ -63,6 +64,7 @@ export const registerSkills = async ({
   await Promise.all([
     agentBuilder.skills.register(GET_ALERTS_SKILL),
     agentBuilder.skills.register(FORENSICS_ANALYTICS_SKILL),
+    agentBuilder.skills.register(ALERT_TRIAGE_SKILL),
     agentBuilder.skills.register(SECURITY_LABS_SEARCH_SKILL),
     agentBuilder.skills.register(SECURITY_CASES_SKILL),
     agentBuilder.skills.register(SECURITY_DETECTION_RULES_SKILL),

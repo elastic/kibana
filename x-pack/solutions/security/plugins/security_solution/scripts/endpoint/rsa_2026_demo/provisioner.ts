@@ -19,6 +19,7 @@ import {
   stepBrowserHistory,
   stepDetectionRule,
   stepWorkflow,
+  stepTriggerAlert,
   type ProvisioningStep,
 } from './steps';
 import { findVm, getHostVmClient } from '../common/vm_services';
@@ -90,6 +91,7 @@ export const provisionRsa2026Demo = async (
     'browser-history',
     'detection-rule',
     'workflow',
+    'trigger-alert',
   ];
 
   const stepsToRun = steps && steps.length > 0 ? steps : allSteps;
@@ -238,6 +240,40 @@ export const provisionRsa2026Demo = async (
           DEFAULT_RSA_2026_STATE_FILE
         );
       }
+    }
+
+    // Step 8: Trigger alert on a single endpoint
+    if (stepsToRun.includes('trigger-alert')) {
+      if (endpoints.length === 0) {
+        if (stepsToRun.includes('endpoints')) {
+          throw new Error('Endpoints must be created before trigger-alert');
+        }
+        const vmType = config.vmType;
+        if (vmType === 'gcp' && config.gcpVmNames) {
+          endpoints = config.gcpVmNames
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .map((hostname) => ({
+              hostname,
+              agentId: 'unknown',
+              hostVm: getHostVmClient(hostname, vmType, undefined, logger),
+              policyType: inferPolicyType(hostname),
+            }));
+        } else {
+          const existingVms = await findVm(vmType, /^rsa-2026-/, logger);
+          if (existingVms.data.length === 0) {
+            throw new Error('No existing endpoints found. Please run endpoints step first.');
+          }
+          endpoints = existingVms.data.map((hostname) => ({
+            hostname,
+            agentId: 'unknown',
+            hostVm: getHostVmClient(hostname, vmType, undefined, logger),
+            policyType: inferPolicyType(hostname),
+          }));
+        }
+      }
+      await stepTriggerAlert(endpoints, logger, config);
     }
 
     return { policyIds, endpoints, detectionRuleId, workflowId, virusTotalConnectorId };
