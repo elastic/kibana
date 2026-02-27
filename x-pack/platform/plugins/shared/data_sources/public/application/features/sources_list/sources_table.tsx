@@ -212,17 +212,9 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
           defaultMessage: 'Name',
         }),
         render: (name: string, source: ActiveSource) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{getConnectorIcon(source.iconType, 'm')}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink
-                onClick={() => onEdit(source)}
-                data-test-subj={`sourceNameLink-${source.id}`}
-              >
-                <EuiText size="s">{name}</EuiText>
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiLink onClick={() => onEdit(source)} data-test-subj={`sourceNameLink-${source.id}`}>
+            <EuiText size="s">{name}</EuiText>
+          </EuiLink>
         ),
       },
       {
@@ -231,9 +223,14 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
           defaultMessage: 'Type',
         }),
         render: (type: string, source: ActiveSource) => (
-          <EuiText size="s" data-test-subj={`sourceType-${source.id}`}>
-            {capitalize(type)}
-          </EuiText>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{getConnectorIcon(source.iconType, 'm')}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" data-test-subj={`sourceType-${source.id}`}>
+                {capitalize(type)}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
