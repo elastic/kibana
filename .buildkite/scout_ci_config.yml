@@ -37,6 +37,7 @@ plugins:
     - streams_app
     - synthetics
     - transform
+    - ux
     - workflows_extensions
     - workflows_management
   disabled:
