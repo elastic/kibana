@@ -11262,6 +11262,10 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/attachments/index.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/markdown_saved_object/markdown_saved_object.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
               },

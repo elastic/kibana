@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/cloud_security_posture.sh
-    cancel_on_build_failing: true
     label: 'Cloud Security Posture Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -16,7 +15,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh
-    cancel_on_build_failing: true
     label: 'Cloud Security Posture Cypress Tests on Serverless'
     agents:
       machineType: n2-standard-4

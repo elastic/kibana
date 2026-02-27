@@ -62,7 +62,45 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.getErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getErrorMessage",
+        "description": [],
+        "signature": [
+          "(error: unknown) => string"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-common.getErrorMessage.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+            "lineNumber": 64,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "entityStore",
@@ -232,7 +270,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 54,
+        "lineNumber": 62,
         "columnNumber": 22,
         "deprecated": false,
         "trackAdoption": false,
@@ -249,7 +287,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 54,
+        "lineNumber": 62,
         "columnNumber": 12,
         "deprecated": false,
         "trackAdoption": false,
@@ -265,10 +303,10 @@
         "label": "ENTITY_STORE_ROUTES",
         "description": [],
         "signature": [
-          "{ readonly INSTALL: \"/internal/security/entity-store/install\"; readonly UNINSTALL: \"/internal/security/entity-store/uninstall\"; readonly STATUS: \"/internal/security/entity-store/status\"; }"
+          "{ readonly INSTALL: \"/internal/security/entity_store/install\"; readonly UNINSTALL: \"/internal/security/entity_store/uninstall\"; readonly STATUS: \"/internal/security/entity_store/status\"; readonly START: \"/internal/security/entity_store/start\"; readonly STOP: \"/internal/security/entity_store/stop\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly CRUD_UPSERT: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_UPSERT_BULK: \"/internal/security/entity_store/entities/bulk\"; readonly CRUD_DELETE: \"/internal/security/entity_store/entities/\"; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 50,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
