@@ -27,7 +27,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
 
   const euiButtonXsSizeCss = useAiButtonXsSizeCss();
-  const { buttonCss, textCss } = useAiButtonGradientStyles({
+  const { buttonCss, labelCss } = useAiButtonGradientStyles({
     variant,
     iconOnly: props.iconOnly,
   });
@@ -79,7 +79,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
           iconType={iconType ? resolvedIconType(iconType) : undefined}
           css={[buttonCss, iconGradientCss, userCss]}
         >
-          <span css={textCss}>{children}</span>
+          <span css={labelCss}>{children}</span>
         </EuiButtonEmpty>
       </>
     );
@@ -108,7 +108,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
         css={[buttonCss, iconGradientCss, size === 'xs' && euiButtonXsSizeCss, userCss]}
         fill={variant === 'accent'}
       >
-        <span css={textCss}>{children}</span>
+        <span css={labelCss}>{children}</span>
       </EuiButton>
     </>
   );

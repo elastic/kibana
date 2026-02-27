@@ -32,7 +32,7 @@ const defaultSvgGradient = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockUseAiButtonGradientStyles.mockReturnValue({ buttonCss: undefined, textCss: undefined });
+  mockUseAiButtonGradientStyles.mockReturnValue({ buttonCss: undefined, labelCss: undefined });
   mockUseSvgAiGradient.mockReturnValue(defaultSvgGradient);
 });
 

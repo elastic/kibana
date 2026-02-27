@@ -71,12 +71,12 @@ const resolveGradientAngle = ({
   return diagonalGradientAngle + angleBoost;
 };
 
-const getTextColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientColors => ({
+const getLabelColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientColors => ({
   startColor: colors.textPrimary,
   endColor: colors.textAssistance,
 });
 
-const gradientTextCss = (cssGradient: string, hoverGradient?: string) => css`
+const gradientLabelCss = (cssGradient: string, hoverGradient?: string) => css`
   display: inline-block;
   background: ${cssGradient} !important;
   background-clip: text !important;
@@ -94,7 +94,7 @@ const gradientTextCss = (cssGradient: string, hoverGradient?: string) => css`
     : ''}
 `;
 
-const plainTextCss = (color: string) => css`
+const plainLabelCss = (color: string) => css`
   background: none !important;
   background-clip: initial !important;
   -webkit-background-clip: initial !important;
@@ -137,7 +137,7 @@ const resolveVariantStyles = (
       },
     },
   } = euiTheme;
-  const textGradient = buildLinearGradient(getTextColors(colors));
+  const labelGradient = buildLinearGradient(getLabelColors(colors));
 
   const hoverOverlay = linearGradientCss({
     angle: verticalGradientAngle,
@@ -152,8 +152,8 @@ const resolveVariantStyles = (
       return {
         buttonBackground: 'transparent',
         hoverBackground: hoverOverlay,
-        textColor: colors.textPrimary,
-        textCss: gradientTextCss(textGradient),
+        labelColor: colors.textPrimary,
+        labelCss: gradientLabelCss(labelGradient),
       };
 
     case 'outlined':
@@ -171,8 +171,8 @@ const resolveVariantStyles = (
             endPercent: diagonalGradientEndPercent,
           }
         ),
-        textColor: colors.textPrimary,
-        textCss: gradientTextCss(textGradient),
+        labelColor: colors.textPrimary,
+        labelCss: gradientLabelCss(labelGradient),
       };
 
     case 'accent': {
@@ -191,8 +191,8 @@ const resolveVariantStyles = (
       return {
         buttonBackground: accentBg,
         hoverBackground: `${hoverOverlay}, ${accentBg}`,
-        textColor: colors.textInverse,
-        textCss: plainTextCss(colors.textInverse),
+        labelColor: colors.textInverse,
+        labelCss: plainLabelCss(colors.textInverse),
       };
     }
 
@@ -208,8 +208,8 @@ const resolveVariantStyles = (
       return {
         buttonBackground: baseBg,
         hoverBackground: `${hoverOverlay}, ${baseBg}`,
-        textColor: colors.textPrimary,
-        textCss: gradientTextCss(textGradient, `${hoverOverlay}, ${textGradient}`),
+        labelColor: colors.textPrimary,
+        labelCss: gradientLabelCss(labelGradient, `${hoverOverlay}, ${labelGradient}`),
       };
     }
   }
@@ -223,13 +223,13 @@ export const useAiButtonGradientStyles = ({
 
   return useMemo(() => {
     const buttonGradientAngle = resolveGradientAngle({ iconOnly, variant });
-    const { buttonBackground, hoverBackground, borderGradient, textColor, textCss } =
+    const { buttonBackground, hoverBackground, borderGradient, labelColor, labelCss } =
       resolveVariantStyles(variant, euiTheme, buttonGradientAngle);
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
       border-radius: ${euiTheme.border.radius.medium};
-      color: ${textColor} !important;
+      color: ${labelColor} !important;
       ${borderGradient ? outlinedBorderGradientCss(borderGradient) : ''}
 
       &:hover:not(:disabled),
@@ -247,7 +247,7 @@ export const useAiButtonGradientStyles = ({
       }
     `;
 
-    return { buttonCss, textCss };
+    return { buttonCss, labelCss };
   }, [variant, iconOnly, euiTheme]);
 };
 
@@ -271,12 +271,12 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
         `
       : undefined;
 
-    const textColors = getTextColors(euiTheme.colors);
+    const labelColors = getLabelColors(euiTheme.colors);
 
     return {
       iconGradientCss,
       gradientId,
-      colors: textColors,
+      colors: labelColors,
     };
   }, [gradientId, variant, euiTheme]);
 };

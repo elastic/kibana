@@ -19,7 +19,7 @@ export interface AiButtonGradientOptions {
 /** Computed gradient styles for an AI button. */
 export interface AiButtonGradientStyles {
   readonly buttonCss: SerializedStyles;
-  readonly textCss: SerializedStyles;
+  readonly labelCss: SerializedStyles;
 }
 
 /** Start and end colors for a linear gradient. */
@@ -33,8 +33,8 @@ export interface ResolvedVariantStyles {
   readonly buttonBackground: string;
   readonly hoverBackground: string;
   readonly borderGradient?: string;
-  readonly textColor: string;
-  readonly textCss: SerializedStyles;
+  readonly labelColor: string;
+  readonly labelCss: SerializedStyles;
 }
 
 /** SVG gradient definition with colors and optional icon styles. */
