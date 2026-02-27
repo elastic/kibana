@@ -85,6 +85,7 @@ export function ClassicStreamDetailManagement({
           <MissingDataStreamCallout
             streamName={definition.stream.name}
             canManage={definition.privileges.manage}
+            canDelete={true}
             refreshDefinition={refreshDefinition}
           />
         </StreamsAppPageTemplate.Body>

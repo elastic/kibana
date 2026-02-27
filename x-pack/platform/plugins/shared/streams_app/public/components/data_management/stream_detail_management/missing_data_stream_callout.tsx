@@ -7,17 +7,19 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export function MissingDataStreamCallout({
   streamName,
   canManage,
+  canDelete,
   refreshDefinition,
 }: {
   streamName: string;
   canManage: boolean;
+  canDelete: boolean;
   refreshDefinition: () => void;
 }) {
   const {
@@ -118,12 +120,18 @@ export function MissingDataStreamCallout({
 
       <EuiText size="s">
         <p>
-          {i18n.translate('xpack.streams.missingDataStream.actions.helpText', {
-            defaultMessage:
-              'To return to a working state, restore the stream. If this stream should be removed, delete it properly to clean up its definition.',
-          })}
+          {canDelete
+            ? i18n.translate('xpack.streams.missingDataStream.actions.helpText', {
+                defaultMessage:
+                  'To return to a working state, restore the stream. If this stream should be removed, delete it properly to clean up its definition.',
+              })
+            : i18n.translate('xpack.streams.missingDataStream.actions.helpTextNoDelete', {
+                defaultMessage: 'To return to a working state, restore the stream.',
+              })}
         </p>
       </EuiText>
+
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup responsive={false} gutterSize="s" wrap>
         <EuiFlexItem grow={false}>
@@ -137,18 +145,20 @@ export function MissingDataStreamCallout({
             })}
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="streamsMissingDataStreamDeleteButton"
-            color="danger"
-            onClick={deleteStreamProperly}
-            isDisabled={!canManage}
-          >
-            {i18n.translate('xpack.streams.missingDataStream.delete.buttonLabel', {
-              defaultMessage: 'Delete stream properly',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {canDelete && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsMissingDataStreamDeleteButton"
+              color="danger"
+              onClick={deleteStreamProperly}
+              isDisabled={!canManage}
+            >
+              {i18n.translate('xpack.streams.missingDataStream.delete.buttonLabel', {
+                defaultMessage: 'Delete stream properly',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCallOut>
   );

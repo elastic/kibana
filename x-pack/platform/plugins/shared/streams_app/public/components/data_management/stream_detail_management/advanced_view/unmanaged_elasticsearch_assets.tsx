@@ -106,6 +106,7 @@ export function UnmanagedElasticsearchAssets({
       <MissingDataStreamCallout
         streamName={definition.stream.name}
         canManage={definition.privileges.manage}
+        canDelete={true}
         refreshDefinition={refreshDefinition}
       />
     );

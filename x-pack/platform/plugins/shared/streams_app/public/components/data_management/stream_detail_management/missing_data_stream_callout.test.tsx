@@ -48,6 +48,7 @@ describe('MissingDataStreamCallout', () => {
         <MissingDataStreamCallout
           streamName="logs-test"
           canManage={false}
+          canDelete={true}
           refreshDefinition={jest.fn()}
         />
       </I18nProvider>
@@ -66,6 +67,7 @@ describe('MissingDataStreamCallout', () => {
         <MissingDataStreamCallout
           streamName="logs-test"
           canManage={true}
+          canDelete={true}
           refreshDefinition={refreshDefinition}
         />
       </I18nProvider>
@@ -90,6 +92,7 @@ describe('MissingDataStreamCallout', () => {
         <MissingDataStreamCallout
           streamName="logs-test"
           canManage={true}
+          canDelete={true}
           refreshDefinition={refreshDefinition}
         />
       </I18nProvider>
@@ -115,6 +118,7 @@ describe('MissingDataStreamCallout', () => {
         <MissingDataStreamCallout
           streamName="logs-test"
           canManage={true}
+          canDelete={true}
           refreshDefinition={jest.fn()}
         />
       </I18nProvider>
@@ -127,5 +131,78 @@ describe('MissingDataStreamCallout', () => {
       expect.anything()
     );
     expect(mockNavigateToApp).not.toHaveBeenCalled();
+  });
+
+  describe('canDelete prop', () => {
+    it('hides delete button when canDelete is false', () => {
+      render(
+        <I18nProvider>
+          <MissingDataStreamCallout
+            streamName="logs.otel"
+            canManage={true}
+            canDelete={false}
+            refreshDefinition={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streamsMissingDataStreamRestoreButton')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('streamsMissingDataStreamDeleteButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows delete button when canDelete is true', () => {
+      render(
+        <I18nProvider>
+          <MissingDataStreamCallout
+            streamName="logs.otel.child"
+            canManage={true}
+            canDelete={true}
+            refreshDefinition={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streamsMissingDataStreamRestoreButton')).toBeInTheDocument();
+      expect(screen.getByTestId('streamsMissingDataStreamDeleteButton')).toBeInTheDocument();
+    });
+
+    it('shows simplified help text when canDelete is false', () => {
+      render(
+        <I18nProvider>
+          <MissingDataStreamCallout
+            streamName="logs.otel"
+            canManage={true}
+            canDelete={false}
+            refreshDefinition={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(
+        screen.getByText('To return to a working state, restore the stream.')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(/delete it properly to clean up its definition/)
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows full help text when canDelete is true', () => {
+      render(
+        <I18nProvider>
+          <MissingDataStreamCallout
+            streamName="logs.otel.child"
+            canManage={true}
+            canDelete={true}
+            refreshDefinition={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(
+        screen.getByText(/delete it properly to clean up its definition/)
+      ).toBeInTheDocument();
+    });
   });
 });

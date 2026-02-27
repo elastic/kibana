@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { type Streams, isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -119,6 +119,9 @@ export function WiredStreamDetailManagement({
           <MissingDataStreamCallout
             streamName={definition.stream.name}
             canManage={definition.privileges.manage}
+            canDelete={
+              !isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME
+            }
             refreshDefinition={refreshDefinition}
           />
         </StreamsAppPageTemplate.Body>
