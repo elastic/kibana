@@ -66,6 +66,7 @@ export class AgentBuilderPlugin
   private setupServices?: {
     navigationService: NavigationService;
   };
+  private setupDeps?: AgentBuilderSetupDependencies;
   private activeSidebarRef: ConversationSidebarRef | null = null;
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
@@ -85,6 +86,7 @@ export class AgentBuilderPlugin
     });
 
     this.setupServices = { navigationService };
+    this.setupDeps = deps;
 
     registerApp({
       core,
@@ -257,6 +259,13 @@ export class AgentBuilderPlugin
         // right before the user profile
         order: 1001,
       });
+    }
+
+    // Register with workflowsManagement plugin if available.
+    // This enables the workflow YAML editor to use the agentBuilder flyout
+    // without creating a circular plugin dependency.
+    if (this.setupDeps?.workflowsManagement?.registerAgentBuilder) {
+      this.setupDeps.workflowsManagement.registerAgentBuilder(agentBuilderService);
     }
 
     return agentBuilderService;

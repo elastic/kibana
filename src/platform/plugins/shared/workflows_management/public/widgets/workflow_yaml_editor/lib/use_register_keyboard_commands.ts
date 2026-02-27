@@ -14,6 +14,7 @@ import { monaco } from '@kbn/monaco';
 interface RegisterKeyboardCommandsParams {
   editor: monaco.editor.IStandaloneCodeEditor;
   openActionsPopover: () => void;
+  openEditSelectedCode?: (selection: monaco.Selection, selectedText: string) => void;
   save: () => void;
   run: () => void;
   saveAndRun: () => void;
@@ -35,7 +36,7 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
     (params: RegisterKeyboardCommandsParams) => {
       unregisterKeyboardCommands();
 
-      const { editor, openActionsPopover, save, run, saveAndRun } = params;
+      const { editor, openActionsPopover, openEditSelectedCode, save, run, saveAndRun } = params;
 
       /**
        * Helper function to wrap action handlers with read-only check
@@ -71,16 +72,28 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           }),
         }),
 
-        // Open the actions popover
+        // Cmd+K: Context-sensitive action
+        // - If text is selected: Open "Edit selected code" (AI inline edit)
+        // - If no selection: Open actions popover
         editor.addAction({
-          id: 'workflows.editor.action.openActionsPopover',
-          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.openActionsPopover', {
-            defaultMessage: 'Open actions popover',
+          id: 'workflows.editor.action.cmdK',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.cmdK', {
+            defaultMessage: 'Edit selection or open actions',
           }),
           // eslint-disable-next-line no-bitwise
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
-          run: withReadOnlyCheck(() => {
-            openActionsPopover();
+          run: withReadOnlyCheck((ed) => {
+            const selection = ed.getSelection();
+            const hasSelection = selection && !selection.isEmpty();
+
+            if (hasSelection && openEditSelectedCode) {
+              // User has selected text - open the "Edit selected code" feature
+              const selectedText = ed.getModel()?.getValueInRange(selection) ?? '';
+              openEditSelectedCode(selection, selectedText);
+            } else {
+              // No selection - open the actions popover
+              openActionsPopover();
+            }
           }),
         }),
 

@@ -155,6 +155,15 @@ export interface MonacoConnectorHandler {
 }
 
 /**
+ * Callback for "Fix in Chat" action on validation errors
+ */
+export type FixInChatCallback = (errorContext: {
+  message: string;
+  lineNumber: number;
+  columnNumber: number;
+}) => void;
+
+/**
  * Configuration for Monaco providers
  */
 export interface ProviderConfig {
@@ -166,6 +175,8 @@ export interface ProviderConfig {
   fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
   /** Additional configuration options */
   options?: Record<string, any>;
+  /** Callback for "Fix in Chat" action on validation errors */
+  onFixInChat?: FixInChatCallback;
 }
 
 /**

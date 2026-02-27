@@ -23,6 +23,7 @@ import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
 import type {
+  AgentBuilderPluginStartContract,
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
   WorkflowsPublicPluginStart,
@@ -45,6 +46,7 @@ export class WorkflowsPlugin
     >
 {
   private appUpdater$: Subject<AppUpdater>;
+  private registeredAgentBuilder?: AgentBuilderPluginStartContract;
   private telemetryService: TelemetryService;
 
   constructor() {
@@ -67,7 +69,9 @@ export class WorkflowsPlugin
     /* **************************************************************************************************************************** */
     // Return early if workflows UI is not enabled, do not register the connector type and UI
     if (!isWorkflowsUiEnabled) {
-      return {};
+      return {
+        registerAgentBuilder: () => {},
+      };
     }
 
     // Register workflows connector UI component lazily to reduce main bundle size
@@ -95,7 +99,11 @@ export class WorkflowsPlugin
       },
     });
 
-    return {};
+    return {
+      registerAgentBuilder: (agentBuilder: AgentBuilderPluginStartContract) => {
+        this.registeredAgentBuilder = agentBuilder;
+      },
+    };
   }
 
   public start(
@@ -115,7 +123,9 @@ export class WorkflowsPlugin
       }
     });
 
-    return {};
+    return {
+      getAgentBuilder: () => this.registeredAgentBuilder,
+    };
   }
 
   public stop() {}
@@ -129,6 +139,9 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      // agentBuilder is registered by the agentBuilder plugin during its start phase
+      // via the registerAgentBuilder method exposed in our setup contract
+      agentBuilder: this.registeredAgentBuilder,
       workflowsManagement: { telemetry: this.telemetryService.getClient() },
     };
 

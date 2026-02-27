@@ -12,6 +12,8 @@ export * from './spec/lib/get_workflow_json_schema';
 export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export * from './spec/schema';
+export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
+export type { BuiltInStepDefinition, StepCategory } from './spec/builtin_step_definitions';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';

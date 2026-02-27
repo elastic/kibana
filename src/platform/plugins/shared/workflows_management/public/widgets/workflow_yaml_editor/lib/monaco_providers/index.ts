@@ -18,6 +18,7 @@ export type {
   MonacoConnectorHandler,
   MonacoHandlerRegistry,
   ProviderConfig,
+  FixInChatCallback,
 } from './provider_interfaces';
 
 // Provider registry
@@ -34,5 +35,13 @@ export {
   createUnifiedHoverProvider,
   registerUnifiedHoverProvider,
 } from './unified_hover_provider';
+
+// Fix in Chat code action provider
+export {
+  FIX_IN_CHAT_COMMAND_ID,
+  createFixInChatCodeActionProvider,
+  registerFixInChatCodeActionProvider,
+} from './fix_in_chat_code_action_provider';
+export type { FixInChatCallback } from './fix_in_chat_code_action_provider';
 
 // REMOVED: UnifiedDecorationsProvider - no longer needed in new architecture

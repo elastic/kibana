@@ -82,7 +82,11 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
+  - '@kbn/core-http-browser'
+  - '@kbn/sse-utils-client'
   - '@kbn/scout'
+  - '@kbn/repo-info'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod
