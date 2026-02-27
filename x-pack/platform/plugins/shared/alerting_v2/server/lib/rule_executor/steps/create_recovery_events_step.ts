@@ -21,7 +21,7 @@ import {
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../queries';
-import { expandStep, requireState } from '../stream_utils';
+import { guardedExpandStep } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/alert_events';
 import type { ExecutionContext } from '../../execution_context';
@@ -39,28 +39,14 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return expandStep(streamState, async function* (state) {
-      const { input } = state;
-
-      step.logger.debug({
-        message: `[${step.name}] Starting step for rule ${input.ruleId}`,
-      });
-
-      const requiredState = requireState(state, ['rule', 'alertEventsBatch']);
-
-      if (!requiredState.ok) {
-        step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield requiredState.result;
-        return;
-      }
-
-      const { rule, alertEventsBatch } = requiredState.state;
+    return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
+      const { input, rule, alertEventsBatch } = state;
 
       if (rule.kind !== 'alert') {
         step.logger.debug({
           message: `[${step.name}] Skipping recovery for non-alert rule ${input.ruleId}`,
         });
-        yield { type: 'continue', state: requiredState.state };
+        yield { type: 'continue', state };
         return;
       }
 
@@ -73,7 +59,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         step.logger.debug({
           message: `[${step.name}] No active alerts to recover for rule ${input.ruleId}`,
         });
-        yield { type: 'continue', state: requiredState.state };
+        yield { type: 'continue', state };
         return;
       }
 
@@ -97,7 +83,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       yield {
         type: 'continue',
         state: {
-          ...requiredState.state,
+          ...state,
           alertEventsBatch: [...alertEventsBatch, ...recoveryEvents],
         },
       };

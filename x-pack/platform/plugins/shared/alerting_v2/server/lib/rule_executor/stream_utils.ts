@@ -93,3 +93,30 @@ export const requireState = <K extends OptionalStateKey>(
     state,
   };
 };
+
+export const guardedMapStep = <K extends OptionalStateKey>(
+  input: PipelineStateStream,
+  requiredKeys: readonly K[],
+  handler: (state: StateWith<K>) => Promise<StepStreamResult> | StepStreamResult
+): PipelineStateStream =>
+  mapStep(input, (state) => {
+    const result = requireState(state, requiredKeys);
+    if (!result.ok) {
+      return result.result;
+    }
+    return handler(result.state);
+  });
+
+export const guardedExpandStep = <K extends OptionalStateKey>(
+  input: PipelineStateStream,
+  requiredKeys: readonly K[],
+  handler: (state: StateWith<K>) => AsyncIterable<StepStreamResult>
+): PipelineStateStream =>
+  expandStep(input, async function* (state) {
+    const result = requireState(state, requiredKeys);
+    if (!result.ok) {
+      yield result.result;
+      return;
+    }
+    yield* handler(result.state);
+  });

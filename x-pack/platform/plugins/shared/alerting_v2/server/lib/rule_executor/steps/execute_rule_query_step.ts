@@ -14,7 +14,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
-import { expandStep, requireState } from '../stream_utils';
+import { guardedExpandStep } from '../stream_utils';
 
 /**
  * Returns the query to execute for this rule.
@@ -42,25 +42,10 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return expandStep(streamState, async function* (state) {
-      const { input } = state;
-
-      step.logger.debug({
-        message: `[${step.name}] Starting step for rule ${input.ruleId}`,
-      });
-
-      const requiredState = requireState(state, ['rule']);
-
-      if (!requiredState.ok) {
-        step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield requiredState.result;
-        return;
-      }
-
-      const { rule } = requiredState.state;
+    return guardedExpandStep(streamState, ['rule'], async function* (state) {
+      const { input, rule } = state;
 
       const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
-      // Use schedule.lookback if provided, otherwise fall back to the execution interval.
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 
@@ -86,14 +71,10 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         abortSignal: input.executionContext.signal,
       });
 
-      step.logger.debug({
-        message: `[${step.name}] Created streaming query for rule ${input.ruleId}`,
-      });
-
       for await (const batch of esqlRowBatchStream) {
         yield {
           type: 'continue',
-          state: { ...requiredState.state, queryPayload, esqlRowBatch: batch },
+          state: { ...state, queryPayload, esqlRowBatch: batch },
         };
       }
     });

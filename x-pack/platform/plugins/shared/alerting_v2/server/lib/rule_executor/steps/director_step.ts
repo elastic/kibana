@@ -12,7 +12,7 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { DirectorService } from '../../director/director';
-import { expandStep, requireState } from '../stream_utils';
+import { guardedExpandStep } from '../stream_utils';
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
@@ -26,32 +26,15 @@ export class DirectorStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return expandStep(streamState, async function* (state) {
-      const { input } = state;
+    return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
+      const { input, rule, alertEventsBatch } = state;
 
-      step.logger.debug({
-        message: `[${step.name}] Starting step for rule ${input.ruleId}`,
-      });
-
-      const requiredState = requireState(state, ['rule', 'alertEventsBatch']);
-
-      if (!requiredState.ok) {
-        step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield requiredState.result;
-        return;
-      }
-
-      const { rule, alertEventsBatch } = requiredState.state;
-
-      /**
-       * Only alertable rules can generate episodes.
-       */
       if (rule.kind !== 'alert') {
         step.logger.debug({
           message: `[${step.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
         });
 
-        yield { type: 'continue', state: requiredState.state };
+        yield { type: 'continue', state };
         return;
       }
 
@@ -60,7 +43,7 @@ export class DirectorStep implements RuleExecutionStep {
           message: `[${step.name}] No alert events to process for rule ${input.ruleId}`,
         });
 
-        yield { type: 'continue', state: requiredState.state };
+        yield { type: 'continue', state };
         return;
       }
 
@@ -73,7 +56,7 @@ export class DirectorStep implements RuleExecutionStep {
       if (processedBatch.length > 0) {
         yield {
           type: 'continue',
-          state: { ...requiredState.state, alertEventsBatch: processedBatch },
+          state: { ...state, alertEventsBatch: processedBatch },
         };
       }
     });

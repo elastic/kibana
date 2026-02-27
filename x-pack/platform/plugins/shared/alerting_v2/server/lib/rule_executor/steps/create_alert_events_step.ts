@@ -12,7 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { expandStep, requireState } from '../stream_utils';
+import { guardedExpandStep } from '../stream_utils';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
@@ -24,39 +24,25 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
     const step = this;
     let buildBatch: AlertEventsBatchBuilder | undefined;
 
-    return expandStep(streamState, async function* (state) {
-      const { input } = state;
-
-      step.logger.debug({
-        message: `[${step.name}] Starting step for rule ${input.ruleId}`,
-      });
-
-      const requiredState = requireState(state, ['rule', 'esqlRowBatch']);
-
-      if (!requiredState.ok) {
-        step.logger.debug({ message: `[${step.name}] State not ready, halting` });
-        yield requiredState.result;
-        return;
-      }
-
+    return guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
       if (!buildBatch) {
         buildBatch = createAlertEventsBatchBuilder({
-          ruleId: input.ruleId,
-          spaceId: input.spaceId,
-          ruleAttributes: requiredState.state.rule,
-          scheduledTimestamp: input.scheduledAt,
+          ruleId: state.input.ruleId,
+          spaceId: state.input.spaceId,
+          ruleAttributes: state.rule,
+          scheduledTimestamp: state.input.scheduledAt,
           ruleVersion: 1,
         });
 
         step.logger.debug({
-          message: `[${step.name}] Created alert events builder for rule ${input.ruleId}`,
+          message: `[${step.name}] Created alert events builder for rule ${state.input.ruleId}`,
         });
       }
 
-      const alertEventsBatch = buildBatch([...requiredState.state.esqlRowBatch]);
+      const alertEventsBatch = buildBatch([...state.esqlRowBatch]);
 
       if (alertEventsBatch.length > 0) {
-        yield { type: 'continue', state: { ...requiredState.state, alertEventsBatch } };
+        yield { type: 'continue', state: { ...state, alertEventsBatch } };
       }
     });
   }
