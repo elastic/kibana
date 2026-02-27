@@ -33,7 +33,7 @@ export async function loadSkillTools({
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));
 
-    const allowedTools = skill.getAllowedTools?.() ?? [];
+    const allowedTools = (await skill.getAllowedTools?.()) ?? [];
     const registryToolIds = (await skill.getRegistryTools?.()) ?? [];
     const allToolIds = [...new Set([...allowedTools, ...registryToolIds])];
 

@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod';
 import { tool } from '@langchain/core/tools';
@@ -672,7 +672,7 @@ const createWorkflowGenerationGraph = (model: ScopedModel, logger: Logger) => {
           attempt,
         };
       } else {
-        const errors = validationResult.error.errors
+        const errors = validationResult.error.issues
           .map((e) => `${e.path.join('.')}: ${e.message}`)
           .join('; ');
         logger.warn(`Workflow validation failed: ${errors}`);
@@ -764,7 +764,7 @@ const validateWorkflowYaml = async (
       return { valid: true };
     }
 
-    const errors = validationResult.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`);
+    const errors = validationResult.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
     return { valid: false, errors };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -799,7 +799,7 @@ const validateOperationSchema = z.object({
 });
 
 // Main skill tool
-const PLATFORM_WORKFLOW_GENERATION_TOOL = tool(
+const _PLATFORM_WORKFLOW_GENERATION_TOOL = tool(
   async (input, config) => {
     const onechat = getOneChatContext(config);
     if (!onechat) {
@@ -892,7 +892,7 @@ const PLATFORM_WORKFLOW_GENERATION_TOOL = tool(
 
         try {
           // First, get the existing workflow
-          const getWorkflowToolId = platformCoreTools.getWorkflow;
+          const getWorkflowToolId = platformCoreTools.getWorkflowExecutionStatus;
           const available = await onechat.toolProvider.has({
             toolId: getWorkflowToolId,
             request: onechat.request,
@@ -1001,9 +1001,10 @@ const PLATFORM_WORKFLOW_GENERATION_TOOL = tool(
   }
 );
 
-export const PLATFORM_WORKFLOW_GENERATION_SKILL: Skill = {
-  namespace: 'platform.workflow_generation',
-  name: 'Workflow Generation',
+export const PLATFORM_WORKFLOW_GENERATION_SKILL = defineSkillType({
+  id: 'platform.workflow_generation',
+  name: 'workflow-generation',
+  basePath: 'skills/platform',
   description: 'Generate and modify Kibana workflows using natural language',
   content: `# Workflow Generation Skill
 
@@ -1152,8 +1153,8 @@ Use **workflow.executeAsync** (async) when:
 
 ## Important notes
 - Generated workflows are returned as YAML strings, not persisted automatically
-- Use \`${platformCoreTools.listWorkflows}\` to see existing workflows
-- Use \`${platformCoreTools.getWorkflow}\` to retrieve a workflow for modification
+- Use the workflow management tools to see existing workflows
+- Use the workflow management tools to retrieve a workflow for modification
 - Update operations require \`confirm: true\` for safety
 - The LLM will retry up to 3 times if validation fails
 - Child workflows can access parent context via \`{{ parent.workflowId }}\`
@@ -1181,5 +1182,5 @@ platform.workflow_generation({
 })
 \`\`\`
 `,
-  tools: [PLATFORM_WORKFLOW_GENERATION_TOOL],
-};
+  getRegistryTools: () => [platformCoreTools.getWorkflowExecutionStatus],
+});

@@ -85,7 +85,6 @@ export {
   type RunStats,
   parseScoreDocuments,
 } from './src/utils/score_repository';
-export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
 
 export { getUniqueEvaluatorNames, calculateOverallStats } from './src/utils/evaluation_stats';
 

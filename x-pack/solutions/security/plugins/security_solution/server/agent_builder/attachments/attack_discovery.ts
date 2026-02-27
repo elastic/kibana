@@ -104,58 +104,6 @@ The attack discovery JSON is in the attachment content above. Parse it to extrac
 5. Search Elastic Security Labs for related threat intelligence
 6. If this is a confirmed threat, consider adding to a case for tracking`;
     },
-
-    // Skills to reference when this attachment is present
-    skills: ['security.alerts', 'security.cases', 'security.detection_rules'],
-
-    // LLM guidance for handling attack discoveries
-    skillContent: `# Attack Discovery Investigation
-
-An attack discovery is attached showing a potential attack chain detected from security alerts.
-
-## Key Information
-- **Title**: A descriptive name for the identified attack
-- **Summary**: Overview of what the attack discovery found
-- **MITRE ATT&CK Tactics**: The attack techniques identified
-- **Related Alerts**: Alert IDs that contributed to this discovery
-- **Entity Summary**: Hosts and users involved
-
-## Investigation Workflow
-1. **Triage**: Review the summary and MITRE tactics to understand the attack type
-2. **Scope**: Check entity summary to see which hosts/users are affected
-3. **Deep Dive**: Investigate individual alerts for more context
-4. **Risk Assessment**: Check risk scores for affected entities
-5. **Research**: Search Elastic Security Labs for related threat intel
-6. **Action**: If confirmed, add to a case for tracking and response
-
-## Available Actions
-- Query related alerts using the alerts tool
-- Check entity risk scores
-- Add to a security case for tracking
-- Search for related threat intelligence`,
-
-    // React component for visual preview (lazy-loaded)
-    component: {
-      render: () =>
-        import('../public/components/attack_discovery_viewer').then((m) => m.AttackDiscoveryViewer),
-      displayMode: 'expanded',
-      minHeight: 400,
-    },
-
-    // Entity recognition patterns for auto-attachment
-    entityRecognition: {
-      patterns: [
-        /attack\s+discovery\s+["']?([a-zA-Z0-9-]+)["']?/i,
-        /investigate\s+attack\s+["']?([a-zA-Z0-9-]+)["']?/i,
-        /attack\s+["']?([a-zA-Z0-9-]+)["']?/i,
-      ],
-      extractId: (match) => match[1],
-      resolve: async (entityId, context) => {
-        // TODO: Implement resolution from Elasticsearch
-        // This would query the attack discovery index by ID
-        return null;
-      },
-    },
   };
 };
 

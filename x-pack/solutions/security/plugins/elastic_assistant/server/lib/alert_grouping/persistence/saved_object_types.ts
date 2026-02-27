@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsModelVersion, SavedObjectsType } from '@kbn/core/server';
 import {
   ALERT_GROUPING_WORKFLOW_SO_TYPE,
   ALERT_GROUPING_EXECUTION_SO_TYPE,
   CASE_TRIGGER_SO_TYPE,
   BATCH_SIZE_CACHE_SO_TYPE,
 } from './constants';
+
+const modelVersion1: SavedObjectsModelVersion = {
+  changes: [],
+};
 
 /**
  * Saved object type for alert grouping workflows
@@ -40,6 +44,9 @@ export const alertGroupingWorkflowType: SavedObjectsType = {
       updatedBy: { type: 'keyword' },
     },
   },
+  modelVersions: {
+    1: modelVersion1,
+  },
 };
 
 /**
@@ -62,6 +69,9 @@ export const alertGroupingExecutionType: SavedObjectsType = {
       isDryRun: { type: 'boolean' },
       spaceId: { type: 'keyword' },
     },
+  },
+  modelVersions: {
+    1: modelVersion1,
   },
 };
 
@@ -88,6 +98,9 @@ export const caseTriggerType: SavedObjectsType = {
       triggerCount: { type: 'integer' },
     },
   },
+  modelVersions: {
+    1: modelVersion1,
+  },
 };
 
 /**
@@ -104,6 +117,9 @@ export const batchSizeCacheType: SavedObjectsType = {
       batchSize: { type: 'integer' },
       updatedAt: { type: 'date' },
     },
+  },
+  modelVersions: {
+    1: modelVersion1,
   },
 };
 

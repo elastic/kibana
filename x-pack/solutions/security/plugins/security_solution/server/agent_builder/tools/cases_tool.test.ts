@@ -48,14 +48,14 @@ describe('casesTool', () => {
     const tool = casesTool(mockCore);
     await tool.handler(
       {
-        operation: 'create_case',
+        operation: 'create_case' as const,
         params: {
           title: 'Test case',
           description: 'Test description',
           tags: ['tag-1'],
-          confirm: true,
+          confirm: true as const,
         },
-      } as Record<string, unknown>,
+      },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -95,13 +95,13 @@ describe('casesTool', () => {
     const tool = casesTool(mockCore);
     await tool.handler(
       {
-        operation: 'add_comment',
+        operation: 'add_comment' as const,
         params: {
           caseId: 'de0343d4-dacc-4197-83db-08dd252d9719',
           comment: 'blah',
-          confirm: true,
+          confirm: true as const,
         },
-      } as Record<string, unknown>,
+      },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 

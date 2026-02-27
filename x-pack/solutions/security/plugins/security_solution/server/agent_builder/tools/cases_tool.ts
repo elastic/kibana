@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 
@@ -139,7 +140,7 @@ export const casesTool = (
             owner: SECURITY_SOLUTION_CASE_OWNER,
             connector: NONE_CONNECTOR,
             settings: DEFAULT_CASE_SETTINGS,
-          } as Record<string, unknown>);
+          });
           return { results: [{ type: 'other', data: { operation: 'create_case', item: res } }] };
         }
         case 'update_case': {
@@ -158,7 +159,7 @@ export const casesTool = (
                 ...(input.params.status !== undefined ? { status: input.params.status } : {}),
               },
             ],
-          } as Record<string, unknown>);
+          });
           return { results: [{ type: 'other', data: { operation: 'update_case', item: res } }] };
         }
         case 'attach_alerts': {
@@ -166,7 +167,7 @@ export const casesTool = (
           const res = await casesClient.attachments.add({
             caseId: input.params.caseId,
             comment: {
-              type: 'alert',
+              type: AttachmentType.alert,
               alertId: input.params.alerts.map((a) => a.alertId),
               index: input.params.alerts.map((a) => a.index),
               rule: {
@@ -175,7 +176,7 @@ export const casesTool = (
               },
               owner: SECURITY_SOLUTION_CASE_OWNER,
             },
-          } as Record<string, unknown>);
+          });
           return { results: [{ type: 'other', data: { operation: 'attach_alerts', item: res } }] };
         }
         case 'add_comment': {
@@ -188,10 +189,10 @@ export const casesTool = (
               caseId: input.params.caseId,
               comment: {
                 comment,
-                type: 'user',
+                type: AttachmentType.user,
                 owner: SECURITY_SOLUTION_CASE_OWNER,
               },
-            } as Record<string, unknown>);
+            });
             return { results: [{ type: 'other', data: { operation: 'add_comment', item: res } }] };
           } catch (e: unknown) {
             return {

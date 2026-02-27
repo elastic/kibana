@@ -161,7 +161,10 @@ export class IncrementalProcessor {
     startTime: number,
     now: string
   ): Promise<IncrementalProcessingResult> {
-    const existingDiscovery = request.existingDiscovery!;
+    const existingDiscovery = request.existingDiscovery;
+    if (!existingDiscovery) {
+      throw new Error('existingDiscovery is required for delta generation');
+    }
 
     this.logger.info(
       `Processing delta of ${request.newAlerts.length} new alerts for existing discovery ${existingDiscovery.id}`
@@ -251,7 +254,10 @@ export class IncrementalProcessor {
     startTime: number,
     now: string
   ): Promise<IncrementalProcessingResult> {
-    const existingDiscovery = request.existingDiscovery!;
+    const existingDiscovery = request.existingDiscovery;
+    if (!existingDiscovery) {
+      throw new Error('existingDiscovery is required for enhance generation');
+    }
 
     this.logger.info(
       `Enhancing existing discovery ${existingDiscovery.id} with ${request.newAlerts.length} new alerts`

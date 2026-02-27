@@ -199,8 +199,8 @@ const ConversationAttachmentsList: React.FC<{
 
   // Filter to only show active attachments created in this round
   const roundAttachments = useMemo(() => {
-    return attachments.filter((att) => !att.deleted_at && att.created_in_round_id === roundId);
-  }, [attachments, roundId]);
+    return attachments.filter((att) => att.active !== false);
+  }, [attachments]);
 
   if (roundAttachments.length === 0) {
     return null;
@@ -219,13 +219,18 @@ const ConversationAttachmentsList: React.FC<{
         const attachment: Attachment = {
           id: versionedAttachment.id,
           type: versionedAttachment.type,
-          data: latestVersion.data ?? {},
+          data: (latestVersion.data ?? {}) as Record<string, unknown>,
         };
 
-        const RenderContent = attachmentsService.getRenderContent(versionedAttachment.type);
+        const uiDefinition = attachmentsService.getAttachmentUiDefinition(versionedAttachment.type);
+        if (!uiDefinition?.renderInlineContent) {
+          return null;
+        }
+
+        const renderContent = uiDefinition.renderInlineContent;
         return (
           <EuiFlexItem key={versionedAttachment.id} grow={false}>
-            <RenderContent attachment={attachment} version={latestVersion} />
+            {renderContent({ attachment, isSidebar: false })}
           </EuiFlexItem>
         );
       })}

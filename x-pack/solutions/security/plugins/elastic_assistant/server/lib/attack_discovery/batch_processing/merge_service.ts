@@ -73,13 +73,13 @@ export class AttackDiscoveryMergeService {
       let bestMatch: { index: number; score: number } | null = null;
 
       for (let i = 0; i < discoveriesB.length; i++) {
-        if (matchedBIndices.has(i)) continue;
+        if (!matchedBIndices.has(i)) {
+          const discoveryB = discoveriesB[i];
+          const overlapScore = this.calculateOverlapScore(discoveryA, discoveryB);
 
-        const discoveryB = discoveriesB[i];
-        const overlapScore = this.calculateOverlapScore(discoveryA, discoveryB);
-
-        if (overlapScore > 0.3 && (!bestMatch || overlapScore > bestMatch.score)) {
-          bestMatch = { index: i, score: overlapScore };
+          if (overlapScore > 0.3 && (!bestMatch || overlapScore > bestMatch.score)) {
+            bestMatch = { index: i, score: overlapScore };
+          }
         }
       }
 

@@ -5,7 +5,9 @@
  * 2.0.
  */
 import Path from 'path';
+import type { PlaywrightTestConfig } from '@playwright/test';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import type { EvaluationTestOptions } from '@kbn/evals';
 
 const baseConfig = createPlaywrightEvalsConfig({
   testDir: Path.join(__dirname, './evals'),
@@ -16,7 +18,7 @@ const baseConfig = createPlaywrightEvalsConfig({
 const reportDir = Path.join(__dirname, 'playwright-report');
 const enableHtmlReport = process.env.EVAL_HTML_REPORT === 'true';
 
-export default {
+const config: PlaywrightTestConfig<{}, EvaluationTestOptions> = {
   ...baseConfig,
   reporter: [
     ...(Array.isArray(baseConfig.reporter) ? baseConfig.reporter : []),
@@ -31,3 +33,5 @@ export default {
       : []),
   ],
 };
+
+export default config;

@@ -37,7 +37,7 @@ export const selectTools = async ({
   filestore,
   spaceId,
   runner,
-  experimentalFeatures = { filestore: false, skills: false },
+  experimentalFeatures = { filestore: false, skills: false, planning: false },
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds?: string[];

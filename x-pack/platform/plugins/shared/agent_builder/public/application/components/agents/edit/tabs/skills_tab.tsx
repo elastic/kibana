@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiLoadingSpinner,
@@ -138,7 +138,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
     return <EuiLoadingSpinner size="l" />;
   }
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<PublicSkillDefinition>> = [
     {
       field: 'id',
       name: labels.skills.skillIdLabel,
@@ -231,7 +231,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiBasicTable
+      <EuiBasicTable<PublicSkillDefinition>
         items={displaySkills}
         columns={columns}
         itemId="id"
@@ -241,9 +241,9 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
             direction: sortDirection,
           },
         }}
-        onChange={({ sort }: CriteriaWithPagination<PublicSkillDefinition>) => {
+        onChange={({ sort }) => {
           if (sort) {
-            setSortField(sort.field);
+            setSortField(sort.field as keyof PublicSkillDefinition);
             setSortDirection(sort.direction);
           }
         }}

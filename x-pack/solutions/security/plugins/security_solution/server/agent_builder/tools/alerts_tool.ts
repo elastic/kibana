@@ -170,9 +170,10 @@ const parseStructuredAlertQuery = (nlQuery: string): ParsedStructuredQuery | und
   const hashMatches = nlQuery.matchAll(/\b([a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{64})\b/gi);
   for (const m of hashMatches) {
     const value = m[1]?.toLowerCase();
-    if (!value) continue;
-    const alg = value.length === 32 ? 'md5' : value.length === 40 ? 'sha1' : 'sha256';
-    hashes.push({ value, alg });
+    if (value) {
+      const alg = value.length === 32 ? 'md5' : value.length === 40 ? 'sha1' : 'sha256';
+      hashes.push({ value, alg });
+    }
   }
 
   if (hosts.length === 0 && users.length === 0 && hashes.length === 0) return undefined;

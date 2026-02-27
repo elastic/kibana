@@ -17,6 +17,9 @@ import type {
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { runDefaultAgentMode } from './default';
+import { runPlanningAgentMode } from './planning';
+
+export type AgentMode = 'agent' | 'planning';
 
 export interface RunAgentParams {
   /**
@@ -69,6 +72,10 @@ export interface RunAgentParams {
    * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
    */
   action?: ConversationAction;
+  /**
+   * The mode to run the agent in. Defaults to 'agent'.
+   */
+  agentMode?: AgentMode;
 }
 
 export interface RunAgentResponse {
@@ -79,5 +86,16 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
+  const mode = params.agentMode ?? 'agent';
+
+  if (mode === 'planning') {
+    if (!context.experimentalFeatures.planning) {
+      throw new Error(
+        'Planning mode is not available. Enable experimental features in the agent builder settings.'
+      );
+    }
+    return runPlanningAgentMode(params, context);
+  }
+
   return runDefaultAgentMode(params, context);
 };

@@ -55,7 +55,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       const body = response.body as {
         results: Array<{ id: string; readonly: boolean; description: string }>;
       };
-      expect(body).toHaveProperty('results');
+      expect(body.results).toBeDefined();
       expect(Array.isArray(body.results)).toBe(true);
       expect(body.results.length).toBeGreaterThanOrEqual(1);
 
@@ -89,10 +89,10 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       content: string;
       readonly: boolean;
     };
-    expect(body).toHaveProperty('id', skillId);
-    expect(body).toHaveProperty('description', 'A skill for e2e testing');
-    expect(body).toHaveProperty('content', 'This is the skill content with instructions.');
-    expect(body).toHaveProperty('readonly', false);
+    expect(body.id).toBe(skillId);
+    expect(body.description).toBe('A skill for e2e testing');
+    expect(body.content).toBe('This is the skill content with instructions.');
+    expect(body.readonly).toBe(false);
   });
 
   apiTest('should retrieve a created skill by ID', async ({ apiClient }) => {
@@ -116,8 +116,8 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     expect(response.statusCode).toBe(200);
     const body = response.body as { id: string; name: string; readonly: boolean };
-    expect(body).toHaveProperty('id', skillId);
-    expect(body).toHaveProperty('readonly', false);
+    expect(body.id).toBe(skillId);
+    expect(body.readonly).toBe(false);
   });
 
   apiTest('should update an existing skill', async ({ apiClient }) => {
@@ -152,9 +152,9 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       description: string;
       content: string;
     };
-    expect(body).toHaveProperty('name', updatedName);
-    expect(body).toHaveProperty('description', 'Updated description');
-    expect(body).toHaveProperty('content', 'Updated content.');
+    expect(body.name).toBe(updatedName);
+    expect(body.description).toBe('Updated description');
+    expect(body.content).toBe('Updated content.');
   });
 
   apiTest('should delete a user-created skill', async ({ apiClient }) => {
@@ -177,7 +177,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     expect(response.statusCode).toBe(200);
     const body = response.body as { success: boolean };
-    expect(body).toHaveProperty('success', true);
+    expect(body.success).toBe(true);
 
     // Verify it's gone - should return 404
     const getResponse = await apiClient.get(`${SKILLS_API_BASE}/${skillId}`, {
@@ -239,8 +239,8 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       description: string;
       content: string;
     };
-    expect(body).toHaveProperty('id', BUILTIN_SKILL_ID);
-    expect(body).toHaveProperty('name', 'data-exploration');
+    expect(body.id).toBe(BUILTIN_SKILL_ID);
+    expect(body.name).toBe('data-exploration');
     expect(body.description).toBeTruthy();
     expect(body.content).toBeTruthy();
   });
