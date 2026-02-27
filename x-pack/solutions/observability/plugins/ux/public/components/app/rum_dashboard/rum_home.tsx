@@ -99,21 +99,18 @@ export function RumHome() {
 }
 
 function DashboardToolbar() {
-  const sizes = useBreakpoints();
-  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
-
   return (
-    <EuiFlexGroup wrap gutterSize="m" alignItems="center" style={{ marginBottom: 16 }}>
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" alignItems="center" style={{ marginBottom: 8 }}>
+      <EuiFlexItem grow={false}>
         <WebApplicationSelect />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <UserPercentile />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <UxEnvironmentFilter />
       </EuiFlexItem>
-      <EuiFlexItem style={datePickerStyle}>
+      <EuiFlexItem>
         <RumDatePicker />
       </EuiFlexItem>
     </EuiFlexGroup>

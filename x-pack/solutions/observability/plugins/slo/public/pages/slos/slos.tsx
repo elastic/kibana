@@ -19,7 +19,6 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LoadingPage } from '../loading_page';
-import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloList } from './components/slo_list';
 import { SloListSearchBar } from './components/slo_list_search_bar';
 import { SLOsOverview } from './components/slos_overview/slos_overview';
@@ -70,13 +69,7 @@ export function SlosPage() {
   }
 
   return (
-    <ObservabilityPageTemplate
-      data-test-subj="slosPage"
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
-        rightSideItems: [<CreateSloBtn />],
-      }}
-    >
+    <ObservabilityPageTemplate data-test-subj="slosPage">
       <HeaderMenu />
       <SloOutdatedCallout />
       <SloListSearchBar />
