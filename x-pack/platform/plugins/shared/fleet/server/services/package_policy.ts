@@ -3883,78 +3883,13 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
-      // Handle input-level migration: the new input explicitly declares it replaces
-      // an old input type. This merges input-level vars and enables the new input.
-      // Skip migration entirely if the new input itself is deprecated — a deprecated
-      // input should never be auto-enabled or have user configuration carried into it.
+      const originalInputToMigrate = applyInputLevelMigration(
+        update,
+        basePackagePolicy.inputs,
+        inputs
+      );
+      applyStreamLevelMigration(update, originalInputToMigrate, basePackagePolicy.inputs);
 
-      let originalInputToMigrate: NewPackagePolicyInput | undefined;
-      if (update.migrate_from !== undefined && !update.deprecated) {
-        originalInputToMigrate = basePackagePolicy.inputs.find(
-          (i) => i.type === update.migrate_from
-        );
-        if (originalInputToMigrate) {
-          // Ensure the old input doesn't linger in inputs when it has no policy_template
-          // (inputs with a policy_template are already removed by the filter above)
-          const staleIdx = inputs.findIndex((i) => i.type === update.migrate_from);
-          if (staleIdx !== -1) inputs.splice(staleIdx, 1);
-
-          update.vars = deepMergeVars(originalInputToMigrate.vars, update.vars, true);
-          // Preserve the enabled state of the old input rather than unconditionally enabling.
-          update.enabled = originalInputToMigrate.enabled;
-        }
-      }
-
-      // Handle stream-level migration (skipped when the new input is deprecated).
-      if (update.streams && !update.deprecated) {
-        const streamMigrateFromCounters: Record<string, number> = {};
-        let streamMigrationOccurred = false;
-        // Track the first old input encountered during stream-level migration so we can
-        // carry its enabled state over to the new input.
-        let oldInputForStreamMigration: (typeof basePackagePolicy.inputs)[number] | undefined;
-        update.streams = update.streams.map((newStream, idx) => {
-          let oldStream;
-
-          // Migrate stream-level vars by position since datasets differ between input types.
-          // Use the new stream as the structural base (preserving data_stream identity) and seed
-          // its vars with values from the old stream so user configuration is carried over.
-          if (originalInputToMigrate && originalInputToMigrate.streams.length > 0) {
-            oldStream = originalInputToMigrate.streams[idx];
-          } else if (newStream.migrate_from) {
-            // When stream have migrate_from:
-            // each stream with migrate_from is matched positionally to the corresponding old stream in the specified input type.
-            const counter = streamMigrateFromCounters[newStream.migrate_from] ?? 0;
-            streamMigrateFromCounters[newStream.migrate_from] = counter + 1;
-            const oldInputForStream = basePackagePolicy.inputs.find(
-              (i) => i.type === newStream.migrate_from
-            );
-            oldStream = oldInputForStream?.streams[counter];
-            if (oldStream) {
-              streamMigrationOccurred = true;
-              // Capture the old input so we can preserve its enabled state below.
-              if (!oldInputForStreamMigration) {
-                oldInputForStreamMigration = oldInputForStream;
-              }
-            }
-          }
-
-          if (!oldStream) return newStream;
-          const merged = deepMergeVars(
-            { ...newStream, vars: oldStream.vars ?? {} },
-            newStream as InputsOverride,
-            true
-          );
-          // deepMergeVars only handles vars; explicitly carry the enabled state from
-          // the old stream so the user's enable/disable choice is preserved.
-          return { ...removeStaleVars(merged, newStream), enabled: oldStream.enabled };
-        });
-
-        // If stream-level migration succeeded without an input-level migrate_from, carry the
-        // old input's enabled state over instead of unconditionally enabling the new input.
-        if (streamMigrationOccurred && update.migrate_from === undefined) {
-          update.enabled = oldInputForStreamMigration?.enabled ?? update.enabled;
-        }
-      }
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
         update.enabled = false;
@@ -4299,6 +4234,112 @@ export function sendUpdatePackagePolicyTelemetryEvent(
       }
     }
   });
+}
+
+/**
+ * Applies input-level `migrate_from` migration when a new input type explicitly replaces an old
+ * one.
+ *
+ * Mutates `update` in-place (merges vars, preserves the old input's enabled state) and removes the
+ * now-stale old input from the mutable `inputs` array when it was not already pruned by the
+ * policy-template filter above.
+ *
+ * Returns the source input that was migrated from, or undefined when no migration applies.
+ */
+function applyInputLevelMigration(
+  update: InputsOverride,
+  allBaseInputs: NewPackagePolicyInput[],
+  inputs: NewPackagePolicyInput[]
+): NewPackagePolicyInput | undefined {
+  if (update.migrate_from === undefined || update.deprecated) {
+    return undefined;
+  }
+
+  const originalInputToMigrate = allBaseInputs.find((i) => i.type === update.migrate_from);
+  if (!originalInputToMigrate) {
+    return undefined;
+  }
+
+  // Ensure the old input doesn't linger in inputs when it has no policy_template
+  // (inputs with a policy_template are already removed by the filter above)
+  const staleIdx = inputs.findIndex((i) => i.type === update.migrate_from);
+  if (staleIdx !== -1) inputs.splice(staleIdx, 1);
+
+  update.vars = deepMergeVars(originalInputToMigrate.vars, update.vars, true);
+  // Preserve the enabled state of the old input rather than unconditionally enabling.
+  update.enabled = originalInputToMigrate.enabled;
+
+  return originalInputToMigrate;
+}
+
+/**
+ * Applies stream-level `migrate_from` migration for a new input that has no matching existing
+ * input in the current policy.
+ *
+ * Two sources of old streams are considered (in priority order):
+ *  1. `originalInputToMigrate.streams` — when the parent input declared `migrate_from`, streams
+ *     are matched positionally to the corresponding old input's streams.
+ *  2. `newStream.migrate_from` — each stream can independently declare which old input type it
+ *     migrates from, also matched positionally per source type.
+ *
+ * `update.streams` is replaced with the merged streams
+ * `update.enabled` is set from the old input's enabled state when stream-level migration occurred without a corresponding input-level `migrate_from`.
+ */
+function applyStreamLevelMigration(
+  update: InputsOverride,
+  originalInputToMigrate: NewPackagePolicyInput | undefined,
+  allBaseInputs: NewPackagePolicyInput[]
+): void {
+  if (!update.streams || update.deprecated) {
+    return;
+  }
+
+  const streamMigrateFromCounters: Record<string, number> = {};
+  let streamMigrationOccurred = false;
+  // Track the first old input encountered during stream-level migration so we can
+  // carry its enabled state over to the new input.
+  let oldInputForStreamMigration: NewPackagePolicyInput | undefined;
+
+  update.streams = update.streams.map((newStream, idx) => {
+    let oldStream;
+
+    // Migrate stream-level vars by position since datasets differ between input types.
+    // Use the new stream as the structural base (preserving data_stream identity) and seed
+    // its vars with values from the old stream so user configuration is carried over.
+    if (originalInputToMigrate && originalInputToMigrate.streams.length > 0) {
+      oldStream = originalInputToMigrate.streams[idx];
+    } else if (newStream.migrate_from) {
+      // When streams have migrate_from:
+      // each stream with migrate_from is matched positionally to the corresponding old stream in the specified input type.
+      const counter = streamMigrateFromCounters[newStream.migrate_from] ?? 0;
+      streamMigrateFromCounters[newStream.migrate_from] = counter + 1;
+      const oldInputForStream = allBaseInputs.find((i) => i.type === newStream.migrate_from);
+      oldStream = oldInputForStream?.streams[counter];
+      if (oldStream) {
+        streamMigrationOccurred = true;
+        // Capture the old input so we can preserve its enabled state below.
+        if (!oldInputForStreamMigration) {
+          oldInputForStreamMigration = oldInputForStream;
+        }
+      }
+    }
+    if (!oldStream) return newStream;
+
+    const merged = deepMergeVars(
+      { ...newStream, vars: oldStream.vars ?? {} },
+      newStream as InputsOverride,
+      true
+    );
+    // deepMergeVars only handles vars; explicitly carry the enabled state from
+    // the old stream so the user's enable/disable choice is preserved.
+    return { ...removeStaleVars(merged, newStream), enabled: oldStream.enabled };
+  });
+
+  // If stream-level migration succeeded without an input-level migrate_from, carry the
+  // old input's enabled state over instead of unconditionally enabling the new input.
+  if (streamMigrationOccurred && update.migrate_from === undefined) {
+    update.enabled = oldInputForStreamMigration?.enabled ?? update.enabled;
+  }
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
