@@ -22,6 +22,7 @@ import {
 import {
   CancellationBoundaryMiddleware,
   ErrorHandlingMiddleware,
+  ApmMiddleware,
 } from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
@@ -31,12 +32,15 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
    * Middlewares
    */
   bind(CancellationBoundaryMiddleware).toSelf().inSingletonScope();
+  bind(ApmMiddleware).toSelf().inSingletonScope();
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
 
   /**
-   * Middleware list
+   * Middleware list via multi-injection.
+   * Binding order defines execution order.
    */
   bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware).inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware).inSingletonScope();
   bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
 
   /**
