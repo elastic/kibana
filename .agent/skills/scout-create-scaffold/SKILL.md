@@ -1,5 +1,5 @@
 ---
-name: Scout Create Scaffold
+name: scout-create-scaffold
 description: Generate or repair a Scout test scaffold for a Kibana plugin/package (test/scout*/{api,ui} Playwright configs, fixtures, example specs). Use when you need the initial Scout directory structure; prefer `node scripts/scout.js generate` with flags for non-interactive/LLM execution.
 ---
 
