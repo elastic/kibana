@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OnRequestHandlerFactory } from '@kbn/core-elasticsearch-client-server-internal';
 import { getSpaceNPRE, PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import type { OnRequestHandlerFactory } from './cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
 
 /**
