@@ -1,0 +1,30 @@
+version: '1'
+name: 'sources.snowflake.search'
+description: 'Perform semantic search over documents indexed in Snowflake using a Cortex Search tool. The tool_name must match a CORTEX_SEARCH_SERVICE_QUERY tool configured in the customer Snowflake MCP server (discoverable via listTools).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: tool_name
+    type: string
+    required: true
+    description: 'Name of the CORTEX_SEARCH_SERVICE_QUERY tool on the Snowflake MCP server (e.g. "product-search")'
+  - name: query
+    type: string
+    required: true
+    description: 'Semantic search query to find relevant documents'
+  - name: limit
+    type: number
+    default: 10
+    required: false
+    description: 'Maximum number of results to return'
+steps:
+  - name: cortex-search
+    type: mcp.callTool
+    connector-id: <%= mcp-stack-connector-id %>
+    with:
+      name: "${{inputs.tool_name}}"
+      arguments:
+        query: "${{inputs.query}}"
+        limit: ${{inputs.limit}}

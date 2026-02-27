@@ -90,4 +90,8 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+  [
+    '.snowflake',
+    lazy(() => import(/* webpackChunkName: "connectorIconSnowflake" */ './specs/snowflake/icon')),
+  ],
 ]);

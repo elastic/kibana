@@ -5,6 +5,7 @@
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 * [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 * [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages via Slack.
+* [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query your Snowflake data warehouse using Cortex AI and SQL tools.
 
 **Threat intelligence**
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
