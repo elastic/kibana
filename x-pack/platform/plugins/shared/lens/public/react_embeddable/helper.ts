@@ -72,17 +72,17 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  { savedObjectId, ...state }: LensSerializedAPIConfig
+  { ref_id, ...state }: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
 
-  if (savedObjectId) {
+  if (ref_id) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(savedObjectId);
+        await attributeService.loadFromLibrary(ref_id);
       return {
         ...state,
-        savedObjectId,
+        ref_id,
         attributes,
         managed,
         sharingSavedObjectProps,
@@ -93,7 +93,7 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state) as LensRuntimeState;
+  const newState = transformFromApiConfig(state as LensSerializedAPIConfig) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {
@@ -199,7 +199,7 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
 }
 
 export function transformToApiConfig(state: LensSerializedState): LensByValueSerializedAPIConfig {
-  if (state.savedObjectId) {
+  if (state.ref_id) {
     return {
       ...state,
       attributes: undefined,

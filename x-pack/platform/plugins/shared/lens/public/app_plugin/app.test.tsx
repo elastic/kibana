@@ -299,7 +299,7 @@ describe('Lens App', () => {
       });
 
       await act(async () => {
-        await rerender({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        await rerender({ initialInput: { ref_id: breadcrumbDocSavedObjectId } });
 
         lensStore.dispatch(
           setState({
@@ -328,7 +328,7 @@ describe('Lens App', () => {
       expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Create' });
 
       await act(async () => {
-        rerender({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        rerender({ initialInput: { ref_id: breadcrumbDocSavedObjectId } });
         lensStore.dispatch(
           setState({
             persistedDoc: breadcrumbDoc,
@@ -528,7 +528,7 @@ describe('Lens App', () => {
 
         props = {
           ...props,
-          initialInput: prevSavedObjectId ? { savedObjectId: prevSavedObjectId } : undefined,
+          initialInput: prevSavedObjectId ? { ref_id: prevSavedObjectId } : undefined,
         };
 
         if (comesFromDashboard) {
@@ -613,7 +613,7 @@ describe('Lens App', () => {
           originatingApp: 'dashboards',
           originatingPath: '#/view/123',
         };
-        props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };
+        props.initialInput = { ref_id: defaultSavedObjectId, id: '5678' };
         await renderApp({
           preloadedState: {
             isSaveable: true,
@@ -793,7 +793,7 @@ describe('Lens App', () => {
           undefined
         );
         expect(props.redirectToOrigin).toHaveBeenCalledWith({
-          state: expect.objectContaining({ savedObjectId: defaultSavedObjectId }),
+          state: expect.objectContaining({ ref_id: defaultSavedObjectId }),
           isCopied: false,
         });
       });

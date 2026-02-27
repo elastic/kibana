@@ -39,7 +39,7 @@ describe('Dashboard services API', () => {
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({
-        savedObjectId: '123',
+        ref_id: '123',
         attributes,
       });
       const serializedState = api.serializeState();

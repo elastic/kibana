@@ -162,7 +162,7 @@ export function App({
   }
 
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
-  const savedObjectId = initialInput?.savedObjectId;
+  const savedObjectId = initialInput?.ref_id;
 
   const isFromLegacyEditorEmbeddable = isLegacyEditorEmbeddable(initialContext);
   const legacyEditorAppName =

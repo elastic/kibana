@@ -59,7 +59,7 @@ const lensByValuePanelSchema = schema.object(
 const lensByRefPanelSchema = schema.object(
   {
     // TODO: add missing config properties
-    savedObjectId: schema.string(),
+    ref_id: schema.string(),
   },
   { unknowns: 'allow' }
 );

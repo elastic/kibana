@@ -42,7 +42,7 @@ export const getTransformOut = (
     if (savedObjectRef && isByRefLensState(state)) {
       return {
         ...state,
-        savedObjectId: savedObjectRef.id,
+        ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 

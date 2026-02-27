@@ -574,9 +574,9 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.ref_id;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
@@ -779,7 +779,7 @@ export const LensTopNavMenu = ({
                   onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
-                  saveToLibrary: Boolean(initialInput?.savedObjectId),
+                  saveToLibrary: Boolean(initialInput?.ref_id),
                 }
               );
             }
@@ -858,7 +858,7 @@ export const LensTopNavMenu = ({
     return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
-    initialInput?.savedObjectId,
+    initialInput?.ref_id,
     incomingState,
     initialContextIsEmbedded,
     activeData,

@@ -55,7 +55,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
@@ -176,7 +176,7 @@ export function loadEmbeddableData(
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
+            lastState.ref_id
           )}`,
         };
 
@@ -302,7 +302,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
