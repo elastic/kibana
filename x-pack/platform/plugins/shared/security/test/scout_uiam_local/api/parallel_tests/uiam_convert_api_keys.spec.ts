@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
-
-import { createSAMLResponse } from '@kbn/mock-idp-utils';
+import type { SamlAuth } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -18,35 +16,13 @@ apiTest.describe(
   '[NON-MKI] UIAM API Keys convert function',
   { tag: [...tags.serverless.security.complete] },
   () => {
-    let userSessionCookie: string;
-
-    apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
-      const samlResponse = await createSAMLResponse({
-        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
-        username: '1234567890',
-        email: 'elastic_admin@elastic.co',
-        roles: ['admin'],
-        serverless: {
-          uiamEnabled: true,
-          organizationId: organizationId!,
-          projectType: projectType!,
-        },
-      });
-
-      userSessionCookie = parseCookie(
-        (
-          await apiClient.post('api/security/saml/callback', {
-            body: `SAMLResponse=${encodeURIComponent(samlResponse)}`,
-          })
-        ).headers['set-cookie'][0]
-      )!.cookieString();
-    });
-
-    const grantNativeEsApiKey = async (apiClient: {
-      post: (url: string, options?: any) => Promise<any>;
-    }) => {
+    const grantNativeEsApiKey = async (
+      samlAuth: SamlAuth,
+      apiClient: { post: (url: string, options?: any) => Promise<any> }
+    ) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const grantResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
-        headers: { ...COMMON_UNSAFE_HEADERS, Cookie: userSessionCookie },
+        headers: { ...COMMON_UNSAFE_HEADERS, ...cookieHeader },
         responseType: 'json',
         body: {},
       });
@@ -56,8 +32,8 @@ apiTest.describe(
 
     apiTest(
       'should successfully convert a valid Elasticsearch API key into a UIAM API key',
-      async ({ apiClient }) => {
-        const esApiKey = await grantNativeEsApiKey(apiClient);
+      async ({ apiClient, samlAuth }) => {
+        const esApiKey = await grantNativeEsApiKey(samlAuth, apiClient);
 
         const convertResponse = await apiClient.post('test_endpoints/uiam/api_keys/_convert', {
           headers: { ...COMMON_UNSAFE_HEADERS },
