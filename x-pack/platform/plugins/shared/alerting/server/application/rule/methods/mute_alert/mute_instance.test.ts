@@ -346,7 +346,7 @@ describe('mute alert instance', () => {
     );
   });
 
-  it('throws when conditional snooze is requested and no alert indices are available', async () => {
+  it('throws not found when conditional snooze is requested with no alert indices and validation enabled', async () => {
     getAlertIndicesAliasMock.mockReturnValueOnce([]);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -367,11 +367,12 @@ describe('mute alert instance', () => {
       references: [{ name: 'action_0', type: 'action', id: '1' }],
       version: 'v1',
     });
+    alertsServiceMock.isExistingAlert.mockResolvedValueOnce(false);
 
     await expect(() =>
       muteInstance(context, {
         params: { alertId: '1', alertInstanceId: 'instance1' },
-        query: {},
+        query: { validateAlertsExistence: true },
         body: {
           conditions: [
             {
@@ -382,14 +383,14 @@ describe('mute alert instance', () => {
           ],
         },
       })
-    ).rejects.toThrow('Unable to apply conditional snooze');
+    ).rejects.toThrow('Alert instance with id "instance1" does not exist for rule with id "1"');
 
     expect(alertsServiceMock.snoozeAlertInstance).not.toHaveBeenCalled();
-    expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
+    expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
-  it('throws when conditional snooze is requested and no alert indices are available (validate disabled)', async () => {
+  it('persists conditional snooze when no alert indices are available and validation is disabled', async () => {
     getAlertIndicesAliasMock.mockReturnValueOnce([]);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -411,24 +412,37 @@ describe('mute alert instance', () => {
       version: 'v1',
     });
 
-    await expect(() =>
-      muteInstance(context, {
-        params: { alertId: '1', alertInstanceId: 'instance1' },
-        query: { validateAlertsExistence: false },
-        body: {
-          conditions: [
-            {
-              type: 'severity_equals',
-              field: 'kibana.alert.severity',
-              value: 'low',
-            },
-          ],
-        },
-      })
-    ).rejects.toThrow('Unable to apply conditional snooze');
+    await muteInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: {
+        conditions: [
+          {
+            type: 'severity_equals',
+            field: 'kibana.alert.severity',
+            value: 'low',
+          },
+        ],
+      },
+    });
 
+    expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
     expect(alertsServiceMock.snoozeAlertInstance).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      expect.objectContaining({
+        mutedInstanceIds: [],
+        snoozedInstances: [
+          expect.objectContaining({
+            instanceId: 'instance1',
+            conditions: expect.any(Array),
+          }),
+        ],
+        updatedAt: expect.any(String),
+      }),
+      { version: 'v1' }
+    );
   });
 
   it('throws when conditional snooze is requested while rule is muted via muteAll', async () => {

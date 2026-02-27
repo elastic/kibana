@@ -102,15 +102,6 @@ async function muteInstanceWithOCC(
 
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
-  // Conditional snooze must be applied to both the rule SO (snoozedInstances) and the current
-  // AAD doc (ALERT_MUTED + snooze fields). Without indices we cannot update the doc, so we'd
-  // end up in a partial state until the next rule run. We throw to require full apply in one go.
-  if (isConditionalSnooze && (!indices || indices.length === 0)) {
-    throw Boom.badRequest(
-      `Unable to apply conditional snooze to alert instance "${alertInstanceId}" because no alert indices are available for rule "${ruleId}"`
-    );
-  }
-
   if (validateAlertsExistence) {
     const isExistingAlert = await context.alertsService?.isExistingAlert({
       indices,
@@ -159,7 +150,8 @@ async function muteInstanceWithOCC(
       }),
     });
 
-    // Also set ALERT_MUTED=true on the current AAD doc for query-time filtering.
+    // Also set ALERT_MUTED=true on the current AAD doc for query-time filtering when
+    // alert indices are available. Rule SO remains the durable source of truth.
     if (indices && indices.length > 0) {
       await context.alertsService?.snoozeAlertInstance({
         ruleId,
