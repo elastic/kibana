@@ -7,11 +7,15 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
+import fs from 'fs';
+import os from 'os';
 
 const defaultSettings = {
   defaultIndex: 'kibana_sample_data_logs',
   'dateFormat:tz': 'UTC',
 };
+
+let downloadedFilePath: string | null = null;
 
 test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient, apiServices }) => {
@@ -22,6 +26,13 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.dashboard.goto();
+  });
+
+  test.afterEach(async () => {
+    if (downloadedFilePath && fs.existsSync(downloadedFilePath)) {
+      fs.unlinkSync(downloadedFilePath);
+      downloadedFilePath = null;
+    }
   });
 
   test.afterAll(async ({ kbnClient, apiServices }) => {
@@ -166,6 +177,45 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
     await test.step('save panel to library', async () => {
       await pageObjects.dashboard.saveToLibrary('Saved Lens Panel', panelTitle);
+    });
+  });
+
+  test('should export dashboard as PDF and download the report', async ({ page, pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+
+    const isInViewMode = await pageObjects.dashboard.getIsInViewMode();
+    if (!isInViewMode) {
+      await pageObjects.dashboard.clickCancelOutOfEditMode();
+    }
+
+    await test.step('trigger PDF export from share menu', async () => {
+      await page.testSubj.click('exportTopNavButton');
+      await expect(page.testSubj.locator('exportMenuItem-PDF')).toBeVisible();
+      await page.testSubj.click('exportMenuItem-PDF');
+      await expect(page.testSubj.locator('exportItemDetailsFlyout')).toBeVisible();
+      await page.testSubj.click('generateReportButton');
+    });
+
+    await test.step('wait for report to be queued', async () => {
+      await expect(page.testSubj.locator('queueReportSuccess')).toBeVisible({ timeout: 60_000 });
+    });
+
+    await test.step('wait for report completion and download', async () => {
+      const downloadButton = page.testSubj.locator('downloadCompletedReportButton');
+      await expect(downloadButton).toBeVisible({ timeout: 120_000 });
+
+      const downloadPromise = page.waitForEvent('download');
+      await downloadButton.click();
+      const download = await downloadPromise;
+
+      downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
+      await download.saveAs(downloadedFilePath);
+
+      expect(fs.existsSync(downloadedFilePath)).toBe(true);
+      const stats = fs.statSync(downloadedFilePath);
+      expect(stats.size).toBeGreaterThan(0);
     });
   });
 });
