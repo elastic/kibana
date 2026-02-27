@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -18,7 +18,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 
 import { useKibana } from '../../hooks/use_kibana';
 import { SEARCH_AGENT_ID } from '../../../common/constants';
@@ -39,14 +38,6 @@ export const AgentInstallSection = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
-  const [isAgentBuilderAvailable, setIsAgentBuilderAvailable] = useState(false);
-
-  useEffect(() => {
-    const sub = services.application.applications$.subscribe((apps) => {
-      setIsAgentBuilderAvailable(apps.has(AGENT_BUILDER_APP_ID));
-    });
-    return () => sub.unsubscribe();
-  }, [services.application.applications$]);
 
   const cursorDeeplinkUrl = useMemo(
     () =>
@@ -75,13 +66,14 @@ export const AgentInstallSection = () => {
 
   const handleOpenInAgentBuilder = useCallback(() => {
     closePopover();
-    const initialMessage = buildPrompt(selectedUseCase, 'agent-builder');
-    // Open agent builder page with the correct agent selected and a prompt loaded
-    services.application.navigateToApp(AGENT_BUILDER_APP_ID, {
-      path: `/conversations/new?agent_id=${SEARCH_AGENT_ID}`,
-      state: { initialMessage, autoSendInitialMessage: false },
+    services.agentBuilder?.openConversationFlyout({
+      agentId: SEARCH_AGENT_ID,
+      initialMessage: buildPrompt(selectedUseCase, 'agent-builder'),
+      autoSendInitialMessage: false,
+      newConversation: true,
+      sessionTag: 'search-getting-started',
     });
-  }, [closePopover, selectedUseCase, services.application]);
+  }, [closePopover, selectedUseCase, services.agentBuilder]);
 
   const launchButton = (
     <EuiButton
@@ -162,7 +154,7 @@ export const AgentInstallSection = () => {
                     defaultMessage: 'Claude / CLI',
                   })}
                 </EuiContextMenuItem>,
-                ...(isAgentBuilderAvailable
+                ...(services.agentBuilder
                   ? [
                       <EuiContextMenuItem
                         key="agent-builder"
