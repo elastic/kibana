@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { lastValueFrom } from 'rxjs';
-import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -15,49 +14,14 @@ import type {
   IUiSettingsClient,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { EsqlService } from '../services/esql_service';
 
 import type { EsqlServerPluginStart } from '../types';
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
-// Added the limit here to avoid overwhelming the LLM with too many fields. Tokens is not a problem anymore
-// but we don't want to risk the LLM getting stuck or taking too long to generate the query.
-// We can remove or increase this limit if we see that it's a problem.
-const MAX_FIELDS = 1000;
-
-const getSourceNames = async (client: ElasticsearchClient): Promise<string[]> => {
-  const service = new EsqlService({ client });
-  const sources = await service.getAllIndices('local');
-  return sources.filter((s) => !s.hidden).map((s) => s.name);
-};
-
-const getFieldsForSource = async (client: ElasticsearchClient, source: string): Promise<string> => {
-  const response = await client.fieldCaps({
-    index: source,
-    fields: '*',
-    include_unmapped: false,
-  });
-
-  const fields = Object.entries(response.fields)
-    .filter(([fieldName]) => !fieldName.startsWith('_'))
-    .slice(0, MAX_FIELDS)
-    .map(([fieldName, types]) => {
-      const type = Object.keys(types)[0];
-      return `${fieldName}: ${type}`;
-    });
-
-  const totalCount = Object.keys(response.fields).length;
-  let result = fields.join('\n');
-  if (totalCount > MAX_FIELDS) {
-    result += `\n(truncated, showing ${MAX_FIELDS} of ${totalCount} fields)`;
-  }
-
-  return result;
-};
 
 const resolveConnectorId = async ({
   uiSettingsClient,
@@ -87,26 +51,20 @@ const resolveConnectorId = async ({
   return undefined;
 };
 
-const buildSystemPrompt = (sourceNames: string[], fieldsContext?: string): string => {
-  let prompt = `Produce the ES|QL query fenced by the esql tag. Don't explain it.
+const createScopedModel = async ({
+  inference,
+  request,
+  connectorId,
+}: {
+  inference: InferenceServerStart;
+  request: KibanaRequest;
+  connectorId: string;
+}): Promise<ScopedModel> => {
+  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
+  const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+  const connector = await inference.getConnectorById(connectorId, request);
 
-<AvailableSources>
-The user's cluster has the following data sources:
-${sourceNames.join(', ')}
-Use these exact source names in the FROM clause. Do not invent source names.
-</AvailableSources>`;
-
-  if (fieldsContext) {
-    prompt += `
-
-<FieldsContext>
-The relevant source has the following fields (name: type):
-${fieldsContext}
-Use these exact field names in the query.
-</FieldsContext>`;
-  }
-
-  return prompt;
+  return { connector, chatModel, inferenceClient };
 };
 
 export const registerNLtoESQLRoute = (
@@ -154,30 +112,19 @@ export const registerNLtoESQLRoute = (
           });
         }
 
-        // The getSourceNames function is a fallback, the visor has already fetched the sources.
-        const sourceNames = sources?.length ? sources : await getSourceNames(client);
+        const model = await createScopedModel({ inference, request, connectorId });
 
-        let fieldsContext: string | undefined;
-        if (sources?.length) {
-          try {
-            fieldsContext = await getFieldsForSource(client, sources.join(','));
-          } catch {
-            // proceed without field context, less precision but still useful
-          }
-        }
+        const result = await generateEsql({
+          model,
+          esClient: client,
+          logger,
+          nlQuery: query,
+          index: sources?.length ? sources.join(',') : undefined,
+          executeQuery: false,
+        });
 
-        const result = await lastValueFrom(
-          naturalLanguageToEsql({
-            client: inference.getClient({ request }),
-            connectorId,
-            input: query,
-            functionCalling: 'auto',
-            logger,
-            system: buildSystemPrompt(sourceNames, fieldsContext),
-          })
-        );
         return response.ok({
-          body: result,
+          body: { content: result.query },
         });
       } catch (error) {
         logger.debug(error);

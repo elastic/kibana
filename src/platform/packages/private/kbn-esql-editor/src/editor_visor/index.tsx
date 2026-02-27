@@ -27,7 +27,6 @@ import { NoConnectorMessage } from './no_connector_message';
 import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
-import { extractQueryFromLLMMessage } from './utils';
 
 export { VisorMode } from './mode_selector';
 
@@ -135,10 +134,7 @@ export function QuickSearchVisor({
         }),
       });
       if (result.content) {
-        const extractedQuery = extractQueryFromLLMMessage(result.content);
-        if (extractedQuery) {
-          onUpdateAndSubmitQuery(extractedQuery);
-        }
+        onUpdateAndSubmitQuery(result.content);
         setNlValue('');
       }
     } catch (error) {
