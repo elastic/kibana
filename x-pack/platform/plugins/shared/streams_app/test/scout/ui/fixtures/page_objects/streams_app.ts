@@ -525,42 +525,52 @@ export class StreamsApp {
       await textbox.focus();
     }
 
-    // Replace content in a single input event to avoid truncation issues seen with `fill()`.
-    // Validate that the resulting value is parseable JSON to avoid false positives
-    // (e.g. when new JSON is appended to existing template text).
+    const isValidCustomSamplesJson = (raw: string) => {
+      const parsed = JSON.parse(raw) as unknown;
+      return (
+        Array.isArray(parsed) &&
+        parsed.length > 0 &&
+        typeof parsed[0] === 'object' &&
+        parsed[0] !== null &&
+        '@timestamp' in (parsed[0] as Record<string, unknown>) &&
+        'message' in (parsed[0] as Record<string, unknown>)
+      );
+    };
+
     for (let attempt = 0; attempt < 5; attempt++) {
       await this.page.keyboard.press('ControlOrMeta+A');
       await this.page.keyboard.press('Backspace');
-      // Prefer filling the underlying textarea; keyboard insertion can truncate intermittently.
+
       if ((await inputArea.count()) > 0) {
         await inputArea.fill(value);
       } else {
         await textbox.fill(value);
       }
 
-      const currentValue =
+      const currentValueAfterFill =
         (await inputArea.count()) > 0 ? await inputArea.inputValue() : await textbox.inputValue();
       try {
-        const parsed = JSON.parse(currentValue) as unknown;
-        if (
-          Array.isArray(parsed) &&
-          parsed.length > 0 &&
-          typeof parsed[0] === 'object' &&
-          parsed[0] !== null &&
-          '@timestamp' in (parsed[0] as Record<string, unknown>) &&
-          'message' in (parsed[0] as Record<string, unknown>)
-        ) {
+        if (isValidCustomSamplesJson(currentValueAfterFill)) {
+          return;
+        }
+      } catch {
+        // retry with slow typing
+      }
+
+      await this.page.keyboard.press('ControlOrMeta+A');
+      await this.page.keyboard.press('Backspace');
+      await this.page.keyboard.type(value, { delay: 5 });
+      await this.page.waitForTimeout(150);
+
+      const currentValueAfterType =
+        (await inputArea.count()) > 0 ? await inputArea.inputValue() : await textbox.inputValue();
+      try {
+        if (isValidCustomSamplesJson(currentValueAfterType)) {
           return;
         }
       } catch {
         // retry
       }
-
-      // Fallback: type character-by-character (slower but more reliable).
-      await this.page.keyboard.press('ControlOrMeta+A');
-      await this.page.keyboard.press('Backspace');
-      await this.page.keyboard.type(value, { delay: 2 });
-      await this.page.waitForTimeout(100);
     }
 
     throw new Error(
