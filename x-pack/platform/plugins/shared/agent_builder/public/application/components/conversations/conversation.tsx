@@ -80,14 +80,20 @@ export const Conversation: React.FC<{}> = () => {
         setPlan(undefined);
         setModeSuggestion(undefined);
         setAgentMode('agent');
+        hasFetchedPlanRef.current = false;
       }
     }
   }, [conversationId, prevConversationId, setPlan, setModeSuggestion, setAgentMode]);
 
-  // Restore plan state from conversation when loading an existing conversation
+  // Restore plan state from conversation when loading an existing conversation.
+  // Only run on the initial fetch — do not overwrite live streaming updates on refetches.
+  const hasFetchedPlanRef = useRef(false);
   useEffect(() => {
-    if (isFetched && conversation?.state?.plan) {
-      setPlan(conversation.state.plan);
+    if (isFetched && !hasFetchedPlanRef.current) {
+      hasFetchedPlanRef.current = true;
+      if (conversation?.state?.plan) {
+        setPlan(conversation.state.plan);
+      }
     }
   }, [isFetched, conversation, setPlan]);
 
@@ -155,6 +161,7 @@ export const Conversation: React.FC<{}> = () => {
       setPlan({ ...plan, status: 'ready' });
     }
     setAgentMode('agent');
+    messageEditorRef.current?.clear();
     sendMessage({ message: 'Execute the plan.', agentModeOverride: 'agent' });
   }, [plan, setPlan, setAgentMode, sendMessage]);
 
@@ -205,62 +212,6 @@ export const Conversation: React.FC<{}> = () => {
     </EuiFlexItem>
   ) : null;
 
-  const conversationColumn = (
-    <EuiFlexItem grow>
-      <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
-        <EuiFlexItem grow={true} css={scrollWrapperStyles}>
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            ref={scrollContainerRef}
-            css={scrollableStyles}
-          >
-            <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
-        </EuiFlexItem>
-        {modeSuggestionBanner}
-        <EuiFlexItem
-          css={[
-            conversationElementWidthStyles,
-            conversationElementPaddingStyles,
-            inputPaddingStyles,
-          ]}
-          grow={false}
-        >
-          <ConversationInput
-            onSubmit={scrollToMostRecentRoundTop}
-            messageEditorRef={messageEditorRef}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-
-  if (showPlanPanel) {
-    return (
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="none"
-        css={fullWidthAndHeightStyles}
-        responsive={false}
-      >
-        {conversationColumn}
-        <EuiFlexItem grow={false}>
-          <PlanPanel
-            plan={plan}
-            agentMode={agentMode}
-            onApproveAndExecute={handleApproveAndExecute}
-            onItemClick={handlePlanItemClick}
-            isExecuting={isResponseLoading}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
       <EuiFlexItem grow={true} css={scrollWrapperStyles}>
@@ -276,6 +227,21 @@ export const Conversation: React.FC<{}> = () => {
         </EuiFlexGroup>
         {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
+      {modeSuggestionBanner}
+      {showPlanPanel && (
+        <EuiFlexItem
+          css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+          grow={false}
+        >
+          <PlanPanel
+            plan={plan}
+            agentMode={agentMode}
+            onApproveAndExecute={handleApproveAndExecute}
+            onItemClick={handlePlanItemClick}
+            isExecuting={isResponseLoading}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
         grow={false}

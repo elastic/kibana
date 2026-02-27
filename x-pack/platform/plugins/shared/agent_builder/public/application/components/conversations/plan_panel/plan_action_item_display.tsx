@@ -6,14 +6,25 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ActionItemStatus, PlanActionItem } from '@kbn/agent-builder-common';
 
-const statusIconMap: Record<ActionItemStatus, { type: string; color: string }> = {
+const statusIconMap: Record<
+  ActionItemStatus,
+  { type: string; color: string; useSpinner?: boolean }
+> = {
   pending: { type: 'dot', color: 'subdued' },
-  in_progress: { type: 'playFilled', color: 'primary' },
+  in_progress: { type: 'loading', color: 'primary', useSpinner: true },
   completed: { type: 'checkInCircleFilled', color: 'success' },
   failed: { type: 'error', color: 'danger' },
 };
@@ -30,7 +41,7 @@ export const PlanActionItemDisplay: React.FC<PlanActionItemDisplayProps> = ({
   onClick,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { type, color } = statusIconMap[item.status];
+  const statusConfig = statusIconMap[item.status];
   const isFailed = item.status === 'failed';
 
   const itemStyles = css`
@@ -94,7 +105,11 @@ export const PlanActionItemDisplay: React.FC<PlanActionItemDisplayProps> = ({
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={item.status}>
-          <EuiIcon type={type} color={color} size="s" />
+          {statusConfig.useSpinner ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EuiIcon type={statusConfig.type} color={statusConfig.color} size="s" />
+          )}
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>

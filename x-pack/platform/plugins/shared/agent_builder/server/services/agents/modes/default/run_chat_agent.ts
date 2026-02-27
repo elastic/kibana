@@ -163,7 +163,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     // - suggest_planning_mode (if no plan exists yet)
     // - update_plan (if a plan exists)
     const relevantPlanningTools = planningTools.filter((tool) => {
-      if (tool.id === 'planning.create_plan') return !planState.current;
+      if (tool.id === 'planning.create_plan') return true;
       if (tool.id === 'planning.suggest_planning_mode') return !planState.current;
       if (tool.id === 'planning.update_plan') return !!planState.current;
       // list_available_tools is always useful

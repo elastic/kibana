@@ -117,20 +117,10 @@ export const getPlanningTools = ({
     id: 'planning.create_plan',
     type: ToolType.builtin,
     description:
-      'Create a structured plan with ordered action items. In planning mode the plan starts as a draft requiring user approval. In agent mode the plan is immediately ready for execution.',
+      'Create a structured plan with ordered action items, replacing any existing plan. In planning mode the plan starts as a draft requiring user approval. In agent mode the plan is immediately ready for execution.',
     tags: ['planning'],
     schema: createPlanSchema,
     handler: async ({ title, description, action_items: actionItems }) => {
-      if (planState.current) {
-        return {
-          results: [
-            createErrorResult(
-              'A plan already exists. Use update_plan to modify it, or start a new conversation.'
-            ),
-          ],
-        };
-      }
-
       const plan: Plan = {
         title,
         description,

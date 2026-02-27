@@ -23,51 +23,63 @@ const labels = {
   completed: i18n.translate('xpack.agentBuilder.planPanel.status.completed', {
     defaultMessage: 'Completed',
   }),
+  inProgress: i18n.translate('xpack.agentBuilder.planPanel.status.inProgress', {
+    defaultMessage: 'In Progress',
+  }),
 };
 
 interface PlanStatusBadgeProps {
   plan: Plan;
   agentMode: AgentMode;
+  isExecuting?: boolean;
 }
 
 /**
  * Derives the visual display status from plan state and runtime context.
- * "Executing" and "Completed" are UI-only states — not stored in the plan.
+ * "Executing", "In Progress", and "Completed" are UI-only states — not stored in the plan.
  */
 const deriveDisplayStatus = (
   plan: Plan,
-  agentMode: AgentMode
+  agentMode: AgentMode,
+  isExecuting: boolean
 ): { label: string; color: string } => {
   const allCompleted =
     plan.action_items.length > 0 && plan.action_items.every((item) => item.status === 'completed');
+  const hasAnyProgress = plan.action_items.some(
+    (item) => item.status === 'completed' || item.status === 'in_progress'
+  );
 
-  // Draft plans are always shown as Draft
+  if (allCompleted) {
+    return { label: labels.completed, color: 'success' };
+  }
+
+  // Runtime execution state takes priority — the server may still report
+  // 'draft' while the agent is actively working through the plan.
+  if (isExecuting && agentMode === 'agent') {
+    return { label: labels.executing, color: 'accent' };
+  }
+
+  if (agentMode === 'agent' && hasAnyProgress) {
+    return { label: labels.inProgress, color: 'primary' };
+  }
+
   if (plan.status === 'draft') {
     return { label: labels.draft, color: 'warning' };
   }
 
-  // Ready plans in agent mode — derive executing/completed
-  if (plan.status === 'ready' && agentMode === 'agent') {
-    if (allCompleted) {
-      return { label: labels.completed, color: 'success' };
-    }
-    return { label: labels.executing, color: 'accent' };
-  }
-
-  // Ready plans in planning mode (user-initiated, awaiting approval)
   if (plan.status === 'ready' && agentMode === 'planning') {
-    if (allCompleted) {
-      return { label: labels.completed, color: 'success' };
-    }
     return { label: labels.ready, color: 'primary' };
   }
 
-  // Fallback
   return { label: labels.ready, color: 'primary' };
 };
 
-export const PlanStatusBadge: React.FC<PlanStatusBadgeProps> = ({ plan, agentMode }) => {
-  const { label, color } = deriveDisplayStatus(plan, agentMode);
+export const PlanStatusBadge: React.FC<PlanStatusBadgeProps> = ({
+  plan,
+  agentMode,
+  isExecuting = false,
+}) => {
+  const { label, color } = deriveDisplayStatus(plan, agentMode, isExecuting);
 
   return (
     <EuiBadge color={color} data-test-subj="agentBuilderPlanStatusBadge">
