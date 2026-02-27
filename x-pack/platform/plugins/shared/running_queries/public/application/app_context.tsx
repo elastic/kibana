@@ -12,6 +12,7 @@ import type { RunningQueriesApiService } from '../lib/api';
 
 export interface RunningQueriesCapabilities {
   canCancelTasks: boolean;
+  canViewTasks: boolean;
   isLoading: boolean;
 }
 
@@ -36,9 +37,10 @@ export const RunningQueriesAppContextProvider: React.FC<
   const capabilities = useMemo<RunningQueriesCapabilities>(
     () => ({
       canCancelTasks: Boolean(data?.canCancelTasks),
+      canViewTasks: Boolean(data?.canViewTasks),
       isLoading,
     }),
-    [data?.canCancelTasks, isLoading]
+    [data?.canCancelTasks, data?.canViewTasks, isLoading]
   );
 
   return (

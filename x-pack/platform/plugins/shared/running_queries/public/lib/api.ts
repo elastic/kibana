@@ -32,7 +32,7 @@ export class RunningQueriesApiService {
   }
 
   public useLoadPrivileges() {
-    return this.useRequest<{ canCancelTasks: boolean }>({
+    return this.useRequest<{ canCancelTasks: boolean; canViewTasks: boolean }>({
       path: `${API_BASE_PATH}/privileges`,
       method: 'get',
     });

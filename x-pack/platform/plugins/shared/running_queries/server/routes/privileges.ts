@@ -30,19 +30,20 @@ export const registerPrivilegesRoute = ({ router, logger }: RouteOptions) => {
 
         const hasPrivileges = esClient.security?.hasPrivileges;
         if (typeof hasPrivileges !== 'function') {
-          return response.ok({ body: { canCancelTasks: false } });
+          return response.ok({ body: { canCancelTasks: false, canViewTasks: false } });
         }
 
-        const result = await hasPrivileges.call(esClient.security, { cluster: ['manage'] });
+        const result = await hasPrivileges.call(esClient.security, { cluster: ['manage', 'monitor'] });
+        const hasAllRequested = Boolean((result as { has_all_requested?: boolean })?.has_all_requested);
+        const cluster = (result as { cluster?: Record<string, boolean> })?.cluster ?? {};
 
-        const canCancelTasks =
-          Boolean((result as { has_all_requested?: boolean })?.has_all_requested) ||
-          Boolean((result as { cluster?: Record<string, boolean> })?.cluster?.manage);
+        const canCancelTasks = hasAllRequested || Boolean(cluster.manage);
+        const canViewTasks = hasAllRequested || Boolean(cluster.monitor);
 
-        return response.ok({ body: { canCancelTasks } });
+        return response.ok({ body: { canCancelTasks, canViewTasks } });
       } catch (error) {
         logger.debug(`Failed to check running queries privileges: ${error}`);
-        return response.ok({ body: { canCancelTasks: false } });
+        return response.ok({ body: { canCancelTasks: false, canViewTasks: false } });
       }
     }
   );

@@ -24,7 +24,7 @@ import { RunningQueriesTable } from './components/running_queries_table';
 export const RunningQueriesApp: React.FC = () => {
   useBreadcrumbs();
 
-  const { apiService, notifications } = useRunningQueriesAppContext();
+  const { apiService, notifications, capabilities } = useRunningQueriesAppContext();
   const { data, isLoading, error, resendRequest } = apiService.useLoadRunningQueries();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -84,6 +84,7 @@ export const RunningQueriesApp: React.FC = () => {
   );
 
   const queries = data?.queries ?? [];
+  const canViewTasks = capabilities.canViewTasks;
 
   return (
     <EuiPageTemplate restrictWidth={false}>
@@ -132,7 +133,17 @@ export const RunningQueriesApp: React.FC = () => {
         ]}
       />
       <EuiPageTemplate.Section>
-        {isLoading && !data ? (
+        {!capabilities.isLoading && !canViewTasks ? (
+          <EuiText color="danger">
+            <p>
+              {i18n.translate('xpack.runningQueries.insufficientViewPrivileges', {
+                defaultMessage:
+                  'Insufficient privileges to view running queries. Required Elasticsearch cluster privilege: {privilege}.',
+                values: { privilege: 'monitor' },
+              })}
+            </p>
+          </EuiText>
+        ) : isLoading && !data ? (
           <EuiLoadingSpinner size="l" />
         ) : error ? (
           <EuiText color="danger">
