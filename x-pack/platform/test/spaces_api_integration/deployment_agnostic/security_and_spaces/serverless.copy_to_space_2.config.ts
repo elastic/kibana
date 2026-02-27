@@ -11,9 +11,9 @@ import { deploymentAgnosticSpacesServices } from '../services';
 export default createServerlessTestConfig<typeof deploymentAgnosticSpacesServices>({
   services: deploymentAgnosticSpacesServices,
   serverlessProject: 'security',
-  testFiles: [require.resolve('./apis/copy_to_space/index_trial_default_space')],
+  testFiles: [require.resolve('./apis/copy_to_space/index_trial_space_1')],
   junit: {
     reportName:
-      'X-Pack Spaces API Deployment Agnostic Integration Tests -- copy_to_space default space - serverless',
+      'X-Pack Spaces API Deployment Agnostic Integration Tests -- copy_to_space space 1 - serverless',
   },
 });

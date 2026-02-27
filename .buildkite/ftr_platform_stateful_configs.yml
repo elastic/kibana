@@ -91,6 +91,7 @@ enabled:
   - src/platform/test/functional/apps/discover/group11/config.ts
   - src/platform/test/functional/apps/discover/group12/config.ts
   - src/platform/test/functional/apps/discover/group13/config.ts
+  - src/platform/test/functional/apps/discover/group14/config.ts
   - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group8/config.ts
   - src/platform/test/functional/apps/discover/group9/config.ts
@@ -129,6 +130,8 @@ enabled:
   - src/platform/test/functional/apps/visualize/group9/config.ts
   - src/platform/test/functional/apps/visualize/group10/config.ts
   - src/platform/test/functional/apps/visualize/group11/config.ts
+  - src/platform/test/functional/apps/visualize/group12/config.ts
+  - src/platform/test/functional/apps/visualize/group13/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
