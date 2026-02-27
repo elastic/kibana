@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
         expect(headers.warning).to.contain(
-          'The "serializer" query parameter is not supported and will be ignored. Custom serializers have been removed.'
+          'The "serializer" parameter is not supported and will be ignored. Custom serializers have been removed.'
         );
       });
 
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
         expect(headers.warning).to.contain(
-          'The "deserializer" query parameter is not supported and will be ignored. Custom deserializers have been removed.'
+          'The "deserializer" parameter is not supported and will be ignored. Custom deserializers have been removed.'
         );
       });
     });
