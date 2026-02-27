@@ -251,11 +251,11 @@ export function generateEsqlQuery(
     let filterClause = '';
     if (wrapInFilter && col.filter) {
       const { query, language } = col.filter;
-      if (language !== 'kuery' && language !== 'lucene') {
+      if ((language !== 'kuery' && language !== 'lucene') || typeof query !== 'string') {
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
       const cmd = language === 'kuery' ? 'KQL' : 'QSTR';
-      const filteredQueryString = (query as string).replace(/"""/g, '').trim(); // Assume query is string type
+      const filteredQueryString = query.replace(/"""/g, '').trim();
       filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
