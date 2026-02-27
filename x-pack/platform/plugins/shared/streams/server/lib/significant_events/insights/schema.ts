@@ -15,10 +15,6 @@ export const SUBMIT_INSIGHTS_TOOL_NAME = 'submit_insights';
 const insightEvidenceZodSchema = z.object({
   streamName: z.string().describe('The name of the stream where this evidence was found'),
   queryTitle: z.string().describe('The title of the query that detected these events'),
-  featureName: z
-    .string()
-    .optional()
-    .describe('The system or feature the query was generated for (e.g., kubernetes, nginx)'),
   eventCount: z.number().describe('Number of events detected by this query'),
 });
 
