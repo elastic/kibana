@@ -20,7 +20,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
-import { IndicesBrowserOpenMode } from './resource_browser/open_mode';
+import { IndicesBrowserOpenMode } from './resource_browser/types';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -35,6 +35,9 @@ export interface MonacoCommandDependencies {
     openedFrom?: IndicesBrowserOpenMode;
     preloadedSources?: ESQLSourceResult[];
     preloadedTimeSeriesSources?: IndexAutocompleteItem[];
+  }) => void;
+  openFieldsBrowser?: (options?: {
+    preloadedFields?: Array<{ name: string; type?: string }>;
   }) => void;
 }
 
@@ -70,6 +73,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     controlsContext,
     openTimePickerPopover,
     openIndicesBrowser,
+    openFieldsBrowser,
   } = deps;
 
   const commandDisposables: monaco.IDisposable[] = [];
@@ -126,11 +130,51 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     );
   }
 
+  // Open fields browser command (triggered by the "Browse fields" autocomplete item)
+  if (openFieldsBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.fieldsBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedFields: Array<{ name: string; type?: string }> | undefined;
+
+        if (payload?.fields) {
+          try {
+            const parsed = JSON.parse(payload.fields) as unknown;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              preloadedFields = parsed as Array<{ name: string; type?: string }>;
+            }
+          } catch {
+            preloadedFields = undefined;
+          }
+        }
+
+        openFieldsBrowser({
+          preloadedFields,
+        });
+      })
+    );
+  }
+
   // Accept recommended query command
   commandDisposables.push(
     monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
-      const [, { queryLabel }] = args;
+      const [, { queryLabel, queryText }] = args;
       telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
+
+      // When queryText is provided (standalone queries), replaces the entire editor content.
+      // If the queryText is not provided, the recommended query is inserted at the current cursor position
+      // acting as a snippet.
+      if (queryText) {
+        const editor = editorRef.current;
+        const model = editor?.getModel();
+        if (editor && model) {
+          const fullRange = model.getFullModelRange();
+          editor.executeEdits('standaloneQuery', [{ range: fullRange, text: queryText }]);
+          const lastLine = model.getLineCount();
+          const lastColumn = model.getLineMaxColumn(lastLine);
+          editor.setPosition({ lineNumber: lastLine, column: lastColumn });
+        }
+      }
     })
   );
 

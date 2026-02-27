@@ -12,15 +12,15 @@ import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
-import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
+import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
-import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
-import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
+import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
+import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
@@ -31,13 +31,35 @@ import {
   createOutputTokensEvaluator,
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
+import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
+
+function isElasticCloudEsUrl(esUrl: string): boolean {
+  try {
+    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
+    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
+    return (
+      hostname === 'elastic-cloud.com' ||
+      hostname.endsWith('.elastic-cloud.com') ||
+      hostname.endsWith('elastic.cloud')
+    );
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Test type for evaluations. Loads an inference client and a
- * executor client (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+ * executor client.
  */
 
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
+  kbnClient: [
+    async ({ kbnClient, log }, use) => {
+      // Centralize request retries for evals so suites don't need to wrap calls.
+      await use(wrapKbnClientWithRetries({ kbnClient, log }));
+    },
+    { scope: 'worker' },
+  ],
   fetch: [
     async ({ kbnClient, log }, use) => {
       // add a HttpHandler as a fixture, so consumers can use
@@ -64,9 +86,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
       ).evaluationConnector;
 
-      const evaluationConnectorUuid = getConnectorIdAsUuid(predefinedConnector.id);
-
-      if (evaluationConnectorUuid !== connector.id) {
+      if (resolveConnectorId(predefinedConnector.id) !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it
@@ -87,9 +107,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           connectorId: connector.id,
         },
       });
+      const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(inferenceClient);
       log.serviceLoaded?.('inferenceClient');
 
-      await use(inferenceClient);
+      await use(wrappedInferenceClient);
     },
     { scope: 'worker' },
   ],
@@ -130,6 +151,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             'Recall@K',
             { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
+          [
+            ESQL_EQUIVALENCE_EVALUATOR_NAME,
+            { decimalPlaces: 2, statsToInclude: ['mean', 'stdDev'] },
+          ],
         ]),
         evaluatorDisplayGroups: [
           {
@@ -151,9 +176,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  phoenixClient: [
+  executorClient: [
     async (
-      { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
+      { log, connector, evaluationConnector, repetitions, evaluationsEsClient, reportModelScore },
       use
     ) => {
       function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
@@ -179,22 +204,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
-      const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
-      const executorClient = usePhoenixExecutor
-        ? new KibanaPhoenixClient({
-            config: getPhoenixConfig(),
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          })
-        : new KibanaEvalsClient({
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          });
+      const executorClient = new KibanaEvalsClient({
+        log,
+        model,
+        runId: process.env.TEST_RUN_ID!,
+        repetitions,
+      });
 
       const currentRunId = process.env.TEST_RUN_ID;
       await use(executorClient);
@@ -205,12 +222,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         );
       }
 
-      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
-        ? createEsClientForTesting({
-            esUrl: process.env.EVALUATIONS_ES_URL,
-          })
-        : esClient;
-
       const experiments = await executorClient.getRanExperiments();
       const documents = await mapToEvaluationScoreDocuments({
         experiments,
@@ -219,7 +230,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         runId: currentRunId,
         totalRepetitions: repetitions,
       });
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
       try {
         await exportEvaluations(documents, scoreRepository, log);
@@ -233,17 +243,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
-      await reportModelScore(scoreRepository, currentRunId, log);
+      await reportModelScore(scoreRepository, currentRunId, log, {
+        taskModelId: model.id,
+        suiteId: process.env.EVAL_SUITE_ID,
+      });
     },
     {
       scope: 'worker',
     },
-  ],
-  executorClient: [
-    async ({ phoenixClient }, use) => {
-      await use(phoenixClient);
-    },
-    { scope: 'worker' },
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
@@ -302,12 +309,31 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   traceEsClient: [
     async ({ esClient }, use) => {
-      const traceEsClient = process.env.TRACING_ES_URL
+      const esUrl = process.env.TRACING_ES_URL;
+      const apiKey = process.env.TRACING_ES_API_KEY;
+      const traceEsClient = esUrl
         ? createEsClientForTesting({
-            esUrl: process.env.TRACING_ES_URL,
+            esUrl,
+            isCloud: isElasticCloudEsUrl(esUrl),
+            ...(apiKey ? { auth: { apiKey } } : {}),
           })
         : esClient;
       await use(traceEsClient);
+    },
+    { scope: 'worker' },
+  ],
+  evaluationsEsClient: [
+    async ({ esClient }, use) => {
+      const esUrl = process.env.EVALUATIONS_ES_URL;
+      const apiKey = process.env.EVALUATIONS_ES_API_KEY;
+      const evaluationsEsClient = esUrl
+        ? createEsClientForTesting({
+            esUrl,
+            isCloud: isElasticCloudEsUrl(esUrl),
+            ...(apiKey ? { auth: { apiKey } } : {}),
+          })
+        : esClient;
+      await use(evaluationsEsClient);
     },
     { scope: 'worker' },
   ],

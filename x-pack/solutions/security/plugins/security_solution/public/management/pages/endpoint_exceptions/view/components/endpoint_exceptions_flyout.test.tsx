@@ -183,7 +183,9 @@ describe('Endpoint exceptions flyout', () => {
     });
   });
 
-  describe('When valid form state', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253883
+  // FLAKY: https://github.com/elastic/kibana/issues/253640
+  describe.skip('When valid form state', () => {
     it('should enable "Add endpoint exception" button when form is valid', async () => {
       render({ alertData, isAlertDataLoading: false });
 
@@ -365,7 +367,8 @@ describe('Endpoint exceptions flyout', () => {
     });
   });
 
-  describe('When wildcard warning is active', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253648
+  describe.skip('When wildcard warning is active', () => {
     beforeEach(async () => {
       alertData.file!.path = 'lets*contain*wildcards';
 

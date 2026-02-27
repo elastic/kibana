@@ -7,9 +7,14 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -23,8 +28,11 @@ import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
+import type { SkillRegistry } from './services/skills/skill_registry';
+import type { AgentExecutionService } from './services/execution';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -34,6 +42,7 @@ export interface AgentBuilderSetupDependencies {
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
 }
@@ -44,6 +53,7 @@ export interface AgentBuilderStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AttachmentsSetup {
@@ -55,7 +65,8 @@ export interface AttachmentsSetup {
 
 export interface SkillsSetup {
   /**
-   * Register a skill to be available in agentBuilder.
+   * Register a built-in skill to be available in agentBuilder.
+   * Registration is synchronous; validation is deferred to start.
    */
   register: SkillServiceSetup['registerSkill'];
 }
@@ -68,6 +79,27 @@ export interface ToolsSetup {
    * Register a built-in tool to be available in agentBuilder.
    */
   register: ToolsServiceSetup['register'];
+}
+
+/**
+ * AgentBuilder skills service's start contract
+ */
+export interface SkillsStart {
+  /**
+   * Create a skill registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted skills.
+   */
+  getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
+  /**
+   * Register a skill dynamically after plugin start.
+   * Only affects future conversations (existing ones snapshot skills at creation time).
+   */
+  register: (skill: SkillDefinition) => Promise<void>;
+  /**
+   * Unregister a previously registered skill by ID.
+   * Returns true if the skill was found and removed.
+   */
+  unregister: (skillId: string) => Promise<boolean>;
 }
 
 /**
@@ -89,6 +121,32 @@ export interface AgentsSetup {
    * Register a built-in agent to be available in agentBuilder.
    */
   register: (definition: BuiltInAgentDefinition) => void;
+}
+
+export interface AgentsStart {
+  /**
+   * Executes an agent with the given parameters.
+   * @deprecated use execution service instead.
+   */
+  runAgent: RunAgentFn;
+  /**
+   * Return an agent registry scoped to the current user and context.
+   */
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+}
+
+/**
+ * AgentBuilder execution service's start contract
+ */
+export interface ExecutionStart {
+  /**
+   * Execute an agent.
+   */
+  executeAgent: AgentExecutionService['executeAgent'];
+  /**
+   * Retrieve an agent execution by its ID.
+   */
+  getExecution: AgentExecutionService['getExecution'];
 }
 
 /**
@@ -124,11 +182,17 @@ export interface AgentBuilderPluginStart {
   /**
    * Agents service, to execute agents.
    */
-  agents: {
-    runAgent: RunAgentFn;
-  };
+  agents: AgentsStart;
   /**
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
+  /**
+   * Skills service, to manage and access skills.
+   */
+  skills: SkillsStart;
+  /**
+   * Execution service, to execute agents and retrieve execution status.
+   */
+  execution: ExecutionStart;
 }
