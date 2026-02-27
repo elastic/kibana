@@ -53,11 +53,7 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
               expect(muteResponse.statusCode).to.eql(403);
               expect(muteResponse.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
