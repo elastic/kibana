@@ -275,16 +275,14 @@ describe('tab mapping utils', () => {
         services: toolkit.services,
       });
 
-      expect(searchSource.getSerializedFields()).toMatchInlineSnapshot(`
-        Object {
-          "filter": Array [],
-          "index": "the-data-view-id",
-          "query": Object {
-            "language": "kuery",
-            "query": "",
-          },
-        }
-      `);
+      expect(searchSource.getSerializedFields()).toEqual({
+        filter: [],
+        index: 'the-data-view-id',
+        query: {
+          language: 'kuery',
+          query: '',
+        },
+      });
     });
   });
 
