@@ -17,6 +17,7 @@ import type {
   TypedLensSerializedState,
   ValueFormatConfig,
 } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 
 import type {
   ConvertibleLayer,
@@ -192,7 +193,7 @@ export function convertFormBasedToTextBasedLayer({
     ...attributes,
     state: {
       ...attributes.state,
-      query: esqlQuery,
+      query: { esql: esql(esqlQuery.esql).print('wrapping') },
       datasourceStates: {
         textBased: newDatasourceState,
       },
