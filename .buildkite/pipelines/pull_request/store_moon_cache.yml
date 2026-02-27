@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/store_cache.sh
+    cancel_on_build_failing: true
     label: Store Cache for build
     timeout_in_minutes: 10
     id: store_cache
