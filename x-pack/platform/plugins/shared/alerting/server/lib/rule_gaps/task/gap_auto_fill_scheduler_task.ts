@@ -260,13 +260,6 @@ export async function processGapsForRules({
 
       aggregated = addChunkResultsToAggregation(aggregated, chunkResults);
 
-      if (truncatedRuleIds.length > 0) {
-        toProcessRuleIds = toProcessRuleIds.filter((id) => !truncatedRuleIds.includes(id));
-        if (toProcessRuleIds.length === 0) {
-          break;
-        }
-      }
-
       const chunkScheduledCount = chunkResults.reduce(
         (count, result) =>
           result.status === GapFillSchedulePerRuleStatus.SUCCESS ? count + 1 : count,
@@ -281,6 +274,13 @@ export async function processGapsForRules({
             remainingBackfills,
             state: SchedulerLoopState.CAPACITY_EXHAUSTED,
           };
+        }
+      }
+
+      if (truncatedRuleIds.length > 0) {
+        toProcessRuleIds = toProcessRuleIds.filter((id) => !truncatedRuleIds.includes(id));
+        if (toProcessRuleIds.length === 0) {
+          break;
         }
       }
     }
