@@ -427,9 +427,14 @@ steps:
                     with:
                       threat_technique_lines: "${{ variables.threat_technique_lines | push: variables.threat_technique_line }}"
 
-          # Related alerts: builds a graph of alerts that share entity values
-          # (host, user, process, IP, etc.) with the seed alert. Scores edges
-          # by field weight to surface the most relevant connections.
+          # Related alerts: starting from the seed alert, searches a time
+          # window (seed_window) for other alerts that share entity field
+          # values (host, user, process, IP, cloud identity, etc.).
+          # Each match is then expanded by expand_window to chain through
+          # transitively linked entities up to max_depth hops, building a
+          # scored graph of correlated alerts. Edge weights reflect field
+          # specificity so strong identifiers (process.entity_id, user.id)
+          # rank higher than noisier ones (source.ip, host.name).
           - name: get_related_alerts
             type: security.buildAlertEntityGraph
             with:
@@ -440,7 +445,7 @@ steps:
                 # --- Strong, stable identifiers (likely same attack) ---
                 - field: "process.entity_id"
                   score: 5
-                - field: "agent.id"
+                - field: "host.id"
                   score: 4
                 - field: "entity.id"
                   score: 4
@@ -452,6 +457,16 @@ steps:
                   score: 4
                 - field: "user.name"
                   score: 2
+                - field: "related.user"
+                  score: 2
+
+                # --- Cloud-specific user identifiers ---
+                - field: "aws.cloudtrail.user_identity.arn"
+                  score: 3
+                - field: "azure.auditlogs.properties.initiated_by.user.user_principal_name"
+                  score: 3
+                - field: "gcp.audit.authentication_info.principal_email"
+                  score: 3
 
                 # --- Host-level correlation ---
                 - field: "host.name"
@@ -483,6 +498,10 @@ steps:
               ignore_entities:
                 - field: "user.id"
                   values: ["S-1-5-18", "S-1-5-19", "S-1-5-20", "0"]
+                - field: "source.ip"
+                  values: ["::1", "127.0.0.1", "0.0.0.0"]
+                - field: "destination.ip"
+                  values: ["::1", "127.0.0.1", "0.0.0.0"]
               seed_window: "1h"
               expand_window: "1h"
               max_depth: 20

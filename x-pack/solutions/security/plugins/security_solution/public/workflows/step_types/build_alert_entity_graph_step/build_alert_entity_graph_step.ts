@@ -159,7 +159,7 @@ export const buildAlertEntityGraphStepDefinition: PublicStepDefinition = {
     'xpack.securitySolution.workflows.steps.buildAlertEntityGraph.description',
     {
       defaultMessage:
-        'Build a graph of alerts correlated by shared entities (e.g. host, user, service) via BFS traversal within an expanding time window',
+        'Build a scored graph of correlated alerts by performing a breadth-first search over shared entity fields (host, user, process, IP, cloud identity, etc.). Starting from a seed alert, the step searches a configurable time window (seed_window) for alerts that share entity values, then iteratively expands the window (expand_window) at each hop to chain through transitively linked entities up to max_depth rounds, producing a nodes-and-edges graph with per-field edge scores.',
     }
   ),
   icon: React.lazy(() =>
@@ -176,7 +176,11 @@ export const buildAlertEntityGraphStepDefinition: PublicStepDefinition = {
       'xpack.securitySolution.workflows.steps.buildAlertEntityGraph.documentation.details',
       {
         defaultMessage:
-          'Recursively discovers alerts correlated by shared entities (e.g. host, user, service) within a configurable, expanding time window and returns a nodes/edges graph. Correlation is controlled by a score threshold (min_entity_score + per-field score overrides; sums per-label scores).',
+          'Starting from a seed alert, performs a breadth-first search to discover correlated alerts that share entity field values (host, user, process, IP, cloud identity, service, container, etc.). ' +
+          'Round 0 queries a fixed time window (seed_window) around the seed timestamp. Each subsequent round widens the search bounds by expand_window based on the min/max timestamps of newly discovered alerts, chaining through transitively linked entities up to max_depth hops or max_alerts total. ' +
+          'Entity fields carry configurable scores that reflect identifier specificity (e.g. process.entity_id=5, host.id=4, user.name=2, source.ip=1). Aliases allow cross-field matching (e.g. source.ip ↔ destination.ip for lateral-movement detection). ' +
+          'An edge is created between two alerts when their summed per-label entity scores meet or exceed min_entity_score. ignore_entities filters out noisy values (service accounts, loopback IPs) that would create false correlation chains. ' +
+          'The output is a scored nodes-and-edges graph with per-alert metadata (rule name, severity, timestamp), per-edge label scores, and traversal stats (depth reached, query count, effective time range).',
       }
     ),
     examples: [
