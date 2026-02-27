@@ -144,6 +144,8 @@ async function handleEars401Error({
   logger,
   configurationUtilities,
   axiosInstance,
+  authMode,
+  profileUid,
 }: {
   error: AxiosErrorWithRetry;
   connectorId: string;
@@ -152,6 +154,8 @@ async function handleEars401Error({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   axiosInstance: AxiosInstance;
+  authMode?: AuthMode;
+  profileUid?: string;
 }): Promise<never | AxiosInstance> {
   if (error.config._retry) {
     return Promise.reject(error);
@@ -175,6 +179,8 @@ async function handleEars401Error({
     configurationUtilities,
     tokenUrl,
     connectorTokenClient,
+    authMode,
+    profileUid,
     forceRefresh: true,
   });
 
@@ -273,6 +279,8 @@ export const getAxiosInstanceWithAuth = ({
                     logger,
                     configurationUtilities,
                     axiosInstance,
+                    authMode,
+                    profileUid,
                   });
                 }
                 return handleOAuth401Error({
@@ -315,6 +323,8 @@ export const getAxiosInstanceWithAuth = ({
               configurationUtilities,
               tokenUrl: resolveEarsUrl(opts.tokenUrl, configurationUtilities.getEarsUrl()),
               connectorTokenClient,
+              authMode,
+              profileUid,
             });
           }
 

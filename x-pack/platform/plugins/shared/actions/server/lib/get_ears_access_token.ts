@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
@@ -17,6 +18,8 @@ interface GetEarsAccessTokenOpts {
   configurationUtilities: ActionsConfigurationUtilities;
   tokenUrl: string;
   connectorTokenClient: ConnectorTokenClientContract;
+  authMode?: AuthMode;
+  profileUid?: string;
   /**
    * When true, skip the expiration check and force a token refresh.
    * Use this when you've received a 401 and know the token is invalid
@@ -39,13 +42,28 @@ export const getEarsAccessToken = async ({
   configurationUtilities,
   tokenUrl,
   connectorTokenClient,
+  authMode,
+  profileUid,
   forceRefresh = false,
-}: GetEarsAccessTokenOpts): Promise<string | null> =>
-  getStoredTokenWithRefresh({
+}: GetEarsAccessTokenOpts): Promise<string | null> => {
+  const isPerUser = authMode === 'per-user';
+
+  if (isPerUser && !profileUid) {
+    logger.warn(
+      `Per-user authMode requires a profileUid for connectorId: ${connectorId}. Cannot retrieve token.`
+    );
+    return null;
+  }
+
+  return getStoredTokenWithRefresh({
     connectorId,
     logger,
     connectorTokenClient,
     forceRefresh,
+    isPerUser,
+    profileUid,
+    authMode,
     doRefresh: (refreshToken) =>
       requestEarsRefreshToken(tokenUrl, logger, { refreshToken }, configurationUtilities),
   });
+};
