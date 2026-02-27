@@ -2123,6 +2123,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/README.md @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/management/index.ts @elastic/appex-qa
+/x-pack/platform/test/serverless/functional/test_suites/management/index_1.ts @elastic/appex-qa
+/x-pack/platform/test/serverless/functional/test_suites/management/index_2.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/examples/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
 /x-pack/platform/test/README.md @elastic/appex-qa

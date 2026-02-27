@@ -13,15 +13,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseTestConfig.getAll(),
     testFiles: [
-      require.resolve('../../test_suites/management/index_1'),
-      require.resolve('../../test_suites/home_page'),
-      require.resolve('../../test_suites/dev_tools'),
-      require.resolve('../../test_suites/grok_debugger'),
-      require.resolve('../../test_suites/painless_lab'),
+      require.resolve('../../test_suites/management/index_2'),
+      require.resolve('../../test_suites/console'),
+      require.resolve('../../test_suites/spaces'),
+      require.resolve('../../test_suites/reporting'),
     ],
     junit: {
       reportName:
-        'Serverless Security Functional Tests - Common Group 1 (Management Part 1 + Misc)',
+        'Serverless Security Functional Tests - Common Group 18 (Management Part 2 + Console/Spaces/Reporting)',
     },
   };
 }
