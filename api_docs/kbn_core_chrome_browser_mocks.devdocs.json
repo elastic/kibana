@@ -15,7 +15,7 @@
         "label": "chromeServiceMock",
         "description": [],
         "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-        "lineNumber": 125,
+        "lineNumber": 126,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -31,7 +31,7 @@
               "() => jest.Mocked<ChromeServiceContract>"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 126,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -55,11 +55,11 @@
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              "InternalChromeSetup",
+              "ChromeSetup",
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 127,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -87,7 +87,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

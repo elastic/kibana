@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserActivityActionId } from './user_activity_actions';
+
 /**
  * Information about the object being acted upon.
  * @public
@@ -52,7 +54,7 @@ export type UserActivityEventType =
  */
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
-  action: string;
+  action: UserActivityActionId;
   /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
 }
@@ -74,7 +76,7 @@ export interface TrackUserActionParams {
  * @example
  * ```ts
  * core.userActivity.trackUserAction({
- *   event: { action: 'create_dashboard', type: 'creation' },
+ *   event: { action: 'edit_dashboard', type: 'change' },
  *   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: [] },
  * });
  * ```

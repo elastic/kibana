@@ -288,7 +288,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -310,7 +310,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
-            "lineNumber": 40,
+            "lineNumber": 42,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -516,7 +516,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+              "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
             "lineNumber": 64,
@@ -1069,7 +1069,7 @@
         "label": "StepStatus",
         "description": [],
         "signature": [
-          "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+          "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
         "lineNumber": 47,

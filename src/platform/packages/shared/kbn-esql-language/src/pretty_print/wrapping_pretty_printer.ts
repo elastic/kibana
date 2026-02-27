@@ -539,11 +539,10 @@ export class WrappingPrettyPrinter {
     return { txt, indented };
   }
 
-  protected readonly visitor: Visitor<any> = new Visitor()
+  protected readonly visitor: Visitor = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
       if (isPromqlNode(ctx.node)) {
-        const text = PromQLBasicPrettyPrinter.print(ctx.node);
-        return { txt: text || '<UNKNOWN>' };
+        return { txt: PromQLBasicPrettyPrinter.print(ctx.node) };
       }
 
       let text = ctx.node.text ?? '<EXPRESSION>';
@@ -1055,7 +1054,7 @@ export class WrappingPrettyPrinter {
       }
 
       return { txt: text };
-    });
+    }) as unknown as Visitor;
 
   public print(query: ESQLAstQueryExpression) {
     return this.visitor.visitQuery(query, undefined).txt;
