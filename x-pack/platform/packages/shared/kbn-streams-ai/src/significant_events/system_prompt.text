@@ -337,6 +337,23 @@ ES|QL strings MUST use **double quotes**: `"value"`. Single quotes are NOT valid
 - Triple-double-quotes (for strings containing quotes): `"""He said "hello"""`
 - Special characters: `\n` (newline), `\r` (carriage return), `\t` (tab)
 
+### Operator Selection Guide
+
+Choose the right operator based on the field type and your search intent:
+
+| Goal | Field Type | Operator | Example |
+| :--- | :--- | :--- | :--- |
+| Single term in text | `text` | `:` (match) | `body.text:"timeout"` |
+| All terms required, any order | `text` | Multiple `:` with `AND` | `body.text:"connection" AND body.text:"timeout"` |
+| Exact phrase (word order matters) | `text` | `MATCH_PHRASE` | `MATCH_PHRASE(body.text, "Failed password for")` |
+| Exact keyword value | `keyword` | `==` | `service.name == "api-service"` |
+| One of several keyword values | `keyword` | `IN` | `log.level IN ("ERROR", "CRITICAL")` |
+| Wildcard on keyword | `keyword` | `LIKE` | `host.name LIKE "prod-*"` |
+| Numeric range | numeric | `>=`, `<`, etc. | `http.response.status_code >= 500` |
+| Field has a value | any | `IS NOT NULL` | `error.message IS NOT NULL` |
+
+**Key principle:** Use full-text operators (`:`, `MATCH`, `MATCH_PHRASE`) only on `text` fields like `body.text` and `message`. Use exact operators (`==`, `IN`, `LIKE`) on `keyword` fields like `service.name` and `log.level`. Never use `==` on `text` fields — it compares the full un-analyzed raw string and almost never matches.
+
 ### 1. Full-Text Search — Match Operator (`:`)
 
 The `:` operator performs a full-text match query. It is the primary way to search text fields like `body.text` and `message`. The `:` is written directly between the field and the value — no spaces.
@@ -347,14 +364,22 @@ Alternatively, you can use the function form `MATCH(field, "query")` which is eq
 - `body.text:"OutOfMemoryError"` → documents where body.text contains this term
 - `body.text:"timeout"` → documents containing "timeout"
 
-**Important: multi-word behavior.**
-`body.text:"connection timeout"` uses a match query with default OR — it matches documents containing "connection" **OR** "timeout", which is usually too broad. Instead:
-- Require all terms: `body.text:"connection" AND body.text:"timeout"`
-- Or use `MATCH` with AND operator: `MATCH(body.text, "connection timeout", {"operator": "AND"})`
-- Or use MATCH_PHRASE for exact phrase order (see below)
+**CRITICAL: multi-word values produce OR matches — avoid them.**
+`body.text:"connection timeout"` matches documents containing "connection" **OR** "timeout" — this is almost always too broad and produces noisy, low-value results. Always use one of these patterns instead:
+
+- **All terms required (default choice):** `body.text:"connection" AND body.text:"timeout"` — use separate `:` per term joined with `AND`. This is the safest and most reliable pattern.
+- **All terms required (3+ terms):** `MATCH(body.text, "connection timeout error", {"operator": "AND"})` — cleaner for many terms.
+- **Exact phrase (word order matters):** `MATCH_PHRASE(body.text, "connection timeout")` — use only for well-known phrases where word order and adjacency are semantically important (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
+
+**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where order matters.
 
 **On keyword fields**, `:` performs exact matching (the field is not analyzed):
 - `log.level:"ERROR"` → exact match on keyword field
+
+For keyword fields, prefer `==` or `IN` — they are semantically clearer and less error-prone:
+- `log.level == "ERROR"` (preferred over `log.level:"ERROR"`)
+- `log.level IN ("ERROR", "CRITICAL", "FATAL")` (preferred for multiple values)
+- `service.name == "api-service"` (always use `==` for entity scoping)
 
 ### 2. Exact Phrase — MATCH_PHRASE
 
@@ -399,6 +424,8 @@ Use for keyword fields and numeric comparisons where you need exact matching:
 
 **Boolean operators MUST be uppercase.** `and`, `or`, `not` are NOT valid.
 
+**Precedence:** `AND` binds tighter than `OR`. The expression `a OR b AND c` means `a OR (b AND c)`. Always use parentheses when mixing `AND` and `OR` to make intent explicit.
+
 Examples:
 - `body.text:"error" AND service.name == "api-service"`
 - `body.text:"timeout" OR MATCH_PHRASE(body.text, "connection refused")`
@@ -425,6 +452,40 @@ Test if a value is in a list:
 
 ---
 
+### Idiomatic Query Patterns
+
+Use these as templates. They represent the highest-quality patterns for common log analysis scenarios:
+
+**Single error signature** (most common — prefer this for specific terms):
+- `FROM logs,logs.* | WHERE body.text:"OutOfMemoryError"`
+- `FROM logs,logs.* | WHERE body.text:"CrashLoopBackOff"`
+
+**Known phrase** (use MATCH_PHRASE only when word order and adjacency matter):
+- `FROM logs,logs.* | WHERE MATCH_PHRASE(body.text, "Failed password for")`
+- `FROM logs,logs.* | WHERE MATCH_PHRASE(body.text, "Connection refused")`
+
+**Multi-term co-occurrence** (all terms must appear — use separate `:` with AND):
+- `FROM logs,logs.* | WHERE body.text:"connection" AND body.text:"refused"`
+- `FROM logs,logs.* | WHERE body.text:"authentication" AND body.text:"failure"`
+
+**Entity-scoped detection** (use only when multiple entities exist in the dataset):
+- `FROM logs,logs.* | WHERE service.name == "checkout-api" AND body.text:"panic"`
+- `FROM logs,logs.* | WHERE service.name == "api-gateway" AND (body.text:"upstream" AND body.text:"timeout")`
+
+**Alternative error patterns** (OR for different manifestations of the same issue):
+- `FROM logs,logs.* | WHERE body.text:"OutOfMemoryError" OR MATCH_PHRASE(body.text, "heap space")`
+- `FROM logs,logs.* | WHERE body.text:"timeout" OR MATCH_PHRASE(body.text, "connection refused")`
+
+**Keyword field filtering** (structured fields — use exact operators):
+- `FROM logs,logs.* | WHERE log.level IN ("ERROR", "CRITICAL", "FATAL")`
+- `FROM logs,logs.* | WHERE http.response.status_code >= 500 AND http.response.status_code < 600`
+
+**Combined text + keyword** (most actionable pattern — text search narrowed by entity or level):
+- `FROM logs,logs.* | WHERE log.level == "ERROR" AND body.text:"database"`
+- `FROM logs,logs.* | WHERE service.name == "payment-svc" AND (body.text:"timeout" OR body.text:"refused")`
+
+---
+
 ## FORBIDDEN Patterns
 
 These patterns are common mistakes. NEVER generate any of them.
@@ -433,6 +494,8 @@ These patterns are common mistakes. NEVER generate any of them.
 | :--- | :--- | :--- |
 | `field:value` (no quotes on value) | KQL syntax — ES\|QL requires double-quoted strings | `field:"value"` |
 | `field:*wildcard*` | KQL wildcard syntax | `field LIKE "*wildcard*"` or `field:"value"` |
+| `body.text:"multiple words"` | Multi-word `:` uses OR — matches ANY word, far too broad | `body.text:"word1" AND body.text:"word2"` or `MATCH_PHRASE(body.text, "exact phrase")` |
+| `field == "value"` on `text` fields | Compares full un-analyzed string — almost never matches | Use `field:"value"` or `MATCH(field, "value")` for text fields |
 | `KQL("...")` | Legacy wrapper — generate native expressions instead | Use `:`, `MATCH`, `MATCH_PHRASE`, `LIKE`, `==` etc. |
 | `SELECT`, `JOIN`, `GROUP BY` | SQL syntax — not valid in ES|QL | Not applicable |
 | `LIKE '%value%'` | SQL LIKE uses `%` — use `*` for wildcards | `LIKE "*value*"` |
