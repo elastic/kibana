@@ -19,16 +19,6 @@ import type {
   SvgAiGradient,
 } from './gradient_types';
 
-// EUI icons always use viewBox="0 0 16 16" regardless of rendered CSS size (s=12px, m=16px).
-// userSpaceOnUse coordinates target the viewBox, so these work at every rendered size.
-const ICON_GRADIENT_GEOMETRY = {
-  gradientUnits: 'userSpaceOnUse' as const,
-  x1: '-0.5',
-  y1: '-2.5',
-  x2: '15.5',
-  y2: '9.5',
-};
-
 const diagonalGradientStartPercent = 2.98;
 const diagonalGradientEndPercent = 66.24;
 const diagonalGradientAngle = 130;
@@ -283,7 +273,6 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
     return {
       iconGradientCss,
       gradientId,
-      defs: useIconGradient ? ICON_GRADIENT_GEOMETRY : undefined,
       colors: foregroundColors,
     };
   }, [gradientId, variant, euiTheme]);

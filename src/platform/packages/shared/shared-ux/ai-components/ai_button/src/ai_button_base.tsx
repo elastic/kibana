@@ -31,13 +31,11 @@ export const AiButtonBase = (props: AiButtonProps) => {
     variant,
     iconOnly: props.iconOnly,
   });
-  const { gradientId, iconGradientCss, colors, defs } = useSvgAiGradient({ variant });
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant });
 
-  // Render local SVG <defs> so icon paths can reference url(#gradientId).
-  const svgGradientDefs =
-    iconGradientCss && defs ? (
-      <SvgAiGradientDefs gradientId={gradientId} colors={colors} {...defs} />
-    ) : null;
+  const svgGradientDefs = iconGradientCss ? (
+    <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
+  ) : null;
 
   if (props.iconOnly === true) {
     const {

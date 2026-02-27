@@ -28,7 +28,6 @@ const defaultSvgGradient = {
   gradientId: 'test-gradient',
   iconGradientCss: undefined,
   colors: { startColor: '#000', endColor: '#fff' },
-  defs: { gradientUnits: 'userSpaceOnUse', x1: '-0.5', y1: '-2.5', x2: '15.5', y2: '9.5' },
 };
 
 beforeEach(() => {
@@ -103,18 +102,6 @@ describe('<AiButtonBase />', () => {
     });
 
     render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
-
-    expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
-  });
-
-  it("doesn't render gradient defs when defs is undefined (accent variant)", () => {
-    mockUseSvgAiGradient.mockReturnValue({
-      ...defaultSvgGradient,
-      iconGradientCss: css``,
-      defs: undefined,
-    });
-
-    render(<AiButtonBase variant="accent">Gradient check</AiButtonBase>);
 
     expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
   });

@@ -10,34 +10,25 @@
 import type { SerializedStyles } from '@emotion/react';
 import type { AiButtonVariant } from './types';
 
-/** Options for the gradient hooks (shared by button and SVG gradient). */
+/** Options for the AI button gradient hooks. */
 export interface AiButtonGradientOptions {
   readonly variant?: AiButtonVariant;
   readonly iconOnly?: boolean;
 }
 
-/** Geometry for the SVG <linearGradient> defs element. */
-export interface SvgLinearGradientGeometry {
-  readonly gradientUnits: 'userSpaceOnUse';
-  readonly x1: string;
-  readonly y1: string;
-  readonly x2: string;
-  readonly y2: string;
-}
-
-/** Styles returned by `useAiButtonGradientStyles`. */
+/** Computed gradient styles for an AI button. */
 export interface AiButtonGradientStyles {
   readonly buttonCss: SerializedStyles;
   readonly labelCss: SerializedStyles;
 }
 
-/** Start/end colors for a gradient (used internally and in stops). */
+/** Start and end colors for a linear gradient. */
 export interface AiGradientColors {
   readonly startColor: string;
   readonly endColor: string;
 }
 
-/** Resolved styles per variant (internal to resolveVariantStyles). */
+/** Resolved per-variant button styles. */
 export interface ResolvedVariantStyles {
   readonly buttonBackground: string;
   readonly hoverBackground: string;
@@ -46,7 +37,7 @@ export interface ResolvedVariantStyles {
   readonly labelCss: SerializedStyles;
 }
 
-/** Return type of `useSvgAiGradient`. */
+/** SVG gradient definition with colors and optional icon styles. */
 export interface SvgAiGradient {
   /**
    * Emotion CSS that applies the gradient to EUI icons (`.euiIcon`) via `fill/stroke`.
@@ -60,8 +51,4 @@ export interface SvgAiGradient {
    * The gradient colors used by the SVG defs component.
    */
   readonly colors: AiGradientColors;
-  /**
-   * Optional geometry overrides for the rendered SVG <linearGradient>.
-   */
-  readonly defs?: SvgLinearGradientGeometry;
 }

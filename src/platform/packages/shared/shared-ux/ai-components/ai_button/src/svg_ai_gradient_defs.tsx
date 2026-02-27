@@ -8,35 +8,29 @@
  */
 
 import React from 'react';
-import type { AiGradientColors, SvgLinearGradientGeometry } from './gradient_types';
+import type { AiGradientColors } from './gradient_types';
 
+/** Percentage offsets that inset the gradient stops to keep the color transition within the icon's visible area. */
 const ICON_GRADIENT_START_OFFSET = 16;
 const ICON_GRADIENT_END_OFFSET = 83;
 
-export interface SvgAiGradientDefsProps extends SvgLinearGradientGeometry {
+export interface SvgAiGradientDefsProps {
   readonly gradientId: string;
   readonly colors: AiGradientColors;
 }
 
-export const SvgAiGradientDefs = ({
-  gradientId,
-  colors,
-  gradientUnits,
-  x1,
-  y1,
-  x2,
-  y2,
-}: SvgAiGradientDefsProps): JSX.Element => {
+/** EUI icons use viewBox="0 0 16 16" regardless of rendered CSS size; userSpaceOnUse coordinates target that viewBox. Gradient angle and bounds are per design spec. */
+export const SvgAiGradientDefs = ({ gradientId, colors }: SvgAiGradientDefsProps): JSX.Element => {
   return (
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
       <defs>
         <linearGradient
           id={gradientId}
-          x1={x1}
-          y1={y1}
-          x2={x2}
-          y2={y2}
-          gradientUnits={gradientUnits}
+          x1="-0.5"
+          y1="-2.5"
+          x2="15.5"
+          y2="9.5"
+          gradientUnits="userSpaceOnUse"
         >
           <stop offset={`${ICON_GRADIENT_START_OFFSET}%`} stopColor={colors.startColor} />
           <stop offset={`${ICON_GRADIENT_END_OFFSET}%`} stopColor={colors.endColor} />
