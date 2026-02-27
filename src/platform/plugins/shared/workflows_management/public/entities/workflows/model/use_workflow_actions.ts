@@ -35,7 +35,9 @@ export interface UpdateWorkflowParams {
 }
 
 interface OptimisticContext {
+  // Map of query keys to their previous data for workflow lists.
   previousData: Map<string, WorkflowListDto>;
+  // Previous workflow detail data for individual workflow view.
   previousWorkflowDetail?: WorkflowDetailDto;
 }
 
@@ -52,17 +54,21 @@ export const useWorkflowActions = () => {
       });
     },
     onMutate: async ({ id, workflow }) => {
+      // Cancel outgoing refetches to avoid overwriting optimistic updates.
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
       const previousData = new Map<string, WorkflowListDto>();
 
+      // Update all workflow list queries (different pages, filters, etc.).
       queryClient
         .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
+            // Store previous data for rollback on error.
             previousData.set(queryKeyString, data);
 
+            // Immediately update the workflow in the list with new data.
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
@@ -72,6 +78,8 @@ export const useWorkflowActions = () => {
           }
         });
 
+      // Update workflow detail query for non-YAML changes only.
+      // YAML save flow is handled separately by the editor state.
       const previousWorkflowDetail = queryClient.getQueryData<WorkflowDetailDto>(['workflows', id]);
       if (previousWorkflowDetail && !workflow.yaml) {
         const optimisticWorkflowDetail: WorkflowDetailDto = {
@@ -81,19 +89,23 @@ export const useWorkflowActions = () => {
         queryClient.setQueryData(['workflows', id], optimisticWorkflowDetail);
       }
 
+      // Return previous data for potential rollback.
       return { previousData, previousWorkflowDetail };
     },
     onError: (err, variables, context) => {
+      // Restore previous workflow list data.
       if (context?.previousData) {
         context.previousData.forEach((data, queryKeyString) => {
           const queryKey = JSON.parse(queryKeyString);
           queryClient.setQueryData(queryKey, data);
         });
       }
+      // For workflow detail, only revert non-YAML changes.
       if (context?.previousWorkflowDetail && !variables.workflow.yaml) {
         queryClient.setQueryData(['workflows', variables.id], context.previousWorkflowDetail);
       }
 
+      // Report telemetry for failed update.
       const errorObj = err instanceof Error ? err : new Error(String(err));
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
@@ -109,6 +121,7 @@ export const useWorkflowActions = () => {
       });
     },
     onSuccess: (_, variables) => {
+      // Report telemetry for successful update.
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
@@ -122,6 +135,7 @@ export const useWorkflowActions = () => {
         error: undefined,
       });
 
+      // Refetch to ensure data is in sync with the server.
       queryClient.invalidateQueries({
         queryKey: ['workflows'],
         refetchType: variables.skipRefetch ? 'none' : 'active',
@@ -137,17 +151,21 @@ export const useWorkflowActions = () => {
       });
     },
     onMutate: async ({ ids }) => {
+      // Cancel outgoing refetches to avoid overwriting optimistic updates.
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
       const previousData = new Map<string, WorkflowListDto>();
 
+      // Update all workflow list queries (different pages, filters, etc.).
       queryClient
         .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
+            // Store previous data for rollback on error.
             previousData.set(queryKeyString, data);
 
+            // Immediately remove deleted workflows and update pagination.
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.filter((w) => !ids.includes(w.id)),
@@ -158,9 +176,11 @@ export const useWorkflowActions = () => {
           }
         });
 
+      // Return previous data for potential rollback.
       return { previousData };
     },
     onError: (err, variables, context) => {
+      // Restore previous workflow list data (brings back deleted workflows).
       if (context?.previousData) {
         context.previousData.forEach((data, queryKeyString) => {
           const queryKey = JSON.parse(queryKeyString);
@@ -168,6 +188,7 @@ export const useWorkflowActions = () => {
         });
       }
 
+      // Report telemetry for failed deletion.
       const errorObj = err instanceof Error ? err : new Error(String(err));
       variables.ids.forEach((workflowId) => {
         telemetry.reportWorkflowDeleted({
@@ -179,6 +200,7 @@ export const useWorkflowActions = () => {
       });
     },
     onSuccess: (_, variables) => {
+      // Report telemetry for successful deletion.
       variables.ids.forEach((workflowId) => {
         telemetry.reportWorkflowDeleted({
           workflowIds: [workflowId],
@@ -188,6 +210,7 @@ export const useWorkflowActions = () => {
         });
       });
 
+      // Refetch to ensure data is in sync with the server.
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
@@ -196,6 +219,7 @@ export const useWorkflowActions = () => {
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
+      // Report telemetry for successful workflow run.
       telemetry.reportWorkflowRunInitiated({
         workflowId: variables.id,
         hasInputs: inputCount > 0,
@@ -205,6 +229,7 @@ export const useWorkflowActions = () => {
         triggerTab: variables.triggerTab,
       });
 
+      // Refresh workflows and execution views after a run.
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', variables.id, 'executions'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', variables.id] });
@@ -213,6 +238,7 @@ export const useWorkflowActions = () => {
       const inputCount = Object.keys(variables.inputs || {}).length;
       const errorObj = err instanceof Error ? err : new Error(String(err));
 
+      // Report telemetry for failed workflow run.
       telemetry.reportWorkflowRunInitiated({
         workflowId: variables.id,
         hasInputs: inputCount > 0,
@@ -232,6 +258,7 @@ export const useWorkflowActions = () => {
       });
     },
     onSuccess: ({ workflowExecutionId }, variables) => {
+      // Report telemetry for successful step test run.
       telemetry.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
@@ -243,6 +270,7 @@ export const useWorkflowActions = () => {
     },
     onError: (err, variables) => {
       const errorObj = err instanceof Error ? err : new Error(String(err));
+      // Report telemetry for failed step test run.
       telemetry.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
@@ -258,6 +286,7 @@ export const useWorkflowActions = () => {
       return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
     },
     onSuccess: (clonedWorkflow, variables) => {
+      // Report telemetry for successful clone.
       telemetry.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
         newWorkflowId: clonedWorkflow.id,
@@ -269,6 +298,7 @@ export const useWorkflowActions = () => {
     },
     onError: (err, variables) => {
       const errorObj = err instanceof Error ? err : new Error(String(err));
+      // Report telemetry for failed clone.
       telemetry.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
         origin: 'workflow_list',
