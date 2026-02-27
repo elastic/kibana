@@ -511,6 +511,19 @@ function DiscoverDocumentsComponent({
     internalStateActions.setCascadedDocumentsDataGridUiState
   );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const latestExpandedDoc = useLatest(expandedDoc);
+  const latestInitialDocViewerTabId = useLatest(initialDocViewerTabId);
+  const syncCascadeExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined) => {
+      dispatch(
+        setExpandedDocAction({
+          expandedDoc: doc,
+          initialDocViewerTabId: latestInitialDocViewerTabId.current,
+        })
+      );
+    },
+    [dispatch, setExpandedDocAction, latestInitialDocViewerTabId]
+  );
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -538,6 +551,8 @@ function DiscoverDocumentsComponent({
       },
       onUpdateESQLQuery,
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
+      getExpandedDoc: () => latestExpandedDoc.current,
+      syncExpandedDoc: syncCascadeExpandedDoc,
     };
   }, [
     availableCascadeGroups,
@@ -546,6 +561,7 @@ function DiscoverDocumentsComponent({
     esqlVariables,
     latestCascadedDocumentsDataGridsUiState,
     latestDataCascadeUiState,
+    latestExpandedDoc,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
@@ -553,6 +569,7 @@ function DiscoverDocumentsComponent({
     setCascadedDocumentsDataGridUiState,
     setDataCascadeUiState,
     setSelectedCascadeGroups,
+    syncCascadeExpandedDoc,
     viewModeToggle,
   ]);
 

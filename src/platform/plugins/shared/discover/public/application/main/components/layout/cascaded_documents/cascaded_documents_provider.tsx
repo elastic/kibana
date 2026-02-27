@@ -51,6 +51,8 @@ export interface CascadedDocumentsContext
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  getExpandedDoc: () => DataTableRecord | undefined;
+  syncExpandedDoc: (doc: DataTableRecord | undefined) => void;
 }
 
 const cascadedDocumentsContext = createContext<CascadedDocumentsContext | undefined>(undefined);
@@ -71,6 +73,32 @@ export const isCascadedDocumentsVisible = (
 
   return isEsqlQuery && isValidState;
 };
+
+export function createExpandedDocStore() {
+  const listeners = new Map<string, Set<() => void>>();
+  const docs = new Map<string, DataTableRecord | undefined>();
+
+  return {
+    getDoc(cellId: string) {
+      return docs.get(cellId);
+    },
+    setDoc(cellId: string, doc: DataTableRecord | undefined) {
+      docs.set(cellId, doc);
+      listeners.get(cellId)?.forEach((listener) => listener());
+    },
+    subscribe(cellId: string, listener: () => void) {
+      if (!listeners.has(cellId)) {
+        listeners.set(cellId, new Set());
+      }
+      listeners.get(cellId)!.add(listener);
+      return () => {
+        listeners.get(cellId)?.delete(listener);
+      };
+    },
+  };
+}
+
+export type ExpandedDocStore = ReturnType<typeof createExpandedDocStore>;
 
 export const useCascadedDocumentsContext = () => {
   const context = useContext(cascadedDocumentsContext);

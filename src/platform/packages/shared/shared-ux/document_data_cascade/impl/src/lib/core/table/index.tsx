@@ -93,6 +93,8 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
         return actions.setExpandedRows(proposedExpandedState);
       }
 
+      const rowsById = table.getRowModel().rowsById;
+
       // track if we encountered a root row in the proposed expanded rows, not existing in previous expanded rows
       let newRootRow: string | null = null;
 
@@ -100,10 +102,12 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
 
       // Compute the new expanded rows, comparing the proposed expanded rows with the previous expanded rows
       for (const proposedRowId of proposedExpandedRows) {
-        const row = table.getRow(proposedRowId);
+        const row = rowsById[proposedRowId];
+
+        if (!row) continue;
 
         // special treatment for root rows
-        if (!row?.parentId) {
+        if (!row.parentId) {
           if (!previousExpandedRows.includes(proposedRowId) && !allowMultipleRowToggle) {
             // on encountering a root row that is newly expanded, we assign it to the new root pointer
             // and exit, as we want to only keep this row expanded
@@ -112,10 +116,11 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
           } else {
             newExpandedRows[proposedRowId] = true;
           }
-        } else if (row?.parentId && proposedExpandedRows.includes(row?.parentId)) {
+        } else if (row.parentId && proposedExpandedRows.includes(row.parentId)) {
           // when row is a child, and its parent id is in previous expanded row,
           // we need to check if it has a sibling then apply a fitting treatment
-          const siblings = table.getRow(row?.parentId)?.getLeafRows() ?? [];
+          const parentRow = rowsById[row.parentId];
+          const siblings = parentRow?.getLeafRows() ?? [];
           const expandedRowSiblings = siblings.filter(
             (sibling) => proposedExpandedRows.includes(sibling.id) && sibling.id !== proposedRowId
           );
@@ -127,7 +132,7 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
             (expandedRowSiblings.length && !previousExpandedRows.includes(proposedRowId))
           ) {
             newExpandedRows[proposedRowId] = true;
-            newExpandedRows[row.parentId] = true; // we keep it's parent as well
+            newExpandedRows[row.parentId] = true;
           }
         }
       }

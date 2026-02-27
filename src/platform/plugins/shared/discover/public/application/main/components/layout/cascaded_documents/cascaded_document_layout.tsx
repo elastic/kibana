@@ -17,6 +17,7 @@ import {
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@kbn/esql-language';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -36,7 +37,14 @@ import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hoo
 import {
   type DataCascadeUiState,
   useCascadedDocumentsContext,
+  createExpandedDocStore,
 } from './cascaded_documents_provider';
+
+interface ExpandedFlyoutState {
+  cellId: string;
+  doc: DataTableRecord;
+  rows: DataTableRecord[];
+}
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -79,6 +87,8 @@ const ESQLDataCascade = React.memo(
       getDataCascadeUiState,
       setDataCascadeUiState,
       cascadeGroupingChangeHandler,
+      getExpandedDoc,
+      syncExpandedDoc,
     } = useCascadedDocumentsContext();
 
     const cascadeGroupData = useGroupedCascadeData({
@@ -105,39 +115,69 @@ const ESQLDataCascade = React.memo(
       columns,
       togglePopover
     );
-    const [expandedDocByCellId, setExpandedDocByCellId] = useState<
-      Record<string, DataTableRecord | undefined>
-    >({});
+
+    const [expandedDocStore] = useState(createExpandedDocStore);
+    const [flyoutState, setFlyoutState] = useState<ExpandedFlyoutState | undefined>(() => {
+      const restoredDoc = getExpandedDoc();
+      return restoredDoc ? { cellId: '', doc: restoredDoc, rows: [restoredDoc] } : undefined;
+    });
+    const flyoutStateRef = useRef<ExpandedFlyoutState | undefined>();
+    flyoutStateRef.current = flyoutState;
+    const latestSyncExpandedDoc = useLatest(syncExpandedDoc);
+
+    const onExpandDoc = useCallback(
+      (cellId: string, doc: DataTableRecord | undefined, cellRows: DataTableRecord[]) => {
+        const prev = flyoutStateRef.current;
+        if (prev && prev.cellId !== cellId) {
+          expandedDocStore.setDoc(prev.cellId, undefined);
+        }
+        expandedDocStore.setDoc(cellId, doc);
+        latestSyncExpandedDoc.current(doc);
+        if (doc) {
+          setFlyoutState({ cellId, doc, rows: cellRows });
+        } else {
+          setFlyoutState((p) => (p?.cellId === cellId ? undefined : p));
+        }
+      },
+      [expandedDocStore, latestSyncExpandedDoc]
+    );
+
+    const setFlyoutExpandedDoc = useCallback(
+      (doc: DataTableRecord | undefined) => {
+        const current = flyoutStateRef.current;
+        if (!current) return;
+        expandedDocStore.setDoc(current.cellId, doc);
+        latestSyncExpandedDoc.current(doc);
+        if (doc) {
+          setFlyoutState({ ...current, doc });
+        } else {
+          setFlyoutState(undefined);
+        }
+      },
+      [expandedDocStore, latestSyncExpandedDoc]
+    );
 
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => {
-        const setExpandedDocForCell: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = (
-          doc
-        ) => {
-          setExpandedDocByCellId((prev) => ({ ...prev, [cellId]: doc }));
-        };
-
-        return (
-          <ESQLDataCascadeLeafCell
-            dataGridDensityState={dataGridDensityState}
-            showTimeCol={showTimeCol}
-            dataView={dataView}
-            showKeyboardShortcuts={showKeyboardShortcuts}
-            renderDocumentView={renderDocumentView}
-            externalCustomRenderers={externalCustomRenderers}
-            onUpdateDataGridDensity={onUpdateDataGridDensity}
-            expandedDoc={expandedDocByCellId[cellId]}
-            setExpandedDoc={setExpandedDocForCell}
-            cellData={cellData!}
-            cellId={cellId}
-            getScrollElement={getScrollElement}
-            getScrollOffset={getScrollOffset}
-            getScrollMargin={getScrollMargin}
-          />
-        );
-      },
+      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
+        <ESQLDataCascadeLeafCell
+          dataGridDensityState={dataGridDensityState}
+          showTimeCol={showTimeCol}
+          dataView={dataView}
+          showKeyboardShortcuts={showKeyboardShortcuts}
+          renderDocumentView={renderDocumentView}
+          externalCustomRenderers={externalCustomRenderers}
+          onUpdateDataGridDensity={onUpdateDataGridDensity}
+          expandedDocStore={expandedDocStore}
+          onExpandDoc={onExpandDoc}
+          cellData={cellData!}
+          cellId={cellId}
+          getScrollElement={getScrollElement}
+          getScrollOffset={getScrollOffset}
+          getScrollMargin={getScrollMargin}
+        />
+      ),
       [
         dataGridDensityState,
         showTimeCol,
@@ -146,7 +186,8 @@ const ESQLDataCascade = React.memo(
         renderDocumentView,
         externalCustomRenderers,
         onUpdateDataGridDensity,
-        expandedDocByCellId,
+        expandedDocStore,
+        onExpandDoc,
       ]
     );
 
@@ -187,33 +228,43 @@ const ESQLDataCascade = React.memo(
     }, [dataCascadeRef, latestSetDataCascadeUiState]);
 
     return (
-      <DataCascade<ESQLDataGroupNode>
-        ref={setDataCascadeRef}
-        size="s"
-        overscan={15}
-        data={cascadeGroupData}
-        cascadeGroups={availableCascadeGroups}
-        initialGroupColumn={selectedCascadeGroups}
-        initialAnchorItemIndex={dataCascadeUiState?.scrollAnchorItemIndex ?? 0}
-        initialTableState={initialTableState}
-        initialRect={dataCascadeUiState?.scrollRect}
-        customTableHeader={customTableHeading}
-      >
-        <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
-          rowHeaderTitleSlot={rowHeaderTitle}
-          rowHeaderMetaSlots={rowHeaderMeta}
-          rowHeaderActions={rowActions}
-          onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
-          onCascadeGroupNodeCollapsed={onCascadeGroupNodeCollapsed}
+      <>
+        <DataCascade<ESQLDataGroupNode>
+          ref={setDataCascadeRef}
+          size="s"
+          overscan={15}
+          data={cascadeGroupData}
+          cascadeGroups={availableCascadeGroups}
+          initialGroupColumn={selectedCascadeGroups}
+          initialAnchorItemIndex={dataCascadeUiState?.scrollAnchorItemIndex ?? 0}
+          initialTableState={initialTableState}
+          initialRect={dataCascadeUiState?.scrollRect}
+          customTableHeader={customTableHeading}
         >
-          <DataCascadeRowCell
-            onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
-            onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+          <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
+            rowHeaderTitleSlot={rowHeaderTitle}
+            rowHeaderMetaSlots={rowHeaderMeta}
+            rowHeaderActions={rowActions}
+            onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+            onCascadeGroupNodeCollapsed={onCascadeGroupNodeCollapsed}
           >
-            {cascadeLeafRowRenderer}
-          </DataCascadeRowCell>
-        </DataCascadeRow>
-      </DataCascade>
+            <DataCascadeRowCell
+              onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
+              onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+            >
+              {cascadeLeafRowRenderer}
+            </DataCascadeRowCell>
+          </DataCascadeRow>
+        </DataCascade>
+        {flyoutState &&
+          renderDocumentView?.(
+            flyoutState.doc,
+            flyoutState.rows,
+            [SOURCE_COLUMN],
+            setFlyoutExpandedDoc,
+            undefined
+          )}
+      </>
     );
   }
 );
