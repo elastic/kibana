@@ -10,7 +10,7 @@
 import React, { type KeyboardEvent, type PropsWithChildren, useCallback } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPopover, keys } from '@elastic/eui';
+import { EuiPopover, keys, useEuiTheme } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
@@ -22,7 +22,9 @@ import { dialogTexts } from './translations';
  * Opens when the control enters editing mode.
  */
 export function DateRangePickerDialog({ children }: PropsWithChildren) {
-  const { isEditing, setIsEditing, maxWidth, panelRef, panelId } = useDateRangePickerContext();
+  const { isEditing, setIsEditing, panelRef, panelId } = useDateRangePickerContext();
+  const { euiTheme } = useEuiTheme();
+  const maxWidth = euiTheme.components.forms.maxWidth;
 
   const closePopover = useCallback(() => {
     setIsEditing(false);

@@ -40,7 +40,6 @@ export function DateRangePickerControl() {
     isEditing,
     setIsEditing,
     compressed,
-    maxWidth,
     displayText,
     displayFullFormattedText,
     displayShortDuration,
@@ -53,6 +52,7 @@ export function DateRangePickerControl() {
     onInputChange,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
+  const maxWidth = euiTheme.components.forms.maxWidth;
   const hintText = useInputHintText(text);
 
   const controlRef = useRef<HTMLDivElement>(null);

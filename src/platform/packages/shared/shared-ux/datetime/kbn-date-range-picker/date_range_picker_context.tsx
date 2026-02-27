@@ -19,7 +19,7 @@ import React, {
   type MutableRefObject,
 } from 'react';
 
-import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import type { TimeRangeBounds, TimeRangeBoundsOption, TimeRange, InitialFocus } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
@@ -64,8 +64,6 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   presets: TimeRangeBoundsOption[];
   /** Recently used time ranges shown in the Recent section. */
   recent: TimeRangeBoundsOption[];
-  /** Maximum width for the picker control, derived from EUI theme. */
-  maxWidth: string;
   /** Human-readable display text for the current time range (shown when idle). */
   displayText: string;
   /** Full formatted text including absolute dates, used for tooltips. */
@@ -128,9 +126,6 @@ export function DateRangePickerProvider({
   onPresetDelete,
   onInputChange,
 }: PropsWithChildren<DateRangePickerProps>) {
-  const { euiTheme } = useEuiTheme();
-  const maxWidth = euiTheme.components.forms.maxWidth;
-
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -215,7 +210,6 @@ export function DateRangePickerProvider({
       isEditing,
       setIsEditing: setIsEditingWithRestore,
       compressed,
-      maxWidth,
       displayText,
       displayFullFormattedText,
       displayShortDuration,
@@ -238,7 +232,6 @@ export function DateRangePickerProvider({
       isEditing,
       setIsEditingWithRestore,
       compressed,
-      maxWidth,
       displayText,
       displayFullFormattedText,
       displayShortDuration,
