@@ -36,6 +36,7 @@ plugins:
     - streams
     - streams_app
     - transform
+    - triggers_actions_ui
     - uptime
     - ux
     - workflows_extensions
