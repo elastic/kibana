@@ -1,6 +1,7 @@
 ---
 name: enzyme-to-rtl
 description: Migrate Enzyme tests to React Testing Library (RTL). Use when converting shallow/mount enzyme tests to RTL render, replacing enzyme selectors with RTL queries, updating snapshot tests, or when the user mentions enzyme migration, RTL migration, or react-testing-library.
+disable-model-invocation: true
 ---
 
 # Enzyme to React Testing Library Migration
@@ -39,24 +40,33 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 ```
 
-Keep `@kbn/test-jest-helpers` only for non-enzyme utilities (e.g. `nextTick`, `StubBrowserStorage`). Remove `findTestSubject` — use `screen.getByTestId` instead.
+Keep `@kbn/test-jest-helpers` only for non-enzyme utilities (e.g. `nextTick`, `StubBrowserStorage`, `renderWithI18n(<Comp />)`,`renderWithI18n(<Comp />)`  ). Remove `findTestSubject` — use `screen.getByTestId` instead. 
 
-When the component needs i18n, wrap it in `I18nProvider` or use a test wrapper. When it needs other providers (Redux, Router, theme), add them as a `wrapper` option to `render()` or inline in JSX.
+When the component needs i18n or EUI theme context, prefer the RTL helpers from `@kbn/test-jest-helpers` instead of manually wrapping in providers:
+
+| Helper | Wraps with |
+|---|---|
+| `renderWithKibanaRenderContext(<Comp />)` | `EuiThemeProvider` + `I18nProvider` — **preferred default** for most migrations |
+| `renderWithI18n(<Comp />)` | `I18nProvider` only |
+| `renderWithEuiTheme(<Comp />)` | `EuiThemeProvider` only |
+
+These are drop-in replacements for RTL's `render()` and accept the same arguments (including `renderOptions`). When the component needs additional providers (Redux, Router, custom contexts), add them as a `wrapper` option or inline in JSX.
 
 ## Rendering
 
 | Enzyme | RTL |
 |---|---|
-| `shallow(<Comp />)` | `render(<Comp />)` |
-| `mount(<Comp />)` | `render(<Comp />)` |
-| `shallowWithIntl(<Comp />)` | `render(<I18nProvider><Comp /></I18nProvider>)` |
-| `mountWithIntl(<Comp />)` | `render(<I18nProvider><Comp /></I18nProvider>)` |
+| `shallow(<Comp />)` | `render(<Comp />)` or `renderWithKibanaRenderContext(<Comp />)` |
+| `mount(<Comp />)` | `render(<Comp />)` or `renderWithKibanaRenderContext(<Comp />)` |
+| `shallowWithIntl(<Comp />)` | `renderWithI18n(<Comp />)` or `renderWithKibanaRenderContext(<Comp />)` |
+| `mountWithIntl(<Comp />)` | `renderWithI18n(<Comp />)` or `renderWithKibanaRenderContext(<Comp />)` |
 
 Use `screen` for queries (queries `document.body`, so portals are reachable too):
 
 ```typescript
 render(<MyComponent />);
 expect(screen.getByTestId('foo')).toBeInTheDocument();
+```
 
 ## Selector migration
 
@@ -71,13 +81,20 @@ Note: In Kibana Jest setup, RTL uses `testIdAttribute: 'data-test-subj'`, so `ge
 | `wrapper.find('[data-test-subj="x"]').exists()` | `screen.queryByTestId('x')` (returns `null` if absent) |
 | Nested: `wrapper.find('[data-test-subj="a"] [data-test-subj="b"]')` | `within(screen.getByTestId('a')).getByTestId('b')` |
 
+Make sure `findTestSubject` matcher behavior is preserved with a `getByTestId` `RegExp` matcher when `data-test-subj` contains multiple tokens.
+
+After interactions that trigger async updates, prefer `findByTestId` over `getByTestId` to avoid `act()` warnings from unresolved updates.
+
 Kibana-specific fallback: `subj()` from `@kbn/test-subj-selector` converts test-subject selector syntax to a CSS selector (supports `~`/`*`/`>`). Prefer RTL queries first; use this when you truly need CSS selection:
 
 ```typescript
 import { subj } from '@kbn/test-subj-selector';
 
 const el = container.querySelector(subj('foo > ~bar'));
+```
+
 Note: Some EUI components reuse the same `data-test-subj` on both a wrapper and the actual control. If `getByTestId` throws “Found multiple elements”, use `getAllByTestId`/`queryAllByTestId` and narrow (or scope with `within(...)`) instead of switching to brittle CSS selectors.
+
 ### CSS selectors
 
 | Enzyme | RTL |
@@ -93,6 +110,7 @@ Enzyme chains like `wrapper.find('tbody tr td a').at(3).find('div span').at(2).t
 ```typescript
 const links = container.querySelectorAll('tbody tr td a');
 links[3]?.querySelectorAll('div span')[2]?.textContent;
+```
 
 ### Global selectors (modals, popovers)
 
@@ -104,6 +122,7 @@ expect(screen.getByTestId('modal-confirm')).toBeInTheDocument();
 
 // Or scope explicitly
 within(document.body).getByTestId('modal-confirm');
+```
 
 ### Targeting the last element in a NodeList
 
