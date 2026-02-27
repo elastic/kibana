@@ -35,6 +35,7 @@ const comparators: StateComparators<DashboardSettings> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
   hide_panel_titles: 'referenceEquality',
+  hide_panel_borders: 'referenceEquality',
   sync_colors: 'referenceEquality',
   sync_cursor: 'referenceEquality',
   sync_tooltips: 'referenceEquality',
@@ -89,6 +90,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
       description$: stateManager.api.description$,
       timeRestore$: stateManager.api.timeRestore$,
       hideTitle$: stateManager.api.hidePanelTitles$,
+      hideBorder$: stateManager.api.hidePanelBorders$,
       settings: {
         autoApplyFilters$: stateManager.api.autoApplyFilters$,
         syncColors$: stateManager.api.syncColors$,
