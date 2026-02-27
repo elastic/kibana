@@ -72,10 +72,7 @@ const mockPacks = (packs: Array<{ id: string }> = []) => {
   usePacksMock.mockReturnValue({ data: { data: packs } } as never);
 };
 
-const mockProfiles = (
-  profilesMap = new Map(),
-  isLoading = false
-) => {
+const mockProfiles = (profilesMap = new Map(), isLoading = false) => {
   useBulkGetUserProfilesMock.mockReturnValue({ profilesMap, isLoading });
 };
 
