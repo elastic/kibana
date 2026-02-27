@@ -32,7 +32,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardAgent: 5135
-  dashboardMarkdown: 4994
+  dashboardMarkdown: 6219
   data: 494390
   dataQuality: 11469
   datasetQuality: 49315
@@ -208,6 +208,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52210
   watcher: 10485
-  workflowsExtensions: 89952
+  workflowsExtensions: 101161
   workflowsManagement: 21318
   workplaceAIApp: 65547
