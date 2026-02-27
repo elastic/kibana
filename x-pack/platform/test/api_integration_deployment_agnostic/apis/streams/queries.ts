@@ -89,20 +89,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('lists queries when defined on the stream', async () => {
       const queries = [
         {
+          affected_streams: [STREAM_NAME],
           id: v4(),
           title: 'OutOfMemoryError',
           kql: { query: "message:'OutOfMemoryError'" },
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'OutOfMemoryError'")`,
           },
+          type: 'match' as const,
+          tags: [],
         },
         {
+          affected_streams: [STREAM_NAME],
           id: v4(),
           title: 'cluster_block_exception',
           kql: { query: "message:'cluster_block_exception'" },
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'cluster_block_exception'")`,
           },
+          type: 'match' as const,
+          tags: [],
         },
       ];
 
@@ -130,12 +136,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('PUT /api/streams/{name}/queries/{queryId}', () => {
       it('inserts a query when inexistant', async () => {
         const query = {
+          affected_streams: [STREAM_NAME],
           id: v4(),
           title: 'initial title',
           kql: { query: "message:'initial query'" },
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'initial query'")`,
           },
+          type: 'match' as const,
+          tags: [],
         };
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -161,10 +170,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the query and create a new rule when updating an existing query kql', async () => {
         const query = {
+          affected_streams: [STREAM_NAME],
           id: 'first',
           title: 'initial title',
           kql: { query: 'initial query' },
           esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")` },
+          type: 'match' as const,
+          tags: [],
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -190,10 +202,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([
           {
+            affected_streams: [STREAM_NAME],
             id: query.id,
             title: query.title,
             kql: { query: 'updated query' },
             esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query")` },
+            type: 'match',
+            tags: [],
           },
         ]);
 
@@ -205,10 +220,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the query and the rule when updating an existing query title', async () => {
         const query = {
+          affected_streams: [STREAM_NAME],
           id: 'first',
           title: 'initial title',
           kql: { query: 'initial query' },
           esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")` },
+          type: 'match' as const,
+          tags: [],
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -234,10 +252,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([
           {
+            affected_streams: [STREAM_NAME],
             id: query.id,
             title: 'updated title',
             kql: { query: query.kql.query },
             esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")` },
+            type: 'match',
+            tags: [],
           },
         ]);
 
@@ -254,6 +275,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           type: 'system' as const,
         };
         const query = {
+          affected_streams: [STREAM_NAME],
           id: 'feature-query',
           title: 'query with feature',
           kql: { query: 'test query' },
@@ -261,6 +283,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("test query") AND \`host.name\` == "host1"`,
           },
           feature: initialFeature,
+          type: 'match' as const,
+          tags: [],
         };
 
         await apiClient
@@ -308,6 +332,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           type: 'system' as const,
         };
         const query = {
+          affected_streams: [STREAM_NAME],
           id: 'feature-query-unchanged',
           title: 'initial title',
           kql: { query: 'initial query' },
@@ -315,6 +340,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query") AND \`host.name\` == "host1"`,
           },
           feature,
+          type: 'match' as const,
+          tags: [],
         };
 
         await apiClient
@@ -348,6 +375,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([
           {
+            affected_streams: [STREAM_NAME],
             id: query.id,
             title: 'updated title',
             kql: { query: 'updated query' },
@@ -355,6 +383,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query") AND \`host.name\` == "host1"`,
             },
             feature,
+            type: 'match',
+            tags: [],
           },
         ]);
       });
@@ -367,10 +397,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...emptyAssets,
         queries: [
           {
+            affected_streams: [STREAM_NAME],
             id: queryId,
             title: 'Significant Query',
             kql: { query: "message:'query'" },
-            esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'query'")` },
+            esql: {
+              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'query'")`,
+            },
+            type: 'match',
+            tags: [],
           },
         ],
       });
@@ -401,22 +436,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'first',
         title: 'first query',
         kql: { query: 'query 1' },
         esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 1")` },
+        type: 'match' as const,
+        tags: [],
       };
       const secondQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'second',
         title: 'second query',
         kql: { query: 'query 2' },
         esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 2")` },
+        type: 'match' as const,
+        tags: [],
       };
       const thirdQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'third',
         title: 'third query',
         kql: { query: 'query 3' },
         esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3")` },
+        type: 'match' as const,
+        tags: [],
       };
       await putStream(apiClient, STREAM_NAME, {
         stream,
@@ -426,16 +470,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
       const newQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'fourth',
         title: 'fourth query',
         kql: { query: 'query 4' },
         esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 4")` },
+        type: 'match' as const,
+        tags: [],
       };
       const updateThirdQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'third',
         title: 'third query',
         kql: { query: 'query 3 updated' },
         esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3 updated")` },
+        type: 'match' as const,
+        tags: [],
       };
 
       const { esql: _ne, ...newQueryInput } = newQuery;
@@ -496,6 +546,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         type: 'system' as const,
       };
       const queryWithFeature = {
+        affected_streams: [STREAM_NAME],
         id: 'feature-query-bulk',
         title: 'query with feature',
         kql: { query: 'test query' },
@@ -503,6 +554,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("test query") AND \`host.name\` == "host1"`,
         },
         feature: initialFeature,
+        type: 'match' as const,
+        tags: [],
       };
 
       await apiClient
