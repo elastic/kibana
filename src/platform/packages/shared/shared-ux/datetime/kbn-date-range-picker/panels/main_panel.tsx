@@ -145,12 +145,8 @@ export function MainPanel() {
     applyRange();
   }, [onPresetSave, applyRange, timeRange]);
 
+  const styles = mainPanelStyles(euiThemeContext);
   const dividerStyles = panelDividerStyles(euiThemeContext);
-  const stickyMenuStyles = css`
-    background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
-    position: sticky;
-    bottom: 0;
-  `;
 
   // temporary dev-only flag to show the footer conditionally
   // TODO remove as we make progress and add content to it
@@ -162,7 +158,7 @@ export function MainPanel() {
         <PanelBodySection spacingSide="none">
           <PresetsRecentTabs />
         </PanelBodySection>
-        <PanelBodySection spacingSide="none" css={stickyMenuStyles}>
+        <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
           <hr css={dividerStyles.root} />
           <SubPanelMenu />
         </PanelBodySection>

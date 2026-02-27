@@ -63,6 +63,12 @@ export const timeWindowButtonsTexts = {
   ),
 };
 
+export const dialogTexts = {
+  ariaLabel: i18n.translate('sharedUXPackages.dateRangePicker.dialog.ariaLabel', {
+    defaultMessage: 'Date range picker dialog',
+  }),
+};
+
 export const mainPanelTexts = {
   presetsLabel: i18n.translate('sharedUXPackages.dateRangePicker.mainPanel.presetsLabel', {
     defaultMessage: 'Presets',

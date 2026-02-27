@@ -16,12 +16,17 @@ export const mainPanelStyles = ({ euiTheme }: UseEuiTheme) => {
     padding-block-start: ${euiTheme.size.s};
     margin-inline: ${euiTheme.size.s};
     position: sticky;
-    top: 0;
+    top: 0px;
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
   const list = css`
     padding-block: ${euiTheme.size.s};
   `;
+  const stickyBottom = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    position: sticky;
+    bottom: 0px;
+  `;
 
-  return { root, tabs, list };
+  return { root, tabs, list, stickyBottom };
 };

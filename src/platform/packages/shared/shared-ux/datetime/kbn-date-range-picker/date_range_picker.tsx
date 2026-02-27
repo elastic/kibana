@@ -25,6 +25,8 @@ import { CalendarPanel } from './panels/calendar_panel';
 import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
 import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
+const DEFAULT_PANEL_ID = 'main' as const;
+
 export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 
 /** Configuration for a consumer-provided panel inside the date range picker dialog. */
@@ -103,7 +105,7 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
  * A date range picker component that accepts natural language and date math input.
  */
 export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps) {
-  const defaultPanelId = 'main';
+  const defaultPanelId = DEFAULT_PANEL_ID;
   const panelDescriptors: DateRangePickerPanelDescriptor[] = useMemo(
     () => panels.map(({ id, title, icon }) => ({ id, title, icon })),
     [panels]

@@ -15,6 +15,7 @@ import { EuiPopover, keys } from '@elastic/eui';
 import { FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { DateRangePickerControl } from './date_range_picker_control';
+import { dialogTexts } from './translations';
 
 /**
  * Dialog popover for the DateRangePicker.
@@ -84,7 +85,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       }}
       panelProps={{
         id: panelId,
-        'aria-label': 'Date range picker dialog',
+        'aria-label': dialogTexts.ariaLabel,
         'aria-modal': undefined,
         tabIndex: -1,
         onKeyDown: onPanelKeyDown,

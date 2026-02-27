@@ -66,6 +66,8 @@ export const Presets: Story = {
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
 
+const timeRangeKey = (o: Pick<TimeRangeBoundsOption, 'start' | 'end'>) => `${o.start}|${o.end}`;
+
 function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
@@ -77,8 +79,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
 
     if (!args.isInvalid) {
       setRecents((prev) => {
-        const key = `${args.start}|${args.end}`;
-        const deduped = prev.filter((r) => `${r.start}|${r.end}` !== key);
+        const deduped = prev.filter((r) => timeRangeKey(r) !== timeRangeKey(args));
         return [{ start: args.start, end: args.end }, ...deduped].slice(0, 10);
       });
     }
@@ -90,8 +91,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
     (option: TimeRangeBoundsOption) => {
       onPresetSave?.(option);
       setPresets((prev) => {
-        const key = `${option.start}|${option.end}`;
-        const deduped = prev.filter((p) => `${p.start}|${p.end}` !== key);
+        const deduped = prev.filter((p) => timeRangeKey(p) !== timeRangeKey(option));
         return [...deduped, option];
       });
     },
@@ -102,8 +102,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
     (option: TimeRangeBoundsOption) => {
       onPresetDelete?.(option);
       setPresets((prev) => {
-        const key = `${option.start}|${option.end}`;
-        return prev.filter((p) => `${p.start}|${p.end}` !== key);
+        return prev.filter((p) => timeRangeKey(p) !== timeRangeKey(option));
       });
     },
     [onPresetDelete]
