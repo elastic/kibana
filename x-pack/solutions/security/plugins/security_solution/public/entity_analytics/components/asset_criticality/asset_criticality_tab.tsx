@@ -28,15 +28,15 @@ import { AssetCriticalityFileUploader } from '../asset_criticality_file_uploader
 import { useAssetCriticalityPrivileges } from './use_asset_criticality';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import { useKibana } from '../../../common/lib/kibana';
-import type { EngineDescriptor } from '../../../../common/api/entity_analytics';
-import { EntityStoreErrorCallout } from '../entity_store/components/entity_store_error_callout';
+import {
+  ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID,
+  ASSET_CRITICALITY_INSUFFICIENT_PRIVILEGES_TEST_ID,
+  ASSET_CRITICALITY_FILE_UPLOAD_SECTION_TEST_ID,
+  ASSET_CRITICALITY_INFO_PANEL_TEST_ID,
+  ASSET_CRITICALITY_DOC_LINK_TEST_ID,
+} from '../../test_ids';
 
-interface AssetCriticalityTabProps {
-  deleteError?: string;
-  engines?: EngineDescriptor[];
-}
-
-export const AssetCriticalityTab = ({ deleteError, engines }: AssetCriticalityTabProps) => {
+export const AssetCriticalityTab = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const {
     data: assetCriticalityPrivileges,
@@ -44,10 +44,6 @@ export const AssetCriticalityTab = ({ deleteError, engines }: AssetCriticalityTa
     isLoading: assetCriticalityIsLoading,
   } = useAssetCriticalityPrivileges('AssetCriticalityUploadPage');
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
-
-  const entityStoreCallouts = (engines ?? [])
-    .filter((engine) => engine.status === 'error')
-    .map((engine) => <EntityStoreErrorCallout key={engine.type} engine={engine} />);
 
   return (
     <EuiFlexGroup gutterSize="xl">
@@ -58,25 +54,7 @@ export const AssetCriticalityTab = ({ deleteError, engines }: AssetCriticalityTa
         isLoading={assetCriticalityIsLoading}
       />
       <EuiFlexItem grow={2}>
-        <EuiFlexGroup direction="column">
-          {deleteError && (
-            <EuiCallOut
-              announceOnMount
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.errors.deleteErrorTitle"
-                  defaultMessage="There was a problem deleting the entity store"
-                />
-              }
-              color="danger"
-              iconType="alert"
-            >
-              <p>{deleteError}</p>
-            </EuiCallOut>
-          )}
-          {entityStoreCallouts}
-          <WhatIsAssetCriticalityPanel />
-        </EuiFlexGroup>
+        <WhatIsAssetCriticalityPanel />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -105,7 +83,7 @@ const FileUploadSection: React.FC<{
     return <InsufficientAssetCriticalityPrivilegesCallout />;
   }
   return (
-    <EuiFlexItem grow={3}>
+    <EuiFlexItem grow={3} data-test-subj={ASSET_CRITICALITY_FILE_UPLOAD_SECTION_TEST_ID}>
       <EuiSpacer size="m" />
       <EuiText size="s">
         <FormattedMessage
@@ -124,7 +102,12 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
   const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
 
   return (
-    <EuiPanel hasBorder={true} paddingSize="l" grow={false}>
+    <EuiPanel
+      hasBorder={true}
+      paddingSize="l"
+      grow={false}
+      data-test-subj={ASSET_CRITICALITY_INFO_PANEL_TEST_ID}
+    >
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.intro"
         defaultMessage="As part of importing entities using a text file, you are also able to set Asset Criticality for the imported Entities."
@@ -162,6 +145,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
         target="_blank"
         rel="noopener nofollow noreferrer"
         href={entityAnalyticsLinks.assetCriticality}
+        data-test-subj={ASSET_CRITICALITY_DOC_LINK_TEST_ID}
       >
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.documentationLink"
@@ -183,6 +167,7 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
       }
       color="primary"
       iconType="info"
+      data-test-subj={ASSET_CRITICALITY_INSUFFICIENT_PRIVILEGES_TEST_ID}
     >
       <EuiText size="s">
         <FormattedMessage
@@ -218,6 +203,7 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
         }
         color="primary"
         iconType="info"
+        data-test-subj={ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID}
       >
         <EuiText size="s">{msg}</EuiText>
       </EuiCallOut>

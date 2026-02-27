@@ -16,6 +16,13 @@ import {
 } from './entity_analytics_toggle';
 import type { EntityAnalyticsStatus } from '../hooks/use_entity_analytics_status';
 
+import {
+  ENTITY_ANALYTICS_HEALTH_TEST_ID,
+  ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID,
+  ENTITY_ANALYTICS_SWITCH_TEST_ID,
+  ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID,
+} from '../test_ids';
+
 const mockToggle = jest.fn();
 jest.mock('../hooks/use_toggle_entity_analytics', () => ({
   useToggleEntityAnalytics: () => mockUseToggleReturn,
@@ -35,22 +42,22 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('EntityAnalyticsHealth', () => {
   it('shows On when status is enabled', () => {
     render(<EntityAnalyticsHealth status="enabled" />);
-    expect(screen.getByText('On')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
   });
 
   it('shows On when status is partially_enabled', () => {
     render(<EntityAnalyticsHealth status="partially_enabled" />);
-    expect(screen.getByText('On')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
   });
 
   it('shows Off when status is disabled', () => {
     render(<EntityAnalyticsHealth status="disabled" />);
-    expect(screen.getByText('Off')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('Off');
   });
 
   it('shows Off when status is not_installed', () => {
     render(<EntityAnalyticsHealth status="not_installed" />);
-    expect(screen.getByText('Off')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('Off');
   });
 });
 
@@ -69,7 +76,7 @@ describe('EntityAnalyticsErrorPanel', () => {
         entityStoreErrors={[]}
       />
     );
-    expect(screen.getByTestId('entity-analytics-error-panel')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID)).toBeInTheDocument();
     expect(screen.getByText('Risk engine init failed')).toBeInTheDocument();
   });
 
@@ -106,21 +113,21 @@ describe('EntityAnalyticsToggle', () => {
 
   it('renders an unchecked switch when status is not_installed', () => {
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId('entity-analytics-switch');
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).not.toBeChecked();
   });
 
   it('renders a checked switch when status is enabled', () => {
     mockUseToggleReturn.status = 'enabled';
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId('entity-analytics-switch');
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
   });
 
   it('renders a checked switch when status is partially_enabled', () => {
     mockUseToggleReturn.status = 'partially_enabled';
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId('entity-analytics-switch');
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
   });
 
@@ -128,26 +135,26 @@ describe('EntityAnalyticsToggle', () => {
     mockUseToggleReturn.status = 'enabling';
     mockUseToggleReturn.isLoading = true;
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId('entity-analytics-switch');
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeDisabled();
   });
 
   it('shows loading spinner when isLoading', () => {
     mockUseToggleReturn.isLoading = true;
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    expect(screen.getByTestId('entity-analytics-status-loading')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
   it('calls toggle when switch is clicked', () => {
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByTestId('entity-analytics-switch'));
+    fireEvent.click(screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID));
     expect(mockToggle).toHaveBeenCalledTimes(1);
   });
 
   it('disables the switch when status is error', () => {
     mockUseToggleReturn.status = 'error';
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId('entity-analytics-switch');
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeDisabled();
   });
 
@@ -158,7 +165,35 @@ describe('EntityAnalyticsToggle', () => {
     };
 
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId('entity-analytics-switch');
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeDisabled();
+  });
+
+  it('disables the switch when privileges are still loading', () => {
+    const props = {
+      ...defaultProps,
+      isPrivilegesLoading: true,
+    };
+
+    render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeDisabled();
+  });
+
+  it('renders checked and disabled when enabled but privileges are loading', () => {
+    mockUseToggleReturn.status = 'enabled';
+    const props = { ...defaultProps, isPrivilegesLoading: true };
+    render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeChecked();
+    expect(toggle).toBeDisabled();
+  });
+
+  it('renders unchecked and disabled when status is error', () => {
+    mockUseToggleReturn.status = 'error';
+    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).not.toBeChecked();
     expect(toggle).toBeDisabled();
   });
 });

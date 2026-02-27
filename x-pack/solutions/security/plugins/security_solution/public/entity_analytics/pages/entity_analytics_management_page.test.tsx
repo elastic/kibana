@@ -11,6 +11,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_page';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
+import {
+  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
+  RISK_SCORE_TAB_TEST_ID,
+  ASSET_CRITICALITY_TAB_TEST_ID,
+  ENGINE_STATUS_TAB_TEST_ID,
+  ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
+} from '../test_ids';
+
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 jest.mock('../../common/hooks/use_app_toasts', () => ({
@@ -31,8 +39,10 @@ jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => ({ isLoading: false, hasAllRequiredPrivileges: true }),
 }));
 
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
 jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => false,
+  useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+    mockUseIsExperimentalFeatureEnabled(...args),
 }));
 
 jest.mock('../api/hooks/use_risk_engine_status', () => ({
@@ -77,23 +87,45 @@ jest.mock('../components/asset_criticality/use_asset_criticality', () => ({
   }),
 }));
 
+const mockUseEntityStoreStatus = jest.fn().mockReturnValue({
+  data: { status: 'not_installed', engines: [] },
+});
+const mockUseDeleteEntityEngineMutation = jest.fn().mockReturnValue({
+  isLoading: false,
+  isError: false,
+  error: null,
+  mutateAsync: jest.fn(),
+});
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
-  useEntityStoreStatus: () => ({
-    data: { status: 'not_installed', engines: [] },
-  }),
+  useEntityStoreStatus: (...args: unknown[]) => mockUseEntityStoreStatus(...args),
   useEnableEntityStoreMutation: () => ({ isLoading: false, isError: false, mutate: jest.fn() }),
   useStopEntityEngineMutation: () => ({ isLoading: false, mutate: jest.fn() }),
-  useDeleteEntityEngineMutation: () => ({ isLoading: false, isError: false, mutate: jest.fn() }),
+  useDeleteEntityEngineMutation: (...args: unknown[]) => mockUseDeleteEntityEngineMutation(...args),
 }));
 
+const mockUseEntityEnginePrivileges = jest.fn().mockReturnValue({
+  data: { has_all_required: true },
+});
 jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
-  useEntityEnginePrivileges: () => ({
-    data: { has_all_required: true },
-  }),
+  useEntityEnginePrivileges: (...args: unknown[]) => mockUseEntityEnginePrivileges(...args),
 }));
 
 jest.mock('../components/entity_store/components/engines_status', () => ({
-  EngineStatus: () => <span>{'Mocked Engine Status Tab'}</span>,
+  EngineStatus: () => <span data-test-subj="mock-engine-status">{'Mocked Engine Status Tab'}</span>,
+}));
+
+jest.mock('../components/entity_store/components/entity_store_missing_privileges_callout', () => ({
+  EntityStoreMissingPrivilegesCallout: () => (
+    <span data-test-subj="entity-store-missing-privileges">
+      {'Entity store missing privileges'}
+    </span>
+  ),
+}));
+
+jest.mock('../components/entity_store/components/clear_entity_data_button', () => ({
+  ClearEntityDataButton: () => (
+    <span data-test-subj="clear-entity-data-button">{'Clear Entity Data'}</span>
+  ),
 }));
 
 jest.mock('../hooks/use_enabled_entity_types', () => ({
@@ -113,12 +145,16 @@ jest.mock(
 );
 
 jest.mock('../components/entity_analytics_toggle', () => ({
-  EntityAnalyticsToggle: () => 'Entity analytics toggle',
+  EntityAnalyticsToggle: () => (
+    <span data-test-subj="mock-entity-analytics-toggle">{'Entity analytics toggle'}</span>
+  ),
 }));
 jest.mock('../components/risk_score_management/risk_score_useful_links_section', () => ({
   RiskScoreUsefulLinksSection: () => 'Useful links',
 }));
-const mockRiskScorePreviewSection = jest.fn().mockReturnValue(<p>{'Risk score preview'}</p>);
+const mockRiskScorePreviewSection = jest
+  .fn()
+  .mockReturnValue(<p data-test-subj="mock-risk-score-preview">{'Risk score preview'}</p>);
 jest.mock('../components/risk_score_management/risk_score_preview_section', () => ({
   RiskScorePreviewSection: (props: never) => mockRiskScorePreviewSection(props),
 }));
@@ -128,7 +164,11 @@ jest.mock('../components/risk_score_management/alert_filters_kql_bar', () => ({
 }));
 
 jest.mock('../components/asset_criticality_file_uploader/asset_criticality_file_uploader', () => ({
-  AssetCriticalityFileUploader: () => 'Asset criticality file uploader',
+  AssetCriticalityFileUploader: () => (
+    <span data-test-subj="mock-asset-criticality-file-uploader">
+      {'Asset criticality file uploader'}
+    </span>
+  ),
 }));
 
 const defaultRiskEngineSettings = {
@@ -179,6 +219,19 @@ describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseConfigurableRiskEngineSettings.mockReturnValue(buildConfig());
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'not_installed', engines: [] },
+    });
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      data: { has_all_required: true },
+    });
+    mockUseDeleteEntityEngineMutation.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      error: null,
+      mutateAsync: jest.fn(),
+    });
   });
 
   const pageComponent = () => (
@@ -191,15 +244,15 @@ describe('EntityAnalyticsManagementPage', () => {
 
   it('renders page title and tabs', () => {
     render(pageComponent());
-    expect(screen.getByText('Entity analytics')).toBeInTheDocument();
-    expect(screen.getByTestId('riskScoreTab')).toBeInTheDocument();
-    expect(screen.getByTestId('importEntitiesTab')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(RISK_SCORE_TAB_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(ASSET_CRITICALITY_TAB_TEST_ID)).toBeInTheDocument();
   });
 
   it('has the risk score tab selected by default with content visible', () => {
     render(pageComponent());
-    expect(screen.getByText('Entity analytics toggle')).toBeInTheDocument();
-    expect(screen.getByText('Risk score preview')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-entity-analytics-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-risk-score-preview')).toBeInTheDocument();
   });
 
   it('toggles the save bar when making changes to the closed alerts toggle', () => {
@@ -230,10 +283,8 @@ describe('EntityAnalyticsManagementPage', () => {
       from: 'now-30d',
       to: 'now',
       includeClosedAlerts: false,
-      privileges: {
-        hasAllRequiredPrivileges: true,
-        isLoading: false,
-      },
+      hasReadPermissions: true,
+      isPrivilegesLoading: false,
     });
 
     fireEvent.click(screen.getByTestId('includeClosedAlertsSwitch'));
@@ -253,16 +304,63 @@ describe('EntityAnalyticsManagementPage', () => {
       from: 'now-30d',
       to: 'now',
       includeClosedAlerts: true,
-      privileges: {
-        hasAllRequiredPrivileges: true,
-        isLoading: false,
-      },
+      hasReadPermissions: true,
+      isPrivilegesLoading: false,
     });
   });
 
-  it('switches to Import Entities tab when clicked', () => {
+  it('switches to Asset Criticality tab when clicked', () => {
     render(pageComponent());
-    fireEvent.click(screen.getByTestId('importEntitiesTab'));
-    expect(screen.queryByText('Risk score preview')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId(ASSET_CRITICALITY_TAB_TEST_ID));
+    expect(screen.getByTestId('mock-asset-criticality-file-uploader')).toBeInTheDocument();
+  });
+
+  it('shows the Engine Status tab when entity store is installed with privileges', () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'running', engines: [{ type: 'host' }] },
+    });
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      data: { has_all_required: true },
+    });
+
+    render(pageComponent());
+    expect(screen.getByTestId(ENGINE_STATUS_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not show Engine Status tab when entity store is not installed', () => {
+    render(pageComponent());
+    expect(screen.queryByTestId(ENGINE_STATUS_TAB_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('shows feature flag callout when entity store is disabled by feature flag', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    render(pageComponent());
+    expect(screen.getByTestId(ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows entity store missing privileges callout when privileges are insufficient', () => {
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      data: { has_all_required: false },
+    });
+
+    render(pageComponent());
+    expect(screen.getByTestId('entity-store-missing-privileges')).toBeInTheDocument();
+  });
+
+  it('shows the Clear Entity Data button when entity store is installed with privileges', () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'running', engines: [{ type: 'host' }] },
+    });
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      data: { has_all_required: true },
+    });
+
+    render(pageComponent());
+    expect(screen.getByTestId('clear-entity-data-button')).toBeInTheDocument();
+  });
+
+  it('does not show the Clear Entity Data button when entity store is not installed', () => {
+    render(pageComponent());
+    expect(screen.queryByTestId('clear-entity-data-button')).not.toBeInTheDocument();
   });
 });

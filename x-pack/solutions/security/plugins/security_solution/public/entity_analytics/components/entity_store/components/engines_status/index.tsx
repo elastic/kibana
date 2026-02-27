@@ -27,7 +27,6 @@ import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
 import { EntityStoreErrorCallout } from '../entity_store_error_callout';
-import { ClearEntityDataButton } from '../clear_entity_data_button';
 
 const FILE_NAME = 'engines_status.json';
 
@@ -38,15 +37,7 @@ const errorMessage = i18n.translate(
   }
 );
 
-interface EngineStatusProps {
-  onDeleteEntityEngine: () => Promise<void>;
-  isDeletingEntityEngine: boolean;
-}
-
-export const EngineStatus = ({
-  onDeleteEntityEngine,
-  isDeletingEntityEngine,
-}: EngineStatusProps) => {
+export const EngineStatus = () => {
   const {
     data,
     isLoading: isStatusAPILoading,
@@ -85,12 +76,6 @@ export const EngineStatus = ({
       {data?.engines?.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <ClearEntityDataButton
-                onDelete={onDeleteEntityEngine}
-                isDeleting={isDeletingEntityEngine}
-              />
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" onClick={downloadJson}>
                 <FormattedMessage

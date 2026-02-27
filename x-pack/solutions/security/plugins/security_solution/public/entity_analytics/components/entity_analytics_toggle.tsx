@@ -21,6 +21,12 @@ import {
 import type { EntityAnalyticsStatus } from '../hooks/use_entity_analytics_status';
 import { useToggleEntityAnalytics } from '../hooks/use_toggle_entity_analytics';
 import * as i18n from '../translations';
+import {
+  ENTITY_ANALYTICS_HEALTH_TEST_ID,
+  ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID,
+  ENTITY_ANALYTICS_SWITCH_TEST_ID,
+  ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID,
+} from '../test_ids';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
   const isOn = status === 'enabled' || status === 'partially_enabled';
@@ -28,7 +34,7 @@ export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> 
     <EuiHealth
       textSize="m"
       color={isOn ? 'success' : 'subdued'}
-      data-test-subj="entity-analytics-health"
+      data-test-subj={ENTITY_ANALYTICS_HEALTH_TEST_ID}
     >
       {isOn ? i18n.ENTITY_ANALYTICS_STATUS_ON : i18n.ENTITY_ANALYTICS_STATUS_OFF}
     </EuiHealth>
@@ -51,7 +57,7 @@ export const EntityAnalyticsErrorPanel: React.FC<{
         title={i18n.ERROR_PANEL_TITLE}
         color="danger"
         iconType="error"
-        data-test-subj="entity-analytics-error-panel"
+        data-test-subj={ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID}
       >
         <p>{i18n.ERROR_PANEL_MESSAGE}</p>
         <EuiAccordion id="entity-analytics-errors" buttonContent={i18n.ERROR_PANEL_ERRORS}>
@@ -106,7 +112,10 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {isLoading && (
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner data-test-subj="entity-analytics-status-loading" size="m" />
+              <EuiLoadingSpinner
+                data-test-subj={ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID}
+                size="m"
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
@@ -115,7 +124,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={i18n.ENTITY_ANALYTICS_STATUS}
-              data-test-subj="entity-analytics-switch"
+              data-test-subj={ENTITY_ANALYTICS_SWITCH_TEST_ID}
               checked={isChecked}
               onChange={toggle}
               disabled={isDisabled}

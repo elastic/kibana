@@ -9,6 +9,11 @@ import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  CLEAR_ENTITY_DATA_BUTTON_TEST_ID,
+  CLEAR_ENTITY_DATA_MODAL_TEST_ID,
+} from '../../../test_ids';
+
 interface ClearEntityDataButtonProps {
   onDelete: () => Promise<void>;
   isDeleting: boolean;
@@ -25,7 +30,12 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
 
   return (
     <>
-      <EuiButtonEmpty color="danger" iconType="trash" onClick={showClearModal}>
+      <EuiButtonEmpty
+        color="danger"
+        iconType="trash"
+        onClick={showClearModal}
+        data-test-subj={CLEAR_ENTITY_DATA_BUTTON_TEST_ID}
+      >
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.clear"
           defaultMessage="Clear Entity Data"
@@ -36,6 +46,7 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
         <EuiConfirmModal
           isLoading={isDeleting}
           aria-labelledby={modalTitleId}
+          data-test-subj={CLEAR_ENTITY_DATA_MODAL_TEST_ID}
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.clearEntitiesModal.title"
@@ -45,9 +56,7 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
           titleProps={{ id: modalTitleId }}
           onCancel={closeClearModal}
           onConfirm={() => {
-            onDelete()
-              .then(closeClearModal)
-              .catch(() => {});
+            onDelete().finally(closeClearModal);
           }}
           cancelButtonText={
             <FormattedMessage

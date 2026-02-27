@@ -18,13 +18,15 @@ const mockInitRiskEngine = jest.fn().mockResolvedValue({});
 const mockEnableRiskEngine = jest.fn().mockResolvedValue({});
 const mockDisableRiskEngine = jest.fn().mockResolvedValue({});
 
+let mockInitRiskEngineMutationReturn: {
+  mutateAsync: jest.Mock;
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+};
+
 jest.mock('../api/hooks/use_init_risk_engine_mutation', () => ({
-  useInitRiskEngineMutation: () => ({
-    mutateAsync: mockInitRiskEngine,
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
+  useInitRiskEngineMutation: () => mockInitRiskEngineMutationReturn,
 }));
 
 jest.mock('../api/hooks/use_enable_risk_engine_mutation', () => ({
@@ -76,12 +78,9 @@ jest.mock('./use_enabled_entity_types', () => ({
 }));
 
 const mockInvalidateRiskEngineSettingsQuery = jest.fn().mockResolvedValue(undefined);
-jest.mock(
-  '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks',
-  () => ({
-    useInvalidateRiskEngineSettingsQuery: () => mockInvalidateRiskEngineSettingsQuery,
-  })
-);
+jest.mock('../components/risk_score_management/hooks/use_risk_engine_settings_query', () => ({
+  useInvalidateRiskEngineSettingsQuery: () => mockInvalidateRiskEngineSettingsQuery,
+}));
 
 let mockRiskEngineStatusReturn: {
   data: { risk_engine_status: string } | undefined;
@@ -114,6 +113,12 @@ describe('useToggleEntityAnalytics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsEntityStoreDisabled = false;
+    mockInitRiskEngineMutationReturn = {
+      mutateAsync: mockInitRiskEngine,
+      isLoading: false,
+      isError: false,
+      error: null,
+    };
     mockRiskEngineStatusReturn = {
       data: { risk_engine_status: 'NOT_INSTALLED' },
       isFetching: false,
@@ -312,6 +317,55 @@ describe('useToggleEntityAnalytics', () => {
       expect(mockDisableRiskEngine).toHaveBeenCalledTimes(1);
       expect(mockStopEntityEngine).not.toHaveBeenCalled();
       expect(mockEnableEntityStore).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error reporting', () => {
+    it('surfaces risk engine init errors via the errors object', () => {
+      mockInitRiskEngineMutationReturn = {
+        mutateAsync: mockInitRiskEngine,
+        isLoading: false,
+        isError: true,
+        error: { body: { message: 'Risk engine init failed' } },
+      };
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      expect(result.current.errors.riskEngine).toContain('Risk engine init failed');
+      expect(result.current.errors.entityStore).toHaveLength(0);
+    });
+
+    it('uses fallback message when error has no body', () => {
+      mockInitRiskEngineMutationReturn = {
+        mutateAsync: mockInitRiskEngine,
+        isLoading: false,
+        isError: true,
+        error: new Error('network failure'),
+      };
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      expect(result.current.errors.riskEngine).toContain('An unknown error occurred');
+    });
+  });
+
+  describe('isLoading guard', () => {
+    it('is a no-op when isSavingSettings makes isLoading true', async () => {
+      const { result } = renderHook(() =>
+        useToggleEntityAnalytics({
+          ...defaultOptions,
+          isSavingSettings: true,
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockInitRiskEngine).not.toHaveBeenCalled();
+      expect(mockEnableEntityStore).not.toHaveBeenCalled();
+      expect(mockDisableRiskEngine).not.toHaveBeenCalled();
+      expect(mockStopEntityEngine).not.toHaveBeenCalled();
     });
   });
 });

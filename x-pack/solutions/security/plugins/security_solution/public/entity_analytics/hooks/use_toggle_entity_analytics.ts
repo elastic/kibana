@@ -194,7 +194,7 @@ export const useToggleEntityAnalytics = ({
 
   return {
     status,
-    isLoading: isLoading || riskEngineStatusQuery.isFetching,
+    isLoading,
     toggle,
     isEntityStoreFeatureFlagDisabled,
     errors,

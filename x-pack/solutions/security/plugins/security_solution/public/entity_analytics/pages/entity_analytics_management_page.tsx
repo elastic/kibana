@@ -27,6 +27,7 @@ import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab
 import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
+import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import {
   useDeleteEntityEngineMutation,
@@ -35,6 +36,15 @@ import {
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
 import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
+import {
+  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
+  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
+  ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID,
+  RISK_SCORE_TAB_TEST_ID,
+  ASSET_CRITICALITY_TAB_TEST_ID,
+  ENGINE_STATUS_TAB_TEST_ID,
+  ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
+} from '../test_ids';
 
 enum TabId {
   RiskScore = 'riskScore',
@@ -43,6 +53,8 @@ enum TabId {
 }
 
 const isEntityStoreInstalled = (status?: string) => status && status !== 'not_installed';
+const canDeleteEntityEngine = (status?: string) =>
+  !['not_installed', 'installing'].includes(status || '');
 
 export const EntityAnalyticsManagementPage = () => {
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
@@ -109,10 +121,13 @@ export const EntityAnalyticsManagementPage = () => {
     <>
       <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
       <EuiPageHeader
-        data-test-subj="entityAnalyticsManagementPage"
+        data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID}
         pageTitle={
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem data-test-subj="entityAnalyticsManagementPageTitle" grow={false}>
+            <EuiFlexItem
+              data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID}
+              grow={false}
+            >
               {ENTITY_ANALYTICS}
             </EuiFlexItem>
 
@@ -140,14 +155,50 @@ export const EntityAnalyticsManagementPage = () => {
         </>
       )}
 
+      {deleteError && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.errors.deleteErrorTitle"
+                defaultMessage="There was a problem deleting the entity store"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <p>{deleteError}</p>
+          </EuiCallOut>
+        </>
+      )}
+
+      {canDeleteEntityEngine(entityStoreStatus.data?.status) &&
+        entityEnginePrivileges?.has_all_required && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <ClearEntityDataButton
+                  onDelete={async () => {
+                    await deleteEntityEngineMutation.mutateAsync();
+                  }}
+                  isDeleting={deleteEntityEngineMutation.isLoading}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+
       <EuiSpacer size="m" />
 
-      <EuiTabs data-test-subj="entityAnalyticsManagementTabs">
+      <EuiTabs data-test-subj={ENTITY_ANALYTICS_MANAGEMENT_TABS_TEST_ID}>
         <EuiTab
           key={TabId.RiskScore}
           isSelected={selectedTabId === TabId.RiskScore}
           onClick={() => setSelectedTabId(TabId.RiskScore)}
-          data-test-subj="riskScoreTab"
+          data-test-subj={RISK_SCORE_TAB_TEST_ID}
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.riskScore.tabTitle"
@@ -158,7 +209,7 @@ export const EntityAnalyticsManagementPage = () => {
           key={TabId.AssetCriticality}
           isSelected={selectedTabId === TabId.AssetCriticality}
           onClick={() => setSelectedTabId(TabId.AssetCriticality)}
-          data-test-subj="assetCriticalityTab"
+          data-test-subj={ASSET_CRITICALITY_TAB_TEST_ID}
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.tabTitle"
@@ -170,7 +221,7 @@ export const EntityAnalyticsManagementPage = () => {
             key={TabId.Status}
             isSelected={selectedTabId === TabId.Status}
             onClick={() => setSelectedTabId(TabId.Status)}
-            data-test-subj="engineStatusTab"
+            data-test-subj={ENGINE_STATUS_TAB_TEST_ID}
           >
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.engineStatus.tabTitle"
@@ -203,17 +254,12 @@ export const EntityAnalyticsManagementPage = () => {
       </div>
 
       <div hidden={selectedTabId !== TabId.AssetCriticality}>
-        <AssetCriticalityTab deleteError={deleteError} engines={entityStoreStatus.data?.engines} />
+        <AssetCriticalityTab />
       </div>
 
       {shouldDisplayEngineStatusTab && (
         <div hidden={selectedTabId !== TabId.Status}>
-          <EngineStatus
-            onDeleteEntityEngine={async () => {
-              await deleteEntityEngineMutation.mutateAsync();
-            }}
-            isDeletingEntityEngine={deleteEntityEngineMutation.isLoading}
-          />
+          <EngineStatus />
         </div>
       )}
     </>
@@ -235,6 +281,7 @@ const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
         }
         color="primary"
         iconType="info"
+        data-test-subj={ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID}
       >
         <EuiText size="s">
           <FormattedMessage
