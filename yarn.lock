@@ -2335,10 +2335,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@71.1.2":
-  version "71.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.1.2.tgz#fff8dcc61dd83ddb7790aa370c97a6e63ce94537"
-  integrity sha512-aEH1k/fyNaPquT1wU531dNMt1+rNcNd/DF2I/+/r+8bXL6gADHl3MBOv310VJVL9evrLvODqQFpWacGfJNOVcg==
+"@elastic/charts@71.2.0":
+  version "71.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.2.0.tgz#884bec027ebccbbdd6dc8a6d990415fa90b24cf4"
+  integrity sha512-y/sf6yKsajsQhEueLU4HlG4z4j1c9VvgxTsX+AEG81zBAJLWfQ+eaO3hbH3cL1qFEm2KJLn5RF3/cpm5wu3ADg==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -6718,6 +6718,10 @@
   uid ""
 
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-endpoint@link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint":
   version "0.0.0"
   uid ""
 
@@ -11903,7 +11907,7 @@
   resolved "https://registry.yarnpkg.com/@readme/openapi-schemas/-/openapi-schemas-3.1.0.tgz#5ff4b704af6a8b108f9d577fd87cf73e9e7b3178"
   integrity sha512-9FC/6ho8uFa8fV50+FPy/ngWN53jaUu4GRXlAjcxIRrzhltJnpKkBG2Tp0IDraFJeWrOpk84RJ9EMEEYzaI1Bw==
 
-"@redocly/ajv@8.17.1", "ajv@npm:@redocly/ajv@8.17.1":
+"@redocly/ajv@8.17.1":
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.17.1.tgz#e2b1722cbc8b4cd7e05da14a745d3ddd03293734"
   integrity sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==
@@ -15759,6 +15763,16 @@ ajv@^6.12.2, ajv@^6.12.4, ajv@^6.12.5:
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
+
+"ajv@npm:@redocly/ajv@8.17.1":
+  version "8.17.1"
+  resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.17.1.tgz#e2b1722cbc8b4cd7e05da14a745d3ddd03293734"
+  integrity sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==
+  dependencies:
+    fast-deep-equal "^3.1.3"
+    fast-uri "^3.0.1"
+    json-schema-traverse "^1.0.0"
+    require-from-string "^2.0.2"
 
 "ajv@npm:@redocly/ajv@8.17.2":
   version "8.17.2"
