@@ -17,9 +17,10 @@ import {
   apiPublishesDataLoading,
   getViewModeSubject,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 
-import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
@@ -53,11 +54,11 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
   return {
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.isAnchored);
+      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.is_anchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
@@ -100,17 +101,17 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function setTimeslice(timeslice?: TimeSlice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+        const { start_percentage_of_time_range, end_percentage_of_time_range } =
           timeRangePercentage.getLatestState();
 
         if (
-          timesliceStartAsPercentageOfTimeRange !== undefined &&
-          timesliceEndAsPercentageOfTimeRange !== undefined
+          start_percentage_of_time_range !== undefined &&
+          end_percentage_of_time_range !== undefined
         ) {
           timeslice$.next(
             getTimesliceSyncedWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange,
-              timesliceEndAsPercentageOfTimeRange
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             )
           );
         } else {
@@ -235,11 +236,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...timeRangePercentage.getLatestState(),
-            isAnchored: isAnchored$.value,
-          },
-          references: [],
+          ...timeRangePercentage.getLatestState(),
+          isAnchored: isAnchored$.value,
         };
       }
 
@@ -255,19 +253,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           return {
             ...timeRangePercentageComparators,
             width: 'skip',
-            isAnchored: 'skip',
+            is_anchored: 'skip',
           };
         },
         onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved?.rawState);
-          setIsAnchored(lastSaved?.rawState?.isAnchored);
+          timeRangePercentage.reinitializeState(lastSaved);
+          setIsAnchored(lastSaved?.is_anchored);
         },
       });
 
       const api = finalizeApi({
         ...unsavedChangesApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
-        defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
+        label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,
         serializeState,
         clearSelections: () => {
@@ -320,19 +318,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             )
               return;
 
-            const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+            const { start_percentage_of_time_range, end_percentage_of_time_range } =
               timeRangePercentage.getLatestState();
             syncTimesliceWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange,
-              timesliceEndAsPercentageOfTimeRange
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             );
           }
         );
 
       // Initialize the timeslice
       syncTimesliceWithTimeRangePercentage(
-        state.timesliceStartAsPercentageOfTimeRange,
-        state.timesliceEndAsPercentageOfTimeRange
+        state.start_percentage_of_time_range,
+        state.end_percentage_of_time_range
       );
 
       return {

@@ -39,6 +39,8 @@
           "BaseParams"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +65,8 @@
               "> | undefined; zoom?: number | undefined; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -88,6 +92,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -113,6 +119,8 @@
           "BasePayload"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,6 +145,8 @@
               "> | undefined; zoom?: number | undefined; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -148,6 +158,8 @@
             "label": "forceNow",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,6 +185,8 @@
               ">[]"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -194,6 +208,8 @@
           "BaseParams"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -209,6 +225,8 @@
           "\"PNGV2\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -224,6 +242,8 @@
           "\"pngV2\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,6 +260,8 @@
           "BasePayload"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

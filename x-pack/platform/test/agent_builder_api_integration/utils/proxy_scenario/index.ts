@@ -7,6 +7,8 @@
 
 export {
   setupAgentDirectAnswer,
+  setupAgentDirectError,
   setupAgentCallSearchToolWithEsqlThenAnswer,
   setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
+  setupAgentParallelToolCallsThenAnswer,
 } from './scenarios';

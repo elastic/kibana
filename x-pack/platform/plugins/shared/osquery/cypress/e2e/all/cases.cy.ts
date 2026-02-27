@@ -46,7 +46,7 @@ describe('Add to Cases', () => {
       cleanupCase(caseId);
     });
 
-    it('should add result a case and not have add to timeline in result', () => {
+    it('should add result to a case without showing add to timeline button', () => {
       addLiveQueryToCase(liveQueryId, caseId);
       cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
@@ -78,7 +78,7 @@ describe('Add to Cases', () => {
       cleanupCase(caseId);
     });
 
-    it('should add result a case and have add to timeline in result', () => {
+    it('should add result to a case without showing add to timeline button', () => {
       addLiveQueryToCase(liveQueryId, caseId);
       cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
@@ -88,7 +88,7 @@ describe('Add to Cases', () => {
         lens: true,
         discover: true,
         cases: false,
-        timeline: true,
+        timeline: false,
       });
     });
   });

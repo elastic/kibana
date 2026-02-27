@@ -37,6 +37,22 @@ export const dsl = {
   isUntranslatable(): QueryDslQueryContainer {
     return { term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE } };
   },
+  isEligibleForTranslation(): QueryDslQueryContainer {
+    return {
+      bool: {
+        must_not: [
+          {
+            bool: {
+              filter: [
+                { term: { 'original_rule.vendor': 'qradar' } },
+                { match_phrase: { 'original_rule.query': 'buildingBlock="true"' } },
+              ],
+            },
+          },
+        ],
+      },
+    };
+  },
   isNotUntranslatable(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isUntranslatable() } };
   },

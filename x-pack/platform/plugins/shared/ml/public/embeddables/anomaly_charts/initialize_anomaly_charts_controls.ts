@@ -26,20 +26,20 @@ export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableR
 };
 
 export const initializeAnomalyChartsControls = (
-  rawState: AnomalyChartsEmbeddableState,
+  initialState: AnomalyChartsEmbeddableState,
   titlesApi?: TitlesApi,
   parentApi?: unknown
 ) => {
-  const jobIds$ = new BehaviorSubject<JobId[]>(rawState.jobIds);
+  const jobIds$ = new BehaviorSubject<JobId[]>(initialState.jobIds);
   const maxSeriesToPlot$ = new BehaviorSubject<number>(
-    rawState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
+    initialState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
 
   const severityThreshold$ = new BehaviorSubject<SeverityThreshold[] | undefined>(
-    rawState.severityThreshold
+    initialState.severityThreshold
   );
   const selectedEntities$ = new BehaviorSubject<MlEntityField[] | undefined>(
-    rawState.selectedEntities
+    initialState.selectedEntities
   );
   const interval$ = new BehaviorSubject<number | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);

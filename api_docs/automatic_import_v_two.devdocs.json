@@ -9,12 +9,14 @@
     "objects": [],
     "setup": {
       "parentPluginId": "automaticImportVTwo",
-      "id": "def-public.AutomaticImportPluginSetup",
+      "id": "def-public.AutomaticImportV2PluginSetup",
       "type": "Interface",
       "tags": [],
-      "label": "AutomaticImportPluginSetup",
+      "label": "AutomaticImportV2PluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -23,15 +25,58 @@
     },
     "start": {
       "parentPluginId": "automaticImportVTwo",
-      "id": "def-public.AutomaticImportPluginStart",
+      "id": "def-public.AutomaticImportV2PluginStart",
       "type": "Interface",
       "tags": [],
-      "label": "AutomaticImportPluginStart",
+      "label": "AutomaticImportV2PluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-public.AutomaticImportV2PluginStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ useGetIntegrationById: (integrationId: string | undefined) => ",
+            "UseGetIntegrationByIdResult",
+            "; useGetAllIntegrations: () => ",
+            "UseGetAllIntegrationsResult",
+            "; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-public.AutomaticImportV2PluginStart.components",
+          "type": "Object",
+          "tags": [],
+          "label": "components",
+          "description": [],
+          "signature": [
+            "{ CreateIntegration: ",
+            "CreateIntegrationComponent",
+            "; CreateIntegrationSideCardButton: ",
+            "CreateIntegrationSideCardButtonComponent",
+            "; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+          "lineNumber": 24,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -48,6 +93,8 @@
         "label": "AutomaticImportV2PluginSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,6 +115,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,6 +138,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,6 +160,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -129,6 +182,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -143,6 +198,8 @@
         "label": "AutomaticImportV2PluginStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -164,6 +221,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,6 +243,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -204,6 +265,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,6 +287,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,6 +309,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -272,6 +339,8 @@
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -292,6 +361,8 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -312,6 +383,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -333,6 +406,8 @@
             " | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -348,6 +423,8 @@
       "label": "AutomaticImportV2PluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+      "lineNumber": 45,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -371,9 +448,62 @@
           "\nThe integration object with its settings."
         ],
         "signature": [
-          "{ title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; }"
+          "{ status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; title: string; createdBy: string; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; version?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 207,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ApproveAutoImportIntegrationRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "ApproveAutoImportIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "{ version: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ApproveAutoImportIntegrationRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ApproveAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ApproveIntegrationRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "ApproveIntegrationRequest",
+        "description": [],
+        "signature": [
+          "{ version: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -386,9 +516,11 @@
         "label": "CreateAutoImportIntegrationRequestBody",
         "description": [],
         "signature": [
-          "{ title: string; description: string; integrationId: string; dataStreams?: { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }"
+          "{ connectorId: string; description: string; title: string; integrationId: string; dataStreams?: { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -404,6 +536,8 @@
           "{ integration_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -418,9 +552,11 @@
           "\nThe data stream object with its settings."
         ],
         "signature": [
-          "{ title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }"
+          "{ description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -435,9 +571,11 @@
           "\nThe data stream response object with its settings."
         ],
         "signature": [
-          "{ title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }"
+          "{ status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -453,6 +591,8 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -468,6 +608,8 @@
           "{ integration_id: string; data_stream_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -480,9 +622,11 @@
         "label": "GetAllAutoImportIntegrationsResponse",
         "description": [],
         "signature": [
-          "{ title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; }[]"
+          "{ status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; title: string; createdBy: string; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; version?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -498,6 +642,8 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -510,9 +656,11 @@
         "label": "GetAutoImportIntegrationResponse",
         "description": [],
         "signature": [
-          "{ integrationResponse: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }; }"
+          "{ integrationResponse: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -530,6 +678,8 @@
           "{ name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -544,9 +694,11 @@
           "\nThe integration object with its settings."
         ],
         "signature": [
-          "{ title: string; description: string; integrationId: string; dataStreams?: { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }"
+          "{ description: string; title: string; integrationId: string; dataStreams?: { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -561,9 +713,30 @@
           "\nThe integration response object with its settings."
         ],
         "signature": [
-          "{ title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }"
+          "{ status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.LangSmithOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "LangSmithOptions",
+        "description": [
+          "\nThe LangSmith options object."
+        ],
+        "signature": [
+          "{ apiKey: string; projectName: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 250,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -581,6 +754,8 @@
           "{ sourceType: \"index\" | \"file\"; sourceValue: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -598,6 +773,42 @@
           "\"index\" | \"file\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ReanalyzeDataStreamRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestBody",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 141,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ReanalyzeDataStreamRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "{ integration_id: string; data_stream_id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -612,9 +823,11 @@
           "\nThe status of the task"
         ],
         "signature": [
-          "\"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\""
+          "\"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\""
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -627,9 +840,11 @@
         "label": "TaskStatusEnum",
         "description": [],
         "signature": [
-          "{ pending: \"pending\"; failed: \"failed\"; processing: \"processing\"; completed: \"completed\"; cancelled: \"cancelled\"; }"
+          "{ pending: \"pending\"; failed: \"failed\"; processing: \"processing\"; completed: \"completed\"; approved: \"approved\"; cancelled: \"cancelled\"; deleting: \"deleting\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -642,9 +857,11 @@
         "label": "UpdateAutoImportIntegrationRequestBody",
         "description": [],
         "signature": [
-          "{ description?: string | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; logo?: string | undefined; }"
+          "{ description?: string | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; logo?: string | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 165,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -660,6 +877,8 @@
           "{ integration_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 152,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -672,9 +891,11 @@
         "label": "UploadSamplesToDataStreamRequestBody",
         "description": [],
         "signature": [
-          "{ samples: string[]; originalSource: { sourceType: \"index\" | \"file\"; sourceValue: string; }; }"
+          "{ samples: string[]; originalSource: { sourceType: \"index\" | \"file\"; sourceValue: string; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -690,6 +911,8 @@
           "{ integration_id: string; data_stream_id: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -705,6 +928,8 @@
           "{ success?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -728,17 +953,127 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", string, string>; totalDataStreamCount: ",
+          ", string, string>; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; totalDataStreamCount: ",
           "ZodNumber",
           "; successfulDataStreamCount: ",
           "ZodNumber",
-          "; status: ",
+          "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; }>"
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; title: string; createdBy: string; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; version?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; title: string; createdBy: string; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; version?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 211,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ApproveAutoImportIntegrationRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "ApproveAutoImportIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ version: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { version: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { version: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ApproveAutoImportIntegrationRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "ApproveAutoImportIntegrationRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { integration_id: string; }, { integration_id: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ApproveIntegrationRequest",
+        "type": "Object",
+        "tags": [],
+        "label": "ApproveIntegrationRequest",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ version: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { version: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { version: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -752,7 +1087,11 @@
         "description": [],
         "signature": [
           "ZodObject",
-          "<{ integrationId: ",
+          "<{ connectorId: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; integrationId: ",
           "ZodEffects",
           "<",
           "ZodString",
@@ -764,7 +1103,17 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", string, string>; logo: ",
+          ", string, string>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; logo: ",
           "ZodOptional",
           "<",
           "ZodEffects",
@@ -798,11 +1147,13 @@
           "ZodTypeAny",
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">>; }, \"strict\", ",
+          ", { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">>; }, \"strict\", ",
           "ZodTypeAny",
-          ", { title: string; description: string; integrationId: string; dataStreams?: { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }, { title: string; description: string; integrationId: string; dataStreams?: { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }>"
+          ", { connectorId: string; description: string; title: string; integrationId: string; dataStreams?: { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; description: string; title: string; integrationId: string; dataStreams?: { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -827,6 +1178,8 @@
           ", { integration_id?: string | undefined; }, { integration_id?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -862,9 +1215,11 @@
           "ZodTypeAny",
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>"
+          ", { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -900,11 +1255,13 @@
           "ZodTypeAny",
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>, \"many\">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>"
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 141,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -927,6 +1284,8 @@
           ", { integration_id: string; }, { integration_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -953,6 +1312,8 @@
           ", { integration_id: string; data_stream_id: string; }, { integration_id: string; data_stream_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -976,17 +1337,35 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", string, string>; totalDataStreamCount: ",
+          ", string, string>; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; totalDataStreamCount: ",
           "ZodNumber",
           "; successfulDataStreamCount: ",
           "ZodNumber",
-          "; status: ",
+          "; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; }>, \"many\">"
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; title: string; createdBy: string; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; version?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; title: string; createdBy: string; integrationId: string; totalDataStreamCount: number; successfulDataStreamCount: number; version?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }>, \"many\">"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 130,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1009,6 +1388,8 @@
           ", { integration_id: string; }, { integration_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 135,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1040,7 +1421,19 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", string, string>; dataStreams: ",
+          ", string, string>; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; dataStreams: ",
           "ZodArray",
           "<",
           "ZodObject",
@@ -1066,17 +1459,19 @@
           "ZodTypeAny",
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>, \"many\">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">; status: ",
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }>; }, \"strict\", ",
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }>; }, \"strict\", ",
           "ZodTypeAny",
-          ", { integrationResponse: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }; }, { integrationResponse: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }; }>"
+          ", { integrationResponse: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }; }, { integrationResponse: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 146,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1097,6 +1492,8 @@
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1142,7 +1539,7 @@
           "ZodTypeAny",
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">>; logo: ",
+          ", { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">>; logo: ",
           "ZodOptional",
           "<",
           "ZodString",
@@ -1156,9 +1553,11 @@
           "ZodString",
           ", string, string>; }, \"strict\", ",
           "ZodTypeAny",
-          ", { title: string; description: string; integrationId: string; dataStreams?: { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }, { title: string; description: string; integrationId: string; dataStreams?: { title: string; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }>"
+          ", { description: string; title: string; integrationId: string; dataStreams?: { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }, { description: string; title: string; integrationId: string; dataStreams?: { description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[] | undefined; logo?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1188,7 +1587,19 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", string, string>; dataStreams: ",
+          ", string, string>; version: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdBy: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; createdByProfileUid: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; dataStreams: ",
           "ZodArray",
           "<",
           "ZodObject",
@@ -1214,15 +1625,41 @@
           "ZodTypeAny",
           ", { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }, { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }>, \"many\">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">; status: ",
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }>, \"many\">; status: ",
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>; }, \"strip\", ",
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }, { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; dataStreams: { title: string; status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"cancelled\"; description: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; logo?: string | undefined; }>"
+          ", { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }, { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; dataStreams: { status: \"pending\" | \"failed\" | \"processing\" | \"completed\" | \"approved\" | \"cancelled\" | \"deleting\"; description: string; title: string; inputTypes: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[]; dataStreamId: string; }[]; integrationId: string; version?: string | undefined; createdBy?: string | undefined; logo?: string | undefined; createdByProfileUid?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 168,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.LangSmithOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "LangSmithOptions",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 254,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1247,6 +1684,8 @@
           ", { sourceType: \"index\" | \"file\"; sourceValue: string; }, { sourceType: \"index\" | \"file\"; sourceValue: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 110,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1263,6 +1702,70 @@
           "<[\"index\", \"file\"]>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 102,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ReanalyzeDataStreamRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestBody",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ connectorId: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { connectorId: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 142,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.ReanalyzeDataStreamRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "ReanalyzeDataStreamRequestParams",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; data_stream_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { integration_id: string; data_stream_id: string; }, { integration_id: string; data_stream_id: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 130,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1276,9 +1779,11 @@
         "description": [],
         "signature": [
           "ZodEnum",
-          "<[\"pending\", \"processing\", \"completed\", \"failed\", \"cancelled\"]>"
+          "<[\"pending\", \"processing\", \"completed\", \"approved\", \"failed\", \"cancelled\", \"deleting\"]>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 125,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1291,9 +1796,11 @@
         "label": "TaskStatusEnum",
         "description": [],
         "signature": [
-          "{ pending: \"pending\"; failed: \"failed\"; processing: \"processing\"; completed: \"completed\"; cancelled: \"cancelled\"; }"
+          "{ pending: \"pending\"; failed: \"failed\"; processing: \"processing\"; completed: \"completed\"; approved: \"approved\"; cancelled: \"cancelled\"; deleting: \"deleting\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/common_attributes.gen.ts",
+        "lineNumber": 135,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1319,7 +1826,17 @@
           "ZodEffects",
           "<",
           "ZodString",
-          ", string, string>>; dataStreams: ",
+          ", string, string>>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; dataStreams: ",
           "ZodOptional",
           "<",
           "ZodArray",
@@ -1353,9 +1870,11 @@
           "ZodTypeAny",
           ", { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }, { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }>, \"many\">>; }, \"strict\", ",
           "ZodTypeAny",
-          ", { description?: string | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; logo?: string | undefined; }, { description?: string | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; logo?: string | undefined; }>"
+          ", { description?: string | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; logo?: string | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { description?: string | undefined; dataStreams?: { description?: string | undefined; inputTypes?: { name: \"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\"; }[] | undefined; rawSamples?: string[] | undefined; }[] | undefined; logo?: string | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 168,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1378,6 +1897,8 @@
           ", { integration_id: string; }, { integration_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "lineNumber": 155,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1405,11 +1926,23 @@
           "ZodString",
           ", string, string>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { sourceType: \"index\" | \"file\"; sourceValue: string; }, { sourceType: \"index\" | \"file\"; sourceValue: string; }>; }, \"strip\", ",
+          ", { sourceType: \"index\" | \"file\"; sourceValue: string; }, { sourceType: \"index\" | \"file\"; sourceValue: string; }>; langSmithOptions: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ projectName: ",
+          "ZodString",
+          "; apiKey: ",
+          "ZodString",
+          "; }, \"strict\", ",
           "ZodTypeAny",
-          ", { samples: string[]; originalSource: { sourceType: \"index\" | \"file\"; sourceValue: string; }; }, { samples: string[]; originalSource: { sourceType: \"index\" | \"file\"; sourceValue: string; }; }>"
+          ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { samples: string[]; originalSource: { sourceType: \"index\" | \"file\"; sourceValue: string; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { samples: string[]; originalSource: { sourceType: \"index\" | \"file\"; sourceValue: string; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1436,6 +1969,8 @@
           ", { integration_id: string; data_stream_id: string; }, { integration_id: string; data_stream_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 84,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1458,6 +1993,8 @@
           ", { success?: boolean | undefined; }, { success?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
+        "lineNumber": 120,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.loadDashboardInEditMode('test time slider control');
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('deletes an existing control', async () => {

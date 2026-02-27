@@ -8,23 +8,14 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Streams } from '@kbn/streams-schema';
-import { type FeatureSelectorProps } from '../feature_selector';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 
 export function EmptyState({
-  definition,
-  refreshFeatures,
   onManualEntryClick,
   onGenerateSuggestionsClick,
-  features,
-  selectedFeatures,
-  onFeaturesChange,
   aiFeatures,
-}: FeatureSelectorProps & {
-  definition: Streams.all.Definition;
-  refreshFeatures: () => void;
+}: {
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   aiFeatures: AIFeatures | null;
@@ -45,19 +36,14 @@ export function EmptyState({
             <EuiText size="s" textAlign="center" color="subdued">
               {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
                 defaultMessage:
-                  "Single, ‘interesting’ log event identified by an automated rule as being important for understanding a system's behaviour.",
+                  "Single, 'interesting' log event identified by an automated rule as being important for understanding a system's behaviour.",
               })}
             </EuiText>
           </EuiFlexItem>
 
           <EuiFlexItem>
             <SignificantEventsGenerationPanel
-              features={features}
-              selectedFeatures={selectedFeatures}
-              onFeaturesChange={onFeaturesChange}
               onGenerateSuggestionsClick={onGenerateSuggestionsClick}
-              definition={definition}
-              refreshFeatures={refreshFeatures}
               onManualEntryClick={onManualEntryClick}
               isGeneratingQueries={false}
               isSavingManualEntry={false}

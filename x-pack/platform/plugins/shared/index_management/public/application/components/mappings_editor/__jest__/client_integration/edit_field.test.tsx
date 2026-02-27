@@ -22,7 +22,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('Mappings editor: edit field', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253534
+describe.skip('Mappings editor: edit field', () => {
   const getDocumentFields = () => screen.getByTestId('documentFields');
   const getFieldsListItems = () =>
     within(getDocumentFields()).getAllByTestId((content) => content.startsWith('fieldsListItem '));
@@ -154,7 +155,8 @@ describe('Mappings editor: edit field', () => {
 
     // Change field type to Range using EuiComboBox harness
     const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-    fieldTypeComboBox.select('range');
+    await fieldTypeComboBox.select('range');
+    await fieldTypeComboBox.close();
 
     // Wait for SubTypeParameter to appear (range type has subTypes)
     await within(flyout).findByTestId('fieldSubType');

@@ -21,12 +21,14 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
+import { useVirtualizedRowScrollState } from '../../../lib/core/virtualizer';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
   getVirtualizer,
   onCascadeLeafNodeExpanded,
+  onCascadeLeafNodeCollapsed,
   row,
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
@@ -97,45 +99,56 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     }
   }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
 
-  const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
-  const virtualRow = useMemo(
-    () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index),
-    [rootVirtualizer, row]
-  );
-  const getScrollMargin = useCallback(() => virtualRow?.start ?? 0, [virtualRow]);
-  const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
-  const getScrollOffset = useCallback(() => rootVirtualizer.scrollOffset ?? 0, [rootVirtualizer]);
-
   useEffect(
     () => () => {
-      // ensure that for a row that's been scrolled,
-      // if said row is technically still in view because it's cell is being rendered,
-      // when we are unmounting because the expand action from the cell's row was clicked,
-      // we want to ensure said row is the top most item in our list
-      if (
-        virtualRow?.index &&
-        !rootVirtualizer.isScrolling &&
-        getScrollOffset() > getScrollMargin()
-      ) {
-        rootVirtualizer.scrollToVirtualizedIndex(virtualRow.index, {
-          align: 'start',
-          behavior: 'auto',
-        });
-      }
+      onCascadeLeafNodeCollapsed?.({
+        row: row.original,
+        nodePath,
+        nodePathMap,
+      });
     },
-    [getScrollMargin, getScrollOffset, rootVirtualizer, virtualRow?.index]
+    [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
   );
+
+  const { getScrollMargin, getScrollOffset } = useVirtualizedRowScrollState({
+    getVirtualizer,
+    rowIndex: row.index,
+  });
+
+  // Keep a reference to the virtualizer for cleanup and scroll-to operations
+  const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
+
+  const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
+
+  /**
+   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
+   * Returns an unregister function.
+   */
+  const preventSizeChangePropagation = useCallback(() => {
+    return rootVirtualizer.preventRowSizeChangePropagation(row.index);
+  }, [rootVirtualizer, row.index]);
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {
       data: leafData,
       cellId: leafCacheKey,
       key: leafCacheKey,
+      nodePath,
       getScrollElement,
       getScrollOffset,
       getScrollMargin,
+      preventSizeChangePropagation,
     });
-  }, [children, leafData, leafCacheKey, getScrollElement, getScrollOffset, getScrollMargin]);
+  }, [
+    children,
+    leafData,
+    leafCacheKey,
+    nodePath,
+    getScrollElement,
+    getScrollOffset,
+    getScrollMargin,
+    preventSizeChangePropagation,
+  ]);
 
   return (
     <EuiFlexGroup>

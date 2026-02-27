@@ -66,6 +66,7 @@ import type { ProductFeatureKeyType, ProductFeatureKeys } from '@kbn/security-so
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { ResolverPluginSetup } from './resolver/types';
@@ -131,6 +132,7 @@ export interface StartPlugins {
   cases: CasesPublicStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;

@@ -6,7 +6,7 @@ steps:
       machineType: n2-standard-16
       preemptible: true
       diskSizeGb: 150
-    timeout_in_minutes: 60
+    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'
@@ -19,7 +19,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
-      - linting
-      - linting_with_types
-      - checks
-      - check_types
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

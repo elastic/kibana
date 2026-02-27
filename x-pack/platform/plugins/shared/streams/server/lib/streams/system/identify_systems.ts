@@ -30,7 +30,7 @@ export async function identifySystemsWithDescription(
           inferenceClient: options.inferenceClient,
           signal: options.signal,
           logger: options.logger,
-          systemPromptOverride: options.descriptionPromptOverride,
+          systemPrompt: options.descriptionPrompt,
         });
 
         totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);

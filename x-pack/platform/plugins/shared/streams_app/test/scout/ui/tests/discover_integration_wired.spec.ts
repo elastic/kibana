@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 
-const WIRED_STREAM_NAME = 'logs.child';
+const WIRED_STREAM_NAME = 'logs.otel.child';
 
 test.describe(
   'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
-  { tag: ['@svlOblt'] },
+  { tag: tags.serverless.observability.complete },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Create a wired stream
-      await apiServices.streams.forkStream('logs', WIRED_STREAM_NAME, {
+      await apiServices.streams.forkStream('logs.otel', WIRED_STREAM_NAME, {
         always: {},
       });
-      // Generate logs data for a classic stream
+      // Generate logs data for the wired stream
       await generateLogsData(logsSynthtraceEsClient)({
-        index: 'logs',
+        index: 'logs.otel',
         startTime: 'now-15m',
         endTime: 'now',
       });
@@ -43,17 +44,16 @@ test.describe(
       // Navigate to Discover
       await pageObjects.discover.goto();
       // Select the data view for our test stream
-      await pageObjects.discover.selectDataView('logs.child');
+      await pageObjects.discover.selectDataView('logs.otel.child');
       await pageObjects.discover.waitUntilSearchingHasFinished();
-
-      // Expand the first document row to open the flyout
-      const expandButton = page.locator(
-        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-      );
+      await pageObjects.discover.waitForDocTableRendered();
 
       // Refresh and wait for the row — stream routing may take time
-      await pageObjects.discover.waitForDataGridRowWithRefresh(expandButton);
-      await expandButton.click();
+      await page.testSubj.click('querySubmitButton');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
+
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
       await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
@@ -89,20 +89,15 @@ test.describe(
 
       // Navigate to Discover
       await pageObjects.discover.goto();
-      await pageObjects.discover.selectDataView('logs.child');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilFieldListHasCountOfFields();
+      await pageObjects.discover.selectDataView('logs.otel.child');
+      await expect(pageObjects.discover.getSelectedDataView()).toHaveText('logs.otel.child');
+      await pageObjects.discover.waitUntilFieldListHasCountOfFields();
 
-      // Switch to ES|QL mode by clicking the button
+      // Switch to ES|QL mode by clicking the button and waiting for doc table to load
       await pageObjects.discover.selectTextBaseLang();
 
-      // Expand the first document row to open the flyout
-      const expandButton = page.locator(
-        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-      );
-
-      // Wait for the row to be rendered before clicking
-      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
-      await expandButton.click();
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
       await expect(page.getByTestId('kbnDocViewer')).toBeVisible();

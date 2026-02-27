@@ -55,6 +55,8 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
+import { registerDataProviders } from './agent_builder/register_data_provider';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -68,6 +70,7 @@ export class SLOPlugin
   private readonly isDev: boolean;
   private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
+  private staleInstancesCleanupTask?: StaleInstancesCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -160,6 +163,8 @@ export class SLOPlugin
           }),
       };
     }) as SLORoutesDependencies['plugins'];
+
+    registerDataProviders({ core, plugins, logger: this.logger });
 
     registerServerRoutes({
       core,
@@ -256,6 +261,13 @@ export class SLOPlugin
       config: this.config,
     });
 
+    this.staleInstancesCleanupTask = new StaleInstancesCleanupTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
     new BulkDeleteTask({
       core,
       taskManager: plugins.taskManager,
@@ -277,13 +289,20 @@ export class SLOPlugin
 
     this.orphanSummaryCleanupTask?.start(plugins).catch(() => {});
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
+    this.staleInstancesCleanupTask?.start(plugins).catch(() => {});
 
     return {
-      getSloClientWithRequest: (request: KibanaRequest) => {
+      getSloClientWithRequest: async (request: KibanaRequest) => {
+        const spaceId =
+          (await plugins.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+
         return getSloClientWithRequest({
           request,
           soClient: core.savedObjects.getScopedClient(request),
           esClient: internalEsClient,
+          scopedClusterClient: core.elasticsearch.client.asScoped(request),
+          spaceId,
+          logger: this.logger,
         });
       },
     };

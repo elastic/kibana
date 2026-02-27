@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useSampleDataStatus } from '../../hooks/use_sample_data_status';
 import { useKibana } from '../../hooks/use_kibana';
 import { navigateToIndexDetails } from '../utils';
@@ -42,7 +41,6 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
     isInstalling,
   } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
-  const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
   const onViewButtonClick = useCallback(() => {
     setShowViewDataOptions(true);
@@ -68,11 +66,9 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
   const navigateToDashboard = useNavigateToDashboard(dashboardId);
 
   const navigateToAgentBuilder = useCallback(async () => {
-    if (isAgentBuilderAvailable) {
-      const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
-      await agentBuilderLocator?.navigate({});
-    }
-  }, [share, isAgentBuilderAvailable]);
+    const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
+    await agentBuilderLocator?.navigate({});
+  }, [share]);
 
   if (isStatusLoading) {
     return null;
@@ -106,20 +102,16 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
           <EuiContextMenuPanel
             css={{ minWidth: 250 }}
             items={[
-              ...(isAgentBuilderAvailable
-                ? [
-                    <EuiContextMenuItem
-                      key="agentBuilder"
-                      onClick={navigateToAgentBuilder}
-                      icon="comment"
-                    >
-                      <FormattedMessage
-                        id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToAgentBuilder"
-                        defaultMessage="Agents"
-                      />
-                    </EuiContextMenuItem>,
-                  ]
-                : []),
+              <EuiContextMenuItem
+                key="agentBuilder"
+                onClick={navigateToAgentBuilder}
+                icon="comment"
+              >
+                <FormattedMessage
+                  id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToAgentBuilder"
+                  defaultMessage="Agents"
+                />
+              </EuiContextMenuItem>,
               <EuiContextMenuItem key="discover" onClick={navigateToDiscover} icon="discoverApp">
                 <FormattedMessage
                   id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToDiscover"

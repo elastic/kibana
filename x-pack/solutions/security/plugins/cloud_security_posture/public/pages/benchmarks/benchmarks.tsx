@@ -43,7 +43,8 @@ import { NoFindingsStates } from '../../components/no_findings_states';
 const SEARCH_DEBOUNCE_MS = 300;
 
 const AddCisIntegrationButton = () => {
-  const { http } = useKibana().services;
+  const { http, fleet } = useKibana().services;
+  const canInstallPackages = fleet?.authz?.integrations.installPackages;
 
   const integrationsPath = pagePathGetters
     .integrations_all({
@@ -51,7 +52,7 @@ const AddCisIntegrationButton = () => {
     })
     .join('');
 
-  return (
+  return canInstallPackages ? (
     <EuiButton
       data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
@@ -63,7 +64,7 @@ const AddCisIntegrationButton = () => {
         defaultMessage="Add Integration"
       />
     </EuiButton>
-  );
+  ) : null;
 };
 
 const BenchmarkEmptyState = ({ name }: { name: string }) => (

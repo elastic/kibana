@@ -3,7 +3,7 @@
 exports[`Search should render normally 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
   >
     <div
       class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"

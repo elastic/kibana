@@ -24,6 +24,7 @@ import { getSLORoute } from './get_slo';
 import { getSloBurnRates } from './get_slo_burn_rates';
 import { getSloSettingsRoute } from './get_slo_settings';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
+import { getSLOGroupedStatsRoute } from './get_grouped_stats';
 import { getSLOSuggestionsRoute } from './get_suggestions';
 import { inspectSLORoute } from './inspect_slo';
 import { getPurgeInstancesStatusRoute, purgeInstancesRoute } from './purge_instances';
@@ -33,6 +34,7 @@ import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
 import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
 import { healthScanRoutes } from './health_scan';
+import { searchSloDefinitionsRoute } from './search_slo_definitions';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -58,6 +60,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
     ...getSLOStatsOverview,
+    ...getSLOGroupedStatsRoute,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
     ...repairSLORoute,
@@ -67,5 +70,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getSLOTemplateRoute,
     ...findSLOTemplatesRoute,
     ...healthScanRoutes,
+    ...searchSloDefinitionsRoute,
   };
 };

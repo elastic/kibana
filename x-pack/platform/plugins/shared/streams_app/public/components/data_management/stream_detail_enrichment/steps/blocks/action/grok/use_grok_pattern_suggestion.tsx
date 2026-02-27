@@ -14,12 +14,12 @@ import {
   mergeGrokProcessors,
   groupMessagesByPattern,
   extractGrokPatternDangerouslySlow,
-  unwrapPatternDefinitions,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { lastValueFrom } from 'rxjs';
 import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
 import type { Simulation } from '../../../../state_management/simulation_state_machine/types';
+import { NoSuggestionsError, isNoSuggestionsError } from '../utils/no_suggestions_error';
 import {
   usePatternSuggestionDependencies,
   prepareSamplesForPatternExtraction,
@@ -105,13 +105,12 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
             }
           )
         ).then((reviewResult) => {
-          const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
+          // Handle case where LLM couldn't generate suggestions
+          if (reviewResult.grokProcessor === null) {
+            throw new NoSuggestionsError();
+          }
 
-          return {
-            ...grokProcessor,
-            patterns: unwrapPatternDefinitions(grokProcessor), // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
-            pattern_definitions: {},
-          };
+          return getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
         });
       })
     );
@@ -135,6 +134,12 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
     // If all promises failed, throw an aggregate error, otherwise ignore errors and continue with fulfilled results
     if (grokProcessors.length === 0) {
       finishTrackingAndReport(0, [0]);
+
+      // Check if all errors are NoSuggestionsError - if so, throw a single NoSuggestionsError
+      const allNoSuggestions = aggregateError.errors.every((error) => isNoSuggestionsError(error));
+      if (allNoSuggestions) {
+        throw new NoSuggestionsError();
+      }
 
       // Don't show error toast for abort errors - they're expected when user cancels
       const hasNonAbortError = aggregateError.errors.some((error) => !isRequestAbortedError(error));
@@ -164,6 +169,7 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
                   customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
                   from: params.fieldName,
                   patterns: combinedGrokProcessor.patterns,
+                  pattern_definitions: combinedGrokProcessor.pattern_definitions,
                 },
               ],
             },

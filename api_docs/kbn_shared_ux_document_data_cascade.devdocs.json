@@ -25,9 +25,27 @@
         "type": "Function",
         "tags": [],
         "label": "DataCascade",
-        "description": [],
+        "description": [
+          "\nPublic data cascade component. Forwards the ref to DataCascadeImpl so consumers\nreceive the imperative handle on the ref."
+        ],
         "signature": [
-          "({\n  cascadeGroups,\n  initialGroupColumn,\n  ...props\n}: ",
+          "<G extends ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.GroupNode",
+            "text": "GroupNode"
+          },
+          " = ",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.GroupNode",
+            "text": "GroupNode"
+          },
+          ", L extends DocWithId = DocWithId>(props: Omit<",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -35,20 +53,34 @@
             "section": "def-common.DataCascadeImplProps",
             "text": "DataCascadeImplProps"
           },
-          "<G, L> & IDataCascadeProviderProps & { children?: React.ReactNode; }) => React.JSX.Element"
+          "<G, L>, \"cascadeRef\"> & ",
+          "IDataCascadeProviderProps",
+          " & { children?: React.ReactNode; } & { ref?: React.Ref<",
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeImplRef",
+            "text": "DataCascadeImplRef"
+          },
+          "<G, L>> | undefined; }) => React.ReactElement<any>"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-document-data-cascade",
             "id": "def-common.DataCascade.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  cascadeGroups,\n  initialGroupColumn,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
+              "Omit<",
               {
                 "pluginId": "@kbn/shared-ux-document-data-cascade",
                 "scope": "common",
@@ -56,15 +88,25 @@
                 "section": "def-common.DataCascadeImplProps",
                 "text": "DataCascadeImplProps"
               },
-              "<G, L> & IDataCascadeProviderProps & { children?: React.ReactNode; }"
+              "<G, L>, \"cascadeRef\"> & ",
+              "IDataCascadeProviderProps",
+              " & { children?: React.ReactNode; } & { ref?: React.Ref<",
+              {
+                "pluginId": "@kbn/shared-ux-document-data-cascade",
+                "scope": "common",
+                "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+                "section": "def-common.DataCascadeImplRef",
+                "text": "DataCascadeImplRef"
+              },
+              "<G, L>> | undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/index.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -96,6 +138,8 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,6 +161,8 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +200,8 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +223,8 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -196,6 +246,8 @@
           "(nodePath: string[], nodePathMap: Record<string, string>, leafId: string) => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,6 +262,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -225,6 +279,8 @@
               "Record<string, string>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -240,6 +296,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -263,6 +321,8 @@
           "<G>) => string[]"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +337,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +355,8 @@
               "<G>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -316,6 +380,8 @@
           "<G>) => { [x: string]: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -330,6 +396,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -346,6 +414,8 @@
               "<G>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -367,6 +437,8 @@
           "(cacheKey: string) => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -381,6 +453,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/utils.ts",
+            "lineNumber": 75,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -399,9 +473,11 @@
           "\nA badge component to display numbers in a consistent way."
         ],
         "signature": [
-          "({ value, shortenAtExpSize, align = 'end' }: NumberBadgeProps) => React.JSX.Element"
+          "({ value, shortenAtExpSize, textAlign = 'right' }: NumberBadgeProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/helpers/number_badge/number_badge.tsx",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -410,12 +486,14 @@
             "id": "def-common.NumberBadge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ value, shortenAtExpSize, align = 'end' }",
+            "label": "{ value, shortenAtExpSize, textAlign = 'right' }",
             "description": [],
             "signature": [
               "NumberBadgeProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/helpers/number_badge/number_badge.tsx",
+            "lineNumber": 69,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -448,6 +526,8 @@
           "<G>, \"getScrollElement\">"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -462,6 +542,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -478,6 +560,78 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.CascadeRowCellNestedVirtualizationAnchorProps.preventSizeChangePropagation",
+            "type": "Function",
+            "tags": [],
+            "label": "preventSizeChangePropagation",
+            "description": [
+              "\nFunction used to signal to the parent virtualizer that this row's size changes should not be propagated to it.\nThis is only required if the nested virtualization implementation used here measures its rows."
+            ],
+            "signature": [
+              "() => () => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+        "id": "def-common.DataCascadeImplRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataCascadeImplRef",
+        "description": [
+          "\nDefinition of the public API ref for the data cascade component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-document-data-cascade",
+            "scope": "common",
+            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
+            "section": "def-common.DataCascadeImplRef",
+            "text": "DataCascadeImplRef"
+          },
+          "<G, L>"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-document-data-cascade",
+            "id": "def-common.DataCascadeImplRef.getUISnapshotStore",
+            "type": "Function",
+            "tags": [],
+            "label": "getUISnapshotStore",
+            "description": [
+              "\nReturns helpers to access a minimal readonly state of the data cascade component.\nThis can be used as-is or put together leveraging useSyncExternalStore to create a more reactive\ncomponent state.\n"
+            ],
+            "signature": [
+              "() => ",
+              "DataCascadeUISnapshotStore",
+              "<G, L> | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/lib/core/api/index.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -500,6 +654,8 @@
           "DataCascadeImplBaseProps<G, L> & ({ customTableHeader: (props: { availableColumns: string[]; currentSelectedColumns: string[]; onGroupSelection: (groupByColumn: string[]) => void; selectedRows: string[]; }) => React.ReactNode; tableTitleSlot?: undefined; } | { customTableHeader?: undefined; tableTitleSlot: React.FC<{}>; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 272,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -512,17 +668,13 @@
         "label": "DataCascadeRowCellProps",
         "description": [],
         "signature": [
-          "{ children: (args: { data: L[] | null; cellId: string; } & ",
-          {
-            "pluginId": "@kbn/shared-ux-document-data-cascade",
-            "scope": "common",
-            "docId": "kibKbnSharedUxDocumentDataCascadePluginApi",
-            "section": "def-common.CascadeRowCellNestedVirtualizationAnchorProps",
-            "text": "CascadeRowCellNestedVirtualizationAnchorProps"
-          },
-          "<G>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; }"
+          "{ children: (args: ",
+          "CascadeRowCellRendererProps",
+          "<G, L>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; onCascadeLeafNodeCollapsed?: ((args: OnCascadeLeafNodeCollapsedArgs<G>) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 198,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -537,7 +689,7 @@
         "signature": [
           "Pick<",
           "CascadeRowPrimitiveProps",
-          "<G, L>, \"enableSecondaryExpansionAction\" | \"onCascadeGroupNodeExpanded\" | \"rowHeaderTitleSlot\" | \"rowHeaderMetaSlots\" | \"rowHeaderActions\"> & { children: React.ReactElement<",
+          "<G, L>, \"enableSecondaryExpansionAction\" | \"onCascadeGroupNodeExpanded\" | \"onCascadeGroupNodeCollapsed\" | \"rowHeaderTitleSlot\" | \"rowHeaderMetaSlots\" | \"rowHeaderActions\"> & { children: React.ReactElement<",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -548,6 +700,8 @@
           "<G, L>, string | React.JSXElementConstructor<any>>; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
+        "lineNumber": 203,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -573,6 +727,8 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/store_provider/reducers.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -588,6 +744,8 @@
           "Record<string, any> & { id: string; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/store_provider/reducers.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -11,15 +11,17 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
+  apiCanPinPanels,
+  apiHasSections,
   apiPublishesViewMode,
   fetch$,
+  initializeUnsavedChanges,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,
@@ -41,7 +43,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
   return {
     type: RANGE_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState.rawState;
+      const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -68,11 +70,9 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
       function serializeState() {
         return {
-          rawState: {
-            ...dataControlManager.getLatestState(),
-            ...editorStateManager.getLatestState(),
-            value: selections.value$.getValue(),
-          },
+          ...dataControlManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
+          value: selections.value$.getValue(),
         };
       }
 
@@ -93,9 +93,9 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           };
         },
         onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved?.rawState);
-          editorStateManager.reinitializeState(lastSaved?.rawState);
-          selections.setValue(lastSaved?.rawState.value);
+          dataControlManager.reinitializeState(lastSaved);
+          editorStateManager.reinitializeState(lastSaved);
+          selections.setValue(lastSaved?.value);
         },
       });
 
@@ -174,9 +174,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       );
 
       /** Output filters when selections and/or filter meta data changes */
-      const sectionId$ = apiHasSections(parentApi)
-        ? parentApi.getPanelSection$(uuid)
-        : of(undefined);
+      const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
@@ -190,7 +188,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
           if (!dataView) return;
 
           const newFilter = buildFilter(dataView, uuid, {
-            fieldName,
+            field_name: fieldName,
             value,
             sectionId,
           });
@@ -212,6 +210,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
@@ -225,6 +225,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value,
             fieldName,
             viewMode,
+            label,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -234,7 +235,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             editorStateManager.api.step$,
             selections.value$,
             dataControlManager.api.fieldName$,
-            viewMode$
+            viewMode$,
+            dataControlManager.api.label$
           );
 
           useEffect(() => {
@@ -244,6 +246,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -261,6 +265,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}
+              isPinned={isPinned}
+              label={label}
             />
           );
         },

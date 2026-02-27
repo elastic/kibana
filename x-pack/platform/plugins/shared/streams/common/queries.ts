@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import type { StreamQuery } from '@kbn/streams-schema';
+import type { StreamQuery, StreamQueryInput } from '@kbn/streams-schema';
 
 export interface QueryLink {
   'asset.uuid': string;
   'asset.type': 'query';
   'asset.id': string;
   query: StreamQuery;
+  stream_name: string;
+  /** Whether a Kibana rule exists for this query. */
+  rule_backed: boolean;
+  /** The deterministic ID of the Kibana rule associated with this query. */
+  rule_id: string;
 }
 
-type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
-
-export type QueryLinkRequest = OmitFrom<QueryLink, 'asset.uuid'>;
+export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name' | 'query'> & {
+  query: StreamQueryInput;
+};
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 
 export type Query = QueryLink & {
   title: string;
-  query: StreamQuery;
 };

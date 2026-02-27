@@ -482,19 +482,16 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
       const state = {
         serializedState: {
-          rawState: {
-            title: newTitle,
-            description: newDescription,
-            viewType: dashboardAttachment.viewType,
-            dataViewId: dataView.id,
-            metricField: fieldConfig.metricField,
-            splitField: fieldConfig.splitField,
-            fn: fieldConfig.fn,
-            ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-            maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
-            ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
-          },
-          references: [],
+          title: newTitle,
+          description: newDescription,
+          viewType: dashboardAttachment.viewType,
+          dataViewId: dataView.id,
+          metricField: fieldConfig.metricField,
+          splitField: fieldConfig.splitField,
+          fn: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
+          maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+          ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
       };
@@ -689,7 +686,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       }
     >
       <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'s'}>
-        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+        <EuiFlexItem grow={false} css={{ width: '224px' }}>
           <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>

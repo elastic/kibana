@@ -33,6 +33,7 @@ export {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SIGNING_SECRET,
   MOCK_IDP_UIAM_SHARED_SECRET,
+  MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
 } from './constants';
@@ -42,4 +43,6 @@ export {
   createSAMLResponse,
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,
+  getSAMLRequestId,
+  createUiamSessionTokens,
 } from './utils';

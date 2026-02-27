@@ -23,7 +23,6 @@ import {
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
 } from './constants';
 import {
@@ -43,7 +42,6 @@ import {
   wiredStreamsStatusChangedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
-  streamsDescriptionGeneratedSchema,
   streamsTabVisitedSchema,
 } from './schemas';
 
@@ -127,11 +125,6 @@ const streamsFeatureIdentificationDeletedEventType = {
   schema: streamsFeatureIdentificationDeletedSchema,
 };
 
-const streamsDescriptionGeneratedEventType = {
-  eventType: STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  schema: streamsDescriptionGeneratedSchema,
-};
-
 const wiredStreamsStatusChangedEventType = {
   eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   schema: wiredStreamsStatusChangedSchema,
@@ -160,6 +153,5 @@ export {
   wiredStreamsStatusChangedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
-  streamsDescriptionGeneratedEventType,
   streamsTabVisitedEventType,
 };

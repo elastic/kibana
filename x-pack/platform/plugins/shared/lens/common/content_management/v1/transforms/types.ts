@@ -8,17 +8,9 @@
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 
 import type { LensAttributes } from '../../../../server/content_management/v1';
-import type { DeprecatedLegendValueState } from './legend_stats/types';
-import type { DeprecatedColorMappingsState } from './raw_color_mappings/types';
 
-export type DeprecatedV0State = DeprecatedLegendValueState | DeprecatedColorMappingsState;
-
-export type LensAttributesV0 = Omit<LensAttributes, 'version' | 'state'> & {
-  version: never; // explicitly set as no version
-  state: LensAttributes['state'] | DeprecatedV0State;
-};
-
+export type LensAttributesV1 = LensAttributes;
 /**
  * An unversioned Lens item that may or may not include old runtime migrations.
  */
-export type LensSavedObjectV0 = SOWithMetadata<LensAttributesV0>;
+export type LensSavedObjectV1 = SOWithMetadata<LensAttributesV1>;

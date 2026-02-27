@@ -22,6 +22,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Data stream namespace(s) to be included in rule execution.' },
+    },
+  },
   'securitySolution:maxUnassociatedNotes': {
     type: 'integer',
     _meta: { description: 'The maximum number of allowed unassociated notes' },
@@ -507,14 +514,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'agentBuilder:dashboardTools': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'agentBuilder:navEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -523,7 +522,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'dataConnectors:enabled': {
+  'agentBuilder:experimentalFeatures': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -611,6 +614,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmUseUnifiedTraceWaterfall': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:profilingShowErrorFrames': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -629,6 +636,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingDatacenterPUE': {
     type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureAssetCustomDashboards': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableGroupedNav': {
@@ -706,12 +717,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Significant events discovery in Streams.',
     },
   },
-  'observability:streamsEnableGroupStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Group streams in Streams',
-    },
-  },
   'observability:streamsEnableAttachments': {
     type: 'boolean',
     _meta: {
@@ -722,6 +727,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Content packs in Streams',
+    },
+  },
+  'observability:streamsEnableQueryStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Query streams in Streams',
     },
   },
   'observability:enableDiagnosticMode': {
@@ -740,6 +751,21 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Restrict to default AI connector only',
+    },
+  },
+  'agentBuilder:prePromptWorkflowIds': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'Pre-prompt workflow IDs',
+      },
+    },
+  },
+  'securitySolution:entityStoreEnableV2': {
+    type: 'boolean',
+    _meta: {
+      description: 'Switches the Entity Store Engine to v2',
     },
   },
 };

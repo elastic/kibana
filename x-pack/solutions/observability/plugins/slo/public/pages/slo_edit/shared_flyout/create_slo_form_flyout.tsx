@@ -13,6 +13,7 @@ import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
+import type { FormSettings } from '../types';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
@@ -20,14 +21,23 @@ export const sloEditFormFooterPortal = createHtmlPortalNode();
 export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
+  formSettings,
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
+  formSettings?: FormSettings;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="l" maxWidth={620} ownFocus>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      size="l"
+      maxWidth={620}
+      ownFocus
+      session="start"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
           <h3 id="flyoutTitle">
@@ -36,7 +46,11 @@ export default function CreateSLOFormFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SloEditForm onFlyoutClose={onClose} initialValues={formInitialValues} isEditMode={false} />
+        <SloEditForm
+          onFlyoutClose={onClose}
+          initialValues={formInitialValues}
+          formSettings={formSettings}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <OutPortal node={sloEditFormFooterPortal} />

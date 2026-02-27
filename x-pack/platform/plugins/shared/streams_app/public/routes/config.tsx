@@ -18,8 +18,33 @@ import { StreamDetailManagement } from '../components/data_management/stream_det
 import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 
 /**
+ * Optional time range query params.
+ * DateRangeRedirect ensures these are present at runtime.
+ */
+const timeRangeQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+});
+
+/**
+ * Extended query params for management routes that may include
+ * additional feature-specific params (e.g., significant events flyout).
+ */
+const managementQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+  // Significant events flyout params
+  openFlyout: t.string,
+  // Data quality page state
+  pageState: t.string,
+});
+
+/**
  * The array of route definitions to be used when the application
  * creates the routes.
+ *
+ * Query params (rangeFrom/rangeTo) are optional - navigation calls can omit them
+ * and DateRangeRedirect will ensure they're populated from the global timefilter.
  */
 const streamsAppRoutes = {
   '/': {
@@ -38,9 +63,30 @@ const streamsAppRoutes = {
     children: {
       '/': {
         element: <StreamListView />,
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
       },
       '/_discovery': {
-        element: <SignificantEventsDiscoveryPage />,
+        element: <Outlet />,
+        children: {
+          '/_discovery': {
+            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
+          },
+          '/_discovery/{tab}': {
+            element: <SignificantEventsDiscoveryPage />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: timeRangeQueryParams,
+              }),
+            ]),
+          },
+        },
       },
       '/{key}': {
         element: (
@@ -48,11 +94,16 @@ const streamsAppRoutes = {
             <Outlet />
           </StreamDetailRoot>
         ),
-        params: t.type({
-          path: t.type({
-            key: t.string,
+        params: t.intersection([
+          t.type({
+            path: t.type({
+              key: t.string,
+            }),
           }),
-        }),
+          t.partial({
+            query: timeRangeQueryParams,
+          }),
+        ]),
         children: {
           '/{key}': {
             element: (
@@ -60,36 +111,35 @@ const streamsAppRoutes = {
             ),
           },
           /**
-           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and retention view
-           */
-          // '/{key}/{tab}': {
-          //   element: <StreamDetailView />,
-          //   params: t.type({
-          //     path: t.type({
-          //       tab: t.string,
-          //     }),
-          //   }),
-          // },
-          /**
-           * This route is added as a replacement of the old StreamDetailView routing to redirect from existing overview/dashboard links into the management page
+           * This route redirects from legacy overview/dashboard links to the management page
            */
           '/{key}/{tab}': {
             element: (
               <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
             ),
-            params: t.type({
-              path: t.type({
-                tab: t.string,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  tab: t.string,
+                }),
               }),
-            }),
+              t.partial({
+                query: timeRangeQueryParams,
+              }),
+            ]),
           },
           '/{key}/management/{tab}': {
             element: <StreamDetailManagement />,
-            params: t.type({
-              path: t.type({
-                tab: t.string,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  tab: t.string,
+                }),
               }),
-            }),
+              t.partial({
+                query: managementQueryParams,
+              }),
+            ]),
           },
           /**
            * This route is added as a catch-all route to redirect to the retention tab in case of a

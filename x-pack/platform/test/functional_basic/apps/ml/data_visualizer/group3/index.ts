@@ -40,12 +40,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // That's why the 'basic' version of 'index_data_visualizer_actions_panel' is loaded here
     loadTestFile(
       require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover'
+        '../../../../../functional/apps/ml/data_visualizer/group1/index_data_visualizer_grid_in_discover'
       )
     );
     loadTestFile(
       require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover_basic'
+        '../../../../../functional/apps/ml/data_visualizer/group3/index_data_visualizer_grid_in_discover_basic'
       )
     );
     loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));

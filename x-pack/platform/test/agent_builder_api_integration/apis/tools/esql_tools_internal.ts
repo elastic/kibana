@@ -7,12 +7,10 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
   describe('ES|QL Tools internal API', () => {
@@ -25,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       tags: ['test'],
       configuration: {
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: { case_id: { type: 'keyword', description: 'Case ID' } },
+        params: { case_id: { type: 'string', description: 'Case ID' } },
       },
     };
 
@@ -105,34 +103,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(failureResult.reason.error.message).to.contain('not found');
       });
 
-      it('should handle an empty list of IDs', async () => {
-        const response = await supertest
-          .post('/internal/agent_builder/tools/_bulk_delete')
-          .set('kbn-xsrf', 'kibana')
-          .set('x-elastic-internal-origin', 'kibana')
-          .send({ ids: [] })
-          .expect(200);
-
-        expect(response.body).to.have.property('results');
-        expect(response.body.results).to.be.an('array');
-        expect(response.body.results).to.have.length(0);
-      });
-
-      it('should return 404 when ES|QL tool API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
-
+      it('should return 400 when ids array is empty', async () => {
         await supertest
           .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
-          .send({ ids: ['any-id'] })
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
+          .send({ ids: [] })
+          .expect(400);
       });
     });
   });

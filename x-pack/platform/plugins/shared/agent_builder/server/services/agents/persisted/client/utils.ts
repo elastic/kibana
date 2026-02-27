@@ -8,7 +8,7 @@
 import { allToolsSelectionWildcard } from '@kbn/agent-builder-common';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ToolRegistry } from '../../../tools';
+import type { ToolRegistry } from '@kbn/agent-builder-server';
 
 export interface ValidateToolSelectionParams {
   toolRegistry: ToolRegistry;
@@ -39,4 +39,17 @@ export async function validateToolSelection({
     }
   }
   return errors;
+}
+
+export function removeToolIdsFromToolSelection(
+  tools: ToolSelection[],
+  toolIdsToRemove: string[]
+): ToolSelection[] {
+  const removeSet = new Set(toolIdsToRemove);
+  return (tools ?? [])
+    .map((selection) => ({
+      ...selection,
+      tool_ids: (selection.tool_ids ?? []).filter((id) => !removeSet.has(id)),
+    }))
+    .filter((selection) => selection.tool_ids.length > 0);
 }

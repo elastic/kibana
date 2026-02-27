@@ -52,8 +52,24 @@ The custom_rule data model represents the logic and actions of a correlation rul
 
 Dependencies can be found in multiple ways. We list down certain guidelines to correctly identify and resolve dependencies.
 
+
+### Event or Flow Payload Tests
+
+Event or Flow Payload tests check for certain strings, patterns within the the complete event or flow payload/documents. It is important to mention that we are looking at all the fields in the complete event.
+
+#### How to identify Event/Flow Payload dependencies:
+
+  - Event Payload tests can be extracted from test conditions "com.q1labs.semsources.cre.tests.EventPayload_Test"
+  - Flow Payload tests can be extracted from test conditions "com.q1labs.semsources.cre.tests.FlowPayload"
+
+#### How to resolve Event/Flow Payload test conditions:
+
+It is extremely important to be clear and precise, and mention that string or pattern needs to be search in complete event payload and not in particular field. There is not single field exists for event/flow/source payload. You must add special note to mention the same.
+
 ### Reference Sets and Lookups
+
 #### How to identify Reference Set dependencies:
+
 - Reference Sets can be extracted from test conditions "com.q1labs.semsources.cre.tests.ReferenceSetTest".
 - They are often mentioned in human-readable test descriptions, e.g., "is contained in any/all of <Reference Set Name> - <Reference Set Type>". Separate the name and type to extract the name correctly. Basically anything after last hyphen (-) is type of reference set. This is extremely important otherwise tool call will fail For example,
 
@@ -61,6 +77,7 @@ Dependencies can be found in multiple ways. We list down certain guidelines to c
     - "AD Service accounts - AlphaNumeric (Ignore Case)", the Reference Set name is "AD Service accounts"
 
 #### How to resolve Reference Set dependencies:
+
 - Reference Set dependency is called as RESOLVED when you have the lookup index name corresponding to that reference set. Otherwise it is UNRESOLVED.
 - QRadar reference sets are stored as \`lookup\` resources inside Elastic SIEM migrations. Treat all reference set dependencies as lookups.
 - Use the \`getResourceByType\` tool with \`type = "lookup"\` to retrieve the latest reference set content when resolving dependencies. Some resources may already be provided to you. Look at them first before making a tool call.
@@ -70,6 +87,7 @@ Dependencies can be found in multiple ways. We list down certain guidelines to c
 - In Resulting Natual Language description, include the lookup join syntax as well. There should NOT be any mention of reference set in Lookup Section or the NAME because other system except you do not understand reference sets.
 
 ## Rules Dependencies Guidelines
+
 - Rule Names in Tests: If you a test with name such as 'RuleMatch_Test' or 'getCommonRules', it indicates a dependency on another rule. List of rule names can be found within that test condition.
 - If a test condition references another rule by name, that indicates a dependency on that rule. A dependency can also have other rules as its dependencies.
 - A Test can indicate both Rule ID in form of (OWNER-RULE_ID) and Rule Name. Use Rule Name to identify dependencies.

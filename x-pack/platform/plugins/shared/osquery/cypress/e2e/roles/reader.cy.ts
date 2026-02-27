@@ -55,7 +55,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
-    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('be.disabled');
     cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
     cy.get(formFieldInputSelector('id')).should('be.disabled');
     cy.get(formFieldInputSelector('description')).should('be.disabled');

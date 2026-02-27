@@ -6,13 +6,11 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
-import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
-import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface SignificantEventsApiBulkOperationCreate {
-  index: StreamQueryKql;
+  index: StreamQuery;
 }
 interface SignificantEventsApiBulkOperationDelete {
   delete: { id: string };
@@ -23,11 +21,9 @@ type SignificantEventsApiBulkOperation =
   | SignificantEventsApiBulkOperationDelete;
 
 interface SignificantEventsApi {
-  upsertQuery: (query: StreamQueryKql) => Promise<void>;
+  upsertQuery: (query: StreamQuery) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string, system?: System) => SignificantEventsGenerateResponse;
-  abort: () => void;
 }
 
 export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
@@ -39,10 +35,10 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     },
   } = useKibana();
 
-  const { signal, abort, refresh } = useAbortController();
+  const { signal } = useAbortController();
 
   return {
-    upsertQuery: async ({ id, ...body }) => {
+    upsertQuery: async ({ id, esql, ...body }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -76,36 +72,16 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             name,
           },
           body: {
-            operations,
+            operations: operations.map((op) => {
+              if ('index' in op) {
+                const { esql: _esql, ...index } = op.index;
+                return { index };
+              }
+              return op;
+            }),
           },
         },
       });
-    },
-    generate: (connectorId: string, system?: System) => {
-      const { from, to } = getLast24HoursTimeRange();
-      return streamsRepositoryClient.stream(
-        `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
-        {
-          signal,
-          params: {
-            path: {
-              name,
-            },
-            query: {
-              connectorId,
-              from,
-              to,
-            },
-            body: {
-              system,
-            },
-          },
-        }
-      );
-    },
-    abort: () => {
-      abort();
-      refresh();
     },
   };
 }
