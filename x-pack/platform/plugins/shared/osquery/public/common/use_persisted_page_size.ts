@@ -10,16 +10,13 @@ import { useCallback } from 'react';
 
 const STORAGE_KEY = 'osquery:pageSize';
 
-const PAGE_SIZE_OPTIONS_TUPLE = [10, 25, 50, 100] as const;
-type PageSize = (typeof PAGE_SIZE_OPTIONS_TUPLE)[number];
-
-export const PAGE_SIZE_OPTIONS: number[] = [...PAGE_SIZE_OPTIONS_TUPLE];
+export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 export const DEFAULT_PAGE_SIZE = 10;
 
-const PAGE_SIZE_SET: ReadonlySet<number> = new Set(PAGE_SIZE_OPTIONS_TUPLE);
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 
 const isValidPageSize = (value: unknown): value is PageSize =>
-  typeof value === 'number' && PAGE_SIZE_SET.has(value);
+  PAGE_SIZE_OPTIONS.includes(value as PageSize);
 
 export const usePersistedPageSize = (): [number, (size: number) => void] => {
   const [storedValue, setStoredValue] = useLocalStorage<number>(STORAGE_KEY, DEFAULT_PAGE_SIZE);
