@@ -118,9 +118,9 @@ export class ResolutionClient {
     }
 
     // 9. Batch updateByQuery: set resolved_to on all entities to link
-    this.logger.info(`Linking ${linked.length} entities to target '${targetId}'`);
+    this.logger.debug(`Linking ${linked.length} entities to target '${targetId}'`);
 
-    await this.esClient.updateByQuery({
+    const linkResult = await this.esClient.updateByQuery({
       index,
       query: {
         bool: {
@@ -134,6 +134,12 @@ export class ResolutionClient {
       },
       refresh: true,
     });
+
+    if (linkResult.failures?.length) {
+      this.logger.error(
+        `Failed to link some entities to target '${targetId}': ${JSON.stringify(linkResult.failures)}`
+      );
+    }
 
     return { linked, skipped, target_id: targetId };
   }
@@ -172,9 +178,9 @@ export class ResolutionClient {
     }
 
     // 5. Batch updateByQuery: remove resolved_to field
-    this.logger.info(`Unlinking ${entityIds.length} entities`);
+    this.logger.debug(`Unlinking ${entityIds.length} entities`);
 
-    await this.esClient.updateByQuery({
+    const unlinkResult = await this.esClient.updateByQuery({
       index,
       query: {
         bool: {
@@ -187,6 +193,12 @@ export class ResolutionClient {
       },
       refresh: true,
     });
+
+    if (unlinkResult.failures?.length) {
+      this.logger.error(
+        `Failed to unlink some entities: ${JSON.stringify(unlinkResult.failures)}`
+      );
+    }
 
     return { unlinked: entityIds };
   }
