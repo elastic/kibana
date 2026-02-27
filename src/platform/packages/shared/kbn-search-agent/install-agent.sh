@@ -9,8 +9,6 @@ echo "  - Appending Elasticsearch reference to AGENTS.md"
 touch AGENTS.md
 cat AGENTS-elasticsearch-append.md >> AGENTS.md
 rm AGENTS-elasticsearch-append.md
-echo "  - Removing Cursor-specific rule files"
-rm -rf .elasticsearch-agent/rules
 echo "Done. Agent configuration installed."
 echo ""
 echo "Installed files:"

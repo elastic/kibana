@@ -391,7 +391,7 @@ If they're running Elasticsearch on their own infrastructure (not Elastic Cloud)
 When explaining, use these terms consistently:
 
 | Term                   | Meaning                                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
 | **Index**              | A collection of documents (like a database table)                                                  |
 | **Mapping**            | Schema definition — field names, types, analyzers                                                  |
 | **Analyzer**           | Text processing pipeline (tokenizer + filters)                                                     |
@@ -401,7 +401,7 @@ When explaining, use these terms consistently:
 | **RRF**                | Reciprocal Rank Fusion — merges keyword and vector results                                         |
 | **Alias**              | A pointer to one or more indices — enables zero-downtime reindexing and index versioning           |
 | **Data stream**        | Append-only index abstraction for time-series data (logs, metrics, events) with automatic rollover |
-| \*\*ES                 | QL\*\*                                                                                             | Elasticsearch Query Language — piped syntax for analytics and data exploration |
+| **ES\|QL**             | Elasticsearch Query Language — piped syntax for analytics and data exploration                      |
 | **Query DSL**          | JSON query syntax — full feature set for search, backward compatible                               |
 
 ## What NOT to Do

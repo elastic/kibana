@@ -6,9 +6,9 @@ curl -L -o elastic-agent.zip https://raw.githubusercontent.com/wildemat/kibana/s
 echo "  - Extracting configuration files"
 unzip -q elastic-agent.zip && rm elastic-agent.zip
 rm -f AGENTS-elasticsearch-append.md
-echo "  - Installing rules into .cursor/rules/"
+echo "  - Generating Cursor rule from AGENTS.md"
 mkdir -p .cursor/rules
-cp -r .elasticsearch-agent/rules/* .cursor/rules/ 2>/dev/null || true
+{ printf -- '---\ndescription: Elasticsearch solutions architect — guides developers from intent to working search\nglobs: \nalwaysApply: true\n---\n\n'; cat .elasticsearch-agent/AGENTS.md; } > .cursor/rules/elastic.mdc
 echo "  - Installing skills into .cursor/skills/"
 mkdir -p .cursor/skills
 cp -r .elasticsearch-agent/skills/* .cursor/skills/ 2>/dev/null || true
