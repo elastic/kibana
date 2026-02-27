@@ -164,6 +164,68 @@ describe('schema validation', () => {
         overviewEmbeddableSchema.validate(stateWithGroupFiltersWithoutGroupBy)
       ).not.toThrow();
     });
+
+    it('should reject groups array exceeding maxSize (100)', () => {
+      const stateWithTooManyGroups = {
+        group_filters: {
+          group_by: 'status' as const,
+          groups: Array.from({ length: 101 }, (_, i) => `group-${i}`),
+        },
+        overview_mode: 'groups' as const,
+      };
+
+      expect(() => overviewEmbeddableSchema.validate(stateWithTooManyGroups)).toThrow();
+    });
+
+    it('should accept groups array at maxSize (100)', () => {
+      const stateWithMaxGroups = {
+        group_filters: {
+          group_by: 'status' as const,
+          groups: Array.from({ length: 100 }, (_, i) => `group-${i}`),
+        },
+        overview_mode: 'groups' as const,
+      };
+
+      expect(() => overviewEmbeddableSchema.validate(stateWithMaxGroups)).not.toThrow();
+    });
+
+    it('should reject filters array exceeding maxSize (500)', () => {
+      const stateWithTooManyFilters = {
+        group_filters: {
+          group_by: 'status' as const,
+          filters: Array.from({ length: 501 }, () => ({
+            type: 'condition' as const,
+            condition: {
+              field: 'slo.id',
+              operator: 'is' as const,
+              value: 'test',
+            },
+          })),
+        },
+        overview_mode: 'groups' as const,
+      };
+
+      expect(() => overviewEmbeddableSchema.validate(stateWithTooManyFilters)).toThrow();
+    });
+
+    it('should accept filters array at maxSize (500)', () => {
+      const stateWithMaxFilters = {
+        group_filters: {
+          group_by: 'status' as const,
+          filters: Array.from({ length: 500 }, () => ({
+            type: 'condition' as const,
+            condition: {
+              field: 'slo.id',
+              operator: 'is' as const,
+              value: 'test',
+            },
+          })),
+        },
+        overview_mode: 'groups' as const,
+      };
+
+      expect(() => overviewEmbeddableSchema.validate(stateWithMaxFilters)).not.toThrow();
+    });
   });
 
   it('should validate single overview state with optional fields omitted', () => {

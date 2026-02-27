@@ -43,8 +43,10 @@ const GroupOverviewCustomSchema = schema.object({
   group_filters: schema.maybe(
     schema.object({
       group_by: schema.maybe(groupBySchema),
-      groups: schema.maybe(schema.arrayOf(schema.string())),
-      filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
+      // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
+      groups: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+      // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
+      filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
       kql_query: schema.maybe(schema.string()),
     })
   ),
