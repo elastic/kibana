@@ -33,10 +33,19 @@ describe('Quick search visor', () => {
   (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
   const dataMock = dataPluginMock.createStartContract();
 
+  const validLicense = {
+    status: 'active',
+    hasAtLeast: jest.fn().mockReturnValue(true),
+    getFeature: jest.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
+  };
+
   const services = {
     core: corePluginMock,
     data: dataMock,
     kql: kqlMock,
+    esql: {
+      getLicense: jest.fn().mockResolvedValue(validLicense),
+    },
   };
 
   function renderESQLVisor(
@@ -57,8 +66,11 @@ describe('Quick search visor', () => {
   }
 
   const switchToNlMode = async (getByTestId: ReturnType<typeof renderWithI18n>['getByTestId']) => {
-    const modeSelect = getByTestId('esqlVisorModeSelect');
-    const input = modeSelect.querySelector('input')!;
+    let modeSelect: HTMLElement;
+    await waitFor(() => {
+      modeSelect = getByTestId('esqlVisorModeSelect');
+    });
+    const input = modeSelect!.querySelector('input')!;
 
     await act(async () => {
       fireEvent.click(input);
@@ -140,11 +152,28 @@ describe('Quick search visor', () => {
     expect(queryByTestId('esqlVisorModeSelect')).not.toBeInTheDocument();
   });
 
-  it('should render the mode selector when nlToEsql flag is enabled', () => {
+  it('should not render the mode selector when license is not enterprise', async () => {
+    const invalidLicense = {
+      status: 'active',
+      hasAtLeast: jest.fn().mockReturnValue(false),
+      getFeature: jest.fn().mockReturnValue({ isEnabled: false, isAvailable: false }),
+    };
+    services.esql.getLicense.mockResolvedValue(invalidLicense);
+    const { queryByTestId } = renderWithI18n(
+      renderESQLVisor({ ...props }, { nlToEsqlEnabled: true })
+    );
+    await act(async () => {});
+    expect(queryByTestId('esqlVisorModeSelect')).not.toBeInTheDocument();
+    services.esql.getLicense.mockResolvedValue(validLicense);
+  });
+
+  it('should render the mode selector when nlToEsql flag is enabled', async () => {
     const { getByTestId } = renderWithI18n(
       renderESQLVisor({ ...props }, { nlToEsqlEnabled: true })
     );
-    expect(getByTestId('esqlVisorModeSelect')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByTestId('esqlVisorModeSelect')).toBeInTheDocument();
+    });
   });
 
   it('should switch to NL mode and show the NL input when connectors are available', async () => {

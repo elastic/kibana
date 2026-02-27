@@ -67,8 +67,8 @@ export function QuickSearchVisor({
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
-  // Temporary flag to enable/disable the NL to ES|QL feature, will be removed once the feature is stable.
-  const isNlToEsqlEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
+  const getLicense = kibana.services?.esql?.getLicense;
+  const isNlToEsqlFlagEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
@@ -77,12 +77,26 @@ export function QuickSearchVisor({
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
+  const [hasValidLicense, setHasValidLicense] = useState(false);
+  const licenseCheckRef = useRef(false);
   const connectorCheckRef = useRef(false);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const kqlInputRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
+
+  useEffect(() => {
+    if (!isNlToEsqlFlagEnabled || !getLicense || licenseCheckRef.current) return;
+    licenseCheckRef.current = true;
+    getLicense().then((license) => {
+      setHasValidLicense(
+        Boolean(license && license.status === 'active' && license.hasAtLeast('enterprise'))
+      );
+    });
+  }, [isNlToEsqlFlagEnabled, getLicense]);
+
+  const isNlToEsqlEnabled = isNlToEsqlFlagEnabled && hasValidLicense;
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);

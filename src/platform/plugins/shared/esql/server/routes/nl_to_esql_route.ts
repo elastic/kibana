@@ -181,6 +181,16 @@ export const registerNLtoESQLRoute = (
         });
       } catch (error) {
         logger.debug(error);
+        if (
+          error instanceof Error &&
+          'reason' in error &&
+          typeof (error as { reason: string }).reason === 'string' &&
+          (error as { reason: string }).reason.startsWith('license_')
+        ) {
+          return response.forbidden({
+            body: { message: error.message },
+          });
+        }
         throw error;
       }
     }
