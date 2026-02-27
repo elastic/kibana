@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
-import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
@@ -40,7 +40,7 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
   const {
     core: { docLinks },
   } = useApmPluginContext();
-  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
 
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 

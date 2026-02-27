@@ -39,7 +39,6 @@ interface ActionsContextMenuProps {
   button: React.ReactElement;
   id?: string;
   dataTestSubjPrefix?: string;
-  onTogglePopover?: (isPopoverOpen: boolean) => void;
 }
 
 export function ActionsContextMenu({
@@ -47,17 +46,13 @@ export function ActionsContextMenu({
   button,
   id = 'actions-context-menu',
   dataTestSubjPrefix = 'actionsContextMenu',
-  onTogglePopover,
 }: ActionsContextMenuProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   const togglePopover = useCallback(() => {
-    setIsPopoverOpen((prev) => {
-      onTogglePopover?.(!prev);
-      return !prev;
-    });
-  }, [onTogglePopover]);
+    setIsPopoverOpen((prev) => !prev);
+  }, []);
 
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);

@@ -14,7 +14,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
@@ -115,17 +114,7 @@ function ActionsCell<T extends object>({
   actions: TableActions<T>;
   disabled?: boolean;
 }) {
-  const trackEvent = useUiTracker({ app: 'apm' });
   const resolvedActions = useMemo(() => resolveTableActions(actions, item), [actions, item]);
-
-  const trackMenuToggle = useCallback(
-    (isPopoverOpen: boolean) => {
-      if (isPopoverOpen) {
-        trackEvent({ metric: 'service_inventory_actions_menu', metricType: METRIC_TYPE.CLICK });
-      }
-    },
-    [trackEvent]
-  );
 
   return (
     <ActionsContextMenu
@@ -143,7 +132,6 @@ function ActionsCell<T extends object>({
           isDisabled={disabled}
         />
       }
-      onTogglePopover={trackMenuToggle}
     />
   );
 }

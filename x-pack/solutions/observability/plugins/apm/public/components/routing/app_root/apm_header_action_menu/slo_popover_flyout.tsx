@@ -14,7 +14,7 @@ import React, { useCallback, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
-import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceName } from '../../../../hooks/use_service_name';
@@ -41,7 +41,7 @@ interface Props {
 }
 
 export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
-  const { slo } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { query } = useApmParams('/*');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutState, setFlyoutState] = useState<{
@@ -75,16 +75,12 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
           ? [
               {
                 name: createLatencySloLabel,
-                onClick: () => {
-                  openFlyout('sli.apm.transactionDuration');
-                },
+                onClick: () => openFlyout('sli.apm.transactionDuration'),
                 'data-test-subj': 'apmSlosMenuItemCreateLatencySlo',
               },
               {
                 name: createAvailabilitySloLabel,
-                onClick: () => {
-                  openFlyout('sli.apm.transactionErrorRate');
-                },
+                onClick: () => openFlyout('sli.apm.transactionErrorRate'),
                 'data-test-subj': 'apmSlosMenuItemCreateAvailabilitySlo',
               },
             ]

@@ -11,11 +11,10 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
-import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
@@ -30,7 +29,7 @@ const actionsLabel = i18n.translate('xpack.apm.home.actionsMenu.actions', {
 });
 
 export function ActionsMenu() {
-  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { query } = useApmParams('/*');
@@ -54,16 +53,6 @@ export function ActionsMenu() {
   const apmEnvironment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
   const sloEnvironment = apmEnvironment === ENVIRONMENT_ALL.value ? ALL_VALUE : apmEnvironment;
   const manageSlosUrl = useManageSlosUrl();
-
-  const trackEvent = useUiTracker({ app: 'apm' });
-  const trackMenuToggle = useCallback(
-    (isPopoverOpen: boolean) => {
-      if (isPopoverOpen) {
-        trackEvent({ metric: 'service_views_actions_menu', metricType: METRIC_TYPE.CLICK });
-      }
-    },
-    [trackEvent]
-  );
 
   const openSloFlyout = useCallback((indicatorType: ApmIndicatorType) => {
     setSloFlyoutState({ isOpen: true, indicatorType });
@@ -141,18 +130,14 @@ export function ActionsMenu() {
                   name: i18n.translate('xpack.apm.home.actionsMenu.createLatencySlo', {
                     defaultMessage: 'Create APM latency SLO',
                   }),
-                  onClick: () => {
-                    openSloFlyout('sli.apm.transactionDuration');
-                  },
+                  onClick: () => openSloFlyout('sli.apm.transactionDuration'),
                 },
                 {
                   id: 'createAvailabilitySlo',
                   name: i18n.translate('xpack.apm.home.actionsMenu.createAvailabilitySlo', {
                     defaultMessage: 'Create APM availability SLO',
                   }),
-                  onClick: () => {
-                    openSloFlyout('sli.apm.transactionErrorRate');
-                  },
+                  onClick: () => openSloFlyout('sli.apm.transactionErrorRate'),
                 },
               ]
             : []),
@@ -223,7 +208,6 @@ export function ActionsMenu() {
             {actionsLabel}
           </EuiButton>
         }
-        onTogglePopover={trackMenuToggle}
       />
       <AlertingFlyout
         ruleType={ruleType}
