@@ -1,53 +1,61 @@
 ---
-name: prepare-for-pr
-description: Run common CI checks on changed files — type checking, unit tests, eslint fixes, CODEOWNERS generation, and moon project regeneration. Use when the user wants to prepare a branch for a pull request, run pre-merge checks, check that CI will pass, or validate changes before pushing.
+name: branch-readiness-checks
+description: "Validate branch readiness before push or PR using base-diff and local-change checks."
+disable-model-invocation: true
 ---
 
-# Pull Request Preparation
+# Branch Readiness
 
-Run focused, speed-optimized checks on changed files before opening a pull request.
-Do **not** use the MCP `run_ci_checks` tool — run each step directly via shell instead.
+Run focused checks before push/PR.
 
-## Shell timeouts
+## Command Timing
 
-Set `block_until_ms` on every shell command to avoid background polling with `sleep`.
-Use these minimums based on observed runtimes:
+Use bounded polling rather than agent-specific timeout fields.
+For each command, set a `max_wait_ms`, poll every `poll_interval_ms`, and stop when the command completes or the max wait is reached.
+If `max_wait_ms` is exceeded, report a timeout and continue to the next workflow step.
 
-| Command | `block_until_ms` |
-|---------|-----------------|
-| `git diff`, `git merge-base` | 10000 |
-| `node scripts/lint_ts_projects.js` | 60000 |
-| `yarn test:type_check --project` | 60000 |
-| `yarn test:jest` | 60000 |
-| `node scripts/eslint` | 60000 |
-| `node scripts/generate codeowners` | 30000 |
-| `node scripts/regenerate_moon_projects.js` | 30000 |
+| Command type | `max_wait_ms` | `poll_interval_ms` |
+|---|---:|---:|
+| `git diff`, `git merge-base` | 15000 | 1000 |
+| `node scripts/check_changes.ts --ref "$BASE"` | 180000 | 2000 |
+| `node scripts/lint_ts_projects.js`, `yarn test:type_check --project` | 120000 | 2000 |
+| `node scripts/generate codeowners`, `node scripts/regenerate_moon_projects.js` | 60000 | 2000 |
+| `yarn test:jest` (per package) | 300000 | 5000 |
 
 ## Workflow
 
-Run these steps **sequentially**. Do not stop on failure — continue through all steps.
-At the end, summarize any issues that would likely cause the PR to fail its first CI run.
+Run these steps **sequentially**. Continue through all steps even if one fails.
+At the end, summarize issues that are likely to fail CI.
 
 ### Step 0: Identify affected packages
 
-Collect **both** committed and uncommitted changes. Detect the base branch rather than assuming `main`:
+Collect changes relative to branch base, including untracked files. Detect the base branch rather than assuming `main`:
 
 ```bash
 BASE=$(git merge-base HEAD main 2>/dev/null || git merge-base HEAD origin/main)
-# Committed changes on the branch.
-git diff --name-only "$BASE"...HEAD
-# Uncommitted changes in the working tree.
-git diff --name-only
+# Files changed since the branch base (committed + working tree changes).
+git diff --name-only "$BASE"
+# Untracked files.
+git ls-files --others --exclude-standard
 ```
 
-Combine and deduplicate the results. From the changed file paths, identify:
+Combine and deduplicate results. From the changed file paths, identify:
 - The affected packages — walk up from each changed file to the nearest `kibana.jsonc` and read its `id` field for the package ID.
 - The `tsconfig.json` files for those packages (sibling to `kibana.jsonc`).
-- The changed `.ts`/`.tsx`/`.js`/`.jsx` files for eslint scoping.
 
 **Prerequisite check**: verify the TS project map exists by running a quick type check on one package. If it fails with `TS Project map missing`, **stop** and ask the user if they'd like you to run `yarn kbn bootstrap`. Once bootstrap completes (or if the user declines), proceed with the remaining steps.
 
-### Step 1: Lint TS projects
+### Step 1: Run `check_changes` against branch base
+
+Run `check_changes` using the `BASE` computed in Step 0:
+
+```bash
+node scripts/check_changes.ts --ref "$BASE"
+```
+
+Record failures in the final summary, then continue with the remaining steps.
+
+### Step 2: Lint TS projects
 
 Validate and auto-fix `tsconfig.json` files across affected packages.
 
@@ -55,9 +63,9 @@ Validate and auto-fix `tsconfig.json` files across affected packages.
 node scripts/lint_ts_projects.js --fix
 ```
 
-This runs repo-wide but is fast. If any files were modified by `--fix`, note them in the summary. Report any remaining errors that couldn't be auto-fixed.
+This runs repo-wide but is fast. Note files modified by `--fix` and report any remaining errors.
 
-### Step 2: Type check
+### Step 3: Type check
 
 Run type checking scoped to each affected package's `tsconfig.json`.
 Only one `--project` flag per invocation — run separate commands for each package.
@@ -71,35 +79,22 @@ package ID and type-check those too. This catches cross-package breakage that CI
 `tsc -b tsconfig.refs.json` would find.
 
 ```bash
-grep -rl '"@kbn/affected-package-id"' --include='tsconfig.json' .
+rg -l '"@kbn/affected-package-id"' --glob 'tsconfig.json' .
 ```
 
 Deduplicate against already-checked packages. If a package has more than **20** downstream
 tsconfigs, skip the downstream check and warn the user that a full `tsc -b` may be needed.
 
-### Step 3: Unit tests
+### Step 4: Unit tests
 
-Run unit tests **per affected package** using the MCP `run_unit_tests` tool with coverage enabled:
-
-```
-run_unit_tests(package: "@kbn/package-name", collectCoverage: true)
-```
-
-The `package` parameter accepts a package ID (e.g., `@kbn/content-list-table`) or directory path.
-Report uncovered line numbers and overall coverage to the user — let them judge acceptable thresholds.
-
-If the MCP tool is unavailable, fall back to `yarn test:jest --coverage path/to/package/src/`.
-
-### Step 4: ESLint with auto-fix
-
-Run eslint with `--fix` scoped to each affected package's directory rather than listing individual files.
-Walk up from the changed files to the nearest `.eslintrc.js` or `.eslintrc.json` parent directory and pass that directory.
+Run unit tests **per affected package** with coverage enabled.
 
 ```bash
-node scripts/eslint --fix path/to/affected-package/
+yarn test:jest --coverage path/to/package/src/
 ```
 
-Run once per affected package directory. If eslint produces remaining errors after auto-fix, report them.
+If your environment provides a package-scoped unit-test tool, use the equivalent command.
+Report uncovered line numbers and overall coverage.
 
 ### Step 5: CODEOWNERS generation
 
@@ -123,23 +118,22 @@ Check for unstaged changes afterward — if any moon configs changed, note them 
 
 ## Re-runs within the same session
 
-If the user asks to re-run pr-prep after making fixes, or if you make changes as the result of a failure, run all steps again.
+If the user asks to re-run branch-readiness checks after fixes, or if you make changes due to failures, run all steps again.
 
 ## After all checks have run
 
 Report a summary including:
+- Check changes pass/fail and key failures (if any).
 - TS project lint pass/fail.
 - Type check pass/fail per package (or "skipped" if unchanged).
 - Test results and coverage per package (or "skipped" if unchanged).
-- ESLint errors remaining after auto-fix (and which files were auto-fixed).
 - Whether CODEOWNERS or moon configs need to be committed.
 
-### Offering to fix issues
+### Offering to Fix Issues
 
-After reporting the summary, offer to fix issues based on risk level:
+After reporting the summary, offer fixes by risk level:
 
-- **Type errors and remaining eslint errors** — offer to fix these automatically. These are usually mechanical (wrong types, missing arguments, import issues) and safe to correct.
-- **TS project lint errors not resolved by `--fix`** — offer to fix. These are typically structural tsconfig issues.
+- **Check changes failures, type errors, and TS project lint errors not resolved by `--fix`** — offer to fix automatically when mechanical and low risk.
 - **Test failures** — ask before touching test code. Test fixes can change intent, so the user should confirm before proceeding.
 
 Do **not** commit or stage automatically — let the user decide.
