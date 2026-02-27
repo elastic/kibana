@@ -104,6 +104,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/zod'
   - '@kbn/securitysolution-es-utils'
+  - '@kbn/response-ops-retry-service'
+  - '@kbn/openapi-generator'
 tags:
   - plugin
   - prod
@@ -116,6 +118,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
+    - docs/openapi/**/*.gen.ts
     - '!target/**/*'
 tasks:
   jest:

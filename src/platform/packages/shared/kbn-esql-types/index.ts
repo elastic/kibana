@@ -11,8 +11,6 @@ export {
   ESQLVariableType,
   EsqlControlType,
   VariableNamePrefix,
-  type ControlWidthOptions,
-  type ESQLControlState,
   type ESQLControlVariable,
   type PublishesESQLVariable,
   type PublishesESQLVariables,
@@ -26,6 +24,8 @@ export {
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
   type ESQLSourceResult,
+  type EsqlView,
+  type EsqlViewsResult,
 } from './src/sources_autocomplete_types';
 
 export { type RecommendedQuery, type RecommendedField } from './src/extensions_autocomplete_types';
@@ -39,6 +39,7 @@ export {
   REGISTRY_EXTENSIONS_ROUTE,
   SOURCES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
+  VIEWS_ROUTE,
   SOURCES_TYPES,
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,
@@ -53,12 +54,15 @@ export {
   QuerySource,
   TelemetryControlCancelledReason,
   type TelemetryQuerySubmittedProps,
+  type TelemetryLatencyProps,
 } from './src/esql_telemetry_types';
 
+export { type ESQLQueryStats, type ESQLControlsContext } from './src/editor_types';
 export {
   type ESQLCallbacks,
   type PartialFieldsMetadataClient,
   type ESQLFieldWithMetadata,
   type EsqlFieldType,
   esqlFieldTypes,
+  KQL_TYPE_TO_KIND_MAP,
 } from './src/editor_types';

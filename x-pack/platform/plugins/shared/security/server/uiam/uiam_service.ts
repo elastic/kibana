@@ -10,12 +10,49 @@ import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type {
+  ClientAuthentication,
+  GrantUiamAPIKeyParams,
+} from '@kbn/security-plugin-types-server';
 
-import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
-import type { UserProfileGrant } from '../user_profile';
+
+/**
+ * Represents the request body for granting an API key via UIAM.
+ */
+export interface GrantUiamApiKeyRequestBody {
+  /** A descriptive name for the API key. */
+  description: string;
+  /** Indicates whether this is an internal API key. */
+  internal: boolean;
+  /** Optional expiration time for the API key (e.g., '1d', '7d'). */
+  expiration?: string;
+  /** Role assignments that define access and resource limits for the API key. */
+  role_assignments: {
+    /** Limits defining the scope of the API key. */
+    limit: {
+      /** Access types granted to the API key (e.g., 'application'). */
+      access: string[];
+      /** Resource types the API key can access (e.g., 'project'). */
+      resource: string[];
+    };
+  };
+}
+
+/**
+ * Represents the response from granting an API key via UIAM.
+ */
+export interface GrantUiamApiKeyResponse {
+  /** The unique identifier for the API key. */
+  id: string;
+  /** The API key value (encoded). */
+  key: string;
+  /** A descriptive name/description for the API key. */
+  description: string;
+}
 
 /**
  * The service that integrates with UIAM for user authentication and session management.
@@ -28,10 +65,10 @@ export interface UiamServicePublic {
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
 
   /**
-   * Creates a user profile grant based on the provided access token.
-   * @param accessToken UIAM session access token.
+   * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
+   * `client_authentication` option in Elasticsearch client.
    */
-  getUserProfileGrant(accessToken: string): UserProfileGrant;
+  getClientAuthentication(): ClientAuthentication;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -47,6 +84,24 @@ export interface UiamServicePublic {
    * @param refreshToken UIAM session refresh token.
    */
   invalidateSessionTokens(accessToken: string, refreshToken: string): Promise<void>;
+
+  /**
+   * Grants an API key using the UIAM service.
+   * @param authorization The HTTP authorization header containing scheme and credentials.
+   * @param params The parameters for creating the API key (name and optional expiration).
+   * @returns A promise that resolves to an object containing the API key details.
+   */
+  grantApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: GrantUiamAPIKeyParams
+  ): Promise<GrantUiamApiKeyResponse>;
+
+  /**
+   * Revokes a UIAM API key by its ID.
+   * @param apiKeyId The ID of the API key to revoke.
+   * @param apiKey The API key to revoke; will be used for authentication on this request.
+   */
+  revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
 }
 
 /**
@@ -89,14 +144,10 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
-   * See {@link UiamServicePublic.getUserProfileGrant}.
+   * See {@link UiamServicePublic.getClientAuthentication}.
    */
-  getUserProfileGrant(accessToken: string): UserProfileGrant {
-    return {
-      type: 'uiamAccessToken' as const,
-      accessToken,
-      sharedSecret: this.#config.sharedSecret,
-    };
+  getClientAuthentication(): ClientAuthentication {
+    return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
   }
 
   /**
@@ -158,28 +209,111 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.grantApiKey}.
+   */
+  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
+    this.#logger.debug(
+      `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
+    );
+
+    try {
+      const body: GrantUiamApiKeyRequestBody = {
+        description: params.name,
+        internal: true,
+        ...(params.expiration ? { expiration: params.expiration } : {}),
+        role_assignments: {
+          // currently required  to downscope privileges
+          limit: {
+            // limit access to applications within projects (i.e. application_roles, not cloud roles)
+            access: ['application'],
+            // limit access to projects  (i.e. not deployments, organizations, etc.)
+            resource: ['project'],
+          },
+        },
+      };
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: authorization.toString(),
+          },
+          body: JSON.stringify(body),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully granted API key with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to grant API key: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeApiKey}.
+   */
+  async revokeApiKey(apiKeyId: string, apiKey: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to revoke API key: ${apiKeyId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/${apiKeyId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `ApiKey ${apiKey}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully revoked API key: ${apiKeyId}`);
+    } catch (err) {
+      this.#logger.error(() => `Failed to revoke API key: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
    */
   #createFetchDispatcher() {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
+
+    const readFile = (file: string) => readFileSync(file, 'utf8');
+
+    // Read client certificate and key for mTLS from PEM files.
+    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
+    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
       ? (Array.isArray(certificateAuthorities)
           ? certificateAuthorities
           : [certificateAuthorities]
-        ).map((caPath) => readFileSync(caPath, 'utf8'))
+        ).map((caPath) => readFile(caPath))
       : undefined;
 
-    // If we don't have custom CAs and the full verification is required, we don't need custom
-    // dispatcher as it's a default `fetch` behavior.
-    if (!ca && verificationMode === 'full') {
+    // If we don't have any custom TLS settings and the full verification is required, we don't
+    // need a custom dispatcher as it's the default `fetch` behavior.
+    if (!ca && !cert && !key && verificationMode === 'full') {
       return;
     }
 
     return new Agent({
       connect: {
         ca,
+        cert,
+        key,
         // The applications, including Kibana, running inside the MKI cluster should not need access to things like the
         // root CA and should be able to work with the CAs related to that particular cluster. The trust bundle we
         // currently deploy in the Kibana pods includes only the intermediate CA that is scoped to the application

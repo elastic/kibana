@@ -3,13 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-i18n-browser",
@@ -27,5 +22,7 @@
     "@kbn/cloud-plugin",
     "@kbn/es",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-utils",
   ]
 }

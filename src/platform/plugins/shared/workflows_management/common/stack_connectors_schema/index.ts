@@ -27,8 +27,8 @@ export { SlackParamsSchema, SlackResponseSchema } from './slack';
 // Email connector schemas
 export { EmailParamsSchema, EmailResponseSchema } from './email';
 
-// Webhook connector schemas
-export { WebhookParamsSchema, WebhookResponseSchema } from './webhook';
+// HTTP connector schemas
+export { HttpParamsSchema, HttpResponseSchema } from './http';
 
 // Jira connector schemas
 export {
@@ -169,3 +169,13 @@ export {
 
 // Torq connector schemas
 export { TorqParamsSchema, TorqResponseSchema } from './torq';
+
+// MCP connector schemas
+export {
+  McpTestParamsSchema,
+  McpListToolsParamsSchema,
+  McpCallToolParamsSchema,
+  McpTestResponseSchema,
+  McpListToolsResponseSchema,
+  McpCallToolResponseSchema,
+} from './mcp';

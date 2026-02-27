@@ -19,11 +19,14 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import type {
+  SecuritySolutionAlertFlyoutOverviewTabFeature,
+  SecuritySolutionCellRendererFeature,
+} from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -62,9 +65,9 @@ import { LazyCustomCriblExtension } from './security_integrations/cribl/componen
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
-import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/endpoint/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
-import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
@@ -74,6 +77,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private experimentalFeatures: ExperimentalFeatures;
   private contract: PluginContract;
   private services: PluginServices;
+  private logger: Logger;
   private isServerless: boolean;
 
   private appUpdater$ = new Subject<AppUpdater>();
@@ -91,12 +95,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     ).features;
     this.contract = new PluginContract(this.experimentalFeatures);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.logger = initializerContext.logger.get(); // Initializes logger with name plugins.securitySolution
 
     this.services = new PluginServices(
       this.config,
       this.experimentalFeatures,
       this.contract,
-      initializerContext.env.packageInfo
+      initializerContext.env.packageInfo,
+      this.logger
     );
   }
 
@@ -257,9 +263,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
-
-    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
-    cases?.attachmentFramework?.registerExternalReference(externalAttachmentType);
+    cases?.attachmentFramework?.registerExternalReference(generateIndicatorAttachmentType());
 
     this.registerDiscoverSharedFeatures(plugins);
 
@@ -271,9 +275,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
-    if (plugins.onechat?.attachments) {
+    if (plugins.agentBuilder?.attachments) {
       registerAttachmentUiDefinitions({
-        attachments: plugins.onechat.attachments,
+        attachments: plugins.agentBuilder.attachments,
       });
     }
 
@@ -287,6 +291,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
     const { discoverShared } = plugins;
     const discoverFeatureRegistry = discoverShared.features.registry;
+
     const cellRendererFeature: SecuritySolutionCellRendererFeature = {
       id: 'security-solution-cell-renderer',
       getRenderer: async () => {
@@ -294,8 +299,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return getCellRendererForGivenRecord;
       },
     };
-
     discoverFeatureRegistry.register(cellRendererFeature);
+
+    const LazyAlertFlyoutOverviewTab = React.lazy(async () => {
+      const { AlertFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutOverviewTab };
+    });
+
+    const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
+      id: 'security-solution-alert-flyout-overview-tab',
+      render: (hit) => (
+        <React.Suspense fallback={null}>
+          <LazyAlertFlyoutOverviewTab hit={hit} />
+        </React.Suspense>
+      ),
+    };
+    discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

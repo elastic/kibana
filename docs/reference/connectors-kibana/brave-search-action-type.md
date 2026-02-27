@@ -3,7 +3,7 @@ navigation_title: "Brave Search"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/brave-search-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.3
   serverless: preview
 ---
 

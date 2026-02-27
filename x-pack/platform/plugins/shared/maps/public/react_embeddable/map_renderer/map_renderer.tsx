@@ -73,18 +73,15 @@ export function MapRenderer(props: Props) {
           isSharable: props.isSharable,
           getSerializedStateForChild: () => {
             return {
-              rawState: {
-                attributes: {
-                  title: props.title ?? '',
-                  layers: getLayers(props.layerList),
-                },
-                hidePanelTitles: !Boolean(props.title),
-                isLayerTOCOpen:
-                  typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
-                mapCenter: props.mapCenter,
-                mapSettings: props.mapSettings ?? {},
+              attributes: {
+                title: props.title ?? '',
+                layers: getLayers(props.layerList),
               },
-              references: [],
+              hidePanelTitles: !Boolean(props.title),
+              isLayerTOCOpen:
+                typeof props.isLayerTOCOpen === 'boolean' ? props.isLayerTOCOpen : false,
+              mapCenter: props.mapCenter,
+              mapSettings: props.mapSettings ?? {},
             };
           },
           ...searchApi,

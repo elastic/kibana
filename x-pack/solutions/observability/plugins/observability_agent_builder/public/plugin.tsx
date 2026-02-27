@@ -19,6 +19,7 @@ import {
   createLogsAIInsightRenderer,
 } from './components/insights';
 import { registerAttachmentUiDefinitions } from './attachment_types';
+import { registerTelemetryEventTypes } from './analytics';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -38,6 +39,7 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginPublicSetup {
+    registerTelemetryEventTypes(core.analytics);
     return {};
   }
 
@@ -53,7 +55,7 @@ export class ObservabilityAgentBuilderPlugin
     });
 
     registerAttachmentUiDefinitions({
-      attachments: plugins.onechat.attachments,
+      attachments: plugins.agentBuilder.attachments,
     });
 
     return {

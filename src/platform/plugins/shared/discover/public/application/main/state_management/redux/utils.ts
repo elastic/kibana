@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isObject } from 'lodash';
 import { v4 as uuid } from 'uuid';
-import { i18n } from '@kbn/i18n';
-import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { isObject } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverInternalState, TabState } from './types';
+import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
+import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
-  InternalStateDispatch,
   InternalStateDependencies,
+  InternalStateDispatch,
   TabActionPayload,
 } from './internal_state';
+import type { DiscoverInternalState, TabState } from './types';
 
 // For some reason if this is not explicitly typed, TypeScript fails with the following error:
 // TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -118,7 +119,7 @@ export const getSerializedSearchSourceDataViewDetails = (
 
 export const parseControlGroupJson = (
   jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
+): ControlPanelsState<OptionsListESQLControlState> => {
   try {
     return jsonString ? JSON.parse(jsonString) : {};
   } catch (e) {
@@ -135,15 +136,15 @@ export const parseControlGroupJson = (
  * @returns An array of ESQLControlVariable objects.
  */
 export const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
+  panels: ControlPanelsState<OptionsListESQLControlState> | null
 ): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const isSingleSelect = panel.singleSelect ?? true;
-      const selectedValues = panel.selectedOptions || [];
+      const isSingleSelect = panel.single_select ?? true;
+      const selectedValues = panel.selected_options || [];
 
       let value: string | number | (string | number)[];
 
@@ -157,8 +158,8 @@ export const extractEsqlVariables = (
       }
 
       acc.push({
-        key: panel.variableName,
-        type: panel.variableType,
+        key: panel.variable_name,
+        type: panel.variable_type as ESQLVariableType,
         value,
       });
     }

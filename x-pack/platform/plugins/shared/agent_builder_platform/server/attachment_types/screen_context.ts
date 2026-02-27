@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { AttachmentType, screenContextAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import type { ScreenContextAttachmentData } from '@kbn/onechat-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import {
+  AttachmentType,
+  screenContextAttachmentDataSchema,
+} from '@kbn/agent-builder-common/attachments';
+import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 
 /**
  * Creates the definition for the `screen_context` attachment type.
@@ -33,6 +36,7 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    isReadonly: true,
     getTools: () => [],
   };
 };

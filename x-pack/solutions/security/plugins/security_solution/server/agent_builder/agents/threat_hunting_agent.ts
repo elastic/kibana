@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
-import { platformCoreTools } from '@kbn/onechat-common';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import {
@@ -47,7 +47,7 @@ export const createThreatHuntingAgent = (
     avatar_icon: 'logoSecurity',
     name: 'Threat Hunting Agent',
     description:
-      'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
+      'Agent specialized in security alert analysis and entity analysis tasks, including alert investigation, entity investigation and security documentation.',
     labels: ['security'],
     availability: {
       cacheMode: 'space',

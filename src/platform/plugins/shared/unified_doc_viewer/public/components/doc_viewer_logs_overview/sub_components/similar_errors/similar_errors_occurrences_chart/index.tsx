@@ -130,12 +130,10 @@ export function SimilarErrorsOccurrencesChart({
   const getParentApi = useCallback(() => {
     return {
       getSerializedStateForChild: () => ({
-        rawState: {
-          attributes: lensAttributes,
-          viewMode: 'view',
-          timeRange,
-          esqlVariables: [],
-        },
+        attributes: lensAttributes,
+        viewMode: 'view',
+        timeRange,
+        esqlVariables: [],
       }),
       noPadding: true,
     };

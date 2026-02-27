@@ -20,3 +20,10 @@ export const NOT_TRANSLATED_DASHBOARD_TOOLTIP = i18n.translate(
     defaultMessage: 'Not translated migration dashboard',
   }
 );
+
+export const DASHBOARDS_MIGRATION_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.table.caption',
+  {
+    defaultMessage: 'Dashboards migration status',
+  }
+);

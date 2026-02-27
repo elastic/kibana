@@ -10,7 +10,6 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SampleDataActionButton } from './sample_data_action_button';
 import { useKibana } from '../hooks/use_kibana';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 
 jest.mock('../hooks/use_kibana');
@@ -21,8 +20,6 @@ jest.mock('../hooks/use_ingest_data', () => ({
     isLoading: false,
   })),
 }));
-
-const mockUiSettingsGet = jest.fn();
 
 const renderWithWrapper = () => {
   render(
@@ -37,10 +34,9 @@ describe('Sample data action button', () => {
     jest.clearAllMocks();
   });
 
-  it('renders elements when onechat is enabled', async () => {
+  it('renders agent builder menu item', async () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        uiSettings: { get: mockUiSettingsGet },
         share: {
           url: {
             locators: {
@@ -58,11 +54,6 @@ describe('Sample data action button', () => {
       indexName: 'indexName',
       dashboardId: 'dashboardId',
       isLoading: false,
-    });
-    mockUiSettingsGet.mockImplementation((key: string) => {
-      if (key === AGENT_BUILDER_ENABLED_SETTING_ID) {
-        return true;
-      }
     });
 
     renderWithWrapper();

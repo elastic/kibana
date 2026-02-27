@@ -6,11 +6,12 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
-import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common/tools';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -24,7 +25,11 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
     validate: async (input) => {
       const parseResult = esqlAttachmentDataSchema.safeParse(input);
       if (!parseResult.success) {
-        return { valid: false, error: parseResult.error.message };
+        const schema = zodToJsonSchema(esqlAttachmentDataSchema);
+        return {
+          valid: false,
+          error: `message: ${parseResult.error.message}, schema: ${JSON.stringify(schema)}`,
+        };
       }
 
       const validationResult = await validateQuery(parseResult.data.query);

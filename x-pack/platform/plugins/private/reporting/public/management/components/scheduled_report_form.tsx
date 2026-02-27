@@ -415,6 +415,7 @@ export const ScheduledReportForm = ({
                         {i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL}
                       </EuiFormLabel>
                     ),
+                    'aria-label': `${i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL} ${timezone}`,
                   },
                 }}
               />

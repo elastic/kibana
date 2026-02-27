@@ -8,8 +8,17 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { aiPromptStepDefinition } from './ai/ai_prompt_step';
-import { dataDedupeStepDefinition, dataMapStepDefinition } from './data';
+import { aiClassifyStepDefinition } from './ai/ai_classify_step/step';
+import { aiPromptStepDefinition } from './ai/ai_prompt_step/step';
+import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
+import {
+  dataDedupeStepDefinition,
+  dataFilterStepDefinition,
+  dataFindStepDefinition,
+  dataMapStepDefinition,
+  dataRegexExtractStepDefinition,
+  dataRegexReplaceStepDefinition,
+} from './data';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
@@ -19,5 +28,11 @@ export const registerInternalStepDefinitions = (
 ) => {
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
+  serverStepRegistry.register(dataFilterStepDefinition);
+  serverStepRegistry.register(dataFindStepDefinition);
+  serverStepRegistry.register(dataRegexExtractStepDefinition);
+  serverStepRegistry.register(dataRegexReplaceStepDefinition);
+  serverStepRegistry.register(aiClassifyStepDefinition(core));
   serverStepRegistry.register(aiPromptStepDefinition(core));
+  serverStepRegistry.register(aiSummarizeStepDefinition(core));
 };

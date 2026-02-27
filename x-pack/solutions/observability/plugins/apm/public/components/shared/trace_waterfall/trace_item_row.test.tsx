@@ -34,22 +34,29 @@ jest.mock('./bar_details', () => ({
 jest.mock('./toggle_accordion_button', () => ({
   TOGGLE_BUTTON_WIDTH: 10,
   ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
-    <button
+    <div
       data-test-subj="toggle-btn"
       data-open={isOpen}
       data-count={childrenCount}
       onClick={onClick}
-    >
-      Toggle
-    </button>
+      onKeyDown={onClick}
+      role="button"
+      tabIndex={0}
+    />
   ),
 }));
 jest.mock('./trace_waterfall_context');
+
+const MockEuiAccordion = jest.fn();
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: jest.fn(),
+    EuiAccordion: (props: any) => {
+      MockEuiAccordion(props);
+      return <actual.EuiAccordion {...props} />;
+    },
   };
 });
 
@@ -71,10 +78,13 @@ const baseItem = {
   traceId: 'trace-1',
   serviceName: 'Test Service',
   spanLinksCount: { incoming: 0, outgoing: 0 },
+  docType: 'span',
 } as TraceWaterfallItem;
 
 describe('TraceItemRow', () => {
   beforeEach(() => {
+    MockEuiAccordion.mockClear();
+
     mockUseTraceWaterfallContext.mockReturnValue({
       duration: 100,
       margin: { left: 20, right: 10 },
@@ -343,6 +353,26 @@ describe('TraceItemRow', () => {
       expect(bar).toHaveAttribute('data-color', 'red');
     });
   });
+
+  /**
+   * Regression test: EUI forces arrow display when buttonElement="div" for accessibility.
+   * We hide it via arrowProps.css since we use our own ToggleAccordionButton.
+   */
+  it('passes arrowProps with display:none to hide EUI forced arrow', () => {
+    render(<TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />);
+
+    expect(MockEuiAccordion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        buttonElement: 'div',
+        arrowDisplay: 'none',
+        arrowProps: expect.objectContaining({
+          css: expect.objectContaining({
+            styles: expect.stringContaining('display:none'),
+          }),
+        }),
+      })
+    );
+  });
 });
 
 describe('getCriticalPathOverlays', () => {
@@ -360,6 +390,7 @@ describe('getCriticalPathOverlays', () => {
       traceId: 'test-trace',
       serviceName: 'test-service',
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
       ...overrides,
     } as TraceWaterfallItem);
 

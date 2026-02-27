@@ -17,10 +17,12 @@
     "requiredPlugins": [
       "management",
       "features",
-      "encryptedSavedObjects"
+      "encryptedSavedObjects",
+      "licensing"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "home"
     ],
     "requiredBundles": [
       "esUiShared"

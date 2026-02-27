@@ -26,7 +26,7 @@ export {
   getFunctionDefinition,
 } from './functions';
 export { getDateLiterals, getCompatibleLiterals } from './literals';
-export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
+export { getColumnForASTNode, pipePrecedesCurrentWord, techPreviewLabel } from './shared';
 export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';

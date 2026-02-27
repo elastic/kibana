@@ -13,6 +13,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 import { preprocessAlertInputs } from '../utils/preprocess_alert_inputs';
 
 export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -36,7 +37,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
         ),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
 
@@ -67,7 +68,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }
 

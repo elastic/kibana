@@ -16,11 +16,13 @@ import { AttackDiscoveryMarkdownParser } from './attack_discovery_markdown_parse
 import { getFieldMarkdownRenderer } from './field_markdown_renderer';
 
 interface Props {
+  scopeId?: string;
   disableActions?: boolean;
   markdown: string;
 }
 
 const AttackDiscoveryMarkdownFormatterComponent: React.FC<Props> = ({
+  scopeId,
   disableActions = false,
   markdown,
 }) => {
@@ -31,10 +33,13 @@ const AttackDiscoveryMarkdownFormatterComponent: React.FC<Props> = ({
 
   const attackDiscoveryProcessingPluginList = useMemo(() => {
     const processingPluginList = getDefaultEuiMarkdownProcessingPlugins();
-    processingPluginList[1][1].components.fieldPlugin = getFieldMarkdownRenderer(disableActions);
+    processingPluginList[1][1].components.fieldPlugin = getFieldMarkdownRenderer(
+      disableActions,
+      scopeId
+    );
 
     return processingPluginList;
-  }, [disableActions]);
+  }, [disableActions, scopeId]);
 
   return (
     <EuiMarkdownFormat

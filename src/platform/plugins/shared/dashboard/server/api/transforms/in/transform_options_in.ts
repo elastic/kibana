@@ -11,10 +11,12 @@ import type { DashboardState } from '../../types';
 
 const APIToSavedObjectOptionsKeys = {
   hide_panel_titles: 'hidePanelTitles',
+  hide_panel_borders: 'hidePanelBorders',
   use_margins: 'useMargins',
   sync_colors: 'syncColors',
   sync_tooltips: 'syncTooltips',
   sync_cursor: 'syncCursor',
+  auto_apply_filters: 'autoApplyFilters',
 } as const;
 
 export function transformOptionsIn(options: DashboardState['options']): string {

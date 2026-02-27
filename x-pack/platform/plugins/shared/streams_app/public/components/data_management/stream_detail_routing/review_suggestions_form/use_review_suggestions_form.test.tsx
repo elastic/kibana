@@ -8,22 +8,16 @@
 import { act, renderHook } from '@testing-library/react';
 import { useReviewSuggestionsForm } from './use_review_suggestions_form';
 import type { Condition } from '@kbn/streamlang';
-import { showErrorToast } from '../../../../hooks/use_streams_app_fetch';
+import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 
 jest.mock('react-use/lib/useUpdateEffect', () => {
   return (cb: () => void, deps: unknown[]) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ReactImport = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ReactImport.useEffect(cb, deps as any);
   };
 });
-
-// Mock the Kibana hook
-const mockNotifications = {
-  toasts: {
-    addError: jest.fn(),
-  },
-};
 
 const mockStreamsRepositoryClient = {
   stream: jest.fn(),
@@ -31,7 +25,6 @@ const mockStreamsRepositoryClient = {
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
-    core: { notifications: mockNotifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
@@ -50,8 +43,9 @@ jest.mock('@kbn/react-hooks', () => ({
 }));
 
 // Mock the error toast function
-jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  showErrorToast: jest.fn(),
+const mockShowFetchErrorToast = jest.fn();
+jest.mock('../../../../hooks/use_fetch_error_toast', () => ({
+  useFetchErrorToast: () => mockShowFetchErrorToast,
 }));
 
 // Mock the actor ref hook; capture sent events for assertions
@@ -86,8 +80,7 @@ describe('useReviewSuggestionsForm', () => {
   beforeEach(() => {
     mockSend.mockReset();
     mockStreamsRepositoryClient.stream.mockReset();
-    mockNotifications.toasts.addError.mockReset();
-    (showErrorToast as jest.Mock).mockReset();
+    mockShowFetchErrorToast.mockReset();
   });
 
   it('initializes with undefined suggestions and not loading', () => {
@@ -313,6 +306,7 @@ describe('useReviewSuggestionsForm', () => {
       }),
     };
     mockStreamsRepositoryClient.stream.mockReturnValue(mockObservable);
+    const showFetchErrorToast = useFetchErrorToast();
 
     const { result } = renderHook(() => useReviewSuggestionsForm());
 
@@ -325,7 +319,7 @@ describe('useReviewSuggestionsForm', () => {
       });
     });
 
-    expect(showErrorToast).toHaveBeenCalledWith(mockNotifications, error);
+    expect(showFetchErrorToast).toHaveBeenCalledWith(error);
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
 
@@ -342,6 +336,7 @@ describe('useReviewSuggestionsForm', () => {
     mockStreamsRepositoryClient.stream.mockReturnValue(mockObservable);
 
     const { result } = renderHook(() => useReviewSuggestionsForm());
+    const showFetchErrorToast = useFetchErrorToast();
 
     await act(async () => {
       await result.current.fetchSuggestions({
@@ -352,7 +347,7 @@ describe('useReviewSuggestionsForm', () => {
       });
     });
 
-    expect(showErrorToast).not.toHaveBeenCalled();
+    expect(showFetchErrorToast).not.toHaveBeenCalled();
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
 

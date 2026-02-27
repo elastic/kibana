@@ -9,7 +9,6 @@ import React from 'react';
 import { dateHistogramOperation } from '.';
 import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
@@ -24,9 +23,10 @@ import type {
   FormBasedLayer,
   IndexPattern,
 } from '@kbn/lens-common';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 const dataStart = dataPluginMock.createStartContract();
-const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();
+const kqlStart = kqlPluginMock.createStartContract();
 const dataViewsStart = dataViewPluginMocks.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
   (path: string) => {
@@ -108,7 +108,7 @@ const defaultOptions = {
   },
   data: dataStart,
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchStart,
+  kql: kqlStart,
   dataViews: dataViewsStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,

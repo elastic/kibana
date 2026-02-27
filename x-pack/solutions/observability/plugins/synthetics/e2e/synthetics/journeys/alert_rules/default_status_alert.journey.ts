@@ -6,10 +6,10 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
+import { byTestId } from '../../../page_objects/utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
@@ -56,9 +56,20 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await syntheticsApp.navigateToOverview(true, 15);
   });
 
-  step('should create default status alert', async () => {
+  step('should wait for and edit default status alert', async () => {
+    // Wait for the default alert to be created asynchronously after monitor creation
     await page.getByTestId('syntheticsAlertsRulesButton').click();
+
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.waitForSelector(byTestId('manageStatusRuleName'), { timeout: 5 * 1000 });
+    });
+
     await page.getByTestId('manageStatusRuleName').click();
+
+    await retry.tryForTime(30 * 1000, async () => {
+      await page.waitForSelector(byTestId('editDefaultStatusRule'), { timeout: 5 * 1000 });
+    });
+
     await page.isDisabled(byTestId('editDefaultStatusRule'));
     await page.getByTestId('editDefaultStatusRule').click();
 
@@ -200,7 +211,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('queryInput').fill(recoveredFilter);
     await page.click(byTestId('querySubmitButton'));
     await page.getByTestId('optionsList-control-0').hover();
-    await page.getByTestId('control-action-0-erase').click();
+    await page.click(
+      '[data-test-subj="hover-actions-0"] [data-test-subj="embeddablePanelAction-clearControl"]'
+    );
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
 

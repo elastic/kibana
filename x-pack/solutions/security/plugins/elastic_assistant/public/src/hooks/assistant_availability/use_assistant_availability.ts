@@ -7,8 +7,7 @@
 
 import type { UseAssistantAvailability } from '@kbn/elastic-assistant';
 import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
-import { ONECHAT_FEATURE_ID } from '@kbn/onechat-plugin/public';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common';
+import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
@@ -20,10 +19,8 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const {
     application: { capabilities },
-    featureFlags,
   } = useKibana().services;
 
-  /** Whether AI_AGENTS_FEATURE_FLAG is true */
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
   const hasUpdateAIAssistantAnonymization =
     capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
@@ -31,9 +28,9 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities[ASSISTANT_FEATURE_ID]?.manageGlobalKnowledgeBaseAIAssistant === true;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
 
-  const hasAgentBuilderPrivilege = capabilities[ONECHAT_FEATURE_ID]?.show === true;
+  const hasAgentBuilderPrivilege = capabilities[AGENTBUILDER_FEATURE_ID]?.show === true;
   const hasAgentBuilderManagePrivilege =
-    capabilities[ONECHAT_FEATURE_ID]?.showManagement === true &&
+    capabilities[AGENTBUILDER_FEATURE_ID]?.showManagement === true &&
     capabilities.advancedSettings?.save === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
@@ -45,8 +42,6 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasConnectorsReadPrivilege &&
     capabilities.actions?.delete === true &&
     capabilities.actions?.save === true;
-
-  const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
 
   return {
     hasSearchAILakeConfigurations,
@@ -60,6 +55,5 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasManageGlobalKnowledgeBase,
     hasAgentBuilderPrivilege,
     hasAgentBuilderManagePrivilege,
-    isAiAgentsEnabled,
   };
 };

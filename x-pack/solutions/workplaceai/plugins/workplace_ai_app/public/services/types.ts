@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkplaceAIServices {}
+import type { WorkplaceAIClientConfig } from '../types';
+
+export interface WorkplaceAIServices {
+  config: WorkplaceAIClientConfig;
+}

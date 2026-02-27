@@ -9,9 +9,16 @@
 
 import { CPSManager } from './cps_manager';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
+
+const mockGetProjectRoutingAccess = jest.fn();
+jest.mock('./async_services', () => ({
+  ...jest.requireActual('./async_services'),
+  getProjectRoutingAccess: (...args: unknown[]) => mockGetProjectRoutingAccess(...args),
+}));
 
 describe('CPSManager', () => {
   let mockHttp: jest.Mocked<HttpSetup>;
@@ -56,8 +63,10 @@ describe('CPSManager', () => {
   };
 
   beforeEach(() => {
+    mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
+
     mockHttp = {
-      get: jest.fn().mockResolvedValue(mockResponse),
+      post: jest.fn().mockResolvedValue(mockResponse),
     } as unknown as jest.Mocked<HttpSetup>;
 
     mockApplication = {
@@ -80,7 +89,7 @@ describe('CPSManager', () => {
     it('should fetch and store projects successfully', async () => {
       const result = await cpsManager.fetchProjects();
 
-      expect(mockHttp.get).toHaveBeenCalledWith('/internal/cps/projects_tags');
+      expect(mockHttp.post).toHaveBeenCalledWith('/internal/cps/projects_tags');
       expect(result).toEqual({
         origin: mockOriginProject,
         linkedProjects: [mockLinkedProjects[1], mockLinkedProjects[0]], // sorted by alias
@@ -99,16 +108,16 @@ describe('CPSManager', () => {
     it('should cache results and not refetch on subsequent calls', async () => {
       // First fetch
       await cpsManager.fetchProjects();
-      expect(mockHttp.get).toHaveBeenCalledTimes(1);
+      expect(mockHttp.post).toHaveBeenCalledTimes(1);
 
       // Second fetch should return cached data without calling HTTP
       await cpsManager.fetchProjects();
-      expect(mockHttp.get).toHaveBeenCalledTimes(1);
+      expect(mockHttp.post).toHaveBeenCalledTimes(1);
     });
 
     it('should not cache failed requests', async () => {
       jest.useFakeTimers();
-      mockHttp.get.mockRejectedValue(new Error('Network error'));
+      mockHttp.post.mockRejectedValue(new Error('Network error'));
 
       // First fetch fails - run all timers to completion
       const promise = cpsManager.fetchProjects();
@@ -116,7 +125,7 @@ describe('CPSManager', () => {
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Network error');
 
-      expect(mockHttp.get).toHaveBeenCalledTimes(3); // initial + 2 retries
+      expect(mockHttp.post).toHaveBeenCalledTimes(3); // initial + 2 retries
 
       jest.useRealTimers();
     });
@@ -124,15 +133,15 @@ describe('CPSManager', () => {
 
   describe('refresh', () => {
     it('should refetch data when refresh is called', async () => {
-      mockHttp.get.mockResolvedValue(mockResponse);
+      mockHttp.post.mockResolvedValue(mockResponse);
 
       // First fetch
       await cpsManager.fetchProjects();
-      expect(mockHttp.get).toHaveBeenCalledTimes(1);
+      expect(mockHttp.post).toHaveBeenCalledTimes(1);
 
       // Refresh should call HTTP again
       await cpsManager.refresh();
-      expect(mockHttp.get).toHaveBeenCalledTimes(2);
+      expect(mockHttp.post).toHaveBeenCalledTimes(2);
     });
 
     it('should update cached data after refresh', async () => {
@@ -145,8 +154,8 @@ describe('CPSManager', () => {
         linked_projects: mockResponse.linked_projects,
       };
 
-      mockHttp.get.mockResolvedValueOnce(mockResponse);
-      mockHttp.get.mockResolvedValueOnce(updatedResponse);
+      mockHttp.post.mockResolvedValueOnce(mockResponse);
+      mockHttp.post.mockResolvedValueOnce(updatedResponse);
 
       // First fetch
       const result1 = await cpsManager.fetchProjects();
@@ -159,14 +168,14 @@ describe('CPSManager', () => {
       // Subsequent fetch should return updated cached data
       const result3 = await cpsManager.fetchProjects();
       expect(result3!.origin?._alias).toBe('Updated Project');
-      expect(mockHttp.get).toHaveBeenCalledTimes(2); // Only 2 calls, third was from cache
+      expect(mockHttp.post).toHaveBeenCalledTimes(2); // Only 2 calls, third was from cache
     });
   });
 
   describe('retry logic', () => {
     it('should retry on failure with exponential backoff', async () => {
       jest.useFakeTimers();
-      mockHttp.get
+      mockHttp.post
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce(mockResponse);
@@ -176,7 +185,7 @@ describe('CPSManager', () => {
 
       const result = await promise;
 
-      expect(mockHttp.get).toHaveBeenCalledTimes(3); // initial + 2 retries
+      expect(mockHttp.post).toHaveBeenCalledTimes(3); // initial + 2 retries
       expect(result!.origin).toEqual(mockOriginProject);
 
       jest.useRealTimers();
@@ -184,21 +193,21 @@ describe('CPSManager', () => {
 
     it('should throw error after max retries exceeded', async () => {
       jest.useFakeTimers();
-      mockHttp.get.mockRejectedValue(new Error('Persistent error'));
+      mockHttp.post.mockRejectedValue(new Error('Persistent error'));
 
       const promise = cpsManager.fetchProjects();
       const timerPromise = jest.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Persistent error');
 
-      expect(mockHttp.get).toHaveBeenCalledTimes(3); // initial + 2 retries
+      expect(mockHttp.post).toHaveBeenCalledTimes(3); // initial + 2 retries
 
       jest.useRealTimers();
     });
 
     it('should throw error on final failure', async () => {
       jest.useFakeTimers();
-      mockHttp.get.mockRejectedValue(new Error('Error'));
+      mockHttp.post.mockRejectedValue(new Error('Error'));
 
       const promise = cpsManager.fetchProjects();
       const timerPromise = jest.runAllTimersAsync();
@@ -206,6 +215,48 @@ describe('CPSManager', () => {
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow();
 
       jest.useRealTimers();
+    });
+  });
+
+  describe('getProjectRouting', () => {
+    const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    const changeAccess = async (access: ProjectRoutingAccess) => {
+      mockGetProjectRoutingAccess.mockReturnValue(access);
+      (mockApplication.currentAppId$ as BehaviorSubject<string | undefined>).next('app');
+      await flushAsync();
+    };
+
+    it('returns the override value when provided', () => {
+      expect(cpsManager.getProjectRouting('_alias:*')).toBe('_alias:*');
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
+    });
+
+    it('falls back to current projectRouting$ value when no override is provided', () => {
+      cpsManager.setProjectRouting('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+    });
+
+    it('returns DEFAULT_PROJECT_ROUTING when no override and no explicit set', () => {
+      expect(cpsManager.getProjectRouting()).toBe('_alias:*');
+    });
+
+    it('returns undefined when access is DISABLED, regardless of override', async () => {
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBeUndefined();
+    });
+
+    it('resets projectRouting$ to default when access changes to DISABLED', async () => {
+      cpsManager.setProjectRouting('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+
+      await changeAccess(ProjectRoutingAccess.EDITABLE);
+      expect(cpsManager.getProjectRouting()).toBe('_alias:*');
     });
   });
 });

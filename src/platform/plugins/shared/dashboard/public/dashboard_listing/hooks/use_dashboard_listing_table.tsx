@@ -118,15 +118,10 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
-      const { references, ...currentState } = dashboard.attributes;
-      await dashboardClient.update(
-        id,
-        {
-          ...currentState,
-          ...updatedState,
-        },
-        dashboard.references
-      );
+      await dashboardClient.update(id, {
+        ...dashboard.attributes,
+        ...updatedState,
+      });
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },

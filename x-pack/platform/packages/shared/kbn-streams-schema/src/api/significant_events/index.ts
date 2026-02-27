@@ -9,8 +9,8 @@ import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamQueryKql } from '../../queries';
-import type { FeatureType } from '../../feature';
+import type { StreamQuery } from '../../queries';
+import type { TaskStatus } from '../../tasks/types';
 
 /**
  * SignificantEvents Get Response
@@ -36,11 +36,13 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQueryKql & {
+type SignificantEventsResponse = StreamQuery & {
+  stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
+  rule_backed: boolean;
 };
 
 interface SignificantEventsGetResponse {
@@ -59,7 +61,10 @@ interface GeneratedSignificantEventQuery {
   feature?: {
     name: string;
     filter: Condition;
-    type: FeatureType;
+    type: 'system';
+  };
+  esql: {
+    query: string;
   };
   severity_score: number;
   evidence?: string[];
@@ -72,10 +77,34 @@ type SignificantEventsGenerateResponse = Observable<
   >
 >;
 
+interface SignificantEventsQueriesGenerationResult {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: Pick<ChatCompletionTokenCount, 'prompt' | 'completion'>;
+}
+
+type SignificantEventsQueriesGenerationTaskResult =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | {
+      status: TaskStatus.Failed;
+      error: string;
+    }
+  | ({
+      status: TaskStatus.Completed | TaskStatus.Acknowledged;
+    } & SignificantEventsQueriesGenerationResult);
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 };

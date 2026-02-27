@@ -25,6 +25,7 @@ import type {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Group } from '../../../common/typings';
 import {
   aggType,
@@ -77,6 +78,7 @@ export interface InfraClientStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   usageCollection: UsageCollectionStart;
 }
 

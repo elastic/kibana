@@ -22,7 +22,6 @@ import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
 /** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
-
 export class SignatureAnalyzer {
   private readonly signatures: Signature[];
 
@@ -442,5 +441,16 @@ export class SignatureAnalyzer {
     }
 
     return types;
+  }
+
+  // ============================================================================
+  // Static Utilities
+  // ============================================================================
+
+  /** Extracts mapParams string from function signatures (first found) */
+  public static extractMapParams(
+    signatures: Array<{ params: Array<{ mapParams?: string }> }>
+  ): string | undefined {
+    return signatures.flatMap(({ params }) => params).find(({ mapParams }) => mapParams)?.mapParams;
   }
 }

@@ -17,6 +17,7 @@ import type { SideNavLogo } from '../../../types';
 import { MenuItem } from '../menu_item';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
+import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
   id: string;
@@ -33,7 +34,8 @@ export const Logo = ({
   label,
   ...props
 }: LogoProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const { tooltipRef, handleMouseOut } = useTooltip();
 
   /**
@@ -48,9 +50,11 @@ export const Logo = ({
    * We cannot use `euiTheme.size.s` because it's 8px.
    */
   const wrapperStyles = css`
-    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    position: relative;
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-    padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+
+    ${getHighContrastSeparator(euiThemeContext)}
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};

@@ -24,6 +24,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/fields_stats_grid/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -40,6 +42,8 @@
         "label": "IndexDataVisualizerViewProps",
         "description": [],
         "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+        "lineNumber": 101,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,6 +64,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +87,8 @@
               " | null"
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,6 +103,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,6 +120,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -132,6 +144,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/private/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -147,6 +161,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +177,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -180,6 +198,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -195,6 +215,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,6 +231,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -234,6 +258,8 @@
         " & React.RefAttributes<{}>>; }"
       ],
       "path": "x-pack/platform/plugins/private/data_visualizer/public/plugin.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

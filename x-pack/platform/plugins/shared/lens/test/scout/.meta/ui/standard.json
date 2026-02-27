@@ -1,0 +1,18 @@
+{
+  "sha1": "0fa6c8f7f58b18b7eb756577aacf45633a7b8ecc",
+  "tests": [
+    {
+      "id": "76ddacbf8381e78-00e065404a881ec",
+      "title": "Lens ES|QL should display ES|QL conversion modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    }
+  ]
+}

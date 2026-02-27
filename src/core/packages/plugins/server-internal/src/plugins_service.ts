@@ -106,11 +106,16 @@ export class PluginsService
   }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
+    const airgapped = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('airgapped')
+    ).catch(() => false);
+
     const { error$, plugin$ } = discover({
       config,
       coreContext: this.coreContext,
       instanceInfo: {
         uuid: environment.instanceUuid,
+        airgapped,
       },
       nodeInfo: {
         roles: node.roles,
@@ -266,33 +271,35 @@ export class PluginsService
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
     // Register config descriptors and deprecations
-    for (const plugin of plugins) {
-      const configDescriptor = plugin.getConfigDescriptor();
-      if (configDescriptor) {
-        this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
-        if (configDescriptor.deprecations) {
-          this.coreContext.configService.addDeprecationProvider(
-            plugin.configPath,
-            configDescriptor.deprecations
-          );
-        }
-        if (configDescriptor.exposeToUsage) {
-          this.pluginConfigUsageDescriptors.set(
-            Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
-            getFlattenedObject(configDescriptor.exposeToUsage)
-          );
-        }
-        if (configDescriptor.dynamicConfig) {
-          const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
-            .filter(([, value]) => value === true)
-            .map(([key]) => key);
-          if (configKeys.length > 0) {
-            this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+    await Promise.all(
+      plugins.map(async (plugin) => {
+        const configDescriptor = await plugin.getConfigDescriptor();
+        if (configDescriptor) {
+          this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+          if (configDescriptor.deprecations) {
+            this.coreContext.configService.addDeprecationProvider(
+              plugin.configPath,
+              configDescriptor.deprecations
+            );
           }
+          if (configDescriptor.exposeToUsage) {
+            this.pluginConfigUsageDescriptors.set(
+              Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+              getFlattenedObject(configDescriptor.exposeToUsage)
+            );
+          }
+          if (configDescriptor.dynamicConfig) {
+            const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
+              .filter(([, value]) => value === true)
+              .map(([key]) => key);
+            if (configKeys.length > 0) {
+              this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+            }
+          }
+          this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
         }
-        this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
-      }
-    }
+      })
+    );
 
     const config = await firstValueFrom(this.config$);
     const enableAllPlugins = config.shouldEnableAllPlugins;

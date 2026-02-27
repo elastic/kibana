@@ -32,8 +32,8 @@ export abstract class DependencyDetailsTab extends Tab {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies/${this.tabName}?${new URLSearchParams({
         dependencyName: this.defaultDependencyName,
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
         ...overrides,
       })}`
     );

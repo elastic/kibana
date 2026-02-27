@@ -12,7 +12,12 @@ import type {
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService, getEntityAnalyticsApiService } from './worker';
+import {
+  getDetectionRuleApiService,
+  getDetectionAlertsApiService,
+  getEntityAnalyticsApiService,
+  getCloudConnectorApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityParallelFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -42,17 +47,24 @@ export const spaceTest = securityParallelFixtures.extend<
       {
         apiServices,
         kbnClient,
+        esClient,
         log,
         scoutSpace,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
+        esClient: SecurityParallelWorkerFixtures['esClient'];
         log: SecurityParallelWorkerFixtures['log'];
         scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionAlerts = getDetectionAlertsApiService({
+        esClient,
+        log,
+        scoutSpace,
+      });
       extendedApiServices.detectionRule = getDetectionRuleApiService({
         kbnClient,
         log,
@@ -61,6 +73,10 @@ export const spaceTest = securityParallelFixtures.extend<
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
         kbnClient,
         log,
+        scoutSpace,
+      });
+      extendedApiServices.cloudConnectorApi = getCloudConnectorApiService({
+        kbnClient,
         scoutSpace,
       });
 

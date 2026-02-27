@@ -21,19 +21,14 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  isFeature,
-  type StreamQueryKql,
-  type Streams,
-  type Feature,
-  type FeatureType,
-} from '@kbn/streams-schema';
+import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
+import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { v4 } from 'uuid';
-import { from, concatMap } from 'rxjs';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
@@ -42,51 +37,39 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { ALL_DATA_OPTION } from '../feature_selector';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
-import { useStreamDescriptionApi } from '../../stream_detail_features/stream_description/use_stream_description_api';
 
+const defaultTask: SignificantEventsQueriesGenerationTaskResult = {
+  status: TaskStatus.NotStarted,
+};
 interface Props {
-  refreshDefinition: () => void;
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  features: Feature[];
-  query?: StreamQueryKql;
+  query?: StreamQuery;
   initialFlow?: Flow;
-  initialSelectedFeatures: Feature[];
-  onFeatureIdentificationClick: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }
 
 export function AddSignificantEventFlyout({
   generateOnMount,
-  refreshDefinition,
   query,
   onClose,
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedFeatures,
-  features,
-  onFeatureIdentificationClick,
   aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
-    core: { notifications },
-    services: { telemetryClient },
     dependencies: {
       start: { data },
     },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
   const dataViewsFetch = useStreamsAppFetch(() => {
     return data.dataViews.create({ title: definition.stream.name }).then((value) => {
@@ -94,33 +77,95 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const {
-    onGenerateDescription: generateDescription,
-    onSaveDescription: saveDescription,
-    abort: abortDescription,
-  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
-
-  const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
+  const { cancelGenerationTask, getGenerationTask, scheduleGenerationTask } =
+    useSignificantEventsApi({ name: definition.stream.name });
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
     isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
+  const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
+  const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
+  const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>(defaultTask);
+  const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
+    useBoolean(false);
 
-  const stopGeneration = useCallback(() => {
-    setIsGenerating(false);
-    abort();
-    abortDescription();
-  }, [abort, abortDescription]);
+  const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
+    useAsyncFn(scheduleGenerationTask);
+
+  const scheduleTask = (connectorId: string) => {
+    setTask(defaultTask);
+    doScheduleGenerationTask(connectorId).then(setTask);
+  };
+
+  const getTaskStatus = useCallback(() => {
+    gettingTaskStatus();
+    getGenerationTask().then(setTask).finally(stoppedGettingTaskStatus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stoppedGettingTaskStatus, gettingTaskStatus]);
+
+  useEffect(() => {
+    // Skip initial status fetch when we are about to schedule a new generation on mount,
+    // to avoid a race where the previous completed task resolves after the reset and
+    // surfaces stale queries alongside the new loading indicator.
+    if (generateOnMount && initialFlow === 'ai') {
+      return;
+    }
+
+    getTaskStatus();
+  }, [generateOnMount, getTaskStatus, initialFlow]);
+
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getGenerationTask,
+    onRefresh: getTaskStatus,
+    onCancel: cancelGenerationTask,
+  });
+
+  const isGenerating =
+    task?.status === 'in_progress' ||
+    task?.status === 'being_canceled' ||
+    isGettingTaskStatus ||
+    isSchedulingGenerationTask;
+
+  const prevTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
+
+  useEffect(() => {
+    const prevStatus = prevTaskStatusRef.current;
+
+    // Process completed when:
+    // - Transitioning from any non-completed state to completed
+    const isNewlyCompleted =
+      task?.status === TaskStatus.Completed && prevStatus !== TaskStatus.Completed;
+    if (isNewlyCompleted) {
+      setGeneratedQueries(
+        task.queries
+          .filter((nextQuery) => {
+            const validation = validateQuery({
+              title: nextQuery.title,
+              kql: { query: nextQuery.kql },
+            });
+            return validation.kql.isInvalid === false;
+          })
+          .map((nextQuery) => ({
+            id: v4(),
+            kql: { query: nextQuery.kql },
+            esql: nextQuery.esql,
+            title: nextQuery.title,
+            feature: nextQuery.feature,
+            severity_score: nextQuery.severity_score,
+            evidence: nextQuery.evidence,
+          }))
+      );
+    }
+
+    prevTaskStatusRef.current = task?.status;
+  }, [task]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -135,123 +180,17 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = useCallback(
-    (featuresOverride?: Feature[]) => {
-      setSelectedFlow('ai');
+  const generateQueries = () => {
+    const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
+    if (!connectorId) {
+      return;
+    }
 
-      let numberOfGeneratedQueries = 0;
-      const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
-        system: 0,
-      };
-      let inputTokensUsed = 0;
-      let outputTokensUsed = 0;
-      const connector = aiFeatures?.genAiConnectors.selectedConnector;
-      if (!connector) {
-        return;
-      }
+    setSelectedFlow('ai');
+    setGeneratedQueries([]);
 
-      setIsGenerating(true);
-      setGeneratedQueries([]);
-
-      const effectiveFeatures = featuresOverride ?? selectedFeatures;
-
-      const maybeGenerateDescription =
-        !definition.stream.description && effectiveFeatures.length === 0
-          ? generateDescription().then((description) => saveDescription(description))
-          : Promise.resolve();
-
-      maybeGenerateDescription.then(() => {
-        const startTime = Date.now();
-
-        from(effectiveFeatures.length === 0 ? [ALL_DATA_OPTION.value] : effectiveFeatures)
-          .pipe(
-            concatMap((feature) =>
-              generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
-                concatMap(({ queries: nextQueries, tokensUsed }) => {
-                  numberOfGeneratedQueries += nextQueries.length;
-                  if (isFeature(feature)) {
-                    numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
-                  }
-                  inputTokensUsed += tokensUsed.prompt;
-                  outputTokensUsed += tokensUsed.completion;
-
-                  setGeneratedQueries((prev) => [
-                    ...prev,
-                    ...nextQueries
-                      .filter((nextQuery) => {
-                        const validation = validateQuery({
-                          title: nextQuery.title,
-                          kql: { query: nextQuery.kql },
-                        });
-
-                        return validation.kql.isInvalid === false;
-                      })
-                      .map((nextQuery) => ({
-                        id: v4(),
-                        kql: { query: nextQuery.kql },
-                        title: nextQuery.title,
-                        feature: nextQuery.feature,
-                        severity_score: nextQuery.severity_score,
-                        evidence: nextQuery.evidence,
-                      })),
-                  ]);
-
-                  return [];
-                })
-              )
-            )
-          )
-          .subscribe({
-            error: (error) => {
-              setIsGenerating(false);
-              if (error.name === 'AbortError') {
-                return;
-              }
-              notifications.showErrorDialog({
-                title: i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.generateErrorToastTitle',
-                  {
-                    defaultMessage: `Could not generate significant events queries`,
-                  }
-                ),
-                error,
-              });
-            },
-            complete: () => {
-              notifications.toasts.addSuccess({
-                title: i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.generateSuccessToastTitle',
-                  { defaultMessage: `Generated significant events queries successfully` }
-                ),
-              });
-              telemetryClient.trackSignificantEventsSuggestionsGenerate({
-                duration_ms: Date.now() - startTime,
-                input_tokens_used: inputTokensUsed,
-                output_tokens_used: outputTokensUsed,
-                count: numberOfGeneratedQueries,
-                count_by_feature_type: numberOfGeneratedQueriesByFeature,
-                features_selected: selectedFeatures?.length ?? 0,
-                features_total: features.length,
-                stream_name: definition.stream.name,
-                stream_type: getStreamTypeFromDefinition(definition.stream),
-              });
-              setIsGenerating(false);
-            },
-          });
-      });
-    },
-    [
-      aiFeatures?.genAiConnectors.selectedConnector,
-      selectedFeatures,
-      generate,
-      notifications,
-      telemetryClient,
-      features.length,
-      definition,
-      generateDescription,
-      saveDescription,
-    ]
-  );
+    scheduleTask(connectorId);
+  };
 
   useEffect(() => {
     if (initialFlow === 'ai' && generateOnMount) {
@@ -305,11 +244,7 @@ export function AddSignificantEventFlyout({
               <EuiPanel hasShadow={false} paddingSize="l">
                 <SignificantEventsGenerationPanel
                   onManualEntryClick={() => setSelectedFlow('manual')}
-                  features={features}
-                  selectedFeatures={selectedFeatures}
-                  onFeaturesChange={setSelectedFeatures}
                   onGenerateSuggestionsClick={generateQueries}
-                  onFeatureIdentificationClick={onFeatureIdentificationClick}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
@@ -347,20 +282,22 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
-                        setQuery={(next: StreamQueryKql) => setQueries([next])}
+                        isEditMode={isEditMode}
+                        setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={(next: boolean) => {
                           setCanSave(next);
                         }}
                         definition={definition.stream}
                         dataViews={dataViewsFetch.value ?? []}
-                        features={features}
                       />
                     </>
                   )}
 
                   {flowRef.current === 'ai' && (
                     <GeneratedFlowForm
+                      isBeingCanceled={isCancellingTask}
+                      isSchedulingGenerationTask={isSchedulingGenerationTask}
                       isSubmitting={isSubmitting}
                       isGenerating={isGenerating}
                       generatedQueries={generatedQueries}
@@ -369,16 +306,17 @@ export function AddSignificantEventFlyout({
                           prev.map((q) => (q.id === editedQuery.id ? editedQuery : q))
                         );
                       }}
-                      stopGeneration={stopGeneration}
+                      stopGeneration={cancelTask}
                       definition={definition.stream}
-                      setQueries={(next: StreamQueryKql[]) => {
+                      setQueries={(next: StreamQuery[]) => {
                         setQueries(next);
                       }}
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      features={features}
                       dataViews={dataViewsFetch.value ?? []}
+                      taskStatus={task?.status}
+                      taskError={task?.status === 'failed' ? task.error : undefined}
                     />
                   )}
                 </EuiPanel>

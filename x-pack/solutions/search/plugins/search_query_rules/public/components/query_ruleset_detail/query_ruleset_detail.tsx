@@ -51,7 +51,7 @@ export interface QueryRulesetDetailProps {
 export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMode = false }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application, http, history, overlays },
+    services: { application, http, history, notifications, overlays },
   } = useKibana();
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
@@ -102,6 +102,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   const splitButtonPopoverActionsId = useGeneratedHtmlId({
     prefix: 'splitButtonPopoverActionsId',
   });
+  const isTourEnabled = notifications.tours.isEnabled();
   const TOUR_QUERY_RULES_STORAGE_KEY = 'queryRules.tour';
 
   const tourConfig = {
@@ -285,7 +286,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               <EuiFlexItem grow={false}>
                 <EuiTourStep
                   content={<p>{tourStepsInfo[0].content}</p>}
-                  isStepOpen={tourState.isTourActive && tourState.currentTourStep === 1}
+                  isStepOpen={
+                    isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
+                  }
                   minWidth={tourState.tourPopoverWidth}
                   onFinish={finishTour}
                   step={1}
@@ -381,7 +384,12 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                         data-test-subj="searchQueryRulesQueryRulesetActionsButton"
                         size="m"
                         iconType="boxesVertical"
-                        aria-label="More"
+                        aria-label={i18n.translate(
+                          'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                          {
+                            defaultMessage: 'More',
+                          }
+                        )}
                         onClick={() => setPopoverActions(!isPopoverActionsOpen)}
                       />
                     }
@@ -420,7 +428,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               <EuiTourStep
                 anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
                 content={<p>{tourStepsInfo[1].content}</p>}
-                isStepOpen={tourState.isTourActive && tourState.currentTourStep === 2}
+                isStepOpen={
+                  isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 2
+                }
                 maxWidth={tourState.tourPopoverWidth}
                 onFinish={finishTour}
                 step={1}

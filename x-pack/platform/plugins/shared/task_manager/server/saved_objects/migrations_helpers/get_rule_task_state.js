@@ -27,8 +27,7 @@ can "read it" - because it's stored as a JSON string in the task doc.
 */
 
 const path = require('path');
-const https = require('node:https');
-const fetch = require('node-fetch');
+const { Agent } = require('undici');
 
 const KB_URL = process.env.KB_URL || process.env.KBN_URL;
 const ES_URL = process.env.ES_URL;
@@ -254,7 +253,7 @@ async function sendURL(urlWithPass, method, body) {
   if (body) fetchOptions.body = JSON.stringify(body);
 
   if (purl.protocol === 'https:') {
-    fetchOptions.agent = new https.Agent({ rejectUnauthorized: false });
+    fetchOptions.dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   }
 
   // console.log(`fetch("${url}", ${JSON.stringify(fetchOptions, null, 4)}`)

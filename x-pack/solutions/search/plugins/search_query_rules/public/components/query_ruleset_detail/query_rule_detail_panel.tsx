@@ -53,6 +53,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   setSearchFilter = () => {},
   createMode = false,
 }) => {
+  const [isFirstRender, setIsFirstRender] = React.useState<boolean>(true);
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
   const [flyoutMode, setFlyoutMode] = React.useState<'create' | 'edit'>('edit');
   const hasSearchFilter = searchFilter.trim() !== '';
@@ -61,6 +62,8 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
 
   const { mutate: generateRuleId } = useGenerateRuleId(rulesetId);
   useEffect(() => {
+    if (!isFirstRender) return;
+    setIsFirstRender(false);
     if (createMode && rules.length === 0) {
       generateRuleId(undefined, {
         onSuccess: (newRuleId) => {
@@ -69,7 +72,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
         },
       });
     }
-  }, [createMode, rules.length, addNewRule, generateRuleId, rulesetId]);
+  }, [isFirstRender, createMode, rules.length, generateRuleId, rulesetId]);
 
   return (
     <KibanaPageTemplate.Section restrictWidth>

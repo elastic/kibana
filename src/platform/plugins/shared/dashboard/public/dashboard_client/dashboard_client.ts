@@ -10,7 +10,6 @@
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
 import {
@@ -37,7 +36,6 @@ const cache = new LRUCache<string, DashboardReadResponseBody>({
 export const dashboardClient = {
   create: async (
     dashboardState: DashboardState,
-    references: Reference[],
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
     return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_API_PATH, {
@@ -46,11 +44,8 @@ export const dashboardClient = {
         allowUnmappedKeys: true,
       },
       body: JSON.stringify({
-        data: {
-          ...dashboardState,
-          ...(accessMode && { access_control: { access_mode: accessMode } }),
-          references,
-        },
+        ...dashboardState,
+        ...(accessMode && { access_control: { access_mode: accessMode } }),
       }),
     });
   },
@@ -101,7 +96,7 @@ export const dashboardClient = {
       }
     );
   },
-  update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
+  update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       `${DASHBOARD_API_PATH}/${id}`,
       {
@@ -109,12 +104,7 @@ export const dashboardClient = {
         query: {
           allowUnmappedKeys: true,
         },
-        body: JSON.stringify({
-          data: {
-            ...dashboardState,
-            references,
-          },
-        }),
+        body: JSON.stringify(dashboardState),
       }
     );
     cache.delete(id);

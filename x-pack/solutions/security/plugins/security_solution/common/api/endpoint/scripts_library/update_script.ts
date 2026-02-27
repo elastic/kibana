@@ -7,29 +7,27 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import {
-  ScriptDescriptionSchema,
-  ScriptExampleSchema,
   ScriptFileSchema,
-  ScriptInstructionsSchema,
   ScriptNameSchema,
-  ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
   ScriptRequiresInputSchema,
+  getScriptsTagSchema,
 } from './common';
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
 
-export const PatchUpdateRequestSchema = {
+export const PatchUpdateScriptRequestSchema = {
   body: schema.object(
     {
       name: schema.maybe(ScriptNameSchema),
       platform: schema.maybe(ScriptPlatformSchema),
       file: schema.maybe(ScriptFileSchema),
       requiresInput: schema.maybe(ScriptRequiresInputSchema),
-      description: schema.maybe(ScriptDescriptionSchema),
-      instructions: schema.maybe(ScriptInstructionsSchema),
-      example: schema.maybe(ScriptExampleSchema),
-      pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+      description: schema.maybe(schema.string()),
+      instructions: schema.maybe(schema.string()),
+      example: schema.maybe(schema.string()),
+      pathToExecutable: schema.maybe(schema.string()),
+      tags: schema.maybe(getScriptsTagSchema('patch')),
       version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
     },
     {
@@ -45,5 +43,9 @@ export const PatchUpdateRequestSchema = {
   }),
 };
 
-export type PatchUpdateRequestParams = DeepMutable<TypeOf<typeof PatchUpdateRequestSchema.params>>;
-export type PatchUpdateRequestBody = DeepMutable<TypeOf<typeof PatchUpdateRequestSchema.body>>;
+export type PatchUpdateRequestParams = DeepMutable<
+  TypeOf<typeof PatchUpdateScriptRequestSchema.params>
+>;
+export type PatchUpdateRequestBody = DeepMutable<
+  TypeOf<typeof PatchUpdateScriptRequestSchema.body>
+>;

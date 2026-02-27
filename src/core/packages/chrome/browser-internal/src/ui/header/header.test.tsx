@@ -35,7 +35,6 @@ function mockProps() {
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
-    forceAppSwitcherNavigation$: new BehaviorSubject(false),
     globalHelpExtensionMenuLinks$: new BehaviorSubject([]),
     helpExtension$: new BehaviorSubject(undefined),
     helpSupportUrl$: new BehaviorSubject(''),
@@ -46,7 +45,7 @@ function mockProps() {
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
     loadingCount$: new BehaviorSubject(0),
-    isFixed: true,
+    appMenu$: new BehaviorSubject(undefined),
   };
 }
 
@@ -70,7 +69,6 @@ describe('Header', () => {
         visibleIn: ['globalSearch' as const],
       },
     ]);
-    const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
@@ -93,9 +91,9 @@ describe('Header', () => {
         recentlyAccessed$={recentlyAccessed$}
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-        headerBanner$={headerBanner$}
         helpMenuLinks$={of([])}
         isServerless={false}
+        appMenu$={new BehaviorSubject(undefined)}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();
@@ -124,11 +122,8 @@ describe('Header', () => {
     );
     component.update();
     expect(component.find('HeaderExtension').length).toBe(2);
-    expect(
-      component.find('HeaderExtension').at(0).getDOMNode().querySelector('.my-extension1')
-    ).toBeTruthy();
-    expect(
-      component.find('HeaderExtension').at(1).getDOMNode().querySelector('.my-extension2')
-    ).toBeTruthy();
+    const rootNode = component.getDOMNode();
+    expect(rootNode.querySelector('.my-extension1')).toBeTruthy();
+    expect(rootNode.querySelector('.my-extension2')).toBeTruthy();
   });
 });

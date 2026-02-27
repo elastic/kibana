@@ -1,25 +1,59 @@
-## KQL
+# KQL
 
-Performs a KQL query and returns `true` if the provided KQL query string matches the row.
+The KQL function performs a query using the KQL query string format and returns true if the provided query matches the row.
+
+Below characters must be escaped with a backslash.
+- \():<>"*
 
 ## Syntax
 
-`KQL(query)`
+`KQL(query, options, boost, time_zone, case_insensitive, default_field)`
 
 ### Parameters
 
-#### `query`
+#### query
 
 Query string in KQL query string format.
 
+#### options
+
+Optional. KQL additional options as function named parameters. Available in stack version 9.3.0 and later.
+
+#### boost
+
+Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+
+#### time_zone
+
+UTC offset or IANA time zone used to interpret date literals in the query string.
+
+#### case_insensitive
+
+If true, performs case-insensitive matching for keyword fields. Defaults to false.
+
+#### default_field
+
+Default field to search if no field is provided in the query string. Supports wildcards (*).
+
 ## Examples
 
+Filters the `books` table to only include rows where the author is Faulkner.
 ```esql
 FROM books
 | WHERE KQL("author: Faulkner")
-| KEEP book_no, author
-| SORT book_no
-| LIMIT 5
 ```
 
-This example filters rows where the `author` field matches "Faulkner," keeps the `book_no` and `author` columns, sorts the results by `book_no`, and limits the output to 5 rows.
+Filters the `employees` table to only include rows where the first name matches "mary", using case-insensitive matching and a custom boost value.
+```esql
+FROM employees
+| WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})
+```
+
+
+Filters rows where any field contains the term "Great" and limits the output to 10 rows.
+
+```esql
+FROM books
+| WHERE KQL("""Great""")
+| LIMIT 10
+```

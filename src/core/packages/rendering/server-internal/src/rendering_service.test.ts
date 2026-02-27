@@ -58,6 +58,7 @@ const INJECTED_METADATA = {
       buildDate: new Date(BUILD_DATE).toISOString(),
       buildFlavor: expect.any(String),
     },
+    airgapped: expect.any(Boolean),
   },
 };
 
@@ -138,6 +139,51 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
+    });
+
+    it('renders page with light color-scheme when dark mode is disabled', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return false;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light');
+    });
+
+    it('renders page with dark color-scheme when dark mode is enabled', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      expect(dom('meta[name="color-scheme"]').attr('content')).toBe('dark');
+    });
+
+    it('renders page with dual color-scheme when dark mode is set to system', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return 'system';
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light dark');
     });
 
     it('renders "core" page with global settings', async () => {

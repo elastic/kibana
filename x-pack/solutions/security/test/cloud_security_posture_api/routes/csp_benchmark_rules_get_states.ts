@@ -43,7 +43,8 @@ export default function (providerContext: FtrProviderContext) {
     return cspBenchmarkRules.saved_objects[randomIndex].attributes;
   };
 
-  describe('Tests get rules states API', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/249190
+  describe.skip('Tests get rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized({ retry, logger, supertest });
     });

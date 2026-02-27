@@ -18,6 +18,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
 import type { AlertParams, CustomThresholdPrefillOptions } from './types';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
@@ -75,6 +76,7 @@ describe('Expression', () => {
           metadata={metadata}
           dataViews={dataViewMock}
           onChangeMetaData={jest.fn()}
+          kql={{} as KqlPluginStart}
         />
       </QueryClientProvider>
     );
@@ -155,7 +157,7 @@ describe('Expression', () => {
         ],
         comparator: COMPARATORS.GREATER_THAN,
         threshold: [100],
-        timeSize: 1,
+        timeSize: 5,
         timeUnit: 'm',
       },
     ]);

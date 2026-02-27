@@ -126,8 +126,11 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     const onCopied = useCallback(() => {
       setSubStep((currentSubStep) => (currentSubStep !== 1 ? 3 : currentSubStep)); // Move to the next step only if step 1 was completed
 
-      telemetry.reportSetupQueryCopied({ migrationId: migrationStats?.id });
-    }, [telemetry, migrationStats?.id]);
+      telemetry.reportSetupQueryCopied({
+        migrationId: migrationStats?.id,
+        vendor: migrationSource,
+      });
+    }, [telemetry, migrationStats?.id, migrationSource]);
     const copyStep = useCopyExportQueryStep({
       status: getEuiStepStatus(2, subStep),
       onCopied,

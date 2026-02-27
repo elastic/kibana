@@ -7,6 +7,7 @@
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -18,7 +19,6 @@ import type { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getDocumentTypeFilterForServiceDestinationStatistics,

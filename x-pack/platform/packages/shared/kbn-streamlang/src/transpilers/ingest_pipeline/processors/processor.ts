@@ -19,6 +19,13 @@ import type {
   IngestPipelineRemoveProcessor,
   IngestPipelineDropProcessor,
   IngestPipelineReplaceProcessor,
+  IngestPipelineRedactProcessor,
+  IngestPipelineUppercaseProcessor,
+  IngestPipelineLowercaseProcessor,
+  IngestPipelineTrimProcessor,
+  IngestPipelineJoinProcessor,
+  IngestPipelineConcatProcessor,
+  IngestPipelineNetworkDirectionProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -35,6 +42,13 @@ export interface ActionToIngestType {
   remove_by_prefix: WithOptionalTracingTag<IngestPipelineRemoveByPrefixProcessor>;
   remove: WithOptionalTracingTag<IngestPipelineRemoveProcessor>;
   drop_document: WithOptionalTracingTag<IngestPipelineDropProcessor>;
+  uppercase: WithOptionalTracingTag<IngestPipelineUppercaseProcessor>;
+  lowercase: WithOptionalTracingTag<IngestPipelineLowercaseProcessor>;
+  trim: WithOptionalTracingTag<IngestPipelineTrimProcessor>;
+  join: WithOptionalTracingTag<IngestPipelineJoinProcessor>;
   replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
+  redact: WithOptionalTracingTag<IngestPipelineRedactProcessor>;
+  concat: WithOptionalTracingTag<IngestPipelineConcatProcessor>;
+  network_direction: WithOptionalTracingTag<IngestPipelineNetworkDirectionProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

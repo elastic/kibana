@@ -13,9 +13,9 @@ import {
   EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -29,6 +29,8 @@ export class StreamsApp {
   public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
+  public readonly concatFieldInput;
+  public readonly concatLiteralInput;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -62,6 +64,8 @@ export class StreamsApp {
     });
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
   }
 
   async goto() {
@@ -104,6 +108,10 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
+  async gotoAttachmentsTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'attachments');
+  }
+
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
   }
@@ -112,8 +120,19 @@ export class StreamsApp {
     await this.page.getByTestId('dataQualityTab').click();
   }
 
+  async clickRetentionTab() {
+    await this.page.getByTestId('retentionTab').click();
+  }
+
   async clickRootBreadcrumb() {
     await this.page.getByTestId('breadcrumb first').click();
+  }
+
+  async clickStreamsBreadcrumb() {
+    await this.page
+      .locator('a[data-test-subj^="breadcrumb"]')
+      .filter({ hasText: /^Streams$/ })
+      .click();
   }
 
   // Streams table utility methods
@@ -122,12 +141,13 @@ export class StreamsApp {
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    // Use .first() because some pages (like Retention) may have multiple date pickers
     await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
       `Date picker 'start date' is incorrect`
     ).toHaveText(expectedRange.from);
     await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
   }
@@ -150,7 +170,7 @@ export class StreamsApp {
     ).toContainText(expectedIlmPolicy);
   }
 
-  async verifyDiscoverButtonLink(streamName: string) {
+  async verifyDiscoverButtonLink(streamName: string, sourceCommand: 'FROM' | 'TS' = 'FROM') {
     const locator = this.page.locator(
       `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
     );
@@ -162,13 +182,36 @@ export class StreamsApp {
     }
 
     // Expect encoded ESQL snippet to appear (basic validation)
-    // 'FROM <streamName>' should appear URL-encoded
-    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    // '<sourceCommand> <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`${sourceCommand} ${streamName}`);
     if (!href.includes(expectedFragment)) {
       throw new Error(
         `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
       );
     }
+  }
+
+  async getDiscoverButtonLinkSourceCommand(streamName: string): Promise<'FROM' | 'TS' | null> {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      return null;
+    }
+
+    // Check which source command is used in the URL
+    const fromFragment = encodeURIComponent(`FROM ${streamName}`);
+    const tsFragment = encodeURIComponent(`TS ${streamName}`);
+
+    if (href.includes(tsFragment)) {
+      return 'TS';
+    } else if (href.includes(fromFragment)) {
+      return 'FROM';
+    }
+    return null;
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
@@ -246,7 +289,7 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('columns').click();
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
   }
 
   async saveRoutingRule() {
@@ -309,18 +352,42 @@ export class StreamsApp {
   }
 
   async fillConditionEditorWithSyntax(condition: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppConditionEditorCodeEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppConditionEditorCodeEditor')
-      .getByRole('textbox')
-      .fill(condition);
-    // Clean trailing content
-    await this.page.keyboard.press('Shift+Control+ArrowDown');
-    await this.page.keyboard.press('Backspace');
+    const editor = this.page.getByTestId('streamsAppConditionEditorCodeEditor');
+
+    // CodeEditor can start in "read mode". Activate edit mode when needed.
+    const activateEditModeButton = editor.getByRole('button', { name: /activate edit mode/i });
+    try {
+      await activateEditModeButton.click({ timeout: 1000 });
+    } catch {
+      // Button is not present when already in edit mode
+    }
+
+    // Use Monaco's model API to set value reliably (keyboard interactions can be flaky).
+    // There can be multiple Monaco models on the page (e.g. YAML editor), so target the condition model.
+    const conditionModelIndex = await this.page.evaluate(() => {
+      interface MonacoModel {
+        getValue(): string;
+      }
+      interface MonacoEditorApi {
+        getModels(): MonacoModel[];
+      }
+      interface MonacoEnv {
+        monaco?: { editor?: MonacoEditorApi };
+      }
+      const monacoEnv = (window as Window & { MonacoEnvironment?: MonacoEnv }).MonacoEnvironment;
+      const editorApi = monacoEnv?.monaco?.editor;
+      if (!editorApi) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const values: string[] = editorApi.getModels().map((model) => model.getValue());
+      return values.findIndex((value) => value.trim().startsWith('{') && value.includes('"field"'));
+    });
+
+    await this.kibanaMonacoEditor.setCodeEditorValue(
+      condition,
+      conditionModelIndex >= 0 ? conditionModelIndex : undefined
+    );
   }
 
   async toggleConditionEditorWithSyntaxSwitch() {
@@ -406,18 +473,45 @@ export class StreamsApp {
    */
   async clickAddProcessor(handleContextMenuClick: boolean = true) {
     if (handleContextMenuClick) {
-      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+      // New UI has direct button instead of context menu
+      const button = this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton');
+      await expect(button).toBeVisible({ timeout: 60000 });
+      // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
+      await button.evaluate((el) => (el as HTMLElement).click());
+    } else {
+      // When called from within a condition's context menu, use the old menu item
+      const menuItem = this.page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor'
+      );
+      await expect(menuItem).toBeVisible({ timeout: 60000 });
+      await menuItem.evaluate((el) => (el as HTMLElement).click());
     }
-    await this.page
-      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
-      .click();
+
+    // Wait for the processor configuration panel to be ready before interacting with inputs.
+    await expect(
+      this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton')
+    ).toBeVisible({ timeout: 30000 });
   }
 
-  async clickAddCondition() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
-    await this.page
-      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
-      .click();
+  async clickAddCondition(handleContextMenuClick: boolean = true) {
+    if (handleContextMenuClick) {
+      // New UI has direct button instead of context menu
+      const button = this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton');
+      await expect(button).toBeVisible({ timeout: 60000 });
+      await button.evaluate((el) => (el as HTMLElement).click());
+    } else {
+      // When called from within a condition's context menu, use the old menu item
+      const menuItem = this.page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition'
+      );
+      await expect(menuItem).toBeVisible({ timeout: 60000 });
+      await menuItem.evaluate((el) => (el as HTMLElement).click());
+    }
+
+    // Wait for the condition configuration panel to be ready before interacting.
+    await expect(
+      this.page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+    ).toBeVisible({ timeout: 30000 });
   }
   async getProcessorPatternText() {
     return await this.page.getByTestId('fullText').locator('.euiText').textContent();
@@ -564,8 +658,21 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async fillGrokPatternDefinitionsInput(value: string) {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppPatternDefinitionsEditor')
+      .getByRole('textbox')
+      .fill(value);
+  }
+
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.page.getByLabel('Source Field').fill(value);
+    await this.processorFieldComboBox.setCustomSingleOption(value);
   }
 
   async fillDateProcessorFormatInput(value: string) {
@@ -613,6 +720,25 @@ export class StreamsApp {
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
     await this.page.getByRole('button', { name: 'Delete processor' }).click();
+  }
+
+  async waitForModifiedFieldsDetection() {
+    // "Modified fields" badge only renders when there are detected fields; it's not a reliable
+    // signal that the Processing tab has finished initializing. Instead, wait for stable UI
+    // primitives that are always present once the tab is ready.
+    await expect(this.page.getByTestId('streamsAppProcessingDataSourcesList')).toBeVisible({
+      timeout: 60_000,
+    });
+
+    const readySignal = this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentRootSteps')
+      .or(this.page.getByTestId('streamsAppProcessingPreviewEmptyPrompt'))
+      .or(this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton'))
+      .or(this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton'));
+
+    // `readySignal` can legitimately match multiple elements (e.g. both create buttons),
+    // so avoid strict-locator assertions like `toBeVisible()` which require a single match.
+    await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
   async saveStepsListChanges() {
@@ -679,7 +805,9 @@ export class StreamsApp {
   }
 
   async confirmChangesInReviewModal() {
-    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+    await submitButton.click();
   }
 
   /**
@@ -716,6 +844,13 @@ export class StreamsApp {
    */
   async expectSchemaEditorTableVisible() {
     await expect(this.page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
+  }
+
+  async typeFieldName(value: string) {
+    await this.page.testSubj.typeWithDelay('streamsAppSchemaEditorAddFieldFlyoutFieldName', value, {
+      delay: 75,
+    });
+    await this.page.keyboard.press('Enter');
   }
 
   async searchFields(searchTerm: string) {
@@ -933,7 +1068,135 @@ export class StreamsApp {
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
   }
 
+  // Attachments utility methods
+  async expectAttachmentsEmptyPromptVisible() {
+    await expect(this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton')).toBeVisible();
+  }
+
+  async clickAddAttachmentsButton() {
+    await this.page.getByTestId('streamsAppAttachmentsEmptyStateAddButton').click();
+  }
+
+  async expectAddAttachmentFlyoutVisible() {
+    await expect(
+      this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable')
+    ).toBeVisible();
+  }
+
+  async expectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    await expect(flyoutTable.getByText(attachmentTitle)).toBeVisible();
+  }
+
+  async closeAddAttachmentFlyout() {
+    await this.page.getByTestId('streamsAppAddAttachmentFlyoutCancelButton').click();
+  }
+
+  async selectAllAttachmentsInFlyout() {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    // Click the header checkbox to select all
+    await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async clickAddToStreamButton() {
+    await this.page.getByTestId('streamsAppAddAttachmentFlyoutAddAttachmentsButton').click();
+  }
+
+  async expectAttachmentsTableVisible() {
+    await expect(this.page.getByTestId('streamsAppStreamDetailAttachmentsTable')).toBeVisible();
+  }
+
+  async expectAttachmentInTable(attachmentTitle: string) {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    await expect(table.getByText(attachmentTitle)).toBeVisible();
+  }
+
+  async expectAttachmentsCount(count: number) {
+    // Use exact match to avoid matching toast notifications like "3 attachments were added to..."
+    await expect(this.page.getByText(`${count} Attachments`, { exact: true })).toBeVisible();
+  }
+
+  async selectAllAttachmentsInTable() {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    // Click the header checkbox to select all
+    await table.locator('thead input[type="checkbox"]').click();
+  }
+
+  async clickSelectedAttachmentsLink() {
+    await this.page.getByTestId('streamsAppStreamDetailSelectedAttachmentsLink').click();
+  }
+
+  async clickRemoveAttachmentsInPopover() {
+    await this.page.getByText('Remove attachments').click();
+  }
+
+  async confirmRemoveAttachments() {
+    await this.page.getByTestId('streamsAppConfirmAttachmentModalConfirmButton').click();
+  }
+
+  async clickAttachmentDetailsButton(attachmentTitle: string) {
+    const table = this.page.getByTestId('streamsAppStreamDetailAttachmentsTable');
+    // Find the row containing the attachment title, then click the expand button within that row
+    const row = table.locator('tr').filter({ hasText: attachmentTitle });
+    await row.getByTestId('streamsAppAttachmentDetailsButton').click();
+  }
+
+  async expectAttachmentDetailsFlyoutVisible() {
+    await expect(
+      this.page.getByTestId('streamsAppAttachmentDetailsFlyoutGoToButton')
+    ).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutTitle(title: string) {
+    // The title is in an h2 element within the flyout header
+    const flyoutTitle = this.page.locator('.euiFlyoutHeader h2');
+    await expect(flyoutTitle).toHaveText(title);
+  }
+
+  async expectAttachmentDetailsFlyoutDescription(description: string) {
+    // The description is shown in the first InfoPanel - scope to the flyout
+    const flyout = this.page.locator('.euiFlyout');
+    const descriptionText = flyout.getByText(description);
+    await expect(descriptionText).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutType(typeLabel: string) {
+    // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
+    const flyout = this.page.locator('.euiFlyout');
+    const typeBadge = flyout.getByText(typeLabel, { exact: true });
+    await expect(typeBadge).toBeVisible();
+  }
+
+  async expectAttachmentDetailsFlyoutHasStream(streamName: string) {
+    const streamLink = this.page.getByTestId('streamsAppAttachmentDetailsFlyoutStreamLink');
+    await expect(streamLink).toHaveText(streamName);
+  }
+
+  async closeAttachmentDetailsFlyout() {
+    await this.page.getByTestId('euiFlyoutCloseButton').click();
+  }
+
+  async clickUnlinkInDetailsFlyout() {
+    await this.page.getByTestId('streamsAppAttachmentDetailsFlyoutUnlinkButton').click();
+  }
+
   async clickProcessorPreviewTab(label: string) {
     await this.page.getByText(label).click();
+  }
+
+  async clickAddConcatField() {
+    await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
+  }
+
+  async clickAddConcatLiteral() {
+    await this.page.getByTestId('streamsAppConcatAddLiteralButton').click();
+  }
+
+  async fillConcatFieldInput(value: string) {
+    await this.concatFieldInput.selectOption(value);
+  }
+
+  async fillConcatLiteralInput(value: string) {
+    await this.concatLiteralInput.fill(value);
   }
 }

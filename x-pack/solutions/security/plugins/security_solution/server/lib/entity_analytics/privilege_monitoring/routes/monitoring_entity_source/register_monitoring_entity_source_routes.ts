@@ -10,6 +10,7 @@ import { createMonitoringEntitySourceRoute } from './create';
 import { getMonitoringEntitySourceRoute } from './get';
 import { updateMonitoringEntitySourceRoute } from './update';
 import { listMonitoringEntitySourceRoute } from './list';
+import { deleteMonitoringEntitySourceRoute } from './delete';
 
 export const registerMonitoringEntitySourceRoutes = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -19,5 +20,6 @@ export const registerMonitoringEntitySourceRoutes = (
   createMonitoringEntitySourceRoute(router, logger);
   getMonitoringEntitySourceRoute(router, logger, config);
   updateMonitoringEntitySourceRoute(router, logger, config);
+  deleteMonitoringEntitySourceRoute(router, logger, config);
   listMonitoringEntitySourceRoute(router, logger);
 };

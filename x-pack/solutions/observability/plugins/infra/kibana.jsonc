@@ -23,6 +23,7 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "inspector",
       "lens",
       "logsShared",
       "metricsDataAccess",
@@ -60,7 +61,6 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "controls",
       "fleet"
     ]
   }

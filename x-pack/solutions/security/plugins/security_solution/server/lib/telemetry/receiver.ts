@@ -1145,7 +1145,31 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.processTreeFetcher.tree(request, true);
   }
 
+  async tierFilter() {
+    const excludeColdAndFrozenTiers = !!(await this.queryConfig?.excludeColdAndFrozenTiers());
+    if (excludeColdAndFrozenTiers) {
+      return [
+        {
+          bool: {
+            must_not: {
+              terms: {
+                _tier: ['data_frozen', 'data_cold'],
+              },
+            },
+          },
+        },
+      ];
+    }
+    return [];
+  }
+
   public async fetchTimelineEvents(nodeIds: string[]) {
+    const tierFilter = await this.tierFilter();
+
+    this.logger.debug('Fetching timeline events for node IDs', {
+      tierFilters: tierFilter,
+    } as LogMeta);
+
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
@@ -1175,6 +1199,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 'event.category': 'process',
               },
             },
+            ...tierFilter,
           ],
         },
       },
@@ -1328,13 +1353,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     let queryOptions = {};
     let pageSize = -1;
     // kibana.yml configurations take precedence over CDN parameters
-    if (this.queryConfig !== undefined) {
+    if (this.queryConfig?.pageSize !== undefined) {
       queryOptions = {
         maxResponseSize: this.queryConfig.maxResponseSize,
         maxCompressedResponseSize: this.queryConfig.maxCompressedResponseSize,
       };
       pageSize = this.queryConfig.pageSize;
-    } else if (queryConfig !== undefined) {
+    } else if (queryConfig?.pageSize !== undefined) {
       queryOptions = {
         maxResponseSize: queryConfig.maxResponseSize,
         maxCompressedResponseSize: queryConfig.maxCompressedResponseSize,

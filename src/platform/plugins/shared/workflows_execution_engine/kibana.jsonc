@@ -10,6 +10,15 @@
     "id": "workflowsExecutionEngine",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["taskManager", "actions", "workflowsExtensions"]
+    "requiredPlugins": [
+      "taskManager",
+      "actions",
+      "workflowsExtensions",
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "usageApi",
+      "cloud",
+    ],
   }
 }

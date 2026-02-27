@@ -10,6 +10,7 @@
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -36,6 +37,8 @@ import {
   GenAIStreamResponseSchema,
   GenAITestParamsSchema,
   GenAITestResponseSchema,
+  HttpParamsSchema,
+  HttpResponseSchema,
   InferenceCompletionParamsSchema,
   InferenceCompletionResponseSchema,
   InferenceRerankParamsSchema,
@@ -61,6 +64,12 @@ import {
   JiraServiceManagementCloseAlertParamsSchema,
   JiraServiceManagementCreateAlertParamsSchema,
   JiraServiceManagementResponseSchema,
+  McpCallToolParamsSchema,
+  McpCallToolResponseSchema,
+  McpListToolsParamsSchema,
+  McpListToolsResponseSchema,
+  McpTestParamsSchema,
+  McpTestResponseSchema,
   OpenAIParamsSchema,
   OpenAIResponseSchema,
   OpsgenieCloseAlertParamsSchema,
@@ -108,8 +117,6 @@ import {
   TinesWebhooksParamsSchema,
   TorqParamsSchema,
   TorqResponseSchema,
-  WebhookParamsSchema,
-  WebhookResponseSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -130,7 +137,7 @@ export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSc
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackParamsSchema],
   ['.email', EmailParamsSchema],
-  ['.webhook', WebhookParamsSchema],
+  ['.http', HttpParamsSchema],
   ['.teams', TeamsParamsSchema],
   ['.bedrock', BedrockParamsSchema],
   ['.openai', OpenAIParamsSchema],
@@ -272,6 +279,14 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
       test: GenAITestParamsSchema,
     },
   ],
+  [
+    '.mcp',
+    {
+      listTools: McpListToolsParamsSchema,
+      callTool: McpCallToolParamsSchema,
+      test: McpTestParamsSchema,
+    },
+  ],
 ]);
 
 /**
@@ -281,7 +296,7 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
 export const ConnectorOutputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackResponseSchema],
   ['.email', EmailResponseSchema],
-  ['.webhook', WebhookResponseSchema],
+  ['.http', HttpResponseSchema],
   ['.teams', TeamsResponseSchema],
   ['.bedrock', BedrockResponseSchema],
   ['.openai', OpenAIResponseSchema],
@@ -422,6 +437,14 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
       test: GenAITestResponseSchema,
     },
   ],
+  [
+    '.mcp',
+    {
+      listTools: McpListToolsResponseSchema,
+      callTool: McpCallToolResponseSchema,
+      test: McpTestResponseSchema,
+    },
+  ],
 ]);
 
 /**
@@ -447,7 +470,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
@@ -463,12 +485,13 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
+      fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
     }),
     outputSchema: z.any(),
     description: i18n.translate('workflows.connectors.kibana.request.description', {

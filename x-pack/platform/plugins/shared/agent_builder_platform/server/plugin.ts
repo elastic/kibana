@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { dataExplorationSkill } from './skills';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -29,7 +30,7 @@ export class AgentBuilderPlatformPlugin
   // @ts-expect-error unused for now
   private logger: Logger;
   // @ts-expect-error unused for now
-  private config: OnechatConfig;
+  private config: AgentBuilderConfig;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -48,6 +49,8 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+
+    setupDeps.agentBuilder.skills.register(dataExplorationSkill);
 
     return {};
   }

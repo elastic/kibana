@@ -16,168 +16,94 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiHorizontalRule,
-  EuiWrappingPopover,
-} from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
-  AppMenuActionCustom,
-  AppMenuActionPrimary,
-  AppMenuActionSecondary,
-  AppMenuActionSubmenuCustom,
-  AppMenuActionSubmenuSecondary,
+  AppMenuItemType,
+  AppMenuPopoverItem,
+  AppMenuPrimaryActionItem,
+  AppMenuRunActionParams,
+  AppMenuSecondaryActionItem,
+} from '@kbn/core-chrome-app-menu-components';
+import type {
+  DiscoverAppMenuItemType,
+  DiscoverAppMenuPopoverItem,
+  DiscoverAppMenuPrimaryActionItem,
+  DiscoverAppMenuRunActionParams,
+  DiscoverAppMenuSecondaryActionItem,
 } from '@kbn/discover-utils';
-import { AppMenuActionType } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
 
-interface AppMenuActionsMenuPopoverProps {
-  appMenuItem: AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom;
-  anchorElement: HTMLElement;
-  services: DiscoverServices;
-  onClose: () => void;
+function restoreFocus(anchorElement?: HTMLElement, parentTestId?: string) {
+  const overflowButton = document.querySelector(
+    '[data-test-subj="app-menu-overflow-button"]'
+  ) as HTMLElement;
+
+  if (parentTestId) {
+    const parentButton = document.querySelector(
+      `[data-test-subj="${parentTestId}"]`
+    ) as HTMLElement;
+    (parentButton || overflowButton)?.focus();
+  } else if (anchorElement && document.body.contains(anchorElement)) {
+    anchorElement.focus();
+  } else {
+    overflowButton?.focus();
+  }
 }
 
-export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps> = ({
-  appMenuItem,
-  anchorElement,
-  onClose: originalOnClose,
-}) => {
-  const [nestedContent, setNestedContent] = useState<React.ReactNode>();
-
-  const onClose = useCallback(() => {
-    originalOnClose();
-    anchorElement?.focus();
-  }, [anchorElement, originalOnClose]);
-
-  const items = appMenuItem.actions.map((action, i) => {
-    if (action.type === AppMenuActionType.submenuHorizontalRule) {
-      if (i === 0 || i === appMenuItem.actions.length - 1) {
-        return <></>;
-      } else {
-        return <EuiHorizontalRule key={action.id} data-test-subj={action.testId} margin="none" />;
-      }
-    }
-
-    const controlProps = action.controlProps;
-
-    return (
-      <EuiContextMenuItem
-        key={action.id}
-        data-test-subj={controlProps.testId}
-        disabled={
-          typeof controlProps.disableButton === 'function'
-            ? controlProps.disableButton()
-            : Boolean(controlProps.disableButton)
-        }
-        toolTipContent={
-          typeof controlProps.tooltip === 'function' ? controlProps.tooltip() : controlProps.tooltip
-        }
-        icon={controlProps.iconType}
-        href={controlProps.href}
-        onClick={async () => {
-          const result = await controlProps.onClick?.({
-            anchorElement,
-            onFinishAction: onClose,
-          });
-
-          if (result) {
-            setNestedContent(result);
-          }
-        }}
-      >
-        {controlProps.label}
-      </EuiContextMenuItem>
-    );
-  });
-
-  return (
-    <>
-      {nestedContent}
-      <EuiWrappingPopover
-        ownFocus
-        button={anchorElement}
-        closePopover={onClose}
-        isOpen={!nestedContent}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel items={items} />
-      </EuiWrappingPopover>
-    </>
-  );
-};
-
-function cleanup() {
+function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
   if (!isOpen) {
     return;
   }
+
   ReactDOM.unmountComponentAtNode(container);
   document.body.removeChild(container);
   isOpen = false;
-}
 
-export function runAppMenuPopoverAction({
-  appMenuItem,
-  anchorElement,
-  services,
-}: {
-  appMenuItem: AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom;
-  anchorElement: HTMLElement;
-  services: DiscoverServices;
-}) {
-  if (isOpen) {
-    cleanup();
-    return;
-  }
-
-  isOpen = true;
-  document.body.appendChild(container);
-
-  const element = (
-    <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>
-        <AppMenuActionsMenuPopover
-          appMenuItem={appMenuItem}
-          anchorElement={anchorElement}
-          services={services}
-          onClose={cleanup}
-        />
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
-  );
-  ReactDOM.render(element, container);
+  restoreFocus(anchorElement, parentTestId);
 }
 
 export async function runAppMenuAction({
   appMenuItem,
   anchorElement,
   services,
+  parentTestId,
 }: {
-  appMenuItem: AppMenuActionPrimary | AppMenuActionSecondary | AppMenuActionCustom;
+  appMenuItem:
+    | DiscoverAppMenuItemType
+    | DiscoverAppMenuPrimaryActionItem
+    | DiscoverAppMenuSecondaryActionItem
+    | DiscoverAppMenuPopoverItem;
   anchorElement: HTMLElement;
   services: DiscoverServices;
+  parentTestId?: string;
 }) {
-  cleanup();
+  cleanup(anchorElement, parentTestId);
 
-  const controlProps = appMenuItem.controlProps;
+  const onFinishAction = () => {
+    cleanup(anchorElement, parentTestId);
+    // If cleanup didn't run (no React element), still restore focus
+    if (!isOpen) {
+      restoreFocus(anchorElement, parentTestId);
+    }
+  };
 
-  const result = await controlProps.onClick?.({
-    anchorElement,
-    onFinishAction: () => {
-      cleanup();
-      anchorElement?.focus();
+  const params: DiscoverAppMenuRunActionParams = {
+    triggerElement: anchorElement,
+    context: {
+      onFinishAction,
+      parentTestId,
     },
-  });
+  };
 
-  if (!result) {
+  const result = await appMenuItem.run?.(params);
+
+  if (!result || !React.isValidElement(result)) {
     return;
   }
 
@@ -190,4 +116,69 @@ export async function runAppMenuAction({
     </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
+}
+
+/**
+ * Maps Discover-specific menu item types to their corresponding base AppMenu types.
+ */
+type EnhancedAppMenuItem<T> = T extends DiscoverAppMenuItemType
+  ? AppMenuItemType
+  : T extends DiscoverAppMenuPrimaryActionItem
+  ? AppMenuPrimaryActionItem
+  : T extends DiscoverAppMenuSecondaryActionItem
+  ? AppMenuSecondaryActionItem
+  : T extends DiscoverAppMenuPopoverItem
+  ? AppMenuPopoverItem
+  : never;
+
+type DiscoverAppMenuItem =
+  | DiscoverAppMenuItemType
+  | DiscoverAppMenuPrimaryActionItem
+  | DiscoverAppMenuSecondaryActionItem
+  | DiscoverAppMenuPopoverItem;
+
+/**
+ * Transforms Discover-specific menu items into base AppMenu types by replacing
+ * the run action with one that wraps the Discover-specific behavior.
+ * This allows the items to be used with the core AppMenu component.
+ */
+export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
+  appMenuItem,
+  services,
+  parentTestId,
+}: {
+  appMenuItem: T;
+  services: DiscoverServices;
+  parentTestId?: string;
+}): EnhancedAppMenuItem<T> {
+  const enhancedRun = appMenuItem.run
+    ? (params?: AppMenuRunActionParams) => {
+        if (params) {
+          runAppMenuAction({
+            appMenuItem,
+            anchorElement: params.triggerElement,
+            services,
+            parentTestId,
+          });
+        }
+      }
+    : undefined;
+
+  const enhancedItems =
+    'items' in appMenuItem && Array.isArray(appMenuItem.items)
+      ? appMenuItem.items.map(
+          (nestedItem): AppMenuPopoverItem =>
+            enhanceAppMenuItemWithRunAction({
+              appMenuItem: nestedItem,
+              services,
+              parentTestId: appMenuItem.testId || 'app-menu-overflow-button',
+            })
+        )
+      : undefined;
+
+  return {
+    ...appMenuItem,
+    items: enhancedItems,
+    run: enhancedRun,
+  } as unknown as EnhancedAppMenuItem<T>;
 }

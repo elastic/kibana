@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
 import type { MapAttributes } from '../../server';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
@@ -30,8 +30,8 @@ export function getByValueState(state: MapEmbeddableState | undefined, attribute
 
 export function initializeLibraryTransforms(
   isByReference: boolean,
-  serializeByReference: (libraryId: string) => SerializedPanelState<MapByReferenceState>,
-  serializeByValue: () => SerializedPanelState<MapByValueState>
+  serializeByReference: (libraryId: string) => MapByReferenceState,
+  serializeByValue: () => MapByValueState
 ): HasLibraryTransforms<MapByReferenceState, MapByValueState> {
   return {
     canLinkToLibrary: async () => {
@@ -47,7 +47,7 @@ export function initializeLibraryTransforms(
         item: { id: savedObjectId },
       } = await getMapClient().create({
         data: {
-          ...state.rawState.attributes,
+          ...state.attributes,
           title,
         },
       });

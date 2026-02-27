@@ -11,7 +11,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
-import { transformControlGroupOut } from './transform_control_group_out';
+import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
@@ -21,7 +21,8 @@ export function transformDashboardOut(
   references?: SavedObjectReference[]
 ): DashboardState | Partial<DashboardState> {
   const {
-    controlGroupInput,
+    pinned_panels,
+    controlGroupInput: legacyControls,
     description,
     kibanaSavedObjectMeta,
     optionsJSON,
@@ -40,6 +41,8 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
+  const pinnedPanelsOut = transformPinnedPanelsOut(legacyControls, pinned_panels, references ?? []);
+
   const timeRange =
     timeRestore && timeFrom && timeTo
       ? {
@@ -48,11 +51,10 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(optionsJSON ?? '{}');
+  const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),
@@ -60,6 +62,7 @@ export function transformDashboardOut(
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
 
+    ...(pinnedPanelsOut && { pinned_panels: pinnedPanelsOut }),
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },

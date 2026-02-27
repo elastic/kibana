@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
 
-  describe('console onboarding tour', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/224128
+  describe.skip('console onboarding tour', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -125,7 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Skip ongoing tour
       await PageObjects.console.skipTourIfExists();
 
-      // Verify that tour is hiddern
+      // Wait for the skip button to be removed, indicating tour has closed
+      await testSubjects.waitForDeleted('consoleSkipTourButton');
+
+      // Verify that tour is hidden
       await expectAllStepsHidden();
 
       // Re-run tour

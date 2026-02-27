@@ -16,7 +16,7 @@ import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
-  useTableFilters,
+  useTableFiltersState,
 } from '../../../doc_viewer_table/table_filters';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import {
@@ -49,7 +49,7 @@ export function AttributesOverview({
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const { searchTerm, onChangeSearchTerm } = useTableFilters({
+  const { searchTerm, onChangeSearchTerm } = useTableFiltersState({
     storage,
     storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
   });
@@ -74,10 +74,9 @@ export function AttributesOverview({
         flattened,
         searchTerm,
         shouldShowFieldHandler,
-        isEsqlMode,
         areNullValuesHidden,
       }),
-    [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]
+    [allFields, flattened, searchTerm, shouldShowFieldHandler, areNullValuesHidden]
   );
 
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
@@ -195,20 +194,18 @@ export function AttributesOverview({
           alignItems="center"
           gutterSize="m"
         >
-          {isEsqlMode && (
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide null fields',
-                  description: 'Switch label to hide fields with null values in the table',
-                })}
-                checked={areNullValuesHidden ?? false}
-                onChange={onHideNullValuesChange}
-                compressed
-                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                defaultMessage: 'Hide null fields',
+                description: 'Switch label to hide fields with null values in the table',
+              })}
+              checked={areNullValuesHidden ?? false}
+              onChange={onHideNullValuesChange}
+              compressed
+              data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

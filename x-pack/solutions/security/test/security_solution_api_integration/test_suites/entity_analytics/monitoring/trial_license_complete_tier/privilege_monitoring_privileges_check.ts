@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting } from '../../utils';
 import {
   PrivMonRolesUtils,
   READ_ALL_INDICES_ROLE,
@@ -21,14 +20,10 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonRolesUtils = PrivMonRolesUtils(getService);
   const privMonUtils = PrivMonUtils(getService);
   const authHelper = privMonRolesUtils.createUnifiedAuthHelper(getService);
-  const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/243722
-  // Failing: See https://github.com/elastic/kibana/issues/243721
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     describe('privileges checks', () => {
       before(async () => {
-        await enablePrivmonSetting(kibanaServer);
         await privMonRolesUtils.createPrivilegeTestUsers();
       });
 
@@ -75,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
               '.entity_analytics.monitoring.users-default': {
                 read: false,
               },
-              '.ml-anomalies-shared': {
+              '.ml-anomalies-shared*': {
                 read: false,
               },
               'risk-score.risk-score-*': {
@@ -99,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
               '.entity_analytics.monitoring.users-default': {
                 read: true,
               },
-              '.ml-anomalies-shared': {
+              '.ml-anomalies-shared*': {
                 read: false,
               },
               'risk-score.risk-score-*': {
@@ -114,7 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('privilege init engine access', () => {
       before(async () => {
-        await enablePrivmonSetting(kibanaServer);
         await privMonRolesUtils.createPrivilegeTestUsers();
       });
 

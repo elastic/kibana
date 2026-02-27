@@ -6,6 +6,14 @@
  */
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
+const CLOUD_PROVIDERS: readonly CloudProvider[] = ['aws', 'azure', 'gcp'];
+
+/**
+ * Type guard to check if a value is a valid CloudProvider.
+ */
+export const isCloudProvider = (value: unknown): value is CloudProvider =>
+  typeof value === 'string' && CLOUD_PROVIDERS.includes(value as CloudProvider);
+
 export type AccountType = 'single-account' | 'organization-account';
 
 export interface CloudConnectorSecretReference {
@@ -45,7 +53,7 @@ export interface CloudConnector {
   cloudProvider: CloudProvider;
   accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
+  packagePolicyCount?: number;
   created_at: string;
   updated_at: string;
   namespace?: string;

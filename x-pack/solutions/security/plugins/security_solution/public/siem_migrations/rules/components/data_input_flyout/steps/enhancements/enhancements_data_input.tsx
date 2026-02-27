@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiFilePickerProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -162,6 +163,13 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiText size="s">{i18n.ENHANCEMENTS_INSTRUCTIONS}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            iconType="info"
+            size="s"
+            color="primary"
+            title={i18n.ENHANCEMENTS_HELPER_TEXT}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">

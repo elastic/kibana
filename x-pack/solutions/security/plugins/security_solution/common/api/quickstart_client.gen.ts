@@ -113,6 +113,18 @@ import type {
   SearchUnifiedAlertsRequestBodyInput,
   SearchUnifiedAlertsResponse,
 } from './detection_engine/unified_alerts/search/search_route.gen';
+import type {
+  SetUnifiedAlertsAssigneesRequestBodyInput,
+  SetUnifiedAlertsAssigneesResponse,
+} from './detection_engine/unified_alerts/set_alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetUnifiedAlertsTagsRequestBodyInput,
+  SetUnifiedAlertsTagsResponse,
+} from './detection_engine/unified_alerts/set_alert_tags/set_alert_tags_route.gen';
+import type {
+  SetUnifiedAlertsWorkflowStatusRequestBodyInput,
+  SetUnifiedAlertsWorkflowStatusResponse,
+} from './detection_engine/unified_alerts/set_workflow_status/set_workflow_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
@@ -352,6 +364,20 @@ import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
+import type {
+  CreateWatchlistRequestBodyInput,
+  CreateWatchlistResponse,
+} from './entity_analytics/watchlists/management/create.gen';
+import type {
+  GetWatchlistRequestParamsInput,
+  GetWatchlistResponse,
+} from './entity_analytics/watchlists/management/get.gen';
+import type { ListWatchlistsResponse } from './entity_analytics/watchlists/management/list.gen';
+import type {
+  UpdateWatchlistRequestParamsInput,
+  UpdateWatchlistRequestBodyInput,
+  UpdateWatchlistResponse,
+} from './entity_analytics/watchlists/management/update.gen';
 import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
@@ -946,6 +972,19 @@ For detailed information on Kibana actions and alerting, and additional API call
           '/api/endpoint/protection_updates_note/{package_policy_id}',
           props.params
         ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createWatchlist(props: CreateWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateWatchlist`);
+    return this.kbnClient
+      .request<CreateWatchlistResponse>({
+        path: '/api/entity_analytics/watchlists',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2118,6 +2157,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getWatchlist(props: GetWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetWatchlist`);
+    return this.kbnClient
+      .request<GetWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getWorkflowInsights(props: GetWorkflowInsightsProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
     return this.kbnClient
@@ -2392,6 +2443,18 @@ providing you with the most current and effective threat detection capabilities.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listWatchlists() {
+    this.log.info(`${new Date().toISOString()} Calling API ListWatchlists`);
+    return this.kbnClient
+      .request<ListWatchlistsResponse>({
+        path: '/api/entity_analytics/watchlists/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2896,6 +2959,60 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Assign users to detection and attack alerts, and unassign them from alerts.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+    */
+  async setUnifiedAlertsAssignees(props: SetUnifiedAlertsAssigneesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsAssignees`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsAssigneesResponse>({
+        path: '/internal/detection_engine/unified_alerts/assignees',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Add tags to detection and attack alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+    */
+  async setUnifiedAlertsTags(props: SetUnifiedAlertsTagsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsTags`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsTagsResponse>({
+        path: '/internal/detection_engine/unified_alerts/tags',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Set the workflow status of one or more detection and attack alerts by IDs.
+   */
+  async setUnifiedAlertsWorkflowStatus(props: SetUnifiedAlertsWorkflowStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsWorkflowStatus`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsWorkflowStatusResponse>({
+        path: '/internal/detection_engine/unified_alerts/workflow_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Starts a SIEM dashboards migration using the migration id provided
    */
   async startDashboardsMigration(props: StartDashboardsMigrationProps) {
@@ -3136,6 +3253,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateWatchlist(props: UpdateWatchlistProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlist`);
+    return this.kbnClient
+      .request<UpdateWatchlistResponse>({
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
     return this.kbnClient
@@ -3303,6 +3433,9 @@ export interface CreateTimelinesProps {
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
+}
+export interface CreateWatchlistProps {
+  body: CreateWatchlistRequestBodyInput;
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
@@ -3492,6 +3625,9 @@ export interface GetTimelineProps {
 export interface GetTimelinesProps {
   query: GetTimelinesRequestQueryInput;
 }
+export interface GetWatchlistProps {
+  params: GetWatchlistRequestParamsInput;
+}
 export interface GetWorkflowInsightsProps {
   query: GetWorkflowInsightsRequestQueryInput;
 }
@@ -3595,6 +3731,15 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface SetUnifiedAlertsAssigneesProps {
+  body: SetUnifiedAlertsAssigneesRequestBodyInput;
+}
+export interface SetUnifiedAlertsTagsProps {
+  body: SetUnifiedAlertsTagsRequestBodyInput;
+}
+export interface SetUnifiedAlertsWorkflowStatusProps {
+  body: SetUnifiedAlertsWorkflowStatusRequestBodyInput;
+}
 export interface StartDashboardsMigrationProps {
   params: StartDashboardsMigrationRequestParamsInput;
   body: StartDashboardsMigrationRequestBodyInput;
@@ -3647,6 +3792,10 @@ export interface UpdateRuleMigrationIndexPatternProps {
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
   body: UpdateRuleMigrationRulesRequestBodyInput;
+}
+export interface UpdateWatchlistProps {
+  params: UpdateWatchlistRequestParamsInput;
+  body: UpdateWatchlistRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

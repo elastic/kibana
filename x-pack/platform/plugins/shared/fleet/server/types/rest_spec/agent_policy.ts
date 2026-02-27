@@ -92,7 +92,7 @@ export const BulkGetAgentPoliciesRequestSchema = {
 };
 
 export const BulkGetAgentPoliciesResponseSchema = schema.object({
-  items: schema.arrayOf(AgentPolicyResponseSchema),
+  items: schema.arrayOf(AgentPolicyResponseSchema, { maxSize: 10000 }),
 });
 
 export const GetOneAgentPolicyRequestSchema = {
@@ -121,7 +121,7 @@ export const CreateAgentPolicyRequestSchema = {
 
 export const CreateAgentAndPackagePolicyRequestSchema = {
   body: CreateAgentPolicyRequestSchema.body.extends({
-    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body),
+    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body, { maxSize: 1000 }),
   }),
   query: schema.intersection([
     CreateAgentPolicyRequestSchema.query,
@@ -166,9 +166,29 @@ export const GetFullAgentPolicyRequestSchema = {
     agentPolicyId: schema.string(),
   }),
   query: schema.object({
-    download: schema.maybe(schema.boolean()),
-    standalone: schema.maybe(schema.boolean()),
-    kubernetes: schema.maybe(schema.boolean()),
+    download: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the policy as a downloadable file' },
+      })
+    ),
+    standalone: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the policy formatted for standalone agents' },
+      })
+    ),
+    kubernetes: schema.maybe(
+      schema.boolean({
+        meta: { description: 'If true, returns the policy formatted for Kubernetes deployment' },
+      })
+    ),
+    revision: schema.maybe(
+      schema.number({
+        meta: {
+          description:
+            'If provided, returns the policy at the specified revision. Cannot be used with standalone or kubernetes flags.',
+        },
+      })
+    ),
   }),
 };
 
@@ -200,6 +220,7 @@ export const GetListAgentPolicyOutputsRequestSchema = {
   body: schema.object({
     ids: schema.arrayOf(schema.string(), {
       meta: { description: 'list of package policy ids' },
+      maxSize: 1000,
     }),
   }),
 };

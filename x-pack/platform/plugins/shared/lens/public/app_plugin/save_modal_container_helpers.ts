@@ -4,49 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as generateId } from 'uuid';
+
+import { omit } from 'lodash';
+
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-import {
-  DEFAULT_CONTROLS_CHAINING,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  CONTROLS_GROUP_TYPE,
-} from '@kbn/controls-constants';
 import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import { extractLensReferences } from '../../common/references';
-
-/**
- * Transforms control panels state into controls group state format.
- * @param controlsState - The control panels state to transform
- * @returns Array of control configurations for the controls group
- */
-function transformControlPanelsToControlsGroup(
-  controlsState?: ControlPanelsState
-): ControlsGroupState['controls'] {
-  const controls: ControlsGroupState['controls'] = [];
-
-  Object.values(controlsState ?? {}).forEach((panel, idx) => {
-    const { width, grow, type, ...controlConfig } = panel;
-    const id = generateId();
-    controls.push({
-      id,
-      grow,
-      order: idx,
-      type,
-      width,
-      controlConfig,
-    });
-  });
-
-  return controls;
-}
 
 export const redirectToDashboard = ({
-  embeddableInput: rawState,
+  embeddableInput,
   dashboardId,
   originatingApp,
   getOriginatingPath,
@@ -60,38 +27,24 @@ export const redirectToDashboard = ({
   stateTransfer: LensAppServices['stateTransfer'];
   controlsState?: ControlPanelsState;
 }) => {
-  const { references } = extractLensReferences(rawState);
-
   const appId = originatingApp || 'dashboards';
-
-  const controls = transformControlPanelsToControlsGroup(controlsState);
 
   const embeddablePackages: EmbeddablePackageState[] = [
     {
       type: LENS_EMBEDDABLE_TYPE,
-      serializedState: {
-        rawState,
-        references,
-      },
+      serializedState: embeddableInput,
     },
   ];
 
-  // Only add controls group if they exist
-  if (controls.length > 0) {
+  // Add each control to the embeddable package (if any)
+  Object.values(controlsState ?? {}).forEach((control) => {
     embeddablePackages.push({
-      type: CONTROLS_GROUP_TYPE,
+      type: control.type,
       serializedState: {
-        rawState: {
-          labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
-          chainingSystem: DEFAULT_CONTROLS_CHAINING,
-          autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-          ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-          controls,
-        },
-        references: [],
+        ...omit(control, ['type', 'order', 'width', 'grow']), // add as panel rather than pinned, so strip out unnecessary info
       },
     });
-  }
+  });
 
   stateTransfer.navigateToWithEmbeddablePackages(appId, {
     state: embeddablePackages,
