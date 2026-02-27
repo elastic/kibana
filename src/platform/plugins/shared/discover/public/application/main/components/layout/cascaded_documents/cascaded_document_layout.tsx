@@ -58,7 +58,19 @@ export interface ESQLDataCascadeProps
 type EsqlDataCascade = typeof DataCascade<ESQLDataGroupNode>;
 
 const ESQLDataCascade = React.memo(
-  ({ rows, columns, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
+  ({
+    rows,
+    columns,
+    dataGridDensityState,
+    showTimeCol,
+    dataView,
+    showKeyboardShortcuts,
+    renderDocumentView,
+    externalCustomRenderers,
+    onUpdateDataGridDensity,
+    togglePopover,
+    queryMeta,
+  }: ESQLDataCascadeProps) => {
     const {
       availableCascadeGroups,
       selectedCascadeGroups,
@@ -93,22 +105,49 @@ const ESQLDataCascade = React.memo(
       columns,
       togglePopover
     );
+    const [expandedDocByCellId, setExpandedDocByCellId] = useState<
+      Record<string, DataTableRecord | undefined>
+    >({});
 
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
-        <ESQLDataCascadeLeafCell
-          {...props}
-          dataView={dataView}
-          cellData={cellData!}
-          cellId={cellId}
-          getScrollElement={getScrollElement}
-          getScrollOffset={getScrollOffset}
-          getScrollMargin={getScrollMargin}
-        />
-      ),
-      [dataView, props]
+      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => {
+        const setExpandedDocForCell: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = (
+          doc
+        ) => {
+          setExpandedDocByCellId((prev) => ({ ...prev, [cellId]: doc }));
+        };
+
+        return (
+          <ESQLDataCascadeLeafCell
+            dataGridDensityState={dataGridDensityState}
+            showTimeCol={showTimeCol}
+            dataView={dataView}
+            showKeyboardShortcuts={showKeyboardShortcuts}
+            renderDocumentView={renderDocumentView}
+            externalCustomRenderers={externalCustomRenderers}
+            onUpdateDataGridDensity={onUpdateDataGridDensity}
+            expandedDoc={expandedDocByCellId[cellId]}
+            setExpandedDoc={setExpandedDocForCell}
+            cellData={cellData!}
+            cellId={cellId}
+            getScrollElement={getScrollElement}
+            getScrollOffset={getScrollOffset}
+            getScrollMargin={getScrollMargin}
+          />
+        );
+      },
+      [
+        dataGridDensityState,
+        showTimeCol,
+        dataView,
+        showKeyboardShortcuts,
+        renderDocumentView,
+        externalCustomRenderers,
+        onUpdateDataGridDensity,
+        expandedDocByCellId,
+      ]
     );
 
     const dataCascadeUiState = useMemo<DataCascadeUiState | undefined>(

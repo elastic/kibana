@@ -8,21 +8,40 @@
  */
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+  type EuiDataGridCustomBodyProps,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
   DataLoadingState,
   DataGridDensity,
   type UnifiedDataTableProps,
+  SOURCE_COLUMN,
+  SourceDocument,
 } from '@kbn/unified-data-table';
 import {
   type DataCascadeRowCellProps,
   useCascadeVirtualizer,
   type CascadeVirtualizerProps,
 } from '@kbn/shared-ux-document-data-cascade';
-import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
+import {
+  type DataTableRecord,
+  type SortOrder,
+  getShouldShowFieldHandler,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
+} from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import debounce from 'lodash/debounce';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
@@ -40,6 +59,8 @@ interface ESQLDataCascadeLeafCellProps
       | 'renderDocumentView'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
+      | 'expandedDoc'
+      | 'setExpandedDoc'
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
@@ -64,6 +85,231 @@ interface CustomCascadeGridBodyProps
 }
 
 const EMPTY_SORT: SortOrder[] = [];
+const USE_LIGHTWEIGHT_UNIFIED_DATA_TABLE = true;
+
+const ExpandButtonLight = React.memo(function ExpandButtonLight({
+  isExpanded,
+  onToggle,
+}: {
+  isExpanded: boolean;
+  onToggle: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+  const buttonLabel = i18n.translate('unifiedDataTable.grid.viewDoc', {
+    defaultMessage: 'Toggle dialog with details',
+  });
+
+  return (
+    <EuiToolTip
+      content={buttonLabel}
+      delay="long"
+      anchorClassName="unifiedDataTable__rowControl"
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="xs"
+        iconSize="s"
+        aria-label={buttonLabel}
+        data-test-subj="docTableExpandToggleColumn"
+        onClick={onToggle}
+        color={isExpanded ? 'primary' : 'text'}
+        iconType={isExpanded ? 'minimize' : 'expand'}
+        isSelected={isExpanded}
+      />
+    </EuiToolTip>
+  );
+});
+
+const lightweightTableStyles = {
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    height: '100%',
+    minHeight: 0,
+  },
+  header: {
+    borderBottom: 'var(--euiBorderThin)',
+    padding: '6px 8px',
+  },
+  rowsViewport: {
+    minHeight: 0,
+  },
+  row: {
+    display: 'flex',
+    borderBottom: 'var(--euiBorderThin)',
+    alignItems: 'stretch',
+  },
+  controlCell: {
+    width: 28,
+    minWidth: 28,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingTop: 4,
+  },
+  summaryCell: {
+    minWidth: 0,
+    flex: 1,
+    padding: '4px 8px',
+    '.unifiedDataTable__descriptionList': {
+      WebkitLineClamp: 3,
+      display: '-webkit-box',
+      WebkitBoxOrient: 'vertical' as const,
+      overflow: 'hidden',
+      maxHeight: '4.5em',
+    },
+  },
+} as const;
+
+const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
+  rows,
+  dataView,
+  isPlainRecord,
+  services,
+  expandedDoc,
+  setExpandedDoc,
+  renderDocumentView,
+  dataGridDensityState,
+  getScrollElement,
+  getScrollMargin,
+  getScrollOffset,
+  initialVirtualizationMetadata,
+  resultsCount,
+  onOpenInDiscoverTab,
+}: {
+  rows: DataTableRecord[];
+  dataView: NonNullable<UnifiedDataTableProps['dataView']>;
+  isPlainRecord?: boolean;
+  services: NonNullable<UnifiedDataTableProps['services']>;
+  expandedDoc?: DataTableRecord;
+  setExpandedDoc?: UnifiedDataTableProps['setExpandedDoc'];
+  renderDocumentView?: UnifiedDataTableProps['renderDocumentView'];
+  dataGridDensityState: DataGridDensity;
+  getScrollElement: () => Element | null;
+  getScrollMargin: () => number;
+  getScrollOffset: () => number;
+  initialVirtualizationMetadata?: CascadedDocumentsDataGridUiState['virtualizationMetadata'];
+  resultsCount: number;
+  onOpenInDiscoverTab: () => void;
+}) {
+  const maxDocFieldsDisplayed = services.uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
+  const showMultiFields = services.uiSettings.get<boolean>(SHOW_MULTIFIELDS);
+  const isCompressed = dataGridDensityState === DataGridDensity.COMPACT;
+  const canExpand = Boolean(setExpandedDoc && renderDocumentView);
+
+  const shouldShowFieldHandler = useMemo(() => {
+    const dataViewFields = dataView.fields.getAll().map((field) => field.name);
+    return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
+  }, [dataView, showMultiFields]);
+
+  const virtualizer = useCascadeVirtualizer<DataTableRecord>({
+    // @ts-expect-error -- sticky headers are not used in this table
+    rows,
+    enableStickyGroupHeader: false,
+    estimatedRowHeight: isCompressed ? 44 : 60,
+    overscan: 10,
+    initialOffset: getScrollOffset,
+    scrollMargin: getScrollMargin(),
+    getScrollElement,
+    // Lightweight mode: avoid provider updates during scroll to keep interactions stable and fast.
+    onStateChange: undefined,
+    initialRect: initialVirtualizationMetadata?.scrollRect,
+    initialAnchorItemIndex: initialVirtualizationMetadata?.initialDisplayedItemIndex ?? 0,
+  });
+
+  const items = virtualizer.getVirtualItems();
+  const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
+
+  return (
+    <div css={lightweightTableStyles.wrapper} data-test-subj="discoverCascadeLightDataTable">
+      <div css={lightweightTableStyles.header}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <b>
+                <FormattedMessage
+                  id="discover.dataCascade.row.cell.toolbar.heading"
+                  defaultMessage="{count, plural, =0 {no results} =1 {1 result} other {# results}}"
+                  values={{ count: resultsCount }}
+                />
+              </b>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="discoverApp"
+              onClick={onOpenInDiscoverTab}
+              data-test-subj="discoverCascadeLightOpenInDiscoverTabButton"
+            >
+              <FormattedMessage
+                id="discover.dataCascade.lightTable.openInDiscoverTabButtonLabel"
+                defaultMessage="Open in Discover tab"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <div css={lightweightTableStyles.rowsViewport}>
+        <div style={{ height: virtualizer.getTotalSize() }}>
+          <div style={{ transform: `translateY(${translateY}px)` }}>
+            {items.map((virtualRow) => {
+              const row = rows[virtualRow.index];
+              const isCurrentRowExpanded = expandedDoc?.id === row?.id;
+
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  css={lightweightTableStyles.row}
+                >
+                  <div css={lightweightTableStyles.controlCell}>
+                    {canExpand ? (
+                      <ExpandButtonLight
+                        isExpanded={Boolean(isCurrentRowExpanded)}
+                        onToggle={(event) => {
+                          event.stopPropagation();
+                          setExpandedDoc?.(isCurrentRowExpanded ? undefined : row);
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                  <div
+                    css={lightweightTableStyles.summaryCell}
+                    className={
+                      isCurrentRowExpanded ? 'unifiedDataTable__cell--expanded' : undefined
+                    }
+                  >
+                    <SourceDocument
+                      useTopLevelObjectColumns={false}
+                      row={row}
+                      columnId={SOURCE_COLUMN}
+                      dataView={dataView}
+                      shouldShowFieldHandler={shouldShowFieldHandler}
+                      maxEntries={maxDocFieldsDisplayed}
+                      isPlainRecord={isPlainRecord}
+                      fieldFormats={services.fieldFormats}
+                      isCompressed={isCompressed}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      {canExpand &&
+        expandedDoc &&
+        renderDocumentView?.(expandedDoc, rows, [SOURCE_COLUMN], setExpandedDoc!, undefined)}
+    </div>
+  );
+});
 
 /**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
@@ -226,18 +472,21 @@ export const ESQLDataCascadeLeafCell = React.memo(
     showKeyboardShortcuts,
     externalCustomRenderers,
     renderDocumentView,
+    expandedDoc: controlledExpandedDoc,
+    setExpandedDoc: controlledSetExpandedDoc,
     getScrollElement,
     getScrollMargin,
     getScrollOffset,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+    const [localExpandedDoc, setLocalExpandedDoc] = useState<DataTableRecord | undefined>();
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
 
-    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
+    const { getDataGridUiStateMap, setDataGridUiState, openInNewTab, esqlQuery } =
+      useCascadedDocumentsContext();
 
     const initialGridState = useMemo(() => {
       return getDataGridUiStateMap()?.[cellId];
@@ -285,9 +534,11 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const setExpandedDocFn = useCallback(
       (...args: Parameters<NonNullable<UnifiedDataTableProps['setExpandedDoc']>>) =>
-        setExpandedDoc(args[0]),
-      [setExpandedDoc]
+        controlledSetExpandedDoc ? controlledSetExpandedDoc(...args) : setLocalExpandedDoc(args[0]),
+      [controlledSetExpandedDoc]
     );
+
+    const expandedDoc = controlledExpandedDoc ?? localExpandedDoc;
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -351,36 +602,61 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     return (
       <EuiPanel paddingSize="none">
-        <UnifiedDataTable
-          isPlainRecord
-          dataView={dataView}
-          showTimeCol={showTimeCol}
-          showKeyboardShortcuts={showKeyboardShortcuts}
-          services={services}
-          sort={EMPTY_SORT}
-          isSortEnabled={false}
-          enableInTableSearch
-          ariaLabelledBy="data-cascade-leaf-cell"
-          // TODO: I think this will pollute local storage
-          consumer={`discover_esql_cascade_row_leaf_${cellId}`}
-          rows={cellData}
-          loadingState={DataLoadingState.loaded}
-          columns={selectedColumns}
-          onSetColumns={setSelectedColumns}
-          renderCustomToolbar={renderCustomToolbarWithElements}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDocFn}
-          dataGridDensityState={cascadeDataGridDensityState}
-          onUpdateDataGridDensity={setCascadeDataGridDensityState}
-          renderDocumentView={renderDocumentView}
-          renderCustomGridBody={renderCustomCascadeGridBodyCallback}
-          onFullScreenChange={setIsCellInFullScreenMode}
-          externalCustomRenderers={externalCustomRenderers}
-          paginationMode="infinite"
-          sampleSizeState={cellData.length}
-          initialState={initialGridState}
-          onInitialStateChange={onInitialStateChange}
-        />
+        {USE_LIGHTWEIGHT_UNIFIED_DATA_TABLE ? (
+          <UnifiedDataTableLight
+            rows={cellData}
+            dataView={dataView}
+            isPlainRecord
+            services={services}
+            expandedDoc={expandedDoc}
+            setExpandedDoc={setExpandedDocFn}
+            renderDocumentView={renderDocumentView}
+            dataGridDensityState={cascadeDataGridDensityState}
+            getScrollElement={getScrollElement}
+            getScrollMargin={getScrollMargin}
+            getScrollOffset={getScrollOffset}
+            initialVirtualizationMetadata={initialGridState?.virtualizationMetadata}
+            resultsCount={cellData.length}
+            onOpenInDiscoverTab={() => {
+              openInNewTab({
+                appState: {
+                  query: esqlQuery,
+                },
+              });
+            }}
+          />
+        ) : (
+          <UnifiedDataTable
+            isPlainRecord
+            dataView={dataView}
+            showTimeCol={showTimeCol}
+            showKeyboardShortcuts={showKeyboardShortcuts}
+            services={services}
+            sort={EMPTY_SORT}
+            isSortEnabled={false}
+            enableInTableSearch
+            ariaLabelledBy="data-cascade-leaf-cell"
+            // TODO: I think this will pollute local storage
+            consumer={`discover_esql_cascade_row_leaf_${cellId}`}
+            rows={cellData}
+            loadingState={DataLoadingState.loaded}
+            columns={selectedColumns}
+            onSetColumns={setSelectedColumns}
+            renderCustomToolbar={renderCustomToolbarWithElements}
+            expandedDoc={expandedDoc}
+            setExpandedDoc={setExpandedDocFn}
+            dataGridDensityState={cascadeDataGridDensityState}
+            onUpdateDataGridDensity={setCascadeDataGridDensityState}
+            renderDocumentView={renderDocumentView}
+            renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+            onFullScreenChange={setIsCellInFullScreenMode}
+            externalCustomRenderers={externalCustomRenderers}
+            paginationMode="infinite"
+            sampleSizeState={cellData.length}
+            initialState={initialGridState}
+            onInitialStateChange={onInitialStateChange}
+          />
+        )}
       </EuiPanel>
     );
   }
