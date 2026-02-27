@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { RuleExecutionStatus } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type {
+  LogLevel,
+  RuleExecutionStatus,
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevelEnum,
   RuleExecutionStatusEnum,
@@ -22,8 +25,6 @@ import type {
   NumberOfLoggedMessages,
   TopMessages,
 } from '../aggregations/types';
-
-type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
 export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,

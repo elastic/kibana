@@ -6,13 +6,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
   RuleExecutionStatusEnum,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
-
 import {
   ALERTING_PROVIDER,
   RULE_EXECUTION_LOG_PROVIDER,
