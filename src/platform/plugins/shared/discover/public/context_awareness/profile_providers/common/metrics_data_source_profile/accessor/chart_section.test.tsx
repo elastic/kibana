@@ -107,7 +107,7 @@ describe('MetricsExperienceGridWrapper', () => {
     mockUpdateAppStateAction.mockClear();
   });
 
-  it('wraps onFilter to prevent default and forward the event', () => {
+  it('should not prevent default when onFilter is provided', () => {
     const onFilter = jest.fn();
     const preventDefault = jest.fn();
     const event = { preventDefault } as unknown as ExpressionRendererEvent['data'];
@@ -120,21 +120,7 @@ describe('MetricsExperienceGridWrapper', () => {
     gridOnFilter?.(event);
 
     expect(onFilter).toHaveBeenCalledWith(event);
-    expect(preventDefault).toHaveBeenCalled();
-  });
-
-  it('still prevents default when onFilter is not provided', () => {
-    const preventDefault = jest.fn();
-    const event = { preventDefault } as unknown as ExpressionRendererEvent['data'];
-
-    renderChartSection();
-
-    const gridOnFilter = unifiedGridProps?.onFilter;
-
-    expect(gridOnFilter).toEqual(expect.any(Function));
-    gridOnFilter?.(event);
-
-    expect(preventDefault).toHaveBeenCalled();
+    expect(preventDefault).not.toHaveBeenCalled();
   });
 
   it('dispatches breakdown updates from metrics grid callback', () => {
