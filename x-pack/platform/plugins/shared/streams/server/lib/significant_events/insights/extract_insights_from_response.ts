@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { Insight } from '@kbn/streams-schema';
-import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
+import type { InsightCore } from '@kbn/streams-schema';
+import { parseInsightsWithErrors, SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
 
 /**
  * Safely extracts insights from an LLM response.
@@ -15,7 +15,7 @@ import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
 export function extractInsightsFromResponse(
   response: { toolCalls?: Array<{ function: { name: string; arguments: unknown } }> },
   logger: Logger
-): Insight[] {
+): InsightCore[] {
   if (!response.toolCalls || response.toolCalls.length === 0) {
     logger.warn('LLM response has no tool calls');
     return [];
