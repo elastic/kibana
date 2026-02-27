@@ -21,6 +21,12 @@ export const generateSchema = (
   return z.object({
     config: spec.schema ?? z.object({}),
     secrets: generateSecretsSchemaFromSpec(spec.auth, { authorizationCodeEnabled, authMode }),
-    authMode: z.enum(['shared', 'per-user']).optional().meta({ hidden: true }),
+    authMode: z
+      .preprocess(
+        // if the authMode is an empty string, set it to undefined
+        (val) => (val === '' ? undefined : val),
+        z.enum(['shared', 'per-user']).optional()
+      )
+      .meta({ hidden: true }),
   });
 };

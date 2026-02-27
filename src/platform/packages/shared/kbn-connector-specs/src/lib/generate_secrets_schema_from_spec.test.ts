@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
+import { AuthMode } from '../connector_spec';
 
 describe('generateSecretsSchemaFromSpec', () => {
   test('correctly generates schemas for array of auth types', () => {
@@ -89,6 +90,22 @@ describe('generateSecretsSchemaFromSpec', () => {
     expect(authTypes).not.toContain('basic');
     expect(authTypes).not.toContain('bearer');
     expect(authTypes).toContain('oauth_authorization_code');
+  });
+
+  test('returns empty schema when authMode is an unrecognised value', () => {
+    const schema = generateSecretsSchemaFromSpec(
+      {
+        types: ['basic', 'bearer', 'oauth_authorization_code'],
+      },
+
+      { isPfxEnabled: true, authMode: 'unknown' as AuthMode }
+    );
+    const jsonSchema = z.toJSONSchema(schema) as {
+      anyOf?: Array<{ properties?: { authType?: { const?: string } } }>;
+    };
+
+    // All types are filtered out because none match the unrecognised mode
+    expect(jsonSchema.anyOf).toBeUndefined();
   });
 
   test('includes all auth types when authMode is not specified', () => {

@@ -44,6 +44,7 @@ export interface UnsecuredActionsClientOpts {
   kibanaIndices: string[];
   logger: Logger;
   connectorTypeRegistry: ActionTypeRegistry;
+  authorizationCodeEnabled: boolean;
 }
 
 type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
@@ -130,6 +131,7 @@ export class UnsecuredActionsClient {
       internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
       spaceId,
       connectorTypeRegistry: this.opts.connectorTypeRegistry,
+      authorizationCodeEnabled: this.opts.authorizationCodeEnabled,
     });
   }
 

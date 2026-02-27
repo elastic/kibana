@@ -63,12 +63,8 @@ export const getFieldFromSchema = ({
     validate: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
       const [{ value, path: formPath }] = args;
 
-      if (isOptional && (value === undefined || value === null || value === '')) {
-        return undefined;
-      }
-
       try {
-        schema.parse(value);
+        outerSchema.parse(value);
         return undefined;
       } catch (error) {
         if (!(error instanceof ZodError)) {

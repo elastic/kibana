@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
+import { lazy, useMemo } from 'react';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
@@ -68,17 +68,16 @@ export function registerConnectorTypesFromSpecs({
 const createConnectorFields = (
   spec: ConnectorSpec,
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
-  generateSchema: typeof import('./generate_schema').generateSchema
+  generateSchema: typeof import('./generate_schema').generateSchema,
+  authorizationCodeEnabled: boolean
 ) => {
   const ConnectorFields = (props: { readOnly: boolean; isEdit: boolean }) => {
     const [formData] = useFormData();
 
-    const authType = formData?.secrets?.authType;
-
-    const dynamicSchema = generateSchema(spec, {
-      secrets: authType ? { authType } : undefined,
-      authMode: formData?.authMode,
-    });
+    const dynamicSchema = useMemo(
+      () => generateSchema(spec, { authMode: formData?.authMode, authorizationCodeEnabled }),
+      [formData?.authMode, authorizationCodeEnabled]
+    );
 
     return generateFormFields({
       schema: dynamicSchema,
@@ -117,7 +116,12 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: createConnectorFields(spec, generateFormFields, generateSchema),
+        default: createConnectorFields(
+          spec,
+          generateFormFields,
+          generateSchema,
+          authorizationCodeEnabled
+        ),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
