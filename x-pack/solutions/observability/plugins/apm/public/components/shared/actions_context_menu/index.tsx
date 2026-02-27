@@ -69,7 +69,7 @@ export function ActionsContextMenu({
     let subPanelId = 1;
 
     for (const [groupIndex, group] of actions.entries()) {
-      if (group.groupLabel != null) {
+      if (group.groupLabel) {
         mainPanelItems.push({
           name: group.groupLabel,
           disabled: true,
