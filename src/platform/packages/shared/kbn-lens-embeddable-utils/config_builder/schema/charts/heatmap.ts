@@ -47,6 +47,10 @@ const labelsSchemaProps = {
 
 const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'));
 
+const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+  meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
+});
+
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
@@ -68,6 +72,7 @@ const heatmapSharedStateSchema = {
             {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(schema.object(labelsSchemaProps)),
+              sort: schema.maybe(heatmapSortPredicateSchema),
             },
             {
               meta: {
@@ -83,6 +88,7 @@ const heatmapSharedStateSchema = {
             {
               title: schema.maybe(schema.object(axisTitleSchemaProps)),
               labels: schema.maybe(simpleLabelsSchema),
+              sort: schema.maybe(heatmapSortPredicateSchema),
             },
             {
               meta: {
