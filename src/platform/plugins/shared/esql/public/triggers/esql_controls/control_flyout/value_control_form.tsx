@@ -36,7 +36,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ESQLLangEditor } from '../../../create_editor';
@@ -81,6 +81,13 @@ export function ValueControlForm({
   const theme = useEuiTheme();
   const kibana = useKibana<ServiceDeps>();
   const { core } = kibana.services;
+  const abortControllerRef = useRef<AbortController>(new AbortController());
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current.abort();
+    };
+  }, []);
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
@@ -164,19 +171,23 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
+      abortControllerRef.current.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         getESQLResults({
           esqlQuery: query,
           search,
-          signal: undefined,
+          signal: controller.signal,
           filter: undefined,
           dropNullColumns: true,
           timeRange,
           timezone,
           variables: esqlVariables,
         }).then((results) => {
-          if (!isMounted()) {
+          if (!isMounted() || controller.signal.aborted) {
             return;
           }
           const columns = results.response.columns.map((col) => col.name);
@@ -201,6 +212,9 @@ export function ValueControlForm({
         });
         setValuesQuery(query);
       } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return;
+        }
         setEsqlQueryErrors([e]);
       }
     },

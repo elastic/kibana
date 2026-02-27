@@ -31,7 +31,6 @@ steps:
       diskSizeGb: 95
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
-    cancel_on_build_failing: true
     label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2404
@@ -49,7 +48,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/quick_checks.sh
-    cancel_on_build_failing: true
     label: 'Quick Checks'
     agents:
       image: family/kibana-ubuntu-2404
@@ -68,7 +66,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/checks.sh
-    cancel_on_build_failing: true
     label: 'Checks'
     agents:
       image: family/kibana-ubuntu-2404
@@ -87,7 +84,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
-    cancel_on_build_failing: true
     label: 'Linting'
     agents:
       image: family/kibana-ubuntu-2404
@@ -106,7 +102,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/lint_with_types.sh
-    cancel_on_build_failing: true
     label: 'Linting (with types)'
     agents:
       image: family/kibana-ubuntu-2404
@@ -125,7 +120,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
-    cancel_on_build_failing: true
     label: 'Check Types'
     agents:
       image: family/kibana-ubuntu-2404
@@ -144,7 +138,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
-    cancel_on_build_failing: true
     label: 'Check OAS Snapshot'
     agents:
       image: family/kibana-ubuntu-2404
@@ -180,7 +173,6 @@ steps:
 #          limit: 3
 
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
-    cancel_on_build_failing: true
     label: Check Public API Docs
     key: public-api-docs
     agents:
@@ -200,7 +192,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
-    cancel_on_build_failing: true
     label: Mark CI Stats as ready
     agents:
       image: family/kibana-ubuntu-2404
@@ -218,7 +209,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    cancel_on_build_failing: true
     label: 'Pick Test Group Run Order'
     agents:
       image: family/kibana-ubuntu-2404
@@ -238,7 +228,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
-    cancel_on_build_failing: true
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
@@ -259,7 +248,6 @@ steps:
           limit: 1
 
   - label: 'Upload on-merge fanout'
-    cancel_on_build_failing: true
     command: buildkite-agent pipeline upload .buildkite/pipelines/on_merge_fanout.yml
     agents:
       image: family/kibana-ubuntu-2404
@@ -289,7 +277,6 @@ steps:
       - check_types
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-    cancel_on_build_failing: true
     label: 'Build Storybooks'
     agents:
       image: family/kibana-ubuntu-2404
@@ -308,7 +295,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
-    cancel_on_build_failing: true
     label: 'Publish OAS docs to bump.sh'
     agents:
       image: family/kibana-ubuntu-2404
@@ -327,7 +313,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/archive_so_migration_snapshot.sh target/plugin_so_types_snapshot.json
-    cancel_on_build_failing: true
     label: 'Extract Saved Object migration plugin types'
     agents:
       image: family/kibana-ubuntu-2404
