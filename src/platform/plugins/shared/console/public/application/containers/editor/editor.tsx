@@ -192,7 +192,6 @@ export const Editor = memo(
 
     const updateOutputEditorValue = useCallback(
       (nextValue: string) => {
-        console.log('updateOutputEditorValue', nextValue);
         if (!managedSelectedItemId) {
           return;
         }

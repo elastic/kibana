@@ -104,7 +104,6 @@ export const MonacoEditorOutput: FunctionComponent<{
   setVal: (value: string) => void;
   val: string;
 }> = ({ setVal, val }) => {
-  console.log('output render', val);
   const context = useServicesContext();
   const {
     services: { notifications },
@@ -122,9 +121,18 @@ export const MonacoEditorOutput: FunctionComponent<{
   const highlightedLinesClassName = useHighlightedLinesClassName();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const lastSyncedValueRef = useRef<string | null>(null);
+  const setValRef = useRef(setVal);
 
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
+
+  useEffect(() => {
+    setValRef.current = setVal;
+  }, [setVal]);
+
+  useEffect(() => {
+    setValue(val);
+  }, [val]);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -176,7 +184,7 @@ export const MonacoEditorOutput: FunctionComponent<{
       setValue(newVal);
       if (lastSyncedValueRef.current !== newVal) {
         lastSyncedValueRef.current = newVal;
-        setVal(newVal);
+        setValRef.current(newVal);
       }
       if (isMultipleRequest) {
         // If there are multiple responses, add decorations for their status codes
@@ -189,10 +197,10 @@ export const MonacoEditorOutput: FunctionComponent<{
       setValue('');
       if (lastSyncedValueRef.current !== '') {
         lastSyncedValueRef.current = '';
-        setVal('');
+        setValRef.current('');
       }
     }
-  }, [readOnlySettings.tripleQuotes, data, statusCodeClassNames, setVal]);
+  }, [readOnlySettings.tripleQuotes, data, statusCodeClassNames]);
 
   const copyOutputCallback = useCallback(async () => {
     const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
