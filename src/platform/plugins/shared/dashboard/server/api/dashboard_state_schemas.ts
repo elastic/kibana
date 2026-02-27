@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
@@ -51,19 +51,7 @@ export const panelGridSchema = schema.object({
 });
 
 export function getPanelSchema() {
-  return schema.object({
-    config: schema.oneOf([
-      ...((embeddableService ? embeddableService.getAllEmbeddableSchemas() : []) as [
-        ObjectType<{}>
-      ]),
-      schema.object(
-        {},
-        {
-          unknowns: 'allow',
-        }
-      ),
-    ]) as ObjectType<{}>,
-    type: schema.string({ meta: { description: 'The embeddable type' } }),
+  const basePanelProps = {
     grid: panelGridSchema,
     /**
      * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
@@ -75,16 +63,30 @@ export function getPanelSchema() {
         meta: { description: 'The unique ID of the panel.' },
       })
     ),
-    version: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (config in this type).",
-          deprecated: true,
-        },
-      })
-    ),
-  });
+  };
+  const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+  const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
+    schema.object({
+      ...basePanelProps,
+      type: schema.literal(type),
+      config: configSchema,
+    })
+  );
+
+  return schema.discriminatedUnion('type', [
+    ...panelSchemas,
+    // TODO remove fallback when all embeddables register schemas
+    schema.object({
+      ...basePanelProps,
+      type: schema.string(),
+      config: schema.object(
+        {},
+        {
+          unknowns: 'allow',
+        }
+      ),
+    }),
+  ] as [ObjectType<{ grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>; uid: Type<string | undefined>; type: Type<string>; config: ObjectType<{}> }>]);
 }
 
 const sectionGridSchema = schema.object({
