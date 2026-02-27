@@ -27,13 +27,13 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 10300
   core: 556473
-  cps: 6527
+  cps: 9016
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
   dashboardAgent: 5135
   dashboardMarkdown: 6219
-  data: 494390
+  data: 502000
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
