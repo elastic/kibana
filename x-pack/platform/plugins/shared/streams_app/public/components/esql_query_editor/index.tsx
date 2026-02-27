@@ -10,7 +10,7 @@ import type { ESQLEditorProps } from '@kbn/esql/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import { isEmpty, memoize } from 'lodash';
 import { normalizeEsqlQuery } from '@kbn/streams-schema';
 
 export const StreamsESQLEditor = ({
@@ -45,9 +45,12 @@ export const StreamsESQLEditor = ({
   );
 };
 
+// As the normalization is a heavy operation, we memoize it to avoid re-calculating it on every render for static prefixes.
+const memoizedNormalizeEsqlQuery = memoize(normalizeEsqlQuery);
+
 export function validatePrefix(value: string, prefix?: string) {
-  const normalizedValue = normalizeEsqlQuery(value);
-  const normalizedPrefix = prefix ? normalizeEsqlQuery(prefix) : undefined;
+  const normalizedValue = memoizedNormalizeEsqlQuery(value);
+  const normalizedPrefix = prefix ? memoizedNormalizeEsqlQuery(prefix) : undefined;
   if (!normalizedPrefix || normalizedValue.startsWith(normalizedPrefix)) {
     return { isValid: true, error: undefined } as const;
   }

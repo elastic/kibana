@@ -9,7 +9,6 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
 import type { ESQLCommand } from '@kbn/esql-language';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 
 const ESQL_UNITS: Record<string, string> = {
@@ -149,11 +148,11 @@ export async function previewSignificantEvents(
   // insufficient buckets (< 22), so a single query is enough.
   // drop_null_columns removes them from the response when they are absent,
   // and the column-presence check below handles both cases uniformly.
-  const response = (await scopedClusterClient.asCurrentUser.esql.query({
+  const response = await scopedClusterClient.asCurrentUser.esql.query({
     query: buildHistogramQuery(esqlQuery, bucketSize),
     filter,
     drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  });
 
   const countIdx = response.columns.findIndex((col) => col.name === 'count');
   const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');

@@ -55,7 +55,7 @@ export const useDebouncedValue = <T>(
     return () => {
       clearTimeout(timer);
     };
-  }, [value, wait]);
+  }, [value, wait, compareRef]);
 
   return debouncedValue;
 };

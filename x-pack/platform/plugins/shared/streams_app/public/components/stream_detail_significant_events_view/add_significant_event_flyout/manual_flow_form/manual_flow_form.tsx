@@ -18,7 +18,7 @@ import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { buildMetadataOption, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { StreamsESQLEditor, validatePrefix } from '../../../esql_query_editor';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
@@ -55,7 +55,7 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
 }: ManualFlowFormProps) {
-  const queryFrom = getDefaultQueryFrom(definition);
+  const queryFrom = useMemo(() => getDefaultQueryFrom(definition), [definition]);
   const defaultEsql = query.esql.query || queryFrom;
 
   const {
