@@ -5,135 +5,45 @@
  * 2.0.
  */
 
-import * as esKuery from '@kbn/es-query';
-import {
-  validateSortField,
-  validateSearchFields,
-  validateFilterKueryNode,
-} from './validate_attributes';
+import { getFieldNameAttribute } from './validate_attributes';
 
-describe('Validate attributes', () => {
-  const excludedFieldNames = ['monitoring', 'mapped_params'];
-  describe('validateSortField', () => {
-    test('should NOT throw an error, when sort field is not part of the field to exclude', () => {
-      expect(() => validateSortField('name.keyword', excludedFieldNames)).not.toThrow();
-    });
-
-    test('should NOT throw an error, when sort field is not a descendant of the field to exclude', () => {
-      expect(() =>
-        validateSortField('new_field.monitoring.metrics.success', excludedFieldNames)
-      ).not.toThrow();
-    });
-
-    test('should throw an error, when sort field is part of the field to exclude', () => {
-      expect(() =>
-        validateSortField(
-          'monitoring.execution.calculated_metrics.success_ratio',
-          excludedFieldNames
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio"`
-      );
-    });
+describe('getFieldNameAttribute', () => {
+  test('should return the field name when no attributes are ignored', () => {
+    expect(getFieldNameAttribute('name', [])).toEqual('name');
   });
 
-  describe('validateSearchFields', () => {
-    test('should NOT throw an error, when search field is not part of the field to exclude', () => {
-      expect(() => validateSearchFields(['name', 'tags'], excludedFieldNames)).not.toThrow();
-    });
-
-    test('should NOT throw an error, when search field is not a descendant of the field to exclude', () => {
-      expect(() =>
-        validateSearchFields(
-          ['name', 'tags', 'new_field.monitoring.metrics.success'],
-          excludedFieldNames
-        )
-      ).not.toThrow();
-    });
-
-    test('should throw an error, when search field is part of the field to exclude', () => {
-      expect(() =>
-        validateSearchFields(
-          ['name', 'tags', 'monitoring.execution.calculated_metrics.success_ratio'],
-          excludedFieldNames
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Search field monitoring.execution.calculated_metrics.success_ratio not supported"`
-      );
-    });
+  test('should return the first part of a nested field name when no attributes are ignored', () => {
+    expect(getFieldNameAttribute('attributes.name', [])).toEqual('attributes');
+    expect(getFieldNameAttribute('attributes.name.value', [])).toEqual('attributes');
   });
 
-  describe('validateFilterKueryNode', () => {
-    test('should NOT throw an error, when filter does not contain any fields to exclude', () => {
-      expect(() =>
-        validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast"'
-          ),
-          excludedFieldNames,
-        })
-      ).not.toThrow();
-    });
+  test('should filter out ignored attributes and return the first remaining part', () => {
+    expect(getFieldNameAttribute('attributes.name', ['attributes'])).toEqual('name');
+    expect(getFieldNameAttribute('attributes.name.value', ['attributes'])).toEqual('name');
+  });
 
-    test('should NOT throw an error, when filter does not have any descendant of the field to exclude', () => {
-      expect(() =>
-        validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.new_field.monitoring.metrics.success > 50'
-          ),
-          excludedFieldNames,
-        })
-      ).not.toThrow();
-    });
+  test('should filter out multiple ignored attributes', () => {
+    expect(getFieldNameAttribute('attributes.name.value', ['attributes', 'name'])).toEqual('value');
+    expect(getFieldNameAttribute('attributes.name.value', ['attributes', 'value'])).toEqual('name');
+  });
 
-    test('should NOT throw an error, when filter contains params with validate properties', () => {
-      expect(() =>
-        validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.risk_score > 50'
-          ),
-          excludedFieldNames,
-        })
-      ).not.toThrow();
-    });
+  test('should return empty string when all parts are ignored', () => {
+    expect(getFieldNameAttribute('attributes', ['attributes'])).toEqual('');
+    expect(getFieldNameAttribute('attributes.name', ['attributes', 'name'])).toEqual('');
+  });
 
-    test('should throw an error, when filter contains the field to exclude', () => {
-      expect(() =>
-        validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50'
-          ),
-          excludedFieldNames,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Filter is not supported on this field alert.attributes.monitoring.execution.calculated_metrics.success_ratio"`
-      );
-    });
+  test('should return empty string when field name is empty', () => {
+    expect(getFieldNameAttribute('', [])).toEqual('');
+    expect(getFieldNameAttribute('', ['attributes'])).toEqual('');
+  });
 
-    test('should throw an error, when a nested filter contains the field to exclude', () => {
-      expect(() =>
-        validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.actions:{ group: ".server-log" }'
-          ),
-          excludedFieldNames: ['actions'],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Filter is not supported on this field alert.attributes.actions"`
-      );
-    });
+  test('should return the first non-ignored part even when later parts are ignored', () => {
+    expect(getFieldNameAttribute('field1.field2.field3', ['field2', 'field3'])).toEqual('field1');
+    expect(getFieldNameAttribute('field1.field2.field3', ['field1', 'field3'])).toEqual('field2');
+  });
 
-    test('should throw an error, when filtering contains a property that is not valid', () => {
-      expect(() =>
-        validateFilterKueryNode({
-          astFilter: esKuery.fromKueryExpression(
-            'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.mapped_params.risk_score > 50'
-          ),
-          excludedFieldNames,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Filter is not supported on this field alert.attributes.mapped_params.risk_score"`
-      );
-    });
+  test('should handle field names with no dots and ignored attributes', () => {
+    expect(getFieldNameAttribute('name', ['name'])).toEqual('');
+    expect(getFieldNameAttribute('name', ['other'])).toEqual('name');
   });
 });

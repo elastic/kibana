@@ -490,7 +490,150 @@ export const artifactsSchema = schema.object({
   investigation_guide: schema.maybe(investigationGuideSchema),
 });
 
+/**
+ * This is a public schema that is used to generate the OpenAPI schema for all of our public APIs that return a rule response.
+ */
 export const ruleResponseSchema = schema.object({
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the rule.',
+    },
+  }),
+  enabled: schema.boolean({
+    meta: {
+      description:
+        'Indicates whether you want to run the rule on an interval basis after it is created.',
+    },
+  }),
+  name: schema.string({
+    meta: {
+      description: ' The name of the rule.',
+    },
+  }),
+  tags: schema.arrayOf(
+    schema.string({
+      meta: { description: 'The tags for the rule.' },
+    })
+  ),
+  rule_type_id: schema.string({
+    meta: { description: 'The rule type identifier.' },
+  }),
+  consumer: schema.string({
+    meta: {
+      description:
+        'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
+    },
+  }),
+  schedule: intervalScheduleSchema,
+  actions: schema.arrayOf(actionSchema),
+  params: ruleParamsSchemaV1,
+  scheduled_task_id: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Identifier of the scheduled task.',
+      },
+    })
+  ),
+  created_by: schema.nullable(
+    schema.string({
+      meta: {
+        description: 'The identifier for the user that created the rule.',
+      },
+    })
+  ),
+  updated_by: schema.nullable(
+    schema.string({
+      meta: {
+        description: 'The identifier for the user that updated this rule most recently.',
+      },
+    })
+  ),
+  created_at: schema.string({
+    meta: {
+      description: 'The date and time that the rule was created.',
+    },
+  }),
+  updated_at: schema.string({
+    meta: {
+      description: 'The date and time that the rule was updated most recently.',
+    },
+  }),
+  api_key_owner: schema.nullable(
+    schema.string({
+      meta: {
+        description:
+          'The owner of the API key that is associated with the rule and used to run background tasks.',
+      },
+    })
+  ),
+  api_key_created_by_user: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        meta: {
+          description:
+            'Indicates whether the API key that is associated with the rule was created by the user.',
+        },
+      })
+    )
+  ),
+  throttle: schema.maybe(
+    schema.nullable(
+      schema.string({
+        meta: {
+          description:
+            'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+          deprecated: true,
+        },
+      })
+    )
+  ),
+  mute_all: schema.boolean({
+    meta: {
+      description: 'Indicates whether all alerts are muted.',
+    },
+  }),
+  notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
+  muted_alert_ids: schema.arrayOf(
+    schema.string({
+      meta: {
+        description: 'List of identifiers of muted alerts. ',
+      },
+    })
+  ),
+  execution_status: ruleExecutionStatusSchema,
+  last_run: schema.maybe(schema.nullable(ruleLastRunSchema)),
+  next_run: schema.maybe(
+    schema.nullable(
+      schema.string({
+        meta: {
+          description: 'Date and time of the next run of the rule.',
+        },
+      })
+    )
+  ),
+  revision: schema.number({
+    meta: {
+      description: 'The rule revision number.',
+    },
+  }),
+  running: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        meta: {
+          description: 'Indicates whether the rule is running.',
+        },
+      })
+    )
+  ),
+  alert_delay: schema.maybe(alertDelaySchema),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+  artifacts: schema.maybe(artifactsSchema),
+});
+
+/**
+ * This is an internal schema that is used for all of our internal APIs that return a rule response.
+ */
+export const ruleResponseInternalSchema = schema.object({
   id: schema.string({
     meta: {
       description: 'The identifier for the rule.',

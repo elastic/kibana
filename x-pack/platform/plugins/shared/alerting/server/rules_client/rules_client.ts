@@ -9,7 +9,7 @@ import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
 import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
-import type { SanitizedRule, RuleTypeParams } from '../types';
+import type { RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
 import type { CloneRuleParams } from '../application/rule/methods/clone';
@@ -116,17 +116,7 @@ import type {
 import type { FindGapAutoFillSchedulerLogsParams } from '../application/gaps/auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
 import { findGapAutoFillSchedulerLogs } from '../application/gaps/auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
-export type ConstructorOptions = Omit<
-  RulesClientContext,
-  'fieldsToExcludeFromPublicApi' | 'minimumScheduleIntervalInMs'
->;
-
-export const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
-  'monitoring',
-  'mapped_params',
-  'snoozeSchedule',
-  'activeSnoozes',
-];
+export type ConstructorOptions = Omit<RulesClientContext, 'minimumScheduleIntervalInMs'>;
 
 export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
   'activeSnoozes',
@@ -161,7 +151,6 @@ export class RulesClient {
     this.context = {
       ...context,
       minimumScheduleIntervalInMs: parseDuration(context.minimumScheduleInterval.value),
-      fieldsToExcludeFromPublicApi,
     };
   }
 

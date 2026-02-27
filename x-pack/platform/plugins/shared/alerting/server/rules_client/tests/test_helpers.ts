@@ -475,6 +475,7 @@ export const returnedRuleForBulkOps1 = {
   },
   createdAt: new Date('2019-02-12T21:01:22.000Z'),
   updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+  isSnoozedUntil: null,
   schedule: {
     interval: '5m',
   },
@@ -505,6 +506,7 @@ export const returnedRuleForBulkOps2 = {
   },
   createdAt: new Date('2019-02-12T21:01:22.000Z'),
   updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+  isSnoozedUntil: null,
   schedule: {
     interval: '5m',
   },
@@ -536,6 +538,7 @@ export const returnedRuleForBulkOps3 = {
   },
   createdAt: new Date('2019-02-12T21:01:22.000Z'),
   updatedAt: new Date('2019-02-12T21:01:22.000Z'),
+  isSnoozedUntil: null,
   schedule: {
     interval: '5m',
   },

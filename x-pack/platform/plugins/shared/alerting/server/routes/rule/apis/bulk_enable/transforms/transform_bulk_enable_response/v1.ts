@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { BulkEnableRulesResponseV1 } from '../../../../../../../common/routes/rule/apis/bulk_enable';
-import type { RuleParamsV1 } from '../../../../../../../common/routes/rule/response';
 import type { BulkEnableRulesResult } from '../../../../../../application/rule/methods/bulk_enable/types';
-import { transformRuleToRuleResponseV1 } from '../../../../transforms';
+import { transformRuleToRuleResponseInternalV1 } from '../../../../transforms';
 import type { Rule, RuleParams } from '../../../../../../application/rule/types';
 
-export const transformBulkEnableResponse = <Params extends RuleParams = never>(
+export const transformBulkEnableResponseInternal = <Params extends RuleParams = never>(
   response: BulkEnableRulesResult<Params>
-): BulkEnableRulesResponseV1<RuleParamsV1>['body'] => {
+) => {
   return {
-    rules: response.rules.map((rule) => transformRuleToRuleResponseV1<Params>(rule as Rule)),
+    rules: response.rules.map((rule) =>
+      transformRuleToRuleResponseInternalV1<Params>(rule as Rule)
+    ),
     errors: response.errors,
     total: response.total,
     task_ids_failed_to_be_enabled: response.taskIdsFailedToBeEnabled,

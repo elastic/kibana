@@ -149,7 +149,7 @@ describe('bulkGetRules', () => {
   it('should attempt to sanitize the rules', () => {
     expect(transformRuleSoToSanitizedRuleMock).toHaveBeenCalledTimes(testRules.successful.length);
     testRules.successful.forEach((rule) => {
-      expect(transformRuleSoToSanitizedRuleMock).toHaveBeenCalledWith(rulesClientContext, rule, {});
+      expect(transformRuleSoToSanitizedRuleMock).toHaveBeenCalledWith(rulesClientContext, rule);
     });
   });
 

@@ -91,86 +91,7 @@ describe('transformRuleDomainToRule', () => {
       createdBy: 'user',
       createdAt: new Date('2019-02-12T21:01:22.479Z'),
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
-      muteAll: false,
-      mutedInstanceIds: [],
-      snoozeSchedule: [],
-      scheduledTaskId: 'task-123',
-      executionStatus: {
-        lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
-        status: 'pending' as const,
-      },
-      throttle: null,
-      notifyWhen: null,
-      revision: 0,
-      updatedBy: 'user',
-      apiKeyOwner: 'user',
-      flapping: {
-        lookBackWindow: 20,
-        statusChangeThreshold: 20,
-      },
-    });
-  });
-
-  it('should remove public fields if isPublic is true', () => {
-    const result = transformRuleDomainToRule(rule, {
-      isPublic: true,
-    });
-
-    expect(result).toEqual({
-      id: 'test',
-      enabled: false,
-      name: 'my rule name',
-      tags: ['foo'],
-      alertTypeId: 'myType',
-      consumer: 'myApp',
-      schedule: { interval: '1m' },
-      actions: [defaultAction],
-      systemActions: [systemAction],
-      params: {},
-      mapped_params: {},
-      createdBy: 'user',
-      createdAt: new Date('2019-02-12T21:01:22.479Z'),
-      updatedAt: new Date('2019-02-12T21:01:22.479Z'),
-      muteAll: false,
-      mutedInstanceIds: [],
-      scheduledTaskId: 'task-123',
-      executionStatus: {
-        lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
-        status: 'pending' as const,
-      },
-      throttle: null,
-      notifyWhen: null,
-      revision: 0,
-      updatedBy: 'user',
-      apiKeyOwner: 'user',
-      flapping: {
-        lookBackWindow: 20,
-        statusChangeThreshold: 20,
-      },
-    });
-  });
-
-  it('should include legacy id if includeLegacyId is true', () => {
-    const result = transformRuleDomainToRule(rule, {
-      includeLegacyId: true,
-    });
-
-    expect(result).toEqual({
-      id: 'test',
-      enabled: false,
-      name: 'my rule name',
-      tags: ['foo'],
-      alertTypeId: 'myType',
-      consumer: 'myApp',
-      schedule: { interval: '1m' },
       legacyId: 'legacyId',
-      actions: [defaultAction],
-      systemActions: [systemAction],
-      params: {},
-      mapped_params: {},
-      createdBy: 'user',
-      createdAt: new Date('2019-02-12T21:01:22.479Z'),
-      updatedAt: new Date('2019-02-12T21:01:22.479Z'),
       muteAll: false,
       mutedInstanceIds: [],
       snoozeSchedule: [],
@@ -252,6 +173,7 @@ describe('transformRuleDomainToRule', () => {
       createdBy: 'user',
       createdAt: new Date('2019-02-12T21:01:22.479Z'),
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+      legacyId: 'legacyId',
       muteAll: false,
       mutedInstanceIds: [],
       snoozeSchedule: [],

@@ -400,6 +400,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -409,6 +410,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -794,6 +796,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -803,6 +806,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1022,6 +1026,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -1031,6 +1036,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [
           Object {
             "actionTypeId": "test",
@@ -1253,6 +1259,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -1263,6 +1270,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1361,6 +1369,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -1370,6 +1379,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1553,6 +1563,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -1562,6 +1573,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2782,6 +2794,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -2791,6 +2804,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -3451,6 +3465,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -3460,6 +3475,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -3791,6 +3807,7 @@ describe('update()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": "onActiveAlert",
           "params": Object {
             "bar": true,
@@ -3800,6 +3817,7 @@ describe('update()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [
             Object {
               "actionTypeId": "test",
@@ -4315,6 +4333,7 @@ describe('update()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": "onActiveAlert",
           "params": Object {
             "bar": true,
@@ -4324,6 +4343,7 @@ describe('update()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [],
           "updatedAt": 2019-02-12T21:01:22.479Z,
         }
@@ -4543,6 +4563,7 @@ describe('update()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": "onActiveAlert",
           "params": Object {
             "bar": true,
@@ -4552,6 +4573,7 @@ describe('update()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [],
           "updatedAt": 2019-02-12T21:01:22.479Z,
         }

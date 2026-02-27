@@ -505,7 +505,6 @@ describe('find()', () => {
         searchFields: ['params.risk_score', 'params.severity'],
         filter: 'alert.attributes.params.risk_score > 50',
       },
-      excludeFromPublicApi: true,
     });
 
     const findCallParams = unsecuredSavedObjectsClient.find.mock.calls[0][0];

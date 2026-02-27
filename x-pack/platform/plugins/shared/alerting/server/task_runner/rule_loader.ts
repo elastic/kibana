@@ -71,10 +71,8 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiamApiKey);
   const rule = getAlertFromRaw({
     id: ruleId,
-    includeLegacyId: false,
     isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
     logger,
-    omitGeneratedValues: false,
     rawRule,
     references,
     ruleTypeId,

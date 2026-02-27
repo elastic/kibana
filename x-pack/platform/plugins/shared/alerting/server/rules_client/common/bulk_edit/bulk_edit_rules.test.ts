@@ -81,7 +81,6 @@ const rulesClientContext: RulesClientContext = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  fieldsToExcludeFromPublicApi: [],
   minimumScheduleIntervalInMs: 0,
 };
 
@@ -568,6 +567,7 @@ describe('bulkEditRules', () => {
             lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
             status: 'pending',
           },
+          isSnoozedUntil: null,
           snoozeSchedule: [],
           systemActions: [],
           createdAt: expect.any(Date),
