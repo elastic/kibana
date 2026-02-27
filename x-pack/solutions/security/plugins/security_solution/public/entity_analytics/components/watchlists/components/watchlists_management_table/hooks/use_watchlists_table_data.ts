@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { WATCHLISTS_URL } from '../../../../../../../common/entity_analytics/watchlists/constants';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
@@ -32,22 +31,19 @@ export const useWatchlistsTableData = (
 
   const visibleRecords: WatchlistTableItemType[] = Array.isArray(watchlists) ? watchlists : [];
 
-  const inspect = useMemo(
-    () => ({
-      dsl: [
-        JSON.stringify(
-          {
-            method: 'GET',
-            path: `${WATCHLISTS_URL}/list`,
-          },
-          null,
-          2
-        ),
-      ],
-      response: watchlists ? [JSON.stringify(watchlists, null, 2)] : [],
-    }),
-    [watchlists]
-  );
+  const inspect = {
+    dsl: [
+      JSON.stringify(
+        {
+          method: 'GET',
+          path: `${WATCHLISTS_URL}/list`,
+        },
+        null,
+        2
+      ),
+    ],
+    response: watchlists ? [JSON.stringify(watchlists, null, 2)] : [],
+  };
 
   return {
     visibleRecords,

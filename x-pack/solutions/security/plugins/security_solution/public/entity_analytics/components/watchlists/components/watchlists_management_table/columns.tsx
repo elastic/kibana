@@ -23,80 +23,71 @@ import type { WatchlistTableItemType } from './types';
 
 const COLUMN_WIDTHS = { actions: '5%', watchlist_name: '15%' };
 
-const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
-  ({
-    field: 'name',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.watchlistName"
-        defaultMessage="Watchlist Name"
-      />
-    ),
-    width: COLUMN_WIDTHS.watchlist_name,
-    render: (watchlistNames: string | string[]) =>
-      watchlistNames != null
-        ? getRowItemsWithActions({
-            values: Array.isArray(watchlistNames) ? watchlistNames : [watchlistNames],
-            fieldName: 'watchlist.name',
-            idPrefix: 'watchlist-management-watchlist-name',
-            render: (item) => <span>{item}</span>,
-            displayCount: 1,
-          })
-        : getEmptyTagValue(),
-  } as EuiBasicTableColumn<WatchlistTableItemType>);
+const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
+  field: 'name',
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.watchlistName"
+      defaultMessage="Watchlist Name"
+    />
+  ),
+  width: COLUMN_WIDTHS.watchlist_name,
+  render: (watchlistNames: string | string[]) =>
+    watchlistNames !== null
+      ? getRowItemsWithActions({
+          values: Array.isArray(watchlistNames) ? watchlistNames : [watchlistNames],
+          fieldName: 'watchlist.name',
+          idPrefix: 'watchlist-management-watchlist-name',
+          render: (item) => <span>{item}</span>,
+          displayCount: 1,
+        })
+      : getEmptyTagValue(),
+});
 
-const getNumberOfEntitiesColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
-  ({
-    field: 'users.length', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16103
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.numberOfUsers"
-        defaultMessage="Number of Entities"
-      />
-    ),
-    render: (value: number | undefined) => (typeof value === 'number' ? value : getEmptyTagValue()),
-  } as EuiBasicTableColumn<WatchlistTableItemType>);
+const getNumberOfEntitiesColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
+  field: 'users.length', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16103
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.numberOfUsers"
+      defaultMessage="Number of Entities"
+    />
+  ),
+  render: (value: number | undefined) => (typeof value === 'number' ? value : getEmptyTagValue()),
+});
 
-const getRiskScoreWeightingColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
-  ({
-    field: 'riskModifier',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.riskScoreWeighting"
-        defaultMessage="Risk Score Weighting"
-      />
-    ),
-    render: (value: number | undefined) => (typeof value === 'number' ? value : getEmptyTagValue()),
-  } as EuiBasicTableColumn<WatchlistTableItemType>);
+const getRiskScoreWeightingColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
+  field: 'riskModifier',
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.riskScoreWeighting"
+      defaultMessage="Risk Score Weighting"
+    />
+  ),
+  render: (value: number | undefined) => (typeof value === 'number' ? value : getEmptyTagValue()),
+});
 
-const getSourceColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
-  ({
-    field: 'source', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16104
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.source"
-        defaultMessage="Source"
-      />
-    ),
-    render: (value: string | undefined) => (typeof value === 'string' ? value : getEmptyTagValue()),
-  } as EuiBasicTableColumn<WatchlistTableItemType>);
+const getSourceColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
+  field: 'source', // TODO: update this function when data is available https://github.com/elastic/security-team/issues/16104
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.source"
+      defaultMessage="Source"
+    />
+  ),
+  render: (value: string | undefined) => (typeof value === 'string' ? value : getEmptyTagValue()),
+});
 
-const getLastUpdatedColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
-  ({
-    field: 'updatedAt',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.lastUpdated"
-        defaultMessage="Last Updated"
-      />
-    ),
-    render: (value: string | undefined) =>
-      typeof value === 'string' ? (
-        <FormattedRelative value={new Date(value)} />
-      ) : (
-        getEmptyTagValue()
-      ),
-  } as EuiBasicTableColumn<WatchlistTableItemType>);
+const getLastUpdatedColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => ({
+  field: 'updatedAt',
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.column.lastUpdated"
+      defaultMessage="Last Updated"
+    />
+  ),
+  render: (value: string | undefined) =>
+    typeof value === 'string' ? <FormattedRelative value={new Date(value)} /> : getEmptyTagValue(),
+});
 
 const WatchlistsActionsMenu = ({
   record,
