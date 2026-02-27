@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
-    cancel_on_build_failing: true
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -16,7 +15,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
-    cancel_on_build_failing: true
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -32,7 +30,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
-    cancel_on_build_failing: true
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -48,7 +45,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
-    cancel_on_build_failing: true
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
