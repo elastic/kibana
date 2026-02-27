@@ -468,7 +468,10 @@ const QueryStreamPreviewPanel = ({
                   announceOnMount
                   title={i18n.translate('xpack.streams.streamDetail.preview.unknownIndexHint', {
                     defaultMessage: '"{indexName}" is a query stream — use FROM {suggestedView}',
-                    values: queryStreamHint,
+                    values: {
+                      indexName: queryStreamHint.indexName,
+                      suggestedView: queryStreamHint.suggestedView,
+                    },
                   })}
                   color="warning"
                   iconType="help"
