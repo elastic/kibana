@@ -177,7 +177,7 @@ service:
           <p>
             <FormattedMessage
               id="xpack.fleet.addCollectorFlyout.runCollectorInstruction"
-              defaultMessage="Run your collector. E.g. OTel contrib collector:"
+              defaultMessage="Run your collector. The following command uses the OTel contrib collector:"
             />
           </p>
           <EuiCodeBlock isCopyable language="yaml" paddingSize="m">
