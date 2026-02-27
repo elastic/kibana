@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Page } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { waitForLoadingToFinish } from './utils';
 
 export function loginPageProvider({
   page,

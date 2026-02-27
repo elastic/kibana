@@ -22,7 +22,7 @@ import {
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus, type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
+import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -49,11 +49,8 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  systems: System[];
   query?: StreamQuery;
   initialFlow?: Flow;
-  initialSelectedSystems: System[];
-  refreshSystems: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }
@@ -65,9 +62,6 @@ export function AddSignificantEventFlyout({
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedSystems,
-  systems,
-  refreshSystems,
   aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -99,8 +93,6 @@ export function AddSignificantEventFlyout({
   const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
   const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
 
@@ -271,12 +263,7 @@ export function AddSignificantEventFlyout({
               <EuiPanel hasShadow={false} paddingSize="l">
                 <SignificantEventsGenerationPanel
                   onManualEntryClick={() => setSelectedFlow('manual')}
-                  systems={systems}
-                  selectedSystems={selectedSystems}
-                  onSystemsChange={setSelectedSystems}
                   onGenerateSuggestionsClick={generateQueries}
-                  definition={definition.stream}
-                  refreshSystems={refreshSystems}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
@@ -322,7 +309,6 @@ export function AddSignificantEventFlyout({
                         }}
                         definition={definition.stream}
                         dataViews={dataViewsFetch.value ?? []}
-                        systems={systems}
                       />
                     </>
                   )}
@@ -347,7 +333,6 @@ export function AddSignificantEventFlyout({
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      systems={systems}
                       dataViews={dataViewsFetch.value ?? []}
                       taskStatus={task?.status}
                       taskError={task?.status === 'failed' ? task.error : undefined}
