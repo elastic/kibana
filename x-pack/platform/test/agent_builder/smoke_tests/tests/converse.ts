@@ -28,7 +28,6 @@ export const converseApiSuite = (
     const res = await supertest
       .post('/api/agent_builder/converse')
       .set('kbn-xsrf', 'true')
-      .set('Content-Type', 'application/json')
       .send(payload)
       .expect(statusCode);
     return res.body as T;
@@ -62,12 +61,11 @@ export const converseApiSuite = (
       });
       expect(response1.response.message!.length).to.be.greaterThan(0);
 
-      const continuationPayload: ChatRequestBodyPayload = {
+      const response2 = await converse({
         conversation_id: response1.conversation_id,
         input: 'Please say it again.',
         connector_id: id,
-      };
-      const response2 = await converse(continuationPayload);
+      });
       expect(response2.response.message!.length).to.be.greaterThan(0);
     });
   });
