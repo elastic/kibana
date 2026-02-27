@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
+
+import type {
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { AppStatus } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
@@ -22,6 +31,8 @@ export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
 {
   private config: SearchInferenceEndpointsConfigType;
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private licenseSubscription: Subscription | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
@@ -55,10 +66,31 @@ export class SearchInferenceEndpointsPlugin
     return {};
   }
 
-  public start(core: CoreStart): SearchInferenceEndpointsPluginStart {
+  public start(
+    core: CoreStart,
+    deps: AppPluginStartDependencies
+  ): SearchInferenceEndpointsPluginStart {
+    const { licensing } = deps;
     docLinks.setDocLinks(core.docLinks.links);
+
+    this.licenseSubscription = licensing.license$.subscribe((license) => {
+      const status: AppStatus =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
+
+      this.appUpdater$.next(() => ({
+        status,
+      }));
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
+    }
+  }
 }
