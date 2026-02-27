@@ -22,7 +22,7 @@ import type { IconType } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
 
-/** Metadata describing a navigatable panel inside the date range picker dialog. */
+/** Metadata describing a navigable panel inside the date range picker dialog. */
 export interface DateRangePickerPanelDescriptor {
   /** Unique panel identifier, used for navigation */
   id: string;
