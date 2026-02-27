@@ -646,7 +646,6 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
-    /** Treat undefined and “missing property” as equivalent */
     isEqual: (
       persistableState1: TextBasedPersistedState,
       references1: Reference[],

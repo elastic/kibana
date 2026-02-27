@@ -42,7 +42,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
   spaceTest(
     'should display ES|QL conversion modal for inline visualizations',
-    async ({ pageObjects, page }) => {
+    async ({ pageObjects }) => {
       const { dashboard, lens } = pageObjects;
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
@@ -58,8 +58,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await lens.getApplyFlyoutButton().click();
 
-      // Check the in-line editor is not visible
-      const editor = page.getByTestId('customizeLens');
+      const editor = lens.getInlineEditor();
       await expect(editor).toBeHidden();
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
@@ -86,7 +85,6 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await expect(modal).toBeHidden();
 
-      // Do some changes
       await page.getByTestId('lnsMetric_primaryMetricDimensionPanel').click();
       const nameInput = page.getByTestId('name-input');
       await nameInput.fill('Converted metric');

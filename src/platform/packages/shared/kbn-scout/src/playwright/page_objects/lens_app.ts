@@ -207,4 +207,8 @@ export class LensApp {
   getSecondaryFlyoutBackButton() {
     return this.page.getByTestId('lns-indexPattern-dimensionContainerClose');
   }
+
+  getInlineEditor() {
+    return this.page.getByTestId('customizeLens');
+  }
 }
