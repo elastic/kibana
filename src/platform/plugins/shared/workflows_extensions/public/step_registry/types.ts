@@ -8,7 +8,7 @@
  */
 
 import type { DotKeysOf, DotObject } from '@kbn/utility-types';
-import type { StepDocumentation, StepPropertyHandler } from '@kbn/workflows';
+import type { StepPropertyHandler } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 
@@ -25,7 +25,16 @@ export function createPublicStepDefinition<
 >(
   definition: PublicStepDefinition<Input, Output, Config>
 ): PublicStepDefinition<Input, Output, Config> {
-  return definition;
+  const derivedActionsMenuGroup =
+    definition.actionsMenuGroup ??
+    (Object.values(ActionsMenuGroup).includes(definition.category as ActionsMenuGroup)
+      ? (definition.category as ActionsMenuGroup)
+      : undefined);
+
+  return {
+    ...definition,
+    actionsMenuGroup: derivedActionsMenuGroup,
+  };
 }
 
 /**
@@ -38,29 +47,12 @@ export interface PublicStepDefinition<
   Config extends z.ZodObject = z.ZodObject
 > extends CommonStepDefinition<Input, Output, Config> {
   /**
-   * User-facing label/title for this step type.
-   * Displayed in the UI when selecting or viewing steps.
-   */
-  label: string;
-
-  /**
-   * User-facing description of what this step does.
-   * Displayed as help text or in tooltips.
-   */
-  description?: string;
-
-  /**
    * Icon type from EUI icon library.
    * Used to visually represent this step type in the UI.
    * kibana icon will be used if not provided
    * TODO: add support for EuiIconType
    */
   icon?: React.ComponentType;
-
-  /**
-   * Documentation for the step, including details, and examples.
-   */
-  documentation?: StepDocumentation;
 
   /**
    * The catalog under which the step is displayed in the actions menu

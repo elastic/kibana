@@ -19,7 +19,4 @@ export type CommonStepDefinition<
   InputSchema extends z.ZodType = z.ZodType,
   OutputSchema extends z.ZodType = z.ZodType,
   ConfigSchema extends z.ZodObject = z.ZodObject
-> = Omit<
-  BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema>,
-  'category' | 'label' | 'description'
->;
+> = BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema>;

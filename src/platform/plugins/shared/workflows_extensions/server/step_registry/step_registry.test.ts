@@ -15,6 +15,9 @@ const stepId = 'custom.myStep';
 const handler = jest.fn();
 const defaultDefinition: ServerStepDefinition = {
   id: stepId,
+  category: 'kibana',
+  label: 'My Custom Step',
+  description: 'A custom step implementation',
   inputSchema: z.object({ name: z.string() }),
   outputSchema: z.object({ name: z.string() }),
   handler,

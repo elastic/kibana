@@ -14,6 +14,7 @@ import type { PublicStepDefinition } from './types';
 const stepId = 'custom.myStep';
 const defaultDefinition: PublicStepDefinition = {
   id: stepId,
+  category: 'kibana',
   label: 'My Custom Step',
   description: 'A custom step implementation',
   icon: jest.fn(),
