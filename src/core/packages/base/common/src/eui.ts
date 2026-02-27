@@ -9,3 +9,8 @@
 
 export const EUI_STYLES_GLOBAL = 'eui-global';
 export const EUI_STYLES_UTILS = 'eui-utilities';
+
+/** Stable container IDs for Emotion caches in the document head. Used to avoid insertBefore crashes when flyouts unmount. */
+export const KBN_EMOTION_CONTAINER_GLOBAL_ID = 'kbn-emotion-container-global';
+export const KBN_EMOTION_CONTAINER_CSS_ID = 'kbn-emotion-container-css';
+export const KBN_EMOTION_CONTAINER_UTILS_ID = 'kbn-emotion-container-utils';

@@ -9,4 +9,4 @@
 
 export type { PluginOpaqueId, PluginName, DiscoveredPlugin } from './src/plugins';
 export { PluginType } from './src/plugins';
-export { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from './src/eui';
+export { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS, KBN_EMOTION_CONTAINER_GLOBAL_ID, KBN_EMOTION_CONTAINER_CSS_ID, KBN_EMOTION_CONTAINER_UTILS_ID } from './src/eui';

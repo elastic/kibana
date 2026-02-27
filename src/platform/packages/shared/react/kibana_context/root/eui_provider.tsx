@@ -19,7 +19,13 @@ import createCache from '@emotion/cache';
 
 import type { EuiProviderProps } from '@elastic/eui';
 import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
-import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
+import {
+  EUI_STYLES_GLOBAL,
+  EUI_STYLES_UTILS,
+  KBN_EMOTION_CONTAINER_GLOBAL_ID,
+  KBN_EMOTION_CONTAINER_CSS_ID,
+  KBN_EMOTION_CONTAINER_UTILS_ID,
+} from '@kbn/core-base-common';
 import {
   getColorMode,
   defaultTheme,
@@ -54,23 +60,80 @@ const sharedCacheOptions = {
   speedy: true, // Enable speedy mode for better performance
 };
 
+/**
+ * Resolves the Emotion cache container: prefers stable div by id (new template), falls back to meta (legacy).
+ * Stable containers avoid insertBefore crashes when multiple flyouts unmount and the sheet holds stale tag refs.
+ * Returns undefined when run outside the browser (e.g. SSR).
+ */
+function getEmotionContainer(containerId: string, metaNameFallback: string): HTMLElement | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const byId = document.getElementById(containerId);
+  if (byId) return byId;
+  const byMeta = document.querySelector<HTMLElement>(`meta[name="${metaNameFallback}"]`);
+  return byMeta ?? document.head;
+}
+
+/**
+ * Wraps an Emotion cache's sheet._insertTag to validate the insertion point before insertBefore.
+ * When multiple flyouts close (e.g. closeAllFlyouts), the sheet can hold references to style tags
+ * that were removed from the DOM; the next insert then throws "The node before which the new node
+ * is to be inserted is not a child of this node." We fall back to appending and clear stale tag refs.
+ */
+function wrapSheetInsertTag(
+  sheet: {
+    container: Node;
+    tags: HTMLStyleElement[];
+    insertionPoint?: HTMLElement;
+    prepend?: boolean;
+    before?: Node | null;
+    _insertTag: (tag: HTMLStyleElement) => void;
+  }
+): void {
+  sheet._insertTag = (tag: HTMLStyleElement) => {
+    const container = sheet.container;
+    let before: Node | null;
+    if (sheet.tags.length === 0) {
+      before = sheet.insertionPoint
+        ? sheet.insertionPoint.nextSibling
+        : sheet.prepend
+          ? container.firstChild
+          : sheet.before ?? null;
+    } else {
+      before = sheet.tags[sheet.tags.length - 1].nextSibling;
+    }
+    const validBefore = before === null || before.parentNode === container;
+    if (!validBefore) {
+      sheet.tags = sheet.tags.filter((t) => t.parentNode === container);
+      before = sheet.tags.length > 0 ? sheet.tags[sheet.tags.length - 1].nextSibling : null;
+    }
+    (container as HTMLElement).insertBefore(tag, before);
+    sheet.tags.push(tag);
+  };
+}
+
 const emotionCache = createCache({
   ...sharedCacheOptions,
   key: 'css',
-  container: document.querySelector('meta[name="emotion"]') as HTMLElement,
+  container: getEmotionContainer(KBN_EMOTION_CONTAINER_CSS_ID, 'emotion'),
 });
 
 const globalCache = createCache({
   ...sharedCacheOptions,
   key: EUI_STYLES_GLOBAL,
-  container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
+  container: getEmotionContainer(KBN_EMOTION_CONTAINER_GLOBAL_ID, EUI_STYLES_GLOBAL),
 });
 
 const utilitiesCache = createCache({
   ...sharedCacheOptions,
   key: EUI_STYLES_UTILS,
-  container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
+  container: getEmotionContainer(KBN_EMOTION_CONTAINER_UTILS_ID, EUI_STYLES_UTILS),
 });
+
+if (typeof document !== 'undefined') {
+  wrapSheetInsertTag(emotionCache.sheet as Parameters<typeof wrapSheetInsertTag>[0]);
+  wrapSheetInsertTag(globalCache.sheet as Parameters<typeof wrapSheetInsertTag>[0]);
+  wrapSheetInsertTag(utilitiesCache.sheet as Parameters<typeof wrapSheetInsertTag>[0]);
+}
 
 // Enable "compat mode" in Emotion caches.
 emotionCache.compat = true;
