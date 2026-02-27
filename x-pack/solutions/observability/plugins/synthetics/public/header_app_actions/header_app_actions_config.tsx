@@ -13,6 +13,10 @@ import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
 
 const noop = () => {};
 
+const ALERTS_PANEL_ID = 1;
+const MONITOR_STATUS_RULE_PANEL_ID = 2;
+const TLS_CERTIFICATE_RULE_PANEL_ID = 3;
+
 const primaryActionButtonCss = css`
   background-color: transparent !important;
   height: 28px !important;
@@ -94,6 +98,7 @@ export function getSyntheticsHeaderAppActionsConfig(): ChromeHeaderAppActionsCon
             }),
             icon: 'bell',
             onClick: noop,
+            panel: ALERTS_PANEL_ID,
           },
           { isSeparator: true as const, key: 'sepSettings' },
           {
@@ -101,6 +106,92 @@ export function getSyntheticsHeaderAppActionsConfig(): ChromeHeaderAppActionsCon
               defaultMessage: 'Settings',
             }),
             icon: 'gear',
+            onClick: noop,
+          },
+          { isSeparator: true as const, key: 'sepFeedback' },
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.giveFeedback', {
+              defaultMessage: 'Give feedback',
+            }),
+            icon: 'comment',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: ALERTS_PANEL_ID,
+        title: i18n.translate('xpack.synthetics.page_header.alertsLink', {
+          defaultMessage: 'Alerts',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.monitorStatusRule', {
+              defaultMessage: 'Monitor status rule',
+            }),
+            icon: 'bell',
+            onClick: noop,
+            panel: MONITOR_STATUS_RULE_PANEL_ID,
+          },
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.tlsCertificateRule', {
+              defaultMessage: 'TLS certificate rule',
+            }),
+            icon: 'lock',
+            onClick: noop,
+            panel: TLS_CERTIFICATE_RULE_PANEL_ID,
+          },
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.manageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'tableOfContents',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: MONITOR_STATUS_RULE_PANEL_ID,
+        title: i18n.translate('xpack.synthetics.headerAppActions.overflow.monitorStatusRule', {
+          defaultMessage: 'Monitor status rule',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.createStatusRule', {
+              defaultMessage: 'Create status rule',
+            }),
+            icon: 'plusInCircle',
+            onClick: noop,
+          },
+          {
+            name: i18n.translate(
+              'xpack.synthetics.headerAppActions.overflow.editDefaultStatusRule',
+              {
+                defaultMessage: 'Edit default status rule',
+              }
+            ),
+            icon: 'bell',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: TLS_CERTIFICATE_RULE_PANEL_ID,
+        title: i18n.translate('xpack.synthetics.headerAppActions.overflow.tlsCertificateRule', {
+          defaultMessage: 'TLS certificate rule',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.createTlsRule', {
+              defaultMessage: 'Create TLS rule',
+            }),
+            icon: 'plusInCircle',
+            onClick: noop,
+          },
+          {
+            name: i18n.translate('xpack.synthetics.headerAppActions.overflow.editDefaultTlsRule', {
+              defaultMessage: 'Edit default TLS rule',
+            }),
+            icon: 'bell',
             onClick: noop,
           },
         ],
