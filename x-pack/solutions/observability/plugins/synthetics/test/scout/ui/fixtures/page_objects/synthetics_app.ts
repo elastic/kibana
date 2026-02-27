@@ -8,16 +8,7 @@
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-
-enum FormMonitorType {
-  SINGLE = 'single',
-  MULTISTEP = 'multistep',
-  HTTP = 'http',
-  TCP = 'tcp',
-  ICMP = 'icmp',
-}
-
-export type { FormMonitorType };
+import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -87,7 +78,7 @@ export class SyntheticsAppPage {
   }
 
   async waitForMonitorManagementLoadingToFinish() {
-    await expect(this.page.testSubj.locator('uptimeLoader')).toBeHidden({ timeout: 60_000 });
+    await expect(this.page.testSubj.locator('uptimeLoader')).toBeHidden({ timeout: 30_000 });
   }
 
   async waitForLoadingToFinish() {
@@ -433,6 +424,7 @@ export class SyntheticsAppPage {
 
   async refreshOverview() {
     await this.page.testSubj.click('syntheticsRefreshButtonButton');
+    await this.waitForLoadingToFinish();
   }
 
   async openAlertRulesMenu() {

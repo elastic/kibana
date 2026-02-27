@@ -6,6 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { FormMonitorType } from '../../../../common/runtime_types/monitor_management/monitor_configs';
+
+export { FormMonitorType };
 
 export const ES_ARCHIVES = {
   BROWSER: 'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/es_archiver/browser',
@@ -16,14 +19,6 @@ export const ES_ARCHIVES = {
 } as const;
 
 const apmServiceName = 'apmServiceName';
-
-enum FormMonitorType {
-  SINGLE = 'single',
-  MULTISTEP = 'multistep',
-  HTTP = 'http',
-  TCP = 'tcp',
-  ICMP = 'icmp',
-}
 
 export const monitorConfigurations = (locationLabel: string) => {
   const httpName = `http monitor ${uuidv4()}`;

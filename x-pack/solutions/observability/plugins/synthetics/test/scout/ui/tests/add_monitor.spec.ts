@@ -8,15 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
-import { monitorConfigurations } from '../fixtures/constants';
-
-enum FormMonitorType {
-  SINGLE = 'single',
-  MULTISTEP = 'multistep',
-  HTTP = 'http',
-  TCP = 'tcp',
-  ICMP = 'icmp',
-}
+import { FormMonitorType, monitorConfigurations } from '../fixtures/constants';
 
 test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
