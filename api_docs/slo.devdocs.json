@@ -1470,7 +1470,7 @@
             "label": "getGroupedStats",
             "description": [],
             "signature": [
-              "(params: { type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }) => Promise<",
+              "(params: { type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; kqlQuery?: string | undefined; statusFilters?: string[] | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/slo-schema",
                 "scope": "common",
@@ -1494,7 +1494,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }"
+                  "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; kqlQuery?: string | undefined; statusFilters?: string[] | undefined; }"
                 ],
                 "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
                 "lineNumber": 38,
