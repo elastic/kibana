@@ -127,9 +127,9 @@ import {
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import {
+  getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
-  getCompiledVersionsForAgentPolicy,
 } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
