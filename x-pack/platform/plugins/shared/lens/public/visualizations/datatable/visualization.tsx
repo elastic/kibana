@@ -878,7 +878,14 @@ export const getDatatableVisualization = ({
           dataBounds,
         });
 
-        return { ...column, palette: resolvedPalette, colorMapping: resolvedColorMapping };
+        const fixedColumn = {
+          ...column,
+          palette: resolvedPalette,
+          colorMapping: resolvedColorMapping,
+        };
+        if (fixedColumn.palette == null) delete fixedColumn.palette;
+        if (fixedColumn.colorMapping == null) delete fixedColumn.colorMapping;
+        return fixedColumn;
       }
 
       return column;
