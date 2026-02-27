@@ -110,7 +110,6 @@ function buildEvalsYaml({
         `      - label: '${label}'`,
         `        key: ${key}`,
         `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
-        `        cancel_on_build_failing: true`,
         `        env:`,
         `          KBN_EVALS: '1'`,
         `          FTR_EIS_CCM: '1'`,
