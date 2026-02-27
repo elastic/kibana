@@ -13,7 +13,7 @@ export const TRACES = {
   ESQL_QUERY: 'FROM traces-apm*',
   DATA_VIEW_NAME: 'traces-apm*',
   KBN_ARCHIVE:
-    'src/platform/plugins/shared/discover/test/scout_traces/ui/fixtures/kbn_archives/traces_data_view.json',
+    'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces/kbn_archives/traces_data_view.json',
 };
 
 export const RICH_TRACE = {

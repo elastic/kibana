@@ -15,7 +15,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../fixtures';
+import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics';
 
 spaceTest.describe(
   'Metrics in Discover - Grid',

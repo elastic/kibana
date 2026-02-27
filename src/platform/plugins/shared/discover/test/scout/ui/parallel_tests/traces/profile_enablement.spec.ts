@@ -9,7 +9,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { TRACES } from '../fixtures';
+import { TRACES } from '../../fixtures/traces';
 
 spaceTest.describe(
   'Traces in Discover - Profile enablement',
