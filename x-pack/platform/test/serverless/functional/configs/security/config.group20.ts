@@ -17,10 +17,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../test_suites/dev_tools'),
       require.resolve('../../test_suites/grok_debugger'),
       require.resolve('../../test_suites/painless_lab'),
+      require.resolve('../../test_suites/console'),
+      require.resolve('../../test_suites/spaces'),
+      require.resolve('../../test_suites/reporting'),
     ],
     junit: {
       reportName:
-        'Serverless Security Functional Tests - Common Group 20 (Home Page + Dev Tools + Misc)',
+        'Serverless Security Functional Tests - Common Group 20 (Home Page + Dev Tools + Console/Spaces/Reporting + Misc)',
     },
   };
 }

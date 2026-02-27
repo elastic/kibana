@@ -15,10 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../test_suites/platform_security'),
       require.resolve('../../test_suites/data_usage'),
+      require.resolve('../../test_suites/management/disabled_uis'),
     ],
     junit: {
       reportName:
-        'Serverless Security Functional Tests - Common Group 19 (Platform Security + Data Usage)',
+        'Serverless Security Functional Tests - Common Group 19 (Platform Security + Data Usage + Disabled UIs)',
     },
   };
 }
