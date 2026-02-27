@@ -47,6 +47,7 @@ export interface ChromeNavigationProps {
   onToggleCollapsed: (isCollapsed: boolean) => void;
 
   // customize navigation
+  activeSolutionNavId$: Observable<SolutionId | null>;
   getNavigationPrimaryItems: () => NavigationItemInfo[];
   setNavigationCustomization: (
     id: SolutionId,
@@ -61,9 +62,8 @@ export interface ChromeNavigationProps {
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
-  const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
-  const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
   const isEditing = useObservable(props.isEditing$, false);
+  const solutionId = useObservable(props.activeSolutionNavId$, null);
   const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
 
   const handleOpenCustomizeModal = useCallback(() => {
@@ -93,7 +93,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onCustomizeNavigation={handleOpenCustomizeModal}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
-      {isCustomizeModalOpen && (
+      {isCustomizeModalOpen && solutionId && (
         <CustomizeNavigationModal
           solutionId={solutionId}
           onClose={handleCloseCustomizeModal}

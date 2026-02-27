@@ -11,6 +11,8 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiDragDropContext,
   EuiDroppable,
   EuiFlexGroup,
@@ -38,6 +40,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LockedItem } from './locked_item';
 import { DraggableItem } from './draggable_item';
+
+const CALLOUT_DISMISSED_KEY = 'kibana.customizeNavigation.calloutDismissed';
+
 
 const SmoothHeight = ({ children }: { children: React.ReactNode }) => {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -87,6 +92,9 @@ export const CustomizeNavigationModal = ({
   setIsEditingNavigation,
 }: CustomizeNavigationModalProps) => {
   const { euiTheme } = useEuiTheme();
+  const [isCalloutVisible, setIsCalloutVisible] = useState(
+    () => localStorage.getItem(CALLOUT_DISMISSED_KEY) !== 'true'
+  );
   const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
   const [didReset, setDidReset] = useState(false);
@@ -324,6 +332,42 @@ export const CustomizeNavigationModal = ({
           )}
         </SmoothHeight>
       </EuiModalBody>
+      {isCalloutVisible && (
+        <div css={css`padding: 0 ${euiTheme.size.l} ${euiTheme.size.s};`}>
+          <EuiCallOut
+            size="s"
+            title={
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem>
+                  {i18n.translate(
+                    'core.ui.chrome.sideNavigation.customizeNavigation.spaceCallout',
+                    {
+                      defaultMessage: 'The changes will apply to your current space only',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    iconSize="s"
+                    color="primary"
+                    display="empty"
+                    size="xs"
+                    aria-label={i18n.translate(
+                      'core.ui.chrome.sideNavigation.customizeNavigation.dismissCallout',
+                      { defaultMessage: 'Dismiss' }
+                    )}
+                    onClick={() => {
+                      localStorage.setItem(CALLOUT_DISMISSED_KEY, 'true');
+                      setIsCalloutVisible(false);
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        </div>
+      )}
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

@@ -50,6 +50,7 @@ interface ProjectNavigationObservables {
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   activeDataTestSubj$?: Observable<string | undefined>;
   isEditing$: Observable<boolean>;
+  activeSolutionNavId$: Observable<import('@kbn/core-chrome-browser').SolutionId | null>;
   getNavigationPrimaryItems: () => import('@kbn/core-chrome-browser').NavigationItemInfo[];
   setNavigationCustomization: (
     id: import('@kbn/core-chrome-browser').SolutionId,
@@ -151,8 +152,8 @@ export const createChromeComponents = ({
       navLinks$,
       dataTestSubj$: projectNavigation.activeDataTestSubj$,
       onToggleCollapsed: state.sideNav.collapsed.set,
-      isFeedbackEnabled$: state.feedback.isEnabled$,
       isEditing$: projectNavigation.isEditing$,
+      activeSolutionNavId$: projectNavigation.activeSolutionNavId$,
       getNavigationPrimaryItems: projectNavigation.getNavigationPrimaryItems,
       setNavigationCustomization: projectNavigation.setNavigationCustomization,
       setIsEditingNavigation: projectNavigation.setIsEditingNavigation,

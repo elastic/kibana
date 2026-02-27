@@ -205,6 +205,7 @@ export class ChromeService {
         activeNodes$,
         activeDataTestSubj$,
         isEditing$: projectNavigation.getIsEditing$(),
+        activeSolutionNavId$: projectNavigation.getActiveSolutionNavId$(),
         getNavigationPrimaryItems: projectNavigation.getNavigationPrimaryItems,
         setNavigationCustomization: projectNavigation.setNavigationCustomization,
         setIsEditingNavigation: projectNavigation.setIsEditingNavigation,
