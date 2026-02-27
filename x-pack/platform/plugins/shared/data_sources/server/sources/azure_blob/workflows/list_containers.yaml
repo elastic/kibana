@@ -1,0 +1,25 @@
+version: '1'
+name: 'sources.azure-blob.list_containers'
+description: 'List containers in the Azure Blob Storage account. Optional: prefix, maxresults, marker for pagination.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: prefix
+    type: string
+    required: false
+  - name: maxresults
+    type: number
+    required: false
+  - name: marker
+    type: string
+    required: false
+steps:
+  - name: list-containers
+    type: azure-blob.listContainers
+    connector-id: <%= azure-blob-stack-connector-id %>
+    with:
+      prefix: "${{ inputs.prefix }}"
+      maxresults: ${{ inputs.maxresults }}
+      marker: "${{ inputs.marker }}"

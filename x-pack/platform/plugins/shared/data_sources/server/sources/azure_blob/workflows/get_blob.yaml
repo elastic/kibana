@@ -1,0 +1,21 @@
+version: '1'
+name: 'sources.azure-blob.get_blob'
+description: 'Get blob content and metadata from Azure Blob Storage by container and blob name.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: container
+    type: string
+    required: true
+  - name: blob_name
+    type: string
+    required: true
+steps:
+  - name: get-blob
+    type: azure-blob.getBlob
+    connector-id: <%= azure-blob-stack-connector-id %>
+    with:
+      container: "${{ inputs.container }}"
+      blobName: "${{ inputs.blob_name }}"

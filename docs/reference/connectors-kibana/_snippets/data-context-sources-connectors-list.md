@@ -1,4 +1,5 @@
 **Third-party search**
+* [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 * [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.

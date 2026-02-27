@@ -1,0 +1,29 @@
+version: '1'
+name: 'sources.azure-blob.list_blobs'
+description: 'List blobs in an Azure Blob Storage container. Inputs: container (required), optional prefix, maxresults, marker.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: container
+    type: string
+    required: true
+  - name: prefix
+    type: string
+    required: false
+  - name: maxresults
+    type: number
+    required: false
+  - name: marker
+    type: string
+    required: false
+steps:
+  - name: list-blobs
+    type: azure-blob.listBlobs
+    connector-id: <%= azure-blob-stack-connector-id %>
+    with:
+      container: "${{ inputs.container }}"
+      prefix: "${{ inputs.prefix }}"
+      maxresults: ${{ inputs.maxresults }}
+      marker: "${{ inputs.marker }}"

@@ -1,0 +1,33 @@
+version: '1'
+name: 'sources.azure-blob.search'
+description: 'List blobs in Azure Blob Storage by container and optional prefix (prefix-based search). Use container to scope to one container, or leave empty to list containers only.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: container
+    type: string
+    required: false
+  - name: prefix
+    type: string
+    required: false
+  - name: maxresults
+    type: number
+    required: false
+steps:
+  - name: list-blobs-in-container
+    type: azure-blob.listBlobs
+    if: "${{ inputs.container != null && inputs.container != '' }}"
+    connector-id: <%= azure-blob-stack-connector-id %>
+    with:
+      container: "${{ inputs.container }}"
+      prefix: "${{ inputs.prefix }}"
+      maxresults: ${{ inputs.maxresults }}
+  - name: list-containers-only
+    type: azure-blob.listContainers
+    if: "${{ inputs.container == null || inputs.container == '' }}"
+    connector-id: <%= azure-blob-stack-connector-id %>
+    with:
+      prefix: "${{ inputs.prefix }}"
+      maxresults: ${{ inputs.maxresults }}

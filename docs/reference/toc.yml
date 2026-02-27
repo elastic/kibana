@@ -46,6 +46,7 @@ toc:
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
+          - file: connectors-kibana/azure-blob-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
         children:
           - file: connectors-kibana/crowdstrike-action-type.md
@@ -75,6 +76,7 @@ toc:
         children:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
+          - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
