@@ -239,7 +239,7 @@ export function RuleComponent({
             consumers={[rule.consumer]}
             filter={{
               term: {
-                'kibana.alert.rule.uuid': rule.id,
+                [ALERT_RULE_UUID]: rule.id,
               },
             }}
             timeRange={alertSummaryWidgetTimeRange}
