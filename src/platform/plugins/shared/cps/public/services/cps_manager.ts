@@ -131,6 +131,15 @@ export class CPSManager implements ICPSManager {
 
   public updateDefaultProjectRouting(projectRouting: string) {
     this.defaultProjectRouting = projectRouting;
+
+    this.lastEditableProjectRouting = this.defaultProjectRouting;
+
+    // If access is disabled, `projectRouting$` must remain undefined.
+    if (this.projectPickerAccess$.value === ProjectRoutingAccess.DISABLED) {
+      return;
+    }
+
+    this.projectRouting$.next(this.defaultProjectRouting);
   }
 
   /**

@@ -11,6 +11,13 @@ import { useEffect, useState } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject, ProjectsData } from '../types';
 
+export interface UseFetchProjectsResult {
+  originProject: CPSProject | null;
+  linkedProjects: CPSProject[];
+  isLoading: boolean;
+  error: Error | null;
+}
+
 /**
  * Hook for fetching projects data from CPSManager.
  * Returns loading/error states alongside the fetched data.
@@ -18,7 +25,7 @@ import type { CPSProject, ProjectsData } from '../types';
 export const useFetchProjects = (
   fetchProjects: (routing?: ProjectRouting) => Promise<ProjectsData | null>,
   routing?: ProjectRouting
-) => {
+): UseFetchProjectsResult => {
   const [originProject, setOriginProject] = useState<CPSProject | null>(null);
   const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);

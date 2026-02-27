@@ -17,20 +17,12 @@ const RETRY_DELAY_MS = 1000;
 
 export interface ProjectFetcher {
   fetchProjects: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
-  invalidateCache: (projectRouting?: ProjectRouting) => void;
 }
 
 /**
- * Creates project fetcher with caching and retry logic
+ * Creates project fetcher with retry logic.
  */
 export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFetcher {
-  const fetchPromises = new Map<string, Promise<ProjectsData | null>>();
-  const cache = new Map<string, ProjectsData>();
-
-  function cacheKey(projectRouting?: ProjectRouting): string {
-    return projectRouting ?? '';
-  }
-
   async function fetchProjectsWithRetry(
     projectRouting?: ProjectRouting
   ): Promise<ProjectsData | null> {
@@ -68,47 +60,12 @@ export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFe
     throw lastError;
   }
 
-  async function doFetch(projectRouting?: ProjectRouting): Promise<ProjectsData | null> {
-    const key = cacheKey(projectRouting);
-    const existing = fetchPromises.get(key);
-    if (existing) {
-      return existing;
-    }
-
-    const promise = fetchProjectsWithRetry(projectRouting)
-      .then((projectsData) => {
-        if (projectsData) {
-          cache.set(key, projectsData);
-        }
-        return projectsData;
-      })
-      .finally(() => {
-        fetchPromises.delete(key);
-      });
-
-    fetchPromises.set(key, promise);
-    return promise;
-  }
-
   return {
     /**
-     * Fetches projects from the server with caching and retry logic.
-     * Returns cached data if already loaded. If a fetch is already in progress, returns the existing promise.
+     * Fetches projects from the server with retry logic.
      */
     fetchProjects: async (projectRouting?: ProjectRouting): Promise<ProjectsData | null> => {
-      const cached = cache.get(cacheKey(projectRouting));
-      if (cached) {
-        return cached;
-      }
-      return doFetch(projectRouting);
-    },
-
-    /**
-     * Removes cached data for a given project routing key.
-     * The next fetchProjects call for this key will hit the server.
-     */
-    invalidateCache: (projectRouting?: ProjectRouting): void => {
-      cache.delete(cacheKey(projectRouting));
+      return await fetchProjectsWithRetry(projectRouting);
     },
   };
 }

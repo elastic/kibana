@@ -121,35 +121,6 @@ describe('CPSManager', () => {
     });
   });
 
-  describe('caching behavior', () => {
-    it('should cache results and not refetch on subsequent calls', async () => {
-      jest.clearAllMocks();
-      // First fetch
-      await cpsManager.fetchProjects();
-      expect(mockHttp.post).toHaveBeenCalledTimes(1);
-
-      // Second fetch should return cached data without calling HTTP
-      await cpsManager.fetchProjects();
-      expect(mockHttp.post).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not cache failed requests', async () => {
-      jest.clearAllMocks();
-      jest.useFakeTimers();
-      mockHttp.post.mockRejectedValue(new Error('Network error'));
-
-      // First fetch fails - run all timers to completion
-      const promise = cpsManager.fetchProjects();
-      const timerPromise = jest.runAllTimersAsync();
-
-      await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Network error');
-
-      expect(mockHttp.post).toHaveBeenCalledTimes(3); // initial + 2 retries
-
-      jest.useRealTimers();
-    });
-  });
-
   describe('retry logic', () => {
     it('should retry on failure with exponential backoff', async () => {
       jest.useFakeTimers();

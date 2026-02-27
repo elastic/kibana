@@ -18,7 +18,7 @@ import { type FC, useCallback, useState } from 'react';
 import React from 'react';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
-import { ProjectPickerContent } from '@kbn/cps-utils';
+import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';
 import { strings } from '@kbn/cps-utils/components/strings';
 import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +48,8 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
     },
     [cps?.cpsManager]
   );
+
+  const projects = useFetchProjects(fetchProjects, space.projectRouting);
 
   const updateProjectRouting = (newRouting: ProjectRouting) => {
     onChange({
@@ -141,7 +143,7 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
             <ProjectPickerContent
               projectRouting={space.projectRouting}
               onProjectRoutingChange={updateProjectRouting}
-              fetchProjects={fetchProjects}
+              projects={projects}
               isReadonly={!canEdit()}
             />
           </EuiPanel>

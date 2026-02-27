@@ -53,16 +53,17 @@ export const ProjectPicker = ({
   const styles = useMemoCss(projectPickerStyles);
   const { isTourOpen, closeTour } = useProjectPickerTour();
 
-  const { originProject, linkedProjects, isLoading } = useFetchProjects(
+  const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
     fetchProjects,
     projectRouting
   );
 
-  if (totalProjectCount <= 1 || (!isLoading && !originProject)) {
+  if (totalProjectCount <= 1 || (!isLoading && !originProject && !error)) {
     return null;
   }
 
-  const activeProjectsCount = isLoading ? totalProjectCount : linkedProjects.length + 1;
+  const activeProjectsCount =
+    isLoading || error || !originProject ? totalProjectCount : linkedProjects.length + 1;
 
   const button = (
     <EuiToolTip
@@ -144,7 +145,7 @@ export const ProjectPicker = ({
         <ProjectPickerContent
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
-          fetchProjects={fetchProjects}
+          projects={{ originProject, linkedProjects, isLoading, error }}
           isReadonly={isReadonly}
         />
       </EuiPopover>
