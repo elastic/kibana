@@ -18,7 +18,7 @@ import {
   BuildGroupsStep,
   ApplyThrottlingStep,
   DispatchStep,
-  RecordActionsStep,
+  StoreActionsStep,
 } from '../lib/dispatcher/steps';
 
 export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
@@ -35,7 +35,7 @@ export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOpt
   bind(DispatcherExecutionStepsToken).to(BuildGroupsStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(ApplyThrottlingStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(DispatchStep).inSingletonScope();
-  bind(DispatcherExecutionStepsToken).to(RecordActionsStep).inSingletonScope();
+  bind(DispatcherExecutionStepsToken).to(StoreActionsStep).inSingletonScope();
 
   bind(DispatcherPipeline).toSelf().inSingletonScope();
 };

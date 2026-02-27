@@ -7,16 +7,19 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
+import { RULE_SAVED_OBJECT_TYPE, NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { createRuleSoAttributes } from '../test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
@@ -38,36 +41,33 @@ import {
   BuildGroupsStep,
   ApplyThrottlingStep,
   DispatchStep,
-  RecordActionsStep,
+  StoreActionsStep,
 } from './steps';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
 
-const createMockRulesSoService = (
+function mockRulesBulkGet(
+  mockSoClient: jest.Mocked<SavedObjectsClientContract>,
   ruleIds: string[],
   overrides?: Partial<RuleSavedObjectAttributes>
-): RulesSavedObjectServiceContract => ({
-  bulkGetByIds: jest.fn().mockResolvedValue(
-    ruleIds.map((id) => ({
+) {
+  mockSoClient.bulkGet.mockResolvedValue({
+    saved_objects: ruleIds.map((id) => ({
       id,
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: createRuleSoAttributes({
         notification_policies: [{ ref: 'policy_456' }],
         ...overrides,
       }),
-    }))
-  ),
-  create: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  find: jest.fn(),
-});
+      references: [],
+    })),
+  });
+}
 
-const createMockNpSoService = (
-  policyIds: string[]
-): NotificationPolicySavedObjectServiceContract => ({
-  bulkGetByIds: jest.fn().mockResolvedValue(
-    policyIds.map((id) => ({
+function mockNpBulkGet(mockSoClient: jest.Mocked<SavedObjectsClientContract>, policyIds: string[]) {
+  mockSoClient.bulkGet.mockResolvedValue({
+    saved_objects: policyIds.map((id) => ({
       id,
+      type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       attributes: {
         name: `Policy ${id}`,
         description: `Description for ${id}`,
@@ -77,13 +77,10 @@ const createMockNpSoService = (
         createdAt: '2026-01-01T00:00:00.000Z',
         updatedAt: '2026-01-01T00:00:00.000Z',
       },
-    }))
-  ),
-  create: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-});
+      references: [],
+    })),
+  });
+}
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
@@ -102,7 +99,7 @@ function buildDispatcherService(deps: {
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
     new DispatchStep(loggerService),
-    new RecordActionsStep(deps.storageService),
+    new StoreActionsStep(deps.storageService),
   ]);
   return new DispatcherService(pipeline);
 }
@@ -115,12 +112,23 @@ describe('DispatcherService', () => {
   let storageEsClient: jest.Mocked<ElasticsearchClient>;
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: NotificationPolicySavedObjectServiceContract;
+  let rulesMockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let npMockSoClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
     ({ storageService, mockEsClient: storageEsClient } = createStorageService());
-    rulesSoService = createMockRulesSoService(['rule-1', 'rule-2']);
-    npSoService = createMockNpSoService(['policy_456']);
+
+    const rulesMock = createRulesSavedObjectService();
+    rulesSoService = rulesMock.rulesSavedObjectService;
+    rulesMockSoClient = rulesMock.mockSavedObjectsClient;
+    mockRulesBulkGet(rulesMockSoClient, ['rule-1', 'rule-2']);
+
+    const npMock = createNotificationPolicySavedObjectService();
+    npSoService = npMock.notificationPolicySavedObjectService;
+    npMockSoClient = npMock.mockSavedObjectsClient;
+    mockNpBulkGet(npMockSoClient, ['policy_456']);
+
     dispatcherService = buildDispatcherService({
       queryService,
       storageService,
@@ -339,14 +347,22 @@ describe('DispatcherService', () => {
     });
 
     it('dispatches correct fire/suppress actions across 5 rules with ack, unack, snooze, and deactivate suppressions', async () => {
-      rulesSoService = createMockRulesSoService([
+      const rulesMock = createRulesSavedObjectService();
+      rulesSoService = rulesMock.rulesSavedObjectService;
+      rulesMockSoClient = rulesMock.mockSavedObjectsClient;
+      mockRulesBulkGet(rulesMockSoClient, [
         'rule-001',
         'rule-002',
         'rule-003',
         'rule-004',
         'rule-005',
       ]);
-      npSoService = createMockNpSoService(['policy_456']);
+
+      const npMock = createNotificationPolicySavedObjectService();
+      npSoService = npMock.notificationPolicySavedObjectService;
+      npMockSoClient = npMock.mockSavedObjectsClient;
+      mockNpBulkGet(npMockSoClient, ['policy_456']);
+
       dispatcherService = buildDispatcherService({
         queryService,
         storageService,

@@ -40,7 +40,7 @@ import {
   BuildGroupsStep,
   ApplyThrottlingStep,
   DispatchStep,
-  RecordActionsStep,
+  StoreActionsStep,
 } from '../steps';
 import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
@@ -391,7 +391,7 @@ describe('DispatcherService integration tests', () => {
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService),
-      new RecordActionsStep(storageService),
+      new StoreActionsStep(storageService),
     ]);
     dispatcherService = new DispatcherService(pipeline);
   });

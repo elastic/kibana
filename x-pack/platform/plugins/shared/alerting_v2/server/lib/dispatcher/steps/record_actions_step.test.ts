@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RecordActionsStep } from './record_actions_step';
+import { StoreActionsStep } from './record_actions_step';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { ALERT_ACTIONS_DATA_STREAM } from '../../../resources/alert_actions';
 import {
@@ -18,7 +18,7 @@ const createMockStorageService = (): jest.Mocked<StorageServiceContract> => ({
   bulkIndexDocs: jest.fn().mockResolvedValue(undefined),
 });
 
-describe('RecordActionsStep', () => {
+describe('StoreActionsStep', () => {
   const mockDate = new Date('2026-01-22T08:00:00.000Z');
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('RecordActionsStep', () => {
 
   it('halts when suppressed, throttled, and dispatch are all empty', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const state = createDispatcherPipelineState({
       suppressed: [],
@@ -49,7 +49,7 @@ describe('RecordActionsStep', () => {
 
   it('halts when suppressed, throttled, and dispatch are undefined', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const state = createDispatcherPipelineState({});
 
@@ -61,7 +61,7 @@ describe('RecordActionsStep', () => {
 
   it('records suppressed episodes with action_type suppress', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const episode = createAlertEpisode({
       rule_id: 'rule-1',
@@ -98,7 +98,7 @@ describe('RecordActionsStep', () => {
 
   it('records throttled notification groups with throttle-specific reason', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const episode = createAlertEpisode({
       rule_id: 'rule-1',
@@ -141,7 +141,7 @@ describe('RecordActionsStep', () => {
 
   it('records dispatched episodes with fire and notified action types', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const episode = createAlertEpisode({
       rule_id: 'rule-1',
@@ -196,7 +196,7 @@ describe('RecordActionsStep', () => {
 
   it('handles combined suppressed, throttled, and dispatch arrays', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const suppressedEpisode = createAlertEpisode({
       rule_id: 'rule-suppressed',
@@ -295,7 +295,7 @@ describe('RecordActionsStep', () => {
 
   it('records multiple episodes within a single dispatch group', async () => {
     const mockService = createMockStorageService();
-    const step = new RecordActionsStep(mockService);
+    const step = new StoreActionsStep(mockService);
 
     const episode1 = createAlertEpisode({
       rule_id: 'rule-1',

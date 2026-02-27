@@ -101,6 +101,10 @@ export function applyThrottling(
 }
 
 function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {
-  const intervalMillis = parseDurationToMs(interval);
-  return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
+  try {
+    const intervalMillis = parseDurationToMs(interval);
+    return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
+  } catch {
+    return false;
+  }
 }

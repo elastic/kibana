@@ -17,7 +17,7 @@ import type { StorageServiceContract } from '../../services/storage_service/stor
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 
 @injectable()
-export class RecordActionsStep implements DispatcherStep {
+export class StoreActionsStep implements DispatcherStep {
   public readonly name = 'record_actions';
 
   constructor(
