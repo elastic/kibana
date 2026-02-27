@@ -45,12 +45,8 @@ export interface ITelemetryClient {
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
   SLO_OVERVIEW_FLYOUT_VIEWED = 'slo_overview_flyout_viewed',
-  SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED = 'slo_overview_flyout_service_name_clicked',
-  SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED = 'slo_overview_flyout_slo_link_clicked',
-  SLO_OVERVIEW_FLYOUT_ALERT_CLICKED = 'slo_overview_flyout_alert_clicked',
   SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'slo_overview_flyout_search_queried',
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
-  SLO_OVERVIEW_FLYOUT_SLO_CLICKED = 'slo_overview_flyout_slo_clicked',
 }
 
 export interface TelemetryEvent {
