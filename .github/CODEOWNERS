@@ -1880,7 +1880,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 
 
 # Alerting alerting_v2
-/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/response-ops
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/rna-project-team
 
 ### END Observability Plugins
 
