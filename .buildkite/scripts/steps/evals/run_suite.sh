@@ -133,6 +133,7 @@ EOF
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
+          EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -162,7 +163,12 @@ fi
 
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
-SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
+if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
+  SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
+else
+  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
+fi
+
 node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
 SCOUT_PID=$!
 

@@ -75,7 +75,7 @@ export const DashboardAppNoDataPage = ({
         query: `FROM ${indexName}`,
         http: coreServices.http,
       });
-      const esqlQuery = getInitialESQLQuery(dataView, true);
+      const esqlQuery = getInitialESQLQuery(dataView);
 
       try {
         const columns = await getESQLQueryColumns({
