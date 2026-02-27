@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -241,13 +242,17 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
         <EuiSpacer size="s" />
 
         <EuiCodeBlock
+          css={css`
+            .euiCodeBlock__pre {
+              block-size: auto;
+            }
+          `}
           language={
             query.queryType === 'ES|QL' ? 'esql' : query.queryType === 'SQL' ? 'sql' : 'json'
           }
           lineNumbers
-          overflowHeight={300}
+          overflowHeight="100%"
           isCopyable
-          isVirtualized
         >
           {query.query}
         </EuiCodeBlock>
