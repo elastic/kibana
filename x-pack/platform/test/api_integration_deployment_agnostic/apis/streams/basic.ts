@@ -11,6 +11,7 @@ import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
+import type { JsonObject } from '@kbn/utility-types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
@@ -27,7 +28,6 @@ import {
   indexDocument,
   putStream,
 } from './helpers/requests';
-import { JsonObject } from '@kbn/utility-types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
