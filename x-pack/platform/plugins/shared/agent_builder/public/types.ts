@@ -29,6 +29,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
@@ -120,4 +121,11 @@ export interface AgentBuilderPluginStart {
   toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
+  /**
+   * Adds an attachment to the active conversation sidebar.
+   * If no sidebar is open, the attachment is ignored.
+   *
+   * @param attachment - The attachment to add
+   */
+  addAttachment: (attachment: AttachmentInput) => void;
 }

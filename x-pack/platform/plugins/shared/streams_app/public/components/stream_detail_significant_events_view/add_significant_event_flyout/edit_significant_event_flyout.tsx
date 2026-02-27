@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
@@ -21,26 +21,18 @@ export const EditSignificantEventFlyout = ({
   isEditFlyoutOpen,
   setIsEditFlyoutOpen,
   initialFlow,
-  selectedSystems,
-  setSelectedSystems,
   setQueryToEdit,
-  systems,
   refresh,
-  refreshSystems,
   generateOnMount,
   aiFeatures,
 }: {
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQuery | undefined>>;
   initialFlow?: Flow;
-  selectedSystems: System[];
-  setSelectedSystems: React.Dispatch<React.SetStateAction<System[]>>;
-  systems: System[];
   queryToEdit?: StreamQuery;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  refreshSystems: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }) => {
@@ -56,13 +48,11 @@ export const EditSignificantEventFlyout = ({
   const onCloseFlyout = () => {
     setIsEditFlyoutOpen(false);
     setQueryToEdit(undefined);
-    setSelectedSystems([]);
   };
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
-      refreshSystems={refreshSystems}
       definition={definition}
       query={queryToEdit}
       aiFeatures={aiFeatures}
@@ -102,8 +92,8 @@ export const EditSignificantEventFlyout = ({
             break;
           case 'multiple':
             await bulk(
-              data.queries.map((query) => ({
-                index: query,
+              data.queries.map((bulkQuery) => ({
+                index: bulkQuery,
               }))
             ).then(
               async () => {
@@ -143,8 +133,6 @@ export const EditSignificantEventFlyout = ({
       }}
       onClose={onCloseFlyout}
       initialFlow={initialFlow}
-      initialSelectedSystems={selectedSystems}
-      systems={systems}
     />
   ) : null;
 };
