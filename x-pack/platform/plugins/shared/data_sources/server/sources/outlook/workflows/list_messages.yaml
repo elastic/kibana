@@ -1,0 +1,51 @@
+version: '1'
+name: 'sources.outlook.list_messages'
+description: 'List Outlook mail folders and messages. Actions and inputs: listMailFolders (user_id); listMessages (user_id, optional folder_id, optional top, optional skip, optional filter).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "listMailFolders"
+      - "listMessages"
+    required: true
+  - name: user_id
+    type: string
+    required: true
+    description: "User ID or user principal name (e.g., user@contoso.com)"
+  - name: folder_id
+    type: string
+    required: false
+    description: "Mail folder ID. Defaults to Inbox if omitted. Used with listMessages."
+  - name: top
+    type: number
+    required: false
+    description: "Number of messages to return (max 50). Used with listMessages."
+  - name: skip
+    type: number
+    required: false
+    description: "Number of messages to skip for pagination. Used with listMessages."
+  - name: filter
+    type: string
+    required: false
+    description: "OData $filter expression (e.g., 'isRead eq false'). Used with listMessages."
+steps:
+  - name: list-mail-folders
+    type: outlook.listMailFolders
+    if: "${{ inputs.list_action == 'listMailFolders' }}"
+    connector-id: <%= outlook-stack-connector-id %>
+    with:
+      userId: "${{ inputs.user_id }}"
+  - name: list-messages
+    type: outlook.listMessages
+    if: "${{ inputs.list_action == 'listMessages' }}"
+    connector-id: <%= outlook-stack-connector-id %>
+    with:
+      userId: "${{ inputs.user_id }}"
+      folderId: "${{ inputs.folder_id }}"
+      top: ${{ inputs.top }}
+      skip: ${{ inputs.skip }}
+      filter: "${{ inputs.filter }}"
