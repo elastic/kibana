@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
@@ -21,6 +22,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     await esArchiver.loadIfNeeded(
       'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
     );
+
+    await kibanaServer.importExport.load(
+            'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
+          );
   }
 
   async function unloadCurrentData() {

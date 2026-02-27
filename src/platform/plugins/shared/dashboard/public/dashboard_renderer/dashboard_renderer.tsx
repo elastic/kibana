@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -33,7 +32,6 @@ import { DashboardInternalContext } from '../dashboard_api/use_dashboard_interna
 import type { DashboardRedirect } from '../dashboard_app/types';
 import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
 
-import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
@@ -167,9 +165,7 @@ export function DashboardRenderer({
 
   const renderDashboardContents = () => {
     if (error) {
-      return error instanceof SavedObjectNotFound ? (
-        <Dashboard404Page dashboardRedirect={dashboardRedirect} />
-      ) : (
+      return (
         <EuiEmptyPrompt
           iconType="error"
           iconColor="danger"
