@@ -15,9 +15,9 @@ import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/
 import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
-import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
@@ -30,6 +30,10 @@ import { AlertStatus } from './alert_status';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
 import { ABOUT_SECTION_TITLE } from '../../../../flyout_v2/document/components/about_section';
+import {
+  ALERT_REASON_BANNER,
+  AlertReason,
+} from '../../../../flyout_v2/document/components/alert_reason';
 
 const KEY = 'about';
 
@@ -41,8 +45,15 @@ const KEY = 'about';
  */
 export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
-  const { dataFormattedForFieldBrowser, getFieldsData, isRulePreview, scopeId, searchHit } =
-    useDocumentDetailsContext();
+  const {
+    dataFormattedForFieldBrowser,
+    eventId,
+    getFieldsData,
+    indexName,
+    isRulePreview,
+    scopeId,
+    searchHit,
+  } = useDocumentDetailsContext();
   const { rulesPrivileges } = useUserPrivileges();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
@@ -79,6 +90,22 @@ export const AboutSection = memo(() => {
     });
   }, [openPreviewPanel, scopeId, ruleId, telemetry]);
 
+  const openAlertReasonPreview = useCallback(() => {
+    openPreviewPanel({
+      id: DocumentDetailsAlertReasonPanelKey,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        banner: ALERT_REASON_BANNER,
+      },
+    });
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [eventId, indexName, openPreviewPanel, scopeId, telemetry]);
+
   const content =
     eventKind === EventKind.signal ? (
       <>
@@ -87,7 +114,7 @@ export const AboutSection = memo(() => {
           onShowRuleSummary={openRulePreview}
           ruleSummaryDisabled={ruleSummaryDisabled}
         />
-        <Reason />
+        <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
         <MitreAttack />
         <AlertStatus />
       </>
