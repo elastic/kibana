@@ -31,7 +31,8 @@
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
-    "@kbn/yaml-rule-editor"
+    "@kbn/yaml-rule-editor",
+    "@kbn/core-application-browser-mocks"
   ]
 }
 
