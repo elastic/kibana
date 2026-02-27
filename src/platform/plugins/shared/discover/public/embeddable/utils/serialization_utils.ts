@@ -21,6 +21,7 @@ import type {
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS } from '../constants';
 import type { SearchEmbeddableRuntimeState } from '../types';
+import { isTabDeleted } from './is_tab_deleted';
 
 export const deserializeState = async ({
   serializedState,
@@ -48,7 +49,6 @@ export const deserializeState = async ({
     const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
 
     const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
-
     const rawSavedObjectAttributes = isSelectedTabDeleted
       ? {}
       : pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
@@ -116,9 +116,8 @@ export const serializeState = ({
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {
-    const isSelectedTabDeleted = Boolean(
-      selectedTabId && !initialState.tabs?.some((tab) => tab.id === selectedTabId)
-    );
+    const isSelectedTabDeleted = isTabDeleted(selectedTabId, initialState.tabs ?? []);
+
     const selectedTab = selectedTabId
       ? initialState.tabs?.find((tab) => tab.id === selectedTabId)
       : undefined;

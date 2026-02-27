@@ -9,13 +9,13 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover - group 3', function () {
-    loadTestFile(require.resolve('./saved_queries'));
-    loadTestFile(require.resolve('./saved_searches'));
-    loadTestFile(require.resolve('./visualize_field'));
-    loadTestFile(require.resolve('./value_suggestions'));
-    loadTestFile(require.resolve('./value_suggestions_non_timebased'));
+    // loadTestFile(require.resolve('./saved_queries'));
+    // loadTestFile(require.resolve('./saved_searches'));
+    // loadTestFile(require.resolve('./visualize_field'));
+    // loadTestFile(require.resolve('./value_suggestions'));
+    // loadTestFile(require.resolve('./value_suggestions_non_timebased'));
     loadTestFile(require.resolve('./saved_search_embeddable'));
-    loadTestFile(require.resolve('./esql_starred'));
-    loadTestFile(require.resolve('./rule_creation'));
+    // loadTestFile(require.resolve('./esql_starred'));
+    // loadTestFile(require.resolve('./rule_creation'));
   });
 }

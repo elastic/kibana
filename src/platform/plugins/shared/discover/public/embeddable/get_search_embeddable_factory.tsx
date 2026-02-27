@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, merge, skip, map, filter as filterOp } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -145,14 +145,17 @@ export const getSearchEmbeddableFactory = ({
 
       const switchTab = async (tabId: string): Promise<boolean> => {
         const tab = tabs.find((t) => t.id === tabId);
+
         if (!tab) return false;
 
         try {
           await searchEmbeddable.switchToTab(tab);
+
           return true;
         } catch (error) {
           blockingError$.next(error as Error);
           dataLoading$.next(false);
+
           return false;
         }
       };
@@ -161,29 +164,37 @@ export const getSearchEmbeddableFactory = ({
         isInlineEditing$.next(false);
         inlineEditDirty$.next(false);
         draftSelectedTabId$.next(selectedTabId$.getValue());
+
         inlineEditOriginalTab = undefined;
         inlineEditStateSnapshot = undefined;
+
         setFocusedPanelId();
       };
 
       const startInlineEditing = async () => {
         if (isInlineEditing$.getValue()) return;
+
         const currentTabId = selectedTabId$.getValue();
+
         inlineEditOriginalTab = tabs.find((t) => t.id === currentTabId);
-        const { stateManager: sm } = searchEmbeddable;
+
+        const { stateManager } = searchEmbeddable;
+
         inlineEditStateSnapshot = {
-          sort: sm.sort.getValue(),
-          columns: sm.columns.getValue(),
-          grid: sm.grid.getValue(),
-          sampleSize: sm.sampleSize.getValue(),
-          rowsPerPage: sm.rowsPerPage.getValue(),
-          rowHeight: sm.rowHeight.getValue(),
-          headerRowHeight: sm.headerRowHeight.getValue(),
-          viewMode: sm.viewMode.getValue(),
-          density: sm.density.getValue(),
+          sort: stateManager.sort.getValue(),
+          columns: stateManager.columns.getValue(),
+          grid: stateManager.grid.getValue(),
+          sampleSize: stateManager.sampleSize.getValue(),
+          rowsPerPage: stateManager.rowsPerPage.getValue(),
+          rowHeight: stateManager.rowHeight.getValue(),
+          headerRowHeight: stateManager.headerRowHeight.getValue(),
+          viewMode: stateManager.viewMode.getValue(),
+          density: stateManager.density.getValue(),
         };
+
         draftSelectedTabId$.next(currentTabId);
         isInlineEditing$.next(true);
+
         setFocusedPanelId(uuid);
       };
 
@@ -254,6 +265,11 @@ export const getSearchEmbeddableFactory = ({
           selectedTabId$.pipe(
             skip(1),
             map(() => undefined)
+          ),
+          isInlineEditing$.pipe(
+            skip(1),
+            filterOp((isEditing) => !isEditing),
+            map(() => undefined)
           )
         ),
         getComparators: () => {
@@ -319,15 +335,14 @@ export const getSearchEmbeddableFactory = ({
 
             if (currentTabId !== resolvedTabId && resolvedTab) {
               await searchEmbeddable.switchToTab(resolvedTab);
-            } else {
-              searchEmbeddable.reinitializeState(lastSavedRuntimeState);
             }
+            searchEmbeddable.reinitializeState(lastSavedRuntimeState);
           }
           stopInlineEditing();
         },
       });
 
-      const editApi = initializeEditApi({
+      const { onEdit: navigateToDiscover, ...editApiWithoutOnEdit } = initializeEditApi({
         uuid,
         parentApi,
         partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
@@ -335,7 +350,6 @@ export const getSearchEmbeddableFactory = ({
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
       }) as Partial<HasEditCapabilities & { getEditHref: () => Promise<string> }>;
-      const navigateToDiscover = editApi.onEdit;
 
       const api: SearchEmbeddableApi = finalizeApi({
         ...unsavedChangesApi,
@@ -344,7 +358,7 @@ export const getSearchEmbeddableFactory = ({
           Required<Pick<SearchEmbeddableApi, 'filters$' | 'query$' | 'setFilters' | 'setQuery'>>),
         ...timeRangeManager.api,
         ...drilldownsManager.api,
-        ...editApi,
+        ...editApiWithoutOnEdit,
         ...(navigateToDiscover
           ? {
               onEdit: startInlineEditing,

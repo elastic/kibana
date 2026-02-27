@@ -100,15 +100,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
     };
 
-    const selectEmbeddableTab = async (tabId: string, tabLabel: string) => {
+    const enterInlineEditing = async () => {
+      const isAlreadyActive = await testSubjects.exists(
+        'discoverEmbeddableInlineEditSelectTabAction'
+      );
+      if (!isAlreadyActive) {
+        await dashboardPanelActions.clickPanelAction('embeddablePanelAction-editPanel');
+        await header.waitUntilLoadingHasFinished();
+      }
+    };
+
+    const selectTabFromPopover = async (tabLabel: string) => {
+      await testSubjects.click('discoverEmbeddableInlineEditSelectTabAction');
+      const popover = await testSubjects.find('discoverEmbeddableInlineEditSelectTabPopover');
+      await find.clickByButtonText(tabLabel, popover);
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+    };
+
+    const selectEmbeddableTab = async (tabLabel: string) => {
       await retry.try(async () => {
-        await testSubjects.click('discoverEmbeddableTabSelector');
-        await find.clickByCssSelector(`[role="option"][id="${tabId}"]`);
+        await enterInlineEditing();
+        await selectTabFromPopover(tabLabel);
+
+        await testSubjects.click('discoverEmbeddableInlineEditApplyButton');
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
-
-        const selectedTabText = await testSubjects.getVisibleText('discoverEmbeddableTabSelector');
-        expect(selectedTabText).to.contain(tabLabel);
       });
     };
 
@@ -205,7 +222,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should apply data, columns and sorting from selected Discover tab', async () => {
       await addSearchEmbeddableToDashboard('Discover embeddable multi tab');
-      await testSubjects.existOrFail('discoverEmbeddableTabSelector');
 
       const initialDocumentCount = await discover.getSavedSearchDocumentCount();
       const initialHeaders = await dataGrid.getHeaderFields();
@@ -216,7 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialHeaders).to.contain('@timestamp');
       expect(initialHeaders).to.contain('agent');
 
-      await selectEmbeddableTab('filtered-tab', 'Filtered tab');
+      await selectEmbeddableTab('Filtered tab');
 
       const switchedDocumentCount = await discover.getSavedSearchDocumentCount();
       const switchedHeaders = await dataGrid.getHeaderFields();
@@ -245,7 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dashboardName = 'Dashboard deleted tab editor';
 
       await addSearchEmbeddableToDashboard(savedSearchTitle);
-      await selectEmbeddableTab('filtered-tab', 'Filtered tab');
+      await selectEmbeddableTab('Filtered tab');
 
       await dashboard.saveDashboard(dashboardName, {
         saveAsNew: true,
@@ -258,23 +274,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard(dashboardName);
       await dashboard.waitForRenderComplete();
 
+      // View mode: callout prompts to edit the panel
       const viewModeCalloutText = await getDeletedTabCalloutText();
       expect(viewModeCalloutText).to.contain('Edit the panel');
-      await testSubjects.missingOrFail('discoverEmbeddableTabSelector');
       await testSubjects.missingOrFail('docTable');
 
+      // Click "Edit the panel" link → switches dashboard to edit mode
       await testSubjects.click('discoverEmbeddableDeletedTabEditPanelLink');
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
+      // Edit mode (before inline editing): callout prompts to use the edit action
       const editModeCalloutText = await getDeletedTabCalloutText();
-      const selectorText = await testSubjects.getVisibleText('discoverEmbeddableTabSelector');
+      expect(editModeCalloutText).to.contain('choose a different tab');
+      await testSubjects.missingOrFail('docTable');
 
-      expect(editModeCalloutText).to.contain('Select a different tab');
+      // Enter inline editing via the edit hover action
+      await enterInlineEditing();
+
+      // Inline editing: callout says to select a different tab, selector shows deleted label
+      const inlineEditCalloutText = await getDeletedTabCalloutText();
+      expect(inlineEditCalloutText).to.contain('Select a different tab');
+      const selectorText = await testSubjects.getVisibleText(
+        'discoverEmbeddableInlineEditSelectTabAction'
+      );
       expect(selectorText).to.contain('(Deleted tab)');
       await testSubjects.missingOrFail('docTable');
 
-      await selectEmbeddableTab('default-tab', 'Default tab');
+      // Select a valid tab and apply
+      await selectTabFromPopover('Untitled');
+
+      await testSubjects.click('discoverEmbeddableInlineEditApplyButton');
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       await testSubjects.existOrFail('docTable');
@@ -285,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dashboardName = 'Dashboard deleted tab read only';
 
       await addSearchEmbeddableToDashboard(savedSearchTitle);
-      await selectEmbeddableTab('filtered-tab', 'Filtered tab');
+      await selectEmbeddableTab('Filtered tab');
 
       await dashboard.saveDashboard(dashboardName, {
         saveAsNew: true,
@@ -305,7 +335,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const viewModeCalloutText = await getDeletedTabCalloutText();
         expect(viewModeCalloutText).to.contain("Contact one of the dashboard's authors to fix it.");
-        await testSubjects.missingOrFail('discoverEmbeddableTabSelector');
         await testSubjects.missingOrFail('docTable');
       } finally {
         await security.testUser.restoreDefaults();

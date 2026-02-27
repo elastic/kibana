@@ -149,7 +149,7 @@ export function SearchEmbeddableGridComponent({
 
   const canEditDashboardByAccessControl = apiPublishesIsEditableByUser(api.parentApi)
     ? api.parentApi.isEditableByUser
-    : true;
+    : false;
 
   const canSwitchToEditMode = apiCanSetViewMode(api.parentApi);
 
