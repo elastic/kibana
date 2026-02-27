@@ -300,7 +300,7 @@ export async function pickTestGroupRunOrder() {
       ? process.env.JEST_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build'];
+      : [];
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
@@ -511,6 +511,7 @@ export async function pickTestGroupRunOrder() {
         ? {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
+            cancel_on_build_failing: true,
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
@@ -530,6 +531,7 @@ export async function pickTestGroupRunOrder() {
         ? {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+            cancel_on_build_failing: true,
             parallelism: integration.count,
             // TODO: Reduce once we have identified the cause of random long-running tests
             timeout_in_minutes: 75,
@@ -568,6 +570,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                  cancel_on_build_failing: true,
                   timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue, 105),
                   env: {
