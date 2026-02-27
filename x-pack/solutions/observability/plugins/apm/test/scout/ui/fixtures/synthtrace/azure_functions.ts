@@ -4,33 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
+import { SERVICE_AZURE_FUNCTIONS, PRODUCTION_ENVIRONMENT } from '../constants';
 
-const dataConfig = {
-  serviceName: 'synth-dotnet',
-  rate: 10,
-  transaction: {
-    name: 'GET /apple 🍎',
-    duration: 1000,
-  },
-};
-
-export function generateData({ start, end }: { start: number; end: number }) {
-  const { rate, transaction, serviceName } = dataConfig;
+export function azureFunctions({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmFields> {
   const instance = apm
     .service({
-      name: serviceName,
-      environment: 'production',
+      name: SERVICE_AZURE_FUNCTIONS,
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'dotnet',
     })
     .instance('instance-a');
 
-  const traceEvents = timerange(start, end)
+  return timerange(from, to)
     .interval('1m')
-    .rate(rate)
+    .rate(10)
     .generator((timestamp) =>
       instance
-        .transaction({ transactionName: transaction.name })
+        .transaction({ transactionName: 'GET /apple 🍎' })
         .defaults({
           'service.runtime.name': 'dotnet-isolated',
           'cloud.provider': 'azure',
@@ -38,9 +36,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
           'faas.coldstart': true,
         })
         .timestamp(timestamp)
-        .duration(transaction.duration)
+        .duration(1000)
         .success()
     );
-
-  return traceEvents;
 }
