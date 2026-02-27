@@ -135,7 +135,8 @@ export function useYamlValidation(
             variableItems,
             workflowGraph,
             workflowDefinition,
-            yamlDocument
+            yamlDocument,
+            model
           ),
           ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
         );

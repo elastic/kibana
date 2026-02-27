@@ -41,14 +41,23 @@
       },
       "variable_type": {
         "type": "string",
-        "enum": ["fields", "values", "functions", "time_literal", "multi_values"]
+        "enum": [
+          "fields",
+          "values",
+          "functions",
+          "time_literal",
+          "multi_values"
+        ]
       },
       "esql_query": {
         "type": "string"
       },
       "control_type": {
         "type": "string",
-        "enum": ["STATIC_VALUES", "VALUES_FROM_QUERY"]
+        "enum": [
+          "STATIC_VALUES",
+          "VALUES_FROM_QUERY"
+        ]
       },
       "available_options": {
         "type": "array",
@@ -58,7 +67,13 @@
       }
     },
     "additionalProperties": true,
-    "required": ["selected_options", "variable_name", "variable_type", "esql_query", "control_type"]
+    "required": [
+      "selected_options",
+      "variable_name",
+      "variable_type",
+      "esql_query",
+      "control_type"
+    ]
   },
   {
     "type": "object",
@@ -116,7 +131,11 @@
       },
       "search_technique": {
         "type": "string",
-        "enum": ["prefix", "wildcard", "exact"]
+        "enum": [
+          "prefix",
+          "wildcard",
+          "exact"
+        ]
       },
       "selected_options": {
         "type": "array",
@@ -136,19 +155,31 @@
         "properties": {
           "by": {
             "type": "string",
-            "enum": ["_count", "_key"]
+            "enum": [
+              "_count",
+              "_key"
+            ]
           },
           "direction": {
             "type": "string",
-            "enum": ["asc", "desc"]
+            "enum": [
+              "asc",
+              "desc"
+            ]
           }
         },
         "additionalProperties": false,
-        "required": ["by", "direction"]
+        "required": [
+          "by",
+          "direction"
+        ]
       }
     },
     "additionalProperties": true,
-    "required": ["data_view_id", "field_name"]
+    "required": [
+      "data_view_id",
+      "field_name"
+    ]
   },
   {
     "type": "object",
@@ -184,7 +215,10 @@
       }
     },
     "additionalProperties": true,
-    "required": ["data_view_id", "field_name"]
+    "required": [
+      "data_view_id",
+      "field_name"
+    ]
   },
   {
     "type": "object",
@@ -202,24 +236,60 @@
     "additionalProperties": false
   },
   {
-    "type": "object",
     "description": "Markdown embeddable schema",
-    "properties": {
-      "content": {
-        "type": "string"
+    "anyOf": [
+      {
+        "type": "object",
+        "description": "Markdown by-value embeddable schema",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "hide_title": {
+            "type": "boolean"
+          },
+          "hide_border": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "content"
+        ]
       },
-      "description": {
-        "type": "string"
-      },
-      "hide_title": {
-        "type": "boolean"
-      },
-      "title": {
-        "type": "string"
+      {
+        "type": "object",
+        "description": "Markdown by-reference embeddable schema",
+        "properties": {
+          "ref_id": {
+            "type": "string",
+            "description": "The unique identifier of the markdown panel."
+          },
+          "description": {
+            "type": "string"
+          },
+          "hide_title": {
+            "type": "boolean"
+          },
+          "hide_border": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ref_id"
+        ]
       }
-    },
-    "additionalProperties": false,
-    "required": ["content"]
+    ]
   },
   {
     "type": "object",
@@ -229,6 +299,9 @@
         "type": "string"
       },
       "hide_title": {
+        "type": "boolean"
+      },
+      "hide_border": {
         "type": "boolean"
       },
       "title": {
@@ -258,15 +331,24 @@
             },
             "trigger": {
               "type": "string",
-              "enum": ["on_open_panel_menu"]
+              "enum": [
+                "on_open_panel_menu"
+              ]
             },
             "type": {
               "type": "string",
-              "enum": ["url_drilldown"]
+              "enum": [
+                "url_drilldown"
+              ]
             }
           },
           "additionalProperties": false,
-          "required": ["url", "label", "trigger", "type"]
+          "required": [
+            "url",
+            "label",
+            "trigger",
+            "type"
+          ]
         }
       },
       "filters": {
@@ -289,7 +371,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "tags": {
@@ -309,7 +394,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "monitor_ids": {
@@ -329,7 +417,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "monitor_types": {
@@ -349,7 +440,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "locations": {
@@ -369,7 +463,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           }
         },
@@ -402,7 +499,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "tags": {
@@ -422,7 +522,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "monitor_ids": {
@@ -442,7 +545,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "monitor_types": {
@@ -462,7 +568,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           },
           "locations": {
@@ -482,7 +591,10 @@
                 }
               },
               "additionalProperties": false,
-              "required": ["label", "value"]
+              "required": [
+                "label",
+                "value"
+              ]
             }
           }
         },
@@ -491,12 +603,18 @@
       "view": {
         "description": "View mode for the monitors embeddable (defaults to cardView)",
         "type": "string",
-        "enum": ["cardView", "compactView"]
+        "enum": [
+          "cardView",
+          "compactView"
+        ]
       },
       "description": {
         "type": "string"
       },
       "hide_title": {
+        "type": "boolean"
+      },
+      "hide_border": {
         "type": "boolean"
       },
       "title": {

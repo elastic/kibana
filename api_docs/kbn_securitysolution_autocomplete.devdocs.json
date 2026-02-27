@@ -125,7 +125,7 @@
           "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, onWarning, warning, \"aria-label\": ariaLabel, }: AutocompleteFieldMatchProps): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
-        "lineNumber": 57,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -141,7 +141,7 @@
               "AutocompleteFieldMatchProps"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
-            "lineNumber": 57,
+            "lineNumber": 53,
             "columnNumber": 88,
             "deprecated": false,
             "trackAdoption": false,
@@ -162,7 +162,7 @@
           "React.FunctionComponent<AutocompleteFieldWildcardProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src/field_value_wildcard/index.tsx",
-        "lineNumber": 51,
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
