@@ -50,6 +50,42 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     await checkEnabled();
   });
 
+  test('should keep list order stable when bulk-enabling N-1 workflows', async ({
+    pageObjects,
+    apiServices,
+    scoutSpace,
+  }) => {
+    const workflows = [
+      {
+        name: 'BulkTest Order Stable Workflow 1',
+        description: 'Bulk order stability 1',
+        enabled: false,
+      },
+      {
+        name: 'BulkTest Order Stable Workflow 2',
+        description: 'Bulk order stability 2',
+        enabled: false,
+      },
+      {
+        name: 'BulkTest Order Stable Workflow 3',
+        description: 'Bulk order stability 3',
+        enabled: false,
+      },
+    ];
+    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+
+    await pageObjects.workflowList.navigate();
+    const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
+
+    await pageObjects.workflowList.performBulkAction(
+      workflows.slice(1).map((w) => w.name),
+      'enable'
+    );
+
+    const orderAfter = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
+    expect(orderAfter).toStrictEqual(orderBefore);
+  });
+
   test('should disable enabled workflows', async ({
     page,
     pageObjects,
