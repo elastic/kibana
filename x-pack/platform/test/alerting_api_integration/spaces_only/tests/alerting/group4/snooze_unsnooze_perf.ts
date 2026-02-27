@@ -146,7 +146,9 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
           });
         }
         log.info(
-          `[${scenarioName}] All ${ruleCount * alertsPerRule} alerts generated in ${Date.now() - runStart}ms`
+          `[${scenarioName}] All ${ruleCount * alertsPerRule} alerts generated in ${
+            Date.now() - runStart
+          }ms`
         );
       });
 
@@ -162,7 +164,9 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
         await esTestIndexTool.destroy();
       });
 
-      it(`should snooze and unsnooze ${ruleCount * effectiveSnoozesPerRule} instances and report timings`, async function () {
+      it(`should snooze and unsnooze ${
+        ruleCount * effectiveSnoozesPerRule
+      } instances and report timings`, async function () {
         this.timeout(600000);
         const totalInstances = ruleCount * effectiveSnoozesPerRule;
         const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
@@ -178,7 +182,9 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
           for (const instanceId of snoozeInstanceIds) {
             await supertest
               .post(
-                `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${instanceId}/_mute?validate_alerts_existence=false`
+                `${getUrlPrefix(
+                  Spaces.space1.id
+                )}/api/alerting/rule/${ruleId}/alert/${instanceId}/_mute?validate_alerts_existence=false`
               )
               .set('kbn-xsrf', 'foo')
               .send({ expires_at: expiresAt })
@@ -187,7 +193,9 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
         }
         const snoozeDuration = Date.now() - snoozeStart;
         log.info(
-          `[${scenarioName}] Phase 1 complete: snooze took ${snoozeDuration}ms (${(snoozeDuration / totalInstances).toFixed(1)}ms/instance)`
+          `[${scenarioName}] Phase 1 complete: snooze took ${snoozeDuration}ms (${(
+            snoozeDuration / totalInstances
+          ).toFixed(1)}ms/instance)`
         );
 
         // --- Phase 2: Run rules to persist snoozedInstances via updateRuleSavedObjectPostRun ---
@@ -219,9 +227,7 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
             .expect(200);
           expect((rule.snoozed_instances ?? []).length).to.be(effectiveSnoozesPerRule);
         }
-        log.info(
-          `[${scenarioName}] Phase 3 complete: all rules have correct snoozed_instances`
-        );
+        log.info(`[${scenarioName}] Phase 3 complete: all rules have correct snoozed_instances`);
 
         // --- Phase 4: Verify ALERT_MUTED on real AAD docs ---
         log.info(`[${scenarioName}] Phase 4: Verifying ALERT_MUTED on AAD docs...`);
@@ -242,7 +248,9 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
           for (const instanceId of snoozeInstanceIds) {
             await supertest
               .post(
-                `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${instanceId}/_unmute`
+                `${getUrlPrefix(
+                  Spaces.space1.id
+                )}/api/alerting/rule/${ruleId}/alert/${instanceId}/_unmute`
               )
               .set('kbn-xsrf', 'foo')
               .expect(204);
@@ -250,13 +258,13 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
         }
         const unsnoozeDuration = Date.now() - unsnoozeStart;
         log.info(
-          `[${scenarioName}] Phase 5 complete: unsnooze took ${unsnoozeDuration}ms (${(unsnoozeDuration / totalInstances).toFixed(1)}ms/instance)`
+          `[${scenarioName}] Phase 5 complete: unsnooze took ${unsnoozeDuration}ms (${(
+            unsnoozeDuration / totalInstances
+          ).toFixed(1)}ms/instance)`
         );
 
         // --- Phase 6: Verify snoozedInstances cleared ---
-        log.info(
-          `[${scenarioName}] Phase 6: Verifying snoozed_instances cleared on each rule...`
-        );
+        log.info(`[${scenarioName}] Phase 6: Verifying snoozed_instances cleared on each rule...`);
         for (const ruleId of ruleIds) {
           const { body: rule } = await supertest
             .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
@@ -283,11 +291,15 @@ export default function snoozeUnsnoozePerf({ getService }: FtrProviderContext) {
           `Rules: ${ruleCount}, Snoozes per rule: ${effectiveSnoozesPerRule}, Total snooze ops: ${totalInstances}`
         );
         log.info(
-          `Snooze (conditional, nested writes):  ${snoozeDuration}ms total, ${(snoozeDuration / totalInstances).toFixed(1)}ms/instance`
+          `Snooze (conditional, nested writes):  ${snoozeDuration}ms total, ${(
+            snoozeDuration / totalInstances
+          ).toFixed(1)}ms/instance`
         );
         log.info(`Rule runs (post-run SO update):       ${runDuration}ms total`);
         log.info(
-          `Unsnooze (remove nested entries):     ${unsnoozeDuration}ms total, ${(unsnoozeDuration / totalInstances).toFixed(1)}ms/instance`
+          `Unsnooze (remove nested entries):     ${unsnoozeDuration}ms total, ${(
+            unsnoozeDuration / totalInstances
+          ).toFixed(1)}ms/instance`
         );
       });
     });
