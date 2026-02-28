@@ -185,18 +185,17 @@ describe('type_check orchestration', () => {
   });
 
   describe('stale artifact detection', () => {
-    it('throws when no artifact state is recorded on disk', async () => {
+    it('skips stale detection and continues to type check when no artifact state is recorded on disk', async () => {
       readArtifactsState.mockResolvedValueOnce(undefined);
 
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader();
 
-      await expect(runCallback({ log, flagsReader, procRunner })).rejects.toThrow(
-        'found no artifact state on disk'
-      );
+      await runCallback({ log, flagsReader, procRunner });
 
-      expect(runTsc).not.toHaveBeenCalled();
+      expect(detectStaleArtifacts).not.toHaveBeenCalled();
+      expect(runTsc).toHaveBeenCalledTimes(1);
     });
 
     it('logs up-to-date when no projects are stale', async () => {
@@ -242,12 +241,10 @@ describe('type_check orchestration', () => {
       expect(restoreTSBuildArtifacts).toHaveBeenCalledWith(log);
     });
 
-    it('archives artifacts and updates state after a successful type check on a clean tree', async () => {
+    it('archives artifacts and updates state after type check', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader({ 'with-archive': true });
-
-      detectLocalChanges.mockResolvedValue(false);
 
       await runCallback({ log, flagsReader, procRunner });
 
@@ -255,7 +252,7 @@ describe('type_check orchestration', () => {
       expect(writeArtifactsState).toHaveBeenCalledWith('head-sha-1234567890ab');
     });
 
-    it('skips archiving when local changes are detected (not CI)', async () => {
+    it('always updates the state file even when the working tree is dirty (local dev)', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader({ 'with-archive': true });
@@ -264,12 +261,10 @@ describe('type_check orchestration', () => {
 
       await runCallback({ log, flagsReader, procRunner });
 
-      expect(archiveTSBuildArtifacts).not.toHaveBeenCalled();
-      expect(writeArtifactsState).not.toHaveBeenCalled();
-      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('uncommitted changes'));
+      expect(writeArtifactsState).toHaveBeenCalledWith('head-sha-1234567890ab');
     });
 
-    it('throws when local changes are detected on CI', async () => {
+    it('throws on CI when local changes are detected, skipping the archive', async () => {
       isCiEnvironment.mockReturnValue(true);
 
       const log = createLog();
@@ -279,7 +274,7 @@ describe('type_check orchestration', () => {
       detectLocalChanges.mockResolvedValue(true);
 
       await expect(runCallback({ log, flagsReader, procRunner })).rejects.toThrow(
-        'uncommitted changes were detected'
+        'uncommitted changes'
       );
 
       expect(archiveTSBuildArtifacts).not.toHaveBeenCalled();

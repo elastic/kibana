@@ -118,7 +118,10 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     if (isCiEnvironment()) {
       await withGcsAuth(log, async (token) => {
-        await new GcsFileSystem(log, token).restoreArchive(restoreOptions);
+        const restoredSha = await new GcsFileSystem(log, token).restoreArchive(restoreOptions);
+        if (restoredSha) {
+          await writeArtifactsState(restoredSha);
+        }
       });
 
       return;

@@ -74,39 +74,40 @@ run(
      * fresh artifacts from remote for the best type check performance.
      */
     const state = await readArtifactsState();
-    if (!state) {
-      throw createFailError(
-        'found no artifact state on disk. Run with --with-archive first to restore artifacts and record their commit SHA.'
-      );
-    }
 
-    const stale = await detectStaleArtifacts({
-      fromCommit: state.restoredSha,
-      toCommit: 'HEAD',
-      sourceConfigPaths: TS_PROJECTS.map((p) => p.path),
-    });
+    if (state) {
+      const stale = await detectStaleArtifacts({
+        fromCommit: state.restoredSha,
+        toCommit: 'HEAD',
+        sourceConfigPaths: TS_PROJECTS.map((p) => p.path),
+      });
 
-    const shortSha = state.restoredSha.slice(0, 12);
+      const shortSha = state.restoredSha.slice(0, 12);
 
-    if (stale.size === 0) {
-      log.info(`All artifacts are up-to-date (comparing ${shortSha} → HEAD).`);
-    } else {
-      log.info(
-        `${stale.size} project${
-          stale.size === 1 ? '' : 's'
-        } have stale artifacts (comparing ${shortSha} → HEAD):`
-      );
-
-      for (const tsConfigPath of [...stale].sort()) {
-        log.info(`  ${Path.relative(REPO_ROOT, tsConfigPath)}`);
-      }
-
-      if (stale.size > 0 && stale.size < 6) {
-        log.info('Cache freshness is good, no need to restore fresh artifacts from remote.');
+      if (stale.size === 0) {
+        log.info(
+          `[Artifacts freshness] All artifacts are up-to-date (comparing ${shortSha} → HEAD).`
+        );
       } else {
         log.info(
-          'Run with --clear-cache --with-archive to retrieve fresh artifacts from remote for the best type check performance.'
+          `[Artifacts freshness] ${stale.size} project${stale.size === 1 ? '' : 's'} ${
+            stale.size === 1 ? 'has' : 'have'
+          } stale artifacts (comparing ${shortSha} → HEAD):`
         );
+
+        for (const tsConfigPath of [...stale].sort()) {
+          log.info(`  ${Path.relative(REPO_ROOT, tsConfigPath)}`);
+        }
+
+        if (stale.size > 0 && stale.size < 6) {
+          log.info(
+            '[Artifacts freshness] Cache freshness is good, no need to restore fresh artifacts from remote.'
+          );
+        } else {
+          log.info(
+            '[Artifacts freshness] Run with --clear-cache --with-archive to retrieve fresh artifacts from remote for the best type check performance.'
+          );
+        }
       }
     }
 
@@ -151,26 +152,24 @@ run(
 
     // ── Post-check ─────────────────────────────────────────────────────────────
     if (shouldUseArchive) {
-      const [hasLocalChanges, headSha] = await Promise.all([
-        detectLocalChanges(),
-        resolveCurrentCommitSha(),
-      ]);
-
-      if (hasLocalChanges) {
-        const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.`;
-        if (isCiEnvironment()) {
-          throw new Error(`Canceling TypeScript cache archive because ${message}`);
-        } else {
-          log.warning(`Skipping TypeScript cache archive because ${message}`);
+      // Archiving to GCS only happens on CI, so the clean-tree check is
+      // only meaningful there. Locally, archiveTSBuildArtifacts is a no-op.
+      if (isCiEnvironment()) {
+        const hasLocalChanges = await detectLocalChanges();
+        if (hasLocalChanges) {
+          throw new Error(
+            'Canceling TypeScript cache archive: the working tree has uncommitted changes. ' +
+              'Archives must be generated from a clean working tree.'
+          );
         }
-      } else {
-        await archiveTSBuildArtifacts(log);
+      }
 
-        // Update the state file so --only-detect-stale reflects the HEAD SHA
-        // that was just archived, not the older restore SHA.
-        if (headSha) {
-          await writeArtifactsState(headSha);
-        }
+      await archiveTSBuildArtifacts(log);
+
+      // Always update the state file so subsequent runs can detect artifact freshness.
+      const headSha = await resolveCurrentCommitSha();
+      if (headSha) {
+        await writeArtifactsState(headSha);
       }
     } else {
       log.verbose('Skipping TypeScript cache archive because --with-archive was not provided.');
