@@ -231,12 +231,16 @@ export function extendContextWithTemplateLocals(
   return baseSchema.extend(extension) as typeof DynamicStepContextSchema;
 }
 
-const yamlStringCache = new WeakMap<Document, string>();
+const yamlStringCache = new WeakMap<Document, string | null>();
 
-function getCachedYamlString(doc: Document): string {
+function getCachedYamlString(doc: Document): string | null {
   let cached = yamlStringCache.get(doc);
   if (cached === undefined) {
-    cached = doc.toString();
+    try {
+      cached = doc.toString();
+    } catch {
+      cached = null;
+    }
     yamlStringCache.set(doc, cached);
   }
   return cached;
@@ -271,12 +275,16 @@ export function getContextSchemaWithTemplateLocals(
   let offsetInTemplate: number;
   if (scalarType === 'BLOCK_LITERAL' || scalarType === 'BLOCK_FOLDED') {
     const yamlString = getCachedYamlString(yamlDocument);
-    const rawScalarSource = yamlString.slice(scalarStart, scalarNode.range[2]);
-    offsetInTemplate = mapBlockScalarSourceToValueOffset(
-      rawScalarSource,
-      offset - scalarStart,
-      templateString.length
-    );
+    if (yamlString !== null) {
+      const rawScalarSource = yamlString.slice(scalarStart, scalarNode.range[2]);
+      offsetInTemplate = mapBlockScalarSourceToValueOffset(
+        rawScalarSource,
+        offset - scalarStart,
+        templateString.length
+      );
+    } else {
+      offsetInTemplate = offset - scalarStart;
+    }
   } else {
     const isQuoted = scalarType === 'QUOTE_DOUBLE' || scalarType === 'QUOTE_SINGLE';
     const quoteAdjustment = isQuoted ? 1 : 0;
