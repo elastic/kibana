@@ -50,7 +50,7 @@ const queryVectorSuggestion: ISuggestionItem = {
   }),
 };
 
-async function getDiversifyFieldSuggestions(
+async function getVectorFieldSuggestions(
   innerText: string,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext
@@ -242,7 +242,7 @@ export async function autocomplete(
       return [onCompleteItem];
 
     case MmrPosition.AFTER_ON_KEYWORD:
-      return getDiversifyFieldSuggestions(innerText, callbacks, context);
+      return getVectorFieldSuggestions(innerText, callbacks, context);
 
     case MmrPosition.AFTER_FIELD:
       return [limitKeywordSuggestion];
