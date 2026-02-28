@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const unsavedDashboardTitle = 'New Dashboard';
   const newDashboartTitle = 'A Wild Dashboard';
 
-  describe.only('dashboard unsaved listing', () => {
+  describe('dashboard unsaved listing', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
