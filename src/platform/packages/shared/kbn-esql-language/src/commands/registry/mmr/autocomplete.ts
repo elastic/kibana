@@ -17,7 +17,6 @@ import type {
 } from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
-import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import {
   columnExists,
   getFunctionsSuggestions,
@@ -25,7 +24,16 @@ import {
   getLiteralsSuggestions,
   handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
-import { onCompleteItem, pipeCompleteItem, withCompleteItem } from '../complete_items';
+import {
+  mmrLambdaMapSuggestion,
+  mmrLambdaValueSuggestion,
+  mmrLimitKeywordSuggestion,
+  mmrLimitValueSuggestions,
+  mmrQueryVectorSuggestion,
+  onCompleteItem,
+  pipeCompleteItem,
+  withCompleteItem,
+} from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
 
@@ -42,16 +50,6 @@ enum MmrPosition {
 }
 
 const MMR_VECTOR_TYPES = ['dense_vector'];
-
-const queryVectorSuggestion: ISuggestionItem = {
-  label: 'query vector',
-  text: '[${0:0.1}, ${1:0.2}]::dense_vector ',
-  asSnippet: true,
-  kind: 'Value',
-  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.queryVectorSuggestion', {
-    defaultMessage: 'Example query vector',
-  }),
-};
 
 async function getVectorFieldSuggestions(
   innerText: string,
@@ -102,36 +100,6 @@ async function getVectorFieldSuggestions(
     () => [...controlAndLiteralSuggestions, ...functionSuggestions]
   );
 }
-
-const limitKeywordSuggestion: ISuggestionItem = {
-  label: 'LIMIT',
-  text: 'LIMIT ',
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitKeywordSuggestion', {
-    defaultMessage: 'Limit',
-  }),
-};
-
-const limitValueSuggestions: ISuggestionItem[] = buildConstantsDefinitions(
-  ['5', '10'],
-  i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
-    defaultMessage: 'Example limit',
-  }),
-  undefined,
-  {
-    advanceCursorAndOpenSuggestions: true,
-  }
-);
-
-const lambdaMapSuggestion: ISuggestionItem = {
-  label: 'lambda',
-  text: '{ "lambda": ${0:0.5} }',
-  asSnippet: true,
-  kind: 'Value',
-  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.lambdaMapSuggestion', {
-    defaultMessage: 'MMR options configuration',
-  }),
-};
 
 function isAstItemIncomplete(item: ESQLAstItem | undefined): boolean {
   if (!item) {
@@ -210,7 +178,7 @@ export async function autocomplete(
   switch (position) {
     case MmrPosition.AFTER_MMR_KEYWORD:
       return [
-        queryVectorSuggestion,
+        mmrQueryVectorSuggestion,
         ...getLiteralsSuggestions(MMR_VECTOR_TYPES, Location.MMR, {
           includeDateLiterals: false,
           includeCompatibleLiterals: true,
@@ -236,16 +204,16 @@ export async function autocomplete(
       return getVectorFieldSuggestions(innerText, callbacks, context);
 
     case MmrPosition.AFTER_FIELD:
-      return [limitKeywordSuggestion];
+      return [mmrLimitKeywordSuggestion];
 
     case MmrPosition.AFTER_LIMIT_KEYWORD:
-      return limitValueSuggestions;
+      return mmrLimitValueSuggestions;
 
     case MmrPosition.AFTER_LIMIT_VALUE:
       return [withCompleteItem, pipeCompleteItem];
 
     case MmrPosition.AFTER_WITH_KEYWORD:
-      return [lambdaMapSuggestion];
+      return [mmrLambdaMapSuggestion];
 
     case MmrPosition.WITHIN_OPTIONS: {
       const availableParameters: MapParameters = {
@@ -257,19 +225,7 @@ export async function autocomplete(
               defaultMessage: 'MMR lambda value',
             }
           ),
-          suggestions: [
-            {
-              label: '0.5',
-              text: '0.5',
-              kind: 'Value',
-              detail: i18n.translate(
-                'kbn-esql-language.commands.mmr.autocomplete.lambdaSuggestion',
-                {
-                  defaultMessage: 'Example lambda',
-                }
-              ),
-            },
-          ],
+          suggestions: [mmrLambdaValueSuggestion],
         },
       };
 
