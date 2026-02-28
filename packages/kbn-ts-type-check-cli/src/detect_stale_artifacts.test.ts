@@ -24,6 +24,7 @@ import {
 
 jest.mock('execa');
 jest.mock('fs/promises');
+jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo' }));
 
 // ── Synthetic project graph ───────────────────────────────────────────────────
 //
@@ -363,7 +364,11 @@ describe('detectStaleArtifacts', () => {
   it('returns all transitively stale projects when a root dependency file changes', async () => {
     mockExeca.mockResolvedValue({ stdout: 'packages/core/src/index.ts' });
 
-    const result = await detectStaleArtifacts(REPO, 'abc123', 'def456', SOURCE_PATHS);
+    const result = await detectStaleArtifacts({
+      fromCommit: 'abc123',
+      toCommit: 'def456',
+      sourceConfigPaths: SOURCE_PATHS,
+    });
 
     expect(result).toEqual(
       new Set([tsc('packages/core'), tsc('packages/utils'), tsc('packages/plugin-a')])
@@ -373,7 +378,11 @@ describe('detectStaleArtifacts', () => {
   it('returns only the affected project when a leaf file changes', async () => {
     mockExeca.mockResolvedValue({ stdout: 'packages/plugin-a/src/plugin.ts' });
 
-    const result = await detectStaleArtifacts(REPO, 'abc123', 'def456', SOURCE_PATHS);
+    const result = await detectStaleArtifacts({
+      fromCommit: 'abc123',
+      toCommit: 'def456',
+      sourceConfigPaths: SOURCE_PATHS,
+    });
 
     expect(result).toEqual(new Set([tsc('packages/plugin-a')]));
   });
@@ -381,7 +390,11 @@ describe('detectStaleArtifacts', () => {
   it('returns an empty set when no files changed', async () => {
     mockExeca.mockResolvedValue({ stdout: '' });
 
-    const result = await detectStaleArtifacts(REPO, 'abc123', 'def456', SOURCE_PATHS);
+    const result = await detectStaleArtifacts({
+      fromCommit: 'abc123',
+      toCommit: 'def456',
+      sourceConfigPaths: SOURCE_PATHS,
+    });
 
     expect(result).toEqual(new Set());
   });
@@ -389,7 +402,11 @@ describe('detectStaleArtifacts', () => {
   it('returns an empty set when changed files do not belong to any known project', async () => {
     mockExeca.mockResolvedValue({ stdout: 'scripts/some_tool.ts' });
 
-    const result = await detectStaleArtifacts(REPO, 'abc123', 'def456', SOURCE_PATHS);
+    const result = await detectStaleArtifacts({
+      fromCommit: 'abc123',
+      toCommit: 'def456',
+      sourceConfigPaths: SOURCE_PATHS,
+    });
 
     expect(result).toEqual(new Set());
   });

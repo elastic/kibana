@@ -16,7 +16,7 @@ jest.mock('@kbn/dev-cli-errors', () => ({
 }));
 jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo' }));
 jest.mock('@kbn/std', () => ({
-  asyncForEachWithLimit: jest.fn(),
+  asyncForEachWithLimit: jest.fn().mockResolvedValue(undefined),
   asyncMapWithLimit: jest.fn().mockResolvedValue([]),
 }));
 
@@ -25,52 +25,100 @@ jest.mock('./src/archive/archive_ts_build_artifacts', () => ({
 }));
 jest.mock('./src/archive/restore_ts_build_artifacts', () => ({
   restoreTSBuildArtifacts: jest.fn(),
+  readArtifactsState: jest.fn().mockResolvedValue({ restoredSha: 'archive-sha-1234567890ab' }),
+  writeArtifactsState: jest.fn(),
 }));
-jest.mock('./src/archive/constants', () => ({ LOCAL_CACHE_ROOT: '/tmp/cache' }));
 jest.mock('./src/archive/utils', () => ({
   detectLocalChanges: jest.fn().mockResolvedValue(false),
   isCiEnvironment: jest.fn().mockReturnValue(false),
+  resolveCurrentCommitSha: jest.fn().mockResolvedValue('head-sha-1234567890ab'),
 }));
-jest.mock('./src/run_tsc_with_progress', () => ({
-  runTscWithProgress: jest.fn().mockResolvedValue(true),
+jest.mock('./src/run_tsc', () => ({
+  runTsc: jest.fn().mockResolvedValue(true),
+  runTscFastPass: jest.fn().mockResolvedValue(true),
 }));
 jest.mock('./root_refs_config', () => ({
-  getChangedFiles: jest.fn().mockResolvedValue(new Set()),
-  getAffectedProjectRefs: jest.fn().mockReturnValue(new Set()),
   updateRootRefsConfig: jest.fn(),
-  cleanupRootRefsConfig: jest.fn(),
   ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
 }));
+jest.mock('./src/detect_stale_artifacts', () => ({
+  detectStaleArtifacts: jest.fn().mockResolvedValue(new Set()),
+}));
+jest.mock('./src/clean_cache', () => ({
+  cleanCache: jest.fn(),
+}));
+jest.mock('./src/create_type_check_configs', () => ({
+  createTypeCheckConfigs: jest.fn(),
+}));
+jest.mock('./src/normalize_project_path', () => ({
+  normalizeProjectPath: jest.fn((p: string | undefined) => p),
+}));
 
-const { isCiEnvironment, detectLocalChanges } = jest.requireMock('./src/archive/utils') as {
+const makeProject = (name: string, dir: string): TsProject =>
+  ({
+    path: `${dir}/tsconfig.json`,
+    directory: `/repo/${dir}`,
+    typeCheckConfigPath: `/repo/${dir}/tsconfig.type_check.json`,
+    isTypeCheckDisabled: () => false,
+    repoRel: dir,
+    config: { compilerOptions: {} },
+    getBase: () => undefined,
+    getKbnRefs: () => [],
+  } as unknown as TsProject);
+
+jest.mock('@kbn/ts-projects', () => ({
+  TS_PROJECTS: [
+    makeProject('streams_app', 'x-pack/plugins/streams_app'),
+    makeProject('kbn-std', 'src/packages/kbn-std'),
+    makeProject('kbn-utils', 'src/packages/kbn-utils'),
+  ],
+}));
+
+// Import the module AFTER all mocks are in place — this triggers the
+// top-level `run()` call which we intercept via the mock above.
+require('./run_type_check_cli');
+
+const { run } = jest.requireMock('@kbn/dev-cli-runner') as {
+  run: jest.MockedFunction<(fn: Function, opts: unknown) => void>;
+};
+
+// `run` was called with (callback, options). Grab the callback.
+const runCallback = run.mock.calls[0][0] as (ctx: {
+  log: SomeDevLog;
+  flagsReader: ReturnType<typeof makeFlagsReader>;
+  procRunner: ReturnType<typeof createProcRunner>;
+}) => Promise<void>;
+
+const { isCiEnvironment, detectLocalChanges, resolveCurrentCommitSha } = jest.requireMock(
+  './src/archive/utils'
+) as {
   isCiEnvironment: jest.MockedFunction<() => boolean>;
   detectLocalChanges: jest.MockedFunction<() => Promise<boolean>>;
+  resolveCurrentCommitSha: jest.MockedFunction<() => Promise<string>>;
 };
-const { restoreTSBuildArtifacts } = jest.requireMock(
+const { restoreTSBuildArtifacts, readArtifactsState, writeArtifactsState } = jest.requireMock(
   './src/archive/restore_ts_build_artifacts'
 ) as {
   restoreTSBuildArtifacts: jest.MockedFunction<(log: SomeDevLog) => Promise<void>>;
+  readArtifactsState: jest.MockedFunction<() => Promise<{ restoredSha: string } | undefined>>;
+  writeArtifactsState: jest.MockedFunction<(sha: string) => Promise<void>>;
 };
 const { archiveTSBuildArtifacts } = jest.requireMock(
   './src/archive/archive_ts_build_artifacts'
 ) as {
   archiveTSBuildArtifacts: jest.MockedFunction<(log: SomeDevLog) => Promise<void>>;
 };
-const { asyncForEachWithLimit } = jest.requireMock('@kbn/std') as {
-  asyncForEachWithLimit: jest.MockedFunction<(...args: unknown[]) => Promise<void>>;
+const { runTsc, runTscFastPass } = jest.requireMock('./src/run_tsc') as {
+  runTsc: jest.MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
+  runTscFastPass: jest.MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
 };
-const { cleanupRootRefsConfig } = jest.requireMock('./root_refs_config') as {
-  cleanupRootRefsConfig: jest.MockedFunction<() => Promise<void>>;
+const { detectStaleArtifacts } = jest.requireMock('./src/detect_stale_artifacts') as {
+  detectStaleArtifacts: jest.MockedFunction<
+    (opts: Record<string, unknown>) => Promise<Set<string>>
+  >;
 };
-const { getChangedFiles, getAffectedProjectRefs } = jest.requireMock('./root_refs_config') as {
-  getChangedFiles: jest.MockedFunction<() => Promise<Set<string>>>;
-  getAffectedProjectRefs: jest.MockedFunction<(files: Set<string>, refs: string[]) => Set<string>>;
-};
-const { runTscWithProgress } = jest.requireMock('./src/run_tsc_with_progress') as {
-  runTscWithProgress: jest.MockedFunction<(opts: Record<string, unknown>) => Promise<boolean>>;
-};
-const { run } = jest.requireMock('@kbn/dev-cli-runner') as {
-  run: jest.MockedFunction<(fn: Function, opts: unknown) => void>;
+const { cleanCache } = jest.requireMock('./src/clean_cache') as {
+  cleanCache: jest.MockedFunction<() => Promise<void>>;
 };
 
 const createLog = (): SomeDevLog =>
@@ -88,53 +136,24 @@ const createProcRunner = () => ({
 
 const makeFlagsReader = (overrides: Record<string, unknown> = {}) => ({
   boolean: jest.fn((name: string) => overrides[name] ?? false),
-  path: jest.fn((name: string) => overrides[name] ?? undefined),
+  path: jest.fn((name: string) => (overrides[name] as string | undefined) ?? undefined),
+  string: jest.fn((name: string) => (overrides[name] as string | undefined) ?? undefined),
 });
-
-const makeProject = (name: string, dir: string): TsProject =>
-  ({
-    path: `${dir}/tsconfig.json`,
-    directory: `/repo/${dir}`,
-    typeCheckConfigPath: `/repo/${dir}/tsconfig.type_check.json`,
-    isTypeCheckDisabled: () => false,
-    repoRel: dir,
-    config: { compilerOptions: {} },
-    getBase: () => undefined,
-    getKbnRefs: () => [],
-  } as unknown as TsProject);
-
-// Import the module AFTER all mocks are in place — this triggers the
-// top-level `run()` call which we intercept via the mock above.
-
-require('./run_type_check_cli');
-
-// `run` was called with (callback, options). Grab the callback.
-const runCallback = run.mock.calls[0][0] as (ctx: {
-  log: SomeDevLog;
-  flagsReader: ReturnType<typeof makeFlagsReader>;
-  procRunner: ReturnType<typeof createProcRunner>;
-}) => Promise<void>;
-
-// Stub TS_PROJECTS at the module level so the dynamic import resolves.
-jest.mock('@kbn/ts-projects', () => ({
-  TS_PROJECTS: [
-    makeProject('streams_app', 'x-pack/plugins/streams_app'),
-    makeProject('kbn-std', 'src/packages/kbn-std'),
-    makeProject('kbn-utils', 'src/packages/kbn-utils'),
-  ],
-}));
 
 describe('type_check orchestration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     isCiEnvironment.mockReturnValue(false);
     detectLocalChanges.mockResolvedValue(false);
-    getChangedFiles.mockResolvedValue(new Set());
-    getAffectedProjectRefs.mockReturnValue(new Set());
-    runTscWithProgress.mockResolvedValue(true);
+    resolveCurrentCommitSha.mockResolvedValue('head-sha-1234567890ab');
     restoreTSBuildArtifacts.mockResolvedValue(undefined);
     archiveTSBuildArtifacts.mockResolvedValue(undefined);
-    asyncForEachWithLimit.mockResolvedValue(undefined);
+    writeArtifactsState.mockResolvedValue(undefined);
+    readArtifactsState.mockResolvedValue({ restoredSha: 'archive-sha-1234567890ab' });
+    detectStaleArtifacts.mockResolvedValue(new Set());
+    runTsc.mockResolvedValue(true);
+    runTscFastPass.mockResolvedValue(true);
+    cleanCache.mockResolvedValue(undefined);
   });
 
   describe('early exits', () => {
@@ -146,20 +165,69 @@ describe('type_check orchestration', () => {
       await runCallback({ log, flagsReader, procRunner });
 
       expect(restoreTSBuildArtifacts).toHaveBeenCalledWith(log);
-      expect(runTscWithProgress).not.toHaveBeenCalled();
-      expect(procRunner.run).not.toHaveBeenCalled();
+      expect(runTsc).not.toHaveBeenCalled();
+      expect(runTscFastPass).not.toHaveBeenCalled();
     });
+  });
 
-    it('--clean-cache: deletes caches and returns without type checking', async () => {
+  describe('--clean-cache', () => {
+    it('cleans caches and continues to run the type check', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader({ 'clean-cache': true });
 
       await runCallback({ log, flagsReader, procRunner });
 
-      expect(log.warning).toHaveBeenCalledWith('Deleted all TypeScript caches');
-      expect(runTscWithProgress).not.toHaveBeenCalled();
-      expect(procRunner.run).not.toHaveBeenCalled();
+      expect(cleanCache).toHaveBeenCalled();
+      expect(log.info).toHaveBeenCalledWith('Deleted all TypeScript caches');
+      expect(runTsc).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('stale artifact detection', () => {
+    it('throws when no artifact state is recorded on disk', async () => {
+      readArtifactsState.mockResolvedValueOnce(undefined);
+
+      const log = createLog();
+      const procRunner = createProcRunner();
+      const flagsReader = makeFlagsReader();
+
+      await expect(runCallback({ log, flagsReader, procRunner })).rejects.toThrow(
+        'found no artifact state on disk'
+      );
+
+      expect(runTsc).not.toHaveBeenCalled();
+    });
+
+    it('logs up-to-date when no projects are stale', async () => {
+      detectStaleArtifacts.mockResolvedValueOnce(new Set());
+
+      const log = createLog();
+      const procRunner = createProcRunner();
+      const flagsReader = makeFlagsReader();
+
+      await runCallback({ log, flagsReader, procRunner });
+
+      expect(log.info).toHaveBeenCalledWith(
+        expect.stringContaining('All artifacts are up-to-date')
+      );
+    });
+
+    it('logs stale project paths when artifacts are stale', async () => {
+      detectStaleArtifacts.mockResolvedValueOnce(
+        new Set(['/repo/x-pack/plugins/streams_app/tsconfig.type_check.json'])
+      );
+
+      const log = createLog();
+      const procRunner = createProcRunner();
+      const flagsReader = makeFlagsReader();
+
+      await runCallback({ log, flagsReader, procRunner });
+
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('1 project'));
+      expect(log.info).toHaveBeenCalledWith(
+        expect.stringContaining('x-pack/plugins/streams_app/tsconfig.type_check.json')
+      );
     });
   });
 
@@ -174,7 +242,7 @@ describe('type_check orchestration', () => {
       expect(restoreTSBuildArtifacts).toHaveBeenCalledWith(log);
     });
 
-    it('archives artifacts after a successful type check on a clean tree', async () => {
+    it('archives artifacts and updates state after a successful type check on a clean tree', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader({ 'with-archive': true });
@@ -184,6 +252,7 @@ describe('type_check orchestration', () => {
       await runCallback({ log, flagsReader, procRunner });
 
       expect(archiveTSBuildArtifacts).toHaveBeenCalledWith(log);
+      expect(writeArtifactsState).toHaveBeenCalledWith('head-sha-1234567890ab');
     });
 
     it('skips archiving when local changes are detected (not CI)', async () => {
@@ -196,6 +265,8 @@ describe('type_check orchestration', () => {
       await runCallback({ log, flagsReader, procRunner });
 
       expect(archiveTSBuildArtifacts).not.toHaveBeenCalled();
+      expect(writeArtifactsState).not.toHaveBeenCalled();
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('uncommitted changes'));
     });
 
     it('throws when local changes are detected on CI', async () => {
@@ -216,141 +287,69 @@ describe('type_check orchestration', () => {
   });
 
   describe('not on CI', () => {
-    it('with --project filter: runs tsc on the single project, no fail-fast pass', async () => {
+    it('with --project filter: runs only the full pass, skips the fail-fast pass', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
-      const flagsReader = makeFlagsReader({ project: 'x-pack/plugins/streams_app/tsconfig.json' });
+      const flagsReader = makeFlagsReader({
+        project: 'x-pack/plugins/streams_app/tsconfig.json',
+      });
 
       await runCallback({ log, flagsReader, procRunner });
 
-      expect(getChangedFiles).not.toHaveBeenCalled();
-      expect(runTscWithProgress).toHaveBeenCalledTimes(1);
-      expect(runTscWithProgress).toHaveBeenCalledWith(
-        expect.objectContaining({
-          args: expect.arrayContaining([
-            '-b',
-            expect.stringContaining('streams_app/tsconfig.type_check.json'),
-          ]),
-        })
-      );
+      expect(runTscFastPass).not.toHaveBeenCalled();
+      expect(runTsc).toHaveBeenCalledTimes(1);
     });
 
-    it('without --project filter + changed files: runs fail-fast pass then full pass', async () => {
+    it('without --project filter: runs fail-fast pass then full pass', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader();
 
-      getChangedFiles.mockResolvedValue(new Set(['x-pack/plugins/streams_app/public/index.ts']));
-      getAffectedProjectRefs.mockReturnValue(
-        new Set(['./x-pack/plugins/streams_app/tsconfig.type_check.json'])
-      );
-
       await runCallback({ log, flagsReader, procRunner });
 
-      // First call: fail-fast pass (affected project)
-      // Second call: full pass (all projects)
-      expect(runTscWithProgress).toHaveBeenCalledTimes(2);
-
-      const firstCallArgs = runTscWithProgress.mock.calls[0][0] as { args: string[] };
-      expect(firstCallArgs.args).toContain('x-pack/plugins/streams_app/tsconfig.type_check.json');
-      expect(firstCallArgs.args).not.toContain('tsconfig.refs.json');
-
-      const secondCallArgs = runTscWithProgress.mock.calls[1][0] as { args: string[] };
-      expect(secondCallArgs.args).toContain('tsconfig.refs.json');
+      expect(runTscFastPass).toHaveBeenCalledTimes(1);
+      expect(runTsc).toHaveBeenCalledTimes(1);
     });
 
-    it('without --project filter + no changed files: skips fail-fast, runs full pass only', async () => {
+    it('fail-fast pass fails: skips the full pass and throws', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader();
 
-      getChangedFiles.mockResolvedValue(new Set());
-      getAffectedProjectRefs.mockReturnValue(new Set());
-
-      await runCallback({ log, flagsReader, procRunner });
-
-      // Only full pass — fail-fast returned early (no affected projects)
-      expect(runTscWithProgress).toHaveBeenCalledTimes(1);
-
-      const callArgs = runTscWithProgress.mock.calls[0][0] as { args: string[] };
-      expect(callArgs.args).toContain('tsconfig.refs.json');
-    });
-
-    it('fail-fast pass fails: reports error and skips the full pass', async () => {
-      const log = createLog();
-      const procRunner = createProcRunner();
-      const flagsReader = makeFlagsReader();
-
-      getChangedFiles.mockResolvedValue(new Set(['x-pack/plugins/streams_app/public/index.ts']));
-      getAffectedProjectRefs.mockReturnValue(
-        new Set(['./x-pack/plugins/streams_app/tsconfig.type_check.json'])
-      );
-
-      // First call (fail-fast) fails
-      runTscWithProgress.mockResolvedValueOnce(false);
+      runTscFastPass.mockResolvedValueOnce(false);
 
       await expect(runCallback({ log, flagsReader, procRunner })).rejects.toThrow(
         'Unable to build TS project refs'
       );
 
-      expect(log.error).toHaveBeenCalledWith('Type errors found in locally changed projects.');
-
-      // Full pass never ran
-      expect(runTscWithProgress).toHaveBeenCalledTimes(1);
+      expect(runTsc).not.toHaveBeenCalled();
     });
 
-    it('full build fails: throws createFailError', async () => {
+    it('full pass fails: throws createFailError', async () => {
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader();
 
-      // No changed files → skip fail-fast, full build fails
-      runTscWithProgress.mockResolvedValueOnce(false);
+      runTsc.mockResolvedValueOnce(false);
 
       await expect(runCallback({ log, flagsReader, procRunner })).rejects.toThrow(
         'Unable to build TS project refs'
       );
-
-      expect(runTscWithProgress).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('on CI', () => {
-    it('skips fail-fast pass, runs full pass only', async () => {
+    it('skips the fail-fast pass and runs only the full pass', async () => {
       isCiEnvironment.mockReturnValue(true);
 
       const log = createLog();
       const procRunner = createProcRunner();
       const flagsReader = makeFlagsReader();
 
-      getChangedFiles.mockResolvedValue(new Set(['x-pack/plugins/streams_app/public/index.ts']));
-
       await runCallback({ log, flagsReader, procRunner });
 
-      // No fail-fast pass — getChangedFiles should not be called
-      expect(getChangedFiles).not.toHaveBeenCalled();
-
-      // Full pass ran via procRunner (CI uses verbose mode, not progress bar)
-      expect(procRunner.run).toHaveBeenCalledTimes(1);
-      expect(procRunner.run).toHaveBeenCalledWith(
-        'tsc',
-        expect.objectContaining({
-          args: expect.arrayContaining(['-b', 'tsconfig.refs.json']),
-        })
-      );
-    });
-  });
-
-  describe('--cleanup', () => {
-    it('removes generated config files and root refs config', async () => {
-      const log = createLog();
-      const procRunner = createProcRunner();
-      const flagsReader = makeFlagsReader({ cleanup: true });
-
-      await runCallback({ log, flagsReader, procRunner });
-
-      expect(log.verbose).toHaveBeenCalledWith('cleaning up');
-      expect(cleanupRootRefsConfig).toHaveBeenCalled();
+      expect(runTscFastPass).not.toHaveBeenCalled();
+      expect(runTsc).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -12,6 +12,7 @@ import Fsp from 'fs/promises';
 
 import execa from 'execa';
 import { asyncForEachWithLimit } from '@kbn/std';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export interface Project {
   /** Absolute path to this project's tsconfig.type_check.json. */
@@ -180,19 +181,23 @@ export const findTransitiveDependents = (
  * Combines all steps: git diff → project mapping → dependency graph traversal.
  * Runs the git diff and graph construction in parallel since they are independent.
  */
-export const detectStaleArtifacts = async (
-  repoRoot: string,
-  fromCommit: string,
-  toCommit: string,
-  sourceConfigPaths: string[]
-): Promise<Set<string>> => {
-  const projects = discoverProjects(repoRoot, sourceConfigPaths);
+export const detectStaleArtifacts = async ({
+  fromCommit,
+  toCommit,
+  sourceConfigPaths,
+}: {
+  fromCommit: string;
+  toCommit: string;
+  sourceConfigPaths: string[];
+}): Promise<Set<string>> => {
+  const projects = discoverProjects(REPO_ROOT, sourceConfigPaths);
 
   const [changedFiles, dependentsGraph] = await Promise.all([
-    getChangedFiles(repoRoot, fromCommit, toCommit),
+    getChangedFiles(REPO_ROOT, fromCommit, toCommit),
     buildDependentsGraph(projects),
   ]);
 
   const directlyAffected = mapFilesToProjects(changedFiles, projects);
+
   return findTransitiveDependents(directlyAffected, dependentsGraph);
 };

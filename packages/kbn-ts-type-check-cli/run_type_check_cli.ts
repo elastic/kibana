@@ -24,18 +24,18 @@ import { detectStaleArtifacts } from './src/detect_stale_artifacts';
 import { createTypeCheckConfigs } from './src/create_type_check_configs';
 import { runTsc, runTscFastPass } from './src/run_tsc';
 import { cleanCache } from './src/clean_cache';
+import { normalizeProjectPath } from './src/normalize_project_path';
 
 run(
   async ({ log, flagsReader, procRunner }) => {
     const scriptStart = Date.now();
 
     const isVerbose = flagsReader.boolean('verbose');
-    const projectFilter = flagsReader.path('project');
+    const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
     const shouldRestoreOnly = flagsReader.boolean('restore-artifacts');
     const extendedDiagnostics = flagsReader.boolean('extended-diagnostics');
     const shouldCleanCache = flagsReader.boolean('clean-cache');
     const shouldUseArchive = flagsReader.boolean('with-archive');
-    const onlyDetectStale = flagsReader.boolean('only-detect-stale');
 
     const useProgressBar = !isCiEnvironment() && !isVerbose;
 
@@ -66,38 +66,53 @@ run(
       throw createFailError(`No type-checkable project found at path: ${projectFilter}`);
     }
 
-    if (onlyDetectStale) {
-      const state = await readArtifactsState();
-      if (!state) {
-        throw createFailError(
-          '--only-detect-stale found no artifact state on disk. ' +
-            'Run with --with-archive first to restore artifacts and record their commit SHA.'
-        );
-      }
-      const stale = await detectStaleArtifacts(
-        REPO_ROOT,
-        state.restoredSha,
-        'HEAD',
-        TS_PROJECTS.map((p) => p.path)
+    // ── Detect freshness of artifacts on filesystem ──────────────────────────────────────────────────
+    /*
+     * Detects stale artifacts by comparing the restored commit SHA with the current HEAD.
+     * If stale artifacts are found, it logs which projects will have to be rechecked during type checking.
+     * If more than 5 projects are stale, it suggests running with --clear-cache --with-archive to retrieve
+     * fresh artifacts from remote for the best type check performance.
+     */
+    const state = await readArtifactsState();
+    if (!state) {
+      throw createFailError(
+        'found no artifact state on disk. Run with --with-archive first to restore artifacts and record their commit SHA.'
       );
-
-      const shortSha = state.restoredSha.slice(0, 12);
-
-      if (stale.size === 0) {
-        log.info(`All artifacts are up-to-date (comparing ${shortSha} → HEAD).`);
-      } else {
-        log.info(`${stale.size} project(s) have stale artifacts (comparing ${shortSha} → HEAD):`);
-        for (const tsConfigPath of [...stale].sort()) {
-          log.info(`  ${Path.relative(REPO_ROOT, tsConfigPath)}`);
-        }
-      }
-
-      return;
     }
 
-    await createTypeCheckConfigs(log, projectsToCheck, TS_PROJECTS);
+    const stale = await detectStaleArtifacts({
+      fromCommit: state.restoredSha,
+      toCommit: 'HEAD',
+      sourceConfigPaths: TS_PROJECTS.map((p) => p.path),
+    });
+
+    const shortSha = state.restoredSha.slice(0, 12);
+
+    if (stale.size === 0) {
+      log.info(`All artifacts are up-to-date (comparing ${shortSha} → HEAD).`);
+    } else {
+      log.info(
+        `${stale.size} project${
+          stale.size === 1 ? '' : 's'
+        } have stale artifacts (comparing ${shortSha} → HEAD):`
+      );
+
+      for (const tsConfigPath of [...stale].sort()) {
+        log.info(`  ${Path.relative(REPO_ROOT, tsConfigPath)}`);
+      }
+
+      if (stale.size > 0 && stale.size < 6) {
+        log.info('Cache freshness is good, no need to restore fresh artifacts from remote.');
+      } else {
+        log.info(
+          'Run with --clear-cache --with-archive to retrieve fresh artifacts from remote for the best type check performance.'
+        );
+      }
+    }
 
     // ── Type checking ──────────────────────────────────────────────────────────
+    await createTypeCheckConfigs(log, projectsToCheck, TS_PROJECTS);
+
     let didTypeCheckFail = false;
 
     // Fail-fast pass: type-check only the projects with local changes so the
@@ -181,23 +196,13 @@ run(
     `,
     flags: {
       string: ['project'],
-      boolean: [
-        'clean-cache',
-        'extended-diagnostics',
-        'with-archive',
-        'restore-artifacts',
-        'only-detect-stale',
-      ],
+      boolean: ['clean-cache', 'extended-diagnostics', 'with-archive', 'restore-artifacts'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
         --clean-cache           Delete all TypeScript caches and generated config files, then perform a
                                   full type check.
         --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
-        --only-detect-stale     Analyse the artifacts on the filesystem to determine which projects are
-                                  stale relative to the current HEAD. Reads the commit SHA recorded when
-                                  artifacts were last restored; run with --with-archive first if no state
-                                  has been recorded yet.
         --with-archive          Restore cached artifacts before running and archive results afterwards.
                                   Locally, this will try to fetch from GCS first (requires gcloud auth login)
                                   and fall back to the local cache. Downloaded archives are cached locally
