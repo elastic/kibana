@@ -179,6 +179,17 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
         if (matchedShas.length > 0) {
           const bestMatch = matchedShas[0];
 
+          if (currentSha && bestMatch !== currentSha) {
+            log.warning(
+              `No CI artifacts available yet for HEAD (${currentSha.slice(0, 12)}). ` +
+                `Falling back to the nearest ancestor with a cached archive (${bestMatch.slice(
+                  0,
+                  12
+                )}). ` +
+                `If type checking is slow, wait for CI to publish artifacts for HEAD and retry with --clean-cache --with-archive.`
+            );
+          }
+
           log.info(
             `Found ${
               matchedShas.length
