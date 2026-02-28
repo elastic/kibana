@@ -8,6 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 
 interface PdfTracker {
   setCpuUsage: (cpu: number) => void;
@@ -25,25 +26,31 @@ interface ApmSpan {
 }
 
 export function getTracker(): PdfTracker {
-  const apmTrans = apm.startTransaction('generate-pdf', TRANSACTION_TYPE);
+  return withActiveSpan(
+    'generate-pdf',
+    { attributes: { 'transaction.type': TRANSACTION_TYPE } },
+    () => {
+      const apmTrans = apm.startTransaction('generate-pdf', TRANSACTION_TYPE);
 
-  let apmScreenshots: ApmSpan | null = null;
+      let apmScreenshots: ApmSpan | null = null;
 
-  return {
-    startScreenshots() {
-      apmScreenshots = apmTrans.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
-    },
-    endScreenshots() {
-      if (apmScreenshots) apmScreenshots.end();
-    },
-    setCpuUsage(cpu: number) {
-      apmTrans.setLabel('cpu', cpu, false);
-    },
-    setMemoryUsage(memory: number) {
-      apmTrans.setLabel('memory', memory, false);
-    },
-    end() {
-      if (apmTrans) apmTrans.end();
-    },
-  };
+      return {
+        startScreenshots() {
+          apmScreenshots = apmTrans.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
+        },
+        endScreenshots() {
+          if (apmScreenshots) apmScreenshots.end();
+        },
+        setCpuUsage(cpu: number) {
+          apmTrans.setLabel('cpu', cpu, false);
+        },
+        setMemoryUsage(memory: number) {
+          apmTrans.setLabel('memory', memory, false);
+        },
+        end() {
+          if (apmTrans) apmTrans.end();
+        },
+      };
+    }
+  );
 }
