@@ -1,0 +1,17 @@
+version: '1'
+name: 'sources.mysql.list_tables'
+description: 'List all tables in a MySQL database. Use this to discover available tables before querying. Inputs: database (string, optional - uses configured default if omitted).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: database
+    type: string
+    required: false
+steps:
+  - name: list-tables
+    type: mysql.listTables
+    connector-id: <%= mysql-stack-connector-id %>
+    with:
+      database: "${{inputs.database}}"

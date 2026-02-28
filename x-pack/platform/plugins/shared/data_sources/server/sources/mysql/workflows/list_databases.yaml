@@ -1,0 +1,13 @@
+version: '1'
+name: 'sources.mysql.list_databases'
+description: 'List all databases accessible to the authenticated MySQL user. Use this to discover available databases before querying.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs: []
+steps:
+  - name: list-databases
+    type: mysql.listDatabases
+    connector-id: <%= mysql-stack-connector-id %>
+    with: {}

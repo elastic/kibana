@@ -1,0 +1,20 @@
+version: '1'
+name: 'sources.mysql.query'
+description: 'Execute a read-only SQL query against the MySQL database. Use this to retrieve specific data with custom SQL. Inputs: sql (string), maxRows (number, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sql
+    type: string
+  - name: maxRows
+    type: number
+    required: false
+steps:
+  - name: execute-query
+    type: mysql.query
+    connector-id: <%= mysql-stack-connector-id %>
+    with:
+      sql: "${{inputs.sql}}"
+      maxRows: ${{inputs.maxRows}}

@@ -1,0 +1,30 @@
+version: '1'
+name: 'sources.mysql.search'
+description: 'Search rows in a MySQL table by matching a search term against specified columns using LIKE patterns. Inputs: table (string), searchTerm (string), columns (array of column names to search in), maxRows (number, optional), database (string, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table
+    type: string
+  - name: searchTerm
+    type: string
+  - name: columns
+    type: array
+  - name: maxRows
+    type: number
+    required: false
+  - name: database
+    type: string
+    required: false
+steps:
+  - name: search-rows
+    type: mysql.searchRows
+    connector-id: <%= mysql-stack-connector-id %>
+    with:
+      table: "${{inputs.table}}"
+      searchTerm: "${{inputs.searchTerm}}"
+      columns: "${{inputs.columns}}"
+      maxRows: ${{inputs.maxRows}}
+      database: "${{inputs.database}}"

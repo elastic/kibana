@@ -1,0 +1,20 @@
+version: '1'
+name: 'sources.mysql.describe_table'
+description: 'Describe the schema of a MySQL table, including column names, types, and constraints. Use this to understand table structure before writing queries. Inputs: table (string), database (string, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table
+    type: string
+  - name: database
+    type: string
+    required: false
+steps:
+  - name: describe-table
+    type: mysql.describeTable
+    connector-id: <%= mysql-stack-connector-id %>
+    with:
+      table: "${{inputs.table}}"
+      database: "${{inputs.database}}"
