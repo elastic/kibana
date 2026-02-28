@@ -7,7 +7,7 @@
 import { Alert as LegacyAlert } from '../../../alert/alert';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { buildOngoingAlert } from './build_ongoing_alert';
-import type { AlertRuleData } from '../../types';
+import { createAlertRuleData } from '../../types';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -1014,7 +1014,7 @@ for (const flattened of [true, false]) {
     });
 
     describe('ALERT_MUTED field', () => {
-      const ruleData: AlertRuleData = {
+      const ruleData = createAlertRuleData({
         consumer: 'bar',
         executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         id: '1',
@@ -1026,7 +1026,7 @@ for (const flattened of [true, false]) {
         alertDelay: 0,
         muteAll: false,
         mutedInstanceIds: [],
-      };
+      });
 
       test('should set ALERT_MUTED to false when alert is not muted', () => {
         const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
@@ -1073,10 +1073,10 @@ for (const flattened of [true, false]) {
           alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
-          ruleData: {
+          ruleData: createAlertRuleData({
             ...ruleData,
             mutedInstanceIds: ['alert-A', 'alert-B'],
-          },
+          }),
           isImproving: null,
           timestamp: '2023-03-28T12:27:28.159Z',
           kibanaVersion: '8.9.0',
@@ -1093,7 +1093,7 @@ for (const flattened of [true, false]) {
           alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
-          ruleData: {
+          ruleData: createAlertRuleData({
             ...ruleData,
             snoozedInstances: [
               {
@@ -1101,7 +1101,7 @@ for (const flattened of [true, false]) {
                 expiresAt: new Date(Date.now() + 3600000).toISOString(),
               },
             ],
-          },
+          }),
           isImproving: null,
           timestamp: '2023-03-28T12:27:28.159Z',
           kibanaVersion: '8.9.0',
@@ -1111,7 +1111,7 @@ for (const flattened of [true, false]) {
       });
 
       test('should keep ALERT_MUTED true across consecutive ongoing updates when in snoozedInstances', () => {
-        const snoozedRuleData = {
+        const snoozedRuleData = createAlertRuleData({
           ...ruleData,
           snoozedInstances: [
             {
@@ -1119,7 +1119,7 @@ for (const flattened of [true, false]) {
               expiresAt: new Date(Date.now() + 3600000).toISOString(),
             },
           ],
-        };
+        });
         const firstLegacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
         firstLegacyAlert.scheduleActions('default');
 

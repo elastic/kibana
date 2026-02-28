@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { formatRule } from './format_rule';
+import { createAlertRuleData } from '../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../types';
 import {
@@ -51,7 +52,7 @@ describe('formatRule', () => {
   test('should format rule data', () => {
     expect(
       formatRule({
-        rule: {
+        rule: createAlertRuleData({
           muteAll: false,
           mutedInstanceIds: [],
           consumer: 'bar',
@@ -65,7 +66,7 @@ describe('formatRule', () => {
           spaceId: 'default',
           tags: ['rule-', '-tags'],
           alertDelay: 0,
-        },
+        }),
         ruleType,
       })
     ).toEqual({

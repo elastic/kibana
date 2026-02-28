@@ -33,7 +33,7 @@ export function getAlertMutedStatus(
     return false;
   }
 
-  if (ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId)) {
+  if (ruleData.muteAll || ruleData.mutedInstanceIdsSet.has(alertInstanceId)) {
     return true;
   }
 
@@ -41,5 +41,5 @@ export function getAlertMutedStatus(
     return true;
   }
 
-  return (ruleData.snoozedInstances ?? []).some((e) => e.instanceId === alertInstanceId);
+  return ruleData.snoozedInstanceIdsSet.has(alertInstanceId);
 }

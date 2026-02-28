@@ -41,7 +41,7 @@ import type { SnoozedInstanceConfig, SnoozedInstanceEntry } from '../lib/snooze_
 
 export type { SnoozedInstanceConfig, SnoozedInstanceEntry };
 
-export interface AlertRuleData {
+export interface AlertRuleDataInput {
   consumer: string;
   executionId: string;
   id: string;
@@ -55,6 +55,34 @@ export interface AlertRuleData {
   mutedInstanceIds: string[];
   snoozedInstances?: SnoozedInstanceEntry[];
 }
+
+export interface AlertRuleData extends AlertRuleDataInput {
+  readonly mutedInstanceIdsSet: ReadonlySet<string>;
+  readonly snoozedInstanceIdsSet: ReadonlySet<string>;
+}
+
+/**
+ * Builds AlertRuleData with derived Sets for O(1) lookups.
+ * `mutedInstanceIds` and `snoozedInstances` are shallow-copied so
+ * post-construction mutations on the caller side cannot desync the
+ * derived Sets. `tags` is passed through by reference (no derived
+ * Set depends on it).
+ */
+export const createAlertRuleData = (
+  input: AlertRuleDataInput,
+  prebuiltSets?: {
+    mutedInstanceIdsSet?: ReadonlySet<string>;
+    snoozedInstanceIdsSet?: ReadonlySet<string>;
+  }
+): AlertRuleData => ({
+  ...input,
+  mutedInstanceIds: [...input.mutedInstanceIds],
+  snoozedInstances: input.snoozedInstances ? [...input.snoozedInstances] : undefined,
+  mutedInstanceIdsSet: prebuiltSets?.mutedInstanceIdsSet ?? new Set(input.mutedInstanceIds),
+  snoozedInstanceIdsSet:
+    prebuiltSets?.snoozedInstanceIdsSet ??
+    new Set((input.snoozedInstances ?? []).map((e) => e.instanceId)),
+});
 
 export interface AlertRule {
   [ALERT_RULE_CATEGORY]: string;

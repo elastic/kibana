@@ -67,6 +67,7 @@ export interface ActionSchedulerOptions<
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
+  mutedInstanceIdsSet?: ReadonlySet<string>;
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;

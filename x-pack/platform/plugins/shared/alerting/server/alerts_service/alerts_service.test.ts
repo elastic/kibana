@@ -29,6 +29,9 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 
 jest.mock('../alerts_client');
 
+const { createAlertRuleData } =
+  jest.requireActual<typeof import('../alerts_client')>('../alerts_client');
+
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 
@@ -1545,7 +1548,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1559,7 +1562,7 @@ describe('Alerts Service', () => {
               alertDelay: 0,
               muteAll: false,
               mutedInstanceIds: [],
-            },
+            }),
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
@@ -1587,6 +1590,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -1615,7 +1620,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -1629,7 +1634,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(result).toBe(null);
@@ -1672,7 +1677,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -1686,7 +1691,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1728,6 +1733,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -1787,7 +1794,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -1801,7 +1808,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             }),
             alertsService.createAlertsClient({
               alertingEventLogger,
@@ -1811,7 +1818,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -1825,7 +1832,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             }),
           ]);
 
@@ -1867,6 +1874,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -1918,7 +1927,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -1932,7 +1941,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
@@ -1960,6 +1969,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -2019,7 +2030,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -2033,7 +2044,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             });
           };
 
@@ -2068,6 +2079,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -2132,7 +2145,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -2146,7 +2159,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             });
           };
 
@@ -2206,7 +2219,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -2220,7 +2233,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -2280,7 +2293,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -2294,7 +2307,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -2352,7 +2365,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -2366,7 +2379,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(AlertsClient).not.toHaveBeenCalled();

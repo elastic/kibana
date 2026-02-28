@@ -37,7 +37,7 @@ import {
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { alertRule } from '../test_fixtures';
-import type { AlertRuleData } from '../../types';
+import { createAlertRuleData } from '../../types';
 
 describe('buildNewAlert', () => {
   test('should build alert document with info from legacy alert', () => {
@@ -441,7 +441,7 @@ describe('buildNewAlert', () => {
   });
 
   describe('ALERT_MUTED field', () => {
-    const ruleData: AlertRuleData = {
+    const ruleData = createAlertRuleData({
       consumer: 'bar',
       executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
       id: '1',
@@ -453,7 +453,7 @@ describe('buildNewAlert', () => {
       alertDelay: 0,
       muteAll: false,
       mutedInstanceIds: [],
-    };
+    });
 
     test('should set ALERT_MUTED to false when alert is not muted', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
@@ -495,10 +495,10 @@ describe('buildNewAlert', () => {
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        ruleData: {
+        ruleData: createAlertRuleData({
           ...ruleData,
           mutedInstanceIds: ['alert-A', 'alert-B'],
-        },
+        }),
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       });
@@ -568,10 +568,10 @@ describe('buildNewAlert', () => {
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        ruleData: {
+        ruleData: createAlertRuleData({
           ...ruleData,
           mutedInstanceIds: ['alert-B', 'alert-C'],
-        },
+        }),
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       });

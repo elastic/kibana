@@ -344,6 +344,16 @@ export class TaskRunner<
       isServerless: this.context.isServerless,
       shouldGrantUiam: this.context.shouldGrantUiam,
     };
+    // Build lookup Sets once and share them with both the alerts client
+    // (via createAlertRuleData) and the action scheduler to avoid redundant
+    // allocations. Only mutedInstanceIdsSet is passed to the action scheduler
+    // because PerAlertActionScheduler needs it for O(1) mute checks;
+    // snoozedInstanceIdsSet is only consumed by the alerts client path.
+    const mutedInstanceIdsSet: ReadonlySet<string> = new Set(rule.mutedInstanceIds);
+    const snoozedInstanceIdsSet: ReadonlySet<string> = new Set(
+      (rule.snoozedInstances ?? []).map((e) => e.instanceId)
+    );
+
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
         Params,
@@ -370,6 +380,7 @@ export class TaskRunner<
           mutedInstanceIds: rule.mutedInstanceIds,
           snoozedInstances: rule.snoozedInstances,
         },
+        prebuiltSets: { mutedInstanceIdsSet, snoozedInstanceIdsSet },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
         taskInstance: this.taskInstance,
@@ -434,6 +445,7 @@ export class TaskRunner<
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
+      mutedInstanceIdsSet,
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,

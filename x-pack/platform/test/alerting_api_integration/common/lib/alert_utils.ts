@@ -208,7 +208,7 @@ export class AlertUtils {
         )}/api/alerting/rule/${alertId}/alert/${instanceId}/_mute?validate_alerts_existence=false`
       )
       .set('kbn-xsrf', 'foo')
-      .send({});
+      .set('content-type', 'application/json');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }

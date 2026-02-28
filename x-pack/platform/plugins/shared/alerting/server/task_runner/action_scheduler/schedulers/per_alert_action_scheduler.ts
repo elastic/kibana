@@ -61,12 +61,13 @@ export class PerAlertActionScheduler<
 > implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private actions: RuleAction[] = [];
-  private mutedAlertIdsSet: Set<string> = new Set();
+  private mutedAlertIdsSet: ReadonlySet<string>;
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
   /** Alert instance IDs whose snooze conditions were met during this run and should be auto-unmuted. */
   public alertsToAutoUnmute: AlertToAutoUnmute[] = [];
+  private alertsToAutoUnmuteIds: Set<string> = new Set();
 
   constructor(
     private readonly context: ActionSchedulerOptions<
@@ -83,7 +84,7 @@ export class PerAlertActionScheduler<
     this.ruleTypeActionGroups = new Map(
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
-    this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+    this.mutedAlertIdsSet = context.mutedInstanceIdsSet ?? new Set(context.rule.mutedInstanceIds);
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -443,15 +444,18 @@ export class PerAlertActionScheduler<
     if (!result?.shouldUnmute) {
       return;
     }
-    if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
-      this.alertsToAutoUnmute.push({
-        alertInstanceId: alertId,
-        reason: result.reason ?? 'conditions met',
-      });
-      this.context.logger.debug(
-        `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${result.reason}`
-      );
+    this.addAutoUnmute(alertId, result.reason ?? 'conditions met');
+  }
+
+  private addAutoUnmute(alertId: string, reason: string): void {
+    if (this.alertsToAutoUnmuteIds.has(alertId)) {
+      return;
     }
+    this.alertsToAutoUnmute.push({ alertInstanceId: alertId, reason });
+    this.alertsToAutoUnmuteIds.add(alertId);
+    this.context.logger.debug(
+      `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${reason}`
+    );
   }
 
   private isAlertMuted(
@@ -466,7 +470,7 @@ export class PerAlertActionScheduler<
 
     // Path 2: Conditional snooze from alert.getSnoozeConfig() (set in initializeExecution from rule SO).
     // Skip re-evaluation if already in alertsToAutoUnmute (e.g. from initial pass).
-    if (this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+    if (this.alertsToAutoUnmuteIds.has(alertId)) {
       return false;
     }
 
@@ -480,15 +484,7 @@ export class PerAlertActionScheduler<
       return false;
     }
     if (result.shouldUnmute) {
-      if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
-        this.alertsToAutoUnmute.push({
-          alertInstanceId: alertId,
-          reason: result.reason ?? 'conditions met',
-        });
-        this.context.logger.debug(
-          `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${result.reason}`
-        );
-      }
+      this.addAutoUnmute(alertId, result.reason ?? 'conditions met');
       return false;
     }
 
