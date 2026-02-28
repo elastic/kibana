@@ -75,20 +75,7 @@ async function getVectorFieldSuggestions(
   });
 
   if (!callbacks?.getByType) {
-    const contextField = context?.columns?.keys().next().value as string | undefined;
-    const label = contextField || 'field';
-    return [
-      {
-        label,
-        text: `${label} `,
-        kind: 'Field',
-        detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.fieldSuggestion', {
-          defaultMessage: 'Example field',
-        }),
-      },
-      ...controlAndLiteralSuggestions,
-      ...functionSuggestions,
-    ];
+    return [];
   }
 
   const fieldSuggestions = await getFieldsSuggestions(MMR_VECTOR_TYPES, callbacks.getByType, {
