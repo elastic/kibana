@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/plugins/shared/screenshotting
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/screenshot-mode-plugin'
   - '@kbn/cloud-plugin'

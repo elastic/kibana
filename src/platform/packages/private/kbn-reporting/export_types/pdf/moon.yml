@@ -19,6 +19,7 @@ project:
     sourceRoot: src/platform/packages/private/kbn-reporting/export_types/pdf
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/reporting-common'
   - '@kbn/screenshotting-plugin'
   - '@kbn/reporting-server'
