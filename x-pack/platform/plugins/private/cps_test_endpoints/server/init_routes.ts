@@ -104,12 +104,10 @@ export function initRoutes(core: CoreSetup) {
         body: schema.object({
           systemIndex: schema.string({ defaultValue: '.kibana' }),
           dataIndex: schema.string({ defaultValue: 'logs-*' }),
+          linkedOnlyIndex: schema.maybe(schema.string()),
           projectRoutingValues: schema.arrayOf(schema.string(), {
             // Default to common routing expressions
             // In QA, replace these with actual linked project aliases (e.g., 'your-linked-project-id')
-            // NOTE: The indices specified above should exist in the ORIGIN project, not the linked project.
-            // Internal user requests are always routed to origin, so querying an index that only
-            // exists in the linked project will result in "index not found" (which is expected behavior).
             defaultValue: ['_alias:_origin', '_alias:_all'],
           }),
         }),
@@ -126,7 +124,7 @@ export function initRoutes(core: CoreSetup) {
       },
     },
     async (context, request, response) => {
-      const { systemIndex, dataIndex, projectRoutingValues } = request.body;
+      const { systemIndex, dataIndex, linkedOnlyIndex, projectRoutingValues } = request.body;
       const results: TestResults = {
         timestamp: new Date().toISOString(),
         environment: 'unknown',
@@ -226,6 +224,94 @@ export function initRoutes(core: CoreSetup) {
               },
             });
             results.summary.failed++;
+          }
+        }
+
+        // Test 3: Verify routing behavior - query linked-only index
+        // This test confirms internal user CANNOT access linked project data
+        // even when project_routing explicitly points to linked project
+        if (linkedOnlyIndex) {
+          for (const projectRouting of projectRoutingValues) {
+            // Skip _alias:_origin since that's expected to fail
+            if (projectRouting === '_alias:_origin') {
+              continue;
+            }
+
+            const scenario = `Linked-only index (${linkedOnlyIndex}) with project_routing=${projectRouting} - verify no access`;
+            results.summary.total++;
+
+            try {
+              const searchResponse = await esClient.search({
+                index: linkedOnlyIndex,
+                size: 0,
+                query: { match_all: {} },
+                body: {
+                  project_routing: projectRouting,
+                },
+              } as any);
+
+              // If we get here with hits, that's UNEXPECTED - internal user shouldn't see linked data
+              const hitsCount = (searchResponse.hits.total as any)?.value ?? 0;
+              if (hitsCount > 0) {
+                results.scenarios.push({
+                  scenario,
+                  success: false,
+                  statusCode: 200,
+                  error: 'UNEXPECTED: Internal user got data from linked project',
+                  details: {
+                    indexSearched: linkedOnlyIndex,
+                    projectRouting,
+                    hitsCount,
+                    message: `FAIL: Got ${hitsCount} hits from linked-only index. Internal user should NOT access linked project data!`,
+                  },
+                });
+                results.summary.failed++;
+              } else {
+                // 0 hits is acceptable (index exists but no matching docs in origin)
+                results.scenarios.push({
+                  scenario,
+                  success: true,
+                  statusCode: 200,
+                  details: {
+                    indexSearched: linkedOnlyIndex,
+                    projectRouting,
+                    hitsCount: 0,
+                    message: 'PASS: 0 hits (internal user correctly limited to origin)',
+                  },
+                });
+                results.summary.passed++;
+              }
+            } catch (error: any) {
+              // "index not found" is the EXPECTED behavior - proves we're hitting origin only
+              if (error.message?.includes('index_not_found') || error.statusCode === 404) {
+                results.scenarios.push({
+                  scenario,
+                  success: true,
+                  statusCode: 404,
+                  details: {
+                    indexSearched: linkedOnlyIndex,
+                    projectRouting,
+                    message:
+                      'PASS: Index not found (proves internal user routed to origin, not linked)',
+                  },
+                });
+                results.summary.passed++;
+              } else {
+                // Any other error is unexpected
+                results.scenarios.push({
+                  scenario,
+                  success: false,
+                  statusCode: error.statusCode || 500,
+                  error: error.message,
+                  details: {
+                    indexSearched: linkedOnlyIndex,
+                    projectRouting,
+                    message: `FAIL: Unexpected error: ${error.message}`,
+                  },
+                });
+                results.summary.failed++;
+              }
+            }
           }
         }
 

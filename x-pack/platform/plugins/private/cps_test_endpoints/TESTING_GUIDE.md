@@ -47,8 +47,15 @@ Kibana will start on http://localhost:5601
 
 Open the browser console and check the health endpoint:
 
+**Important**: Internal routes require special headers in serverless mode.
+
 ```javascript
-fetch('/internal/cps_test/health')
+fetch('/internal/cps_test/health', {
+  headers: {
+    'x-elastic-internal-origin': 'Kibana',
+    'kbn-xsrf': 'true'
+  }
+})
   .then(r => r.json())
   .then(console.log)
 ```
@@ -71,6 +78,7 @@ In the browser console (with Kibana UI open at http://localhost:5601):
 fetch('/internal/cps_test/run_all', {
   method: 'POST',
   headers: {
+    'x-elastic-internal-origin': 'Kibana',
     'kbn-xsrf': 'true',
     'Content-Type': 'application/json'
   },
@@ -87,6 +95,7 @@ Or using curl:
 ```bash
 curl -X POST http://localhost:5601/internal/cps_test/run_all \
   -u elastic_serverless:changeme \
+  -H 'x-elastic-internal-origin: Kibana' \
   -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -147,14 +156,19 @@ Deploy your Kibana build (with the plugin) to Project A:
 
 ### Step 4: Verify Plugin is Running in QA
 
-**Option A: Using Browser Console (OAuth login)**
+**Option A: Using Browser Console (OAuth login)** ⭐ **Recommended**
 
 1. Log into your QA Kibana UI using OAuth
 2. Open browser console (F12)
 3. Run:
 
 ```javascript
-fetch('/internal/cps_test/health')
+fetch('/internal/cps_test/health', {
+  headers: {
+    'x-elastic-internal-origin': 'Kibana',
+    'kbn-xsrf': 'true'
+  }
+})
   .then(r => r.json())
   .then(console.log)
 ```
@@ -173,10 +187,14 @@ Expected response:
 ```bash
 # Only if you have username/password (not OAuth)
 curl https://your-project.qa.elastic.co/internal/cps_test/health \
-  -u username:password
+  -u username:password \
+  -H 'x-elastic-internal-origin: Kibana' \
+  -H 'kbn-xsrf: true'
 ```
 
 **Note**: Most serverless QA environments use OAuth/SAML authentication, so browser console (Option A) is the recommended approach.
+
+**Important**: The `x-elastic-internal-origin` header is **required** for all internal routes in serverless mode. Without it, you'll get a 400 error: "uri [...] exists but is not available with the current configuration".
 
 ### Step 5: Run CPS Tests in QA
 
@@ -190,13 +208,18 @@ curl https://your-project.qa.elastic.co/internal/cps_test/health \
 fetch('/internal/cps_test/run_all', {
   method: 'POST',
   headers: {
+    'x-elastic-internal-origin': 'Kibana',
     'kbn-xsrf': 'true',
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
     systemIndex: '.kibana',
     dataIndex: 'logs-*',
-    projectRoutingValues: ['keepbriando-cps-test-proj-linked-ce713c', '_alias:_all']
+    linkedOnlyIndex: 'kibana_sample_data_ecommerce',  // Index that ONLY exists in linked project
+    projectRoutingValues: [
+      'keepbriando-cps-test-proj-linked-ce713c',
+      '_alias:*'
+    ]
   })
 }).then(r => r.json()).then(data => {
   console.log('CPS Test Results:');
@@ -206,18 +229,28 @@ fetch('/internal/cps_test/run_all', {
 })
 ```
 
+**Parameters explained**:
+- `systemIndex`: `.kibana` - Exists in origin (tests acceptance)
+- `dataIndex`: `logs-*` - Exists in origin (tests acceptance)  
+- `linkedOnlyIndex`: `kibana_sample_data_ecommerce` - EXISTS ONLY in linked project (tests routing behavior)
+  - **Expected**: "index not found" error → Proves internal user routed to origin
+  - **If unexpected**: Gets data → BUG! Internal user accessed linked project
+- `projectRoutingValues`: Different routing expressions to test
+
 **Method 2: Using curl (if you have basic auth)**
 
 ```bash
 # Only if your QA environment provides username/password credentials
 curl -X POST https://your-project.qa.elastic.co/internal/cps_test/run_all \
   -u username:password \
+  -H 'x-elastic-internal-origin: Kibana' \
   -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/json' \
   -d '{
     "systemIndex": ".kibana",
     "dataIndex": "logs-*",
-    "projectRoutingValues": ["keepbriando-cps-test-proj-linked-ce713c"]
+    "linkedOnlyIndex": "kibana_sample_data_ecommerce",
+    "projectRoutingValues": ["keepbriando-cps-test-proj-linked-ce713c", "_alias:*"]
   }' | jq '.'
 ```
 
@@ -225,24 +258,38 @@ curl -X POST https://your-project.qa.elastic.co/internal/cps_test/run_all \
 
 ### Step 6: Interpret QA Results
 
+The tests now include **three types of verification**:
+
+1. **System index test** (`.kibana`) - Verifies ES accepts `project_routing` parameter
+2. **Data index test** (`logs-*`) - Verifies ES accepts `project_routing` parameter  
+3. **Linked-only index test** (`kibana_sample_data_ecommerce`) - **Verifies actual routing behavior**
+
 Review the output:
 
 **Success Scenario** (Expected):
 ```json
 {
   "summary": {
-    "total": 6,
-    "passed": 6,
+    "total": 8,
+    "passed": 8,
     "failed": 0
   },
   "scenarios": [
     {
-      "scenario": "System index search (.kibana) with project_routing=_alias:project-b",
+      "scenario": "System index search (.kibana) with project_routing=...",
       "success": true,
       "statusCode": 200,
       "details": {
         "message": "Request succeeded - ES accepted project_routing for internal user",
         "hitsCount": 150
+      }
+    },
+    {
+      "scenario": "Linked-only index (kibana_sample_data_ecommerce) with project_routing=keepbriando-cps-test-proj-linked-ce713c - verify no access",
+      "success": true,
+      "statusCode": 404,
+      "details": {
+        "message": "PASS: Index not found (proves internal user routed to origin, not linked)"
       }
     }
     // ...
@@ -250,28 +297,35 @@ Review the output:
 }
 ```
 
-**Failure Scenario** (If there's a bug):
+**Key indicators of correct behavior**:
+- ✅ System/data index tests: `success: true, statusCode: 200` - ES accepts requests
+- ✅ Linked-only index tests: `success: true, statusCode: 404` - "index not found" proves origin-only routing
+- ✅ All passed: Internal user correctly limited to origin project
+
+**Failure Scenario - BUG DETECTED** (If internal user accesses linked data):
 ```json
 {
   "summary": {
-    "total": 6,
-    "passed": 3,
-    "failed": 3
+    "total": 8,
+    "passed": 6,
+    "failed": 2
   },
   "scenarios": [
     {
-      "scenario": "System index search (.kibana) with project_routing=_alias:project-b",
+      "scenario": "Linked-only index (kibana_sample_data_ecommerce) with project_routing=_alias:*  - verify no access",
       "success": false,
-      "statusCode": 400,
-      "error": "Bad Request",
+      "statusCode": 200,
+      "error": "UNEXPECTED: Internal user got data from linked project",
       "details": {
-        "message": "Request failed - ES rejected project_routing for internal user"
+        "hitsCount": 42,
+        "message": "FAIL: Got 42 hits from linked-only index. Internal user should NOT access linked project data!"
       }
     }
-    // ...
   ]
 }
 ```
+
+**This indicates a critical bug**: Internal user routing is NOT working correctly - the internal user was able to access linked project data.
 
 ### Step 7: Run Targeted Tests
 
@@ -283,6 +337,7 @@ If you need to test specific scenarios:
 fetch('/internal/cps_test/run_scenario', {
   method: 'POST',
   headers: {
+    'x-elastic-internal-origin': 'Kibana',
     'kbn-xsrf': 'true',
     'Content-Type': 'application/json'
   },
@@ -299,6 +354,7 @@ fetch('/internal/cps_test/run_scenario', {
 ```bash
 curl -X POST https://your-project.qa.elastic.co/internal/cps_test/run_scenario \
   -u username:password \
+  -H 'x-elastic-internal-origin: Kibana' \
   -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -330,6 +386,15 @@ curl -X POST https://your-project.qa.elastic.co/internal/cps_test/run_scenario \
 3. For QA: Use proper user credentials with appropriate permissions
 4. Check if authentication type is correct (basic auth)
 
+### Route Not Available Error
+
+**Symptom**: 400 Bad Request with message "uri [...] exists but is not available with the current configuration"
+
+**Solutions**:
+1. **Add required header**: Include `'x-elastic-internal-origin': 'Kibana'` in all requests
+2. This header is required for internal routes in serverless mode
+3. Update all `fetch()` calls to include this header
+
 ### XSRF Errors
 
 **Symptom**: 400 Bad Request with "xsrf" error
@@ -358,15 +423,33 @@ curl -X POST https://your-project.qa.elastic.co/internal/cps_test/run_scenario \
 
 ## Expected Outcomes
 
-Based on the task description, we expect:
+Based on the task description and CPS design, we expect:
 
-✅ **ES accepts** `project_routing` parameter from internal user
-✅ **ES routes** internal user requests to origin only (ignoring the project_routing value)
-✅ **All tests pass** without 400 errors
+### ✅ **Test 1 & 2: Request Acceptance**
+✅ **ES accepts** `project_routing` parameter from internal user (no 400 errors)  
+✅ **All system/data index tests pass** with `statusCode: 200`
 
-If tests fail, it indicates:
-❌ ES is rejecting `project_routing` from internal user
-❌ There may be a configuration or implementation issue with CPS + internal user handling
+### ✅ **Test 3: Routing Behavior Verification**
+✅ **ES routes** internal user requests to origin only (ignoring `project_routing` value)  
+✅ **Linked-only index returns 404** "index not found" (proves origin-only routing)  
+✅ **Internal user CANNOT access linked project data**
+
+If all tests pass, it confirms:
+1. ES accepts the `project_routing` parameter from internal user ✅
+2. ES correctly routes internal user to origin only ✅
+3. The behavior matches our expectations ✅
+
+### ❌ **Failure Scenarios**
+
+**If system/data index tests fail**:
+❌ ES is rejecting `project_routing` from internal user  
+❌ Requests return 400 Bad Request  
+→ Issue: Parameter acceptance problem
+
+**If linked-only index test returns data (hits > 0)**:
+❌ ES is NOT routing internal user to origin only  
+❌ Internal user can access linked project data  
+→ Issue: **Critical routing bug** - internal user isolation broken!
 
 ## Cleanup
 
