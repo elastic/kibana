@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { maps } = getPageObjects(['maps']);
   const security = getService('security');
 
-  describe.only('esql', () => {
+  describe('esql', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
         skipBrowserRefresh: true,
