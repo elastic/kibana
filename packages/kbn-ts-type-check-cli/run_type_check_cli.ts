@@ -13,6 +13,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+import chalk from 'chalk';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 import {
   readArtifactsState,
@@ -86,27 +87,42 @@ run(
 
       if (stale.size === 0) {
         log.info(
-          `[Artifacts freshness] All artifacts are up-to-date (comparing ${shortSha} → HEAD).`
+          `[Cache check] ${chalk.green(
+            '✓ All artifacts are up-to-date'
+          )} — no committed changes since ${shortSha}.`
         );
       } else {
         log.info(
-          `[Artifacts freshness] ${stale.size} project${stale.size === 1 ? '' : 's'} ${
+          `[Cache check] ${stale.size} project${stale.size === 1 ? '' : 's'} ${
             stale.size === 1 ? 'has' : 'have'
-          } stale artifacts (comparing ${shortSha} → HEAD):`
+          } stale artifacts due to committed changes since ${shortSha}:`
         );
 
         for (const tsConfigPath of [...stale].sort()) {
-          log.info(`  ${Path.relative(REPO_ROOT, tsConfigPath)}`);
+          log.info(
+            `[Cache check]   * ${Path.relative(REPO_ROOT, tsConfigPath).replace(
+              '/tsconfig.type_check.json',
+              ''
+            )}`
+          );
         }
 
         if (stale.size > 0 && stale.size < 6) {
           log.info(
-            '[Artifacts freshness] Cache freshness is good, no need to restore fresh artifacts from remote.'
+            `[Cache check] ${chalk.green(
+              '✓ Cache freshness is good'
+            )}, no need to restore fresh artifacts from remote.`
           );
         } else {
           log.info(
-            '[Artifacts freshness] Run with --clear-cache --with-archive to retrieve fresh artifacts from remote for the best type check performance.'
+            `[Cache check] ${chalk.yellow('⚠️ More than 5 projects have stale artifacts.')} `
           );
+
+          if (!isCiEnvironment()) {
+            log.info(
+              'Run with --clear-cache --with-archive to attempt to retrieve fresh artifacts from remote for the best type check performance.'
+            );
+          }
         }
       }
     }
