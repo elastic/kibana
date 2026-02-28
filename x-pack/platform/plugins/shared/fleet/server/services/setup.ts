@@ -8,6 +8,7 @@
 import fs from 'fs/promises';
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 
 import { compact } from 'lodash';
 
@@ -97,22 +98,28 @@ export async function setupFleet(
     useLock: boolean;
   } = { useLock: false }
 ): Promise<SetupStatus> {
-  const t = apm.startTransaction('fleet-setup', 'fleet');
-  try {
-    if (options.useLock) {
-      return _runSetupWithLock(() =>
-        awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
-      );
-    } else {
-      return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  return withActiveSpan(
+    'fleet-setup',
+    { attributes: { 'transaction.type': 'fleet' } },
+    async () => {
+      const t = apm.startTransaction('fleet-setup', 'fleet');
+      try {
+        if (options.useLock) {
+          return _runSetupWithLock(() =>
+            awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
+          );
+        } else {
+          return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+        }
+      } catch (error) {
+        apm.captureError(error);
+        t.setOutcome('failure');
+        throw error;
+      } finally {
+        t.end();
+      }
     }
-  } catch (error) {
-    apm.captureError(error);
-    t.setOutcome('failure');
-    throw error;
-  } finally {
-    t.end();
-  }
+  );
 }
 
 async function createSetupSideEffects(

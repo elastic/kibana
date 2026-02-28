@@ -5,6 +5,8 @@
  * 2.0.
  */
 import apm from 'elastic-apm-node';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -169,8 +171,24 @@ function getAgentPolicyCreateMock() {
 }
 let mockedLogger: jest.Mocked<Logger>;
 
+let otelExporter: tracing.InMemorySpanExporter;
+let otelProvider: tracing.BasicTracerProvider;
+
+beforeAll(() => {
+  otelExporter = new tracing.InMemorySpanExporter();
+  otelProvider = new tracing.BasicTracerProvider({
+    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  });
+  trace.setGlobalTracerProvider(otelProvider);
+});
+
+afterAll(async () => {
+  await otelProvider.shutdown();
+});
+
 describe('Agent policy', () => {
   beforeEach(() => {
+    otelExporter?.reset();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
@@ -1860,6 +1878,12 @@ describe('Agent policy', () => {
           refresh: 'wait_for',
         })
       );
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'deploy-policies');
+      expect(span).toBeDefined();
+      expect(span!.attributes['transaction.type']).toBe('fleet');
+      expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
     });
 
     it('should call audit logger', async () => {
