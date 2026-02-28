@@ -59,7 +59,7 @@ function parseMapStateJSON(mapStateJSON?: string) {
       ? {
           adHocDataViews: adHocDataViews.map((adhocDataView) =>
             dropUnknownKeys(adhocDataView, ['allowHidden', 'id', 'name', 'timeFieldName', 'title'])
-          ),
+          ) as MapAttributes['adHocDataViews'],
         }
       : {}),
   };
