@@ -40,6 +40,8 @@ enum MmrPosition {
   AFTER_COMMAND = 'after_command',
 }
 
+const MMR_VECTOR_TYPES = ['dense_vector'];
+
 const queryVectorSuggestion: ISuggestionItem = {
   label: 'query vector',
   text: '[${0:0.1}, ${1:0.2}]::dense_vector ',
@@ -55,7 +57,7 @@ async function getVectorFieldSuggestions(
   callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  const controlAndLiteralSuggestions = getLiteralsSuggestions(['dense_vector'], Location.MMR, {
+  const controlAndLiteralSuggestions = getLiteralsSuggestions(MMR_VECTOR_TYPES, Location.MMR, {
     includeDateLiterals: false,
     includeCompatibleLiterals: true,
     addComma: false,
@@ -66,7 +68,7 @@ async function getVectorFieldSuggestions(
 
   const functionSuggestions = getFunctionsSuggestions({
     location: Location.MMR,
-    types: ['dense_vector'],
+    types: MMR_VECTOR_TYPES,
     options: {},
     context,
     callbacks,
@@ -89,8 +91,7 @@ async function getVectorFieldSuggestions(
     ];
   }
 
-  const types = ['dense_vector'];
-  const fieldSuggestions = await getFieldsSuggestions(types, callbacks.getByType, {
+  const fieldSuggestions = await getFieldsSuggestions(MMR_VECTOR_TYPES, callbacks.getByType, {
     addSpaceAfterField: true,
     openSuggestions: true,
   });
@@ -220,7 +221,7 @@ export async function autocomplete(
     case MmrPosition.AFTER_MMR_KEYWORD:
       return [
         queryVectorSuggestion,
-        ...getLiteralsSuggestions(['dense_vector'], Location.MMR, {
+        ...getLiteralsSuggestions(MMR_VECTOR_TYPES, Location.MMR, {
           includeDateLiterals: false,
           includeCompatibleLiterals: true,
           addComma: false,
@@ -230,7 +231,7 @@ export async function autocomplete(
         }),
         ...getFunctionsSuggestions({
           location: Location.MMR,
-          types: ['dense_vector'],
+          types: MMR_VECTOR_TYPES,
           options: {},
           context,
           callbacks,
