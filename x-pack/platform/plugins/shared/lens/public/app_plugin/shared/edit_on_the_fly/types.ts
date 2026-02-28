@@ -26,7 +26,7 @@ export interface FlyoutWrapperProps {
   isNewPanel?: boolean;
   isSaveable?: boolean;
   onCancel?: () => void;
-  onApply?: () => void;
+  onApply?: () => void | Promise<void>;
   navigateToLensEditor?: () => void;
   isReadOnly?: boolean;
   applyButtonLabel?: string;
@@ -80,7 +80,7 @@ export interface EditConfigPanelProps {
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
   /** Apply button handler */
-  onApply?: (attrs: TypedLensSerializedState['attributes']) => void;
+  onApply?: (attrs: TypedLensSerializedState['attributes']) => void | Promise<void>;
   /** Cancel button handler */
   onCancel?: () => void;
   // Lens panels allow read-only "edit" where the user can look and tweak the existing chart, without

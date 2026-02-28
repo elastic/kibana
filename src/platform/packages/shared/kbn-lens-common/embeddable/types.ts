@@ -403,11 +403,6 @@ export type LensInternalApi = Simplify<
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;
-      /**
-       * Snapshot of the embeddable state which facilitates state reset flows.
-       */
-      getBaselineState: () => LensRuntimeState | undefined;
-      updateBaselineState: (state: LensRuntimeState | undefined) => void;
     }
 >;
 

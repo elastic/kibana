@@ -142,11 +142,11 @@ export function prepareInlineEditPanel(
           );
           onCancel?.();
         }}
-        onApply={(newAttributes) => {
-          panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
+        onApply={async (newAttributes) => {
           if (newAttributes.visualizationType != null) {
-            onApply?.(newAttributes);
+            await onApply?.(newAttributes);
           }
+          panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
         }}
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}

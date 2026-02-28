@@ -20,7 +20,9 @@ import {
   EVENT_ANNOTATION_GROUP_TYPE,
   type EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import fastIsEqual from 'fast-deep-equal';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
   LensRuntimeState,
@@ -248,20 +250,16 @@ export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: st
 }
 
 /**
- * Returns updated state with library saved annotation group data for all by-reference
+ * Returns updated state with library annotation group data for all by-reference
  * annotation layers that reference the given group ID, or undefined if no layers matched.
  *
  * Handles both hydrated layers (annotationGroupId on the layer) and persisted layers
  * (annotationGroupRef resolved via the references array).
- *
- * When `referenceOnly` is true, only the `__lastSaved` snapshot is updated while
- * local annotations are preserved.
  */
 export function updateAttributesWithAnnotation(
   state: LensRuntimeState,
   groupId: string,
-  libraryGroup: EventAnnotationGroupConfig,
-  { referenceOnly = false }: { referenceOnly?: boolean } = {}
+  libraryGroup: EventAnnotationGroupConfig
 ): LensRuntimeState | undefined {
   const { attributes } = state;
   if (attributes.visualizationType !== 'lnsXY') return undefined;
@@ -280,15 +278,12 @@ export function updateAttributesWithAnnotation(
 
   let changed = false;
   const layers = vizState.layers.map((layer) => {
-    // Hydrated form: annotationGroupId is directly on the layer (used during inline editing)
+    // Hydrated form: annotationGroupId is directly on the layer during inline editing
+    // and on saved dashboards after injection.
     if ('annotationGroupId' in layer && layer.annotationGroupId === groupId) {
       changed = true;
-      const refLayer = layer as XYByReferenceAnnotationLayerConfig;
-      if (referenceOnly) {
-        return { ...refLayer, __lastSaved: libraryGroup };
-      }
       return {
-        ...refLayer,
+        ...(layer as XYByReferenceAnnotationLayerConfig),
         annotations: structuredClone(libraryGroup.annotations),
         ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
         indexPatternId: libraryGroup.indexPatternId,
@@ -296,18 +291,13 @@ export function updateAttributesWithAnnotation(
       };
     }
 
-    // Persisted form: annotationGroupRef maps to the group ID via the references array.
-    // This is the form stored in attributes$ for non-editing panels (e.g. duplicated panels
-    // on an unsaved dashboard).
+    // Persisted form: duplicated panels on unsaved dashboards store annotationGroupRef
+    // instead of annotationGroupId — resolve it via the references array.
     if (
       'annotationGroupRef' in layer &&
       refNameToGroupId.get((layer as { annotationGroupRef: string }).annotationGroupRef) === groupId
     ) {
       changed = true;
-      if (referenceOnly) {
-        return { ...layer, __lastSaved: libraryGroup };
-      }
-      // Hydrate into the full runtime form so the attributes$ change triggers a re-render
       return {
         layerId: layer.layerId,
         layerType: layer.layerType,
@@ -331,4 +321,52 @@ export function updateAttributesWithAnnotation(
         },
       }
     : undefined;
+}
+
+/**
+ * Saves all modified linked (by-reference) annotation layers to the library.
+ * Each layer with local changes is committed via `updateAnnotationGroup`, which
+ * also fires `annotationGroupUpdated$` to notify other panels.
+ */
+export async function saveUpdatedLinkedAnnotationsToLibrary(
+  vizState: unknown,
+  eventAnnotationService: EventAnnotationServiceType
+): Promise<void> {
+  const xyState = vizState as XYState | undefined;
+  if (!xyState?.layers) return;
+
+  for (const layer of xyState.layers) {
+    if (
+      'annotationGroupId' in layer &&
+      '__lastSaved' in layer &&
+      !fastIsEqual(
+        {
+          annotations: layer.annotations,
+          ignoreGlobalFilters: layer.ignoreGlobalFilters,
+          indexPatternId: layer.indexPatternId,
+        },
+        {
+          annotations: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved.annotations,
+          ignoreGlobalFilters: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved
+            .ignoreGlobalFilters,
+          indexPatternId: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved.indexPatternId,
+        }
+      )
+    ) {
+      const refLayer = layer as XYByReferenceAnnotationLayerConfig;
+      const groupConfig: EventAnnotationGroupConfig = {
+        annotations: refLayer.annotations,
+        indexPatternId: refLayer.indexPatternId,
+        ignoreGlobalFilters: refLayer.ignoreGlobalFilters,
+        title: refLayer.__lastSaved.title,
+        description: refLayer.__lastSaved.description,
+        tags: refLayer.__lastSaved.tags,
+        dataViewSpec: refLayer.__lastSaved.dataViewSpec,
+      };
+      await eventAnnotationService.updateAnnotationGroup(groupConfig, refLayer.annotationGroupId);
+      // Sync __lastSaved so serialization produces a clean by-reference layer
+      // rather than a "linked with local changes" layer.
+      refLayer.__lastSaved = groupConfig;
+    }
+  }
 }

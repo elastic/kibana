@@ -205,13 +205,9 @@ export function LensEditConfigurationFlyout({
     setESQLQueryState(state);
   }, []);
 
-  const onApply = useCallback(() => {
+  const onApply = useCallback(async () => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
-    }
-    if (savedObjectId) {
-      saveByRef?.(currentAttributes);
-      updateByRefInput?.(savedObjectId);
     }
 
     // check if visualization type changed, if it did, don't pass the previous visualization state
@@ -227,7 +223,15 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(currentAttributes);
+    // Run the apply callback first so auto-save operations (e.g. linked annotations)
+    // complete before the visualization is persisted via saveByRef.
+    await onApplyCallback?.(currentAttributes);
+
+    if (savedObjectId) {
+      saveByRef?.(currentAttributes);
+      updateByRefInput?.(savedObjectId);
+    }
+
     // Remove the user's preferred chart type from sessionStorage
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();

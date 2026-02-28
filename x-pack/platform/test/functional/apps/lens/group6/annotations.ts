@@ -205,32 +205,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('lnsXY_textVisibility_name');
         await lens.closeDimensionEditor();
 
-        // Save the updated annotation group to library (overwrite)
-        await lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
-        await retry.waitFor('save modal to appear', async () =>
-          testSubjects.exists('confirmSaveSavedObjectButton')
-        );
-        await testSubjects.click('confirmSaveSavedObjectButton');
-
-        await retry.waitFor('annotation save success toast', async () => {
-          const content = await toastsService.getContentByIndex(1);
-          return content.includes('Saved');
-        });
-        await toastsService.dismissAll();
-
-        // After saving to library, "Apply and close" should be disabled because the
-        // library save already committed the changes — there's nothing left to apply.
-        const applyButton = await testSubjects.find('applyFlyoutButton');
-        expect(await applyButton.getAttribute('disabled')).to.be('true');
-
-        // Close the flyout via Cancel — the library save is already persisted,
-        // and the reactive annotationGroupUpdated$ subscription handles syncing
-        // the cloned panel.
-        await testSubjects.click('cancelFlyoutButton');
+        // Click "Apply and close" — this auto-saves the linked annotation to the
+        // library and propagates updates to other panels via annotationGroupUpdated$.
+        await testSubjects.click('applyFlyoutButton');
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
-        // Both panels should show the "Event" annotation text: the first panel
+        // Both panels should now show the "Event" annotation text
         await retry.waitFor('annotation text to appear in both panels', async () => {
           const texts = await find.allByCssSelector('[data-test-subj="xyVisAnnotationText"]', 1000);
           return texts.length >= 2;

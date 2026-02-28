@@ -30,7 +30,10 @@ import type {
 } from '@kbn/lens-common';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
-import { extractInheritedViewModeObservable } from '../helper';
+import {
+  extractInheritedViewModeObservable,
+  saveUpdatedLinkedAnnotationsToLibrary,
+} from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
@@ -233,24 +236,23 @@ export function initializeEditApi(
       // prevent serializing incomplete state during editing
       internalApi.updateEditingState(true);
     }
-    internalApi.updateBaselineState(getState());
+    const firstState = getState();
     const ConfigPanel = await getInlineEditor({
       onCancel: () => {
         internalApi.updateEditingState(false);
-        const baseline = internalApi.getBaselineState();
-        if (baseline) {
-          updateState({ ...baseline });
-        }
-        internalApi.updateBaselineState(undefined);
+        updateState({ ...firstState });
       },
-      // the getState() here contains the wrong filters references but the input attributes
-      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: !canEdit()
         ? noop
-        : (attributes: LensRuntimeState['attributes']) => {
+        : async (attributes: LensRuntimeState['attributes']) => {
+            if (attributes.visualizationType === 'lnsXY') {
+              await saveUpdatedLinkedAnnotationsToLibrary(
+                attributes.state.visualization,
+                startDependencies.eventAnnotationService
+              );
+            }
             internalApi.updateEditingState(false);
             updateState({ ...getState(), attributes });
-            internalApi.updateBaselineState(undefined);
           },
       closeFlyout: () => {
         internalApi.updateEditingState(false);

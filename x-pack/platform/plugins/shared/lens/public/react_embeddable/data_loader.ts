@@ -333,8 +333,8 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
-    // When a library annotation group is updated, fetch the latest data, push it
-    // into attributes$ so the chart re-renders, and update the editing baseline.
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
     services.eventAnnotationService.annotationGroupUpdated$
       .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
       .subscribe(async (updatedGroupId) => {
@@ -342,29 +342,9 @@ export function loadEmbeddableData(
           const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
             updatedGroupId
           );
-          const currentState = getState();
-          const updated = updateAttributesWithAnnotation(
-            currentState,
-            updatedGroupId,
-            libraryGroup
-          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
           if (updated) {
             internalApi.updateAttributes(updated.attributes);
-          }
-
-          const baseline = internalApi.getBaselineState();
-          if (baseline) {
-            // When by reference annotations are saved to library, those changes should now be
-            // reflected in the baseline (so that cancel/reset behaviors work as expected).
-            const baselineWithUpdatedAnnotations = updateAttributesWithAnnotation(
-              baseline,
-              updatedGroupId,
-              libraryGroup,
-              { referenceOnly: true }
-            );
-            if (baselineWithUpdatedAnnotations) {
-              internalApi.updateBaselineState(baselineWithUpdatedAnnotations);
-            }
           }
         } catch (err) {
           addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);

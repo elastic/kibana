@@ -47,6 +47,7 @@ import {
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
   isLegacyEditorEmbeddable,
@@ -307,6 +308,14 @@ export function App({
   const runSave = useCallback(
     async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+
+      if (visualization.activeId === 'lnsXY') {
+        await saveUpdatedLinkedAnnotationsToLibrary(
+          visualization.state,
+          lensAppServices.eventAnnotationService
+        );
+      }
+
       const prevVisState =
         persistedDoc?.visualizationType === visualization.activeId
           ? persistedDoc?.state.visualization
