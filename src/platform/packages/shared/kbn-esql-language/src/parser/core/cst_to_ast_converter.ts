@@ -2214,6 +2214,14 @@ export class CstToAstConverter {
     if (!limitToken) return;
 
     const limitValueCtx = ctx.integerValue();
+    if (!limitValueCtx) {
+      const limitOption = this.toOption(limitToken.getText().toLowerCase(), ctx, [], true);
+      limitOption.location.min = limitToken.symbol.start;
+      limitOption.location.max = limitToken.symbol.stop;
+
+      return limitOption;
+    }
+
     const limitOption = this.toOption(limitToken.getText().toLowerCase(), limitValueCtx);
 
     limitOption.args.push(this.fromConstantToArray(limitValueCtx));
