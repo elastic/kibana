@@ -92,14 +92,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: v4(),
           title: 'OutOfMemoryError',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'OutOfMemoryError'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`,
           },
         },
         {
           id: v4(),
           title: 'cluster_block_exception',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'cluster_block_exception'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'cluster_block_exception'")`,
           },
         },
       ];
@@ -131,7 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: v4(),
           title: 'initial title',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'initial query'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'initial query'")`,
           },
         };
         const upsertQueryResponse = await apiClient
@@ -160,7 +160,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
-          esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")` },
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
+          },
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -169,15 +171,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
+        const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("updated query")`;
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
             params: {
               path: { name: STREAM_NAME, queryId: query.id },
               body: {
                 title: query.title,
-                esql: {
-                  query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query")`,
-                },
+                esql: { query: updatedEsql },
               },
             },
           })
@@ -190,7 +191,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: query.id,
             title: query.title,
-            esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query")` },
+            esql: { query: updatedEsql },
           },
         ]);
 
@@ -204,7 +205,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
-          esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")` },
+          esql: {
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
+          },
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -232,7 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: query.id,
             title: 'updated title',
-            esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")` },
+            esql: { query: query.esql.query },
           },
         ]);
 
@@ -252,7 +255,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: queryId,
             title: 'Significant Query',
-            esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'query'")` },
+            esql: {
+              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
+            },
           },
         ],
       });
@@ -285,17 +290,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const firstQuery = {
         id: 'first',
         title: 'first query',
-        esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 1")` },
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
+        },
       };
       const secondQuery = {
         id: 'second',
         title: 'second query',
-        esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 2")` },
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 2")`,
+        },
       };
       const thirdQuery = {
         id: 'third',
         title: 'third query',
-        esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3")` },
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
+        },
       };
       await putStream(apiClient, STREAM_NAME, {
         stream,
@@ -307,12 +318,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const newQuery = {
         id: 'fourth',
         title: 'fourth query',
-        esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 4")` },
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 4")`,
+        },
       };
       const updateThirdQuery = {
         id: 'third',
         title: 'third query',
-        esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3 updated")` },
+        esql: {
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3 updated")`,
+        },
       };
 
       const bulkResponse = await apiClient

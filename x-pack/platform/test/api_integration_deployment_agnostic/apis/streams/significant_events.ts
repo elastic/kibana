@@ -75,6 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates the queries', async () => {
+        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const response = await putStream(apiClient, STREAM_NAME, {
           stream,
           ...emptyAssets,
@@ -82,9 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'aaa',
               title: 'OOM Error',
-              esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`,
-              },
+              esql: { query: esqlQuery },
             },
           ],
         });
@@ -95,9 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
           title: 'OOM Error',
-          esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`,
-          },
+          esql: { query: esqlQuery },
         });
       });
 
@@ -257,6 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the queries', async () => {
         const indexName = 'classic-stream-queries';
+        const esqlQuery = `FROM ${indexName} METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
         await putStream(apiClient, indexName, classicPutBody);
 
@@ -269,9 +267,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'aaa',
               title: 'OOM Error',
-              esql: {
-                query: `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`,
-              },
+              esql: { query: esqlQuery },
             },
           ],
         });
@@ -282,9 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
           title: 'OOM Error',
-          esql: {
-            query: `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`,
-          },
+          esql: { query: esqlQuery },
         });
 
         await clean();
