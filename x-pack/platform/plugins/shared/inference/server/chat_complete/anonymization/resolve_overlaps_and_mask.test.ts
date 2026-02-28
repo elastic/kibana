@@ -91,7 +91,11 @@ describe('processMatches', () => {
 
     const result = resolveOverlapsAndMask({ detectedMatches, state, rules: [emailRule] });
 
-    const expectedMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
+    const expectedMask = getEntityMask({
+      value: 'carlos@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Email ${expectedMask} for help`);
     expect(result.anonymizations).toHaveLength(1);
     expect(result.anonymizations[0]).toEqual({
@@ -113,8 +117,16 @@ describe('processMatches', () => {
       rules: [emailRule, phoneRule],
     });
 
-    const emailMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
-    const phoneMask = getEntityMask({ value: '555-123-4567', class_name: 'MISC' });
+    const emailMask = getEntityMask({
+      value: 'carlos@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
+    const phoneMask = getEntityMask({
+      value: '555-123-4567',
+      class_name: 'MISC',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Email ${emailMask} or call ${phoneMask}`);
     expect(result.anonymizations).toHaveLength(2);
     expect(result.anonymizations[0]).toEqual({
@@ -144,9 +156,17 @@ describe('processMatches', () => {
       rules: [emailRule, phoneRule],
     });
 
-    const emailMask = getEntityMask({ value: 'maria@test.com', class_name: 'EMAIL' });
-    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'MISC' });
-    const emailMask2 = getEntityMask({ value: 'diego@example.org', class_name: 'EMAIL' });
+    const emailMask = getEntityMask({
+      value: 'maria@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
+    const phoneMask = getEntityMask({ value: '555-1234', class_name: 'MISC', field: 'data' });
+    const emailMask2 = getEntityMask({
+      value: 'diego@example.org',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Email: ${emailMask}`);
     expect(result.records[0].data).toBe(`Phone: ${phoneMask}`);
     expect(result.records[1].content).toBe(`Contact ${emailMask2}`);
@@ -178,7 +198,11 @@ describe('processMatches', () => {
       rules: [emailRule, domainRule],
     });
 
-    const emailMask = getEntityMask({ value: 'sofia@example.com', class_name: 'EMAIL' });
+    const emailMask = getEntityMask({
+      value: 'sofia@example.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Contact ${emailMask} today`);
     expect(result.anonymizations).toHaveLength(1);
     expect(result.anonymizations[0]).toEqual({
@@ -204,8 +228,16 @@ describe('processMatches', () => {
       rules: [emailRule, domainRule],
     });
 
-    const domainMask = getEntityMask({ value: 'example.com', class_name: 'HOST_NAME' });
-    const emailMask = getEntityMask({ value: 'admin@example.com', class_name: 'EMAIL' });
+    const domainMask = getEntityMask({
+      value: 'example.com',
+      class_name: 'HOST_NAME',
+      field: 'content',
+    });
+    const emailMask = getEntityMask({
+      value: 'admin@example.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.records[0].content).toBe(`Visit ${domainMask} or email ${emailMask} today`);
     expect(result.anonymizations).toHaveLength(2);
   });
@@ -237,7 +269,11 @@ describe('processMatches', () => {
         mask: getEntityMask({ value: 'existing', class_name: 'EXISTING' }),
       },
     });
-    const emailMask = getEntityMask({ value: 'luis@test.com', class_name: 'EMAIL' });
+    const emailMask = getEntityMask({
+      value: 'luis@test.com',
+      class_name: 'EMAIL',
+      field: 'content',
+    });
     expect(result.anonymizations[1]).toEqual({
       rule: { type: 'RegExp' },
       entity: { value: 'luis@test.com', class_name: 'EMAIL', mask: emailMask },

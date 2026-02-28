@@ -237,7 +237,11 @@ describe('anonymizeMessages', () => {
       },
       {
         type: 'text',
-        text: getEntityMask({ class_name: 'EMAIL', value: 'jorge21@gmail.com' }),
+        text: getEntityMask({
+          class_name: 'EMAIL',
+          value: 'jorge21@gmail.com',
+          field: '/content/1/text',
+        }),
       },
     ]);
   });
@@ -448,7 +452,11 @@ describe('anonymizeMessages', () => {
     const anonymizedContent = result.messages[0] as UserMessage;
     const content = anonymizedContent.content;
 
-    const emailMask = getEntityMask({ class_name: 'EMAIL', value: 'a@example.com' });
+    const emailMask = getEntityMask({
+      class_name: 'EMAIL',
+      value: 'a@example.com',
+      field: '/content/2/text',
+    });
     const expected = [
       { type: 'text', text: 'hello' },
       { type: 'image', source: { data: 'img', mimeType: 'image/png' } },

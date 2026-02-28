@@ -63,9 +63,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ),
       });
 
-      simulatorPromise = proxy.interceptWithResponse(
-        'your email is EMAIL_f3cad5d12e6341ea1f5c27832754720aff68020e'
-      );
+      simulatorPromise = proxy.interceptWithResponse((requestBody) => {
+        const allUserContent = requestBody.messages
+          .filter((message) => message.role === 'user' && typeof message.content === 'string')
+          .map((message) => message.content as string)
+          .join(' ');
+        const emailMask = allUserContent.match(/EMAIL_[0-9a-f]{40}/)?.[0];
+        if (!emailMask) {
+          throw new Error(`Expected masked email token in user messages, got: ${allUserContent}`);
+        }
+        return `your email is ${emailMask}`;
+      });
 
       void proxy.interceptTitle('Title for a new conversation');
 
