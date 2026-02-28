@@ -14,7 +14,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '../../../../detections/components/alerts_table';
 
 interface Props {
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   size: number;
 }
 

@@ -9,17 +9,21 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
+  IdentifyFeaturesResult,
+  OnboardingResult,
   SignificantEventsQueriesGenerationResult,
+  TaskResult,
 } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
-import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
+import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
@@ -40,12 +44,14 @@ export interface OnboardingTaskParams {
   from: number;
   to: number;
   steps: OnboardingStep[];
+  saveQueries: boolean;
 }
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string) {
-  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
+export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
+  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
+  return saveQueries ? base : `${base}_no_save_queries`;
 }
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
@@ -60,10 +66,10 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamName, from, to, steps, _task } = runContext.taskInstance
-                .params as TaskParams<OnboardingTaskParams>;
+              const { connectorId, streamName, from, to, steps, saveQueries, _task } = runContext
+                .taskInstance.params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, inferenceClient, queryClient } =
+              const { taskClient, inferenceClient, queryClient, streamsClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
@@ -119,7 +125,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
-                      await saveQueries(streamName, queriesTaskResult.queries, { queryClient });
+                      if (saveQueries) {
+                        await persistQueries(streamName, queriesTaskResult.queries, {
+                          queryClient,
+                          streamsClient,
+                        });
+                      }
                       break;
 
                     default:
@@ -129,7 +140,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
                   _task,
-                  { connectorId, streamName, from, to, steps },
+                  { connectorId, streamName, from, to, steps, saveQueries },
                   { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
@@ -138,7 +149,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -149,7 +160,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 taskContext.logger.error(
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
-                  { error }
+                  { error } as LogMeta
                 );
 
                 await taskClient.fail<OnboardingTaskParams>(
@@ -160,6 +171,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
+                    saveQueries,
                   },
                   errorMessage
                 );
@@ -175,35 +187,34 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
   } satisfies TaskDefinitionRegistry;
 }
 
+const SUBTASK_POLL_INTERVAL_MS = 2000;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>(
   subtaskId: string,
   parentTaskId: string,
   taskClient: TaskClient<StreamsTaskType>
 ): Promise<TaskResult<TPayload>> {
-  const sleepInterval = 2000;
-  let intervalId: NodeJS.Timeout;
+  while (true) {
+    const parentTask = await taskClient.get(parentTaskId);
 
-  return await new Promise<TaskResult<TPayload>>((resolve, reject) => {
-    intervalId = setInterval(async () => {
-      const parentTask = await taskClient.get(parentTaskId);
+    if (parentTask.status === TaskStatus.BeingCanceled) {
+      await taskClient.cancel(subtaskId);
+    }
 
-      if (parentTask.status === TaskStatus.BeingCanceled) {
-        await taskClient.cancel(subtaskId);
-      }
+    const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
-      const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
+    if (result.status === TaskStatus.Failed) {
+      throw new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`);
+    }
 
-      if (result.status === TaskStatus.Failed) {
-        reject(new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`));
-      }
+    if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+      return result;
+    }
 
-      if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
-        resolve(result);
-      }
-    }, sleepInterval);
-  }).finally(() => {
-    clearInterval(intervalId);
-  });
+    await sleep(SUBTASK_POLL_INTERVAL_MS);
+  }
 }
 
 async function scheduleFeaturesIdentificationTask(
@@ -246,21 +257,24 @@ async function scheduleQueriesGenerationTask(
   return id;
 }
 
-export async function saveQueries(
+export async function persistQueries(
   streamName: string,
   queries: GeneratedSignificantEventQuery[],
   deps: {
     queryClient: QueryClient;
+    streamsClient: StreamsClient;
   }
 ) {
-  const { queryClient } = deps;
+  const { queryClient, streamsClient } = deps;
 
   if (queries.length === 0) {
     return;
   }
 
+  const definition = await streamsClient.getStream(streamName);
+
   await queryClient.bulk(
-    streamName,
+    definition,
     queries.map((query) => ({
       index: {
         id: v4(),

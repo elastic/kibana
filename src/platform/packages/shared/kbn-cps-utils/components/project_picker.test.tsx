@@ -14,7 +14,7 @@ import type { ProjectRouting } from '@kbn/es-query';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { PROJECT_ROUTING } from '../constants';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectPicker } from './project_picker';
 
 describe('ProjectPicker', () => {
@@ -45,6 +45,7 @@ describe('ProjectPicker', () => {
     projectRouting: undefined as ProjectRouting | undefined,
     onProjectRoutingChange: jest.fn(),
     fetchProjects: mockFetchProjects,
+    totalProjectCount: 2,
   };
 
   const renderProjectPicker = async (props: Partial<typeof defaultProps> = {}) => {
@@ -212,7 +213,7 @@ describe('ProjectPicker', () => {
       // Press Enter to open popover
       await userEvent.keyboard('{Enter}');
 
-      expect(screen.getByText('Cross-project search scope')).toBeInTheDocument();
+      expect(screen.getByText('Cross-project search (CPS) scope')).toBeInTheDocument();
     });
   });
 });
