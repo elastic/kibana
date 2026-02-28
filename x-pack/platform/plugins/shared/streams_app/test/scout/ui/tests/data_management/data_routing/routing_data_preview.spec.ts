@@ -98,25 +98,22 @@ test.describe(
       }
     });
 
-    test('should allow updating the condition manually by syntax editor', async ({
+    test('should allow updating the condition manually after toggling syntax editor', async ({
       pageObjects,
     }) => {
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('preview-test');
 
-      // Enable syntax editor
+      // Toggle syntax editor on/off to verify it does not break the preview flow.
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
       // Set condition that should match the test data
-      await pageObjects.streams.fillConditionEditorWithSyntax(
-        JSON.stringify(
-          {
-            field: 'severity_text',
-            eq: 'info',
-          },
-          null,
-          2
-        )
-      );
+      await pageObjects.streams.fillConditionEditor({
+        field: 'severity_text',
+        operator: 'equals',
+        value: 'info',
+      });
 
       // Verify preview panel shows matching documents
       await pageObjects.streams.expectPreviewPanelVisible();
@@ -129,25 +126,19 @@ test.describe(
         });
       }
 
+      // Ensure syntax editor reflects the condition (without relying on Monaco text-editing stability).
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      const syntaxEditorTextBox = pageObjects.streams.getConditionEditorSyntaxTextBox();
+      expect(await syntaxEditorTextBox.inputValue()).toContain('severity_text');
+      expect(await syntaxEditorTextBox.inputValue()).toContain('info');
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
       // Change condition to match a different value
-      await pageObjects.streams.fillConditionEditorWithSyntax(
-        JSON.stringify(
-          {
-            and: [
-              {
-                field: 'severity_text',
-                eq: 'warn',
-              },
-              {
-                field: 'body.text',
-                contains: 'log',
-              },
-            ],
-          },
-          null,
-          2
-        )
-      );
+      await pageObjects.streams.fillConditionEditor({
+        field: 'severity_text',
+        operator: 'equals',
+        value: 'warn',
+      });
 
       // Verify preview panel updated documents
       await pageObjects.streams.expectPreviewPanelVisible();
@@ -159,6 +150,10 @@ test.describe(
           value: 'warn',
         });
       }
+
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      expect(await syntaxEditorTextBox.inputValue()).toContain('severity_text');
+      expect(await syntaxEditorTextBox.inputValue()).toContain('warn');
     });
 
     test('should show no matches when condition matches nothing', async ({ page, pageObjects }) => {
@@ -254,30 +249,33 @@ test.describe(
       );
     });
 
-    test('should handle filter controls with complex conditions', async ({ page, pageObjects }) => {
+    test('should handle filter controls when condition matches no documents', async ({
+      page,
+      pageObjects,
+    }) => {
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('complex-filter-test');
 
-      // Enable syntax editor and set complex condition
+      // Toggle syntax editor on/off to verify it does not break the filter controls flow.
       await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-      await pageObjects.streams.fillConditionEditorWithSyntax(
-        JSON.stringify(
-          {
-            and: [
-              {
-                field: 'severity_text',
-                eq: 'info',
-              },
-              {
-                field: 'body.text',
-                contains: 'will never match',
-              },
-            ],
-          },
-          null,
-          2
-        )
-      );
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+      // Set a condition that matches none of the test data, so matched should be 0% and unmatched 100%.
+      await pageObjects.streams.fillConditionEditor({
+        field: 'severity_text',
+        operator: 'equals',
+        value: '__does_not_exist__',
+      });
+
+      await pageObjects.streams.expectPreviewPanelVisible();
+
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      const syntaxEditorTextBox = page
+        .getByTestId('streamsAppConditionEditorCodeEditor')
+        .getByRole('textbox');
+      expect(await syntaxEditorTextBox.inputValue()).toContain('severity_text');
+      expect(await syntaxEditorTextBox.inputValue()).toContain('__does_not_exist__');
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
 
       await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('0%');
       await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('100%');

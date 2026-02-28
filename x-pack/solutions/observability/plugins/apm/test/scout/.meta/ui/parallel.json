@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-13T09:56:49.144Z",
-  "sha1": "99f5f3598c50bd1011190256f686d55291776fce",
+  "lastModified": "2026-02-24T05:09:57.770Z",
+  "sha1": "b37fbc020d0e0eb51980c3e0795cdc289673c709",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -414,6 +414,38 @@
       }
     },
     {
+      "id": "9b7bac9a7589b4d-d035aadde3cc9a4",
+      "title": "Service overview - header filters Filtering by transaction type - changes url when selecting different value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "9b7bac9a7589b4d-4ed45060815dbc2",
+      "title": "Service overview - header filters Filtering by searchbar - filters by transaction.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
       "id": "89c8ff66ee766e0-93d765a7c716612",
       "title": "Agent Configuration Viewer should not be able to modify settings",
       "expectedStatus": "passed",
@@ -817,7 +849,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 25,
+        "line": 31,
         "column": 9
       }
     },
@@ -833,7 +865,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 9
       }
     },
@@ -849,7 +881,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 111,
+        "line": 107,
         "column": 9
       }
     },
@@ -865,7 +897,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 141,
+        "line": 140,
         "column": 9
       }
     },
@@ -881,7 +913,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 171,
+        "line": 173,
         "column": 9
       }
     },
