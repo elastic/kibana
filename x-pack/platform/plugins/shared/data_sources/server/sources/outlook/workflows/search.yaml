@@ -1,0 +1,28 @@
+version: '1'
+name: 'sources.outlook.search'
+description: 'Search Outlook messages using Microsoft Graph Search API. Actions and inputs: searchMessages (query, optional from, optional size). The query input accepts Keyword Query Language (KQL) syntax.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: "Search query string (KQL syntax supported)"
+  - name: from
+    type: number
+    required: false
+    description: "Offset for pagination"
+  - name: size
+    type: number
+    required: false
+    description: "Number of results to return (max 25)"
+steps:
+  - name: search-messages
+    type: outlook.searchMessages
+    connector-id: <%= outlook-stack-connector-id %>
+    with:
+      query: "${{ inputs.query }}"
+      from: ${{ inputs.from }}
+      size: ${{ inputs.size }}

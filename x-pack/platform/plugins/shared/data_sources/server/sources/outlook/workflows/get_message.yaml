@@ -1,0 +1,46 @@
+version: '1'
+name: 'sources.outlook.get_message'
+description: 'Retrieve a specific Outlook message by ID, including full body content. Actions and inputs: getMessage (user_id, message_id). Also supports searching a user mailbox: searchUserMessages (user_id, query, optional top).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: get_action
+    type: choice
+    options:
+      - "getMessage"
+      - "searchUserMessages"
+    required: true
+  - name: user_id
+    type: string
+    required: true
+    description: "User ID or user principal name (e.g., user@contoso.com)"
+  - name: message_id
+    type: string
+    required: false
+    description: "Message ID (required for getMessage)"
+  - name: query
+    type: string
+    required: false
+    description: "Search query (required for searchUserMessages)"
+  - name: top
+    type: number
+    required: false
+    description: "Number of results to return (max 25, for searchUserMessages)"
+steps:
+  - name: get-message
+    type: outlook.getMessage
+    if: "${{ inputs.get_action == 'getMessage' and inputs.message_id }}"
+    connector-id: <%= outlook-stack-connector-id %>
+    with:
+      userId: "${{ inputs.user_id }}"
+      messageId: "${{ inputs.message_id }}"
+  - name: search-user-messages
+    type: outlook.searchUserMessages
+    if: "${{ inputs.get_action == 'searchUserMessages' and inputs.query }}"
+    connector-id: <%= outlook-stack-connector-id %>
+    with:
+      userId: "${{ inputs.user_id }}"
+      query: "${{ inputs.query }}"
+      top: ${{ inputs.top }}
