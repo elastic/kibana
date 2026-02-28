@@ -17,7 +17,6 @@ describe('schema validation', () => {
         slo_id: 'test-slo-id',
         slo_instance_id: 'test-instance-id',
         remote_name: 'remote-1',
-        show_all_group_by_instances: true,
         overview_mode: 'single' as const,
         title: 'Test Title',
         hide_title: false,
@@ -29,7 +28,6 @@ describe('schema validation', () => {
         slo_id: 'test-slo-id',
         slo_instance_id: 'test-instance-id',
         remote_name: 'remote-1',
-        show_all_group_by_instances: true,
         overview_mode: 'single',
       });
     });
@@ -233,7 +231,7 @@ describe('schema validation', () => {
     const stateWithOnlyRequiredFields = {
       slo_id: 'test-slo-id',
       overview_mode: 'single' as const,
-      // slo_instance_id, remote_name, show_all_group_by_instances are all optional
+      // slo_instance_id, remote_name are all optional
     };
 
     expect(() => overviewEmbeddableSchema.validate(stateWithOnlyRequiredFields)).not.toThrow();

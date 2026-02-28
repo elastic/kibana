@@ -31,6 +31,7 @@ import type {
   OverviewEmbeddableState,
   SingleOverviewCustomState,
 } from '../common/embeddables/overview/types';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
@@ -140,7 +141,7 @@ export class SLOPlugin
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState?: OverviewEmbeddableState) => {
             if (
-              (serializedState as SingleOverviewCustomState)?.show_all_group_by_instances ||
+              (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
               (serializedState as GroupOverviewCustomState)?.group_filters
             ) {
               return { placementSettings: { width: 24, height: 8 } };

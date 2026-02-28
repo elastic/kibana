@@ -23,7 +23,6 @@ describe('transformSingleOverviewOut', () => {
       Object {
         "overview_mode": "single",
         "remote_name": "legacy-remote",
-        "show_all_group_by_instances": true,
         "slo_id": "legacy-slo-id",
         "slo_instance_id": "legacy-instance-id",
         "title": "Test Title",

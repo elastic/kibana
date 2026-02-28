@@ -13,6 +13,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   fetch$,
   initializeStateManager,
@@ -82,7 +83,6 @@ export const getOverviewEmbeddableFactory = ({
       slo_id: '',
       slo_instance_id: undefined,
       remote_name: undefined,
-      show_all_group_by_instances: undefined,
     });
     const groupSloManager = initializeStateManager<Omit<GroupOverviewCustomState, 'overview_mode'>>(
       state as GroupOverviewCustomState,
@@ -133,7 +133,6 @@ export const getOverviewEmbeddableFactory = ({
         slo_id: 'referenceEquality',
         slo_instance_id: 'referenceEquality',
         group_filters: 'referenceEquality',
-        show_all_group_by_instances: 'referenceEquality',
         remote_name: 'referenceEquality',
         overview_mode: 'referenceEquality',
         ...titleComparators,
@@ -195,21 +194,14 @@ export const getOverviewEmbeddableFactory = ({
     return {
       api,
       Component: () => {
-        const [
-          sloId,
-          sloInstanceId,
-          showAllGroupByInstances,
-          overviewMode,
-          groupFilters,
-          remoteName,
-        ] = useBatchedPublishingSubjects(
-          singleSloManager.api.sloId$,
-          singleSloManager.api.sloInstanceId$,
-          singleSloManager.api.showAllGroupByInstances$,
-          overviewMode$,
-          groupSloManager.api.groupFilters$,
-          singleSloManager.api.remoteName$
-        );
+        const [sloId, sloInstanceId, overviewMode, groupFilters, remoteName] =
+          useBatchedPublishingSubjects(
+            singleSloManager.api.sloId$,
+            singleSloManager.api.sloInstanceId$,
+            overviewMode$,
+            groupSloManager.api.groupFilters$,
+            singleSloManager.api.remoteName$
+          );
 
         useEffect(() => {
           return () => {
@@ -259,7 +251,6 @@ export const getOverviewEmbeddableFactory = ({
                 sloInstanceId={sloInstanceId}
                 reloadSubject={reload$}
                 remoteName={remoteName}
-                showAllGroupByInstances={showAllGroupByInstances}
               />
             );
           }
@@ -281,7 +272,7 @@ export const getOverviewEmbeddableFactory = ({
                 <QueryClientProvider client={queryClient}>
                   {overviewMode === 'groups' ? (
                     renderOverview()
-                  ) : showAllGroupByInstances ? (
+                  ) : sloInstanceId === ALL_VALUE ? (
                     <div
                       data-test-subj="sloSingleOverviewPanel"
                       data-shared-item=""

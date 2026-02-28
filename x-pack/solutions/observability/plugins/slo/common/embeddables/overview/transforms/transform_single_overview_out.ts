@@ -29,21 +29,21 @@ export function transformSingleOverviewOut(
     sloInstanceId: legacySloInstanceId,
     remoteName: legacyRemoteName,
     overviewMode: legacyOverviewMode,
-    showAllGroupByInstances: legacyShowAll,
+    showAllGroupByInstances: _legacyShowAll,
+    show_all_group_by_instances: _showAll,
     ...state
-  } = storedState as SingleOverviewCustomState & LegacySingleOverviewState;
+  } = storedState as SingleOverviewCustomState &
+    LegacySingleOverviewState & { show_all_group_by_instances?: boolean };
 
   const sloId = state.slo_id ?? legacySloId;
   const sloInstanceId = state.slo_instance_id ?? legacySloInstanceId;
   const remoteName = state.remote_name ?? legacyRemoteName;
   const overviewMode = state.overview_mode ?? legacyOverviewMode;
-  const showAllGroupByInstances = state.show_all_group_by_instances ?? legacyShowAll;
   return {
     ...state,
     ...(sloId ? { slo_id: sloId } : {}),
     ...(sloInstanceId ? { slo_instance_id: sloInstanceId } : {}),
     ...(remoteName ? { remote_name: remoteName } : {}),
     ...(overviewMode ? { overview_mode: overviewMode } : {}),
-    ...(showAllGroupByInstances ? { show_all_group_by_instances: showAllGroupByInstances } : {}),
   };
 }

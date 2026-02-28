@@ -29,7 +29,6 @@ const SingleOverviewCustomSchema = schema.object({
       meta: { description: 'The name of the remote SLO' },
     })
   ),
-  show_all_group_by_instances: schema.maybe(schema.boolean()),
   overview_mode: schema.literal('single'),
 });
 
