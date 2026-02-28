@@ -181,9 +181,6 @@ const RulesPage = () => {
         pageHeader={{
           paddingSize: 'none',
           bottomBorder: 'extended',
-          css: css`
-            padding-inline: 8px;
-          `,
           tabs: tabs.map((tab) => ({
             label: tab.name,
             onClick: () => onSectionChange(tab.id),
@@ -191,6 +188,9 @@ const RulesPage = () => {
             key: tab.id,
             'data-test-subj': `${tab.id}Tab`,
           })),
+          css: css`
+            padding-inline: 8px;
+          `,
         }}
       >
         <EuiSpacer size="l" />

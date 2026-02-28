@@ -129,9 +129,9 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
           <KibanaPageTemplate
             restrictWidth={false}
             solutionNav={solution}
-            // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-            // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-            mainProps={{ paddingSize: 'm' }}
+            // @ts-expect-error Technically `paddingSize` isn't supported but it is passed through;
+            // 'none' so section apps control their own padding (e.g. tabs edge-to-edge, body padded).
+            mainProps={{ paddingSize: 'none' }}
             panelled
           >
             <ManagementRouter

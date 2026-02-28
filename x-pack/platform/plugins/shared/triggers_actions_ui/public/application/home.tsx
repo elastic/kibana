@@ -8,10 +8,15 @@
 import React, { useState, lazy, useEffect, useCallback } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
+
+/** Body-only padding; Management uses mainProps paddingSize 'none' so tabs are edge-to-edge. */
+const bodyPaddingCss = css`
+  padding: 16px;
+`;
 
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
@@ -115,9 +120,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <EuiPageTemplate.Header
         paddingSize="none"
         bottomBorder="extended"
-        css={css`
-          padding-inline: 8px;
-        `}
         tabs={tabs.map((tab) => ({
           label: tab.name,
           onClick: () => onSectionChange(tab.id),
@@ -125,18 +127,22 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           key: tab.id,
           'data-test-subj': `${tab.id}Tab`,
         }))}
+        css={css`
+          padding-inline: 8px;
+        `}
       />
-      <EuiSpacer size="l" />
-      <HealthContextProvider>
-        <PerformanceContextProvider>
-          <HealthCheck waitForCheck={true}>
-            <Routes>
-              <Route exact path={routeToLogs} component={renderLogsList} />
-              <Route exact path={routeToRules} component={renderRulesList} />
-            </Routes>
-          </HealthCheck>
-        </PerformanceContextProvider>
-      </HealthContextProvider>
+      <div css={bodyPaddingCss}>
+        <HealthContextProvider>
+          <PerformanceContextProvider>
+            <HealthCheck waitForCheck={true}>
+              <Routes>
+                <Route exact path={routeToLogs} component={renderLogsList} />
+                <Route exact path={routeToRules} component={renderRulesList} />
+              </Routes>
+            </HealthCheck>
+          </PerformanceContextProvider>
+        </HealthContextProvider>
+      </div>
 
       {ruleTypeModalVisible && (
         <RuleTypeModal

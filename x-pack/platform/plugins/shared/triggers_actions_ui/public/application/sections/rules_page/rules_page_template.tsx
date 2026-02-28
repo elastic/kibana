@@ -38,7 +38,7 @@ export const RulesPageTemplate: React.FunctionComponent<RulesPageTemplateProps> 
   const templateProps: KibanaPageTemplatePropsWithPadding = {
     restrictWidth: false,
     panelled: true,
-    mainProps: { paddingSize: 'l' },
+    mainProps: { paddingSize: 'none' },
     pageHeader,
     ...restProps,
   };
