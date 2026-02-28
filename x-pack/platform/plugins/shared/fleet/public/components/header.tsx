@@ -78,11 +78,13 @@ export const Header: React.FC<HeaderProps> = ({
   <Container data-test-subj={dataTestSubj}>
     <Wrapper maxWidth={maxWidth}>
       {topContent}
-      <HeaderColumns
-        leftColumn={leftColumn}
-        rightColumn={rightColumn}
-        rightColumnGrow={rightColumnGrow}
-      />
+      {(leftColumn || rightColumn) && (
+        <HeaderColumns
+          leftColumn={leftColumn}
+          rightColumn={rightColumn}
+          rightColumnGrow={rightColumnGrow}
+        />
+      )}
       <EuiFlexGroup>
         {tabs ? (
           <EuiFlexItem>
