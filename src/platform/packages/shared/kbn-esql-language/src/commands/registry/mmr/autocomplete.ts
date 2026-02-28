@@ -94,7 +94,7 @@ export async function autocomplete(
         },
       };
 
-      return getCommandMapExpressionSuggestions(innerText, availableParameters, true);
+      return getCommandMapExpressionSuggestions(innerText, availableParameters, false);
     }
 
     case MmrPosition.AFTER_COMMAND:
