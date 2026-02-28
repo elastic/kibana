@@ -31,10 +31,11 @@ export function getEntityMask(
   }
 
   // Legacy fallback: unsalted object-hash (for when anonymization plugin is unavailable)
+  // NOTE: Do not add `field` here — it would change the hash output for existing
+  // flag=false deployments. The HMAC path (above) includes field for new tokens.
   const hash = objectHash({
     value: entity.value,
     class_name: entity.class_name,
-    field: entity.field ?? entity.class_name,
   });
   return `${entity.class_name}_${hash}`;
 }
