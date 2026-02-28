@@ -91,11 +91,18 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
 
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
   const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
-    schema.object({
-      ...basePanelProps,
-      type: schema.literal(type),
-      config: configSchema,
-    })
+    schema.object(
+      {
+        ...basePanelProps,
+        type: schema.literal(type),
+        config: configSchema,
+      },
+      {
+        meta: {
+          id: `kbn-dashboard-panel-${type}`,
+        },
+      }
+    )
   );
 
   return schema.discriminatedUnion(
