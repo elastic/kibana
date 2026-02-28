@@ -9,38 +9,60 @@ import React, { useMemo } from 'react';
 import { EuiButton, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { LeftPanelInvestigationTab } from '../../left';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+
+export interface InvestigationGuideProps {
+  /**
+   * Alert/event document
+   */
+  hit: DataTableRecord;
+  /**
+   * If false we show a message that investigation guide is not available.
+   */
+  isAvailable: boolean;
+  /**
+   * Callback invoked when the user clicks "Show investigation guide".
+   */
+  onShowInvestigationGuide: () => void;
+}
 
 /**
  * Render either the investigation guide button that opens Investigation section in the left panel,
  * or a no-data message if investigation guide hasn't been set up on the rule
  */
-export const InvestigationGuide: React.FC = () => {
-  const { dataFormattedForFieldBrowser, isRulePreview } = useDocumentDetailsContext();
+export const InvestigationGuide: React.FC<InvestigationGuideProps> = ({
+  hit,
+  isAvailable,
+  onShowInvestigationGuide,
+}) => {
+  const isAlert = useMemo(
+    () => Boolean(getFieldValue(hit, 'kibana.alert.rule.uuid') as string),
+    [hit]
+  );
+  const ruleId = useMemo(
+    () =>
+      (isAlert
+        ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
+        : (getFieldValue(hit, 'signal.rule.id') as string)) ?? '',
+    [hit, isAlert]
+  );
 
-  const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
-    dataFormattedForFieldBrowser,
-  });
-
-  const goToInvestigationsTab = useNavigateToLeftPanel({
-    tab: LeftPanelInvestigationTab,
-  });
+  const { loading, error, rule } = useRuleWithFallback(ruleId);
+  const ruleNote = rule?.note;
 
   const hasInvestigationGuide = useMemo(
-    () => !error && basicAlertData && basicAlertData.ruleId && ruleNote,
-    [error, basicAlertData, ruleNote]
+    () => !error && ruleId && ruleNote,
+    [error, ruleId, ruleNote]
   );
 
   const content = useMemo(() => {
-    if (isRulePreview) {
+    if (!isAvailable) {
       return (
         <EuiCallOut
           announceOnMount
@@ -80,7 +102,7 @@ export const InvestigationGuide: React.FC = () => {
     if (hasInvestigationGuide) {
       return (
         <EuiButton
-          onClick={goToInvestigationsTab}
+          onClick={onShowInvestigationGuide}
           iconType="documentation"
           size="s"
           fullWidth
@@ -119,9 +141,9 @@ export const InvestigationGuide: React.FC = () => {
         />
       </EuiCallOut>
     );
-  }, [isRulePreview, loading, hasInvestigationGuide, goToInvestigationsTab]);
+  }, [hasInvestigationGuide, isAvailable, loading, onShowInvestigationGuide]);
 
   return <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>{content}</div>;
 };
 
-InvestigationGuide.displayName = 'InvestigationGuideButton';
+InvestigationGuide.displayName = 'InvestigationGuide';
