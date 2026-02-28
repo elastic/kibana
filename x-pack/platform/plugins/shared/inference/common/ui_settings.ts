@@ -123,7 +123,7 @@ export function getUiSettings({
           }
         : {}),
       schema: schema.object({
-        rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
+        rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema]), { maxSize: 1000 }),
       }),
       type: 'json',
       requiresPageReload: true,
