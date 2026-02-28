@@ -19,6 +19,7 @@ import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useHistory } from 'react-router-dom';
 
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
@@ -119,6 +120,8 @@ export interface RulesListProps {
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
   navigateToCreateRuleForm?: (ruleTypeId: string) => void;
+  /** When set, MaintenanceWindowCallout is rendered into this DOM element (flush with parent), not inside the page template. */
+  calloutSlotId?: string;
 }
 
 export const percentileFields = {
@@ -161,6 +164,7 @@ export const RulesList = ({
   onRefresh,
   navigateToEditRuleForm,
   navigateToCreateRuleForm,
+  calloutSlotId,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -749,12 +753,25 @@ export const RulesList = ({
     Array.from(ruleTypesState.data.values())
   );
 
+  const calloutSlotEl =
+    typeof document !== 'undefined' && calloutSlotId
+      ? document.getElementById(calloutSlotId)
+      : null;
+  if (calloutSlotId && calloutSlotEl) {
+    createPortal(
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />,
+      calloutSlotEl
+    );
+  }
+
   return (
     <>
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
+      {!calloutSlotId && (
+        <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={allRuleCategories} />
+      )}
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

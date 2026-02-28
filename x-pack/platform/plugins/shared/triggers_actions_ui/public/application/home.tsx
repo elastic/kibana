@@ -98,6 +98,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       'xl'
     )({
       showCreateRuleButtonInPrompt: true,
+      calloutSlotId: 'rules-list-callout-slot',
     });
   }, []);
 
@@ -131,6 +132,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           padding-inline: 8px;
         `}
       />
+      <div id="rules-list-callout-slot" data-test-subj="rulesListCalloutSlot" />
       <div css={bodyPaddingCss}>
         <HealthContextProvider>
           <PerformanceContextProvider>

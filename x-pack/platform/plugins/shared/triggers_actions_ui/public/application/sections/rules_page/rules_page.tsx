@@ -137,16 +137,20 @@ const RulesPage = () => {
 
   const renderRulesList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
-        <RulesList
-          consumers={NON_SIEM_CONSUMERS}
-          rulesListKey="rules-page"
-          showCreateRuleButtonInPrompt={true}
-          navigateToEditRuleForm={navigateToEditRuleForm}
-          navigateToCreateRuleForm={navigateToCreateRuleForm}
-          ruleDetailsRoute={rulesAppDetailsRoute}
-        />
-      </KibanaPageTemplate.Section>
+      <>
+        <div id="rules-list-callout-slot" data-test-subj="rulesListCalloutSlot" />
+        <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
+          <RulesList
+            consumers={NON_SIEM_CONSUMERS}
+            rulesListKey="rules-page"
+            showCreateRuleButtonInPrompt={true}
+            navigateToEditRuleForm={navigateToEditRuleForm}
+            navigateToCreateRuleForm={navigateToCreateRuleForm}
+            ruleDetailsRoute={rulesAppDetailsRoute}
+            calloutSlotId="rules-list-callout-slot"
+          />
+        </KibanaPageTemplate.Section>
+      </>
     );
   }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
 
