@@ -78,7 +78,9 @@ export class SyntheticsAppPage {
   }
 
   async waitForMonitorManagementLoadingToFinish() {
-    await expect(this.page.testSubj.locator('uptimeLoader')).toBeHidden({ timeout: 30_000 });
+    await expect(this.page.testSubj.locator('syntheticsMonitorList-loaded')).toBeVisible({
+      timeout: 30_000,
+    });
   }
 
   async waitForLoadingToFinish() {

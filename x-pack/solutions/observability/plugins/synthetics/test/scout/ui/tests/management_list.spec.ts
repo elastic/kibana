@@ -46,18 +46,23 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
     await test.step('filter by type and search', async () => {
       await expect(page.getByText('Showing 1-3 of 3 Configurations')).toBeVisible();
       await pageObjects.syntheticsApp.selectFilterOption('Type', 'Journey / Page');
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
+      await expect(page.getByText('Showing 1-1 of 1 Configuration')).toBeVisible();
 
       const searchInput = page.testSubj.locator('syntheticsOverviewSearchInput');
       await searchInput.click();
       await searchInput.fill('3');
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
       await expect(page.getByText('Showing 1-1 of 1 Configuration')).toBeVisible();
     });
 
     await test.step('no results search', async () => {
       const searchInput = page.testSubj.locator('syntheticsOverviewSearchInput');
       await searchInput.fill('5553');
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
       await expect(page.getByText('0-0')).toBeVisible();
       await searchInput.press('Escape');
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
       await expect(page.getByText('1-3')).toBeVisible();
     });
 
@@ -73,11 +78,13 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
       await frequencyFilter.click();
       await fiveMinOption.click();
       await page.getByText('Apply').click();
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
       await expect(page.getByText('1-1')).toBeVisible();
 
       await frequencyFilter.click();
       await fiveMinOption.click();
       await page.getByText('Apply').click();
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
       await expect(page.getByText('1-3')).toBeVisible();
     });
   });
