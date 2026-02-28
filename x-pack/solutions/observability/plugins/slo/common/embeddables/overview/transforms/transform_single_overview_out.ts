@@ -30,10 +30,8 @@ export function transformSingleOverviewOut(
     remoteName: legacyRemoteName,
     overviewMode: legacyOverviewMode,
     showAllGroupByInstances: _legacyShowAll,
-    show_all_group_by_instances: _showAll,
     ...state
-  } = storedState as SingleOverviewCustomState &
-    LegacySingleOverviewState & { show_all_group_by_instances?: boolean };
+  } = storedState as SingleOverviewCustomState & LegacySingleOverviewState;
 
   const sloId = state.slo_id ?? legacySloId;
   const sloInstanceId = state.slo_instance_id ?? legacySloInstanceId;
