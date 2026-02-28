@@ -119,5 +119,56 @@ describe('MMR command', () => {
       expect(mmrCmd.namedParameters).toBeUndefined();
       expect(mmrCmd.args).toHaveLength(2);
     });
+
+    it('marks query vector function as incomplete when parameters are not set', () => {
+      const text = 'FROM movies | MMR TO_DENSE_VECTOR(';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const mmrCmd = ast.commands[1] as ESQLAstMmrCommand;
+
+      expect(mmrCmd.queryVector).toMatchObject({
+        type: 'function',
+        name: 'to_dense_vector',
+        incomplete: true,
+      });
+      expect(mmrCmd.incomplete).toBe(true);
+    });
+
+    it('does not mark query vector function as incomplete when params section is closed', () => {
+      const text = 'FROM movies | MMR NOW() ON genre LIMIT 10';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const mmrCmd = ast.commands[1] as ESQLAstMmrCommand;
+
+      expect(mmrCmd.queryVector).toMatchObject({
+        type: 'function',
+        name: 'now',
+        incomplete: false,
+      });
+    });
+
+    it('marks query vector function as incomplete when required params are missing', () => {
+      const text = 'FROM movies | MMR TO_DENSE_VECTOR() ON genre LIMIT 10';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const mmrCmd = ast.commands[1] as ESQLAstMmrCommand;
+
+      expect(mmrCmd.queryVector).toMatchObject({
+        type: 'function',
+        name: 'to_dense_vector',
+        incomplete: true,
+      });
+      expect(mmrCmd.incomplete).toBe(true);
+    });
+
+    it('marks TEXT_EMBEDDING query vector function as incomplete when required params are missing', () => {
+      const text = 'FROM movies | MMR TEXT_EMBEDDING() ON genre LIMIT 10';
+      const { ast } = EsqlQuery.fromSrc(text);
+      const mmrCmd = ast.commands[1] as ESQLAstMmrCommand;
+
+      expect(mmrCmd.queryVector).toMatchObject({
+        type: 'function',
+        name: 'text_embedding',
+        incomplete: true,
+      });
+      expect(mmrCmd.incomplete).toBe(true);
+    });
   });
 });
