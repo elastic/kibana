@@ -12,6 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
@@ -357,108 +358,124 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
-    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
-      childOf: this.instance.task.traceparent,
-    });
-    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
+    return withActiveSpan(
+      'task-manager-run',
+      {
+        attributes: {
+          'transaction.type': TASK_MANAGER_RUN_TRANSACTION_TYPE,
+          'kibana.task.type': this.taskType,
+        },
+      },
+      async () => {
+        const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
+          childOf: this.instance.task.traceparent,
+        });
+        const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
-    // Validate state
-    const stateValidationResult = this.validateTaskState(this.instance.task);
+        // Validate state
+        const stateValidationResult = this.validateTaskState(this.instance.task);
 
-    if (stateValidationResult.error) {
-      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(
-          asErr({
-            error: stateValidationResult.error,
-            state: stateValidationResult.taskInstance.state,
-            shouldValidate: false,
-          }),
-          stopTaskTimer()
-        )
-      );
-      if (apmTrans) apmTrans.end('failure');
-      return processedResult;
-    }
-
-    const modifiedContext = await this.beforeRun({
-      taskInstance: stateValidationResult.taskInstance,
-    });
-
-    this.onTaskEvent(
-      asTaskManagerStatEvent(
-        'runDelay',
-        asOk(getTaskDelayInSeconds(this.instance.task.scheduledAt))
-      )
-    );
-
-    // For long running tasks, update retryAt on an interval to allow for quicker task recovery
-    const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
-
-    try {
-      const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
-      const fakeRequest = this.getFakeKibanaRequest(
-        modifiedContext.taskInstance.apiKey,
-        modifiedContext.taskInstance.userScope?.spaceId
-      );
-
-      const abortController = new AbortController();
-
-      this.task = definition.createTaskRunner({
-        taskInstance: sanitizedTaskInstance,
-        fakeRequest,
-        abortController,
-      });
-
-      const originalTaskCancel = this.task.cancel;
-      this.task.cancel = async function () {
-        abortController.abort();
-
-        // Stop updating retryAt for long running tasks if the task is cancelled
-        if (stopUpdatingLongRunningTasks) {
-          stopUpdatingLongRunningTasks();
+        if (stateValidationResult.error) {
+          const processedResult = await withSpan(
+            { name: 'process result', type: 'task manager' },
+            () =>
+              this.processResult(
+                asErr({
+                  error: stateValidationResult.error,
+                  state: stateValidationResult.taskInstance.state,
+                  shouldValidate: false,
+                }),
+                stopTaskTimer()
+              )
+          );
+          if (apmTrans) apmTrans.end('failure');
+          return processedResult;
         }
-        if (originalTaskCancel) return originalTaskCancel.call(this);
-      };
 
-      const runner = getExecutionContextRunner(this.executionContext, {
-        name: `run ${this.instance.task.taskType}`,
-        id: this.instance.task.id,
-        description: 'run task',
-      });
+        const modifiedContext = await this.beforeRun({
+          taskInstance: stateValidationResult.taskInstance,
+        });
 
-      const result = await runner.run(() =>
-        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
-      );
+        this.onTaskEvent(
+          asTaskManagerStatEvent(
+            'runDelay',
+            asOk(getTaskDelayInSeconds(this.instance.task.scheduledAt))
+          )
+        );
 
-      const validatedResult = this.validateResult(result);
-      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(validatedResult, stopTaskTimer())
-      );
-      if (apmTrans) apmTrans.end('success');
-      return processedResult;
-    } catch (err) {
-      const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
-      this.logger.error(`Task ${this} failed: ${err}`, {
-        tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
-        error: { stack_trace: err.stack },
-      });
-      // in error scenario, we can not get the RunResult
-      // re-use modifiedContext's state, which is correct as of beforeRun
-      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(
-          asErr({ error: err, state: modifiedContext.taskInstance.state }),
-          stopTaskTimer()
-        )
-      );
-      if (apmTrans) apmTrans.end('failure');
-      return processedResult;
-    } finally {
-      // Stop updating retryAt for long running tasks once the task has finished
-      if (stopUpdatingLongRunningTasks) {
-        stopUpdatingLongRunningTasks();
+        // For long running tasks, update retryAt on an interval to allow for quicker task recovery
+        const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+
+        try {
+          const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
+          const fakeRequest = this.getFakeKibanaRequest(
+            modifiedContext.taskInstance.apiKey,
+            modifiedContext.taskInstance.userScope?.spaceId
+          );
+
+          const abortController = new AbortController();
+
+          this.task = definition.createTaskRunner({
+            taskInstance: sanitizedTaskInstance,
+            fakeRequest,
+            abortController,
+          });
+
+          const originalTaskCancel = this.task.cancel;
+          this.task.cancel = async function () {
+            abortController.abort();
+
+            // Stop updating retryAt for long running tasks if the task is cancelled
+            if (stopUpdatingLongRunningTasks) {
+              stopUpdatingLongRunningTasks();
+            }
+            if (originalTaskCancel) return originalTaskCancel.call(this);
+          };
+
+          const runner = getExecutionContextRunner(this.executionContext, {
+            name: `run ${this.instance.task.taskType}`,
+            id: this.instance.task.id,
+            description: 'run task',
+          });
+
+          const result = await runner.run(() =>
+            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+          );
+
+          const validatedResult = this.validateResult(result);
+          const processedResult = await withSpan(
+            { name: 'process result', type: 'task manager' },
+            () => this.processResult(validatedResult, stopTaskTimer())
+          );
+          if (apmTrans) apmTrans.end('success');
+          return processedResult;
+        } catch (err) {
+          const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
+          this.logger.error(`Task ${this} failed: ${err}`, {
+            tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
+            error: { stack_trace: err.stack },
+          });
+          // in error scenario, we can not get the RunResult
+          // re-use modifiedContext's state, which is correct as of beforeRun
+          const processedResult = await withSpan(
+            { name: 'process result', type: 'task manager' },
+            () =>
+              this.processResult(
+                asErr({ error: err, state: modifiedContext.taskInstance.state }),
+                stopTaskTimer()
+              )
+          );
+          if (apmTrans) apmTrans.end('failure');
+          return processedResult;
+        } finally {
+          // Stop updating retryAt for long running tasks once the task has finished
+          if (stopUpdatingLongRunningTasks) {
+            stopUpdatingLongRunningTasks();
+          }
+          this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
+        }
       }
-      this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
-    }
+    );
   }
 
   private validateTaskState(taskInstance: ConcreteTaskInstance) {
@@ -508,76 +525,82 @@ export class TaskManagerRunner implements TaskRunner {
       return true;
     }
 
-    const apmTrans = apm.startTransaction(
-      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-      TASK_MANAGER_TRANSACTION_TYPE
-    );
-    apmTrans.addLabels({ entityId: this.taskType });
-
-    const now = new Date();
-    try {
-      const { taskInstance } = await this.beforeMarkRunning({
-        taskInstance: this.instance.task,
-      });
-
-      const attempts = taskInstance.attempts + 1;
-      const ownershipClaimedUntil = taskInstance.retryAt;
-
-      const { id } = taskInstance;
-
-      const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
-      if (timeUntilClaimExpires < 0) {
-        this.logger.debug(
-          `[Task Runner] Task ${id} started after ownership expired (${Math.abs(
-            timeUntilClaimExpires
-          )}ms after expiry)`
+    return withActiveSpan(
+      'mark-task-as-running',
+      { attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE } },
+      async () => {
+        const apmTrans = apm.startTransaction(
+          TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+          TASK_MANAGER_TRANSACTION_TYPE
         );
-      }
+        apmTrans.addLabels({ entityId: this.taskType });
 
-      this.instance = asReadyToRun(
-        (await this.bufferedTaskStore.update(
-          {
-            ...taskWithoutEnabled(taskInstance),
-            status: TaskStatus.Running,
-            startedAt: now,
-            attempts,
-            retryAt: getRetryAt(taskInstance, this.definition) ?? null,
-            // This is a safe conversion as we're setting the startAt above
-          },
-          { validate: false }
-        )) as ConcreteTaskInstanceWithStartedAt
-      );
+        const now = new Date();
+        try {
+          const { taskInstance } = await this.beforeMarkRunning({
+            taskInstance: this.instance.task,
+          });
 
-      const timeUntilClaimExpiresAfterUpdate =
-        howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
-      if (timeUntilClaimExpiresAfterUpdate < 0) {
-        this.logger.debug(
-          `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
-            timeUntilClaimExpiresAfterUpdate
-          )}ms after expiry)`
-        );
-      }
+          const attempts = taskInstance.attempts + 1;
+          const ownershipClaimedUntil = taskInstance.retryAt;
 
-      if (apmTrans) apmTrans.end('success');
-      this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
-      return true;
-    } catch (error) {
-      if (apmTrans) apmTrans.end('failure');
-      this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
-      if (!SavedObjectsErrorHelpers.isConflictError(error)) {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          // try to release claim as an unknown failure prevented us from marking as running
-          mapErr((errReleaseClaim: Error) => {
-            this.logger.error(
-              `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
+          const { id } = taskInstance;
+
+          const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
+          if (timeUntilClaimExpires < 0) {
+            this.logger.debug(
+              `[Task Runner] Task ${id} started after ownership expired (${Math.abs(
+                timeUntilClaimExpires
+              )}ms after expiry)`
             );
-          }, await this.releaseClaimAndIncrementAttempts());
-        }
+          }
 
-        throw error;
+          this.instance = asReadyToRun(
+            (await this.bufferedTaskStore.update(
+              {
+                ...taskWithoutEnabled(taskInstance),
+                status: TaskStatus.Running,
+                startedAt: now,
+                attempts,
+                retryAt: getRetryAt(taskInstance, this.definition) ?? null,
+                // This is a safe conversion as we're setting the startAt above
+              },
+              { validate: false }
+            )) as ConcreteTaskInstanceWithStartedAt
+          );
+
+          const timeUntilClaimExpiresAfterUpdate =
+            howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
+          if (timeUntilClaimExpiresAfterUpdate < 0) {
+            this.logger.debug(
+              `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
+                timeUntilClaimExpiresAfterUpdate
+              )}ms after expiry)`
+            );
+          }
+
+          if (apmTrans) apmTrans.end('success');
+          this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
+          return true;
+        } catch (error) {
+          if (apmTrans) apmTrans.end('failure');
+          this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
+          if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+            if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+              // try to release claim as an unknown failure prevented us from marking as running
+              mapErr((errReleaseClaim: Error) => {
+                this.logger.error(
+                  `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
+                );
+              }, await this.releaseClaimAndIncrementAttempts());
+            }
+
+            throw error;
+          }
+        }
+        return false;
       }
-    }
-    return false;
+    );
   }
 
   /**
