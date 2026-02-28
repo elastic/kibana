@@ -295,6 +295,7 @@ export const mmrQueryVectorSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.queryVectorSuggestion', {
     defaultMessage: 'Example query vector',
   }),
+  category: SuggestionCategory.VALUE,
 };
 
 export const mmrLimitKeywordSuggestion: ISuggestionItem = {
