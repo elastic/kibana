@@ -15,29 +15,15 @@ import type {
   ESQLCommand,
   ESQLMessage,
 } from '../../../types';
-import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateMap } from '../../definitions/utils/validation/map';
 import { validateCommandArguments } from '../../definitions/utils/validation';
+import type { ICommandCallbacks, ICommandContext } from '../types';
+import { getItemLocation } from './utils';
 
 const MMR_WITH_MAP_DEFINITION =
   "{name='lambda', description='The relevance/diversity balancing factor', type=[double]}";
-
-const getItemLocation = (item: ESQLAstItem | undefined, fallback: ESQLCommand['location']) => {
-  if (!item) {
-    return fallback;
-  }
-
-  if (Array.isArray(item)) {
-    const firstNode = item[0];
-    return firstNode && typeof firstNode === 'object' && 'location' in firstNode
-      ? firstNode.location
-      : fallback;
-  }
-
-  return item.location;
-};
 
 const allowedVectorTypes = ['dense_vector', 'param', 'unknown'];
 

@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLAstMmrCommand, ESQLCommandOption } from '../../../types';
+import type {
+  ESQLAstItem,
+  ESQLAstMmrCommand,
+  ESQLCommand,
+  ESQLCommandOption,
+} from '../../../types';
 import { isMap, isOptionNode } from '../../../ast/is';
 import {
   columnExists,
@@ -32,6 +37,24 @@ export enum MmrPosition {
 }
 
 export const MMR_VECTOR_TYPES = ['dense_vector'];
+
+export const getItemLocation = (
+  item: ESQLAstItem | undefined,
+  fallback: ESQLCommand['location']
+) => {
+  if (!item) {
+    return fallback;
+  }
+
+  if (Array.isArray(item)) {
+    const firstNode = item[0];
+    return firstNode && typeof firstNode === 'object' && 'location' in firstNode
+      ? firstNode.location
+      : fallback;
+  }
+
+  return item.location;
+};
 
 export function getMmrVectorValueSuggestions(
   callbacks?: ICommandCallbacks,
