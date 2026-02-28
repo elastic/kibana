@@ -427,6 +427,7 @@ function createNavTree({
         }),
         renderAs: 'panelOpener',
         icon: 'database',
+        breadcrumbStatus: 'hidden',
         children: [
           {
             id: 'ingest_and_integrations',
@@ -436,6 +437,7 @@ function createNavTree({
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
             renderAs: 'panelOpener',
+            breadcrumbStatus: 'hidden',
             children: [
               {
                 link: 'integrations',
