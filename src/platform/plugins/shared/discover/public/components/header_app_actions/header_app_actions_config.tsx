@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiHorizontalRule,
@@ -129,6 +130,24 @@ const OverflowKeyPadSection: React.FC<OverflowKeyPadSectionProps> = ({ onShare }
 const saveOverflowMenuCss = css`
   width: 160px;
 `;
+
+const esqlButtonCss = css`
+  block-size: 28px;
+`;
+
+const DiscoverEsqlButton: React.FC = () => (
+  <EuiButton
+    size="s"
+    iconType="editorCodeBlock"
+    minWidth={false}
+    color="success"
+    css={esqlButtonCss}
+    onClick={noop}
+    data-test-subj="headerGlobalNav-appActionsEsqlButton"
+  >
+    ES|QL
+  </EuiButton>
+);
 
 const DiscoverSaveButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -261,6 +280,6 @@ export function getDiscoverHeaderAppActionsConfig(
         Share
       </EuiButtonIcon>,
     ],
-    primaryActions: [<DiscoverSaveButton key="save" />],
+    primaryActions: [<DiscoverSaveButton key="save" />, <DiscoverEsqlButton key="esql" />],
   };
 }
