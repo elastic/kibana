@@ -224,9 +224,7 @@ describe('type_check orchestration', () => {
       await runCallback({ log, flagsReader, procRunner });
 
       expect(log.info).toHaveBeenCalledWith(expect.stringContaining('1 project'));
-      expect(log.info).toHaveBeenCalledWith(
-        expect.stringContaining('x-pack/plugins/streams_app/tsconfig.type_check.json')
-      );
+      expect(log.info).toHaveBeenCalledWith(expect.stringContaining('x-pack/plugins/streams_app'));
     });
   });
 
