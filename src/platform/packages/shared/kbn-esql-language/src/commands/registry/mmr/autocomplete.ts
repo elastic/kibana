@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { isMap, isOptionNode } from '../../../ast/is';
 import type {
   ESQLAstAllCommands,
@@ -44,7 +45,9 @@ const queryVectorSuggestion: ISuggestionItem = {
   text: '[${0:0.1}, ${1:0.2}]::dense_vector ',
   asSnippet: true,
   kind: 'Value',
-  detail: 'Example query vector',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.queryVectorSuggestion', {
+    defaultMessage: 'Example query vector',
+  }),
   sortText: '1',
 };
 
@@ -78,7 +81,9 @@ async function getDiversifyFieldSuggestions(
         label,
         text: `${label} `,
         kind: 'Field',
-        detail: 'Example field',
+        detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.fieldSuggestion', {
+          defaultMessage: 'Example field',
+        }),
         sortText: '1',
       },
       ...controlAndLiteralSuggestions,
@@ -115,7 +120,9 @@ const limitKeywordSuggestion: ISuggestionItem = {
   label: 'LIMIT',
   text: 'LIMIT ',
   kind: 'Keyword',
-  detail: 'Limit',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitKeywordSuggestion', {
+    defaultMessage: 'Limit',
+  }),
   sortText: '1',
 };
 
@@ -123,7 +130,9 @@ const limitValueSuggestion: ISuggestionItem = {
   label: '10',
   text: '10 ',
   kind: 'Value',
-  detail: 'Example limit',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
+    defaultMessage: 'Example limit',
+  }),
   sortText: '1',
 };
 
@@ -132,7 +141,9 @@ const lambdaMapSuggestion: ISuggestionItem = {
   text: '{ "lambda": ${0:0.5} }',
   asSnippet: true,
   kind: 'Value',
-  detail: 'MMR options map',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.lambdaMapSuggestion', {
+    defaultMessage: 'MMR options configuration',
+  }),
   sortText: '1',
 };
 
@@ -254,13 +265,23 @@ export async function autocomplete(
       const availableParameters: MapParameters = {
         lambda: {
           type: 'number',
-          description: 'MMR lambda value',
+          description: i18n.translate(
+            'kbn-esql-language.commands.mmr.autocomplete.lambdaDescription',
+            {
+              defaultMessage: 'MMR lambda value',
+            }
+          ),
           suggestions: [
             {
               label: '0.5',
               text: '0.5',
               kind: 'Value',
-              detail: 'Example lambda',
+              detail: i18n.translate(
+                'kbn-esql-language.commands.mmr.autocomplete.lambdaSuggestion',
+                {
+                  defaultMessage: 'Example lambda',
+                }
+              ),
             },
           ],
         },
