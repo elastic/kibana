@@ -48,7 +48,6 @@ const queryVectorSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.queryVectorSuggestion', {
     defaultMessage: 'Example query vector',
   }),
-  sortText: '1',
 };
 
 async function getDiversifyFieldSuggestions(
@@ -84,7 +83,6 @@ async function getDiversifyFieldSuggestions(
         detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.fieldSuggestion', {
           defaultMessage: 'Example field',
         }),
-        sortText: '1',
       },
       ...controlAndLiteralSuggestions,
       ...functionSuggestions,
@@ -123,7 +121,6 @@ const limitKeywordSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitKeywordSuggestion', {
     defaultMessage: 'Limit',
   }),
-  sortText: '1',
 };
 
 const limitValueSuggestion: ISuggestionItem = {
@@ -133,7 +130,6 @@ const limitValueSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
     defaultMessage: 'Example limit',
   }),
-  sortText: '1',
 };
 
 const lambdaMapSuggestion: ISuggestionItem = {
@@ -144,7 +140,6 @@ const lambdaMapSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.lambdaMapSuggestion', {
     defaultMessage: 'MMR options configuration',
   }),
-  sortText: '1',
 };
 
 function isAstItemIncomplete(item: ESQLAstItem | undefined): boolean {
