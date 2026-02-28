@@ -10,7 +10,6 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiHorizontalRule,
@@ -27,6 +26,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiSplitButton,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -135,19 +135,34 @@ const esqlButtonCss = css`
   block-size: 28px;
 `;
 
-const DiscoverEsqlButton: React.FC = () => (
-  <EuiButton
-    size="s"
-    iconType="editorCodeBlock"
-    minWidth={false}
-    color="success"
-    css={esqlButtonCss}
-    onClick={noop}
-    data-test-subj="headerGlobalNav-appActionsEsqlButton"
-  >
-    ES|QL
-  </EuiButton>
-);
+interface DiscoverEsqlButtonProps {
+  onClick?: () => void;
+}
+
+const DiscoverEsqlButton: React.FC<DiscoverEsqlButtonProps> = ({ onClick }) => {
+  const button = (
+    <EuiButton
+      size="s"
+      iconType="editorCodeBlock"
+      minWidth={false}
+      color="success"
+      css={esqlButtonCss}
+      onClick={onClick ?? noop}
+      data-test-subj="headerGlobalNav-appActionsEsqlButton"
+    >
+      ES|QL
+    </EuiButton>
+  );
+  return (
+    <EuiToolTip
+      content={i18n.translate('discover.localMenu.esqlTooltipLabel', {
+        defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
+      })}
+    >
+      {button}
+    </EuiToolTip>
+  );
+};
 
 const DiscoverSaveButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -213,12 +228,14 @@ const DiscoverSaveButton: React.FC = () => {
 };
 
 /**
- * POC: Static header app actions config for Discover (secondary: New, Share, overflow; primary: Save).
+ * POC: Static header app actions config for Discover (secondary: New, Share, overflow; primary: Save, ES|QL).
  * Same pattern as setHelpExtension: set when app mounts; cleared on app change.
  * @param openShareModal - Callback to open the shared Share modal (used by secondary Share button and overflow Share keypad item).
+ * @param onEsqlClick - Optional callback when ES|QL button is clicked (transition to ES|QL mode). When undefined, the ES|QL button is not shown.
  */
 export function getDiscoverHeaderAppActionsConfig(
-  openShareModal: () => void
+  openShareModal: () => void,
+  onEsqlClick?: () => void
 ): ChromeHeaderAppActionsConfig {
   return {
     overflowPanels: [
@@ -280,6 +297,9 @@ export function getDiscoverHeaderAppActionsConfig(
         Share
       </EuiButtonIcon>,
     ],
-    primaryActions: [<DiscoverSaveButton key="save" />, <DiscoverEsqlButton key="esql" />],
+    primaryActions: [
+      <DiscoverSaveButton key="save" />,
+      ...(onEsqlClick ? [<DiscoverEsqlButton key="esql" onClick={onEsqlClick} />] : []),
+    ],
   };
 }
