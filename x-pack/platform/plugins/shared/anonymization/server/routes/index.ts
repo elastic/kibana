@@ -11,6 +11,10 @@ import { registerProfileRoutes } from './profiles';
 /**
  * Registers all anonymization plugin HTTP routes.
  */
-export const registerRoutes = (router: IRouter, logger: Logger): void => {
-  registerProfileRoutes(router, logger);
+export const registerRoutes = (
+  router: IRouter,
+  logger: Logger,
+  options: { active: boolean }
+): void => {
+  registerProfileRoutes(router, logger, options);
 };

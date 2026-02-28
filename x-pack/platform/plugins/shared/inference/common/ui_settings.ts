@@ -42,35 +42,41 @@ const nerRuleSchema = schema.allOf([
   }),
 ]);
 
-export const uiSettings: Record<string, UiSettingsParams> = {
-  [aiAnonymizationSettings]: {
-    category: ['observability'],
-    name: i18n.translate('xpack.inference.anonymizationSettingsLabel', {
-      defaultMessage: 'Anonymization Settings',
-    }),
-    value: JSON.stringify(
-      {
-        rules: [
-          {
-            entityClass: 'EMAIL',
-            type: 'RegExp',
-            pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
-            enabled: false,
-          },
-          {
-            type: 'NER',
-            modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
-            enabled: false,
-            allowedEntityClasses: ['PER', 'ORG', 'LOC'],
-            timeoutSeconds: 30,
-          },
-        ],
-      },
-      null,
-      2
-    ),
-    description: i18n.translate('xpack.inference.anonymizationSettingsDescription', {
-      defaultMessage: `Deprecated setting. Use GenAI Settings anonymization profiles instead.
+export function getUiSettings({
+  anonymizationEnabled,
+}: {
+  anonymizationEnabled: boolean;
+}): Record<string, UiSettingsParams> {
+  return {
+    [aiAnonymizationSettings]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.inference.anonymizationSettingsLabel', {
+        defaultMessage: 'Anonymization Settings',
+      }),
+      value: JSON.stringify(
+        {
+          rules: [
+            {
+              entityClass: 'EMAIL',
+              type: 'RegExp',
+              pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+              enabled: false,
+            },
+            {
+              type: 'NER',
+              modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
+              enabled: false,
+              allowedEntityClasses: ['PER', 'ORG', 'LOC'],
+              timeoutSeconds: 30,
+            },
+          ],
+        },
+        null,
+        2
+      ),
+      description: anonymizationEnabled
+        ? i18n.translate('xpack.inference.anonymizationSettingsDescription.deprecated', {
+            defaultMessage: `Deprecated setting. Use GenAI Settings anonymization profiles instead.
           <br />
           List of anonymization rules
           <ul>
@@ -81,26 +87,48 @@ export const uiSettings: Record<string, UiSettingsParams> = {
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
             <li><strong>timeoutSeconds:</strong> (ner type only) maximum seconds <em>per inference request</em> before timing out (multiple requests may be issued during a single chat interaction)</li>
           </ul>`,
-      values: {
-        ul: (chunks) => `<ul>${chunks}</ul>`,
-        li: (chunks) => `<li>${chunks}</li>`,
-        strong: (chunks) => `<strong>${chunks}</strong>`,
-        em: (chunks) => `<em>${chunks}</em>`,
-      },
-    }),
-    deprecation: {
-      message:
-        'This setting is deprecated. Configure anonymization via the Global Anonymization Profile in GenAI Settings.',
-      docLinksKey: 'advancedSettings',
+            values: {
+              ul: (chunks) => `<ul>${chunks}</ul>`,
+              li: (chunks) => `<li>${chunks}</li>`,
+              strong: (chunks) => `<strong>${chunks}</strong>`,
+              em: (chunks) => `<em>${chunks}</em>`,
+            },
+          })
+        : i18n.translate('xpack.inference.anonymizationSettingsDescription', {
+            defaultMessage: `List of anonymization rules
+          <ul>
+            <li><strong>type:</strong> "ner" or "regex"</li>
+            <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
+            <li><strong>pattern:</strong> (regex type only) the regular-expression string to match</li>
+            <li><strong>modelId:</strong> (ner type only) ID of the NER (Named Entity Recognition) model to use</li>
+            <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
+            <li><strong>timeoutSeconds:</strong> (ner type only) maximum seconds <em>per inference request</em> before timing out (multiple requests may be issued during a single chat interaction)</li>
+          </ul>`,
+            values: {
+              ul: (chunks) => `<ul>${chunks}</ul>`,
+              li: (chunks) => `<li>${chunks}</li>`,
+              strong: (chunks) => `<strong>${chunks}</strong>`,
+              em: (chunks) => `<em>${chunks}</em>`,
+            },
+          }),
+      ...(anonymizationEnabled
+        ? {
+            deprecation: {
+              message:
+                'This setting is deprecated. Configure anonymization via the Global Anonymization Profile in GenAI Settings.',
+              docLinksKey: 'advancedSettings' as const,
+            },
+            readonly: true,
+            readonlyMode: 'strict' as const,
+          }
+        : {}),
+      schema: schema.object({
+        rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
+      }),
+      type: 'json',
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
     },
-    readonly: true,
-    readonlyMode: 'strict',
-    schema: schema.object({
-      rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
-    }),
-    type: 'json',
-    requiresPageReload: true,
-    solutionViews: ['classic', 'oblt'],
-    technicalPreview: true,
-  },
-};
+  };
+}

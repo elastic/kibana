@@ -50,8 +50,9 @@ export interface AnonymizationPolicyService {
   getSalt: (namespace: string) => Promise<string>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AnonymizationPluginSetup {}
+export interface AnonymizationPluginSetup {
+  isEnabled: () => boolean;
+}
 
 export interface AnonymizationPluginStart {
   /**

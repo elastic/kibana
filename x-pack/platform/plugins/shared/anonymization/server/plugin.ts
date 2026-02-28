@@ -81,7 +81,7 @@ export class AnonymizationPlugin
     registerFeatures({ features: deps.features });
 
     const router = core.http.createRouter();
-    registerRoutes(router, this.logger);
+    registerRoutes(router, this.logger, { active: this.config.active });
 
     // Register the encrypted saved object type for per-space salt material
     core.savedObjects.registerType({
@@ -108,7 +108,9 @@ export class AnonymizationPlugin
       attributesToEncrypt: new Set(['salt']),
     });
 
-    return {};
+    return {
+      isEnabled: () => this.config.active,
+    };
   }
 
   public start(core: CoreStart, deps: AnonymizationStartDeps): AnonymizationPluginStart {

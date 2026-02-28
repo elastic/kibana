@@ -28,7 +28,7 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { uiSettings } from '../common/ui_settings';
+import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById } from './util/get_connector_by_id';
@@ -78,7 +78,8 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    coreSetup.uiSettings.register(uiSettings);
+    const anonymizationEnabled = pluginsSetup.anonymization?.isEnabled() ?? false;
+    coreSetup.uiSettings.register(getUiSettings({ anonymizationEnabled }));
     const router = coreSetup.http.createRouter();
 
     registerRoutes({

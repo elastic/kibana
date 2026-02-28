@@ -52,7 +52,11 @@ const resolveRouteContext = async (context: RequestHandlerContext) => {
   return { coreContext, namespace, esClient, repo, username };
 };
 
-export const registerProfileRoutes = (router: IRouter, logger: Logger): void => {
+export const registerProfileRoutes = (
+  router: IRouter,
+  logger: Logger,
+  options: { active: boolean }
+): void => {
   // POST /internal/anonymization/profiles — Create profile
   router.versioned
     .post({
@@ -161,16 +165,18 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const query = request.query as FindAnonymizationProfilesRequestQuery;
           const { coreContext, namespace, esClient, repo } = await resolveRouteContext(context);
           await ensureProfilesIndex({ esClient, logger });
-          await ensureGlobalProfileForNamespace({
-            namespace,
-            profilesRepo: repo,
-            logger,
-            getLegacySettingsString: () =>
-              coreContext.uiSettings.client.get<string | undefined>(
-                LEGACY_ANONYMIZATION_UI_SETTING_KEY
-              ),
-            forceEnsure: true,
-          });
+          if (options.active) {
+            await ensureGlobalProfileForNamespace({
+              namespace,
+              profilesRepo: repo,
+              logger,
+              getLegacySettingsString: () =>
+                coreContext.uiSettings.client.get<string | undefined>(
+                  LEGACY_ANONYMIZATION_UI_SETTING_KEY
+                ),
+              forceEnsure: true,
+            });
+          }
           const result = await repo.find({
             namespace,
             filter: query.filter,
