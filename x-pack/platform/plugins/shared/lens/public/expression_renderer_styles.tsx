@@ -17,9 +17,11 @@ import { css } from '@emotion/react';
  *
  * @see https://github.com/elastic/kibana/issues/249382
  */
+const fontFeatureSettings = "'tnum', 'zero', 'ss01', 'ss07'";
+const fontVariantNumeric = 'tabular-nums slashed-zero';
 const numericFontFeatures = css`
-  font-feature-settings: 'tnum', 'zero', 'ss01', 'ss07';
-  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: ${fontFeatureSettings};
+  font-variant-numeric: ${fontVariantNumeric};
 
   // Override user agent form element font features inheritance
   button,
@@ -49,5 +51,10 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
 export const lnsGlobalChartStyles = css`
   [id^='echTooltipPortal'] {
     ${numericFontFeatures}
+
+    // Override elastic-charts .echTooltip__value which sets font-feature-settings: "tnum"
+    .echTooltip__value {
+      font-feature-settings: ${fontFeatureSettings};
+    }
   }
 `;
