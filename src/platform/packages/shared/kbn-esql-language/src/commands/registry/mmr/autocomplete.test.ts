@@ -101,7 +101,12 @@ describe('MMR Autocomplete', () => {
 
   it('suggests limit value after LIMIT keyword', async () => {
     const context = buildContextWithDenseVector();
-    await expectMmrSuggestions('FROM a | MMR ON denseField LIMIT ', ['10 '], undefined, context);
+    await expectMmrSuggestions(
+      'FROM a | MMR ON denseField LIMIT ',
+      ['5 ', '10 '],
+      undefined,
+      context
+    );
   });
 
   it('suggests WITH and pipe after limit value', async () => {

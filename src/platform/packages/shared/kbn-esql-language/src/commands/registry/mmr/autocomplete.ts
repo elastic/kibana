@@ -17,6 +17,7 @@ import type {
 } from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import {
   columnExists,
   getFunctionsSuggestions,
@@ -105,20 +106,22 @@ async function getVectorFieldSuggestions(
 const limitKeywordSuggestion: ISuggestionItem = {
   label: 'LIMIT',
   text: 'LIMIT ',
-  kind: 'Keyword',
+  kind: 'Reference',
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitKeywordSuggestion', {
     defaultMessage: 'Limit',
   }),
 };
 
-const limitValueSuggestion: ISuggestionItem = {
-  label: '10',
-  text: '10 ',
-  kind: 'Value',
-  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
+const limitValueSuggestions: ISuggestionItem[] = buildConstantsDefinitions(
+  ['5', '10'],
+  i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
     defaultMessage: 'Example limit',
   }),
-};
+  undefined,
+  {
+    advanceCursorAndOpenSuggestions: true,
+  }
+);
 
 const lambdaMapSuggestion: ISuggestionItem = {
   label: 'lambda',
@@ -236,7 +239,7 @@ export async function autocomplete(
       return [limitKeywordSuggestion];
 
     case MmrPosition.AFTER_LIMIT_KEYWORD:
-      return [limitValueSuggestion];
+      return limitValueSuggestions;
 
     case MmrPosition.AFTER_LIMIT_VALUE:
       return [withCompleteItem, pipeCompleteItem];
