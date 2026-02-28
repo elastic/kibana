@@ -10,9 +10,9 @@
 import { isMap, isOptionNode } from '../../../ast/is';
 import type {
   ESQLAstAllCommands,
+  ESQLAstItem,
   ESQLAstMmrCommand,
   ESQLCommandOption,
-  ESQLSingleAstItem,
 } from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
@@ -136,6 +136,18 @@ const lambdaMapSuggestion: ISuggestionItem = {
   sortText: '1',
 };
 
+function isAstItemIncomplete(item: ESQLAstItem | undefined): boolean {
+  if (!item) {
+    return true;
+  }
+
+  if (Array.isArray(item)) {
+    return item.length === 0 || isAstItemIncomplete(item[0]);
+  }
+
+  return item.incomplete;
+}
+
 function getPosition(command: ESQLAstMmrCommand): MmrPosition {
   const onOption = command.args.find(
     (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'on'
@@ -163,7 +175,7 @@ function getPosition(command: ESQLAstMmrCommand): MmrPosition {
 
   if (limitOption) {
     const limitValue = limitOption.args[0];
-    if (!limitValue || (limitValue as ESQLSingleAstItem).incomplete) {
+    if (isAstItemIncomplete(limitValue)) {
       return MmrPosition.AFTER_LIMIT_KEYWORD;
     }
     return MmrPosition.AFTER_LIMIT_VALUE;
@@ -171,14 +183,14 @@ function getPosition(command: ESQLAstMmrCommand): MmrPosition {
 
   if (onOption) {
     const onField = onOption.args[0];
-    if (!onField || (onField as ESQLSingleAstItem).incomplete) {
+    if (isAstItemIncomplete(onField)) {
       return MmrPosition.AFTER_ON_KEYWORD;
     }
     return MmrPosition.AFTER_FIELD;
   }
 
   if (command.queryVector) {
-    if ((command.queryVector as ESQLSingleAstItem).incomplete) {
+    if (command.queryVector.incomplete) {
       return MmrPosition.AFTER_MMR_KEYWORD;
     }
     return MmrPosition.AFTER_QUERY_VECTOR;
