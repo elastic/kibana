@@ -33,27 +33,35 @@ export enum MmrPosition {
 
 export const MMR_VECTOR_TYPES = ['dense_vector'];
 
+export function getMmrVectorValueSuggestions(
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+): ISuggestionItem[] {
+  return [
+    ...getLiteralsSuggestions(MMR_VECTOR_TYPES, Location.MMR, {
+      includeDateLiterals: false,
+      includeCompatibleLiterals: true,
+      addComma: false,
+      advanceCursorAndOpenSuggestions: false,
+      supportsControls: true,
+      variables: context?.variables,
+    }),
+    ...getFunctionsSuggestions({
+      location: Location.MMR,
+      types: MMR_VECTOR_TYPES,
+      options: {},
+      context,
+      callbacks,
+    }),
+  ];
+}
+
 export async function getVectorFieldSuggestions(
   innerText: string,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  const controlAndLiteralSuggestions = getLiteralsSuggestions(MMR_VECTOR_TYPES, Location.MMR, {
-    includeDateLiterals: false,
-    includeCompatibleLiterals: true,
-    addComma: false,
-    advanceCursorAndOpenSuggestions: false,
-    supportsControls: true,
-    variables: context?.variables,
-  });
-
-  const functionSuggestions = getFunctionsSuggestions({
-    location: Location.MMR,
-    types: MMR_VECTOR_TYPES,
-    options: {},
-    context,
-    callbacks,
-  });
+  const vectorValueSuggestions = getMmrVectorValueSuggestions(callbacks, context);
 
   if (!callbacks?.getByType) {
     return [];
@@ -76,10 +84,9 @@ export async function getVectorFieldSuggestions(
         ...suggestion,
         rangeToReplace,
       })),
-      ...controlAndLiteralSuggestions,
-      ...functionSuggestions,
+      ...vectorValueSuggestions,
     ],
-    () => [...controlAndLiteralSuggestions, ...functionSuggestions]
+    () => [...vectorValueSuggestions]
   );
 }
 

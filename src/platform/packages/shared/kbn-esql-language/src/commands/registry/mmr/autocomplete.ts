@@ -12,10 +12,6 @@ import type { ESQLAstAllCommands, ESQLAstMmrCommand } from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
-  getFunctionsSuggestions,
-  getLiteralsSuggestions,
-} from '../../definitions/utils/autocomplete/helpers';
-import {
   mmrLambdaMapSuggestion,
   mmrLambdaValueSuggestion,
   mmrLimitKeywordSuggestion,
@@ -26,8 +22,12 @@ import {
   withCompleteItem,
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
-import { Location } from '../types';
-import { getPosition, getVectorFieldSuggestions, MmrPosition, MMR_VECTOR_TYPES } from './utils';
+import {
+  getMmrVectorValueSuggestions,
+  getPosition,
+  getVectorFieldSuggestions,
+  MmrPosition,
+} from './utils';
 
 export async function autocomplete(
   query: string,
@@ -44,21 +44,7 @@ export async function autocomplete(
     case MmrPosition.AFTER_MMR_KEYWORD:
       return [
         mmrQueryVectorSuggestion,
-        ...getLiteralsSuggestions(MMR_VECTOR_TYPES, Location.MMR, {
-          includeDateLiterals: false,
-          includeCompatibleLiterals: true,
-          addComma: false,
-          advanceCursorAndOpenSuggestions: false,
-          supportsControls: true,
-          variables: context?.variables,
-        }),
-        ...getFunctionsSuggestions({
-          location: Location.MMR,
-          types: MMR_VECTOR_TYPES,
-          options: {},
-          context,
-          callbacks,
-        }),
+        ...getMmrVectorValueSuggestions(callbacks, context),
         onCompleteItem,
       ];
 
