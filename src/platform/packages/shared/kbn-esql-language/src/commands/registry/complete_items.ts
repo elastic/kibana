@@ -307,16 +307,18 @@ export const mmrLimitKeywordSuggestion: ISuggestionItem = {
   }),
 };
 
-export const mmrLimitValueSuggestions: ISuggestionItem[] = buildConstantsDefinitions(
-  ['5', '10'],
-  i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
-    defaultMessage: 'Example limit',
-  }),
-  undefined,
-  {
-    advanceCursorAndOpenSuggestions: true,
-  }
-);
+// wrapping in a function to avoid circular dependency issues with the tests
+export const mmrLimitValueSuggestions: () => ISuggestionItem[] = () =>
+  buildConstantsDefinitions(
+    ['5', '10'],
+    i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
+      defaultMessage: 'Example limit',
+    }),
+    undefined,
+    {
+      advanceCursorAndOpenSuggestions: true,
+    }
+  );
 
 export const mmrLambdaMapSuggestion: ISuggestionItem = {
   label: 'lambda',

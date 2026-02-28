@@ -83,7 +83,7 @@ export async function autocomplete(
       return [mmrLimitKeywordSuggestion];
 
     case MmrPosition.AFTER_LIMIT_KEYWORD:
-      return mmrLimitValueSuggestions;
+      return mmrLimitValueSuggestions();
 
     case MmrPosition.AFTER_LIMIT_VALUE:
       return [withCompleteItem, pipeCompleteItem];
