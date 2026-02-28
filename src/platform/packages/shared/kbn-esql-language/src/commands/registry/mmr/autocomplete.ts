@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstMmrCommand } from '../../../types';
+import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import {
@@ -22,6 +23,7 @@ import {
   withCompleteItem,
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
+import { Location } from '../types';
 import {
   getMmrVectorValueSuggestions,
   getPosition,
@@ -36,17 +38,40 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
+
   const innerText = query.substring(0, cursorPosition);
   const mmrCommand = command as ESQLAstMmrCommand;
   const position = getPosition(mmrCommand);
 
   switch (position) {
-    case MmrPosition.AFTER_MMR_KEYWORD:
+    case MmrPosition.AFTER_MMR_KEYWORD: {
+      const queryVectorExpression = mmrCommand.queryVector;
+
+      if (queryVectorExpression && !Array.isArray(queryVectorExpression)) {
+        const { suggestions } = await suggestForExpression({
+          query,
+          command,
+          expressionRoot: queryVectorExpression,
+          cursorPosition,
+          location: Location.MMR,
+          context,
+          callbacks,
+        });
+
+        if (suggestions.length > 0) {
+          return suggestions;
+        }
+      }
+
       return [
+        onCompleteItem,
         mmrQueryVectorSuggestion,
         ...getMmrVectorValueSuggestions(callbacks, context),
-        onCompleteItem,
       ];
+    }
 
     case MmrPosition.AFTER_QUERY_VECTOR:
       return [onCompleteItem];

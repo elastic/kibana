@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMap, isOptionNode } from '../../../ast/is';
 import type { ESQLAstItem, ESQLAstMmrCommand, ESQLCommandOption } from '../../../types';
+import { isMap, isOptionNode } from '../../../ast/is';
 import {
   columnExists,
   getFieldsSuggestions,
@@ -61,8 +61,6 @@ export async function getVectorFieldSuggestions(
   callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  const vectorValueSuggestions = getMmrVectorValueSuggestions(callbacks, context);
-
   if (!callbacks?.getByType) {
     return [];
   }
@@ -84,9 +82,8 @@ export async function getVectorFieldSuggestions(
         ...suggestion,
         rangeToReplace,
       })),
-      ...vectorValueSuggestions,
     ],
-    () => [...vectorValueSuggestions]
+    () => [...filteredFieldSuggestions]
   );
 }
 
