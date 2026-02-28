@@ -6282,6 +6282,60 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.UpdateOriginResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateOriginResponse",
+        "description": [
+          "\nResponse from the update origin API endpoint."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+        "lineNumber": 280,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UpdateOriginResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "lineNumber": 284,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UpdateOriginResponse.attachment",
+            "type": "Object",
+            "tags": [],
+            "label": "attachment",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.VersionedAttachment",
+                "text": "VersionedAttachment"
+              },
+              "<string, unknown>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "lineNumber": 285,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.UserIdAndName",
         "type": "Interface",
         "tags": [],
