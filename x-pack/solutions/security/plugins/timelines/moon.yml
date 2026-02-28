@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/security-threat-hunting-investigations'
   metadata:
-    sourceRoot: x-pack/platform/plugins/shared/timelines
+    sourceRoot: x-pack/solutions/security/plugins/timelines
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -46,8 +46,8 @@ dependsOn:
 tags:
   - plugin
   - prod
-  - group-platform
-  - shared
+  - group-security
+  - private
   - jest-unit-tests
 fileGroups:
   src:
