@@ -15,10 +15,12 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
+    await syntheticsServices.deleteCustomRules();
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
+    await syntheticsServices.deleteCustomRules();
   });
 
   test('creates a custom TLS alert rule and verifies alert fires', async ({
@@ -61,15 +63,23 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
     await test.step('filter monitors by KQL', async () => {
       await page.testSubj.locator('queryInput').fill('monitor.type: "tcp" ');
       await page.keyboard.press('Enter');
-      await expect(
-        page.testSubj.locator('syntheticsStatusRuleVizMonitorQueryIDsButton')
-      ).toHaveText('0 existing monitors');
+      // The button disappears during loading and re-appears with updated count
+      const monitorCountButton = page.testSubj.locator(
+        'syntheticsStatusRuleVizMonitorQueryIDsButton'
+      );
+      await expect(monitorCountButton).toBeHidden({ timeout: 10_000 });
+      await expect(monitorCountButton).toHaveText('0 existing monitors', { timeout: 30_000 });
 
       await page.testSubj.locator('queryInput').fill('');
       await page.keyboard.press('Enter');
     });
 
     await test.step('filter by monitor type', async () => {
+      const monitorCountButton = page.testSubj.locator(
+        'syntheticsStatusRuleVizMonitorQueryIDsButton'
+      );
+      await expect(monitorCountButton).toBeVisible({ timeout: 30_000 });
+
       await page.getByRole('button', { name: 'Type All' }).click();
       await page.testSubj.click('monitorTypeField');
       await page.getByRole('option', { name: 'http' }).click();
@@ -77,9 +87,7 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
         .locator('ruleDefinition')
         .getByRole('button', { name: 'Type http' })
         .click();
-      await expect(
-        page.testSubj.locator('syntheticsStatusRuleVizMonitorQueryIDsButton')
-      ).toHaveText('1 existing monitor');
+      await expect(monitorCountButton).toHaveText('1 existing monitor', { timeout: 30_000 });
     });
 
     await test.step('create TLS rule', async () => {
@@ -101,7 +109,8 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
 
     await test.step('verify rule creation', async () => {
       await pageObjects.syntheticsApp.goToRulesPage();
-      await expect(page.getByText(tlsRuleName)).toBeVisible();
+      // eslint-disable-next-line playwright/no-nth-methods
+      await expect(page.getByText(tlsRuleName).first()).toBeVisible();
     });
 
     await test.step('verify alert fires', async () => {
@@ -109,7 +118,8 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
-        await expect(page.getByText(tlsRuleName)).toBeVisible({ timeout: 5_000 });
+        // eslint-disable-next-line playwright/no-nth-methods
+        await expect(page.getByText(tlsRuleName).first()).toBeVisible({ timeout: 5_000 });
       }).toPass({ timeout: 30_000 });
     });
   });

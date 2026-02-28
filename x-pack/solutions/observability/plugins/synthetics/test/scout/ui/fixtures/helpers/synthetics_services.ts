@@ -52,6 +52,7 @@ export interface SyntheticsServicesFixture {
   }) => Promise<void>;
   cleanUp: () => Promise<void>;
   cleanUpAlerts: () => Promise<void>;
+  deleteCustomRules: () => Promise<void>;
   deleteConnectors: () => Promise<void>;
   deleteMonitorByQuery: (query: string) => Promise<void>;
   deleteMonitors: () => Promise<void>;
@@ -329,6 +330,22 @@ function createSyntheticsServices(
     });
   };
 
+  const deleteCustomRules = async () => {
+    const { data } = await kbnClient.request<{ data: Array<{ id: string; consumer: string }> }>({
+      path: '/api/alerting/rules/_find?per_page=100',
+      method: 'GET',
+    });
+    const rules = (data as any).data ?? [];
+    for (const rule of rules) {
+      if (rule.consumer === 'uptime' || rule.consumer === 'synthetics') {
+        await kbnClient.request({
+          path: `/api/alerting/rule/${rule.id}`,
+          method: 'DELETE',
+        });
+      }
+    }
+  };
+
   const deleteConnectors = async () => {
     const { data } = await kbnClient.request({
       path: '/api/actions/connectors',
@@ -555,6 +572,7 @@ function createSyntheticsServices(
     addSummaryDocument,
     cleanUp,
     cleanUpAlerts,
+    deleteCustomRules,
     deleteConnectors,
     deleteMonitorByQuery,
     deleteMonitors,
