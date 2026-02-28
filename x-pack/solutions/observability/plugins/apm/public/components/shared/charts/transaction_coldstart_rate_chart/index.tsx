@@ -145,7 +145,7 @@ export function TransactionColdstartRateChart({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h2>
+            <h2 data-test-subj="coldstartRateChartTitle">
               {i18n.translate('xpack.apm.coldstartRate', {
                 defaultMessage: 'Cold start rate',
               })}
