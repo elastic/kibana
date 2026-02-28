@@ -69,8 +69,9 @@ async function muteInstanceWithOCC(
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // Require action execute permission for mute so roles with "alerts but no actions" get 403
-    await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    if (attributes.actions.length) {
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({

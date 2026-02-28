@@ -58,9 +58,6 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
               });
               break;
             case 'space_1_all_alerts_none_actions at space1':
-              expect(muteResponse.statusCode).to.eql(403);
-              expect(muteResponse.body.error).to.eql('Forbidden');
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -122,8 +119,6 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
               expect(snoozeResult.statusCode).to.eql(403);
               break;
             case 'space_1_all_alerts_none_actions at space1':
-              expect(snoozeResult.statusCode).to.eql(403);
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
