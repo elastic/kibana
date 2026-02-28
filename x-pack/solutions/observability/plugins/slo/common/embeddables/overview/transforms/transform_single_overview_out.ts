@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type {
   OverviewEmbeddableState,
   SingleOverviewCustomState,
@@ -29,7 +30,7 @@ export function transformSingleOverviewOut(
     sloInstanceId: legacySloInstanceId,
     remoteName: legacyRemoteName,
     overviewMode: legacyOverviewMode,
-    showAllGroupByInstances: _legacyShowAll,
+    showAllGroupByInstances: legacyShowAll,
     ...state
   } = storedState as SingleOverviewCustomState & LegacySingleOverviewState;
 
@@ -37,10 +38,16 @@ export function transformSingleOverviewOut(
   const sloInstanceId = state.slo_instance_id ?? legacySloInstanceId;
   const remoteName = state.remote_name ?? legacyRemoteName;
   const overviewMode = state.overview_mode ?? legacyOverviewMode;
+
+  // Legacy non-grouped SLOs stored sloInstanceId: "*" with showAllGroupByInstances: false.
+  // Drop slo_instance_id in that case to avoid rendering all-instances view for a non-grouped SLO.
+  const shouldIncludeInstanceId =
+    sloInstanceId && (sloInstanceId !== ALL_VALUE || legacyShowAll === true);
+
   return {
     ...state,
     ...(sloId ? { slo_id: sloId } : {}),
-    ...(sloInstanceId ? { slo_instance_id: sloInstanceId } : {}),
+    ...(shouldIncludeInstanceId ? { slo_instance_id: sloInstanceId } : {}),
     ...(remoteName ? { remote_name: remoteName } : {}),
     ...(overviewMode ? { overview_mode: overviewMode } : {}),
   };
