@@ -13,10 +13,9 @@ import type {
   ESQLAstItem,
   ESQLAstMmrCommand,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLMessage,
 } from '../../../types';
-import type { ICommandContext } from '../types';
+import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateMap } from '../../definitions/utils/validation/map';
@@ -40,23 +39,30 @@ const getItemLocation = (item: ESQLAstItem | undefined, fallback: ESQLCommand['l
   return item.location;
 };
 
+const allowedVectorTypes = ['dense_vector', 'param', 'unknown'];
+
 export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLCommand[],
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const mmrCommand = command as ESQLAstMmrCommand;
-  const queryVectorArg = mmrCommand.args.find((arg) => !Array.isArray(arg) && !isOptionNode(arg));
-  const onOption = mmrCommand.args.find(
-    (arg) => !Array.isArray(arg) && isOptionNode(arg) && arg.name.toLowerCase() === 'on'
-  );
-  const withOption = mmrCommand.args.find(
-    (arg) => !Array.isArray(arg) && isOptionNode(arg) && arg.name.toLowerCase() === 'with'
-  );
+  let queryVectorArg: ESQLAstItem | undefined;
+  let onFieldArg: ESQLAstItem | undefined;
+  let optionsMap: ESQLAstItem | undefined;
 
-  const onFieldArg = (onOption as ESQLCommandOption)?.args[0];
-  const optionsMap = (withOption as ESQLCommandOption)?.args[0];
+  for (const arg of mmrCommand.args) {
+    if (Array.isArray(arg)) continue;
+    if (isOptionNode(arg)) {
+      const name = arg.name.toLowerCase();
+      if (name === 'on') onFieldArg = arg.args[0];
+      else if (name === 'with') optionsMap = arg.args[0];
+    } else if (!queryVectorArg) {
+      queryVectorArg = arg;
+    }
+  }
 
   if (queryVectorArg) {
     const queryVectorType = getExpressionType(
@@ -65,7 +71,7 @@ export const validate = (
       context?.unmappedFieldsStrategy
     );
 
-    if (!['dense_vector', 'param', 'unknown'].includes(queryVectorType)) {
+    if (!allowedVectorTypes.includes(queryVectorType)) {
       messages.push(
         getMessageFromId({
           messageId: 'mmrQueryVectorWrongType',
@@ -83,7 +89,7 @@ export const validate = (
       context?.unmappedFieldsStrategy
     );
 
-    if (!['dense_vector', 'param', 'unknown'].includes(diversifyFieldType)) {
+    if (!allowedVectorTypes.includes(diversifyFieldType)) {
       messages.push(
         getMessageFromId({
           messageId: 'mmrOnFieldWrongType',
@@ -102,7 +108,7 @@ export const validate = (
     }
   }
 
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };
