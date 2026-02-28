@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -23,6 +23,7 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { queryClient } from './query_client';
 import type { TriggersAndActionsUiServices } from './rules_app';
+import { getRulesHeaderAppActionsConfig } from './sections/rules_page/header_app_actions/header_app_actions_config';
 
 const RuleDetailsRouteWrapper = lazy(
   () => import('./sections/rule_details/components/rule_details_route_wrapper')
@@ -56,7 +57,14 @@ const AppWithoutRouter = () => {
   const {
     actions: { validateEmailAddresses, enabledEmailServices },
     isServerless,
+    chrome,
   } = useKibana().services;
+
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig) {
+      chrome.setHeaderAppActionsConfig(getRulesHeaderAppActionsConfig());
+    }
+  }, [chrome]);
 
   return (
     <ConnectorProvider

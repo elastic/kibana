@@ -10,15 +10,13 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { getCreateRuleRoute, getCreateRuleFromTemplateRoute } from '@kbn/rule-data-utils';
-import { RulesSettingsLink } from './components/rules_setting/rules_settings_link';
-import { RulesListDocLink } from './sections/rules_list/components/rules_list_doc_link';
-import { CreateRuleButton } from './sections/rules_list/components/create_rule_button';
 import type { Section } from './constants';
 import { routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
@@ -52,7 +50,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ruleTypeRegistry,
     application: { navigateToApp },
   } = useKibana().services;
-  const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes: [],
@@ -89,14 +87,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     setRuleTypeModalVisibility(true);
   }, []);
 
-  const headerActions = [
-    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-    <RulesSettingsLink
-      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-    />,
-    <RulesListDocLink />,
-  ];
-
   const renderRulesList = useCallback(() => {
     return suspendedComponentWithProps(
       RulesList,
@@ -124,19 +114,10 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     <>
       <EuiPageTemplate.Header
         paddingSize="none"
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage id="xpack.triggersActionsUI.home.appTitle" defaultMessage="Rules" />
-          </span>
-        }
-        rightSideItems={headerActions}
-        description={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.home.sectionDescription"
-            defaultMessage="Detect conditions using rules."
-          />
-        }
+        bottomBorder="extended"
+        css={css`
+          padding-inline: 8px;
+        `}
         tabs={tabs.map((tab) => ({
           label: tab.name,
           onClick: () => onSectionChange(tab.id),
