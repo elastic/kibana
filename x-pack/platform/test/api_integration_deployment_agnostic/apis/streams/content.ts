@@ -74,7 +74,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'my-error-query',
               title: 'error query',
-              kql: { query: 'message: ERROR' },
               esql: {
                 query:
                   'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
@@ -260,7 +259,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: 'my-error-query',
             title: 'error query',
-            kql: { query: 'message: ERROR' },
             esql: {
               query:
                 'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
@@ -512,7 +510,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: 'my-error-query',
             title: 'error query',
-            kql: { query: 'message: ERROR' },
             esql: {
               query:
                 'FROM logs.otel.branch_c.nested,logs.otel.branch_c.nested.* | WHERE KQL("message: ERROR")',
@@ -771,7 +768,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   {
                     id: 'my-error-query',
                     title: 'error query',
-                    kql: { query: 'message: ERROR' },
                     esql: {
                       query:
                         'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',

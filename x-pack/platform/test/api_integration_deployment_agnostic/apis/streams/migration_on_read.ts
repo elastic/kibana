@@ -207,7 +207,6 @@ const expectedQueriesResponse = {
     {
       id: '12345',
       title: 'Test',
-      kql: { query: 'atest' },
       esql: {
         query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* | WHERE KQL("atest")`,
       },
@@ -279,7 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             title: 'Init Query',
-            kql: { query: 'test' },
+            esql: { query: 'FROM logs.otel | LIMIT 1' },
           },
         },
       });
