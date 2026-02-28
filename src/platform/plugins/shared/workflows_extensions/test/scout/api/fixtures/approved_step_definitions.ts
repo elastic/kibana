@@ -68,4 +68,24 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'search.rerank',
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
+  {
+    id: 'cases.createCase',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.updateCase',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.getCase',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.addComment',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.createCaseFromTemplate',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
 ];

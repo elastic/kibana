@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../common/constants';
-import { flattenNestedObject, addNestedFieldFromSource } from '.';
+import type { TimelineEventsDetailsItem } from '../search_strategy';
+import { ENRICHMENT_DESTINATION_PATH } from '../constants';
+import { addNestedFieldFromSource, flattenNestedObject } from './add_nested_field_from_source';
 
 describe('addNestedFieldFromSource', () => {
   it('returns original fieldsData when source is undefined', () => {
