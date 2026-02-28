@@ -6,3 +6,5 @@ Stream description:
 
 Initial clustering:
 {{{initial_clustering}}}
+
+Before proposing partitions, use the `get_stream_features` tool to fetch features about this stream. Features provide valuable context about entities detected in the logs. This information can help you understand what systems are present and design more accurate partition conditions. If no features are returned, proceed based on the clustering data alone.
