@@ -38,7 +38,7 @@ describe('EUI & React Router Component Helpers', () => {
 
     const popoutElement = getByRole('presentation');
     expect(popoutElement).toBeInTheDocument();
-    expect(popoutElement.getAttribute('data-euiicon-type')).toEqual('external');
+    expect(popoutElement.getAttribute('data-euiicon-type')).toEqual('popout');
   });
 
   it('renders with the correct href', () => {

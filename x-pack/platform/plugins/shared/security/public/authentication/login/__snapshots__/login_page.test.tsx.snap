@@ -25,7 +25,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
     fill={true}
     href="http://some-host/bar"
     iconSide="right"
-    iconType="popout"
+    iconType="external"
     target="_blank"
   >
     <MemoizedFormattedMessage
@@ -61,7 +61,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
     fill={true}
     href="http://some-host/bar"
     iconSide="right"
-    iconType="popout"
+    iconType="external"
     target="_blank"
   >
     <MemoizedFormattedMessage
