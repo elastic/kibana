@@ -103,15 +103,18 @@ function isAstItemIncomplete(item: ESQLAstItem | undefined): boolean {
 }
 
 export function getPosition(command: ESQLAstMmrCommand): MmrPosition {
-  const onOption = command.args.find(
-    (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'on'
-  ) as ESQLCommandOption;
-  const limitOption = command.args.find(
-    (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'limit'
-  ) as ESQLCommandOption;
-  const withOption = command.args.find(
-    (arg) => isOptionNode(arg) && arg.name.toLowerCase() === 'with'
-  ) as ESQLCommandOption;
+  let onOption: ESQLCommandOption | undefined;
+  let limitOption: ESQLCommandOption | undefined;
+  let withOption: ESQLCommandOption | undefined;
+
+  for (const arg of command.args) {
+    if (isOptionNode(arg)) {
+      const name = arg.name.toLowerCase();
+      if (name === 'on') onOption = arg;
+      else if (name === 'limit') limitOption = arg;
+      else if (name === 'with') withOption = arg;
+    }
+  }
 
   if (withOption) {
     const map = isMap(withOption.args[0]) ? withOption.args[0] : undefined;
