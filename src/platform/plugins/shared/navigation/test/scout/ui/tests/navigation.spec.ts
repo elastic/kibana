@@ -87,7 +87,7 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     pageObjects,
     browserAuth,
   }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
 
     await page.gotoApp('management');
