@@ -17,8 +17,14 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
-    await syntheticsServices.addMonitorSimple(testMonitor1);
-    await syntheticsServices.addMonitorSimple(testMonitor2);
+    await syntheticsServices.addMonitorSimple(testMonitor1, {
+      type: 'http',
+      urls: 'https://www.elastic.co',
+    });
+    await syntheticsServices.addMonitorSimple(testMonitor2, {
+      type: 'http',
+      urls: 'https://www.elastic.co',
+    });
     await syntheticsServices.addMonitorSimple(testMonitor3, {
       type: 'browser',
       schedule: { unit: 'm', number: '5' },
@@ -54,6 +60,11 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
       await searchInput.fill('3');
       await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
       await expect(page.getByText('Showing 1-1 of 1 Configuration')).toBeVisible();
+
+      await searchInput.clear();
+      await pageObjects.syntheticsApp.selectFilterOption('Type', 'Journey / Page');
+      await pageObjects.syntheticsApp.waitForMonitorManagementLoadingToFinish();
+      await expect(page.getByText('Showing 1-3 of 3 Configurations')).toBeVisible();
     });
 
     await test.step('no results search', async () => {
