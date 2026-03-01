@@ -38,8 +38,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
   private resume(): void {
     const context = this.workflowRuntime.getWorkflowExecution().context;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const resumeInput = context?.resumeInput as Record<string, any> | undefined;
+    const resumeInput = context?.resumeInput as Record<string, unknown> | undefined;
 
     this.stepExecutionRuntime.finishStep(resumeInput);
 
