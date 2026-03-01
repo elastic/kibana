@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
 import Pw from '@parcel/watcher';
 import type { CleanupTask } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+
+const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
 run(
   async ({ log, flagsReader, procRunner, addCleanupTask }) => {
@@ -43,19 +46,20 @@ run(
 
 async function lintFiles({
   procRunner,
-  options = { fix: false },
+  options,
 }: {
   procRunner: ProcRunner;
-  options: { fix: boolean; stopExisting?: boolean };
+  options: { fix: boolean; stopExisting: boolean; paths?: string[] };
 }) {
-  const { stopExisting = false } = options;
+  const { stopExisting, paths } = options;
+
   if (stopExisting) {
     await procRunner.stop('oxlint');
   }
 
   await procRunner.run('oxlint', {
     cmd: 'oxlint',
-    args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json'],
+    args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json', ...(paths ?? [])],
     cwd: REPO_ROOT,
     wait: true,
   });
@@ -75,25 +79,49 @@ async function watchAndLintFiles({
   log.info('Linting files in watch mode...');
 
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+  // null signals that a full scan is needed (e.g. FSEvents dropped events on macOS)
+  let pendingPaths: Set<string> | null = new Set();
 
   const DEBOUNCE_MS = 500;
 
   const subscription = await Pw.subscribe(
     REPO_ROOT,
-    (err) => {
+    (err, events) => {
       if (err) {
-        log.error(`Error watching files: ${err}`);
-        return;
+        // macOS FSEvents drops events when too many files change at once (e.g. during git checkout).
+        // Fall back to a full scan rather than logging a spurious error.
+        if (err.message?.includes('Events were dropped by the FSEvents client')) {
+          pendingPaths = null;
+        } else {
+          log.error(`Error watching files: ${err}`);
+          return;
+        }
+      } else {
+        const relevant = events.filter(
+          (e) => e.type !== 'delete' && LINTABLE_EXTENSIONS.has(Path.extname(e.path))
+        );
+
+        if (relevant.length === 0 && pendingPaths !== null && pendingPaths.size === 0) {
+          return;
+        }
+
+        if (pendingPaths !== null) {
+          for (const { path } of relevant) {
+            pendingPaths.add(path);
+          }
+        }
       }
 
       if (debounceTimer) clearTimeout(debounceTimer);
 
       debounceTimer = setTimeout(async () => {
+        const paths = pendingPaths !== null ? [...pendingPaths] : undefined;
+        pendingPaths = new Set();
         debounceTimer = undefined;
         try {
-          await lintFiles({ procRunner, options: { fix: options.fix, stopExisting: true } });
+          await lintFiles({ procRunner, options: { fix: options.fix, stopExisting: true, paths } });
         } catch {
-          // ProcRunner already logged the error; don't rethrow to keep watching
+          log.debug('Lint run failed, continuing to watch...');
         }
       }, DEBOUNCE_MS);
     },
@@ -109,7 +137,7 @@ async function watchAndLintFiles({
   try {
     await lintFiles({ procRunner, options: { fix: options.fix, stopExisting: false } });
   } catch {
-    // ProcRunner already logged the error; don't rethrow to continue to watch mode
+    log.debug('Lint run failed, continuing to watch...');
   }
 
   log.info('Watching for changes... (Ctrl+C to exit)');
