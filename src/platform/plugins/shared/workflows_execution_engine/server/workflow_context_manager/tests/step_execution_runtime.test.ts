@@ -467,6 +467,21 @@ describe('StepExecutionRuntime', () => {
           })
         );
       });
+
+      it('should strip a residual resumeAt from prior state when entering an indefinite wait', () => {
+        // Guards against a prior timer-based run leaving a resumeAt that leaks into
+        // a subsequent indefinite wait record and confuses the scheduler.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.RUNNING,
+          state: { resumeAt: '2025-12-31T00:00:00.000Z', otherKey: 'kept' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ state: { otherKey: 'kept' } })
+        );
+      });
     });
   });
 

@@ -252,11 +252,23 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
       status: waitingStatus,
-      state: resumeDate
-        ? { ...(this.stepExecution?.state || {}), resumeAt: resumeDate.toISOString() }
-        : this.stepExecution?.state,
+      state: this.buildWaitState(resumeDate),
     });
     return true;
+  }
+
+  /**
+   * Builds the step state for entering a wait. When a resumeDate is provided (timer-based),
+   * adds resumeAt to existing state. When omitted (indefinite), explicitly strips any residual
+   * resumeAt so a prior timer sentinel cannot leak into an indefinite wait record.
+   */
+  private buildWaitState(resumeDate: Date | undefined): Record<string, unknown> | undefined {
+    const existing = this.stepExecution?.state ?? {};
+    if (resumeDate) {
+      return { ...existing, resumeAt: resumeDate.toISOString() };
+    }
+    const { resumeAt: _stripped, ...rest } = existing;
+    return Object.keys(rest).length ? rest : undefined;
   }
 
   /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */
