@@ -306,7 +306,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.filterDescription',
               { defaultMessage: 'Filter by value' }
             ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -323,7 +323,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.excludeDescription',
               { defaultMessage: 'Filter out value' }
             ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({

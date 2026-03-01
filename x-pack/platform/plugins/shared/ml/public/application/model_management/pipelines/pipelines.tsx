@@ -67,7 +67,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                         absolute: true,
                       });
                     }}
-                    iconType={'documentEdit'}
+                    iconType={'pencil'}
                     iconSide="left"
                   >
                     <FormattedMessage

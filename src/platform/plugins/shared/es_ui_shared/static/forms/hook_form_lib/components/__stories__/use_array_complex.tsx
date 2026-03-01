@@ -203,7 +203,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => removeItem(id)}
                         aria-label="Remove processor"
                       />
@@ -463,7 +463,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         onClick={() => removeItem(id)}
                         aria-label="Remove processor"
                       />

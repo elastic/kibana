@@ -142,7 +142,7 @@ export function StreamTree({
                       aria-label={i18n.translate('xpack.streams.contentPack.tree.collapse', {
                         defaultMessage: 'Collapse',
                       })}
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       color="text"
                       onClick={() => {
                         setRows((prevRows) => {
@@ -160,7 +160,7 @@ export function StreamTree({
                       aria-label={i18n.translate('xpack.streams.contentPack.tree.expand', {
                         defaultMessage: 'Expand',
                       })}
-                      iconType="arrowRight"
+                      iconType="chevronSingleRight"
                       color="text"
                       onClick={() => {
                         setRows((prevRows) => {

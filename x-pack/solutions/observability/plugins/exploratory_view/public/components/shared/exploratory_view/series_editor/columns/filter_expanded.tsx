@@ -39,7 +39,7 @@ export function FilterExpanded(props: FilterProps) {
       button={
         <EuiFilterButton
           onClick={() => setIsOpen((prevState) => !prevState)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isOpen}
         >
           {props.label}

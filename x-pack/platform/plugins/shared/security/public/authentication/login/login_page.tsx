@@ -277,7 +277,7 @@ export class LoginPage extends Component<Props, State> {
             <EuiButton
               href={window.location.href}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               fill
             >

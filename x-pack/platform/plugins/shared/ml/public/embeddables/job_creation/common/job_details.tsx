@@ -337,7 +337,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
               <EuiButtonEmpty
                 onClick={createADJobInWizard}
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
               >
@@ -359,7 +359,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <EuiIcon type="checkInCircleFilled" color="success" />
+                <EuiIcon type="checkCircleFill" color="success" />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

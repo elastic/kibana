@@ -28,7 +28,7 @@ export const AddDataButton: React.FC = () => {
   const items = [
     <EuiContextMenuItem
       key="upload"
-      icon="exportAction"
+      icon="upload"
       data-test-subj="gettingStartedUploadMenuItem"
       onClick={() => {
         closePopover();
@@ -71,7 +71,7 @@ export const AddDataButton: React.FC = () => {
     <EuiButton
       color="primary"
       fill={true}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       data-test-subj="gettingStartedAddDataButton"

@@ -119,7 +119,7 @@ const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShar
       <EuiFilterButton
         badgeColor="subdued"
         disabled={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isPopoverOpen}
         onClick={onFilterButtonClick}
         hasActiveFilters={!!items.find((item) => item.checked === 'on')}

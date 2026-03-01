@@ -25,7 +25,7 @@ export const MonitorSelector = () => {
     <EuiButtonIcon
       data-test-subj="syntheticsMonitorSelectorButton"
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={onButtonClick}
       aria-label={SELECT_MONITOR}
     />

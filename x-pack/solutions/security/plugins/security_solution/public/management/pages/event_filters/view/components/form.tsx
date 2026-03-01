@@ -414,7 +414,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               />
             </EuiText>
           ),
-          iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
+          iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkCircleFill',
           'data-test-subj': getTestId('filterEventsButton'),
         },
         {
@@ -434,7 +434,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               />
             </EuiFlexGroup>
           ),
-          iconType: isFilterProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
+          iconType: isFilterProcessDescendantsSelected ? 'checkCircleFill' : 'empty',
           'data-test-subj': getTestId('filterProcessDescendantsButton'),
         },
       ];

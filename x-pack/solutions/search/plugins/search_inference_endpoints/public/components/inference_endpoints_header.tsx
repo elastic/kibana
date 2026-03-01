@@ -28,7 +28,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
       bottomBorder={true}
       rightSideItems={[
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           fill
           iconSize="m"
           data-test-subj="add-inference-endpoint-header-button"
@@ -38,7 +38,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         </EuiButton>,
         <EuiButtonEmpty
           aria-label={i18n.API_DOCUMENTATION_LINK}
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           iconSize="s"
           flush="both"
@@ -51,7 +51,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         <EuiButtonEmpty
           aria-label={i18n.VIEW_YOUR_MODELS_LINK}
           href={trainedModelPageUrl}
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           iconSize="s"
           flush="both"
@@ -63,7 +63,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
         <EuiButtonEmpty
           aria-label={i18n.EIS_DOCUMENTATION_LINK}
           href={docLinks.elasticInferenceService}
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           iconSize="s"
           flush="both"

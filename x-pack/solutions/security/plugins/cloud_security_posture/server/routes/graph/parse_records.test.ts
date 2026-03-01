@@ -1142,14 +1142,14 @@ describe('parseRecords', () => {
       expect(actorNode).toBeDefined();
       expect(actorNode.label).toBe('non-enriched-actor-123'); // group ID (entity ID for single)
       expect(actorNode.tag).toBe('Entity');
-      expect(actorNode.icon).toBe('magnifyWithExclamation');
+      expect(actorNode.icon).toBe('magnifyExclamation');
       expect(actorNode.shape).toBe('rectangle');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('non-enriched-target-456'); // group ID (entity ID for single)
       expect(targetNode.tag).toBe('Entity');
-      expect(targetNode.icon).toBe('magnifyWithExclamation');
+      expect(targetNode.icon).toBe('magnifyExclamation');
       expect(targetNode.shape).toBe('rectangle');
       expect(targetNode.count).toBeUndefined();
     });
@@ -1206,14 +1206,14 @@ describe('parseRecords', () => {
       expect(actorNode).toBeDefined();
       expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
       expect(actorNode.tag).toBe('Entities');
-      expect(actorNode.icon).toBe('magnifyWithExclamation');
+      expect(actorNode.icon).toBe('magnifyExclamation');
       expect(actorNode.shape).toBe('rectangle');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
       expect(targetNode.tag).toBe('Entities');
-      expect(targetNode.icon).toBe('magnifyWithExclamation');
+      expect(targetNode.icon).toBe('magnifyExclamation');
       expect(targetNode.shape).toBe('rectangle');
       expect(targetNode.count).toBe(2);
     });
@@ -1592,7 +1592,7 @@ describe('parseRecords', () => {
       });
       expect(actorNode.label).toBeUndefined();
       expect(actorNode.tag).toBe('Entities');
-      expect(actorNode.icon).toBe('magnifyWithExclamation');
+      expect(actorNode.icon).toBe('magnifyExclamation');
       expect(actorNode.shape).toBe('rectangle');
       expect(actorNode.count).toBe(3);
 
@@ -1613,7 +1613,7 @@ describe('parseRecords', () => {
       });
       expect(targetNode.label).toBeUndefined();
       expect(targetNode.tag).toBe('Entities');
-      expect(targetNode.icon).toBe('magnifyWithExclamation');
+      expect(targetNode.icon).toBe('magnifyExclamation');
       expect(targetNode.shape).toBe('rectangle');
       expect(targetNode.count).toBe(2);
     });

@@ -51,7 +51,7 @@ const StatusFilterComponent: React.FC<Props> = ({
         badgeColor="subdued"
         data-test-subj="statusFilterButton"
         disabled={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isPopoverOpen}
         onClick={onFilterButtonClick}
         hasActiveFilters={!!statusItems.find((item) => item.checked === 'on')}

@@ -97,7 +97,7 @@ function createBaseLensDefinition<D extends {}>(
                 },
                 lineWidth: 3,
                 color: euiTheme.colors.danger,
-                icon: 'alert',
+                icon: 'warning',
               },
               {
                 type: 'manual',

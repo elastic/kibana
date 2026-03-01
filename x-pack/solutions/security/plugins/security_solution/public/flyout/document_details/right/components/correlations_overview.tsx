@@ -102,7 +102,7 @@ export const CorrelationsOverview: React.FC = () => {
           />
         ),
         link,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
     >

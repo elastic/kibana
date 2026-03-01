@@ -21,13 +21,13 @@ import {
 describe('direction', () => {
   describe('#getDirectionIcon', () => {
     const knownDirections = [
-      { direction: INBOUND, expected: 'arrowDown' },
-      { direction: OUTBOUND, expected: 'arrowUp' },
+      { direction: INBOUND, expected: 'chevronSingleDown' },
+      { direction: OUTBOUND, expected: 'chevronSingleUp' },
       { direction: EXTERNAL, expected: 'globe' },
       { direction: INTERNAL, expected: 'bullseye' },
-      { direction: INCOMING, expected: 'arrowDown' },
-      { direction: OUTGOING, expected: 'arrowUp' },
-      { direction: LISTENING, expected: 'arrowDown' },
+      { direction: INCOMING, expected: 'chevronSingleDown' },
+      { direction: OUTGOING, expected: 'chevronSingleUp' },
+      { direction: LISTENING, expected: 'chevronSingleDown' },
       { direction: UNKNOWN, expected: DEFAULT_ICON },
     ];
 

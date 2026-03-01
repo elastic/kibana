@@ -189,7 +189,7 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
         onClick={onClick}
         onClickAriaLabel={onClickAriaLabel}
-        iconType={isButton ? 'arrowDown' : undefined}
+        iconType={isButton ? 'chevronSingleDown' : undefined}
         iconSide={isButton ? 'right' : undefined}
       />
     );

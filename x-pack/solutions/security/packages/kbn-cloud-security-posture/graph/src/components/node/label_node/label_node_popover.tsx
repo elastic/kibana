@@ -85,7 +85,7 @@ const Section: React.FC<{ testSubj: string; badge: React.ReactNode; label: strin
 const AlertBadge: React.FC<{ count: number }> = ({ count }) => (
   <RoundedBadge>
     <EuiIcon
-      type="warningFilled"
+      type="warningFill"
       color="danger"
       size="s"
       data-test-subj="label-node-tooltip-alert-icon"

@@ -57,7 +57,7 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => 
       data-test-subj="ruleDetails-viewInApp"
       isLoading={ruleNavigation === null}
       disabled={!hasNavigation(ruleNavigation)}
-      iconType="popout"
+      iconType="external"
       {...getNavigationHandler(ruleNavigation, rule, navigateToUrl, basePath)}
     >
       <FormattedMessage

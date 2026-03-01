@@ -71,7 +71,7 @@ const RuleExecutionStatusSelectorComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}

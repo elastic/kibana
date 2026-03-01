@@ -97,7 +97,7 @@ export const useResponsiveTabs = ({
       tabsSizeConfig.isScrollable ? (
         <EuiButtonIcon
           data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           color="text"
           disabled={scrollState?.isScrollableLeft === false}
           aria-label={scrollLeftButtonLabel}
@@ -113,7 +113,7 @@ export const useResponsiveTabs = ({
       tabsSizeConfig.isScrollable ? (
         <EuiButtonIcon
           data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           color="text"
           disabled={scrollState?.isScrollableRight === false}
           aria-label={scrollRightButtonLabel}

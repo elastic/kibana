@@ -64,7 +64,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
         label: i18n.translate('xpack.ml.anomalyResultsViewSelector.anomalyExplorerLabel', {
           defaultMessage: 'View results in the Anomaly Explorer',
         }),
-        iconType: 'visTable',
+        iconType: 'table',
         value: ML_PAGES.ANOMALY_EXPLORER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },

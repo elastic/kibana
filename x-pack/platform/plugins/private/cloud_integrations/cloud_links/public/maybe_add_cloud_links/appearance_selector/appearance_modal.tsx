@@ -35,7 +35,7 @@ const colorModeOptions: Array<Value<ColorMode>> = [
   {
     id: 'system',
     label: systemLabel,
-    icon: 'desktop',
+    icon: 'display',
   },
   {
     id: 'light',
@@ -148,7 +148,7 @@ const ContrastModeGroup: FC<{
         {
           id: 'system',
           label: systemLabel,
-          icon: 'desktop',
+          icon: 'display',
         },
         {
           id: 'standard',
@@ -165,7 +165,7 @@ const ContrastModeGroup: FC<{
           label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalContrastModeHigh', {
             defaultMessage: 'High',
           }),
-          icon: 'contrastHigh',
+          icon: 'contrastFill',
         },
       ]}
       selectedValue={contrastMode}

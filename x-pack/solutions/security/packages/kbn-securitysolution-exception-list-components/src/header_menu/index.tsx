@@ -104,7 +104,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonIcon
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType ? iconType : 'boxesHorizontal'}
+              iconType={iconType ? iconType : 'boxesVertical'}
               data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
               aria-label={ariaLabel}
             >

@@ -15,7 +15,7 @@ import { getSecurityLinkAction } from '../mocks/security_link_component.mock';
 describe('HeaderMenu', () => {
   it('should render button icon with default settings', () => {
     const wrapper = render(
-      <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
+      <HeaderMenu iconType="boxesVertical" disableActions={false} actions={null} />
     );
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('HeaderMenu', () => {
   it('should render button icon disabled', () => {
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         disableActions={false}
         actions={actionsWithDisabledDelete}
       />
@@ -52,7 +52,7 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={null}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
       />
     );
 
@@ -68,7 +68,7 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={actions}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
         anchorPosition="downLeft"
       />
     );
@@ -87,7 +87,7 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={actions}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
         anchorPosition="downLeft"
       />
     );
@@ -113,7 +113,7 @@ describe('HeaderMenu', () => {
     const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         disableActions={false}
         emptyButton
         actions={customActions}
@@ -134,7 +134,7 @@ describe('HeaderMenu', () => {
     customAction[0].onClick = onEdit;
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         dataTestSubj="headerMenu"
         disableActions={false}
         actions={actions}

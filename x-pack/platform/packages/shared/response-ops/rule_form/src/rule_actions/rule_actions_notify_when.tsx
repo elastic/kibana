@@ -296,7 +296,7 @@ export const RuleActionsNotifyWhen = ({
       button={
         <EuiFormPrepend
           element="button"
-          iconRight="arrowDown"
+          iconRight="chevronSingleDown"
           label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
           onClick={useCallback(() => setSummaryMenuOpen(!summaryMenuOpen), [summaryMenuOpen])}
         />

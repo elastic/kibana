@@ -169,7 +169,7 @@ export const BrowserStepsList = ({
                 data-test-subj="syntheticsColumnsButton"
                 onClick={() => toggleDetails(item)}
                 aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
-                iconType={expandedMap[item._id] ? 'arrowDown' : 'arrowRight'}
+                iconType={expandedMap[item._id] ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             ),
           },

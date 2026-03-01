@@ -83,7 +83,7 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   render: (record: { 'user.name': string }) => {
     return (
       <EuiButtonIcon
-        iconType="expand"
+        iconType="maximize"
         onClick={() => {
           openUserFlyout(record['user.name']);
         }}

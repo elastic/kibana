@@ -109,7 +109,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             <HeaderMenu
               emptyButton
               useCustomActions
-              iconType="list"
+              iconType="listBullet"
               actions={referencedLinks}
               disableActions={false}
               text={i18n.AFFECTED_RULES(rules.length)}

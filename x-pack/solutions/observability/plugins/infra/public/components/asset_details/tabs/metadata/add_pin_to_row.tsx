@@ -46,7 +46,7 @@ export const AddMetadataPinToRow = ({
           <EuiButtonIcon
             size="s"
             color="primary"
-            iconType="pinFilled"
+            iconType="pinFill"
             data-test-subj="infraAssetDetailsMetadataRemovePin"
             aria-label={i18n.translate('xpack.infra.metadata.pinnedAriaLabel', {
               defaultMessage: 'Pinned {fieldName}',

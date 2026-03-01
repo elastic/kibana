@@ -77,7 +77,7 @@ const ACTION_DEFINITION: Record<
   [VisualizationContextMenuActions.openInLens]: {
     id: VisualizationContextMenuActions.openInLens,
     getDisplayName: () => OPEN_IN_LENS,
-    getIconType: () => 'visArea',
+    getIconType: () => 'chartArea',
     type: 'actionButton',
     order: 0,
   },

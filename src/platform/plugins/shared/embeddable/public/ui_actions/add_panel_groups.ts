@@ -16,7 +16,7 @@ export const ADD_PANEL_VISUALIZATION_GROUP = {
       defaultMessage: 'Visualizations',
     }),
   getIconType: () => {
-    return 'visGauge';
+    return 'chartGauge';
   },
   order: 1000,
 };

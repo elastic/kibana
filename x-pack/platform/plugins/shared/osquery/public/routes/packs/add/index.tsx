@@ -22,7 +22,7 @@ const AddPackPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...packListProps} flush="left" size="xs">
+          <EuiButtonEmpty iconType="chevronSingleLeft" {...packListProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.addPack.viewPacksListTitle"
               defaultMessage="View all packs"

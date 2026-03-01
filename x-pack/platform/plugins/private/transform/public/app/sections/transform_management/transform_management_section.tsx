@@ -186,7 +186,7 @@ export const TransformManagement: FC = () => {
     return (
       <>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}

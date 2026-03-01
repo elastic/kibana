@@ -254,7 +254,7 @@ describe('SecurityNavControl', () => {
                   "href": "",
                   "icon": <EuiIcon
                     size="m"
-                    type="exit"
+                    type="logOut"
                   />,
                   "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log out"
@@ -334,7 +334,7 @@ describe('SecurityNavControl', () => {
                   "href": "",
                   "icon": <EuiIcon
                     size="m"
-                    type="exit"
+                    type="logOut"
                   />,
                   "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log out"
@@ -381,7 +381,7 @@ describe('SecurityNavControl', () => {
                   "href": "",
                   "icon": <EuiIcon
                     size="m"
-                    type="exit"
+                    type="logOut"
                   />,
                   "name": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Log in"

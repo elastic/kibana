@@ -131,7 +131,7 @@ const ActionsCell: React.FC<{
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       aria-label={i18n.translate('xpack.dataSources.activeSources.actionsLabel', {
         defaultMessage: 'Actions',
       })}

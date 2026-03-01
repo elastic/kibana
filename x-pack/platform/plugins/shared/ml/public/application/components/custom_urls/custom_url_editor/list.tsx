@@ -375,7 +375,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                       size="s"
                       color="primary"
                       onClick={() => onTestButtonClick(index)}
-                      iconType="popout"
+                      iconType="external"
                       aria-label={i18n.translate(
                         'xpack.ml.customUrlEditorList.testCustomUrlAriaLabel',
                         {

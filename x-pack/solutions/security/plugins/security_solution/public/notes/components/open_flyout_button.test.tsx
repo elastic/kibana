@@ -33,7 +33,7 @@ describe('OpenFlyoutButtonIcon', () => {
         <OpenFlyoutButtonIcon
           eventId={mockEventId}
           timelineId={mockTimelineId}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
         />
       </TestProviders>
     );
@@ -52,7 +52,7 @@ describe('OpenFlyoutButtonIcon', () => {
         <OpenFlyoutButtonIcon
           eventId={mockEventId}
           timelineId={mockTimelineId}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
         />
       </TestProviders>
     );

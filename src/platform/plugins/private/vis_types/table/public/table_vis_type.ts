@@ -22,7 +22,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data table',
   }),
-  icon: 'visTable',
+  icon: 'table',
   description: i18n.translate('visTypeTable.tableVisDescription', {
     defaultMessage: 'Display data in rows and columns.',
   }),

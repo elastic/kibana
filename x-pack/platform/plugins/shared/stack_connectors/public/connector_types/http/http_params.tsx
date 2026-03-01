@@ -207,7 +207,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addQueryParam}
             data-test-subj="httpQueryAddButton"
             size="s"
@@ -286,7 +286,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addHeader}
             data-test-subj="httpHeaderAddButton"
             size="s"

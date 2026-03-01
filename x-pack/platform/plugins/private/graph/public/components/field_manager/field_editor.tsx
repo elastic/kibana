@@ -192,7 +192,7 @@ export function FieldEditor({
                   : i18n.translate('xpack.graph.fieldManager.disableFieldLabel', {
                       defaultMessage: 'Disable field',
                     }),
-                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
+                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeSlash'} size="m" />,
                 onClick: toggleDisabledState,
                 toolTipContent: isDisabled
                   ? i18n.translate('xpack.graph.fieldManager.enableFieldTooltipContent', {

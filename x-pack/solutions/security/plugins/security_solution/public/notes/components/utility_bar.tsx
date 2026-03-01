@@ -141,7 +141,7 @@ export const NotesUtilityBar = React.memo(() => {
           <UtilityBarAction
             dataTestSubj="notes-management-utility-bar-actions"
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             popoverContent={BulkActionPopoverContent}
           >
             <span data-test-subj="notes-management-utility-bar-action-button">{BATCH_ACTIONS}</span>

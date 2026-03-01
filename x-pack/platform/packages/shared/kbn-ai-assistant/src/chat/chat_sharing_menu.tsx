@@ -190,7 +190,7 @@ export function ChatSharingMenu({
           data-test-subj="observabilityAiAssistantChatAccessBadge"
         >
           {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
-          <EuiIcon type="arrowDown" size="m" css={{ paddingLeft: euiTheme.size.xs }} />
+          <EuiIcon type="chevronSingleDown" size="m" css={{ paddingLeft: euiTheme.size.xs }} />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}

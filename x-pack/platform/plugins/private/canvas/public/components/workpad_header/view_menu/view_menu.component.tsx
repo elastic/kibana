@@ -196,14 +196,14 @@ export const ViewMenu: FunctionComponent<Props> = ({
     ...getScaleMenuItems(),
     {
       name: strings.getZoomInText(),
-      icon: 'magnifyWithPlus',
+      icon: 'magnifyPlus',
       onClick: zoomIn,
       disabled: zoomScale === MAX_ZOOM_LEVEL,
       className: 'canvasContextMenu--topBorder',
     },
     {
       name: strings.getZoomOutText(),
-      icon: 'magnifyWithMinus',
+      icon: 'magnifyMinus',
       onClick: zoomOut,
       disabled: zoomScale <= MIN_ZOOM_LEVEL,
     },
@@ -266,7 +266,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
-        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
+        icon: <EuiIcon type={isWriteable ? 'eyeSlash' : 'eye'} size="m" />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           toggleWriteable();
@@ -275,7 +275,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getZoomMenuItemLabel(),
-        icon: 'magnifyWithPlus',
+        icon: 'magnifyPlus',
         panel: {
           id: 3,
           title: strings.getZoomMenuItemLabel(),

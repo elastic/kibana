@@ -57,7 +57,7 @@ export const QueryBar = () => {
       <QueryStringInput
         indexPatterns={dataView ? [dataView] : []}
         nonKqlMode="text"
-        iconType="search"
+        iconType="magnify"
         isClearable={true}
         onChange={(queryN) => {
           if (queryN?.language === SyntaxType.text) {

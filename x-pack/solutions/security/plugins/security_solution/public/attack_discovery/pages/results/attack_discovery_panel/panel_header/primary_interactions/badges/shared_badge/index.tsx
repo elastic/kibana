@@ -133,7 +133,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         aria-label={i18n.VISIBILITY}
         color="hollow"
         data-test-subj="sharedBadgeButton"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={onBadgeButtonClick}
         onClickAriaLabel={i18n.SELECT_VISIBILITY_ARIA_LABEL}

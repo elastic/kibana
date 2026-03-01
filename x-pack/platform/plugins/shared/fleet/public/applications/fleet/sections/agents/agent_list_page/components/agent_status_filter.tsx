@@ -231,7 +231,7 @@ export const AgentStatusFilter: React.FC<{
         zIndex={Number(euiTheme.levels.header) - 1}
         button={
           <EuiFilterButton
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={() => updateIsStatusFilterOpen(!isStatusFilterOpen)}
             isSelected={isStatusFilterOpen}
             hasActiveFilters={selectedStatus.length > 0}

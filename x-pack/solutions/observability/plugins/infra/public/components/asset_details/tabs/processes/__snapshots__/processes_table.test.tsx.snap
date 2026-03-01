@@ -188,7 +188,7 @@ Object {
                   >
                     <span
                       color="inherit"
-                      data-euiicon-type="arrowRight"
+                      data-euiicon-type="chevronSingleRight"
                     />
                     <span
                       class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
@@ -469,7 +469,7 @@ Object {
                 >
                   <span
                     color="inherit"
-                    data-euiicon-type="arrowRight"
+                    data-euiicon-type="chevronSingleRight"
                   />
                   <span
                     class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"

@@ -39,7 +39,7 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
   const button = useMemo(() => {
     return (
       <EuiButtonEmpty
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         data-test-subj={'timeline-modal-new-timeline-dropdown-button'}
         onClick={togglePopover}
@@ -61,7 +61,7 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
     () => [
       <EuiContextMenuItem
         key="new-timeline"
-        icon="plusInCircle"
+        icon="plusCircle"
         data-test-subj={'timeline-modal-new-timeline'}
         onClick={handleCreateNewTimeline}
       >
@@ -69,7 +69,7 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="new-timeline-template"
-        icon="plusInCircle"
+        icon="plusCircle"
         data-test-subj={'timeline-modal-new-timeline-template'}
         onClick={handleCreateNewTimelineTemplate}
       >

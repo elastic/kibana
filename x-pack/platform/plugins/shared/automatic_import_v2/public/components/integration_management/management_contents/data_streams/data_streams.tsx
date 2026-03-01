@@ -53,7 +53,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
             <EuiFlexItem grow={false}>
               {hasDataStreams && (
                 <EuiButton
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={openCreateDataStreamFlyout}
                   data-test-subj="addDataStreamButton"
                 >
@@ -74,7 +74,7 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
           </EuiText>
           <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={openCreateDataStreamFlyout}
               data-test-subj="addDataStreamButton"
             >

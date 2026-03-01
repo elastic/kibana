@@ -74,7 +74,7 @@ export function CreateStackInAWSConsole({
         href={awsConsoleURL}
         target="_blank"
         iconSide="right"
-        iconType="popout"
+        iconType="external"
         fill={isPrimaryAction}
       >
         {i18n.translate(

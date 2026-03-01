@@ -32,7 +32,7 @@ const PushButtonComponent: React.FC<PushButtonProps> = ({
   const button = (
     <EuiButtonEmpty
       data-test-subj="push-to-external-service"
-      iconType="importAction"
+      iconType="download"
       onClick={pushToService}
       disabled={disabled}
       isLoading={isLoading}

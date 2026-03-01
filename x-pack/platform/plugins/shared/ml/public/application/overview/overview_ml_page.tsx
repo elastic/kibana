@@ -229,7 +229,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
                           data-test-subj="mlOverviewCardLogPatternAnalysisButton"
                         >
-                          <EuiIcon type="logPatternAnalysis" />
+                          <EuiIcon type="pattern" />
                           <FormattedMessage
                             id="xpack.ml.overview.logPatternAnalysis.findPatternsButton"
                             defaultMessage="Find patterns"
@@ -268,7 +268,7 @@ export const OverviewPage: FC = () => {
                           onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
                           data-test-subj="mlOverviewCardLogRateAnalysisButton"
                         >
-                          <EuiIcon type="visBarVertical" />
+                          <EuiIcon type="chartBarVertical" />
                           <FormattedMessage
                             id="xpack.ml.overview.logRateAnalysis.explainChangesButton"
                             defaultMessage="Explain changes"
@@ -315,7 +315,7 @@ export const OverviewPage: FC = () => {
                             }
                           )}
                         >
-                          <EuiIcon type="changePointDetection" />
+                          <EuiIcon type="chartChangePoint" />
                           <FormattedMessage
                             id="xpack.ml.overview.changePointDetection.findChangesButton"
                             defaultMessage="Find changes"

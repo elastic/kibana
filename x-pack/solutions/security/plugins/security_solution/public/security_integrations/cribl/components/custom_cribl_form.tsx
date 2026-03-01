@@ -258,7 +258,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
             <EuiSpacer size="s" />
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton fill size="s" iconType="plusInCircle" onClick={onAddEntry}>
+                <EuiButton fill size="s" iconType="plusCircle" onClick={onAddEntry}>
                   <FormattedMessage
                     id="xpack.securitySolution.securityIntegration.cribl.addButton"
                     defaultMessage="Add"

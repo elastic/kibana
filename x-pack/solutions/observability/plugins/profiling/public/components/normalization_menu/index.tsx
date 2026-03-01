@@ -96,7 +96,7 @@ export function NormalizationMenu(props: Props) {
           append={
             <EuiFormAppend
               element="button"
-              iconLeft="arrowDown"
+              iconLeft="chevronSingleDown"
               data-test-subj="profilingNormalizationMenuButton"
               aria-label={i18n.translate(
                 'xpack.profiling.normalizationMenu.menuPopoverButtonAriaLabel',

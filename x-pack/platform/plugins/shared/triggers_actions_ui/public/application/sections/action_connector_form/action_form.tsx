@@ -615,7 +615,7 @@ export const ActionForm = ({
             <EuiButton
               size="m"
               fullWidth
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="addAlertActionButton"
               onClick={() => setIsAddActionPanelOpen(true)}
             >

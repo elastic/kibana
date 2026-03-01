@@ -120,7 +120,7 @@ export const FeatureFeedbackButton = ({
         sanitizedPath,
       })}
       size="s"
-      iconType={defaultButton ? undefined : 'popout'}
+      iconType={defaultButton ? undefined : 'external'}
       iconSide="right"
       target="_blank"
       onClickCapture={onClickCapture}

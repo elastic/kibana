@@ -79,7 +79,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       <EuiButtonEmpty
         data-test-subj="viewDataBtn"
         size="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={onViewButtonClick}
       >
