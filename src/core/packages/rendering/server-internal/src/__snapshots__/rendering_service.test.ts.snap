@@ -12,7 +12,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -100,7 +101,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -184,7 +186,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -272,7 +275,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -356,7 +360,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -440,7 +445,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -528,7 +534,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -612,7 +619,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -696,7 +704,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -780,7 +789,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -869,7 +879,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -957,7 +968,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1048,7 +1060,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1141,7 +1154,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1225,7 +1239,8 @@ Object {
   "buildNumber": Any<Number>,
   "clusterInfo": Object {},
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1314,7 +1329,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1407,7 +1423,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1496,7 +1513,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1585,7 +1603,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {
@@ -1676,7 +1695,8 @@ Object {
     "cluster_version": "8.0.0",
   },
   "csp": Object {
-    "warnLegacyBrowsers": true,
+    "nonce": Any<String>,
+    "warnLegacyBrowsers": Any<Boolean>,
   },
   "customBranding": Object {},
   "env": Object {

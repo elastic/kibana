@@ -40,6 +40,7 @@ export interface RenderingMetadata {
   scriptPaths: string[];
   injectedMetadata: InjectedMetadata;
   customBranding: CustomBranding;
+  cspNonce: string;
 }
 
 /** @internal */
@@ -82,6 +83,12 @@ export interface IRenderOptions {
 }
 
 /** @internal */
+export interface RenderResult {
+  html: string;
+  cspNonce: string;
+}
+
+/** @internal */
 export interface InternalRenderingServiceSetup {
   /**
    * Generate a `KibanaResponse` which renders an HTML page bootstrapped
@@ -89,7 +96,7 @@ export interface InternalRenderingServiceSetup {
    *
    * @example
    * ```ts
-   * const html = await rendering.render(request, uiSettings);
+   * const { html, cspNonce } = await rendering.render(request, uiSettings);
    * ```
    */
   render(
@@ -99,7 +106,7 @@ export interface InternalRenderingServiceSetup {
       globalClient: IUiSettingsClient;
     },
     options?: IRenderOptions
-  ): Promise<string>;
+  ): Promise<RenderResult>;
 }
 
 /** @internal */

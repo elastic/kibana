@@ -12,6 +12,7 @@ export type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   IRenderOptions,
+  RenderResult,
   RenderingMetadata,
   RenderingPrebootDeps,
   RenderingSetupDeps,

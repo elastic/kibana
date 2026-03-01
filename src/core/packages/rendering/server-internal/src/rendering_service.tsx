@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { randomBytes } from 'crypto';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -274,10 +275,12 @@ export class RenderingService {
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+    const cspNonce = randomBytes(16).toString('hex');
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
+      cspNonce,
       strictCsp: http.csp.strict,
       hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
@@ -327,7 +330,7 @@ export class RenderingService {
           customizedLogo: branding?.customizedLogo,
           pageTitle: branding?.pageTitle,
         },
-        csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
+        csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers, nonce: cspNonce },
         externalUrl: http.externalUrl,
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
@@ -347,7 +350,10 @@ export class RenderingService {
       },
     };
 
-    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    return {
+      html: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
+      cspNonce,
+    };
   }
 
   public async stop() {}

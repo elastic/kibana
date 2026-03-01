@@ -13,16 +13,19 @@ export {
 
 export {
   lensAttachmentPanelSchema,
+  scriptPanelAttachmentSchema,
   genericAttachmentPanelSchema,
   attachmentPanelSchema,
   dashboardSectionSchema,
   dashboardAttachmentDataSchema,
   isLensAttachmentPanel,
+  isScriptPanelAttachment,
   isGenericAttachmentPanel,
 } from './types';
 
 export type {
   LensAttachmentPanel,
+  ScriptPanelAttachment,
   GenericAttachmentPanel,
   AttachmentPanel,
   DashboardSection,

@@ -114,26 +114,40 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { html, cspNonce } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
-          body,
-          headers: options.headers,
+          body: html,
+          headers: {
+            ...options.headers,
+            'content-security-policy': buildCspWithNonce(deps.http.csp.header, cspNonce),
+            'content-security-policy-report-only': buildCspWithNonce(
+              deps.http.csp.reportOnlyHeader,
+              cspNonce
+            ),
+          },
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { html, cspNonce } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
-          body,
-          headers: options.headers,
+          body: html,
+          headers: {
+            ...options.headers,
+            'content-security-policy': buildCspWithNonce(deps.http.csp.header, cspNonce),
+            'content-security-policy-report-only': buildCspWithNonce(
+              deps.http.csp.reportOnlyHeader,
+              cspNonce
+            ),
+          },
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
@@ -166,3 +180,19 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     };
   }
 }
+
+/**
+ * Takes a CSP header string and adds a per-request nonce to the script-src directive.
+ * This allows sandboxed iframes using srcdoc to execute inline scripts tagged with
+ * the nonce, without broadly enabling 'unsafe-inline'.
+ * Applied to both the enforcing and report-only CSP headers so that srcdoc iframes
+ * (which inherit both from the parent) don't generate spurious violations.
+ */
+const buildCspWithNonce = (baseCsp: string, nonce: string): string => {
+  if (!baseCsp) return baseCsp;
+  const nonceToken = `'nonce-${nonce}'`;
+  if (baseCsp.includes('script-src ')) {
+    return baseCsp.replace(/script-src\s/, `script-src ${nonceToken} `);
+  }
+  return baseCsp;
+};

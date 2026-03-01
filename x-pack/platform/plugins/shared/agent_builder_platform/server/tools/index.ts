@@ -23,6 +23,7 @@ import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
+import { createScriptPanelTool } from './create_script_panel';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
 export const registerTools = ({
@@ -43,6 +44,7 @@ export const registerTools = ({
     listIndicesTool(),
     indexExplorerTool(),
     createVisualizationTool(),
+    createScriptPanelTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),

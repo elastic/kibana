@@ -38,6 +38,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+
+  // Mini Apps
+  'mini_app_get_code',
+  'mini_app_update_code',
+  'mini_app_str_replace',
+  'mini_app_insert_at_line',
+  'mini_app_append_code',
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

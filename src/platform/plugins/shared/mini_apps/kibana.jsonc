@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/mini-apps",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Mini Apps - Create and run custom JavaScript applications in Kibana",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "miniApps",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "scriptPanel",
+      "data",
+      "expressions"
+    ],
+    "optionalPlugins": [
+      "agentBuilder"
+    ]
+  }
+}

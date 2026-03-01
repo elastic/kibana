@@ -14,6 +14,7 @@ export enum ToolResultType {
   dashboard = 'dashboard',
   query = 'query',
   visualization = 'visualization',
+  scriptPanel = 'script_panel',
   other = 'other',
   error = 'error',
   fileReference = 'file_reference',
@@ -26,6 +27,7 @@ interface ToolResultTypeDataMap {
   [ToolResultType.dashboard]: DashboardResultData;
   [ToolResultType.query]: QueryResultData;
   [ToolResultType.visualization]: VisualizationResultData;
+  [ToolResultType.scriptPanel]: ScriptPanelResultData;
   [ToolResultType.error]: ErrorResultData;
   [ToolResultType.fileReference]: FileReferenceResultData;
   [ToolResultType.other]: OtherResultData;
@@ -124,6 +126,23 @@ export interface VisualizationResultData {
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
 
+// script panel
+
+export interface ScriptPanelResultData {
+  /** The JavaScript code to execute in the sandboxed iframe */
+  script_code: string;
+  /** Optional title for the panel */
+  title?: string;
+  /** Optional description */
+  description?: string;
+  /** The ES|QL query used for data fetching (if any) */
+  esql?: string;
+  /** Natural language query that created this panel */
+  query?: string;
+}
+
+export type ScriptPanelResult = ToolResultMixin<ToolResultType.scriptPanel>;
+
 // other
 
 export type OtherResultData<T extends Object = Object> = T;
@@ -186,4 +205,8 @@ export const isFileReferenceResult = (result: ToolResult): result is FileReferen
 
 export const isVisualizationResult = (result: ToolResult): result is VisualizationResult => {
   return result.type === ToolResultType.visualization;
+};
+
+export const isScriptPanelResult = (result: ToolResult): result is ScriptPanelResult => {
+  return result.type === ToolResultType.scriptPanel;
 };

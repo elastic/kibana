@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
+import { isLensAttachmentPanel, isScriptPanelAttachment } from '@kbn/dashboard-agent-common';
 import type {
   DashboardAttachmentData,
   PanelAddedEventData,
@@ -107,14 +107,27 @@ export class DashboardAttachmentStore {
    * Add a panel progressively to the attachment.
    */
   addPanel(attachmentId: string, panel: PanelAddedEventData['panel']): void {
-    const attachmentPanel: AttachmentPanel = isLensAttachmentPanel(panel)
-      ? {
-          type: 'lens',
-          panelId: panel.panelId,
-          visualization: panel.visualization,
-          title: panel.title,
-        }
-      : panel;
+    let attachmentPanel: AttachmentPanel;
+
+    if (isLensAttachmentPanel(panel)) {
+      attachmentPanel = {
+        type: 'lens',
+        panelId: panel.panelId,
+        visualization: panel.visualization,
+        title: panel.title,
+      };
+    } else if (isScriptPanelAttachment(panel)) {
+      attachmentPanel = {
+        type: 'SCRIPT_PANEL',
+        panelId: panel.panelId,
+        scriptCode: panel.scriptCode,
+        title: panel.title,
+        query: panel.query,
+        esql: panel.esql,
+      };
+    } else {
+      attachmentPanel = panel;
+    }
 
     const cachedData = this.attachmentCache.get(attachmentId);
     const baseData: DashboardAttachmentData = cachedData ?? {

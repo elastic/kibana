@@ -32,6 +32,7 @@ export const Template: FunctionComponent<Props> = ({
     hardenPrototypes,
     strictCsp,
     customBranding,
+    cspNonce,
   },
 }) => {
   const title = customBranding.pageTitle ?? 'Elastic';
@@ -56,6 +57,7 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content={colorScheme} />
+        <meta name="kbn-csp-nonce" content={cspNonce} />
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />

@@ -38,6 +38,28 @@ export const lensAttachmentPanelSchema = z.object({
 export type LensAttachmentPanel = z.infer<typeof lensAttachmentPanelSchema>;
 
 /**
+ * Zod schema for script panel entries.
+ * Script panels execute user-authored JavaScript in a sandboxed iframe.
+ */
+export const scriptPanelAttachmentSchema = z.object({
+  type: z.literal('SCRIPT_PANEL'),
+  panelId: z.string(),
+  /** The JavaScript code to execute in the sandboxed iframe */
+  scriptCode: z.string(),
+  /** Panel title */
+  title: z.string().optional(),
+  /** Natural language query that created this (if agent-generated) */
+  query: z.string().optional(),
+  /** ES|QL query used (if applicable) */
+  esql: z.string().optional(),
+});
+
+/**
+ * A script panel entry containing JavaScript code for sandboxed execution.
+ */
+export type ScriptPanelAttachment = z.infer<typeof scriptPanelAttachmentSchema>;
+
+/**
  * Zod schema for generic (non-Lens) panel entries.
  * The `type` field contains the actual embeddable type.
  */
@@ -63,12 +85,14 @@ export type GenericAttachmentPanel = z.infer<typeof genericAttachmentPanelSchema
  */
 export const attachmentPanelSchema = z.union([
   lensAttachmentPanelSchema,
+  scriptPanelAttachmentSchema,
   genericAttachmentPanelSchema,
 ]);
 
 /**
  * Union type for dashboard panel entries.
  * - LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')
+ * - ScriptPanelAttachment: Script panel with JavaScript code (type: 'SCRIPT_PANEL')
  * - GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)
  */
 export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
@@ -78,6 +102,13 @@ export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
  */
 export function isLensAttachmentPanel(panel: AttachmentPanel): panel is LensAttachmentPanel {
   return panel.type === 'lens' && 'visualization' in panel;
+}
+
+/**
+ * Type guard to check if a panel is a script panel.
+ */
+export function isScriptPanelAttachment(panel: AttachmentPanel): panel is ScriptPanelAttachment {
+  return panel.type === 'SCRIPT_PANEL' && 'scriptCode' in panel;
 }
 
 /**
