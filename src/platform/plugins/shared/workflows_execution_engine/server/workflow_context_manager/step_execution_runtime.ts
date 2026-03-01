@@ -209,19 +209,17 @@ export class StepExecutionRuntime {
   }
 
   /**
-   * Attempts to enter a wait state for the step execution until a specific absolute date/time.
-   * If the step is already in a wait state, it exits the wait state instead.
+   * Attempts to enter a wait state for the step execution.
+   * If the step is already in a wait state, it clears the state and returns false (exit wait).
    *
-   * When entering a wait state, the step execution is marked with the provided `waitingStatus`
-   * (defaults to `ExecutionStatus.WAITING`) and the `resumeAt` timestamp is stored in the step's
-   * state. The workflow can then resume execution at or after the specified time.
-   *
-   * @param resumeDate - The absolute date/time when execution should resume (Date object).
-   * @param waitingStatus - The status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
-   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   * @param resumeDate - When provided, stored as `resumeAt` in step state so the scheduler can
+   *   wake the step at that time (used by the timer-based `wait` step). Omit for indefinite waits
+   *   such as `waitForInput`, where resumption is triggered externally, not by the scheduler.
+   * @param waitingStatus - Status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
+   * @returns `true` if the step has entered a wait state, `false` if it has exited one.
    */
   public tryEnterWaitUntil(
-    resumeDate: Date,
+    resumeDate?: Date,
     waitingStatus: ExecutionStatus = ExecutionStatus.WAITING
   ): boolean {
     const resumeAt = this.stepExecution?.state?.resumeAt;
@@ -245,10 +243,9 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
       status: waitingStatus,
-      state: {
-        ...(this.stepExecution?.state || {}),
-        resumeAt: resumeDate.toISOString(),
-      },
+      state: resumeDate
+        ? { ...(this.stepExecution?.state || {}), resumeAt: resumeDate.toISOString() }
+        : this.stepExecution?.state,
     });
     return true; // successfully entered wait state
   }

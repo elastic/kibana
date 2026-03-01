@@ -15,8 +15,6 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
 /** 100 years in the future — effectively indefinite until a human provides input. */
-const FAR_FUTURE_MS = 100 * 365 * 24 * 60 * 60 * 1000;
-
 export class WaitForInputStepImpl implements NodeImplementation {
   constructor(
     private node: WaitForInputGraphNode,
@@ -26,9 +24,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
   ) {}
 
   async run(): Promise<void> {
-    const farFuture = new Date(Date.now() + FAR_FUTURE_MS);
-
-    if (this.stepExecutionRuntime.tryEnterWaitUntil(farFuture, ExecutionStatus.WAITING_FOR_INPUT)) {
+    if (this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)) {
       this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
         event: { action: 'hitl:waiting' },
       });

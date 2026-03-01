@@ -65,26 +65,13 @@ describe('WaitForInputStepImpl', () => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(true);
     });
 
-    it('should call tryEnterWaitUntil with WAITING_FOR_INPUT status', async () => {
+    it('should call tryEnterWaitUntil with no date and WAITING_FOR_INPUT status', async () => {
       await underTest.run();
 
       expect(mockStepExecutionRuntime.tryEnterWaitUntil).toHaveBeenCalledWith(
-        expect.any(Date),
+        undefined,
         ExecutionStatus.WAITING_FOR_INPUT
       );
-    });
-
-    it('should call tryEnterWaitUntil with a far-future date (~100 years)', async () => {
-      const before = Date.now();
-      await underTest.run();
-      const after = Date.now();
-
-      const [resumeDate] = mockStepExecutionRuntime.tryEnterWaitUntil.mock.calls[0];
-      const msUntilResume = resumeDate.getTime() - before;
-      const expectedMs = 100 * 365 * 24 * 60 * 60 * 1000;
-
-      expect(msUntilResume).toBeGreaterThanOrEqual(expectedMs - (after - before));
-      expect(msUntilResume).toBeLessThanOrEqual(expectedMs);
     });
 
     it('should not finish the step on first run', async () => {
@@ -197,10 +184,10 @@ describe('tryEnterWaitUntil — default status regression (wait step)', () => {
     // StepExecutionRuntime function signature — effectively a contract test.
     // The actual runtime behaviour is tested by wait_step.test.ts.
     const runtime = {
-      tryEnterWaitUntil: (date: Date, status = ExecutionStatus.WAITING) => status,
+      tryEnterWaitUntil: (date?: Date, status = ExecutionStatus.WAITING) => status,
     };
     expect(runtime.tryEnterWaitUntil(new Date())).toBe(ExecutionStatus.WAITING);
-    expect(runtime.tryEnterWaitUntil(new Date(), ExecutionStatus.WAITING_FOR_INPUT)).toBe(
+    expect(runtime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)).toBe(
       ExecutionStatus.WAITING_FOR_INPUT
     );
   });
