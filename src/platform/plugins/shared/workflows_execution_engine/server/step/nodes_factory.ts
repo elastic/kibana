@@ -20,6 +20,7 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  WaitForInputGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
@@ -262,8 +263,7 @@ export class NodesFactory {
         );
       case 'waitForInput':
         return new WaitForInputStepImpl(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          node as any,
+          node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
