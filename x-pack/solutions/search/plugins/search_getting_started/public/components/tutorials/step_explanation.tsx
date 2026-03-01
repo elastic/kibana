@@ -17,7 +17,7 @@ export const StepExplanation: React.FC<StepExplanationProps> = ({ explanation, v
   if (!visible) return null;
 
   return (
-    <EuiPanel color="subdued" paddingSize="m" hasBorder={false}>
+    <EuiPanel color="subdued" paddingSize="m" hasBorder={false} data-test-subj="stepExplanation">
       <EuiMarkdownFormat textSize="s">{explanation}</EuiMarkdownFormat>
     </EuiPanel>
   );

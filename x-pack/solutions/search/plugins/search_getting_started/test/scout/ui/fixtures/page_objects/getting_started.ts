@@ -161,4 +161,42 @@ export class GettingStarted {
   async getEmbeddedConsole() {
     return this.page.testSubj.locator('consoleEmbeddedBody');
   }
+
+  async selectTutorial(slug: string) {
+    await this.page.testSubj.locator(`tutorialCard-${slug}`).click();
+  }
+
+  async getStepPanel(stepIndex: number) {
+    return this.page.testSubj.locator(`tutorialStep-${stepIndex}`);
+  }
+
+  async clickStepExecute(stepIndex: number) {
+    const stepPanel = this.page.testSubj.locator(`tutorialStep-${stepIndex}`);
+    await stepPanel.locator('[data-test-subj="stepExecuteButton"]').click();
+  }
+
+  async clickStepNext(stepIndex: number) {
+    await this.page.testSubj.locator(`tutorialStep-${stepIndex}-next`).click();
+  }
+
+  async clickStepComplete(stepIndex: number) {
+    await this.page.testSubj.locator(`tutorialStep-${stepIndex}-complete`).click();
+  }
+
+  async getStepExplanation(stepIndex: number) {
+    const stepPanel = this.page.testSubj.locator(`tutorialStep-${stepIndex}`);
+    return stepPanel.locator('[data-test-subj="stepExplanation"]');
+  }
+
+  async getTutorialSummary() {
+    return this.page.testSubj.locator('tutorialSummary');
+  }
+
+  async clickTutorialReset() {
+    await this.page.testSubj.locator('tutorialReset').click();
+  }
+
+  async clickTutorialBackToAll() {
+    await this.page.testSubj.locator('tutorialBack').click();
+  }
 }

@@ -161,6 +161,7 @@ export const StepCodeSection: React.FC<StepCodeSectionProps> = ({
             isDisabled={!canExecute}
             isLoading={isExecuting}
             onClick={onExecute}
+            data-test-subj="stepExecuteButton"
           />
         </EuiToolTip>
       </EuiFlexItem>

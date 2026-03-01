@@ -44,6 +44,7 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
   const isFailed = state.status === 'failed';
   const showExplanation = isCompleted;
   const showAdvanceButton = isCompleted && isCurrentStep && !isLastStep;
+  const showCompleteButton = isCompleted && isCurrentStep && isLastStep;
   const showRetryButton = isFailed && isCurrentStep;
 
   return (
@@ -68,7 +69,7 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
 
       <StepExplanation explanation={resolved.explanation} visible={showExplanation} />
 
-      {(showAdvanceButton || showRetryButton) && (
+      {(showAdvanceButton || showCompleteButton || showRetryButton) && (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -97,6 +98,20 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
                 >
                   {i18n.translate('xpack.searchGettingStarted.tutorial.step.next', {
                     defaultMessage: 'Next step',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {showCompleteButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType="check"
+                  onClick={onAdvance}
+                  data-test-subj={`tutorialStep-${stepIndex}-complete`}
+                >
+                  {i18n.translate('xpack.searchGettingStarted.tutorial.step.complete', {
+                    defaultMessage: 'Complete tutorial',
                   })}
                 </EuiButton>
               </EuiFlexItem>
