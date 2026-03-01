@@ -227,8 +227,12 @@ export class StepExecutionRuntime {
     resumeDate?: Date,
     waitingStatus: ExecutionStatus = ExecutionStatus.WAITING
   ): boolean {
+    // For timer-based waits, resumeAt is the sole sentinel (written on entry, cleared on exit).
+    // For indefinite waits (no resumeDate), status is the sentinel since no resumeAt is written.
     const alreadyWaiting =
-      this.stepExecution?.state?.resumeAt != null || this.stepExecution?.status === waitingStatus;
+      resumeDate != null
+        ? this.stepExecution?.state?.resumeAt != null
+        : this.stepExecution?.status === waitingStatus;
 
     if (alreadyWaiting) {
       const newState = { ...(this.stepExecution?.state || {}) };

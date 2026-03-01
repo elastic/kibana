@@ -415,6 +415,19 @@ describe('StepExecutionRuntime', () => {
           expect.objectContaining({ state: undefined })
         );
       });
+
+      it('should enter wait state even when status is WAITING but resumeAt is absent', () => {
+        // Guards against the broad-detection bug: status alone must not trigger exit
+        // for timer-based waits — only resumeAt is authoritative.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: {},
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+
+        expect(entered).toBe(true);
+      });
     });
 
     describe('indefinite wait (resumeDate omitted)', () => {
