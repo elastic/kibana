@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SupportedDataType, Signature } from '../../../types';
+import type { SupportedDataType } from '../../../types';
 import { FunctionDefinitionTypes } from '../../../types';
-import { acceptsArbitraryExpressions } from './utils';
 
 export interface CommaContext {
   /** Determines which strategy handler to use */
@@ -21,11 +20,8 @@ export interface CommaContext {
   isCursorFollowedByComma?: boolean;
   /** True if position is ambiguous in repeating signature (positions 2, 4, 6...) */
   isAmbiguousPosition?: boolean;
-  functionSignatures?: Array<{
-    params: Array<{ type: SupportedDataType | 'any' | 'unknown'; name?: string }>;
-    minParams?: number;
-    returnType?: string;
-  }>;
+  /** True if function accepts arbitrary/complex expressions (e.g., CASE) */
+  isExpressionHeavy?: boolean;
 
   /** Position-specific fields for 'after_complete' */
   typeMatches?: boolean;
@@ -55,7 +51,7 @@ export function shouldSuggestComma(context: CommaContext): boolean {
     return false;
   }
 
-  const isExpressionHeavyFunction = hasExpressionHeavyParameters(context.functionSignatures);
+  const isExpressionHeavyFunction = context.isExpressionHeavy ?? false;
   const handler = positionHandlers[position];
   if (!handler) {
     return false;
@@ -126,20 +122,4 @@ function handleInsideList(context: CommaContext): boolean {
   }
 
   return true;
-}
-
-function hasExpressionHeavyParameters(
-  signatures?: Array<{
-    params: Array<{ type: SupportedDataType | 'any' | 'unknown'; name?: string }>;
-    minParams?: number;
-    returnType?: string;
-  }>
-): boolean {
-  if (!signatures || signatures.length === 0) {
-    return false;
-  }
-
-  // Pattern: boolean + any params, minParams >= 2, returnType = unknown
-  // Example: CASE function accepts expressions in all parameters
-  return acceptsArbitraryExpressions(signatures as Signature[]);
 }
