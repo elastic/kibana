@@ -378,6 +378,85 @@ describe('StepExecutionRuntime', () => {
     });
   });
 
+  describe('tryEnterWaitUntil', () => {
+    beforeEach(() => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        ...workflowExecution,
+        currentNodeId: 'node1',
+      });
+    });
+
+    describe('timer-based wait (resumeDate provided)', () => {
+      it('should enter wait state and store resumeAt on first call', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        const resumeDate = new Date('2025-12-31T00:00:00.000Z');
+        const entered = underTest.tryEnterWaitUntil(resumeDate);
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.WAITING,
+            state: expect.objectContaining({ resumeAt: resumeDate.toISOString() }),
+          })
+        );
+      });
+
+      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+
+        expect(entered).toBe(false);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ state: undefined })
+        );
+      });
+    });
+
+    describe('indefinite wait (resumeDate omitted)', () => {
+      it('should enter wait state with WAITING_FOR_INPUT status on first call', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ status: ExecutionStatus.WAITING_FOR_INPUT })
+        );
+      });
+
+      it('should exit wait state on resume call when step status is already WAITING_FOR_INPUT', () => {
+        // Simulates the resume run: stepExecution already has WAITING_FOR_INPUT status
+        // and no resumeAt in state. Without the status-based check this would return true
+        // (re-entering wait) instead of false (exiting wait) — the core bug being tested.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          state: {},
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(entered).toBe(false);
+      });
+
+      it('should not store resumeAt in state for indefinite waits', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.not.objectContaining({
+            state: expect.objectContaining({ resumeAt: expect.anything() }),
+          })
+        );
+      });
+    });
+  });
+
   describe('failStep', () => {
     beforeEach(() => {
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({

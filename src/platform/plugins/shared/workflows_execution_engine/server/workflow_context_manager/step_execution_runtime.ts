@@ -212,9 +212,14 @@ export class StepExecutionRuntime {
    * Attempts to enter a wait state for the step execution.
    * If the step is already in a wait state, it clears the state and returns false (exit wait).
    *
-   * @param resumeDate - When provided, stored as `resumeAt` in step state so the scheduler can
-   *   wake the step at that time (used by the timer-based `wait` step). Omit for indefinite waits
-   *   such as `waitForInput`, where resumption is triggered externally, not by the scheduler.
+   * "Already waiting" is detected by two complementary signals:
+   * - `state.resumeAt` is present: used by timer-based waits (e.g. `wait` step) where a resume
+   *   date is written on entry and cleared on exit.
+   * - `stepExecution.status === waitingStatus`: used by indefinite waits (e.g. `waitForInput`)
+   *   where no `resumeAt` is written but the status alone marks the wait.
+   *
+   * @param resumeDate - When provided, stored as `resumeAt` so the scheduler can wake the step
+   *   at that time. Omit for indefinite waits triggered externally (e.g. resume API).
    * @param waitingStatus - Status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
    * @returns `true` if the step has entered a wait state, `false` if it has exited one.
    */
@@ -222,17 +227,17 @@ export class StepExecutionRuntime {
     resumeDate?: Date,
     waitingStatus: ExecutionStatus = ExecutionStatus.WAITING
   ): boolean {
-    const resumeAt = this.stepExecution?.state?.resumeAt;
+    const alreadyWaiting =
+      this.stepExecution?.state?.resumeAt != null || this.stepExecution?.status === waitingStatus;
 
-    if (resumeAt) {
-      // already in wait state
+    if (alreadyWaiting) {
       const newState = { ...(this.stepExecution?.state || {}) };
       delete newState.resumeAt;
       this.workflowExecutionState.upsertStep({
         id: this.stepExecutionId,
         state: Object.keys(newState).length ? newState : undefined,
       });
-      return false; // was already waiting, now exiting wait state
+      return false;
     }
 
     this.workflowExecutionState.upsertStep({
@@ -247,7 +252,7 @@ export class StepExecutionRuntime {
         ? { ...(this.stepExecution?.state || {}), resumeAt: resumeDate.toISOString() }
         : this.stepExecution?.state,
     });
-    return true; // successfully entered wait state
+    return true;
   }
 
   /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */
