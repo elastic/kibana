@@ -15,6 +15,7 @@ import { useTutorialContent } from '../../hooks/use_tutorial_content';
 import {
   useExecuteTutorialStep,
   insertValues,
+  StepExecutionError,
   type EsResponse,
 } from '../../hooks/use_execute_tutorial_step';
 
@@ -25,8 +26,6 @@ export interface StepState {
   response?: EsResponse;
   error?: string;
 }
-
-// TODO: actions taken by the user throughout a tutorial should log telemetry events.
 
 export interface ResolvedStep {
   /** Original step definition */
@@ -63,12 +62,13 @@ const resolveStepContent = (
 
 export const useTutorialState = (slug: TutorialSlug) => {
   const execute = useExecuteTutorialStep();
-  const { steps: rawSteps } = useTutorialContent(slug);
+  const { steps: rawSteps, globalVariables } = useTutorialContent(slug);
+  const initialSavedValues = useMemo(() => ({ ...globalVariables }), [globalVariables]);
 
   const [state, setState] = useState<TutorialState>(() => ({
     selectedTutorial: slug,
     currentStep: 0,
-    savedValues: {},
+    savedValues: { ...initialSavedValues },
     stepStates: rawSteps.map(() => ({ status: 'pending' as StepStatus })),
     completed: false,
     started: false,
@@ -124,9 +124,15 @@ export const useTutorialState = (slug: TutorialSlug) => {
         return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
+        const failedResponse =
+          err instanceof StepExecutionError ? err.response : undefined;
         setState((prev) => {
           const nextStepStates = [...prev.stepStates];
-          nextStepStates[stepIndex] = { status: 'failed', error: message };
+          nextStepStates[stepIndex] = {
+            status: 'failed',
+            error: message,
+            response: failedResponse,
+          };
           return { ...prev, stepStates: nextStepStates };
         });
         throw err;
@@ -150,12 +156,12 @@ export const useTutorialState = (slug: TutorialSlug) => {
     setState({
       selectedTutorial: slug,
       currentStep: 0,
-      savedValues: {},
+      savedValues: { ...initialSavedValues },
       stepStates: rawSteps.map(() => ({ status: 'pending' })),
       completed: false,
       started: false,
     });
-  }, [slug, rawSteps]);
+  }, [slug, rawSteps, initialSavedValues]);
 
   return { state, steps, executeStep, advanceStep, isStepReady, reset };
 };

@@ -26,6 +26,15 @@ export interface StepExecutionResult {
   explanation: string;
 }
 
+export class StepExecutionError extends Error {
+  public readonly response: EsResponse;
+  constructor(message: string, response: EsResponse) {
+    super(message);
+    this.name = 'StepExecutionError';
+    this.response = response;
+  }
+}
+
 /**
  * Parses a Console-style API snippet ("GET /index/_search\n{...}") into
  * method, path, and optional JSON body.
@@ -101,6 +110,15 @@ export const executeTutorialStep = async (
   const snippet = insertValues(step.apiSnippet, savedValues);
   const parsed = parseApiSnippet(snippet);
   const response = await executeEsRequest(http, parsed);
+
+  const hasBodyError = Boolean(response.body.error);
+  const bodyStatus = typeof response.body.status === 'number' ? response.body.status : 0;
+  if (hasBodyError || bodyStatus >= 400) {
+    const errorObj = response.body.error as Record<string, unknown> | undefined;
+    const errorType = (errorObj?.type as string) ?? 'unknown_error';
+    const errorReason = (errorObj?.reason as string) ?? 'Request failed';
+    throw new StepExecutionError(`${errorType}: ${errorReason}`, response);
+  }
 
   const extractedValues: Record<SnippetVariableKey, string> = {};
   for (const [key, responsePath] of Object.entries(step.valuesToSave)) {

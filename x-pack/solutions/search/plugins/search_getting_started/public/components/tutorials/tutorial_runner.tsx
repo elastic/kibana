@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
 import React, { useCallback, useRef, useEffect } from 'react';
 import {
   EuiButton,
@@ -13,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { TutorialDefinition } from '../../hooks/use_tutorial_content';
 import { useTutorialState } from './tutorial_state';
@@ -50,18 +52,54 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
 
   const handleExecute = useCallback(
     (stepIndex: number) => {
+      const step = steps[stepIndex];
+      console.log('[Telemetry] Step executed', {
+        tutorial: tutorial.slug,
+        stepId: step?.source.id,
+        stepIndex,
+      });
       executeStep(stepIndex).catch(() => {
         // Error state is handled via stepStates; no additional action needed
       });
     },
-    [executeStep]
+    [executeStep, steps, tutorial.slug]
   );
+
+  const handleAdvance = useCallback(() => {
+    const currentStepDef = steps[state.currentStep];
+    const isLastStep = state.currentStep === steps.length - 1;
+    if (isLastStep) {
+      console.log('[Telemetry] Complete tutorial clicked', {
+        tutorial: tutorial.slug,
+        stepId: currentStepDef?.source.id,
+        stepIndex: state.currentStep,
+      });
+    } else {
+      console.log('[Telemetry] Next step clicked', {
+        tutorial: tutorial.slug,
+        stepId: currentStepDef?.source.id,
+        stepIndex: state.currentStep,
+      });
+    }
+    advanceStep();
+  }, [advanceStep, state.currentStep, steps, tutorial.slug]);
 
   const visibleSteps = steps.slice(0, state.currentStep + 1);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        css={css`
+          position: sticky;
+          top: var(--euiFixedHeadersOffset, 0);
+          z-index: 10;
+          background: var(--euiColorEmptyShade, #fff);
+          padding-block: 12px;
+          margin-block: -12px;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2>{tutorial.title}</h2>
@@ -105,7 +143,7 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
             isCurrentStep={i === state.currentStep}
             isReady={isStepReady(i)}
             onExecute={() => handleExecute(i)}
-            onAdvance={advanceStep}
+            onAdvance={handleAdvance}
             isLastStep={i === steps.length - 1}
           />
         </div>

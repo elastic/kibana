@@ -6,6 +6,11 @@
  */
 
 import { sampleTutorial } from '../components/tutorials/new_tutorial_content/sample_tutorial';
+import { basicsTutorial } from '../components/tutorials/new_tutorial_content/basics_tutorial';
+import { semanticTutorial } from '../components/tutorials/new_tutorial_content/semantic_tutorial';
+import { esqlTutorial } from '../components/tutorials/new_tutorial_content/esql_tutorial';
+import { timeSeriesTutorial } from '../components/tutorials/new_tutorial_content/time_series_tutorial';
+import { agentBuilderTutorial } from '../components/tutorials/new_tutorial_content/agent_builder_tutorial';
 
 type StepID = string;
 type ResponsePath = string;
@@ -48,6 +53,7 @@ export interface TutorialDefinition {
   slug: string;
   title: string;
   description: string;
+  globalVariables?: Record<SnippetVariableKey, string>;
   summary: {
     text: string;
     links: TutorialSummaryLink[];
@@ -57,7 +63,14 @@ export interface TutorialDefinition {
 
 export type TutorialSlug = (typeof AVAILABLE_TUTORIALS)[number]['slug'];
 
-export const AVAILABLE_TUTORIALS: TutorialDefinition[] = [sampleTutorial];
+export const AVAILABLE_TUTORIALS: TutorialDefinition[] = [
+  sampleTutorial,
+  basicsTutorial,
+  semanticTutorial,
+  esqlTutorial,
+  timeSeriesTutorial,
+  agentBuilderTutorial,
+];
 
 const TUTORIAL_BY_SLUG = new Map(AVAILABLE_TUTORIALS.map((t) => [t.slug, t]));
 

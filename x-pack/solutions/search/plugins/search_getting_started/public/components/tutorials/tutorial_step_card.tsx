@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -42,10 +42,29 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
   const { resolved, state } = step;
   const isCompleted = state.status === 'completed';
   const isFailed = state.status === 'failed';
+  const isRunning = state.status === 'running';
+
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  useEffect(() => {
+    if (!isRunning && isRetrying) {
+      setIsRetrying(false);
+    }
+  }, [isRunning, isRetrying]);
+
+  const handleRetry = useCallback(() => {
+    setIsRetrying(true);
+    onExecute();
+  }, [onExecute]);
+
+  const retryInProgress = isRetrying && isRunning;
+
   const showExplanation = isCompleted;
-  const showAdvanceButton = isCompleted && isCurrentStep && !isLastStep;
-  const showCompleteButton = isCompleted && isCurrentStep && isLastStep;
-  const showRetryButton = isFailed && isCurrentStep;
+  const showRetryButton = (isFailed || retryInProgress) && isCurrentStep;
+  const showAdvanceButton =
+    (isCompleted || isFailed || retryInProgress) && isCurrentStep && !isLastStep;
+  const showCompleteButton =
+    (isCompleted || isFailed || retryInProgress) && isCurrentStep && isLastStep;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj={`tutorialStep-${stepIndex}`}>
@@ -78,7 +97,8 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
                 <EuiButton
                   color="warning"
                   iconType="refresh"
-                  onClick={onExecute}
+                  isLoading={retryInProgress}
+                  onClick={handleRetry}
                   data-test-subj={`tutorialStep-${stepIndex}-retry`}
                 >
                   {i18n.translate('xpack.searchGettingStarted.tutorial.step.retry', {
