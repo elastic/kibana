@@ -149,6 +149,11 @@ describe('WaitForInputStepImpl', () => {
       await expect(underTest.run()).resolves.not.toThrow();
     });
 
+    it('should not call updateWorkflowExecution when resumeInput is absent', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
     it('should still navigate to the next node', async () => {
       await underTest.run();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
@@ -170,6 +175,11 @@ describe('WaitForInputStepImpl', () => {
     it('should call finishStep with undefined', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+    });
+
+    it('should not call updateWorkflowExecution when context is null', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 });

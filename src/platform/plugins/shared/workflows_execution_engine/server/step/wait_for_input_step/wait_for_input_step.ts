@@ -43,8 +43,10 @@ export class WaitForInputStepImpl implements NodeImplementation {
     this.stepExecutionRuntime.finishStep(resumeInput);
 
     // Clear resumeInput so subsequent waitForInput steps are not auto-completed.
-    const { resumeInput: _cleared, ...restContext } = context ?? {};
-    this.stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
+    if (context != null && typeof context === 'object' && 'resumeInput' in context) {
+      const { resumeInput: _cleared, ...restContext } = context as Record<string, unknown>;
+      this.stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
+    }
 
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' resumed with human input`, {
       event: { action: 'hitl:resumed' },
