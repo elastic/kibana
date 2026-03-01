@@ -304,6 +304,7 @@ export const ManageIntegrationsTable: React.FC<{
             {item.successfulDataStreamCount}/{item.totalDataStreamCount}
           </EuiBadge>
         ),
+        maxWidth: '80px',
       },
       {
         field: 'version',
