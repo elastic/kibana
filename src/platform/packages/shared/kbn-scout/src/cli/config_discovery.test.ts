@@ -180,6 +180,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
           {
             path: 'pluginA/parallel.playwright.config.ts',
@@ -198,6 +201,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@cloud-serverless-search'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -226,6 +232,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@cloud-serverless-workplaceai'], // Only serverless, not in tags.deploymentAgnostic
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -258,6 +267,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   ],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -398,6 +410,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
               },
             ],
           },
+          server: {
+            configSet: 'default',
+          },
         },
       ],
     });
@@ -463,6 +478,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
           {
             path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
@@ -481,6 +499,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@local-stateful-classic'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -536,6 +557,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
           {
             path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/config.playwright.config.ts',
@@ -554,6 +578,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@local-stateful-classic'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -642,6 +669,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -723,6 +753,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@local-stateful-classic'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -811,6 +844,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
         ],
       },
@@ -880,6 +916,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 },
               ],
             },
+            server: {
+              configSet: 'default',
+            },
           },
           {
             path: 'pluginTestModes/config2.playwright.config.ts',
@@ -898,6 +937,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   tags: ['@cloud-serverless-observability_complete'],
                 },
               ],
+            },
+            server: {
+              configSet: 'default',
             },
           },
         ],
@@ -948,6 +990,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   },
                 ],
               },
+              server: {
+                configSet: 'default',
+              },
             },
             {
               path: 'pluginSearch/config2.playwright.config.ts',
@@ -966,6 +1011,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                     tags: ['@cloud-serverless-search'],
                   },
                 ],
+              },
+              server: {
+                configSet: 'default',
               },
             },
           ],
@@ -995,6 +1043,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   },
                 ],
               },
+              server: {
+                configSet: 'default',
+              },
             },
           ],
         },
@@ -1022,6 +1073,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                     tags: ['@cloud-serverless-observability_complete'],
                   },
                 ],
+              },
+              server: {
+                configSet: 'default',
               },
             },
           ],
@@ -1238,6 +1292,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
                     ],
                   },
                 ],
+              },
+              server: {
+                configSet: 'default',
               },
             },
           ],

@@ -139,6 +139,9 @@ describe('test_config module', () => {
             exists: true,
             ...validManifestContent,
           },
+          server: {
+            configSet: 'default',
+          },
         });
       }
     );
@@ -168,6 +171,9 @@ describe('test_config module', () => {
         manifest: {
           path: manifestPath,
           ...dummyManifestProps,
+        },
+        server: {
+          configSet: 'default',
         },
       });
     });
@@ -225,6 +231,9 @@ describe('test_config module', () => {
           path: 'src/platform/plugins/shared/pluggy_mc_pluginface/test/scout/.meta/api/standard.json',
           ...dummyManifestProps,
         },
+        server: {
+          configSet: 'default',
+        },
       },
       {
         path: 'x-pack/solutions/security/packages/halt_who_goes_there/test/scout/api/playwright.config.ts',
@@ -240,6 +249,9 @@ describe('test_config module', () => {
         manifest: {
           path: 'x-pack/solutions/security/packages/halt_who_goes_there/test/scout/.meta/api/standard.json',
           ...dummyManifestProps,
+        },
+        server: {
+          configSet: 'default',
         },
       },
     ];
