@@ -19,19 +19,20 @@ const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs
 
 run(
   async ({ log, flagsReader, procRunner, addCleanupTask }) => {
+    const paths = flagsReader.getPositionals().map((t) => Path.resolve(t));
     const fix = flagsReader.boolean('fix');
     const watch = flagsReader.boolean('watch');
 
     if (watch) {
-      await watchAndLintFiles({ procRunner, log, addCleanupTask, options: { fix } });
+      await watchAndLintFiles({ procRunner, log, addCleanupTask, options: { fix, paths } });
     } else {
       log.info('Linting files...');
-      await lintFiles({ procRunner, options: { fix, stopExisting: false } });
+      await lintFiles({ procRunner, options: { fix, paths } });
       log.success('Linting files completed');
     }
   },
   {
-    usage: `node scripts/lint [...packages] [--watch] [--fix]`,
+    usage: `node scripts/lint [paths...] [--fix] [--watch]`,
     flags: {
       boolean: ['fix', 'watch'],
       alias: { f: 'fix', w: 'watch' },
@@ -49,17 +50,11 @@ async function lintFiles({
   options,
 }: {
   procRunner: ProcRunner;
-  options: { fix: boolean; stopExisting: boolean; paths?: string[] };
+  options: { fix: boolean; paths: string[] };
 }) {
-  const { stopExisting, paths } = options;
-
-  if (stopExisting) {
-    await procRunner.stop('oxlint');
-  }
-
   await procRunner.run('oxlint', {
     cmd: 'oxlint',
-    args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json', ...(paths ?? [])],
+    args: [...(options.fix ? ['--fix'] : []), '--config', '.oxlintrc.json', ...options.paths],
     cwd: REPO_ROOT,
     wait: true,
   });
@@ -74,54 +69,62 @@ async function watchAndLintFiles({
   procRunner: ProcRunner;
   log: ToolingLog;
   addCleanupTask: (task: CleanupTask) => void;
-  options: { fix: boolean };
+  options: { fix: boolean; paths: string[] };
 }) {
   log.info('Linting files in watch mode...');
 
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-  // null signals that a full scan is needed (e.g. FSEvents dropped events on macOS)
-  let pendingPaths: Set<string> | null = new Set();
+  let isLinting = false;
 
   const DEBOUNCE_MS = 500;
+
+  const isWithinPaths = (filePath: string) =>
+    options.paths.length === 0 || options.paths.some((p) => filePath.startsWith(p));
 
   const subscription = await Pw.subscribe(
     REPO_ROOT,
     (err, events) => {
       if (err) {
         // macOS FSEvents drops events when too many files change at once (e.g. during git checkout).
-        // Fall back to a full scan rather than logging a spurious error.
-        if (err.message?.includes('Events were dropped by the FSEvents client')) {
-          pendingPaths = null;
-        } else {
+        // Fall through to trigger a full relint rather than logging a spurious error.
+        if (!err.message?.includes('Events were dropped by the FSEvents client')) {
           log.error(`Error watching files: ${err}`);
           return;
         }
       } else {
-        const relevant = events.filter(
-          (e) => e.type !== 'delete' && LINTABLE_EXTENSIONS.has(Path.extname(e.path))
+        const hasLintableChanges = events.some(
+          (e) =>
+            e.type !== 'delete' &&
+            LINTABLE_EXTENSIONS.has(Path.extname(e.path)) &&
+            isWithinPaths(e.path)
         );
 
-        if (relevant.length === 0 && pendingPaths !== null && pendingPaths.size === 0) {
+        if (!hasLintableChanges) {
           return;
-        }
-
-        if (pendingPaths !== null) {
-          for (const { path } of relevant) {
-            pendingPaths.add(path);
-          }
         }
       }
 
-      if (debounceTimer) clearTimeout(debounceTimer);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
 
       debounceTimer = setTimeout(async () => {
-        const paths = pendingPaths !== null ? [...pendingPaths] : undefined;
-        pendingPaths = new Set();
         debounceTimer = undefined;
         try {
-          await lintFiles({ procRunner, options: { fix: options.fix, stopExisting: true, paths } });
+          if (isLinting) {
+            // Only stop if a lint is actually in progress. Since Node.js is single-threaded,
+            // checking isLinting and calling stop() are synchronous, so there is no race
+            // between the check and the kill signal being sent.
+            await procRunner.stop('oxlint');
+          }
+
+          isLinting = true;
+
+          await lintFiles({ procRunner, options: { fix: options.fix, paths: options.paths } });
         } catch {
           log.debug('Lint run failed, continuing to watch...');
+        } finally {
+          isLinting = false;
         }
       }, DEBOUNCE_MS);
     },
@@ -135,9 +138,9 @@ async function watchAndLintFiles({
   });
 
   try {
-    await lintFiles({ procRunner, options: { fix: options.fix, stopExisting: false } });
+    await lintFiles({ procRunner, options: { fix: options.fix, paths: options.paths } });
   } catch {
-    log.debug('Lint run failed, continuing to watch...');
+    log.warning('Lint run failed, continuing to watch...');
   }
 
   log.info('Watching for changes... (Ctrl+C to exit)');
