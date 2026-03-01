@@ -4978,26 +4978,6 @@
               },
               {
                 "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/generated_event_preview.tsx"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/generated_event_preview.tsx"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/significant_events_generated_table.tsx"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/manual_flow_form/manual_flow_form.tsx"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/manual_flow_form/manual_flow_form.tsx"
-              },
-              {
-                "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/manual_flow_form/manual_flow_form.tsx"
               },
               {
@@ -5027,10 +5007,6 @@
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/add_significant_event_flyout/add_significant_event_flyout.tsx"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view/significant_events_table.tsx"
               },
               {
                 "plugin": "streamsApp",
@@ -5708,7 +5684,7 @@
         "label": "ElasticsearchProcessorType",
         "description": [],
         "signature": [
-          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"fail\" | \"grok\" | \"reroute\" | \"fingerprint\" | \"dissect\" | \"convert\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
+          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"fail\" | \"grok\" | \"reroute\" | \"convert\" | \"fingerprint\" | \"dissect\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/ingest_pipeline_processors.ts",
         "lineNumber": 10,

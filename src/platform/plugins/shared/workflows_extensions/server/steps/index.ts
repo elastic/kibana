@@ -14,6 +14,8 @@ import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
 import {
   dataAggregateStepDefinition,
   dataDedupeStepDefinition,
+  dataFilterStepDefinition,
+  dataFindStepDefinition,
   dataMapStepDefinition,
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
@@ -27,6 +29,8 @@ export const registerInternalStepDefinitions = (
 ) => {
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
+  serverStepRegistry.register(dataFilterStepDefinition);
+  serverStepRegistry.register(dataFindStepDefinition);
   serverStepRegistry.register(dataRegexExtractStepDefinition);
   serverStepRegistry.register(dataRegexReplaceStepDefinition);
   serverStepRegistry.register(dataAggregateStepDefinition);
