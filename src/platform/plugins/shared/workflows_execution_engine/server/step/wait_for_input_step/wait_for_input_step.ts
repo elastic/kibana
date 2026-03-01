@@ -14,7 +14,6 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
-/** 100 years in the future — effectively indefinite until a human provides input. */
 export class WaitForInputStepImpl implements NodeImplementation {
   constructor(
     private node: WaitForInputGraphNode,
