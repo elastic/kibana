@@ -12,6 +12,7 @@ import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
   KibanaStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
 } from '../../../spec/schema';
 
@@ -35,6 +36,13 @@ export const WaitGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WaitStepSchema,
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
+
+export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('waitForInput'),
+  configuration: WaitForInputStepSchema,
+});
+export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
 
 export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

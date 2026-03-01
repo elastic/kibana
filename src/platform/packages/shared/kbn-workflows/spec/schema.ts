@@ -222,6 +222,19 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const WaitForInputStepSchema = BaseStepSchema.extend({
+  type: z.literal('waitForInput'),
+  with: z
+    .object({
+      message: z
+        .string()
+        .optional()
+        .describe('Message displayed to the user when waiting for input'),
+    })
+    .optional(),
+});
+export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
+
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set'),
   with: z.record(z.string(), z.unknown()),
@@ -507,6 +520,7 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WaitForInputStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 

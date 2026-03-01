@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -212,14 +212,18 @@ export class StepExecutionRuntime {
    * Attempts to enter a wait state for the step execution until a specific absolute date/time.
    * If the step is already in a wait state, it exits the wait state instead.
    *
-   * When entering a wait state, the step execution is marked with `ExecutionStatus.WAITING` and
-   * the `resumeAt` timestamp is stored in the step's state. The workflow can then resume execution
-   * at or after the specified time.
+   * When entering a wait state, the step execution is marked with the provided `waitingStatus`
+   * (defaults to `ExecutionStatus.WAITING`) and the `resumeAt` timestamp is stored in the step's
+   * state. The workflow can then resume execution at or after the specified time.
    *
    * @param resumeDate - The absolute date/time when execution should resume (Date object).
+   * @param waitingStatus - The status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
    * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
    */
-  public tryEnterWaitUntil(resumeDate: Date): boolean {
+  public tryEnterWaitUntil(
+    resumeDate: Date,
+    waitingStatus: ExecutionStatus = ExecutionStatus.WAITING
+  ): boolean {
     const resumeAt = this.stepExecution?.state?.resumeAt;
 
     if (resumeAt) {
@@ -240,13 +244,18 @@ export class StepExecutionRuntime {
       scopeStack: this.workflowExecution.scopeStack,
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
-      status: ExecutionStatus.WAITING,
+      status: waitingStatus,
       state: {
         ...(this.stepExecution?.state || {}),
         resumeAt: resumeDate.toISOString(),
       },
     });
     return true; // successfully entered wait state
+  }
+
+  /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */
+  public updateWorkflowExecution(update: Partial<EsWorkflowExecution>): void {
+    this.workflowExecutionState.updateWorkflowExecution(update);
   }
 
   private logStepStart(stepId: string, stepExecutionId: string): void {
