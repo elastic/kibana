@@ -136,11 +136,6 @@ export const OptionsListStrings = {
           'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
         values: { fieldName, optionCount },
       }),
-    getAllowExpensiveQueriesWarning: () =>
-      i18n.translate('controls.optionsList.popover.allowExpensiveQueriesWarning', {
-        defaultMessage:
-          'The cluster setting to allow expensive queries is off, so some features are disabled.',
-      }),
     getLoadingMoreMessage: () =>
       i18n.translate('controls.optionsList.popover.loadingMore', {
         defaultMessage: 'Loading more options...',
