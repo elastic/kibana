@@ -13,9 +13,10 @@ import {
   fieldNameExistsFilter,
   getDetailsPageFilter,
   getIndexFilters,
-  sourceOrDestinationIpExistsFilter,
   getNetworkDetailsPageFilter,
   getESQLGlobalFilters,
+  hostEUIDExistsFilter,
+  sourceOrDestinationIpExistsFilter,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
@@ -97,7 +98,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('hosts', 'mockHost'),
-      ...fieldNameExistsFilter('hosts'),
+      ...hostEUIDExistsFilter(),
       ...getIndexFilters(['auditbeat-*']),
       ...filterFromSearchBar,
     ]);

@@ -45,6 +45,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
   getPrivmonMonitoringSourceByIdUrl,
+  ENTITIES_KPI_URL,
   LIST_ENTITIES_URL,
   MONITORING_ENGINE_INIT_URL,
   MONITORING_ENTITY_LIST_SOURCES_URL,
@@ -118,6 +119,26 @@ export const useEntityAnalyticsRoutes = () => {
           sort_order: params.sortOrder,
           page: params.page,
           per_page: params.perPage,
+          filterQuery: params.filterQuery,
+        },
+        signal,
+      });
+
+    /**
+     * Fetches severity count KPI from Entity Store v2
+     */
+    const fetchEntitiesKpi = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: { entityTypes: string[]; filterQuery?: string };
+    }) =>
+      http.fetch<{ severityCount: Record<string, number> }>(ENTITIES_KPI_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          entity_types: params.entityTypes,
           filterQuery: params.filterQuery,
         },
         signal,
@@ -502,6 +523,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      fetchEntitiesKpi,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,

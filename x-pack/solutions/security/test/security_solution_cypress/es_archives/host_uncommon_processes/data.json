@@ -1296,3 +1296,200 @@
   }
 }
 
+{
+  "type": "doc",
+  "value": {
+    "id": "_euid_test_entity_id_001",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:42:00.000Z",
+      "host" : {
+        "entity" : {
+          "id" : "fleet-host-entity-id-001"
+        },
+        "hostname" : "euid-test-fleet",
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "name" : "euid-test-fleet"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "euid-test-fleet"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "category" : ["process"],
+        "type" : ["start"],
+        "action" : "process_started"
+      },
+      "process" : {
+        "name" : "euid_test_entity_id",
+        "args" : ["-euid-test"],
+        "entity_id" : "euid_entity_001"
+      },
+      "user" : {
+        "id" : "505",
+        "name" : "test"
+      },
+      "ecs" : { "version" : "8.0.0" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_euid_test_name_domain_001",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:42:01.000Z",
+      "host" : {
+        "hostname" : "euid-server",
+        "name" : "euid-server",
+        "domain" : "example.com"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "euid-test"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "category" : ["process"],
+        "type" : ["start"],
+        "action" : "process_started"
+      },
+      "process" : {
+        "name" : "euid_test_name_domain",
+        "args" : ["-euid-test"],
+        "entity_id" : "euid_name_domain_001"
+      },
+      "user" : {
+        "id" : "505",
+        "name" : "test"
+      },
+      "ecs" : { "version" : "8.0.0" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_euid_test_name_only_001",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:42:02.000Z",
+      "host" : {
+        "hostname" : "euid-name-only",
+        "name" : "euid-name-only"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "euid-test"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "category" : ["process"],
+        "type" : ["start"],
+        "action" : "process_started"
+      },
+      "process" : {
+        "name" : "euid_test_name_only",
+        "args" : ["-euid-test"],
+        "entity_id" : "euid_name_only_001"
+      },
+      "user" : {
+        "id" : "505",
+        "name" : "test"
+      },
+      "ecs" : { "version" : "8.0.0" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_euid_test_multi_host_001",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:42:03.000Z",
+      "host" : {
+        "hostname" : "test.local",
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "category" : ["process"],
+        "type" : ["start"],
+        "action" : "process_started"
+      },
+      "process" : {
+        "name" : "euid_test_multi_host",
+        "args" : ["-euid-test"],
+        "entity_id" : "euid_multi_001"
+      },
+      "user" : {
+        "id" : "505",
+        "name" : "test"
+      },
+      "ecs" : { "version" : "8.0.0" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_euid_test_multi_host_002",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:42:04.000Z",
+      "host" : {
+        "hostname" : "euid-second-host",
+        "id" : "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
+        "name" : "euid-second-host"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc8",
+        "name" : "euid-second-host"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "category" : ["process"],
+        "type" : ["start"],
+        "action" : "process_started"
+      },
+      "process" : {
+        "name" : "euid_test_multi_host",
+        "args" : ["-euid-test"],
+        "entity_id" : "euid_multi_002"
+      },
+      "user" : {
+        "id" : "505",
+        "name" : "test"
+      },
+      "ecs" : { "version" : "8.0.0" }
+    }
+  }
+}
+

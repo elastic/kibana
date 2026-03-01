@@ -16,13 +16,19 @@ import { HostsTableType } from '../store/model';
 
 import { MlHostConditionalContainer } from '../../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
-import { hostDetailsPagePathWithEntityIdentifiers } from './types';
+import {
+  hostDetailsPagePath,
+  hostDetailsPagePathWithEntityIdentifiers,
+  hostDetailsPagePathWithEntityIdentifiersSegment,
+} from './types';
 
 const parseEntityIdentifiersFromParams = (
   detailName: string,
-  encodedSegment: string | undefined
+  entityIdentifiersSegment: string | undefined
 ): Record<string, string> => {
-  const decoded = encodedSegment ? decodeEntityIdentifiersFromUrl(encodedSegment) : null;
+  const decoded = entityIdentifiersSegment
+    ? decodeEntityIdentifiersFromUrl(entityIdentifiersSegment)
+    : null;
   return decoded ?? { 'host.name': decodeURIComponent(detailName) };
 };
 
@@ -30,15 +36,6 @@ const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.events}|` +
   `${HostsTableType.hosts}|` +
-  `${HostsTableType.uncommonProcesses}|` +
-  `${HostsTableType.anomalies}|` +
-  `${HostsTableType.risk}|` +
-  `${HostsTableType.sessions})`;
-
-const getHostDetailsTabPathWithEntityIdentifiers = () =>
-  `${hostDetailsPagePathWithEntityIdentifiers}/:tabName(` +
-  `${HostsTableType.events}|` +
-  `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.risk}|` +
@@ -64,45 +61,76 @@ export const HostsContainer = React.memo(() => (
       <Hosts />
     </Route>
     <Route
-      path={getHostDetailsTabPathWithEntityIdentifiers()}
+      path={hostDetailsPagePathWithEntityIdentifiersSegment}
       render={({
         match: {
           params: { detailName, entityIdentifiers: entityIdentifiersSegment },
         },
       }) => (
         <HostDetails
-          hostDetailsPagePath={hostDetailsPagePathWithEntityIdentifiers}
+          detailName={decodeURIComponent(detailName)}
+          hostDetailsPagePath={hostDetailsPagePath}
           entityIdentifiers={parseEntityIdentifiersFromParams(detailName, entityIdentifiersSegment)}
         />
       )}
     />
-    <Route // Redirect to the first tab when tabName is not present.
+    <Route
       path={hostDetailsPagePathWithEntityIdentifiers}
       render={({
         match: {
-          params: { detailName, entityIdentifiers: entityIdentifiersSegment },
+          params: { detailName },
+        },
+      }) => (
+        <HostDetails
+          detailName={decodeURIComponent(detailName)}
+          hostDetailsPagePath={hostDetailsPagePath}
+          entityIdentifiers={parseEntityIdentifiersFromParams(detailName, undefined)}
+        />
+      )}
+    />
+    <Route // Compatibility: old format had entityIdentifiers before tabName. Redirect to entityIdentifiers after tabName.
+      path={`${HOSTS_PATH}/name/:detailName/:entityIdentifiersSegment/:tabName`}
+      render={({
+        match: {
+          params: { detailName, entityIdentifiersSegment, tabName },
         },
         location: { search = '' },
       }) => (
         <Redirect
           to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${entityIdentifiersSegment}/${HostsTableType.events}`,
+            pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}/${entityIdentifiersSegment}`,
+            search,
+          }}
+        />
+      )}
+    />
+    <Route // Compatibility: old format had entityIdentifiers without tab. Redirect to events tab.
+      path={`${HOSTS_PATH}/name/:detailName/:entityIdentifiersSegment`}
+      render={({
+        match: {
+          params: { detailName, entityIdentifiersSegment },
+        },
+        location: { search = '' },
+      }) => (
+        <Redirect
+          to={{
+            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.events}/${entityIdentifiersSegment}`,
             search,
           }}
         />
       )}
     />
     <Route // Redirect to the first tab when tabName is not present.
-      path={hostDetailsPagePathWithEntityIdentifiers}
+      path={`${HOSTS_PATH}/name/:detailName`}
       render={({
         match: {
-          params: { detailName, entityIdentifiers: entityIdentifiersSegment },
+          params: { detailName },
         },
         location: { search = '' },
       }) => (
         <Redirect
           to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${entityIdentifiersSegment}/${HostsTableType.events}`,
+            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.events}`,
             search,
           }}
         />

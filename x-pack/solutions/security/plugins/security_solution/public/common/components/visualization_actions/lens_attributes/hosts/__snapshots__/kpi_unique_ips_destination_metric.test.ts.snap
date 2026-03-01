@@ -64,7 +64,7 @@ Object {
           "key": "bool",
           "negate": false,
           "type": "custom",
-          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.entity.id\\"}},{\\"exists\\": {\\"field\\": \\"host.id\\"}},{\\"exists\\": {\\"field\\": \\"host.name\\"}},{\\"exists\\": {\\"field\\": \\"host.hostname\\"}}],\\"minimum_should_match\\": 1}}]}}}",
         },
         "query": Object {
           "bool": Object {
@@ -72,7 +72,22 @@ Object {
             "should": Array [
               Object {
                 "exists": Object {
+                  "field": "host.entity.id",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "host.id",
+                },
+              },
+              Object {
+                "exists": Object {
                   "field": "host.name",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "host.hostname",
                 },
               },
             ],

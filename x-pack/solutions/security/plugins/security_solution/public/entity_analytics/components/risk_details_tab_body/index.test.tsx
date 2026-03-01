@@ -13,9 +13,11 @@ import { RiskDetailsTabBody } from '.';
 import { EntityType } from '../../../../common/search_strategy';
 import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../explore/users/store/model';
-import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useHostRiskScoresFromEntityStore } from '../../api/hooks/use_host_risk_scores_from_entity_store';
+import { useUserRiskScoresFromEntityStore } from '../../api/hooks/use_user_risk_scores_from_entity_store';
 
-jest.mock('../../api/hooks/use_risk_score');
+jest.mock('../../api/hooks/use_host_risk_scores_from_entity_store');
+jest.mock('../../api/hooks/use_user_risk_scores_from_entity_store');
 jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 
@@ -31,19 +33,23 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     riskEntity,
   };
 
-  const mockUseRiskScore = useRiskScore as jest.Mock;
+  const mockUseHostRiskScoresFromEntityStore = useHostRiskScoresFromEntityStore as jest.Mock;
+  const mockUseUserRiskScoresFromEntityStore = useUserRiskScoresFromEntityStore as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseRiskScore.mockReturnValue({
+    mockUseHostRiskScoresFromEntityStore.mockReturnValue({
+      data: [],
       loading: false,
-      inspect: {
-        dsl: [],
-        response: [],
-      },
-      isInspected: false,
-      totalCount: 0,
+      inspect: { dsl: [], response: [] },
+      refetch: jest.fn(),
+      hasEngineBeenInstalled: true,
+    });
+    mockUseUserRiskScoresFromEntityStore.mockReturnValue({
+      data: [],
+      loading: false,
+      inspect: { dsl: [], response: [] },
       refetch: jest.fn(),
       hasEngineBeenInstalled: true,
     });
@@ -56,20 +62,19 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore).toBeCalledWith({
-      filterQuery: {
-        terms: {
-          [`${riskEntity}.name`]: ['testEntity'],
-        },
-      },
-      onlyLatest: false,
-      riskEntity,
-      skip: false,
-      timerange: {
-        from: '2019-06-25T04:31:59.345Z',
-        to: '2019-06-25T06:31:59.345Z',
-      },
-    });
+    if (riskEntity === EntityType.host) {
+      expect(mockUseHostRiskScoresFromEntityStore).toBeCalledWith({
+        filterQuery: JSON.stringify({ terms: { 'host.name': ['testEntity'] } }),
+        pagination: { cursorStart: 0, querySize: 1 },
+        skip: false,
+      });
+    } else {
+      expect(mockUseUserRiskScoresFromEntityStore).toBeCalledWith({
+        filterQuery: JSON.stringify({ terms: { 'user.name': ['testEntity'] } }),
+        pagination: { cursorStart: 0, querySize: 1 },
+        skip: false,
+      });
+    }
   });
 
   it("doesn't skip when both toggleStatus are true", () => {
@@ -78,7 +83,11 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+    if (riskEntity === EntityType.host) {
+      expect(mockUseHostRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(false);
+    } else {
+      expect(mockUseUserRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(false);
+    }
   });
 
   it("doesn't skip when at least one toggleStatus is true", () => {
@@ -90,7 +99,11 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+    if (riskEntity === EntityType.host) {
+      expect(mockUseHostRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(false);
+    } else {
+      expect(mockUseUserRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(false);
+    }
   });
 
   it('does skip when both toggleStatus are false', () => {
@@ -101,6 +114,40 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
+    if (riskEntity === EntityType.host) {
+      expect(mockUseHostRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(true);
+    } else {
+      expect(mockUseUserRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(true);
+    }
+  });
+
+  it('uses filterQuery from props when provided for host', () => {
+    if (riskEntity !== EntityType.host) return;
+    const hostFilterQuery = '{"bool":{"must":[{"match":{"host.name":"my-host"}}]}}';
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody {...defaultProps} filterQuery={hostFilterQuery} />
+      </TestProviders>
+    );
+    expect(mockUseHostRiskScoresFromEntityStore).toBeCalledWith({
+      filterQuery: hostFilterQuery,
+      pagination: { cursorStart: 0, querySize: 1 },
+      skip: false,
+    });
+  });
+
+  it('uses filterQuery from props when provided for user', () => {
+    if (riskEntity !== EntityType.user) return;
+    const userFilterQuery = '{"bool":{"must":[{"match":{"user.name":"my-user"}}]}}';
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody {...defaultProps} filterQuery={userFilterQuery} />
+      </TestProviders>
+    );
+    expect(mockUseUserRiskScoresFromEntityStore).toBeCalledWith({
+      filterQuery: userFilterQuery,
+      pagination: { cursorStart: 0, querySize: 1 },
+      skip: false,
+    });
   });
 });

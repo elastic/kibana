@@ -237,7 +237,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
               </th>
               <th
                 class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_node.host.os_2"
+                data-test-subj="tableHeaderCell_node.host.os.name_2"
                 role="columnheader"
                 scope="col"
               >
@@ -246,15 +246,15 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 >
                   <span
                     class="eui-textTruncate"
-                    title="OS"
+                    title="Operating system"
                   >
-                    OS
+                    Operating system
                   </span>
                 </div>
               </th>
               <th
                 class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_node.host.version_3"
+                data-test-subj="tableHeaderCell_node.host.os.version_3"
                 role="columnheader"
                 scope="col"
               >
@@ -286,7 +286,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    elrond.elstc.co
                   </span>
                 </div>
               </td>
@@ -299,7 +299,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    2018-12-06T15:40:53.319Z
                   </span>
                 </div>
               </td>
@@ -312,7 +312,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    Ubuntu
                   </span>
                 </div>
               </td>
@@ -325,7 +325,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    18.04.1 LTS (Bionic Beaver)
                   </span>
                 </div>
               </td>
@@ -342,7 +342,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    siem-kibana
                   </span>
                 </div>
               </td>
@@ -355,7 +355,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    2018-12-07T14:12:38.560Z
                   </span>
                 </div>
               </td>
@@ -368,7 +368,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    Debian GNU/Linux
                   </span>
                 </div>
               </td>
@@ -381,7 +381,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <span
                     class=""
                   >
-                    —
+                    9 (stretch)
                   </span>
                 </div>
               </td>

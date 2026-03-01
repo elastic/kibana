@@ -50,20 +50,34 @@ interface UseAllHost {
 
 /**
  * Maps Entity Store HostEntity.host to HostEcs (HostItem.host uses HostEcs with array fields).
+ * Entity store stores host.os.name and host.os.version per ECS (may be missing from HostEntity schema).
  */
-const mapEntityHostToHostEcs = (host: HostEntity['host']) =>
-  host
-    ? {
-        name: [host.name],
-        id: host.id,
-        ip: host.ip,
-        mac: host.mac,
-        architecture: host.architecture,
-        ...(host.hostname?.length && { hostname: host.hostname }),
-        ...(host.domain?.length && { domain: host.domain }),
-        ...(host.type?.length && { type: host.type }),
-      }
-    : undefined;
+const mapEntityHostToHostEcs = (host: HostEntity['host']) => {
+  if (!host) return undefined;
+  const hostWithOs = host as HostEntity['host'] & { os?: { name?: string[]; version?: string } };
+  const osName = hostWithOs.os?.name;
+  const osVersion = hostWithOs.os?.version;
+  return {
+    name: [host.name],
+    id: host.id,
+    ip: host.ip,
+    mac: host.mac,
+    architecture: host.architecture,
+    ...(host.hostname?.length && { hostname: host.hostname }),
+    ...(host.domain?.length && { domain: host.domain }),
+    ...(host.type?.length && { type: host.type }),
+    ...((osName != null || osVersion != null) && {
+      os: {
+        ...(osName != null && {
+          name: Array.isArray(osName) ? osName : [osName as string],
+        }),
+        ...(osVersion != null && {
+          version: Array.isArray(osVersion) ? osVersion : [osVersion as string],
+        }),
+      },
+    }),
+  };
+};
 
 /**
  * Maps Entity Store HostEntity to HostsEdges (node: HostItem, cursor)

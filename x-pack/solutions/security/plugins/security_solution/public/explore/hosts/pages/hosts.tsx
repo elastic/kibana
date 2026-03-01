@@ -97,7 +97,7 @@ const HostsComponent = () => {
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection, EntityType.host);
-      return [...globalFilters, ...hostEUIDFilter, ...severityFilter];
+      return [...globalFilters, ...severityFilter];
     }
 
     return globalFilters;

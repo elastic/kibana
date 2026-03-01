@@ -22,6 +22,7 @@ import {
   getESQLGlobalFilters,
   getIndexFilters,
   getNetworkDetailsPageFilter,
+  hostEUIDExistsFilter,
   sourceOrDestinationIpExistsFilter,
 } from './utils';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -85,6 +86,10 @@ export const useLensAttributes = ({
     if (tabName === NetworkRouteType.events) {
       if (pageName === SecurityPageName.network) {
         return sourceOrDestinationIpExistsFilter;
+      }
+      // Use host EUID fields (host.entity.id, host.id, host.name, host.hostname) for hosts page
+      if ((pageName as string) === SecurityPageName.hosts) {
+        return hostEUIDExistsFilter();
       }
       return fieldNameExistsFilter(pageName);
     }

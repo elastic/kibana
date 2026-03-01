@@ -9,6 +9,7 @@ import {
   getDetailsPageFilter,
   getNetworkDetailsPageFilter,
   getRequestsAndResponses,
+  hostEUIDExistsFilter,
   parseVisualizationData,
 } from './utils';
 import { mockRequests } from './__mocks__/utils';
@@ -64,6 +65,16 @@ describe('getDetailsPageFilter', () => {
 
   test('should render an emptry array if no field name mapped', () => {
     expect(getDetailsPageFilter('xxx')).toMatchInlineSnapshot(`Array []`);
+  });
+});
+
+describe('hostEUIDExistsFilter', () => {
+  test('should include all host EUID fields in filter', () => {
+    const filter = hostEUIDExistsFilter();
+    const metaValue = JSON.parse(filter[0].meta!.value as string);
+    const shouldClauses = metaValue.query.bool.filter[0].bool.should;
+    const fields = shouldClauses.map((c: { exists: { field: string } }) => c.exists.field);
+    expect(fields).toEqual(['host.entity.id', 'host.id', 'host.name', 'host.hostname']);
   });
 });
 

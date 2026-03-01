@@ -28,18 +28,18 @@ const TabNavigationItemComponent = ({
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
-  const handleClick = useCallback(
-    (ev: React.SyntheticEvent) => {
-      ev.preventDefault();
-      navigateTo({ path: hrefWithSearch, restoreScroll: true });
-      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
-    },
-    [navigateTo, hrefWithSearch, id]
-  );
-
   const appHref = getAppUrl({
     path: hrefWithSearch,
   });
+
+  const handleClick = useCallback(
+    (ev: React.SyntheticEvent) => {
+      ev.preventDefault();
+      navigateTo({ url: appHref, restoreScroll: true });
+      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
+    },
+    [navigateTo, appHref, id]
+  );
 
   return (
     <EuiTab

@@ -9,10 +9,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
 import { EuiPanel } from '@elastic/eui';
-import { EMPTY_SEVERITY_COUNT, EntityType } from '../../../common/search_strategy';
-import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
-import { useRiskScore } from '../api/hooks/use_risk_score';
+import { EntityType } from '../../../common/search_strategy';
 import { UserRiskScoreQueryId } from '../common/utils';
+import { useUserRiskScoreKpiFromEntityStore } from '../api/hooks/use_user_risk_score_kpi_from_entity_store';
+import { useUserRiskScoresFromEntityStore } from '../api/hooks/use_user_risk_scores_from_entity_store';
 import { EnableRiskScore } from './enable_risk_score';
 import type { UsersComponentsQueryProps } from '../../explore/users/pages/navigation/types';
 import { manageQuery } from '../../common/components/page/manage_query';
@@ -30,11 +30,9 @@ const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
 export const UserRiskScoreQueryTabBody = ({
   deleteQuery,
-  endDate: to,
   filterQuery,
   setQuery,
   skip,
-  startDate: from,
   type,
 }: UsersComponentsQueryProps) => {
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
@@ -45,7 +43,7 @@ export const UserRiskScoreQueryTabBody = ({
     () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
-  const userSeveritySelectionRedux = useDeepEqualSelector((state: State) =>
+  const severitySelectionRedux = useDeepEqualSelector((state: State) =>
     getUserRiskScoreFilterQuerySelector(state)
   );
   const pagination = useMemo(
@@ -59,32 +57,27 @@ export const UserRiskScoreQueryTabBody = ({
   const { toggleStatus } = useQueryToggle(UserRiskScoreQueryId.USERS_BY_RISK);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
+    setQuerySkip(!toggleStatus);
+  }, [toggleStatus]);
 
   const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
-  const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
-    useRiskScore({
-      filterQuery,
+  const { data, inspect, hasEngineBeenInstalled, loading, refetch, totalCount } =
+    useUserRiskScoresFromEntityStore({
+      filterQuery: filterQuery as string,
       pagination,
-      riskEntity: EntityType.user,
       skip: querySkip,
       sort,
-      timerange,
     });
 
-  const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
-    filterQuery,
-    riskEntity: EntityType.user,
+  const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpiFromEntityStore({
+    filterQuery: filterQuery as string,
     skip: querySkip,
   });
 
   const isDisabled = !hasEngineBeenInstalled && !loading;
-
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
+
   if (RiskScoreUpsell) {
     return <RiskScoreUpsell />;
   }
@@ -100,14 +93,15 @@ export const UserRiskScoreQueryTabBody = ({
   if (isDisabled) {
     return (
       <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.host} />
+        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
       </EuiPanel>
     );
   }
 
   if (
+    !loading &&
     hasEngineBeenInstalled &&
-    userSeveritySelectionRedux.length === 0 &&
+    severitySelectionRedux.length === 0 &&
     data &&
     data.length === 0
   ) {
@@ -121,13 +115,13 @@ export const UserRiskScoreQueryTabBody = ({
         data={data ?? []}
         id={UserRiskScoreQueryId.USERS_BY_RISK}
         inspect={inspect}
-        isInspect={isInspected}
+        isInspect={false}
         loading={loading || isKpiLoading}
         loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
         refetch={refetch}
         setQuery={setQuery}
         setQuerySkip={setQuerySkip}
-        severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
+        severityCount={severityCount}
         totalCount={totalCount}
         type={type}
       />

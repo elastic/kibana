@@ -100,32 +100,36 @@ export const fieldNameExistsFilter = (pageName: string): Filter[] => {
     : [];
 };
 
+const HOST_EUID_FIELDS = ['host.entity.id', 'host.id', 'host.name', 'host.hostname'] as const;
+
 /**
  * Creates a filter that checks for host EUID existence following entity store priority:
  * host.entity.id > host.id > host.name > host.hostname
  */
 export const hostEUIDExistsFilter = (): Filter[] => {
+  const shouldClauses = HOST_EUID_FIELDS.map((field) => ({
+    exists: { field },
+  }));
+  const value = JSON.stringify({
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: shouldClauses,
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  });
+
   return [
     {
       query: {
         bool: {
-          should: [
-            {
-              exists: {
-                field: 'host.id',
-              },
-            },
-            {
-              exists: {
-                field: 'host.name',
-              },
-            },
-            {
-              exists: {
-                field: 'host.hostname',
-              },
-            },
-          ],
+          should: shouldClauses,
           minimum_should_match: 1,
         },
       },
@@ -135,7 +139,7 @@ export const hostEUIDExistsFilter = (): Filter[] => {
         key: 'bool',
         negate: false,
         type: 'custom',
-        value: `{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.id"}},{"exists": {"field": "host.name"}},{"exists": {"field": "host.hostname"}}],"minimum_should_match": 1}}]}}}`,
+        value,
       },
     },
   ];

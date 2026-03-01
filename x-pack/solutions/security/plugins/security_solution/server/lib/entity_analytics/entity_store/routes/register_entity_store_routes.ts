@@ -9,6 +9,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { applyDataViewIndicesEntityEngineRoute } from './apply_dataview_indices';
 import { deleteEntityEngineRoute, deleteEntityEnginesRoute } from './delete';
 import { listEntitiesRoute } from './entities/list';
+import { listEntitiesKpiRoute } from './entities/kpi';
 import { getEntityEngineRoute } from './get';
 import { initEntityEngineRoute } from './init';
 import { listEntityEnginesRoute } from './list';
@@ -38,6 +39,7 @@ export const registerEntityStoreRoutes = ({
   getEntityEngineRoute(router, telemetry, logger);
   listEntityEnginesRoute(router, telemetry, logger);
   listEntitiesRoute(router, telemetry, logger);
+  listEntitiesKpiRoute(router, telemetry, logger);
   applyDataViewIndicesEntityEngineRoute(router, telemetry, logger);
   entityStoreInternalPrivilegesRoute(router, telemetry, logger, getStartServices);
   upsertEntity(router, telemetry, logger);

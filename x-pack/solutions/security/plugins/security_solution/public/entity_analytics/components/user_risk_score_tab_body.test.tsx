@@ -11,17 +11,19 @@ import { TestProviders } from '../../common/mock';
 import { useQueryToggle } from '../../common/containers/query_toggle';
 import { UserRiskScoreQueryTabBody } from './user_risk_score_tab_body';
 import { UsersType } from '../../explore/users/store/model';
-import { useRiskScore } from '../api/hooks/use_risk_score';
-import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
+import { useUserRiskScoresFromEntityStore } from '../api/hooks/use_user_risk_scores_from_entity_store';
+import { useUserRiskScoreKpiFromEntityStore } from '../api/hooks/use_user_risk_score_kpi_from_entity_store';
 
-jest.mock('../api/hooks/use_risk_score_kpi');
-jest.mock('../api/hooks/use_risk_score');
+jest.mock('../api/hooks/use_user_risk_score_kpi_from_entity_store');
+jest.mock('../api/hooks/use_user_risk_scores_from_entity_store');
 jest.mock('../../common/containers/query_toggle');
 jest.mock('../../common/lib/kibana');
 
-describe('All users query tab body', () => {
-  const mockUseRiskScore = useRiskScore as jest.Mock;
-  const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
+describe('User risk score query tab body', () => {
+  const mockUseUserRiskScoresFromEntityStore =
+    useUserRiskScoresFromEntityStore as jest.Mock;
+  const mockUseUserRiskScoreKpiFromEntityStore =
+    useUserRiskScoreKpiFromEntityStore as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     indexNames: [],
@@ -36,18 +38,15 @@ describe('All users query tab body', () => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
 
-    mockUseRiskScore.mockReturnValue({
-      loading: false,
-      inspect: {
-        dsl: [],
-        response: [],
-      },
-      isInspected: false,
+    mockUseUserRiskScoresFromEntityStore.mockReturnValue({
+      data: [],
       totalCount: 0,
+      loading: false,
       refetch: jest.fn(),
+      inspect: { dsl: [], response: [], indexPattern: [] },
       hasEngineBeenInstalled: true,
     });
-    mockUseRiskScoreKpi.mockReturnValue({
+    mockUseUserRiskScoreKpiFromEntityStore.mockReturnValue({
       loading: false,
       severityCount: {
         unknown: 12,
@@ -65,8 +64,8 @@ describe('All users query tab body', () => {
         <UserRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
-    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseUserRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseUserRiskScoreKpiFromEntityStore.mock.calls[0][0].skip).toEqual(false);
   });
 
   it('toggleStatus=false, skip', () => {
@@ -76,7 +75,7 @@ describe('All users query tab body', () => {
         <UserRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
-    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseUserRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseUserRiskScoreKpiFromEntityStore.mock.calls[0][0].skip).toEqual(true);
   });
 });

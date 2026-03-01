@@ -992,6 +992,74 @@ export class EntityStoreDataClient {
     return { records: records as Entity[], total, inspect };
   }
 
+  /**
+   * Fetches severity count aggregation for entity risk scores from Entity Store v2.
+   * Uses a size=0 search with terms aggregation on entity.risk.calculated_level.
+   */
+  public async searchEntitiesKpi(params: {
+    entityTypes: EntityType[];
+    filterQuery?: string;
+  }): Promise<{ severityCount: Record<string, number> }> {
+    const { filterQuery, entityTypes } = params;
+
+    const useV2 = true;
+    const getIndexName = useV2 ? getEntitiesIndexNameV2 : getEntitiesIndexName;
+    const index = uniq(entityTypes.map((type) => getIndexName(type, this.options.namespace)));
+    const parsedQuery = filterQuery ? JSON.parse(filterQuery) : undefined;
+
+    const entityTypeFilter =
+      useV2 && entityTypes.length > 0
+        ? { terms: { 'entity.EngineMetadata.Type': entityTypes } }
+        : undefined;
+
+    const riskExistsFilter = { exists: { field: 'entity.risk.calculated_score_norm' } };
+    const mustClauses: object[] = [riskExistsFilter];
+    if (entityTypeFilter) mustClauses.push(entityTypeFilter);
+    if (parsedQuery) mustClauses.push(parsedQuery);
+    const query = { bool: { must: mustClauses } };
+
+    const response = await this.esClient.search({
+      index,
+      query,
+      size: 0,
+      ignore_unavailable: true,
+      aggs: {
+        severity: {
+          terms: { field: 'entity.risk.calculated_level', size: 10 },
+          aggs: {
+            unique_entries: {
+              cardinality: { field: 'host.name' },
+            },
+          },
+        },
+      },
+    });
+
+    const agg = response.aggregations?.severity as
+      | { buckets?: Array<{ key: string; doc_count?: number; unique_entries?: { value?: number } }> }
+      | undefined;
+    const buckets = agg?.buckets ?? [];
+    const severityCount: Record<string, number> = {
+      Unknown: 0,
+      Low: 0,
+      Moderate: 0,
+      High: 0,
+      Critical: 0,
+    };
+
+    for (const bucket of buckets) {
+      const severity = bucket.key as string;
+      const count = bucket.unique_entries?.value ?? bucket.doc_count ?? 0;
+      if (severity in severityCount) {
+        severityCount[severity] += count;
+      } else {
+        severityCount.Unknown += count;
+      }
+    }
+
+    return { severityCount };
+  }
+
   public async applyDataViewIndices(): Promise<{
     successes: EngineDataviewUpdateResult[];
     errors: Error[];

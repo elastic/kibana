@@ -22,7 +22,7 @@ describe('helpers', () => {
       hosts: {
         buckets: [
           {
-            key: '123',
+            key: 'host:host-id-1',
             host: {
               hits: {
                 total: 0,
@@ -60,7 +60,7 @@ describe('helpers', () => {
       hosts: {
         buckets: [
           {
-            key: '123',
+            key: 'host:host-id-1',
             host: {
               hits: {
                 total: 0,
@@ -81,7 +81,7 @@ describe('helpers', () => {
             },
           },
           {
-            key: '345',
+            key: 'host:host-id-2',
             host: {
               hits: {
                 total: 0,
@@ -119,7 +119,7 @@ describe('helpers', () => {
       hosts: {
         buckets: [
           {
-            key: '789',
+            key: 'host:host-9',
             host: {
               hits: {
                 total: 0,
@@ -131,7 +131,6 @@ describe('helpers', () => {
                     _id: 'id-9',
                     _score: 0,
                     fields: {
-                      'host.id': ['host-id-9'],
                       'host.name': ['host-9'],
                     },
                   },
@@ -153,22 +152,42 @@ describe('helpers', () => {
       },
     };
 
-    test('will return a single host correctly', () => {
+    test('will return a single host correctly (display: host.name, entityIdentifiers: host.id)', () => {
       const hosts = getHosts(bucket1.hosts.buckets);
-      expect(hosts).toEqual([{ id: ['123'], name: ['host-1'] }]);
-    });
-
-    test('will return two hosts correctly', () => {
-      const hosts = getHosts(bucket2.hosts.buckets);
       expect(hosts).toEqual([
-        { id: ['123'], name: ['host-1'] },
-        { id: ['345'], name: ['host-2'] },
+        {
+          id: ['host:host-id-1'],
+          name: ['host-1'],
+          entityIdentifiers: { 'host.id': 'host-id-1' },
+        },
       ]);
     });
 
-    test('will return a dot notation host', () => {
+    test('will return two hosts correctly (display: host.name, entityIdentifiers for link)', () => {
+      const hosts = getHosts(bucket2.hosts.buckets);
+      expect(hosts).toEqual([
+        {
+          id: ['host:host-id-1'],
+          name: ['host-1'],
+          entityIdentifiers: { 'host.id': 'host-id-1' },
+        },
+        {
+          id: ['host:host-id-2'],
+          name: ['host-2'],
+          entityIdentifiers: { 'host.id': 'host-id-2' },
+        },
+      ]);
+    });
+
+    test('will return a host with only host.name (no host.id)', () => {
       const hosts = getHosts(bucket3.hosts.buckets);
-      expect(hosts).toEqual([{ id: ['789'], name: ['host-9'] }]);
+      expect(hosts).toEqual([
+        {
+          id: ['host:host-9'],
+          name: ['host-9'],
+          entityIdentifiers: { 'host.name': 'host-9' },
+        },
+      ]);
     });
 
     test('will return no hosts when given an empty array', () => {

@@ -16,8 +16,12 @@ import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
+import {
+  buildHostFilterFromEntityIdentifiers,
+  buildHostNamesFilter,
+  type HostItem,
+} from '../../../../common/search_strategy';
+import { useHostRiskScoresFromEntityStore } from '../../../entity_analytics/api/hooks/use_host_risk_scores_from_entity_store';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -31,6 +35,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import { Loader } from '../../../common/components/loader';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
@@ -87,28 +92,39 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
+    const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+    const isAuthorized =
+      capabilities.isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
     const darkMode = useKibanaIsDarkMode();
-    const filterQuery = useMemo(
+    const effectiveHostName = useMemo(
       () =>
-        entityIdentifiers['host.name']
-          ? buildHostNamesFilter([entityIdentifiers['host.name']])
-          : undefined,
+        entityIdentifiers['host.name'] ||
+        entityIdentifiers['host.hostname'] ||
+        Object.entries(entityIdentifiers).find(([k]) =>
+          k.startsWith('host.')
+        )?.[1],
       [entityIdentifiers]
     );
+    const filterQuery = useMemo(() => {
+      const euidFilter = buildHostFilterFromEntityIdentifiers(entityIdentifiers);
+      if (euidFilter) {
+        return JSON.stringify(euidFilter);
+      }
+      return effectiveHostName
+        ? JSON.stringify(buildHostNamesFilter([effectiveHostName]))
+        : undefined;
+    }, [entityIdentifiers, effectiveHostName]);
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
       data: hostRisk,
-      isAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
-    } = useRiskScore({
+    } = useHostRiskScoresFromEntityStore({
       filterQuery,
-      riskEntity: EntityType.host,
-      skip: entityIdentifiers['host.name'] == null,
-      onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
+      skip: !filterQuery,
     });
 
     useQueryInspector({

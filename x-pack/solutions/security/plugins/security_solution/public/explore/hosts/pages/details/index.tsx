@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -84,10 +85,13 @@ import { PageLoader } from '../../../../common/components/page_loader';
 const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({
+  detailName: detailNameProp,
   entityIdentifiers,
   hostDetailsPagePath,
 }) => {
-  const displayName = useMemo(() => entityIdentifiers['host.name'], [entityIdentifiers]);
+  const { detailName: detailNameFromParams } = useParams<{ detailName?: string }>();
+  const displayName =
+    (detailNameFromParams ? decodeURIComponent(detailNameFromParams) : null) ?? detailNameProp ?? '';
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -324,6 +328,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   hostName: displayName,
                   isEnterprise: isEnterprisePlus,
+                  entityIdentifiers,
                 })}
               />
 

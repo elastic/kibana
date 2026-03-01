@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { euid } from '@kbn/entity-store/common';
 import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
+
+const HOST_EUID_FIELD = 'host.euid';
 
 export const mockOptions: HostUncommonProcessesRequestOptions = {
   defaultIndex: [
@@ -95,7 +98,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -160,7 +163,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -220,7 +223,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -276,7 +279,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -335,7 +338,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -398,7 +401,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -460,7 +463,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -518,7 +521,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -575,7 +578,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-kibana',
+                  key: 'host:siem-kibana',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -633,7 +636,7 @@ export const mockSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-kibana',
+                  key: 'host:siem-kibana',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -726,7 +729,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -790,7 +793,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -850,7 +853,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -906,7 +909,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -965,7 +968,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -1028,7 +1031,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -1090,7 +1093,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -1148,7 +1151,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-windows',
+                  key: 'host:siem-windows',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -1205,7 +1208,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-kibana',
+                  key: 'host:siem-kibana',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -1263,7 +1266,7 @@ export const formattedSearchStrategyResponse = {
               sum_other_doc_count: 0,
               buckets: [
                 {
-                  key: 'siem-kibana',
+                  key: 'host:siem-kibana',
                   doc_count: 1,
                   host: {
                     hits: {
@@ -1560,6 +1563,9 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignore_unavailable: true,
+          runtime_mappings: {
+            [HOST_EUID_FIELD]: euid.getEuidPainlessRuntimeMapping('host'),
+          },
           aggregations: {
             process_count: { cardinality: { field: 'process.name' } },
             group_by_process: {
@@ -1586,16 +1592,19 @@ export const formattedSearchStrategyResponse = {
                     ],
                   },
                 },
-                host_count: { cardinality: { field: 'host.name' } },
+                host_count: { cardinality: { field: HOST_EUID_FIELD } },
                 hosts: {
-                  terms: { field: 'host.name' },
+                  terms: { field: HOST_EUID_FIELD },
                   aggregations: {
                     host: {
                       top_hits: {
                         size: 1,
                         _source: false,
                         fields: [
+                          'host.entity.id',
+                          'host.id',
                           'host.name',
+                          'host.hostname',
                           {
                             field: '@timestamp',
                             format: 'strict_date_optional_time',
@@ -1718,6 +1727,9 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignore_unavailable: true,
+  runtime_mappings: {
+    [HOST_EUID_FIELD]: euid.getEuidPainlessRuntimeMapping('host'),
+  },
   aggregations: {
     process_count: { cardinality: { field: 'process.name' } },
     group_by_process: {
@@ -1744,16 +1756,19 @@ export const expectedDsl = {
             ],
           },
         },
-        host_count: { cardinality: { field: 'host.name' } },
+        host_count: { cardinality: { field: HOST_EUID_FIELD } },
         hosts: {
-          terms: { field: 'host.name' },
+          terms: { field: HOST_EUID_FIELD },
           aggregations: {
             host: {
               top_hits: {
                 size: 1,
                 _source: false,
                 fields: [
+                  'host.entity.id',
+                  'host.id',
                   'host.name',
+                  'host.hostname',
                   {
                     field: '@timestamp',
                     format: 'strict_date_optional_time',

@@ -9,8 +9,16 @@ import type { hostsModel } from '../store';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HOSTS_PATH } from '../../../../common/constants';
 
-/** Path for host details when URL includes entityIdentifiers segment for precise entity resolution */
-export const hostDetailsPagePathWithEntityIdentifiers = `${HOSTS_PATH}/name/:detailName/:entityIdentifiers`;
+/** Tab names for host details routes */
+const HOST_DETAILS_TAB_NAMES =
+  'events|authentications|uncommonProcesses|anomalies|hostRisk|sessions';
+
+/** Base path for host details (used by details_tabs for route matching) */
+export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
+
+/** Path for host details. entityIdentifiers come after tabName for precise entity resolution */
+export const hostDetailsPagePathWithEntityIdentifiers = `${hostDetailsPagePath}/:tabName(${HOST_DETAILS_TAB_NAMES})`;
+export const hostDetailsPagePathWithEntityIdentifiersSegment = `${hostDetailsPagePathWithEntityIdentifiers}/:entityIdentifiers`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
   filterQuery?: string;
