@@ -434,14 +434,31 @@ function createSyntheticsServices(
     const policies =
       (
         data as {
-          items?: Array<{ id: string; package_policies?: Array<{ package?: { name: string } }> }>;
+          items?: Array<{
+            id: string;
+            package_policies?: Array<{ id: string; package?: { name: string } }>;
+          }>;
         }
       )?.items ?? [];
     for (const policy of policies) {
-      const hasSynthetics = policy.package_policies?.some(
-        (pp) => pp.package?.name === 'synthetics'
-      );
-      if (!hasSynthetics) continue;
+      const syntheticsPolicies =
+        policy.package_policies?.filter((pp) => pp.package?.name === 'synthetics') ?? [];
+      if (syntheticsPolicies.length === 0) continue;
+
+      // Force-delete managed package policies before deleting the agent policy
+      try {
+        await kbnClient.request({
+          path: '/api/fleet/package_policies/delete',
+          method: 'POST',
+          body: {
+            packagePolicyIds: syntheticsPolicies.map((pp) => pp.id),
+            force: true,
+          },
+        });
+      } catch {
+        // best-effort; continue to agent policy deletion
+      }
+
       try {
         await kbnClient.request({
           path: '/api/fleet/agent_policies/delete',
