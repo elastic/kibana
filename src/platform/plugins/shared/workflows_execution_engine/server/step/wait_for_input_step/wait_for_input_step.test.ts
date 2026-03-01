@@ -173,22 +173,3 @@ describe('WaitForInputStepImpl', () => {
     });
   });
 });
-
-describe('tryEnterWaitUntil — default status regression (wait step)', () => {
-  it('should default to WAITING status when no status argument is provided', () => {
-    // This test validates the backward-compatible default on the optional param.
-    // The wait step calls tryEnterWaitUntil(date) with no second argument; it
-    // must continue to receive ExecutionStatus.WAITING as the default.
-    //
-    // We verify this by checking the default value of the parameter on the
-    // StepExecutionRuntime function signature — effectively a contract test.
-    // The actual runtime behaviour is tested by wait_step.test.ts.
-    const runtime = {
-      tryEnterWaitUntil: (date?: Date, status = ExecutionStatus.WAITING) => status,
-    };
-    expect(runtime.tryEnterWaitUntil(new Date())).toBe(ExecutionStatus.WAITING);
-    expect(runtime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)).toBe(
-      ExecutionStatus.WAITING_FOR_INPUT
-    );
-  });
-});
