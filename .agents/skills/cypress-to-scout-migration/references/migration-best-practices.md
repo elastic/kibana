@@ -199,8 +199,9 @@ EUI wraps disabled buttons in a tooltip anchor `<span>` that intercepts pointer 
 // Broken — hover never reaches the disabled button
 await saveButton.hover();
 
-// Working — hover the tooltip anchor wrapper
-await saveButton.locator('xpath=..').hover();
+// Working — hover the tooltip anchor wrapper using CSS :has()
+const tooltipAnchor = page.locator('span:has([data-test-subj="save-button"])');
+await tooltipAnchor.hover();
 await expect(tooltip).toBeVisible();
 ```
 
@@ -216,15 +217,40 @@ readonly saveStatus = this.page.testSubj.locator('timeline-save-status');
 readonly saveStatus = this.panel.locator('[data-test-subj="timeline-save-status"]');
 ```
 
-### `force: true` for app-level DOM instability
+### `dispatchEvent` for app-level DOM instability
 
-When an application bug causes continuous DOM re-rendering (e.g., a `useEffect` loop triggering table `refetch()`), elements inside affected containers get detached before Playwright's actionability checks complete. In these cases, `force: true` is a valid workaround — but always document the app bug and the affected source location.
+When an application bug causes continuous DOM re-rendering (e.g., a `useEffect` loop triggering table `refetch()`), elements inside affected containers get detached before Playwright's actionability checks complete. Use `dispatchEvent('click')` instead of `force: true` — it bypasses actionability checks without triggering the `playwright/no-force-option` lint rule.
 
 ```typescript
 // EUI's collapsed actions popover re-renders continuously due to
 // app bug in StatefulOpenTimeline: useEffect on noteIds triggers refetch().
 // See: open_timeline/index.tsx lines ~406-419
-await this.createFromTemplateButton.click({ force: true });
+await this.createFromTemplateButton.dispatchEvent('click');
 ```
 
-This is distinct from porting Cypress `{ force: true }` blindly — it's a documented workaround for a known app issue.
+Always document the app bug and the affected source location. This is distinct from porting Cypress `{ force: true }` blindly.
+
+### Avoid `.first()`, `.last()`, `.nth()` — use specific locators
+
+The `playwright/no-nth-methods` lint rule forbids positional methods. Alternatives:
+
+```typescript
+// Forbidden — positional indexing
+await actionsButton.first().click();
+await rows.nth(0).toContainText('Second');
+
+// For waitFor() — remove .first(), waitFor doesn't enforce strict mode
+await actionsButton.waitFor({ state: 'visible' });
+
+// For click() — ensure the locator matches a single element
+// (e.g., scope to a specific table tab where only one row exists)
+await actionsButton.click();
+
+// For ordered assertions — toContainText accepts an array
+await expect(rows).toContainText(['Second', 'First']);
+
+// For filtering — use filter() instead of nth()
+await rows.filter({ hasText: 'Security Timeline' }).click();
+```
+
+`toContainText` with an array checks that each element in the locator list contains the corresponding text **in order** — same ordering guarantee as `nth()` without positional indexing.

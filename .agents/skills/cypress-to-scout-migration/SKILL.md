@@ -157,7 +157,7 @@ Use `assets/page_object_template.ts` and `assets/api_service_template.ts` as sta
 | `cy.wait(ms)` | **Forbidden** — use `expect.poll()` or locator assertions |
 | Screens files (selectors) | Page object class with locators |
 | Tasks files (actions) | Page object methods |
-| `{ force: true }` | Fix the underlying issue — don't port force clicks (exception: documented app bugs causing DOM instability — see best practices) |
+| `{ force: true }` | Fix the underlying issue — don't port force clicks (app bugs: use `dispatchEvent('click')` — see best practices) |
 | `.within()` | `.locator()` chaining (no stale reference issues) |
 | `beforeEach` (UI setup) | `apiServices` in `beforeAll` (API-based setup) |
 | `@ess` / `@serverless` tags | `tags.stateful.<domain>`, `tags.serverless.<solution>.<tier>` |
