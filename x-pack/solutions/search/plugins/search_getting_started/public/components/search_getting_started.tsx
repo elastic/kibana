@@ -11,10 +11,11 @@ import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../common';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
-import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
+// import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
 import { GettingStartedFooter } from './footer';
 import { SearchGettingStartedHeader } from './header';
+import { UpdatedTutorials } from './tutorials/updated_tutorials';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -29,7 +30,8 @@ export const SearchGettingStartedPage: React.FC = () => {
         <SearchGettingStartedHeader />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section data-test-subj="gettingStartedConsoleTutorials" paddingSize="xl">
-        <ConsoleTutorialsGroup />
+        {/* <ConsoleTutorialsGroup /> */}
+        <UpdatedTutorials />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section data-test-subj="gettingStartedCodeExamples">
         <SearchGettingStartedConnectCode />

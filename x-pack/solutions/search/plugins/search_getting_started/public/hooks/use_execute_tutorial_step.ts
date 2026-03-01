@@ -1,0 +1,121 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpSetup } from '@kbn/core/public';
+import type { TutorialStep, SnippetVariableKey } from './use_tutorial_content';
+import { useKibana } from './use_kibana';
+
+export interface ParsedSnippet {
+  method: string;
+  path: string;
+  body: string | undefined;
+}
+
+export interface EsResponse {
+  statusCode: number;
+  body: Record<string, unknown>;
+}
+
+export interface StepExecutionResult {
+  response: EsResponse;
+  extractedValues: Record<SnippetVariableKey, string>;
+  explanation: string;
+}
+
+/**
+ * Parses a Console-style API snippet ("GET /index/_search\n{...}") into
+ * method, path, and optional JSON body.
+ */
+export const parseApiSnippet = (apiSnippet: string): ParsedSnippet => {
+  const lines = apiSnippet.trim().split('\n');
+  const firstLine = lines[0].trim();
+  const spaceIndex = firstLine.indexOf(' ');
+  const method = firstLine.substring(0, spaceIndex).toUpperCase();
+  const path = firstLine.substring(spaceIndex + 1).trim();
+  const body = lines.length > 1 ? lines.slice(1).join('\n').trim() : undefined;
+  return { method, path, body: body || undefined };
+};
+
+/**
+ * Executes a parsed ES request through the Console proxy endpoint.
+ * This is the same mechanism the Dev Tools Console uses internally.
+ */
+export const executeEsRequest = async (
+  http: HttpSetup,
+  { method, path, body }: ParsedSnippet
+): Promise<EsResponse> => {
+  const response = await http.post<string>('/api/console/proxy', {
+    query: { method, path },
+    body,
+    asResponse: true,
+  });
+
+  const statusCode = parseInt(
+    response.response?.headers.get('x-console-proxy-status-code') ?? '200',
+    10
+  );
+
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = typeof response.body === 'string' ? JSON.parse(response.body) : response.body ?? {};
+  } catch {
+    // Non-JSON response (e.g. acknowledged: true as plain text)
+  }
+
+  return { statusCode, body: parsed };
+};
+
+/**
+ * Resolves a dot-bracket path like "hits.hits[0]._score" against a nested object.
+ */
+export const resolveResponsePath = (obj: unknown, responsePath: string): string => {
+  const segments = responsePath.replace(/\[(\d+)]/g, '.$1').split('.');
+  let current: unknown = obj;
+  for (const segment of segments) {
+    if (current == null || typeof current !== 'object') return '';
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return String(current ?? '');
+};
+
+export const insertValues = (template: string, values: Record<string, string>): string => {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value),
+    template
+  );
+};
+
+/**
+ * Runs a single tutorial step: substitutes saved variables into the snippet,
+ * executes it via the Console proxy, and extracts values from the response.
+ */
+export const executeTutorialStep = async (
+  http: HttpSetup,
+  step: TutorialStep,
+  savedValues: Record<SnippetVariableKey, string>
+): Promise<StepExecutionResult> => {
+  const snippet = insertValues(step.apiSnippet, savedValues);
+  const parsed = parseApiSnippet(snippet);
+  const response = await executeEsRequest(http, parsed);
+
+  const extractedValues: Record<SnippetVariableKey, string> = {};
+  for (const [key, responsePath] of Object.entries(step.valuesToSave)) {
+    extractedValues[key] = resolveResponsePath(response.body, responsePath);
+  }
+
+  const mergedValues = { ...savedValues, ...extractedValues };
+  const explanation = insertValues(step.explanation, mergedValues);
+
+  return { response, extractedValues, explanation };
+};
+
+export const useExecuteTutorialStep = () => {
+  const { http } = useKibana().services;
+
+  return (step: TutorialStep, savedValues: Record<SnippetVariableKey, string>) =>
+    executeTutorialStep(http, step, savedValues);
+};
