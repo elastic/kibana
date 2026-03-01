@@ -157,7 +157,7 @@ Use `assets/page_object_template.ts` and `assets/api_service_template.ts` as sta
 | `cy.wait(ms)` | **Forbidden** — use `expect.poll()` or locator assertions |
 | Screens files (selectors) | Page object class with locators |
 | Tasks files (actions) | Page object methods |
-| `{ force: true }` | Fix the underlying issue — don't port force clicks |
+| `{ force: true }` | Fix the underlying issue — don't port force clicks (exception: documented app bugs causing DOM instability — see best practices) |
 | `.within()` | `.locator()` chaining (no stale reference issues) |
 | `beforeEach` (UI setup) | `apiServices` in `beforeAll` (API-based setup) |
 | `@ess` / `@serverless` tags | `tags.stateful.<domain>`, `tags.serverless.<solution>.<tier>` |
@@ -232,6 +232,8 @@ After the Scout test is verified:
 - Skipping the "make sure your test fails" verification
 - Batching multiple spec migrations into a single PR
 - Merging without running the Flaky Test Runner
+- Using `fill()` on Kibana query bars — `QueryStringInput` submits React props, not DOM value; use `pressSequentially()` (see best practices)
+- Asserting `.euiTableRow` count as 0 — `EuiBasicTable` always renders an empty-state row; assert on the message text instead
 
 ## References
 

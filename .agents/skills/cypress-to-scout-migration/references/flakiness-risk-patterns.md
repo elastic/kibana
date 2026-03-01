@@ -21,6 +21,7 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 - **Look for:** `{ force: true }` on `.click()`, `.type()`, `.check()`, `.select()`
 - **Why:** Playwright strict mode rejects interactions with hidden/disabled elements. Force-clicks mask real UI issues (element behind overlay, not yet visible, disabled).
 - **Scout approach:** Wait for the element to be actionable. If behind an overlay, close the overlay first.
+- **Exception:** If the Cypress `{ force: true }` exists because an **app bug** causes continuous DOM re-rendering (e.g., a `useEffect` loop triggering table re-fetches), `force: true` is a valid Scout workaround. Document the app bug location and consider filing a fix. See `migration-best-practices.md` → "force: true for app-level DOM instability".
 
 ### `esArchiver` for system indices
 
