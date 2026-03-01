@@ -136,6 +136,9 @@ export const sampleTutorial: TutorialDefinition = {
   title: 'Search basics',
   description:
     'Learn how to create an index, add documents, run full-text searches, apply filters, and use aggregations.',
+  globalVariables: {
+    index_name: 'book_catalog',
+  },
   summary: {
     text: 'You created an index, indexed documents with the bulk API, ran full-text and filtered queries, and computed aggregations. These are the building blocks for any search experience on Elasticsearch.',
     links: [
