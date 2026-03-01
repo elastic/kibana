@@ -69,7 +69,35 @@ export const AnalyzeGraph: FC = () => {
     ? experimentalAnalyzerPatterns
     : oldAnalyzerPatterns;
 
-  const { dataView, status } = useDataView(SourcererScopeName.analyzer);
+  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
+    SourcererScopeName.analyzer
+  );
+  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
+    useSourcererDataView(SourcererScopeName.analyzer);
+
+  const isLoading: boolean = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
+        : oldSourcererDataViewIsLoading,
+    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
+  );
+
+  const isDataViewInvalid: boolean = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataViewStatus === 'error' ||
+          (experimentalDataViewStatus === 'ready' && !experimentalDataView.hasMatchedIndices())
+        : !oldSourcererDataViewSpec ||
+          !oldSourcererDataViewSpec.id ||
+          !oldSourcererDataViewSpec.title,
+    [
+      experimentalDataView,
+      experimentalDataViewStatus,
+      newDataViewPickerEnabled,
+      oldSourcererDataViewSpec,
+    ]
+  );
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
@@ -91,7 +119,7 @@ export const AnalyzeGraph: FC = () => {
     );
   }
 
-  if (status === 'loading' || status === 'pristine') {
+  if (isLoading) {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -101,7 +129,7 @@ export const AnalyzeGraph: FC = () => {
     );
   }
 
-  if (status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices())) {
+  if (isDataViewInvalid) {
     return (
       <EuiEmptyPrompt
         color="danger"
