@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { sampleTutorialSteps } from '../components/tutorials/new_tutorial_content/sample_tutorial';
-
-export type TutorialSlug = 'sample-tutorial';
+import { sampleTutorial } from '../components/tutorials/new_tutorial_content/sample_tutorial';
 
 type StepID = string;
 type ResponsePath = string;
@@ -41,17 +39,32 @@ export interface TutorialStep {
   valuesToSave: Record<SnippetVariableKey, ResponsePath>;
 }
 
-export interface TutorialContent {
-  slug: TutorialSlug;
-  content: Array<TutorialStep>;
-  isLoading: boolean;
+export interface TutorialSummaryLink {
+  label: string;
+  href: string;
 }
 
-const TUTORIAL_CONTENT_BY_SLUG: Record<TutorialSlug, Array<TutorialStep>> = {
-  'sample-tutorial': sampleTutorialSteps,
-};
+export interface TutorialDefinition {
+  slug: string;
+  title: string;
+  description: string;
+  summary: {
+    text: string;
+    links: TutorialSummaryLink[];
+  };
+  steps: TutorialStep[];
+}
 
-export const useTutorialContent = (slug: TutorialSlug): TutorialContent => {
-  const content = TUTORIAL_CONTENT_BY_SLUG[slug] ?? [];
-  return { slug, content, isLoading: false };
+export type TutorialSlug = (typeof AVAILABLE_TUTORIALS)[number]['slug'];
+
+export const AVAILABLE_TUTORIALS: TutorialDefinition[] = [sampleTutorial];
+
+const TUTORIAL_BY_SLUG = new Map(AVAILABLE_TUTORIALS.map((t) => [t.slug, t]));
+
+export const useTutorialContent = (slug: TutorialSlug): TutorialDefinition => {
+  const tutorial = TUTORIAL_BY_SLUG.get(slug);
+  if (!tutorial) {
+    throw new Error(`Unknown tutorial slug: ${slug}`);
+  }
+  return tutorial;
 };

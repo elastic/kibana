@@ -18,13 +18,15 @@ import {
   type EsResponse,
 } from '../../hooks/use_execute_tutorial_step';
 
-type StepStatus = 'pending' | 'running' | 'completed' | 'failed';
+export type StepStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 export interface StepState {
   status: StepStatus;
   response?: EsResponse;
   error?: string;
 }
+
+// TODO: actions taken by the user throughout a tutorial should log telemetry events.
 
 export interface ResolvedStep {
   /** Original step definition */
@@ -44,6 +46,7 @@ export interface TutorialState {
   selectedTutorial: TutorialSlug;
   currentStep: number;
   savedValues: Record<SnippetVariableKey, string>;
+  stepStates: StepState[];
   completed: boolean;
   started: boolean;
 }
@@ -60,28 +63,34 @@ const resolveStepContent = (
 
 export const useTutorialState = (slug: TutorialSlug) => {
   const execute = useExecuteTutorialStep();
-  const { content: rawSteps } = useTutorialContent(slug);
+  const { steps: rawSteps } = useTutorialContent(slug);
 
-  const [state, setState] = useState<TutorialState>({
+  const [state, setState] = useState<TutorialState>(() => ({
     selectedTutorial: slug,
     currentStep: 0,
     savedValues: {},
+    stepStates: rawSteps.map(() => ({ status: 'pending' as StepStatus })),
     completed: false,
     started: false,
-  });
-
-  const [stepStates, setStepStates] = useState<StepState[]>(() =>
-    rawSteps.map(() => ({ status: 'pending' as StepStatus }))
-  );
+  }));
 
   const steps: ResolvedStep[] = useMemo(
     () =>
       rawSteps.map((step, i) => ({
         source: step,
         resolved: resolveStepContent(step, state.savedValues),
-        state: stepStates[i] ?? { status: 'pending' },
+        state: state.stepStates[i] ?? { status: 'pending' },
       })),
-    [rawSteps, state.savedValues, stepStates]
+    [rawSteps, state.savedValues, state.stepStates]
+  );
+
+  const isStepReady = useCallback(
+    (stepIndex: number): boolean => {
+      const step = rawSteps[stepIndex];
+      if (!step) return false;
+      return step.valuesToInsert.every((key) => key in state.savedValues);
+    },
+    [rawSteps, state.savedValues]
   );
 
   const savedValuesRef = useRef(state.savedValues);
@@ -92,37 +101,33 @@ export const useTutorialState = (slug: TutorialSlug) => {
       const step = rawSteps[stepIndex];
       if (!step) return;
 
-      setStepStates((prev) => {
-        const next = [...prev];
-        next[stepIndex] = { status: 'running' };
-        return next;
+      setState((prev) => {
+        const nextStepStates = [...prev.stepStates];
+        nextStepStates[stepIndex] = { status: 'running' };
+        return { ...prev, stepStates: nextStepStates, started: true };
       });
 
       try {
         const currentValues = savedValuesRef.current;
         const result = await execute(step, currentValues);
 
-        setStepStates((prev) => {
-          const next = [...prev];
-          next[stepIndex] = { status: 'completed', response: result.response };
-          return next;
+        setState((prev) => {
+          const nextStepStates = [...prev.stepStates];
+          nextStepStates[stepIndex] = { status: 'completed', response: result.response };
+          return {
+            ...prev,
+            stepStates: nextStepStates,
+            savedValues: { ...prev.savedValues, ...result.extractedValues },
+          };
         });
-
-        setState((prev) => ({
-          ...prev,
-          savedValues: { ...prev.savedValues, ...result.extractedValues },
-          currentStep: stepIndex + 1,
-          started: true,
-          completed: stepIndex + 1 >= rawSteps.length,
-        }));
 
         return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        setStepStates((prev) => {
-          const next = [...prev];
-          next[stepIndex] = { status: 'failed', error: message };
-          return next;
+        setState((prev) => {
+          const nextStepStates = [...prev.stepStates];
+          nextStepStates[stepIndex] = { status: 'failed', error: message };
+          return { ...prev, stepStates: nextStepStates };
         });
         throw err;
       }
@@ -130,16 +135,27 @@ export const useTutorialState = (slug: TutorialSlug) => {
     [execute, rawSteps]
   );
 
+  const advanceStep = useCallback(() => {
+    setState((prev) => {
+      const nextStep = prev.currentStep + 1;
+      return {
+        ...prev,
+        currentStep: nextStep,
+        completed: nextStep >= rawSteps.length,
+      };
+    });
+  }, [rawSteps.length]);
+
   const reset = useCallback(() => {
     setState({
       selectedTutorial: slug,
       currentStep: 0,
       savedValues: {},
+      stepStates: rawSteps.map(() => ({ status: 'pending' })),
       completed: false,
       started: false,
     });
-    setStepStates(rawSteps.map(() => ({ status: 'pending' })));
   }, [slug, rawSteps]);
 
-  return { state, steps, executeStep, reset };
+  return { state, steps, executeStep, advanceStep, isStepReady, reset };
 };

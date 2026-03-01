@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TutorialStep } from '../../../hooks/use_tutorial_content';
+import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
 
-export const sampleTutorialSteps: TutorialStep[] = [
+const sampleTutorialSteps: TutorialStep[] = [
   {
     id: 'create_index',
     header: '## Step 1: Create an index',
@@ -130,3 +130,28 @@ export const sampleTutorialSteps: TutorialStep[] = [
       'The most common genre is **{{top_genre}}** with {{top_genre_count}} documents. Aggregations are a powerful way to build faceted navigation, dashboards, and analytics on top of your search data.',
   },
 ];
+
+export const sampleTutorial: TutorialDefinition = {
+  slug: 'sample-tutorial',
+  title: 'Search basics',
+  description:
+    'Learn how to create an index, add documents, run full-text searches, apply filters, and use aggregations.',
+  summary: {
+    text: 'You created an index, indexed documents with the bulk API, ran full-text and filtered queries, and computed aggregations. These are the building blocks for any search experience on Elasticsearch.',
+    links: [
+      {
+        label: 'Search your data',
+        href: 'https://www.elastic.co/docs/solutions/search',
+      },
+      {
+        label: 'Query DSL reference',
+        href: 'https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl',
+      },
+      {
+        label: 'Aggregations guide',
+        href: 'https://www.elastic.co/docs/explore-analyze/query-filter/aggregations',
+      },
+    ],
+  },
+  steps: sampleTutorialSteps,
+};
