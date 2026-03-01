@@ -71,16 +71,12 @@ function getEARSAuthUrl(
 }
 
 function generateCodeVerifier(length: number = 43) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-  const randomBytes = crypto.randomBytes(length);
-  let codeVerifier = '';
-
-  for (let i = 0; i < length; i++) {
-    const randomIndex = randomBytes[i] % characters.length;
-    codeVerifier += characters[randomIndex];
-  }
-
-  return codeVerifier;
+  return crypto
+    .randomBytes(length)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 function calculateCodeChallenge(codeVerifier: string): string {
