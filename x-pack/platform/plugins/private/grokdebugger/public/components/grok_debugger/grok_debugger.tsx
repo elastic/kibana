@@ -42,7 +42,7 @@ interface GrokDebuggerComponentState {
   rawEvent: string;
   pattern: string;
   customPatterns: string;
-  /** Grok-parsed fields from ES — shape depends on the user's pattern. See {@type GrokdebuggerResponseParams.structuredEvent}. */
+  /** Grok-parsed fields, keys/values depend on the user's grok pattern. */
   structuredEvent: Record<string, unknown>;
 }
 

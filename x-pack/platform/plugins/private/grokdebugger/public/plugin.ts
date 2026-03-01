@@ -42,10 +42,14 @@ export class GrokDebuggerUIPlugin implements Plugin<void, void, AppPublicPluginD
     });
 
     plugins.licensing.license$.subscribe((license) => {
-      if (!license.isActive && !devTool.isDisabled()) {
-        devTool.disable();
-      } else if (devTool.isDisabled()) {
-        devTool.enable();
+      if (license.isActive) {
+        if (devTool.isDisabled()) {
+          devTool.enable();
+        }
+      } else {
+        if (!devTool.isDisabled()) {
+          devTool.disable();
+        }
       }
     });
   }

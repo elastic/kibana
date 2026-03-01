@@ -24,7 +24,7 @@ export class GrokdebuggerRequest {
     this.customPatterns = props.customPatterns ?? {};
   }
 
-  get upstreamJSON() {
+  public get upstreamJSON() {
     return {
       rawEvent: this.rawEvent,
       pattern: this.pattern,

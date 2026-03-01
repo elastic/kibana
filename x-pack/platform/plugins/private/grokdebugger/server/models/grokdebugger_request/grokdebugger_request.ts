@@ -33,7 +33,7 @@ export class GrokdebuggerRequest {
     this.customPatterns = props.customPatterns ?? {};
   }
 
-  get upstreamJSON() {
+  public get upstreamJSON() {
     return {
       pipeline: {
         description: 'this is a grokdebugger simulation',
