@@ -132,7 +132,7 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
-import { accessesFrequentlyMaintainer } from './lib/entity_analytics/entity_store/maintainers/accesses_frequently';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/entity_store/maintainers/accesses';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,

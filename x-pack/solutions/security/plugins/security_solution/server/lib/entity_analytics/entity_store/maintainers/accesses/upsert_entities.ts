@@ -18,12 +18,10 @@ function buildEntityDoc(record: ProcessedEntityRecord): Entity {
     entity: {
       id: record.entityId,
       relationships: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        Accesses_frequently:
-          record.Accesses_frequently.length > 0 ? record.Accesses_frequently : undefined,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        Accesses_infrequently:
-          record.Accesses_infrequently.length > 0 ? record.Accesses_infrequently : undefined,
+        accesses_frequently:
+          record.accesses_frequently.length > 0 ? record.accesses_frequently : undefined,
+        accesses_infrequently:
+          record.accesses_infrequently.length > 0 ? record.accesses_infrequently : undefined,
       },
     },
   } as Entity;

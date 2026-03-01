@@ -13,7 +13,7 @@ import { runMaintainer } from './run_maintainer';
 export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
   description:
-    'Computes Accesses_frequently and Accesses_infrequently relationships from authentication events',
+    'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
   interval: '1m',
   initialState: {},
   run: async ({ esClient, logger, status }) => {

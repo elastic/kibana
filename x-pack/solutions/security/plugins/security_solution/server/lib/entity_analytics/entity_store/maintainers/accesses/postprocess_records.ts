@@ -30,10 +30,8 @@ export function postprocessEsqlResults(
 
     return {
       entityId: record.actorUserId as string,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      Accesses_frequently: toStringArray(record.Accesses_frequently),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      Accesses_infrequently: toStringArray(record.Accesses_infrequently),
+      accesses_frequently: toStringArray(record.accesses_frequently),
+      accesses_infrequently: toStringArray(record.accesses_infrequently),
     };
   });
 }

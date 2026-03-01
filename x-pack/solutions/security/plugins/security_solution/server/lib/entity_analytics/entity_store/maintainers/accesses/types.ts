@@ -16,8 +16,6 @@ export interface CompositeBucket {
 
 export interface ProcessedEntityRecord {
   entityId: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Accesses_frequently: string[];
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Accesses_infrequently: string[];
+  accesses_frequently: string[];
+  accesses_infrequently: string[];
 }

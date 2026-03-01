@@ -35,12 +35,12 @@ export function buildEsqlQuery(): string {
 | MV_EXPAND targetEntityId
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
-    access_count > 4, "Accesses_frequently",
-    "Accesses_infrequently"
+    access_count > 4, "accesses_frequently",
+    "accesses_infrequently"
   )
 | STATS targets = VALUES(targetEntityId) BY access_type, actorUserId
 | STATS
-    Accesses_frequently   = VALUES(targets) WHERE access_type == "Accesses_frequently",
-    Accesses_infrequently = VALUES(targets) WHERE access_type == "Accesses_infrequently"
+    accesses_frequently   = VALUES(targets) WHERE access_type == "accesses_frequently",
+    accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently"
   BY actorUserId`;
 }
