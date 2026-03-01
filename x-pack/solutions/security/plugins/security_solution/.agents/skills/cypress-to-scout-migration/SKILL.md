@@ -23,6 +23,7 @@ When guidance from different sources conflicts:
 
 ## Additional sub-skills
 
+- **REQUIRED:** scout-best-practices-reviewer — run against every migrated test before submitting the PR
 - **ON FLAKY TESTS:** flaky-test-doctor (co-located in this plugin's `.agents/skills/`, when source test is flaky/skipped)
 
 ## Triage: flakiness risk assessment (Gate 4)
@@ -104,14 +105,16 @@ Available Security serverless tiers:
 
 ## Security Solution roles and auth
 
+**Do not use `loginAsAdmin()` for tests.** Admin has full privileges and masks permission bugs. Always use the least-privileged role that the feature requires.
+
 | Role | Method | Use |
 |------|--------|-----|
-| Admin | `browserAuth.loginAsAdmin()` | Full privileges |
-| Platform engineer | `browserAuth.loginAsPlatformEngineer()` | Standard analyst role |
-| Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | RBAC testing |
-| Serverless role | `browserAuth.loginAs('roleName')` | Serverless-only roles (e.g., `t1_analyst`) |
+| Platform engineer | `browserAuth.loginAsPlatformEngineer()` | Default for most tests — standard CRUD privileges |
+| T1 analyst | `browserAuth.loginAsT1Analyst()` | Read-only analyst (RBAC testing) |
+| Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — works for any role in `roles.yml` |
+| Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC testing with inline descriptors |
 
-For stateful environments, custom roles are set via `samlAuth.setCustomRole()` using descriptors from `SERVERLESS_ROLES_ROOT_PATH/security/roles.yml`.
+All named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`) delegate to `loginAsSecurityRole()`, which handles stateful vs serverless transparently. For stateful environments, roles are resolved from `SERVERLESS_ROLES_ROOT_PATH/security/roles.yml` via `samlAuth.setCustomRole()`.
 
 ## Security Solution API services
 
@@ -123,6 +126,7 @@ Available in `apiServices` fixture:
 | `detectionAlerts` | `deleteAll()` |
 | `entityAnalytics` | `deleteEntityStoreEngines()`, `deleteRiskEngineConfiguration()`, `getRiskEngineStatus()`, `waitForEntityStoreStatus()` |
 | `cloudConnectorApi` | Cloud connector operations |
+| `timeline` | `createTimeline()`, `createTimelineTemplate()`, `deleteAll()` |
 
 If the API service you need doesn't exist, create one using the template from the general skill (`assets/api_service_template.ts`) and wire it into `@kbn/scout-security`:
 1. Add to `kbn-scout-security/src/playwright/fixtures/worker/apis/`
@@ -154,10 +158,28 @@ Ensure ALL of these are cleaned in `afterAll`/`afterEach`.
 
 **Keep Cypress tests with `@serverless` tag until Scout MKI pipelines are ready** — they provide MKI coverage Scout cannot replace yet.
 
+## Review checklist (Security-specific additions)
+
+After migration, run the `scout-best-practices-reviewer` skill against the new test. In addition to the general checklist, verify these Security Solution specifics:
+
+- [ ] No `loginAsAdmin()` — uses least-privileged role (`loginAsPlatformEngineer`, `loginAsT1Analyst`, or `loginAsSecurityRole`)
+- [ ] Imports from `@kbn/scout-security` (not `@kbn/scout`)
+- [ ] `expect` imported from `@kbn/scout-security/ui` (not main entry)
+- [ ] All locators extracted as `readonly` properties in page object constructor
+- [ ] No EUI CSS class selectors (`.euiTableRow`, `.euiToolTipAnchor`) — use `getByRole()` or `data-test-subj`
+- [ ] All Security-specific resources cleaned in `afterAll`/`afterEach`
+- [ ] Tags include both stateful and serverless: `[...tags.stateful.classic, ...tags.serverless.security.complete]`
+
+## Ownership notes
+
+- **Timeline UI** lives in the `security_solution` plugin (`public/timelines/`), not the `timelines` plugin. The `timelines` plugin only contains server-side saved object definitions and APIs. Scout tests for timeline UI belong in `security_solution/test/scout/`.
+- **Timeline `deleteAll()`** must delete both timelines and templates — they share the same API but require separate fetch calls filtered by `timeline_type`.
+
 ## Common mistakes (Security-specific)
 
 - Using `@kbn/scout` instead of `@kbn/scout-security` for Security Solution tests
-- Missing `loginAsPlatformEngineer()` — don't default to `loginAsAdmin()` when platform_engineer suffices
+- Using `loginAsAdmin()` — admin masks permission bugs; use `loginAsPlatformEngineer()` for CRUD or `loginAsT1Analyst()` for read-only
+- Using `loginAsSecurityRole('t1_analyst')` instead of `loginAsT1Analyst()` — prefer named convenience methods for commonly used roles
 - Not cleaning Security-specific resources (Risk Engine, Entity Store, detection rules)
 - Following general Scout conventions over Security Solution conventions when they conflict
 - Migrating a flaky/skipped test without running the flaky-test-doctor analysis first — you may port an app bug into Scout
