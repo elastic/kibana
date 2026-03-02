@@ -92,7 +92,7 @@ function createNavTree({
       },
       {
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...(streamsAvailable
         ? [
@@ -409,7 +409,7 @@ function createNavTree({
           defaultMessage: 'Add data',
         }),
         link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
+        icon: 'plusCircle',
       },
       {
         id: 'devTools',

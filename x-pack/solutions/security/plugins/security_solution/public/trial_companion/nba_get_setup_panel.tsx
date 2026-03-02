@@ -109,9 +109,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
 }) => {
   const { analytics, application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const iconType = completed.includes(item.milestoneId)
-    ? 'checkInCircleFilled'
-    : RadioCircleIconSVG;
+  const iconType = completed.includes(item.milestoneId) ? 'checkCircleFill' : RadioCircleIconSVG;
   const color = completed.includes(item.milestoneId) ? 'success' : 'default';
   const accordionId = useGeneratedHtmlId({
     prefix: 'yourTrialCompanionAccordionTODOItem',

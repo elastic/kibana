@@ -228,7 +228,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
     await page.testSubj.click('dscViewModeFieldStatsButton');
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
-    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-arrowRight');
+    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-chevronSingleRight');
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
