@@ -64,9 +64,15 @@ const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
   },
 };
 
+const sloInfoShownEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_INFO_SHOWN,
+  schema: {},
+};
+
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   sloOverviewFlyoutViewedEventType,
   sloOverviewFlyoutSearchQueriedEventType,
   sloOverviewFlyoutStatusFilteredEventType,
+  sloInfoShownEventType,
 ];
