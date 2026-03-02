@@ -41,6 +41,20 @@ const ROW_HEIGHT = 90;
 const OVERSCAN = 10;
 const MAX_SUMMARY_FIELDS = 80;
 
+/**
+ * Returns a shallow copy of the row with null/undefined values removed from flattened,
+ * so formatHit only counts and renders fields that actually have data.
+ */
+const filterNullFields = (row: DataTableRecord): DataTableRecord => {
+  const filtered: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row.flattened)) {
+    if (value !== null && value !== undefined) {
+      filtered[key] = value;
+    }
+  }
+  return { ...row, flattened: filtered };
+};
+
 const formatTimestamp = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
   if (typeof value === 'string') {
@@ -102,6 +116,7 @@ const VirtualRow = React.memo(
     );
 
     const timestampValue = timeFieldName ? row.flattened[timeFieldName] : undefined;
+    const filteredRow = useMemo(() => filterNullFields(row), [row]);
 
     return (
       <div data-index={virtualRow.index} style={{ height: ROW_HEIGHT }}>
@@ -132,7 +147,7 @@ const VirtualRow = React.memo(
           <div css={styles.summaryCell} role="gridcell">
             <SourceDocument
               useTopLevelObjectColumns={false}
-              row={row}
+              row={filteredRow}
               columnId="_source"
               dataView={dataView}
               shouldShowFieldHandler={shouldShowFieldHandler}
