@@ -478,11 +478,15 @@ describe('STATS Autocomplete', () => {
           ),
         ]);
         await statsExpectSuggestions('from a | stats col0 = min(integerField) + ', [
-          ...getFunctionSignaturesByReturnType(Location.STATS, ['integer', 'double', 'long'], {
-            scalar: true,
-            agg: true,
-            grouping: true,
-          }),
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            ['integer', 'double', 'long', 'dense_vector'],
+            {
+              scalar: true,
+              agg: true,
+              grouping: true,
+            }
+          ),
         ]);
       });
 

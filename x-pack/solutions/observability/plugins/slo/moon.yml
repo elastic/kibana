@@ -123,6 +123,7 @@ dependsOn:
   - '@kbn/observability-get-padded-alert-time-range-util'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
