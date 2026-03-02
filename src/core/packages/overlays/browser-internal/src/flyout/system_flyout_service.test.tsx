@@ -36,6 +36,18 @@ const emitEvent = (event: FlyoutManagerEvent) => {
   eventListeners.forEach((listener) => listener(event));
 };
 
+const mockFlushEmotionCache = jest.fn();
+jest.mock('@kbn/react-kibana-context-root', () => {
+  const actual = jest.requireActual('@kbn/react-kibana-context-root');
+  return {
+    ...actual,
+    createEmotionCacheForContainer: jest.fn((_container: HTMLElement, _keyPrefix: string) => ({
+      cache: { default: {}, global: {}, utility: {} },
+      flush: mockFlushEmotionCache,
+    })),
+  };
+});
+
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
@@ -53,6 +65,7 @@ beforeEach(() => {
   mockReactDomRender.mockClear();
   mockReactDomUnmount.mockClear();
   mockSubscribeToEvents.mockClear();
+  mockFlushEmotionCache.mockClear();
   eventListeners.clear();
 });
 
@@ -286,6 +299,15 @@ describe('SystemFlyoutService', () => {
       expect(targetElement.children.length).toBe(0);
 
       testService.stop();
+    });
+
+    it('invokes the Emotion cache flush callback when the flyout is closed via ref.close()', async () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>);
+      expect(mockFlushEmotionCache).not.toHaveBeenCalled();
+
+      await ref.close();
+
+      expect(mockFlushEmotionCache).toHaveBeenCalledTimes(1);
     });
   });
 
