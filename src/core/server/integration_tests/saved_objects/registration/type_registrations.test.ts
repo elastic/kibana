@@ -115,6 +115,7 @@ const previouslyRegisteredTypes = [
   'maintenance-window',
   'map',
   'maps-telemetry',
+  'markdown',
   'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',

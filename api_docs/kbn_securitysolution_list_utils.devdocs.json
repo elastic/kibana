@@ -665,7 +665,7 @@
             "section": "def-common.FormattedBuilderEntry",
             "text": "FormattedBuilderEntry"
           },
-          ", newField: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }) => { index: number; updatedEntry: ",
+          ", newField: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }) => { index: number; updatedEntry: ",
           {
             "pluginId": "@kbn/securitysolution-list-utils",
             "scope": "common",
@@ -716,7 +716,7 @@
               "- newly selected list"
             ],
             "signature": [
-              "{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }"
+              "{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "lineNumber": 424,
