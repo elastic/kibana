@@ -86,6 +86,7 @@ toc:
           - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
+          - file: connectors-kibana/zendesk-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
