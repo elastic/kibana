@@ -49,6 +49,7 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
     borderBottom: euiTheme.border.thin,
     fontWeight: euiTheme.font.weight.semiBold,
     fontSize: euiTheme.size.m,
+    lineHeight: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
   }),
   expandHeaderCell: css({
     flexShrink: 0,
@@ -58,7 +59,7 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
   timestampHeaderCell: css({
     flexShrink: 0,
     width: TIMESTAMP_COL_WIDTH,
-    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    padding: `0 ${euiTheme.size.s}`,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -66,7 +67,7 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
   }),
   summaryHeaderCell: css({
     flex: 1,
-    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    padding: `0 ${euiTheme.size.s}`,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -86,9 +87,10 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
   }),
   virtualRow: css({
     display: 'flex',
+    alignItems: 'stretch',
     borderBottom: euiTheme.border.thin,
     contentVisibility: 'auto',
-    containIntrinsicSize: '0 34px',
+    containIntrinsicSize: '0 68px',
     '&:hover': {
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
     },
@@ -99,8 +101,9 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
     flexShrink: 0,
     width: EXPAND_COL_WIDTH,
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
+    paddingTop: euiTheme.size.xs,
     borderRight: euiTheme.border.thin,
   }),
   timestampCell: css({
@@ -113,15 +116,18 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
     borderRight: euiTheme.border.thin,
     fontSize: euiTheme.size.m,
     fontFamily: euiTheme.font.familyCode,
+    lineHeight: 1.5,
   }),
   summaryCell: css({
     flex: 1,
     padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    fontSize: euiTheme.size.m,
-    fontFamily: euiTheme.font.familyCode,
     minWidth: 0,
+
+    // 3-line clamp matching UnifiedDataTable row height behaviour
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    lineHeight: 1.5,
   }),
 });

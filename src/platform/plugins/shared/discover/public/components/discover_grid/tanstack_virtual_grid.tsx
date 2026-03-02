@@ -19,8 +19,12 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { SourceDocument } from '@kbn/unified-data-table';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getTanstackVirtualGridStyles } from './tanstack_virtual_grid.styles';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface TanstackVirtualGridProps {
   rows: DataTableRecord[];
@@ -33,16 +37,9 @@ export interface TanstackVirtualGridProps {
   columnsMeta?: DataTableColumnsMeta;
 }
 
-const ROW_HEIGHT = 34;
+const ROW_HEIGHT = 68;
 const OVERSCAN = 10;
 const MAX_SUMMARY_FIELDS = 5;
-
-const formatCellValue = (value: unknown): string => {
-  if (value === null || value === undefined) return '-';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  return JSON.stringify(value);
-};
 
 const formatTimestamp = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
@@ -56,21 +53,6 @@ const formatTimestamp = (value: unknown): string => {
   return String(value);
 };
 
-const buildSummary = (row: DataTableRecord, excludeFields: Set<string>): string => {
-  const pairs: string[] = [];
-  for (const [key, value] of Object.entries(row.flattened)) {
-    if (excludeFields.has(key)) continue;
-    if (value === null || value === undefined) continue;
-    pairs.push(`${key}: ${formatCellValue(value)}`);
-    if (pairs.length >= MAX_SUMMARY_FIELDS) break;
-  }
-  const remaining = Object.keys(row.flattened).length - pairs.length - excludeFields.size;
-  if (remaining > 0) {
-    pairs.push(`and ${remaining} more`);
-  }
-  return pairs.join(' \u00b7 ');
-};
-
 /**
  * A single virtualised row, extracted to avoid closure allocations in the hot path.
  */
@@ -82,7 +64,10 @@ const VirtualRow = React.memo(
     onToggleExpand,
     timeFieldName,
     showTimeCol,
-    summaryExcludeFields,
+    dataView,
+    fieldFormats,
+    shouldShowFieldHandler,
+    columnsMeta,
     styles,
   }: {
     row: DataTableRecord;
@@ -91,7 +76,10 @@ const VirtualRow = React.memo(
     onToggleExpand: (doc: DataTableRecord) => void;
     timeFieldName: string | undefined;
     showTimeCol: boolean;
-    summaryExcludeFields: Set<string>;
+    dataView: DataView;
+    fieldFormats: FieldFormatsStart;
+    shouldShowFieldHandler: (fieldName: string) => boolean;
+    columnsMeta: DataTableColumnsMeta | undefined;
     styles: ReturnType<typeof getTanstackVirtualGridStyles>;
   }) => {
     const handleExpandClick = useCallback(
@@ -142,7 +130,18 @@ const VirtualRow = React.memo(
 
           {/* summary */}
           <div css={styles.summaryCell} role="gridcell">
-            {buildSummary(row, summaryExcludeFields)}
+            <SourceDocument
+              useTopLevelObjectColumns={false}
+              row={row}
+              columnId="_source"
+              dataView={dataView}
+              shouldShowFieldHandler={shouldShowFieldHandler}
+              maxEntries={MAX_SUMMARY_FIELDS}
+              isPlainRecord
+              fieldFormats={fieldFormats}
+              columnsMeta={columnsMeta}
+              isCompressed
+            />
           </div>
         </div>
       </div>
@@ -167,17 +166,15 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
     columns,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const { fieldFormats } = useDiscoverServices();
     const parentRef = useRef<HTMLDivElement | null>(null);
 
     const timeFieldName = dataView.timeFieldName;
 
-    const summaryExcludeFields = useMemo(() => {
-      const exclude = new Set<string>();
-      if (timeFieldName && showTimeCol) {
-        exclude.add(timeFieldName);
-      }
-      return exclude;
-    }, [timeFieldName, showTimeCol]);
+    const shouldShowFieldHandler = useMemo(() => {
+      const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+      return getShouldShowFieldHandler(dataViewFields, dataView, true);
+    }, [dataView]);
 
     const rowVirtualizer = useVirtualizer({
       count: rows.length,
@@ -255,7 +252,10 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
                       onToggleExpand={toggleExpandDoc}
                       timeFieldName={timeFieldName}
                       showTimeCol={showTimeCol}
-                      summaryExcludeFields={summaryExcludeFields}
+                      dataView={dataView}
+                      fieldFormats={fieldFormats}
+                      shouldShowFieldHandler={shouldShowFieldHandler}
+                      columnsMeta={columnsMeta}
                       styles={styles}
                     />
                   );
