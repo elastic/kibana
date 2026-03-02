@@ -48,6 +48,13 @@ const NON_ESQL_REFERENCE_NA = {
   explanation: 'Not applicable: reference rule is not ES|QL',
 };
 
+const MISSING_INDEX_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation:
+    'Not applicable: rule generation failed due to missing index — not a model quality issue',
+};
+
 /**
  * Wraps an evaluator so it returns N/A for negative-case examples (category === 'negative').
  * These are prompts where the model should refuse to generate a rule, so production-quality
@@ -80,6 +87,26 @@ function skipNonEsqlReferences(
     evaluate: async (args) => {
       if (args.expected?.language !== 'esql') {
         return NON_ESQL_REFERENCE_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
+/**
+ * Wraps an evaluator so it returns N/A when rule generation failed because the
+ * required index could not be discovered. This is an environment constraint
+ * (no matching data), not a model quality issue, so it should not penalise scores.
+ */
+function skipMissingIndexFailures(
+  evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
+): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      const error = (args.output as RuleGenerationTaskOutput)?.error;
+      if (error && /could not discover a suitable index/i.test(error)) {
+        return MISSING_INDEX_NA;
       }
       return evaluator.evaluate(args);
     },
@@ -379,24 +406,24 @@ export function createEvaluateDataset({
 
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    skipNegativeCases(createQuerySyntaxValidityEvaluator()),
-    skipNegativeCases(createFieldCoverageEvaluator()),
-    skipNegativeCases(createRuleTypeLanguageEvaluator()),
-    skipNegativeCases(createMitreAccuracyEvaluator()),
-    skipNegativeCases(createSeverityValidityEvaluator()),
-    skipNegativeCases(createRiskScoreValidityEvaluator()),
-    skipNegativeCases(createIntervalFormatEvaluator()),
-    skipNegativeCases(createLookbackGapEvaluator()),
-    skipNegativeCases(createSeverityMatchEvaluator()),
-    skipNegativeCases(createRiskScoreMatchEvaluator()),
+    skipMissingIndexFailures(skipNegativeCases(createQuerySyntaxValidityEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createFieldCoverageEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createRuleTypeLanguageEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createMitreAccuracyEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createSeverityValidityEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createRiskScoreValidityEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createIntervalFormatEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createLookbackGapEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createSeverityMatchEvaluator())),
+    skipMissingIndexFailures(skipNegativeCases(createRiskScoreMatchEvaluator())),
     // LLM — ES|QL functional equivalence via @kbn/evals built-in evaluator
-    skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator)),
+    skipMissingIndexFailures(skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator))),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
     // Re-enable when running thorough multi-model comparisons.
-    // skipNegativeCases(createRuleNameEvaluator(evaluators)),
-    // skipNegativeCases(createRuleDescriptionEvaluator(evaluators)),
+    // skipMissingIndexFailures(skipNegativeCases(createRuleNameEvaluator(evaluators))),
+    // skipMissingIndexFailures(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
-    createRejectionEvaluator(),
+    skipMissingIndexFailures(createRejectionEvaluator()),
   ];
 
   return async function evaluateDataset({
