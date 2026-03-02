@@ -106,7 +106,7 @@ export const AttacksTableSortSelect = React.memo(
         flush="both"
         iconSide="right"
         iconSize="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={onButtonClick}
         size="xs"
       >
