@@ -107,21 +107,21 @@ export const RunScriptOsConfigValues = z.object({
   scriptId: z.string().optional(),
   scriptInput: z.string().optional(),
   /**
-   * Specify the timeout in seconds for the script execution. Example: "timeout": 60
+   * Specify the timeout in seconds for the script execution
    */
   timeout: z.number().int().optional(),
 });
 
 /**
   * > warn
-> Run script response action will only be available with v9.4.0
+> This functionality is currently not available
 
   */
 export type RunscriptParams = z.infer<typeof RunscriptParams>;
 export const RunscriptParams = z.object({
-  command: z.literal('runscript').optional(),
+  command: z.literal('runscript'),
   /**
-   * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Collect data"
+   * Add a note that explains or describes the action. You can find your comment in the response actions history log
    */
   comment: z.string().optional(),
   config: z
