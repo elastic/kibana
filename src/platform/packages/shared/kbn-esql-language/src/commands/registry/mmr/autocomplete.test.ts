@@ -114,7 +114,7 @@ describe('MMR Autocomplete', () => {
     const context = buildContextWithDenseVector();
     await expectMmrSuggestions(
       'FROM a | MMR ON denseField LIMIT ',
-      ['5 ', '10 '],
+      ['10 ', '100 ', '1000 '],
       undefined,
       context
     );
