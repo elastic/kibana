@@ -339,12 +339,6 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
-  async updateEsqlQuery(query: string) {
-    await this.codeEditor.setCodeEditorValue(query);
-    await this.page.testSubj.click('querySubmitButton');
-    await this.waitUntilSearchingHasFinished();
-  }
-
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
