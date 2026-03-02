@@ -140,5 +140,90 @@ describe('ObservabilitySharedPlugin', () => {
 
       expect(mockAgentBuilder.setConversationFlyoutActiveConfig).not.toHaveBeenCalled();
     });
+
+    it('clears config when app has no category', () => {
+      const apps = new Map<string, PublicAppInfo>();
+      apps.set('unknownApp', createMockApp('unknownApp'));
+      applications$.next(apps);
+
+      plugin.start(coreStart, {
+        embeddable: {} as any,
+        share: sharePluginMock.createStartContract(),
+        agentBuilder: mockAgentBuilder as AgentBuilderPluginStart,
+      });
+
+      currentAppId$.next('unknownApp');
+
+      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).toHaveBeenCalled();
+    });
+
+    it('handles rapid navigation between apps correctly', () => {
+      const apps = new Map<string, PublicAppInfo>();
+      apps.set('apm', createMockApp('apm', DEFAULT_APP_CATEGORIES.observability.id));
+      apps.set('slo', createMockApp('slo', DEFAULT_APP_CATEGORIES.observability.id));
+      apps.set('discover', createMockApp('discover', DEFAULT_APP_CATEGORIES.kibana.id));
+      applications$.next(apps);
+
+      plugin.start(coreStart, {
+        embeddable: {} as any,
+        share: sharePluginMock.createStartContract(),
+        agentBuilder: mockAgentBuilder as AgentBuilderPluginStart,
+      });
+
+      // Rapid navigation: apm -> discover -> slo
+      currentAppId$.next('apm');
+      currentAppId$.next('discover');
+      currentAppId$.next('slo');
+
+      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).toHaveBeenLastCalledWith({
+        agentId: OBSERVABILITY_AGENT_ID,
+        sessionTag: OBSERVABILITY_SESSION_TAG,
+        newConversation: false,
+      });
+    });
+
+    it('skips redundant calls when navigating within same category', () => {
+      const apps = new Map<string, PublicAppInfo>();
+      apps.set('apm', createMockApp('apm', DEFAULT_APP_CATEGORIES.observability.id));
+      apps.set('slo', createMockApp('slo', DEFAULT_APP_CATEGORIES.observability.id));
+      apps.set('infra', createMockApp('infra', DEFAULT_APP_CATEGORIES.observability.id));
+      applications$.next(apps);
+
+      plugin.start(coreStart, {
+        embeddable: {} as any,
+        share: sharePluginMock.createStartContract(),
+        agentBuilder: mockAgentBuilder as AgentBuilderPluginStart,
+      });
+
+      // Navigate between Observability apps
+      currentAppId$.next('apm');
+      currentAppId$.next('slo');
+      currentAppId$.next('infra');
+
+      // Should only call setConfig once (for the first navigation to Observability)
+      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    });
+
+    it('skips redundant calls when navigating within non-Observability apps', () => {
+      const apps = new Map<string, PublicAppInfo>();
+      apps.set('discover', createMockApp('discover', DEFAULT_APP_CATEGORIES.kibana.id));
+      apps.set('dashboard', createMockApp('dashboard', DEFAULT_APP_CATEGORIES.kibana.id));
+      applications$.next(apps);
+
+      plugin.start(coreStart, {
+        embeddable: {} as any,
+        share: sharePluginMock.createStartContract(),
+        agentBuilder: mockAgentBuilder as AgentBuilderPluginStart,
+      });
+
+      // Navigate between non-Observability apps
+      currentAppId$.next('discover');
+      currentAppId$.next('dashboard');
+
+      // Should only call clearConfig once (for the first navigation to non-Observability)
+      expect(mockAgentBuilder.clearConversationFlyoutActiveConfig).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.setConversationFlyoutActiveConfig).not.toHaveBeenCalled();
+    });
   });
 });

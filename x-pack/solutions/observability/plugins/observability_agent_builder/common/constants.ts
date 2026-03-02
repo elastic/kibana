@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// Agent ID
-export const OBSERVABILITY_AGENT_ID = 'observability.agent';
-
-// Session tag for grouping Observability Agent conversations
-export const OBSERVABILITY_SESSION_TAG = 'observability';
+export {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SESSION_TAG,
+} from '@kbn/observability-shared-plugin/common';
 
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';

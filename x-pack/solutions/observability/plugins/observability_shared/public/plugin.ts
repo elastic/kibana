@@ -46,6 +46,10 @@ import {
 } from '../common';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+import { OBSERVABILITY_AGENT_ID, OBSERVABILITY_SESSION_TAG } from '../common/constants';
+
+export { OBSERVABILITY_AGENT_ID, OBSERVABILITY_SESSION_TAG };
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -60,9 +64,6 @@ export interface ObservabilitySharedStart {
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
 export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugin['start']>;
 export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['profiling'];
-
-export const OBSERVABILITY_AGENT_ID = 'observability.agent';
-export const OBSERVABILITY_SESSION_TAG = 'observability';
 
 interface ObservabilitySharedLocators {
   infra: {
@@ -89,6 +90,7 @@ export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
   private appChangeSubscription?: Subscription;
+  private lastIsObservabilityApp?: boolean;
 
   constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
@@ -162,6 +164,12 @@ export class ObservabilitySharedPlugin implements Plugin {
       const currentApp = registeredApps.get(currentAppId);
       const isObservabilityApp =
         currentApp?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
+
+      // Only call agent methods when the state actually changes
+      if (isObservabilityApp === this.lastIsObservabilityApp) {
+        return;
+      }
+      this.lastIsObservabilityApp = isObservabilityApp;
 
       if (isObservabilityApp) {
         agentBuilder.setConversationFlyoutActiveConfig({
