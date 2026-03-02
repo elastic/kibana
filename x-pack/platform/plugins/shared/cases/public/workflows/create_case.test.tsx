@@ -13,7 +13,7 @@ describe('createCreateCaseStepDefinition', () => {
     const definition = createCreateCaseStepDefinition();
 
     expect(definition.id).toBe('cases.createCase');
-    expect(definition.actionsMenuGroup).toBe('kibana');
+    expect(definition.category).toBe('kibana');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 
