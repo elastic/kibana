@@ -78,8 +78,13 @@ yarn test:type_check --project path/to/tsconfig.json
 package ID and type-check those too. This catches cross-package breakage that CI's full
 `tsc -b tsconfig.refs.json` would find.
 
+Use `rg` if available, otherwise fall back to `grep`:
+
 ```bash
+# Preferred (rg).
 rg -l '"@kbn/affected-package-id"' --glob 'tsconfig.json' .
+# Fallback (grep).
+grep -rl '"@kbn/affected-package-id"' --include='tsconfig.json' .
 ```
 
 Deduplicate against already-checked packages. If a package has more than **20** downstream
@@ -94,7 +99,8 @@ yarn test:jest --coverage path/to/package/src/
 ```
 
 If your environment provides a package-scoped unit-test tool, use the equivalent command.
-Report uncovered line numbers and overall coverage.
+
+After the run, read the coverage summary output and report overall line/branch/function coverage percentages per package. Flag any package whose line coverage is **below 80%** and provide recommendations to bring it above that threshold. Use specific uncovered files or line ranges when the coverage output provides them.
 
 ### Step 5: CODEOWNERS generation
 
@@ -126,7 +132,7 @@ Report a summary including:
 - Check changes pass/fail and key failures (if any).
 - TS project lint pass/fail.
 - Type check pass/fail per package (or "skipped" if unchanged).
-- Test results and coverage per package (or "skipped" if unchanged).
+- Test results and coverage per package (or "skipped" if unchanged); flag packages below 80% line coverage.
 - Whether CODEOWNERS or moon configs need to be committed.
 
 ### Offering to Fix Issues
@@ -135,5 +141,6 @@ After reporting the summary, offer fixes by risk level:
 
 - **Check changes failures, type errors, and TS project lint errors not resolved by `--fix`** — offer to fix automatically when mechanical and low risk.
 - **Test failures** — ask before touching test code. Test fixes can change intent, so the user should confirm before proceeding.
+- **Coverage gaps (below 80%)** — offer to add tests for uncovered code, but ask first. Coverage improvements are optional and the user may choose to defer them.
 
 Do **not** commit or stage automatically — let the user decide.
