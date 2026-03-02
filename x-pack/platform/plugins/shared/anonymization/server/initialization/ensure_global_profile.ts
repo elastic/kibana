@@ -13,10 +13,10 @@ import { migrateLegacyUiSettingsIntoGlobalProfile } from './legacy_ui_settings_m
 
 const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
 const MAX_CACHED_NAMESPACES = 1000;
-type EnsuredNamespaceState = {
+interface EnsuredNamespaceState {
   lastEnsuredAt: number;
   migratedLegacySettings: boolean;
-};
+}
 
 const ensuredStateByNamespace = new LRUCache<string, EnsuredNamespaceState>({
   max: MAX_CACHED_NAMESPACES,

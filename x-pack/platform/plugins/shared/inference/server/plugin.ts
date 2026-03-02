@@ -128,7 +128,6 @@ export class InferencePlugin
       const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
       const policyService = pluginsStart.anonymization?.getPolicyService();
-      const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
 
       const getLegacyRules = async (): Promise<AnonymizationRule[]> => {
         const legacySettings = await uiSettingsClient.get<unknown>(aiAnonymizationSettings);

@@ -42,7 +42,9 @@ export const createAnonymizationPolicyService = ({
     namespace: string,
     dataViewId: string
   ): Promise<string[]> => {
-    const namespaceScopedClient = core.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
+    const namespaceScopedClient = core.savedObjects
+      .getUnsafeInternalClient()
+      .asScopedToNamespace(namespace);
 
     try {
       const result = await namespaceScopedClient.resolve<{
@@ -84,7 +86,9 @@ export const createAnonymizationPolicyService = ({
   };
 
   const getLegacySettingsForNamespace = async (namespace: string): Promise<string | undefined> => {
-    const scopedInternalClient = core.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
+    const scopedInternalClient = core.savedObjects
+      .getUnsafeInternalClient()
+      .asScopedToNamespace(namespace);
     const uiSettingsClient = core.uiSettings.asScopedToClient(scopedInternalClient);
     return uiSettingsClient.get<string | undefined>(LEGACY_ANONYMIZATION_UI_SETTING_KEY);
   };
