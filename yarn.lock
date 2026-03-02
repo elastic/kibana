@@ -2453,10 +2453,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@113.1.0":
-  version "113.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-113.1.0.tgz#cbf0c15fddb2b17670254f702f007d28b353c1bb"
-  integrity sha512-5OKvEod5YWn5POEUTXAT96O75SODI4o/JM0vVCflVg48bRJeH9WphNWtK6f2/sfm6aEpGbeFJ9L+vwv1t3MYrA==
+"@elastic/eui@file:./eui_flyouts_emotion_fix_3.tgz":
+  version "113.1.0-flyoutsemotionfix.3"
+  resolved "file:./eui_flyouts_emotion_fix_3.tgz#81b05d3f952c5c293ddd9ee9ff52d04c21d32f7d"
   dependencies:
     "@elastic/eui-theme-common" "8.1.0"
     "@elastic/prismjs-esql" "^1.1.2"
