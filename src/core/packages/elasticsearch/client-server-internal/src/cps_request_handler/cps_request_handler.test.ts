@@ -315,6 +315,136 @@ describe('getCpsRequestHandler', () => {
           expect(params.querystring).toBeUndefined();
         }
       );
+
+      describe('bulkBody stripping', () => {
+        it('strips project_routing from each plain-object entry in bulkBody array', () => {
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+            bulkBody: [
+              { index: 'my-index' },
+              { query: { match_all: {} }, project_routing: 'should-be-stripped' },
+              { index: 'other-index', project_routing: 'also-stripped' },
+              { query: { term: { category: 'alpha' } } },
+            ],
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          expect(params).toEqual({
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+            bulkBody: [
+              { index: 'my-index' },
+              { query: { match_all: {} } },
+              { index: 'other-index' },
+              { query: { term: { category: 'alpha' } } },
+            ],
+          });
+        });
+
+        it('leaves bulkBody entries without project_routing untouched', () => {
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+            bulkBody: [{ index: 'my-index' }, { query: { match_all: {} } }],
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          expect(params).toEqual({
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+            bulkBody: [{ index: 'my-index' }, { query: { match_all: {} } }],
+          });
+        });
+
+        it('strips project_routing from a pre-serialized NDJSON string bulkBody', () => {
+          const ndjson =
+            JSON.stringify({ index: 'my-index', project_routing: 'should-be-stripped' }) +
+            '\n' +
+            JSON.stringify({ query: { match_all: {} }, project_routing: 'also-stripped' }) +
+            '\n' +
+            JSON.stringify({ index: 'clean' }) +
+            '\n';
+
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+            bulkBody: ndjson,
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          // Parse each line to assert content independent of JSON key ordering.
+          const lines = (params.bulkBody as string).split('\n').filter(Boolean);
+          expect(JSON.parse(lines[0])).toEqual({ index: 'my-index' });
+          expect(JSON.parse(lines[1])).toEqual({ query: { match_all: {} } });
+          expect(JSON.parse(lines[2])).toEqual({ index: 'clean' });
+          expect(params.method).toBe('POST');
+          expect(params.path).toBe('/_msearch');
+        });
+
+        it('preserves trailing newline in NDJSON string bulkBody', () => {
+          const ndjson =
+            JSON.stringify({ index: 'my-index', project_routing: 'x' }) +
+            '\n' +
+            JSON.stringify({ query: { match_all: {} } }) +
+            '\n';
+
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+            bulkBody: ndjson,
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          expect(params.bulkBody as string).toMatch(/\n$/);
+        });
+
+        it('does not fail when bulkBody is absent', () => {
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+          };
+
+          expect(() => onRequest({ scoped: true }, params, {})).not.toThrow();
+          expect(params).toEqual({
+            method: 'POST',
+            path: '/_msearch',
+            meta: { name: 'msearch', acceptedParams: ['project_routing'] },
+          });
+        });
+
+        it('strips project_routing from bulkBody even without meta.name set', () => {
+          // Callers using transport.request() directly may not set meta.name.
+          // We still strip from bulkBody unconditionally when CPS is disabled.
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: '/_msearch',
+            bulkBody: [
+              { index: 'my-index' },
+              { query: { match_all: {} }, project_routing: 'should-be-stripped' },
+            ],
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          expect(params).toEqual({
+            method: 'POST',
+            path: '/_msearch',
+            bulkBody: [{ index: 'my-index' }, { query: { match_all: {} } }],
+          });
+        });
+      });
     });
   });
 });
