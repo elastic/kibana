@@ -78,7 +78,6 @@ const renderFlyout = (
   };
 };
 
-
 const Wrapper = ({
   initialSteps,
   initialSelectedStepIndex,
