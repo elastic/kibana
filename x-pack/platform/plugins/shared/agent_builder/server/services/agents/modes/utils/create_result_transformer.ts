@@ -9,6 +9,7 @@ import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
 import { getToolCallEntryPath } from '../../../runner/store/volumes/tool_results/utils';
 
 /**
@@ -75,8 +76,16 @@ export type ToolCallResultTransformer = (toolCall: ToolCallWithResult) => Promis
 export interface CreateResultTransformerOptions {
   /**
    * Tool registry to look up tool-specific summarization functions.
+   * Used as a fallback when the tool is not found in the tool manager
+   * (e.g. for evicted dynamic tools from previous rounds).
    */
   toolRegistry: ToolRegistry;
+  /**
+   * Tool manager to look up tool-specific summarization functions.
+   * Checked first, as it contains all active tools including internal ones
+   * (filestore tools, attachment tools) that may not be in the registry.
+   */
+  toolManager: ToolManager;
   /**
    * Filestore to check token counts for file reference substitution.
    */
@@ -102,6 +111,7 @@ export interface CreateResultTransformerOptions {
  */
 export const createResultTransformer = ({
   toolRegistry,
+  toolManager,
   filestore,
   filestoreEnabled,
   tokenThreshold = FILE_REFERENCE_TOKEN_THRESHOLD,
@@ -113,7 +123,7 @@ export const createResultTransformer = ({
     }
 
     // Step 1: Try tool-specific summarization
-    const summarized = await tryToolSummarization(toolCall, toolRegistry);
+    const summarized = await tryToolSummarization(toolCall, toolManager, toolRegistry);
     if (summarized) {
       return summarized.map(markResultAsCleaned);
     }
@@ -141,12 +151,21 @@ export const createResultTransformer = ({
 
 /**
  * Attempts to apply tool-specific summarization using the tool's `summarizeToolReturn` function.
+ * Checks the tool manager first (has all active tools including internal ones like filestore tools),
+ * then falls back to the tool registry (for evicted dynamic tools from previous rounds).
  * Returns the summarized results, or undefined if no summarization is available/applicable.
  */
 const tryToolSummarization = async (
   toolCall: ToolCallWithResult,
+  toolManager: ToolManager,
   toolRegistry: ToolRegistry
 ): Promise<ToolResult[] | undefined> => {
+  const managerSummarizer = toolManager.getSummarizer(toolCall.tool_id);
+  if (managerSummarizer) {
+    const summarizedResults = managerSummarizer(toolCall);
+    return summarizedResults ?? undefined;
+  }
+
   try {
     const tool = await toolRegistry.get(toolCall.tool_id);
     if (!tool?.summarizeToolReturn) {

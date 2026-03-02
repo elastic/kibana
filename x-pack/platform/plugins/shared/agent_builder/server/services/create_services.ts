@@ -125,6 +125,7 @@ export class ServiceManager {
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
       trackingService,
+      analyticsService,
       hooks,
     });
     runner = runnerFactory.getRunner();
