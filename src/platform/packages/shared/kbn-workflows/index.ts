@@ -14,11 +14,8 @@ export { getKibanaConnectors } from './spec/kibana';
 export * from './spec/schema';
 export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
-export type {
-  BaseStepDefinition,
-  StepCategory,
-  StepDocumentation,
-} from './spec/step_definition_types';
+export { StepCategory } from './spec/step_definition_types';
+export type { BaseStepDefinition, StepDocumentation } from './spec/step_definition_types';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';

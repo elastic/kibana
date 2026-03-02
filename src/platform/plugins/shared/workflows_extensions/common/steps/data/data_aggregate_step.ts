@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -54,7 +55,7 @@ export const dataAggregateStepCommonDefinition: CommonStepDefinition<
   DataAggregateStepConfigSchema
 > = {
   id: DataAggregateStepTypeId,
-  category: 'data',
+  category: StepCategory.Data,
   label: 'Aggregate Collection',
   description: 'Group records and compute metrics like count, sum, avg, min, and max',
   documentation: {

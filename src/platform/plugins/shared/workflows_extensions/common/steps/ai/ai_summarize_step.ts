@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -53,7 +54,7 @@ export const AiSummarizeStepCommonDefinition: CommonStepDefinition<
   AiSummarizeStepConfigSchema
 > = {
   id: AiSummarizeStepTypeId,
-  category: 'ai',
+  category: StepCategory.Ai,
   label: i18n.translate('workflowsExtensionsExample.AiSummarizeStep.label', {
     defaultMessage: 'AI Summarize',
   }),

@@ -25,16 +25,7 @@ export function createPublicStepDefinition<
 >(
   definition: PublicStepDefinition<Input, Output, Config>
 ): PublicStepDefinition<Input, Output, Config> {
-  const derivedActionsMenuGroup =
-    definition.actionsMenuGroup ??
-    (Object.values(ActionsMenuGroup).includes(definition.category as ActionsMenuGroup)
-      ? (definition.category as ActionsMenuGroup)
-      : undefined);
-
-  return {
-    ...definition,
-    actionsMenuGroup: derivedActionsMenuGroup,
-  };
+  return definition;
 }
 
 /**
@@ -53,12 +44,6 @@ export interface PublicStepDefinition<
    * TODO: add support for EuiIconType
    */
   icon?: React.ComponentType;
-
-  /**
-   * The catalog under which the step is displayed in the actions menu
-   * Default value is `kibana`
-   */
-  actionsMenuGroup?: ActionsMenuGroup;
 
   /**
    * Property handlers for the step.
@@ -107,15 +92,4 @@ export interface DynamicSchema<
     input: z.infer<Input>;
     config: z.infer<Config>;
   }): z.ZodType<z.infer<Output>>;
-}
-
-/**
- * The catalog under which the step is displayed in the actions menu
- */
-export enum ActionsMenuGroup {
-  elasticsearch = 'elasticsearch',
-  external = 'external',
-  ai = 'ai',
-  kibana = 'kibana',
-  data = 'data',
 }

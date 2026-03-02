@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema } from './shared';
@@ -34,7 +35,7 @@ export const addCommentStepCommonDefinition: CommonStepDefinition<
   AddCommentStepOutputSchema
 > = {
   id: AddCommentStepTypeId,
-  category: 'kibana',
+  category: StepCategory.Kibana,
   label: i18n.ADD_COMMENT_STEP_LABEL,
   description: i18n.ADD_COMMENT_STEP_DESCRIPTION,
   documentation: {

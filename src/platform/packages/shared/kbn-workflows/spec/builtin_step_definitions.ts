@@ -14,7 +14,7 @@ import {
   IfStepConfigSchema,
   WaitStepInputSchema,
 } from './schema';
-import type { BaseStepDefinition } from './step_definition_types';
+import { type BaseStepDefinition, StepCategory } from './step_definition_types';
 
 const EmptyObjectSchema = z.object({});
 
@@ -32,7 +32,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'If',
     description:
       'Conditional execution. Runs steps when condition is true, with optional else block for the false branch',
-    category: 'flowControl',
+    category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
     outputSchema: EmptyObjectSchema,
     configSchema: IfStepConfigSchema,
@@ -59,7 +59,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Loop (foreach)',
     description:
       'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}',
-    category: 'flowControl',
+    category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
     outputSchema: EmptyObjectSchema,
     configSchema: ForEachStepConfigSchema,
@@ -80,7 +80,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     id: 'wait',
     label: 'Wait',
     description: 'Pause execution for a specified duration',
-    category: 'flowControl',
+    category: StepCategory.FlowControl,
     inputSchema: WaitStepInputSchema,
     outputSchema: EmptyObjectSchema,
     documentation: {
@@ -96,7 +96,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     id: 'data.set',
     label: 'Set Variables',
     description: 'Set variables in the workflow context',
-    category: 'data',
+    category: StepCategory.Data,
     inputSchema: DataSetStepInputSchema,
     outputSchema: EmptyObjectSchema,
     documentation: {

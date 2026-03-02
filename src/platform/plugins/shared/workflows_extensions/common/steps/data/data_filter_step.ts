@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -34,7 +35,7 @@ export const dataFilterStepCommonDefinition: CommonStepDefinition<
   DataFilterStepConfigSchema
 > = {
   id: DataFilterStepTypeId,
-  category: 'data',
+  category: StepCategory.Data,
   label: i18n.translate('workflowsExtensions.dataFilterStep.label', {
     defaultMessage: 'Filter Collection',
   }),

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
@@ -43,7 +44,7 @@ export const updateCaseStepCommonDefinition: CommonStepDefinition<
   UpdateCaseStepOutputSchema
 > = {
   id: UpdateCaseStepTypeId,
-  category: 'kibana',
+  category: StepCategory.Kibana,
   label: i18n.UPDATE_CASE_STEP_LABEL,
   description: i18n.UPDATE_CASE_STEP_DESCRIPTION,
   documentation: {

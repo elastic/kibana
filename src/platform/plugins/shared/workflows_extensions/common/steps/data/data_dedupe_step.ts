@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -33,7 +34,7 @@ export const dataDedupeStepCommonDefinition: CommonStepDefinition<
   DataDedupeStepConfigSchema
 > = {
   id: DataDedupeStepTypeId,
-  category: 'data',
+  category: StepCategory.Data,
   label: 'Deduplicate Collection',
   description: 'Remove duplicate items from a collection based on unique keys',
   documentation: {

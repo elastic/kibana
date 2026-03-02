@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -44,7 +45,7 @@ export const dataRegexReplaceStepCommonDefinition: CommonStepDefinition<
   DataRegexReplaceStepConfigSchema
 > = {
   id: DataRegexReplaceStepTypeId,
-  category: 'data',
+  category: StepCategory.Data,
   label: i18n.translate('workflowsExtensions.dataRegexReplaceStep.label', {
     defaultMessage: 'Replace with Regex',
   }),

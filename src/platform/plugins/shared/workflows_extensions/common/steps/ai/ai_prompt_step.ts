@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { StepCategory } from '@kbn/workflows';
 import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
@@ -70,7 +71,7 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
   AiPromptStepConfigSchema
 > = {
   id: AiPromptStepTypeId,
-  category: 'ai',
+  category: StepCategory.Ai,
   label: i18n.translate('workflowsExtensionsExample.AiPromptStep.label', {
     defaultMessage: 'AI Prompt',
   }),
