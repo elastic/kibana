@@ -20,7 +20,11 @@ const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
 const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
-const toStatusCode = (err: unknown): number => (err as { statusCode?: number })?.statusCode ?? 500;
+const toStatusCode = (err: unknown): number => {
+  const directStatus = (err as { statusCode?: number })?.statusCode;
+  const metaStatus = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  return directStatus ?? metaStatus ?? 500;
+};
 
 const INDEX_ENSURE_CACHE_MS = 60_000;
 let replacementsIndexEnsuredAt = 0;
