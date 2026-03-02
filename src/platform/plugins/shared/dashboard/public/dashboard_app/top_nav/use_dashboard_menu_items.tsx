@@ -220,7 +220,7 @@ export const useDashboardMenuItems = ({
       label: topNavStrings.resetChanges.label,
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
-      iconType: 'editorUndo',
+      iconType: 'undo',
       disableButton:
         isResetting ||
         !hasUnsavedChanges ||
@@ -269,7 +269,7 @@ export const useDashboardMenuItems = ({
 
       switchToViewMode: {
         order: 1,
-        iconType: 'exit', // use 'logOut' when added to EUI
+        iconType: 'logOut', // use 'logOut' when added to EUI
         label: topNavStrings.switchToViewMode.label,
         id: 'cancel',
         disableButton: disableTopNav || !lastSavedId || isResetting,
@@ -307,7 +307,7 @@ export const useDashboardMenuItems = ({
         order: 3,
         label: topNavStrings.export.label,
         id: 'export',
-        iconType: 'exportAction',
+        iconType: 'upload',
         testId: 'exportTopNavButton',
         disableButton: disableTopNav,
         items: exportItems,
@@ -330,7 +330,7 @@ export const useDashboardMenuItems = ({
       add: {
         label: topNavStrings.add.label,
         id: 'add',
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
         color: 'success',
         testId: 'dashboardAddTopNavButton',
         htmlId: 'dashboardAddTopNavButton',
@@ -379,7 +379,7 @@ export const useDashboardMenuItems = ({
           ],
           isMainButtonLoading: isSaveInProgress,
           secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
-          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonFill: true,
           isSecondaryButtonDisabled: isSaveInProgress,
           notifcationIndicatorTooltipContent: topNavStrings.unsavedChangesTooltip,

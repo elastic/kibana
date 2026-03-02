@@ -132,7 +132,7 @@ export function LayerControl({
               >
                 <EuiButtonIcon
                   onClick={hideAllLayers}
-                  iconType="eyeClosed"
+                  iconType="eyeSlash"
                   color="text"
                   aria-label={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
                     defaultMessage: 'Hide all layers',
