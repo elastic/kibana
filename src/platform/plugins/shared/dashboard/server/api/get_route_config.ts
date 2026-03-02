@@ -9,12 +9,6 @@
 
 import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../common/constants';
 
-/**
- * INTERNAL_API_VERSION is the temporary version for the internal API until the
- * public API is fully implemented and stable. When the public API is ready, this
- * const will be removed and a PUBLIC_API_VERSION (ex. 2023-10-31) will be introduced.
- */
-
 export function getRouteConfig(isDashboardAppRequest: boolean) {
   return isDashboardAppRequest
     ? {
