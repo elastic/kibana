@@ -125,13 +125,13 @@ export const HeaderHelpMenu = ({
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  const helpExtensionContent = helpExtension?.content;
+  const helpExtensionLegacyContent = helpExtension?.content;
   const helpExtensionMount = useCallback(
     (domNode: HTMLDivElement) => {
-      const unmount = helpExtensionContent?.(domNode, { hideHelpMenu: closeMenu });
+      const unmount = helpExtensionLegacyContent?.(domNode, { hideHelpMenu: closeMenu });
       return unmount ?? (() => {});
     },
-    [helpExtensionContent, closeMenu]
+    [helpExtensionLegacyContent, closeMenu]
   );
 
   const createOnClickHandler = useCallback(
@@ -198,7 +198,7 @@ export const HeaderHelpMenu = ({
 
   let customContent: React.ReactNode = null;
   if (helpExtension) {
-    const { appName, links, content } = helpExtension;
+    const { appName, links, content, reactContent } = helpExtension;
 
     const customLinks =
       links &&
@@ -234,16 +234,23 @@ export const HeaderHelpMenu = ({
         }
       });
 
+    let extensionContent: React.ReactNode = null;
+    if (reactContent) {
+      extensionContent = reactContent({ hideHelpMenu: closeMenu });
+    } else if (content) {
+      extensionContent = <HeaderExtension extension={helpExtensionMount} />;
+    }
+
     customContent = (
       <>
         <EuiPopoverTitle>
           <h3>{appName}</h3>
         </EuiPopoverTitle>
         {customLinks}
-        {content && (
+        {extensionContent && (
           <>
             {customLinks && <EuiSpacer size="xs" />}
-            <HeaderExtension extension={helpExtensionMount} />
+            {extensionContent}
           </>
         )}
       </>

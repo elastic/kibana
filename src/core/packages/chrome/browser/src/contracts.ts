@@ -50,11 +50,11 @@ export interface ChromeSetup {
  * ```
  *
  * @example
- * How to set the help dropdown extension:
+ * How to set the help dropdown extension (React-first, preferred):
  * ```tsx
- * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * core.chrome.setHelpExtension({
+ *   appName: 'My App',
+ *   reactContent: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -149,7 +149,19 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Mount an element next to the last breadcrumb
+   * Render a React element next to the last breadcrumb.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBadge = dynamic(() => import('./my_badge'));
+   *
+   * const unregister = chrome.setBreadcrumbsAppendExtension({
+   *   content: <LazyBadge />,
+   *   order: 10,
+   * });
+   * ```
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
@@ -233,6 +245,15 @@ export interface ChromeStart {
    * Set the banner that will appear on top of the chrome header.
    *
    * @remarks Using `undefined` when invoking this API will remove the banner.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBanner = dynamic(() => import('./my_banner'));
+   *
+   * chrome.setHeaderBanner({ content: <LazyBanner /> });
+   * ```
    */
   setHeaderBanner(headerBanner?: ChromeUserBanner): void;
 

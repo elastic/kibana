@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import type { IconType, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeBadge {
@@ -25,9 +25,21 @@ export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 
-/** @public */
+/**
+ * @example
+ * Set a banner using a lazy-loaded component (recommended):
+ * ```tsx
+ * import { dynamic } from '@kbn/shared-ux-utility';
+ *
+ * const LazyBanner = dynamic(() => import('./my_banner'));
+ *
+ * chrome.setHeaderBanner({ content: <LazyBanner /> });
+ * ```
+ *
+ * @public
+ */
 export interface ChromeUserBanner {
-  content: MountPoint<HTMLDivElement>;
+  content: ChromeExtensionContent<HTMLDivElement>;
 }
 
 /** @public */

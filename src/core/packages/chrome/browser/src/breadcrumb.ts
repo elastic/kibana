@@ -8,7 +8,7 @@
  */
 
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
 import type { AppDeepLinkId } from './project_navigation';
 
 /** @public */
@@ -20,9 +20,21 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
   deepLinkId?: AppDeepLinkId;
 }
 
-/** @public */
+/**
+ * @example
+ * Append a lazy-loaded element next to the breadcrumbs (recommended):
+ * ```tsx
+ * import { dynamic } from '@kbn/shared-ux-utility';
+ *
+ * const LazyBadge = dynamic(() => import('./my_badge'));
+ *
+ * chrome.setBreadcrumbsAppendExtension({ content: <LazyBadge />, order: 10 });
+ * ```
+ *
+ * @public
+ */
 export interface ChromeBreadcrumbsAppendExtension {
-  content: MountPoint<HTMLDivElement>;
+  content: ChromeExtensionContent<HTMLDivElement>;
   /** The order in which the extension should be appended to the breadcrumbs. Default is 50 */
   order?: number;
 }

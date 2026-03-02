@@ -8,12 +8,12 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
-  mount: MountPoint;
+  mount: ChromeExtensionContent;
 }
 
 /** @public */
@@ -28,13 +28,22 @@ export interface ChromeHelpMenuLink {
  * {@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.
  *
  * @example
- * Register a left-side nav control rendered with React.
- * ```jsx
+ * Register a lazy-loaded nav control (recommended — encourages bundle splitting):
+ * ```tsx
+ * import { dynamic } from '@kbn/shared-ux-utility';
+ *
+ * const LazyMyControl = dynamic(() => import('./my_control'));
+ *
  * chrome.navControls.registerLeft({
- *   mount(targetDomElement) {
- *     ReactDOM.mount(<MyControl />, targetDomElement);
- *     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
- *   }
+ *   mount: <LazyMyControl />,
+ * })
+ * ```
+ *
+ * @example
+ * Register a lightweight nav control inline (no lazy loading needed):
+ * ```tsx
+ * chrome.navControls.registerLeft({
+ *   mount: <MySmallControl />,
  * })
  * ```
  *

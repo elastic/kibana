@@ -8,20 +8,33 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useRef, useEffect } from 'react';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import React, { useRef, useEffect, Suspense, type CSSProperties } from 'react';
+import { isMountPoint, type ChromeExtensionContent } from '@kbn/core-mount-utils-browser';
 
 interface Props {
-  extension?: MountPoint<HTMLDivElement>;
+  extension?: ChromeExtensionContent<HTMLDivElement>;
   display?: 'block' | 'inlineBlock';
   containerClassName?: string;
 }
 
-export const HeaderExtension = ({ extension, display, containerClassName }: Props) => {
+interface MountPointBridgeProps {
+  extension: (element: HTMLDivElement) => () => void;
+  style?: CSSProperties;
+  containerClassName?: string;
+}
+
+const mountPointContainerCss = css`
+  &:empty {
+    // empty containers should be removed from the layout flow
+    display: contents;
+  }
+`;
+
+const MountPointBridge = ({ extension, style, containerClassName }: MountPointBridgeProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!ref.current || !extension) return;
+    if (!ref.current) return;
     const unrender = extension(ref.current);
     return () => {
       unrender?.();
@@ -29,16 +42,27 @@ export const HeaderExtension = ({ extension, display, containerClassName }: Prop
   }, [extension]);
 
   return (
-    <div
-      css={css`
-        &:empty {
-          // empty containers should be removed from the layout flow
-          display: contents;
-        }
-      `}
-      ref={ref}
-      className={containerClassName}
-      style={{ display: display === 'inlineBlock' ? 'inline-block' : undefined }}
-    />
+    <div css={mountPointContainerCss} ref={ref} className={containerClassName} style={style} />
+  );
+};
+
+export const HeaderExtension = ({ extension, display, containerClassName }: Props) => {
+  if (!extension) return null;
+
+  const style: CSSProperties | undefined =
+    display === 'inlineBlock' ? { display: 'inline-block' } : undefined;
+
+  if (!isMountPoint(extension)) {
+    return (
+      <Suspense fallback={null}>
+        <div className={containerClassName} style={style}>
+          {extension}
+        </div>
+      </Suspense>
+    );
+  }
+
+  return (
+    <MountPointBridge extension={extension} containerClassName={containerClassName} style={style} />
   );
 };

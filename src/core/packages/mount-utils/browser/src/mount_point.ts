@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
+
 /**
  * A function that should mount DOM content inside the provided container element
  * and return a handler to unmount it.
@@ -25,3 +27,20 @@ export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => Un
  * @public
  */
 export type UnmountCallback = () => void;
+
+/**
+ * A union type representing either a React node (preferred) or a legacy {@link MountPoint}.
+ * Use `ReactNode` for new code; `MountPoint` is supported for backward compatibility.
+ *
+ * @public
+ */
+export type ChromeExtensionContent<T extends HTMLElement = HTMLElement> = ReactNode | MountPoint<T>;
+
+/**
+ * Returns `true` if the given `ChromeExtensionContent` is a {@link MountPoint} (legacy imperative API).
+ *
+ * @public
+ */
+export const isMountPoint = <T extends HTMLElement = HTMLElement>(
+  content: ChromeExtensionContent<T>
+): content is MountPoint<T> => typeof content === 'function';
