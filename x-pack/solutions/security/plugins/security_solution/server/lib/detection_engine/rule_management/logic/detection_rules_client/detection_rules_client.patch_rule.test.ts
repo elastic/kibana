@@ -438,7 +438,6 @@ describe('DetectionRulesClient.patchRule', () => {
                 },
               ],
             },
-            { field: 'ruleSource', operation: 'set', value: { type: 'internal' } },
           ],
         })
       );
