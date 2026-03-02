@@ -175,6 +175,18 @@ After migration, run the `scout-best-practices-reviewer` skill against the new t
 - **Timeline UI** lives in the `security_solution` plugin (`public/timelines/`), not the `timelines` plugin. The `timelines` plugin only contains server-side saved object definitions and APIs. Scout tests for timeline UI belong in `security_solution/test/scout/`.
 - **Timeline `deleteAll()`** must delete both timelines and templates — they share the same API but require separate fetch calls filtered by `timeline_type`.
 
+## Skill improvement
+
+After every migration, check if you learned something new that should be captured. In addition to the general skill's Phase 4 checklist, suggest updates to this skill if:
+
+- **New Security API service** — a new `apiServices` method was created (update the API services table)
+- **New Security role convenience method** — a new `loginAs*` method was added (update the roles table)
+- **Security-specific ownership insight** — learned which plugin owns UI vs API for a feature (update Ownership notes)
+- **New cleanup requirement** — discovered a Security resource type that needs explicit cleanup (update Data cleanup section)
+- **New review checklist item** — found a Security-specific pattern that should be verified during review
+
+Prompt the user: _"During this migration I learned [X]. Want me to add it to the Security Solution skill so future migrations benefit?"_
+
 ## Common mistakes (Security-specific)
 
 - Using `@kbn/scout` instead of `@kbn/scout-security` for Security Solution tests

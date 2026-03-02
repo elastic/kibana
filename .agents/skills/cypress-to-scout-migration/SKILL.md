@@ -235,6 +235,19 @@ After the Scout test is verified:
 - Using `fill()` on Kibana query bars — `QueryStringInput` submits React props, not DOM value; use `pressSequentially()` (see best practices)
 - Asserting `.euiTableRow` count as 0 — `EuiBasicTable` always renders an empty-state row; assert on the message text instead
 
+## Phase 4: Skill improvement
+
+After every migration, review what you learned and suggest updating this skill if any of these apply:
+
+- **New Kibana/EUI component interaction pattern** — a component required a non-obvious Playwright approach (e.g., `pressSequentially` for query bars, `dispatchEvent` for unstable popovers, CSS `:has()` for tooltip anchors)
+- **New flakiness pattern** — a Cypress pattern caused flakiness in Scout that isn't already in `references/flakiness-risk-patterns.md`
+- **New API service or page object** — reusable infrastructure was created that should be documented in the solution-specific skill
+- **New role or auth method** — a convenience login method was added (e.g., `loginAsT1Analyst`)
+- **Lint rule workaround** — a Playwright lint rule required a non-obvious alternative (e.g., `dispatchEvent` instead of `force: true`, `toContainText([...])` instead of `nth()`)
+- **Ownership or architecture insight** — learned where UI code lives, which plugin owns what, or how data flows
+
+Prompt the user: _"During this migration I learned [X]. Want me to add it to the skill so future migrations benefit?"_
+
 ## References
 
 Open only what you need:
