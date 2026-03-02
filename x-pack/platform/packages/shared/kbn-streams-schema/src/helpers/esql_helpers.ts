@@ -110,10 +110,7 @@ export function getFromSources(esql: string): string[] {
  * string unchanged when there is no FROM clause or no source was
  * modified.
  */
-export function rewriteFromSources(
-  esql: string,
-  transform: (index: string) => string
-): string {
+export function rewriteFromSources(esql: string, transform: (index: string) => string): string {
   const { root } = Parser.parse(esql);
 
   const fromCmd = root.commands.find(
@@ -144,10 +141,6 @@ export function rewriteFromSources(
   if (!modified) return esql;
 
   const updatedFrom = { ...fromCmd, args: updatedArgs };
-  const updatedCommands = root.commands.map((cmd) =>
-    cmd === fromCmd ? updatedFrom : cmd
-  );
-  return BasicPrettyPrinter.print(
-    Builder.expression.query(updatedCommands as ESQLCommand[])
-  );
+  const updatedCommands = root.commands.map((cmd) => (cmd === fromCmd ? updatedFrom : cmd));
+  return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
 }
