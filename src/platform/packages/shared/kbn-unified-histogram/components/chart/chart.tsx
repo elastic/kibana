@@ -292,13 +292,11 @@ export function UnifiedHistogramChart({
         toolbarCss={chartToolbarCss}
         toolbar={{
           toggleActions: toolbarToggleActions,
-          leftSide: chartSectionTitle
-            ? [
-                <EuiText size="s">
-                  <strong>{chartSectionTitle}</strong>
-                </EuiText>,
-              ]
-            : undefined,
+          leftSide: chartSectionTitle ? (
+            <EuiText size="s">
+              <strong>{chartSectionTitle}</strong>
+            </EuiText>
+          ) : undefined,
         }}
       />
     );

@@ -70,7 +70,7 @@ export const DiscoverHistogramLayout = ({
 
         ${hideDataTable
           ? css`
-              .kbnResizableLayout__resizeButton {
+              [data-test-subj='unifiedHistogramResizableButton'] {
                 pointer-events: none;
                 cursor: default;
               }

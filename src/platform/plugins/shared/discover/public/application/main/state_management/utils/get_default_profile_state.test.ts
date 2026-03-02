@@ -88,7 +88,7 @@ describe('getDefaultProfileState', () => {
       expect(appState).toEqual(undefined);
     });
 
-    it('should expand both chart and table when profile does not define hideChart/hideDataTable (e.g. transitioning from metrics to non-metrics)', () => {
+    it('should apply profile default for hideChart and hideDataTable when resetting', () => {
       const appState = getDefaultProfileState({
         scopedProfilesManager,
         resetDefaultProfileState: {
@@ -102,6 +102,7 @@ describe('getDefaultProfileState', () => {
         dataView: emptyDataView,
       }).getPreFetchState();
 
+      // Mock profile returns hideChart: true; hideDataTable is undefined so fallback is false
       expect(appState).toMatchObject({
         hideChart: true,
         hideDataTable: false,
