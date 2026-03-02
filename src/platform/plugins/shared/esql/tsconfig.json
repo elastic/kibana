@@ -46,6 +46,7 @@
     "@kbn/core-http-server",
     "@kbn/management-settings-ids",
     "@kbn/es-types",
+    "@kbn/agent-builder-genai-utils",
   ],
   "exclude": [
     "target/**/*",
