@@ -136,6 +136,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/synthtrace-client'
   - '@kbn/cps-utils'
+  - '@kbn/es-types'
 tags:
   - plugin
   - prod
