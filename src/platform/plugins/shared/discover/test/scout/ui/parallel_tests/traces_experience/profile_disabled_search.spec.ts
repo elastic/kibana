@@ -19,7 +19,7 @@ import {
 spaceTest.describe(
   'Traces in Discover - Profile disabled (Search solution)',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.search],
+    tag: tags.stateful.all,
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
