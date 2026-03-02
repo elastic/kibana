@@ -14,6 +14,7 @@ import {
   breakdownMetricAttributes,
   complexMetricAttributes,
   breakdownMetricWithFormulaRefColumnsAttributes,
+  trendlineMetricAttributes,
 } from './lens_state_config.mock';
 import {
   simpleMetricAPIAttributes,
@@ -21,6 +22,9 @@ import {
   complexMetricAPIAttributes,
   complexESQLMetricAPIAttributes,
   metricAPIWithTermsRankedBySecondary,
+  trendlineMetricAPIAttributes,
+  trendlineWithSecondaryMetricAPIAttributes,
+  trendlineWithBreakdownMetricAPIAttributes,
 } from './lens_api_config.mock';
 
 describe('Metric', () => {
@@ -35,6 +39,10 @@ describe('Metric', () => {
 
     it('should convert a breakdown-by metric', () => {
       validateConverter(breakdownMetricAttributes, metricStateSchema);
+    });
+
+    it('should convert a metric with trendline', () => {
+      validateConverter(trendlineMetricAttributes, metricStateSchema);
     });
   });
   describe('validateAPIConverter', () => {
@@ -56,6 +64,18 @@ describe('Metric', () => {
 
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
       validateAPIConverter(metricAPIWithTermsRankedBySecondary, metricStateSchema);
+    });
+
+    it('should convert a metric with trendline', () => {
+      validateAPIConverter(trendlineMetricAPIAttributes, metricStateSchema);
+    });
+
+    it('should convert a metric with trendline and secondary metric', () => {
+      validateAPIConverter(trendlineWithSecondaryMetricAPIAttributes, metricStateSchema);
+    });
+
+    it('should convert a metric with trendline and breakdown', () => {
+      validateAPIConverter(trendlineWithBreakdownMetricAPIAttributes, metricStateSchema);
     });
   });
 

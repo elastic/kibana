@@ -177,3 +177,67 @@ export const metricAPIWithTermsRankedBySecondary = {
     },
   },
 } as MetricState;
+
+export const trendlineMetricAPIAttributes = {
+  type: 'metric',
+  title: 'Metric - Trendline',
+  description: 'Metric with trendline background chart',
+  dataset: { type: 'dataView', id: 'testId' },
+  metrics: [
+    {
+      type: 'primary',
+      operation: 'count',
+      empty_as_null: true,
+      background_chart: {
+        type: 'trend',
+        time_field: 'timestamp',
+      },
+    },
+  ],
+} as MetricState;
+
+export const trendlineWithSecondaryMetricAPIAttributes = {
+  type: 'metric',
+  title: 'Metric - Trendline with Secondary',
+  description: 'Metric with trendline and secondary metric',
+  dataset: { type: 'dataView', id: 'testId' },
+  metrics: [
+    {
+      type: 'primary',
+      operation: 'count',
+      empty_as_null: true,
+      background_chart: {
+        type: 'trend',
+        time_field: 'timestamp',
+      },
+    },
+    {
+      type: 'secondary',
+      operation: 'average',
+      field: 'bytes',
+    },
+  ],
+} as MetricState;
+
+export const trendlineWithBreakdownMetricAPIAttributes = {
+  type: 'metric',
+  title: 'Metric - Trendline with Breakdown',
+  description: 'Metric with trendline and breakdown',
+  dataset: { type: 'dataView', id: 'testId' },
+  metrics: [
+    {
+      type: 'primary',
+      operation: 'count',
+      empty_as_null: true,
+      background_chart: {
+        type: 'trend',
+        time_field: 'timestamp',
+      },
+    },
+  ],
+  breakdown_by: {
+    operation: 'terms',
+    fields: ['extension.keyword'],
+    size: 5,
+  },
+} as MetricState;

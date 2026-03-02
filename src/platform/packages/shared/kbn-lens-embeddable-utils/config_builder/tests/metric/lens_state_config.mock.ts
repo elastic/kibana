@@ -10,6 +10,7 @@
 import type {
   AvgIndexPatternColumn,
   CountIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   MedianIndexPatternColumn,
@@ -489,4 +490,114 @@ export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
+};
+
+/**
+ * Metric with trendline generated from kibana
+ */
+export const trendlineMetricAttributes: LensAttributes = {
+  title: 'Metric - Trendline',
+  description: 'Metric with trendline background chart',
+  visualizationType: 'lnsMetric',
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-29b51bd9-2fdc-43ff-ad5b-84361c410ff8',
+    },
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-77aaea1d-fb58-42d2-bb5c-b7ac363316dd',
+    },
+  ],
+  state: {
+    visualization: {
+      layerId: '29b51bd9-2fdc-43ff-ad5b-84361c410ff8',
+      layerType: 'data',
+      metricAccessor: 'ede0ece3-1093-4110-8672-ecf7e1724ccb',
+      showBar: false,
+      applyColorTo: 'background',
+      trendlineLayerId: '77aaea1d-fb58-42d2-bb5c-b7ac363316dd',
+      trendlineLayerType: 'metricTrendline',
+      trendlineTimeAccessor: 'ce401516-4d0c-42d0-a2c6-e13a58c17820',
+      trendlineMetricAccessor: '271f4e55-845f-4d4d-87ec-ea61df913678',
+      secondaryTrend: {
+        type: 'none',
+      },
+      secondaryLabelPosition: 'before',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '29b51bd9-2fdc-43ff-ad5b-84361c410ff8': {
+            columns: {
+              'ede0ece3-1093-4110-8672-ecf7e1724ccb': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  emptyAsNull: true,
+                },
+              } as CountIndexPatternColumn,
+            },
+            columnOrder: ['ede0ece3-1093-4110-8672-ecf7e1724ccb'],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+          '77aaea1d-fb58-42d2-bb5c-b7ac363316dd': {
+            linkToLayers: ['29b51bd9-2fdc-43ff-ad5b-84361c410ff8'],
+            columns: {
+              'ce401516-4d0c-42d0-a2c6-e13a58c17820': {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              '271f4e55-845f-4d4d-87ec-ea61df913678': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  emptyAsNull: true,
+                },
+              } as CountIndexPatternColumn,
+            },
+            columnOrder: [
+              'ce401516-4d0c-42d0-a2c6-e13a58c17820',
+              '271f4e55-845f-4d4d-87ec-ea61df913678',
+            ],
+            sampling: 1,
+            ignoreGlobalFilters: false,
+            incompleteColumns: {},
+          },
+        },
+      },
+      // @ts-expect-error
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: 2,
 };

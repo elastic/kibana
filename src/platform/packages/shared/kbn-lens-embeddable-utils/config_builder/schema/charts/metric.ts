@@ -72,6 +72,7 @@ export const complementaryVizSchemaNoESQL = schema.oneOf([
   }),
   schema.object({
     type: schema.literal('trend'),
+    time_field: schema.string({ meta: { description: 'Time field for trend chart' } }),
   }),
 ]);
 

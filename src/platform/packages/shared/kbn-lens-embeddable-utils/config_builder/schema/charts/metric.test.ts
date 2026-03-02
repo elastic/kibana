@@ -498,6 +498,7 @@ describe('Metric Schema', () => {
             },
             background_chart: {
               type: 'trend',
+              time_field: '@timestamp',
             },
           },
           {

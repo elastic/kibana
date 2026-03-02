@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   LENS_METRIC_STATE_DEFAULTS,
@@ -35,7 +36,10 @@ import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type { MetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
-import type { LensApiBucketOperations } from '../../schema/bucket_ops';
+import type {
+  LensApiBucketOperations,
+  LensApiDateHistogramOperation,
+} from '../../schema/bucket_ops';
 import { generateLayer } from '../utils';
 import type {
   MetricStateESQL,
@@ -276,12 +280,20 @@ function buildFromTextBasedLayer(
 
 function buildFromFormBasedLayer(
   layer: PersistedIndexPatternLayer,
+  trendlineLayer: PersistedIndexPatternLayer | undefined,
   metricAccessor: string,
   visualization: MetricVisualizationState
 ): WritableMetricStateWithoutDataset {
   const metric = operationFromColumn(metricAccessor, layer);
   if (!metric || !isAPIColumnOfMetricType(metric)) {
     throw Error('The primary metric must refer to a metric operation.');
+  }
+
+  let trendlineTimeField: string | undefined;
+  if (trendlineLayer && visualization.trendlineTimeAccessor) {
+    const trendlineTimeColumn = trendlineLayer.columns[visualization.trendlineTimeAccessor];
+    trendlineTimeField = (trendlineTimeColumn as DateHistogramIndexPatternColumn | undefined)
+      ?.sourceField;
   }
 
   const maxValue = visualization.maxAccessor
@@ -347,13 +359,15 @@ function buildFromFormBasedLayer(
           }
         : {}),
     },
-    visualization
+    visualization,
+    trendlineTimeField
   );
 }
 
 function enrichConfigurationWithVisualizationProperties(
   state: WritableMetricStateWithoutDataset,
-  visualization: MetricVisualizationState
+  visualization: MetricVisualizationState,
+  trendlineTimeField?: string
 ): WritableMetricStateWithoutDataset {
   const [primaryMetric, secondaryMetric] = state.metrics;
 
@@ -368,8 +382,8 @@ function enrichConfigurationWithVisualizationProperties(
       primaryMetric.sub_label = visualization.subtitle;
     }
 
-    if (visualization.trendlineLayerType) {
-      primaryMetric.background_chart = { ...primaryMetric.background_chart, type: 'trend' };
+    if (visualization.trendlineLayerType && trendlineTimeField) {
+      primaryMetric.background_chart = { type: 'trend', time_field: trendlineTimeField };
     }
 
     if (visualization.color) {
@@ -461,6 +475,7 @@ function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
   layer: PersistedIndexPatternLayer | TextBasedLayer,
   layerId: string,
+  trendlineLayer: PersistedIndexPatternLayer | undefined,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
@@ -480,7 +495,7 @@ function reverseBuildVisualizationState(
     dataset: dataset satisfies MetricState['dataset'],
     ...(isTextBasedLayer(layer)
       ? buildFromTextBasedLayer(layer, metricAccessor, visualization)
-      : buildFromFormBasedLayer(layer, metricAccessor, visualization)),
+      : buildFromFormBasedLayer(layer, trendlineLayer, metricAccessor, visualization)),
   } as MetricState;
 }
 
@@ -490,6 +505,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
     throw Error('The primary metric must refer to a metric operation.');
   }
   const newPrimaryColumns = fromMetricAPItoLensState(primaryMetric);
+
   const newSecondaryColumns = secondaryMetric
     ? fromMetricAPItoLensState(secondaryMetric)
     : undefined;
@@ -502,16 +518,26 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
   };
 
   const defaultLayer = layers[DEFAULT_LAYER_ID];
-  const trendLineLayer = layers[TRENDLINE_LAYER_ID];
+  const trendlineLayer = layers[TRENDLINE_LAYER_ID];
 
-  if (trendLineLayer) {
-    trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
+  if (trendlineLayer) {
+    trendlineLayer.linkToLayers = [DEFAULT_LAYER_ID];
   }
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), newPrimaryColumns);
-  if (trendLineLayer) {
-    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
-    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, newPrimaryColumns);
+
+  if (trendlineLayer && primaryMetric.background_chart?.type === 'trend') {
+    const op: LensApiDateHistogramOperation = {
+      field: primaryMetric.background_chart.time_field,
+      operation: 'date_histogram',
+      include_empty_rows: true,
+      suggested_interval: 'auto',
+      use_original_time_range: false,
+    };
+    const trendlineColumn = fromBucketLensApiToLensState(op, []);
+
+    addLayerColumn(trendlineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
+    addLayerColumn(trendlineLayer, HISTOGRAM_COLUMN_NAME, trendlineColumn, true);
   }
 
   if (layer.breakdown_by) {
@@ -528,16 +554,17 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
     );
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
-    if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, breakdownColumn, true);
+    if (trendlineLayer) {
+      addLayerColumn(trendlineLayer, `${columnName}_trendline`, breakdownColumn, true);
     }
   }
 
   if (newSecondaryColumns?.length) {
     const columnName = getAccessorName('secondary');
     addLayerColumn(defaultLayer, columnName, newSecondaryColumns);
-    if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newSecondaryColumns, false, 'X0');
+
+    if (trendlineLayer) {
+      addLayerColumn(trendlineLayer, `${columnName}_trendline`, newSecondaryColumns);
     }
   }
 
@@ -546,9 +573,6 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
     const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.max_value);
 
     addLayerColumn(defaultLayer, columnName, newColumn);
-    if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newColumn, false, 'X0');
-    }
   }
 
   return layers;
@@ -603,8 +627,14 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
   const regularDataViews = Object.values(usedDataviews).filter(
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
+  const hasTrendline =
+    isPrimaryMetric(config.metrics[0]) && config.metrics[0]?.background_chart?.type === 'trend';
+
   const references = regularDataViews.length
-    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({
+        [DEFAULT_LAYER_ID]: regularDataViews[0]?.id,
+        ...(hasTrendline ? { [TRENDLINE_LAYER_ID]: regularDataViews[0]?.id } : {}),
+      })
     : [];
 
   return {
@@ -625,6 +655,9 @@ export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const visualization = state.visualization as MetricVisualizationState;
   const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
+  const trendlineLayer = visualization.trendlineLayerId
+    ? layers[visualization.trendlineLayerId]
+    : undefined;
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
@@ -632,6 +665,11 @@ export function fromLensStateToAPI(config: LensAttributes): MetricState {
       visualization,
       layer,
       layerId ?? DEFAULT_LAYER_ID,
+      trendlineLayer &&
+        // this is mostly a type-guard... trendlines are only supported for form based metric visualizations
+        !isTextBasedLayer(trendlineLayer)
+        ? trendlineLayer
+        : undefined,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences
