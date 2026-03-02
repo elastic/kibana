@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/dashboard-markdown'
   - '@kbn/management-settings-ids'
+  - '@kbn/lens-plugin'
 tags:
   - plugin
   - prod
