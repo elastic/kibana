@@ -72,7 +72,7 @@ export const DataSourcesView: React.FC = () => {
     <>
       {connectors.length === 0 ? (
         <EuiEmptyPrompt
-          iconType="search"
+          iconType="magnify"
           title={
             <h2>
               {i18n.translate('xpack.dataSources.connectors.noResults', {
