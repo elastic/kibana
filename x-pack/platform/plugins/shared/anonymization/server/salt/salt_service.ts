@@ -14,6 +14,7 @@ export const ANONYMIZATION_SALT_SAVED_OBJECT_TYPE = 'anonymization-salt';
 
 /** Length of generated salt in bytes (32 bytes = 256 bits). */
 const SALT_LENGTH_BYTES = 32;
+const REPLACEMENTS_ENCRYPTION_KEY_LENGTH_BYTES = 32;
 const SALT_ID_NAMESPACE = uuidv5.DNS;
 
 const getSaltSavedObjectId = (namespace: string): string =>
@@ -21,6 +22,7 @@ const getSaltSavedObjectId = (namespace: string): string =>
 
 interface SaltAttributes {
   salt: string;
+  replacementsEncryptionKey?: string;
 }
 
 /**
@@ -40,6 +42,22 @@ export class SaltService {
    * The salt is stored as an encrypted saved object keyed by a deterministic UUID per namespace.
    */
   async getSalt(namespace: string): Promise<string> {
+    const keyMaterial = await this.getOrCreateKeyMaterial(namespace);
+    return keyMaterial.salt;
+  }
+
+  /**
+   * Gets the per-space replacements encryption key, creating it if it doesn't exist.
+   * Stored with the same hidden encrypted SO as salt material.
+   */
+  async getReplacementsEncryptionKey(namespace: string): Promise<string> {
+    const keyMaterial = await this.getOrCreateKeyMaterial(namespace);
+    return keyMaterial.replacementsEncryptionKey;
+  }
+
+  private async getOrCreateKeyMaterial(
+    namespace: string
+  ): Promise<{ salt: string; replacementsEncryptionKey: string }> {
     const id = getSaltSavedObjectId(namespace);
     const soNamespace = namespace === 'default' ? undefined : namespace;
 
@@ -55,11 +73,24 @@ export class SaltService {
         { namespace: soNamespace }
       );
 
-      return attributes.salt;
+      if (attributes.replacementsEncryptionKey) {
+        return {
+          salt: attributes.salt,
+          replacementsEncryptionKey: attributes.replacementsEncryptionKey,
+        };
+      }
+
+      const replacementsEncryptionKey = randomBytes(
+        REPLACEMENTS_ENCRYPTION_KEY_LENGTH_BYTES
+      ).toString('hex');
+      await this.updateKeyMaterial(namespace, id, {
+        replacementsEncryptionKey,
+      });
+      return { salt: attributes.salt, replacementsEncryptionKey };
     } catch (err) {
       if (err?.output?.statusCode === 404 || err?.statusCode === 404) {
         // Salt doesn't exist yet — create it
-        return this.createSalt(namespace);
+        return this.createKeyMaterial(namespace);
       }
       throw err;
     }
@@ -69,9 +100,14 @@ export class SaltService {
    * Creates a new per-space salt. Idempotent: if a concurrent create
    * produced a conflict, reads and returns the existing salt.
    */
-  private async createSalt(namespace: string): Promise<string> {
+  private async createKeyMaterial(
+    namespace: string
+  ): Promise<{ salt: string; replacementsEncryptionKey: string }> {
     const id = getSaltSavedObjectId(namespace);
     const salt = randomBytes(SALT_LENGTH_BYTES).toString('hex');
+    const replacementsEncryptionKey = randomBytes(
+      REPLACEMENTS_ENCRYPTION_KEY_LENGTH_BYTES
+    ).toString('hex');
 
     const internalSoClient = this.savedObjects
       .getUnsafeInternalClient({
@@ -82,17 +118,43 @@ export class SaltService {
     try {
       await internalSoClient.create<SaltAttributes>(
         ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
-        { salt },
+        { salt, replacementsEncryptionKey },
         { id }
       );
 
       this.logger.info(`Created anonymization salt for space: ${namespace}`);
-      return salt;
+      return { salt, replacementsEncryptionKey };
     } catch (err) {
       // Handle race condition: another request created it first
       if (err?.statusCode === 409) {
         this.logger.debug(`Salt already exists for space: ${namespace}, reading existing`);
-        return this.getSalt(namespace);
+        return this.getOrCreateKeyMaterial(namespace);
+      }
+      throw err;
+    }
+  }
+
+  private async updateKeyMaterial(
+    namespace: string,
+    id: string,
+    attributes: Partial<SaltAttributes>
+  ): Promise<void> {
+    const internalSoClient = this.savedObjects
+      .getUnsafeInternalClient({
+        includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
+      })
+      .asScopedToNamespace(namespace);
+
+    try {
+      await internalSoClient.update<SaltAttributes>(
+        ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
+        id,
+        attributes
+      );
+    } catch (err) {
+      if (err?.statusCode === 409) {
+        this.logger.debug(`Salt key material update conflict in space: ${namespace}, re-reading`);
+        return;
       }
       throw err;
     }

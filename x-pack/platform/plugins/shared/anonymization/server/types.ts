@@ -48,6 +48,11 @@ export interface AnonymizationPolicyService {
    * Retrieves the per-space salt material for deterministic tokenization.
    */
   getSalt: (namespace: string) => Promise<string>;
+
+  /**
+   * Retrieves the per-space replacements encryption key material.
+   */
+  getReplacementsEncryptionKey: (namespace: string) => Promise<string>;
 }
 
 export interface AnonymizationPluginSetup {

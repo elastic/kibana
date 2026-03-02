@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getValidatedReplacementsEncryptionKey } from './plugin';
+import { getValidatedReplacementsEncryptionKey, resolveReplacementsEncryptionKey } from './plugin';
 
 describe('getValidatedReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', () => {
@@ -33,5 +33,40 @@ describe('getValidatedReplacementsEncryptionKey', () => {
         encryptionKey: 'test-key',
       })
     ).toBe('test-key');
+  });
+});
+
+describe('resolveReplacementsEncryptionKey', () => {
+  it('returns configured fallback key when anonymization is disabled', async () => {
+    await expect(
+      resolveReplacementsEncryptionKey({
+        namespace: 'default',
+        anonymizationEnabled: false,
+        configuredEncryptionKey: 'fallback-key',
+      })
+    ).resolves.toBe('fallback-key');
+  });
+
+  it('returns policy-managed key when anonymization is enabled', async () => {
+    const getReplacementsEncryptionKey = jest.fn().mockResolvedValue('managed-key');
+
+    await expect(
+      resolveReplacementsEncryptionKey({
+        namespace: 'default',
+        anonymizationEnabled: true,
+        policyService: { getReplacementsEncryptionKey },
+        configuredEncryptionKey: 'fallback-key',
+      })
+    ).resolves.toBe('managed-key');
+  });
+
+  it('falls back to configured key when policy service is unavailable', async () => {
+    await expect(
+      resolveReplacementsEncryptionKey({
+        namespace: 'default',
+        anonymizationEnabled: true,
+        configuredEncryptionKey: 'fallback-key',
+      })
+    ).resolves.toBe('fallback-key');
   });
 });

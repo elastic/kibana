@@ -193,5 +193,9 @@ export const createAnonymizationPolicyService = ({
     getSalt: async (namespace) => {
       return saltService.getSalt(namespace);
     },
+
+    getReplacementsEncryptionKey: async (namespace) => {
+      return saltService.getReplacementsEncryptionKey(namespace);
+    },
   };
 };

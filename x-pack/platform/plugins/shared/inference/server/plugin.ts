@@ -67,6 +67,30 @@ export const getValidatedReplacementsEncryptionKey = ({
   return anonymizationEnabled ? encryptionKey : undefined;
 };
 
+export const resolveReplacementsEncryptionKey = async ({
+  namespace,
+  anonymizationEnabled,
+  policyService,
+  configuredEncryptionKey,
+}: {
+  namespace: string;
+  anonymizationEnabled: boolean;
+  policyService?: {
+    getReplacementsEncryptionKey: (targetNamespace: string) => Promise<string>;
+  };
+  configuredEncryptionKey?: string;
+}): Promise<string | undefined> => {
+  if (!anonymizationEnabled) {
+    return configuredEncryptionKey;
+  }
+
+  if (policyService) {
+    return policyService.getReplacementsEncryptionKey(namespace);
+  }
+
+  return configuredEncryptionKey;
+};
+
 export class InferencePlugin
   implements
     Plugin<
@@ -106,14 +130,14 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
-    const replacementsEncryptionKey = getValidatedReplacementsEncryptionKey({
+    const configuredReplacementsEncryptionKey = getValidatedReplacementsEncryptionKey({
       anonymizationEnabled,
       encryptionKey: this.config.replacements.encryptionKey,
     });
 
     if (anonymizationEnabled) {
       this.logger.info(
-        'Persistent anonymization replacements require explicit xpack.inference.replacements.encryptionKey; requests using replacements APIs will return 400 when it is not configured'
+        'Persistent anonymization replacements key material is auto-managed per space via anonymization; xpack.inference.replacements.encryptionKey is treated as a fallback override'
       );
     }
 
@@ -165,6 +189,12 @@ export class InferencePlugin
       const namespace =
         core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
       const policyService = pluginsStart.anonymization?.getPolicyService();
+      const replacementsEncryptionKeyPromise = resolveReplacementsEncryptionKey({
+        namespace,
+        anonymizationEnabled,
+        policyService,
+        configuredEncryptionKey: configuredReplacementsEncryptionKey,
+      });
       return {
         namespace,
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
@@ -183,7 +213,7 @@ export class InferencePlugin
           },
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
-            encryptionKey: replacementsEncryptionKey,
+            encryptionKeyPromise: replacementsEncryptionKeyPromise,
             usePersistentReplacements: anonymizationEnabled,
             requireEncryptionKey: anonymizationEnabled,
           },

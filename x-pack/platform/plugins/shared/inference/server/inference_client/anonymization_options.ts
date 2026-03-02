@@ -18,6 +18,7 @@ export interface InferenceAnonymizationOptions {
   replacements?: {
     esClient?: ElasticsearchClient;
     encryptionKey?: string;
+    encryptionKeyPromise?: Promise<string | undefined>;
     usePersistentReplacements?: boolean;
     requireEncryptionKey?: boolean;
   };

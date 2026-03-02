@@ -28,6 +28,7 @@ interface PrepareAnonymizationOptions {
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
   replacementsEncryptionKey?: string;
+  replacementsEncryptionKeyPromise?: Promise<string | undefined>;
   usePersistentReplacements?: boolean;
   requireReplacementsEncryptionKey?: boolean;
   saltPromise?: Promise<string | undefined>;
@@ -47,6 +48,7 @@ export const prepareAnonymization = async ({
   esClient,
   replacementsEsClient,
   replacementsEncryptionKey,
+  replacementsEncryptionKeyPromise,
   usePersistentReplacements = true,
   requireReplacementsEncryptionKey = false,
   saltPromise,
@@ -70,22 +72,36 @@ export const prepareAnonymization = async ({
     return { anonymization, replacementsId: undefined, effectivePolicy };
   }
 
-  if (requireReplacementsEncryptionKey && !replacementsEncryptionKey) {
-    throw createInferenceRequestError(
-      'xpack.inference.replacements.encryptionKey must be configured when anonymization replacements are active',
-      400
-    );
-  }
-
   const carriedReplacementsId = metadata?.anonymization?.replacementsId;
   const replacementsClient = replacementsEsClient ?? esClient;
-  await ensureReplacementsIndex({ esClient: replacementsClient, logger });
-  const repo = new ReplacementsRepository(replacementsClient, {
-    encryptionKey: replacementsEncryptionKey,
-  });
+  let repo: ReplacementsRepository | undefined;
   let replacementsId = carriedReplacementsId;
+  let resolvedReplacementsEncryptionKey = replacementsEncryptionKey;
+
+  const getReplacementsEncryptionKey = async (): Promise<string | undefined> => {
+    if (resolvedReplacementsEncryptionKey) {
+      return resolvedReplacementsEncryptionKey;
+    }
+    resolvedReplacementsEncryptionKey = await replacementsEncryptionKeyPromise;
+    return resolvedReplacementsEncryptionKey;
+  };
+
+  if (carriedReplacementsId) {
+    const encryptionKey = await getReplacementsEncryptionKey();
+    if (requireReplacementsEncryptionKey && !encryptionKey) {
+      throw createInferenceRequestError(
+        'xpack.inference.replacements.encryptionKey must be configured when anonymization replacements are active',
+        400
+      );
+    }
+    await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+    repo = new ReplacementsRepository(replacementsClient, {
+      encryptionKey,
+    });
+  }
+
   let existingReplacements = carriedReplacementsId
-    ? await repo.get(namespace, carriedReplacementsId)
+    ? await repo?.get(namespace, carriedReplacementsId)
     : null;
   if (carriedReplacementsId && !existingReplacements) {
     // Recover by allocating a new doc ID when caller carries a stale/unknown one.
@@ -113,7 +129,22 @@ export const prepareAnonymization = async ({
     return { anonymization, replacementsId: undefined, effectivePolicy };
   }
 
+  const encryptionKey = await getReplacementsEncryptionKey();
+  if (requireReplacementsEncryptionKey && !encryptionKey) {
+    throw createInferenceRequestError(
+      'xpack.inference.replacements.encryptionKey must be configured when anonymization replacements are active',
+      400
+    );
+  }
+
   replacementsId ??= uuidv4();
+
+  if (!repo) {
+    await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+    repo = new ReplacementsRepository(replacementsClient, {
+      encryptionKey,
+    });
+  }
 
   if (existingReplacements) {
     const updated = await repo.update(namespace, replacementsId, { replacements });

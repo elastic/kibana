@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   replaceTokensWithOriginals,
   type DeanonymizeWithReplacementsRequestBody,
@@ -14,6 +15,7 @@ import {
 import { apiPrivileges } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
+import type { InferenceServerStart, InferenceStartDependencies } from '../../../types';
 
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
@@ -39,13 +41,46 @@ const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void
 const INDEX_ENSURE_CACHE_MS = 60_000;
 let replacementsIndexEnsuredAt = 0;
 
+const resolveEncryptionKey = async ({
+  coreSetup,
+  request,
+  namespace,
+  configuredEncryptionKey,
+}: {
+  coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
+  request: KibanaRequest;
+  namespace: string;
+  configuredEncryptionKey?: string;
+}): Promise<string | undefined> => {
+  const [, pluginsStart] = await coreSetup.getStartServices();
+  const anonymizationPlugin = pluginsStart.anonymization;
+  const anonymizationEnabled = anonymizationPlugin?.isEnabled() ?? false;
+
+  if (!anonymizationEnabled) {
+    return configuredEncryptionKey;
+  }
+
+  return anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
+};
+
 const resolveReplacementsContext = async (
   context: RequestHandlerContext,
-  options: { encryptionKey?: string; logger: Logger }
+  request: KibanaRequest,
+  options: {
+    coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
+    encryptionKey?: string;
+    logger: Logger;
+  }
 ) => {
-  assertReplacementsEncryptionKeyConfigured(options.encryptionKey);
   const coreContext = await context.core;
   const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
+  const encryptionKey = await resolveEncryptionKey({
+    coreSetup: options.coreSetup,
+    request,
+    namespace,
+    configuredEncryptionKey: options.encryptionKey,
+  });
+  assertReplacementsEncryptionKeyConfigured(encryptionKey);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   if (Date.now() - replacementsIndexEnsuredAt > INDEX_ENSURE_CACHE_MS) {
@@ -53,7 +88,7 @@ const resolveReplacementsContext = async (
     replacementsIndexEnsuredAt = Date.now();
   }
 
-  const repo = new ReplacementsRepository(esClient, options);
+  const repo = new ReplacementsRepository(esClient, { encryptionKey });
   return { namespace, repo };
 };
 
@@ -61,6 +96,7 @@ export const registerReplacementsRoutes = (
   router: IRouter,
   logger: Logger,
   options: {
+    coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
     encryptionKey?: string;
   }
 ): void => {
@@ -86,7 +122,7 @@ export const registerReplacementsRoutes = (
       },
       async (context, request, response) => {
         try {
-          const { namespace, repo } = await resolveReplacementsContext(context, {
+          const { namespace, repo } = await resolveReplacementsContext(context, request, {
             ...options,
             logger,
           });
@@ -139,7 +175,7 @@ export const registerReplacementsRoutes = (
       async (context, request, response) => {
         try {
           const body = request.body as DeanonymizeWithReplacementsRequestBody;
-          const { namespace, repo } = await resolveReplacementsContext(context, {
+          const { namespace, repo } = await resolveReplacementsContext(context, request, {
             ...options,
             logger,
           });

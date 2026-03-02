@@ -29,5 +29,8 @@ export const registerRoutes = ({
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerPromptRoute({ router, coreSetup, logger: logger.get('prompt') });
   registerConnectorsRoute({ router, coreSetup });
-  registerReplacementsRoutes(router, logger.get('replacements'), replacements);
+  registerReplacementsRoutes(router, logger.get('replacements'), {
+    coreSetup,
+    ...replacements,
+  });
 };

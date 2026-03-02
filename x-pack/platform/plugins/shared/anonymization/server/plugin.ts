@@ -43,6 +43,7 @@ export interface AnonymizationStartDeps {
 
 const anonymizationSaltSchemaV1 = schema.object({
   salt: schema.string(),
+  replacementsEncryptionKey: schema.maybe(schema.string()),
 });
 
 export class AnonymizationPlugin
@@ -94,7 +95,7 @@ export class AnonymizationPlugin
 
     deps.encryptedSavedObjects.registerType({
       type: ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['salt']),
+      attributesToEncrypt: new Set(['salt', 'replacementsEncryptionKey']),
     });
 
     return {
