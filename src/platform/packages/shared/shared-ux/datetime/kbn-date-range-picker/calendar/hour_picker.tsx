@@ -7,38 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { Hour } from './hour';
 import { hourPickerStyles } from './hour_picker.styles';
 
 interface HourPickerProps {
-  hour: number;
-  onHourChange: (hour: number) => void;
+  selectedHour: string | undefined;
+  onHourChange: (hour: string) => void;
 }
 
-// TODO: move to utils
 const HOURS_IN_DAY = 24;
 const HOURS = Array.from({ length: HOURS_IN_DAY * 2 }, (_, index) => {
-  if (index % 2 === 0) {
-    return `${index / 2}:00`;
-  } else {
-    return `${(index - 1) / 2}:30`;
-  }
+  const hour = Math.floor(index / 2);
+  const minute = index % 2 === 0 ? '00' : '30';
+  return `${hour}:${minute}`;
 });
 
-// TODO: handle interaction and state
-export function HourPicker({ hour, onHourChange }: HourPickerProps) {
+export function HourPicker({ selectedHour, onHourChange }: HourPickerProps) {
   const euiThemeContext = useEuiTheme();
   const styles = hourPickerStyles(euiThemeContext);
-
-  const [selectedHour, setSelectedHour] = useState<string>();
 
   return (
     <div css={styles.container}>
       {HOURS.map((h) => (
-        <Hour key={h} onClick={() => setSelectedHour(h)}>
+        <Hour key={h} onClick={() => onHourChange(h)} isSelected={h === selectedHour}>
           {h}
         </Hour>
       ))}

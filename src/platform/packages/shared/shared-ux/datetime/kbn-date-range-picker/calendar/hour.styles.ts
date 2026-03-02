@@ -10,10 +10,30 @@
 import { css } from '@emotion/react';
 import { type UseEuiTheme } from '@elastic/eui';
 
-export const hourStyles = (euiThemeContext: UseEuiTheme) => {
+export const hourStyles = (euiThemeContext: UseEuiTheme, isSelected: boolean) => {
   const { euiTheme } = euiThemeContext;
 
-  const button = css``;
+  const button = css`
+    display: block;
+    width: 100%;
+    padding: ${euiTheme.size.xs};
+    border: none;
+    background: ${isSelected ? euiTheme.colors.primary : 'transparent'};
+    color: ${isSelected ? euiTheme.colors.ghost : euiTheme.colors.text};
+    text-align: left;
+    cursor: pointer;
+    font-size: ${euiTheme.size.m};
+    transition: background-color ${euiTheme.animation.fast} ease-in-out;
+
+    &:hover {
+      background: ${isSelected ? euiTheme.colors.primary : euiTheme.colors.lightestShade};
+    }
+
+    &:focus {
+      outline: 2px solid ${euiTheme.colors.primary};
+      outline-offset: -2px;
+    }
+  `;
 
   return { button };
 };

@@ -11,12 +11,21 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const calendarStyles = ({ euiTheme }: UseEuiTheme) => {
-  // TODO: replace pixels
   const container = css`
-    max-height: 394px;
+    position: relative;
+    height: 394px;
     flex-grow: 1;
     border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
   `;
 
-  return { container };
+  const todayButton = css`
+    position: absolute;
+    bottom: ${euiTheme.size.s};
+    left: 50%;
+    transform: translateX(-50%);
+    background: ${euiTheme.colors.emptyShade};
+    box-shadow: ${euiTheme.levels.menu};
+  `;
+
+  return { container, todayButton };
 };

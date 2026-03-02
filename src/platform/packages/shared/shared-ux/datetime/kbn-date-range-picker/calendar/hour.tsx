@@ -8,22 +8,34 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { useEuiTheme } from '@elastic/eui';
-
-import { hourStyles } from './hour.styles';
+import { css } from '@emotion/react';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 interface HourProps {
   children: ReactNode;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
-export function Hour({ children, onClick }: HourProps) {
-  const euiThemeContext = useEuiTheme();
-  const styles = hourStyles(euiThemeContext);
+export function Hour({ children, onClick, isSelected = false }: HourProps) {
+  const buttonStyles = css`
+    inline-size: 100%;
+    min-block-size: 24px;
+    block-size: 24px;
+    font-size: 12px;
+  `;
+
+  if (isSelected) {
+    return (
+      <EuiButton size="s" fill color="primary" css={buttonStyles} onClick={onClick}>
+        {children}
+      </EuiButton>
+    );
+  }
 
   return (
-    <button css={styles.button} onClick={onClick}>
+    <EuiButtonEmpty size="s" css={buttonStyles} onClick={onClick}>
       {children}
-    </button>
+    </EuiButtonEmpty>
   );
 }
