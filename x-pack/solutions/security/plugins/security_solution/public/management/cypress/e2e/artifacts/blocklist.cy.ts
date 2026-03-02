@@ -224,9 +224,13 @@ describe(
         });
 
         it('Deletes a blocklist item', () => {
-          openBlocklist({ itemId });
+          openBlocklist();
           deleteBlocklistItem();
           validateSuccessPopup('delete');
+        });
+
+        after(() => {
+          removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
         });
       });
 
@@ -244,18 +248,20 @@ describe(
 
         it('Updates a match blocklist item', () => {
           openBlocklist({ itemId });
-          selectSignatureField();
           selectOperator('is one of');
-          setMultiValue();
           submitBlocklist();
           validateSuccessPopup('update');
           validateRenderedCondition(IS_ONE_OF_EXPECTED_CONDITION);
         });
 
         it('Deletes a blocklist item', () => {
-          openBlocklist({ itemId });
+          openBlocklist();
           deleteBlocklistItem();
           validateSuccessPopup('delete');
+        });
+
+        after(() => {
+          removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
         });
       });
     });
