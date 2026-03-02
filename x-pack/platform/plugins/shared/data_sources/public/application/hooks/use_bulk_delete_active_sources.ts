@@ -22,7 +22,7 @@ export const useBulkDeleteActiveSources = (onSuccess?: () => void) => {
 
   return useMutation(
     async (ids: string[]) => {
-      return await http.delete<BulkDeleteDataSourcesResponse>(BULK_DELETE_API_ROUTE, {
+      return await http.post<BulkDeleteDataSourcesResponse>(BULK_DELETE_API_ROUTE, {
         body: JSON.stringify({ ids }),
       });
     },
@@ -46,7 +46,7 @@ export const useBulkDeleteActiveSources = (onSuccess?: () => void) => {
           toasts?.addWarning({
             title: i18n.translate('xpack.dataSources.bulkDeleteActiveSources.partialSuccessToast', {
               defaultMessage:
-                '{deletedCount, plural, one {# data source} other {# data sources}} deleted, but {partialCount, plural, one {# source} other {# sources}} could not fully clean up related resources',
+                '{deletedCount, plural, =0 {} one {# data source deleted successfully, but } other {# data sources deleted successfully, but }}{partialCount, plural, one {# source} other {# sources}} still {partialCount, plural, one {has} other {have}} related resources that could not be removed',
               values: {
                 deletedCount: fullyDeleted.length,
                 partialCount: partiallyDeleted.length,

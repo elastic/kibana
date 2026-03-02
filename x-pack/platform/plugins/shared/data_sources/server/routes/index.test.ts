@@ -888,10 +888,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
-        call[0].path?.includes('{id}')
-      );
-      const routeHandler = deleteCall?.[1];
+      const routeHandler = mockRouter.delete.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -949,15 +946,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
-        call[0].path?.includes('{id}')
-      );
-      const routeHandler = deleteCall?.[1];
-
-      if (!routeHandler) {
-        throw new Error('Route handler not found for DELETE /api/data_sources/{id}');
-      }
-
+      const routeHandler = mockRouter.delete.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -984,10 +973,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
-        call[0].path?.includes('{id}')
-      );
-      const routeHandler = deleteCall?.[1];
+      const routeHandler = mockRouter.delete.mock.calls[1][1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'nonexistent' },
       });
@@ -1027,10 +1013,11 @@ describe('registerRoutes', () => {
     beforeEach(() => {
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
+      const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
         (call) => call[0].path === BULK_DELETE_API_ROUTE
       );
-      routeHandler = deleteCall?.[1];
+      expect(postCall).toBeDefined();
+      routeHandler = postCall![1];
     });
 
     it('should return results for all successfully deleted data sources', async () => {
@@ -1191,10 +1178,7 @@ describe('DELETE /api/data_sources', () => {
 
     registerRoutes(dependencies);
 
-    const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-      (call) => call[0].path === '/api/data_sources'
-    );
-    routeHandler = deleteCall?.[1];
+    routeHandler = mockRouter.delete.mock.calls[0][1];
   });
 
   describe('success', () => {

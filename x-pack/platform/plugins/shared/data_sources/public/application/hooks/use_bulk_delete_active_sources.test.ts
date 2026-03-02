@@ -15,7 +15,7 @@ import { BULK_DELETE_API_ROUTE } from '../../../common';
 jest.mock('./use_kibana');
 
 const mockHttp = {
-  delete: jest.fn(),
+  post: jest.fn(),
 };
 
 const mockToasts = {
@@ -45,7 +45,7 @@ describe('useBulkDeleteActiveSources', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    mockHttp.delete.mockClear();
+    mockHttp.post.mockClear();
     mockToasts.addSuccess.mockClear();
     mockToasts.addWarning.mockClear();
     mockToasts.addDanger.mockClear();
@@ -62,7 +62,7 @@ describe('useBulkDeleteActiveSources', () => {
 
   describe('successful deletion', () => {
     it('should call the bulk delete API with the correct parameters', async () => {
-      mockHttp.delete.mockResolvedValue({
+      mockHttp.post.mockResolvedValue({
         results: [{ id: 'ds-1', success: true, fullyDeleted: true }],
       });
 
@@ -80,7 +80,7 @@ describe('useBulkDeleteActiveSources', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockHttp.delete).toHaveBeenCalledWith(BULK_DELETE_API_ROUTE, {
+      expect(mockHttp.post).toHaveBeenCalledWith(BULK_DELETE_API_ROUTE, {
         body: JSON.stringify({ ids: ['ds-1'] }),
       });
 
@@ -90,7 +90,7 @@ describe('useBulkDeleteActiveSources', () => {
 
   describe('toast variants', () => {
     it('should show success toast when all data sources are fully deleted', async () => {
-      mockHttp.delete.mockResolvedValue({
+      mockHttp.post.mockResolvedValue({
         results: [
           { id: 'ds-1', success: true, fullyDeleted: true },
           { id: 'ds-2', success: true, fullyDeleted: true },
@@ -113,7 +113,7 @@ describe('useBulkDeleteActiveSources', () => {
     });
 
     it('should show warning toast when some data sources are partially deleted', async () => {
-      mockHttp.delete.mockResolvedValue({
+      mockHttp.post.mockResolvedValue({
         results: [
           { id: 'ds-1', success: true, fullyDeleted: true },
           { id: 'ds-2', success: true, fullyDeleted: false },
@@ -136,7 +136,7 @@ describe('useBulkDeleteActiveSources', () => {
     });
 
     it('should show danger toast when any data sources fail to delete', async () => {
-      mockHttp.delete.mockResolvedValue({
+      mockHttp.post.mockResolvedValue({
         results: [
           { id: 'ds-1', success: true, fullyDeleted: true },
           { id: 'ds-2', success: false, fullyDeleted: false, error: 'Not found' },
@@ -164,7 +164,7 @@ describe('useBulkDeleteActiveSources', () => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const serverError = { body: { message: 'Internal server error' } };
-      mockHttp.delete.mockRejectedValue(serverError);
+      mockHttp.post.mockRejectedValue(serverError);
 
       const { result } = renderHook(() => useBulkDeleteActiveSources(), { wrapper });
 

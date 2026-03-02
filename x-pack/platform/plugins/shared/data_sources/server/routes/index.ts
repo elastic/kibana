@@ -508,7 +508,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
   // Bulk delete selected data sources synchronously (inline).
   // This is intended for time being until we have a design update for asynchronous bulk deletion.
-  router.delete(
+  router.post(
     {
       path: BULK_DELETE_API_ROUTE,
       validate: {
