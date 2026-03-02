@@ -28,16 +28,22 @@ interface CRUDClientDependencies {
   namespace: string;
 }
 
-interface BulkObject {
+export interface BulkObject {
   type: EntityType;
   doc: Entity;
 }
 
-interface BulkObjectResponse {
+export interface BulkObjectResponse {
   _id: string;
   status: number;
   type: string;
   reason: string;
+}
+
+interface UpsertEntitiesBulkParams {
+  objects: BulkObject[];
+  force?: boolean;
+  timestampGenerator?: () => string;
 }
 
 export class CRUDClient {
@@ -94,15 +100,22 @@ export class CRUDClient {
   // UPDATES index for log extraction task to pick up. This will result in
   // appropriate Entities being created or updated on next log extraction run.
   // This is considered a bulk asynchronous upsert.
-  public async upsertEntitiesBulk(
-    objects: BulkObject[],
-    force: boolean
-  ): Promise<BulkObjectResponse[]> {
+  public async upsertEntitiesBulk({
+    objects,
+    force = false,
+    timestampGenerator,
+  }: UpsertEntitiesBulkParams): Promise<BulkObjectResponse[]> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
+      const readyDoc = validateAndTransformDocForUpsert(
+        entityType,
+        this.namespace,
+        doc,
+        force,
+        timestampGenerator
+      );
       operations.push({ create: {} }, readyDoc);
     }
 

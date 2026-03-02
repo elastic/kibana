@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { selectTabRuntimeState } from '..';
+import { internalStateActions, selectTabRuntimeState } from '..';
+import type { TabState } from '../types';
 import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabSyncApi from './tab_sync';
+import * as createTabPersistableStateObservableModule from '../../utils/create_tab_persistable_state_observable';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
 
@@ -101,6 +104,85 @@ describe('tab_sync actions', () => {
 
       expect(mockUnsubscribe).toHaveBeenCalled();
       expect(tabRuntimeState.unsubscribeFn$.getValue()).toBeUndefined();
+    });
+  });
+
+  describe('state observables subscriptions', () => {
+    it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
+      const mockTabState$ = new Subject<
+        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
+      >();
+      const createTabPersistableStateObservableSpy = jest
+        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
+        .mockReturnValue(mockTabState$);
+
+      const { tabId, initializeSingleTab } = await setup();
+
+      await initializeSingleTab({ tabId });
+
+      expect(createTabPersistableStateObservableSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tabId,
+          internalState$: expect.any(Object),
+          getState: expect.any(Function),
+        })
+      );
+
+      // Verify that the observable is subscribed
+      expect(mockTabState$.observed).toBe(true);
+    });
+
+    it('should dispatch syncLocallyPersistedTabState when tabState observable emits', async () => {
+      const mockTabState$ = new Subject<
+        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
+      >();
+      jest
+        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
+        .mockReturnValue(mockTabState$);
+
+      // Spy on the action creator before initialization
+      const syncLocallyPersistedTabStateSpy = jest.spyOn(
+        internalStateActions,
+        'syncLocallyPersistedTabState'
+      );
+
+      const { tabId, initializeSingleTab, getCurrentTab } = await setup();
+
+      await initializeSingleTab({ tabId });
+
+      // Clear any calls that happened during initialization
+      syncLocallyPersistedTabStateSpy.mockClear();
+
+      const { appState, globalState, attributes } = getCurrentTab();
+      const nextState = { appState, globalState, attributes };
+
+      // Emit a state change
+      mockTabState$.next(nextState);
+
+      // Verify the action creator was called with the correct tabId
+      expect(syncLocallyPersistedTabStateSpy).toHaveBeenCalledWith({ tabId });
+    });
+
+    it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
+      const mockTabState$ = new Subject<
+        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
+      >();
+      jest
+        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
+        .mockReturnValue(mockTabState$);
+
+      const { tabId, initializeSingleTab, runtimeStateManager } = await setup();
+
+      await initializeSingleTab({ tabId });
+
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+      const unsubscribeFn = tabRuntimeState.unsubscribeFn$.getValue();
+
+      expect(mockTabState$.observed).toBe(true);
+
+      unsubscribeFn?.();
+
+      expect(mockTabState$.observed).toBe(false);
     });
   });
 });
