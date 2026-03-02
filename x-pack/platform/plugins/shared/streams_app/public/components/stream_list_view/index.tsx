@@ -172,7 +172,7 @@ export function StreamListView() {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={router.link('/_discovery')}
-                  iconType="crosshairs"
+                  iconType="crosshair"
                   data-test-subj="streamsSignificantEventsDiscoveryButton"
                 >
                   {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {

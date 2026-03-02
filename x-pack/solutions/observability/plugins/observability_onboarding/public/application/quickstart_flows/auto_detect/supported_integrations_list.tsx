@@ -50,7 +50,7 @@ const FEATURED_INTEGRATIONS_LIST: SupportedIntegrationItem[] = [
   { title: 'Docker', icon: dockerIconSrc },
   { title: 'Nginx', icon: nginxIconSrc },
   { title: 'MySQL', icon: mysqlIconSrc },
-  { title: 'System', icon: 'desktop' },
+  { title: 'System', icon: 'display' },
 ];
 
 export function SupportedIntegrationsList() {

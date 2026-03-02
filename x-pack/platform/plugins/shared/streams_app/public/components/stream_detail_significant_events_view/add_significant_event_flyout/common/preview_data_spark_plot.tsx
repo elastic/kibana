@@ -149,7 +149,7 @@ export function PreviewDataSparkPlot({
     if (noOccurrencesFound) {
       if (compressed) {
         return (
-          <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" aria-hidden={true} />
+          <EuiIcon type="chartLine" color={euiTheme.colors.disabled} size="l" aria-hidden={true} />
         );
       }
 

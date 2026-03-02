@@ -49,7 +49,7 @@ export function FeaturesTable() {
       render: (_: unknown, feature: Feature) => (
         <EuiButtonIcon
           data-test-subj="featuresDiscoveryDetailsButton"
-          iconType="expand"
+          iconType="maximize"
           aria-label={i18n.translate(
             'xpack.streams.significantEventsDiscovery.featuresTable.detailsButtonAriaLabel',
             { defaultMessage: 'View details' }
