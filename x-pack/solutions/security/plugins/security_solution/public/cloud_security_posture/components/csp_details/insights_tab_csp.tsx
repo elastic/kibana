@@ -16,7 +16,7 @@ import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 /**
  * Insights view displayed in the document details expandable flyout left section
@@ -43,15 +43,7 @@ function isCspFlyoutPanelProps(
 }
 
 export const InsightsTabCsp = memo(
-  ({
-    value,
-    field,
-    scopeId,
-  }: {
-    value: string;
-    field: CloudPostureEntityIdentifier;
-    scopeId: string;
-  }) => {
+  ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
     const panels = useExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
@@ -169,11 +161,17 @@ export const InsightsTabCsp = memo(
         />
         <EuiSpacer size="xl" />
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
-          <MisconfigurationFindingsDetailsTable field={field} value={value} scopeId={scopeId} />
+          <MisconfigurationFindingsDetailsTable
+            entityIdentifiers={entityIdentifiers}
+            scopeId={scopeId}
+          />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable value={value} scopeId={scopeId} />
+          <VulnerabilitiesFindingsDetailsTable
+            entityIdentifiers={entityIdentifiers}
+            scopeId={scopeId}
+          />
         ) : (
-          <AlertsDetailsTable field={field} value={value} />
+          <AlertsDetailsTable entityIdentifiers={entityIdentifiers} />
         )}
       </>
     );

@@ -31,58 +31,55 @@ export const severityLabels: Record<Severity, string> = {
   low: STATUS_LOW_LABEL,
 };
 
-export interface EntityFilter {
-  field: string;
-  value: string;
-}
-
 export const getAlertsByStatusQuery = ({
   additionalFilters = [],
   from,
   to,
-  entityFilter,
+  entityIdentifiers,
   runtimeMappings,
 }: {
   from: string;
   to: string;
-  entityFilter?: EntityFilter;
+  entityIdentifiers?: Record<string, string>;
   additionalFilters?: ESBoolQuery[];
   runtimeMappings?: Record<string, unknown>;
-}) => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        { range: { '@timestamp': { gte: from, lte: to } } },
-        ...(entityFilter
-          ? [
-              {
-                term: {
-                  [entityFilter.field]: entityFilter.value,
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-  },
-  aggs: {
-    alertsByStatus: {
-      terms: {
-        field: 'kibana.alert.workflow_status',
+}) => {
+  const entityFilters = entityIdentifiers
+    ? Object.entries(entityIdentifiers).map(([field, value]) => ({
+        term: {
+          [field]: value,
+        },
+      }))
+    : [];
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...additionalFilters,
+          { range: { '@timestamp': { gte: from, lte: to } } },
+          ...entityFilters,
+        ],
       },
-      aggs: {
-        statusBySeverity: {
-          terms: {
-            field: 'kibana.alert.severity',
+    },
+    aggs: {
+      alertsByStatus: {
+        terms: {
+          field: 'kibana.alert.workflow_status',
+        },
+        aggs: {
+          statusBySeverity: {
+            terms: {
+              field: 'kibana.alert.severity',
+            },
           },
         },
       },
     },
-  },
-  ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
-});
+    ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+  };
+};
 
 export const parseAlertsData = (
   response: AlertsByStatusResponse<{}, AlertsByStatusAgg>
@@ -114,7 +111,7 @@ export interface UseAlertsByStatusProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
-  entityFilter?: EntityFilter;
+  entityIdentifiers?: Record<string, string>;
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
@@ -129,7 +126,7 @@ export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
 
 export const useAlertsByStatus: UseAlertsByStatus = ({
   additionalFilters,
-  entityFilter,
+  entityIdentifiers,
   queryId,
   signalIndexName,
   skip = false,
@@ -171,7 +168,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     query: getAlertsByStatusQuery({
       from,
       to,
-      entityFilter,
+      entityIdentifiers,
       additionalFilters,
       runtimeMappings,
     }),
@@ -185,13 +182,13 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       getAlertsByStatusQuery({
         from,
         to,
-        entityFilter,
+        entityIdentifiers,
         additionalFilters,
         runtimeMappings,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
+  }, [setAlertsQuery, from, to, entityIdentifiers, additionalFilters]);
 
   useEffect(() => {
     if (data == null) {

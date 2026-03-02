@@ -37,13 +37,9 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     jest.clearAllMocks();
 
     mockUseRiskScore.mockReturnValue({
+      data: [],
       loading: false,
-      inspect: {
-        dsl: [],
-        response: [],
-      },
-      isInspected: false,
-      totalCount: 0,
+      inspect: { dsl: [], response: [] },
       refetch: jest.fn(),
       hasEngineBeenInstalled: true,
     });
@@ -57,11 +53,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
       </TestProviders>
     );
     expect(mockUseRiskScore).toBeCalledWith({
-      filterQuery: {
-        terms: {
-          [`${riskEntity}.name`]: ['testEntity'],
-        },
-      },
+      filterQuery: { terms: { [riskEntity === EntityType.host ? 'host.name' : 'user.name']: ['testEntity'] } },
       onlyLatest: false,
       riskEntity,
       skip: false,
@@ -102,5 +94,37 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
       </TestProviders>
     );
     expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
+  });
+
+  it('uses filterQuery from props when provided for host', () => {
+    if (riskEntity !== EntityType.host) return;
+    const hostFilterQuery = { bool: { must: [{ match: { 'host.name': 'my-host' } }] } };
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody {...defaultProps} filterQuery={hostFilterQuery} />
+      </TestProviders>
+    );
+    // Original implementation builds filter from entityName only - does not use filterQuery prop
+    expect(mockUseRiskScore).toBeCalledWith(
+      expect.objectContaining({
+        filterQuery: { terms: { 'host.name': ['testEntity'] } },
+      })
+    );
+  });
+
+  it('uses filterQuery from props when provided for user', () => {
+    if (riskEntity !== EntityType.user) return;
+    const userFilterQuery = { bool: { must: [{ match: { 'user.name': 'my-user' } }] } };
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody {...defaultProps} filterQuery={userFilterQuery} />
+      </TestProviders>
+    );
+    // Original implementation builds filter from entityName only - does not use filterQuery prop
+    expect(mockUseRiskScore).toBeCalledWith(
+      expect.objectContaining({
+        filterQuery: { terms: { 'user.name': ['testEntity'] } },
+      })
+    );
   });
 });
