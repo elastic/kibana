@@ -179,7 +179,13 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
       </EuiFlexGroup>
 
       {visibleSteps.map((step, i) => (
-        <div key={step.source.id} ref={(el) => setStepRef(i, el)}>
+        <div
+          key={step.source.id}
+          ref={(el) => setStepRef(i, el)}
+          css={css`
+            scroll-margin-top: calc(var(--euiFixedHeadersOffset, 0) + 60px);
+          `}
+        >
           <TutorialStepCard
             step={step}
             stepIndex={i}
@@ -193,7 +199,12 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
       ))}
 
       {showCleanup && (
-        <div ref={(el) => setStepRef(steps.length, el)}>
+        <div
+          ref={(el) => setStepRef(steps.length, el)}
+          css={css`
+            scroll-margin-top: calc(var(--euiFixedHeadersOffset, 0) + 60px);
+          `}
+        >
           <CleanupStepCard
             cleanup={tutorial.cleanup!}
             savedValues={state.savedValues}
