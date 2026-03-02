@@ -105,7 +105,7 @@ export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
         label: i18n.translate('xpack.security.formComponents.contrastKeyPadMenu.systemLabel', {
           defaultMessage: 'System',
         }),
-        icon: 'desktop',
+        icon: 'display',
       })}
       {contrastItem({
         id: 'standard',
@@ -119,7 +119,7 @@ export const ContrastKeyPadMenu: FunctionComponent<ContrastKeyPadMenuProps> = ({
         label: i18n.translate('xpack.security.formComponents.contrastKeyPadMenu.highLabel', {
           defaultMessage: 'High',
         }),
-        icon: 'contrastHigh',
+        icon: 'contrastFill',
       })}
     </EuiKeyPadMenu>
   );

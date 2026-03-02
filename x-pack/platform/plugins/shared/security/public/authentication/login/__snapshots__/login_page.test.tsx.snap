@@ -60,7 +60,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
               Open in new window
               <span
                 color="inherit"
-                data-euiicon-type="popout"
+                data-euiicon-type="external"
               />
             </span>
           </a>
@@ -131,7 +131,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
               Open in new window
               <span
                 color="inherit"
-                data-euiicon-type="popout"
+                data-euiicon-type="external"
               />
             </span>
           </a>
@@ -733,7 +733,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
             class="euiText emotion-euiText-xs"
           >
             <p>
-              This is an 
+              This is an
               <em>
                 important
               </em>
