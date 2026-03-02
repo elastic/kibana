@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { applyDagreLayout } from './layout';
-import { FIT_VIEW_PADDING, FIT_VIEW_DURATION } from './constants';
+import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
@@ -121,7 +121,8 @@ function GraphInner({
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
     if (layoutedNodes.length > 0) {
-      setTimeout(() => fitView(getFitViewOptions()), 50);
+      const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
+      return () => clearTimeout(timer);
     }
   }, [
     layoutedNodes,
