@@ -484,7 +484,7 @@ export const useUpdatePackageMutation = () => {
 
 interface ReviewUpgradeArgs {
   pkgName: string;
-  action: 'accept' | 'decline';
+  action: 'accept' | 'decline' | 'pending';
   targetVersion: string;
 }
 

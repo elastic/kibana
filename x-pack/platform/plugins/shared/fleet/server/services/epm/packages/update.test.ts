@@ -115,4 +115,30 @@ describe('reviewUpgrade', () => {
       },
     });
   });
+
+  it('should set action to pending when re-enabling a declined review', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '2.0.0',
+        pending_upgrade_review: { ...pendingReview, action: 'declined' },
+      },
+    });
+
+    await reviewUpgrade({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      action: 'pending',
+      targetVersion: '2.0.0',
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      pending_upgrade_review: {
+        ...pendingReview,
+        action: 'pending',
+      },
+    });
+  });
 });

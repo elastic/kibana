@@ -152,7 +152,9 @@ export const upgradeManagedPackagePolicies = async (
   pkgName: string
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {
   const logger = appContextService.getLogger();
-  logger.debug('Running required package policies upgrades for managed policies');
+  logger.debug(
+    '[UpgradeManagedPackagePoliciesTask] Running required package policies upgrades for managed policies'
+  );
 
   const results: UpgradeManagedPackagePoliciesResult[] = [];
 
@@ -163,7 +165,9 @@ export const upgradeManagedPackagePolicies = async (
   });
 
   if (!installedPackage) {
-    logger.debug('Aborting upgrading managed package policies: package is not installed');
+    logger.debug(
+      '[UpgradeManagedPackagePoliciesTask] Aborting upgrading managed package policies: package is not installed'
+    );
     return [];
   }
 
@@ -184,7 +188,9 @@ export const upgradeManagedPackagePolicies = async (
   }
 
   if (upgradedCount > 0) {
-    logger.info(`Completed upgrading ${upgradedCount} package policies for ${pkgName}`);
+    logger.info(
+      `[UpgradeManagedPackagePoliciesTask] Completed upgrading ${upgradedCount} package policies for ${pkgName}`
+    );
 
     await clearPendingUpgradeReview(soClient, pkgName);
   }
@@ -247,21 +253,25 @@ async function checkUserReview(
   if (review?.target_version === installedPackage.version) {
     if (review.action === 'accepted') {
       logger.debug(
-        `User accepted policy upgrade for ${installedPackage.name}@${installedPackage.version}, proceeding`
+        `[UpgradeManagedPackagePoliciesTask] User accepted policy upgrade for ${installedPackage.name}@${installedPackage.version}, proceeding`
       );
       return true;
     }
 
     if (review.action === 'declined') {
       logger.debug(
-        `Skipping policy upgrade for ${installedPackage.name}: user declined upgrade to ${installedPackage.version}`
+        `[UpgradeManagedPackagePoliciesTask] Skipping policy upgrade for ${installedPackage.name}: user declined upgrade to ${installedPackage.version}`
       );
       return false;
     }
 
-    logger.debug(
-      `Skipping policy upgrade for ${installedPackage.name}: pending user review for ${installedPackage.version}`
-    );
+    if (review.action === 'pending' || !review.action) {
+      logger.debug(
+        `[UpgradeManagedPackagePoliciesTask] Skipping policy upgrade for ${installedPackage.name}: pending user review for ${installedPackage.version}`
+      );
+      return false;
+    }
+
     return false;
   }
 
@@ -288,14 +298,14 @@ async function checkUserReview(
     if (hasNewDeprecations(currentPkgInfo, targetPkgInfo)) {
       const deprecationDetails = getDeprecationDetails(targetPkgInfo);
       logger.info(
-        `Blocking policy auto-upgrade for ${installedPackage.name}@${installedPackage.version}: new deprecations detected, awaiting user review`
+        `[UpgradeManagedPackagePoliciesTask] Blocking policy auto-upgrade for ${installedPackage.name}@${installedPackage.version}: new deprecations detected, awaiting user review`
       );
       await writePendingUpgradeReview(soClient, soId, installedPackage, deprecationDetails);
       return false;
     }
   } catch (error) {
     logger.warn(
-      `Failed to check deprecations for ${installedPackage.name}, proceeding with upgrade: ${error.message}`
+      `[UpgradeManagedPackagePoliciesTask]Failed to check deprecations for ${installedPackage.name}, proceeding with upgrade: ${error.message}`
     );
   }
 

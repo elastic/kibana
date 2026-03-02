@@ -20,11 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 
-import {
-  useAuthz,
-  useReviewUpgradeMutation,
-  useStartServices,
-} from '../../../../../../../hooks';
+import { useAuthz, useReviewUpgradeMutation, useStartServices } from '../../../../../../../hooks';
 import type { InstallFailedAttempt } from '../../../../../../../../common/types';
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
@@ -37,7 +33,7 @@ const InstalledVersionStatus: React.FunctionComponent<{
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="m" type="checkInCircleFilled" color="success" />
+        <EuiIcon size="m" type="checkInCircleFilled" color="success" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{item.installationInfo?.version ?? item.version}</EuiFlexItem>
     </EuiFlexGroup>
@@ -178,7 +174,7 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="error" color="danger" />
+          <EuiIcon size="m" type="error" color="danger" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isUpgradeFailed ? (
@@ -245,8 +241,7 @@ const PendingUpgradeReviewStatus: React.FunctionComponent<{
 
   const pendingReview = item.installationInfo?.pending_upgrade_review;
   const targetVersion = pendingReview?.target_version ?? '';
-  const description =
-    pendingReview?.deprecation_details?.description ?? '';
+  const description = pendingReview?.deprecation_details?.description ?? '';
 
   const handleAccept = useCallback(() => {
     reviewUpgradeMutation.mutate(
@@ -301,7 +296,7 @@ const PendingUpgradeReviewStatus: React.FunctionComponent<{
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="warning" color="warning" />
+          <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FormattedMessage
@@ -361,6 +356,60 @@ const PendingUpgradeReviewStatus: React.FunctionComponent<{
   );
 });
 
+const DeclinedUpgradeStatus: React.FunctionComponent<{
+  item: InstalledPackageUIPackageListItem;
+}> = React.memo(({ item }) => {
+  const reviewUpgradeMutation = useReviewUpgradeMutation();
+  const { notifications } = useStartServices();
+
+  const pendingReview = item.installationInfo?.pending_upgrade_review;
+  const targetVersion = pendingReview?.target_version ?? '';
+
+  const handleReEnable = useCallback(() => {
+    reviewUpgradeMutation.mutate(
+      { pkgName: item.name, action: 'pending', targetVersion },
+      {
+        onSuccess: () => {
+          notifications.toasts.addSuccess({
+            title: (
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.upgradeReviewReEnabledTitle"
+                defaultMessage="Upgrade review re-enabled"
+              />
+            ) as unknown as string,
+          });
+        },
+      }
+    );
+  }, [reviewUpgradeMutation, item.name, targetVersion, notifications.toasts]);
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="m" type="minusInCircle" color="subdued" aria-label="Upgrade paused" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.statusUpgradePausedLabel"
+          defaultMessage="Upgrade paused"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          onClick={handleReEnable}
+          isLoading={reviewUpgradeMutation.isLoading}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epmInstalledIntegrations.reEnableUpgradeButton"
+            defaultMessage="Re-enable"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+
 export const InstallationVersionStatus: React.FunctionComponent<{
   item: InstalledPackageUIPackageListItem;
 }> = React.memo(({ item }) => {
@@ -372,6 +421,8 @@ export const InstallationVersionStatus: React.FunctionComponent<{
     return <UpgradeAvailableVersionStatus item={item} />;
   } else if (status === 'pending_upgrade_review') {
     return <PendingUpgradeReviewStatus item={item} />;
+  } else if (status === 'declined_review') {
+    return <DeclinedUpgradeStatus item={item} />;
   } else if (status === 'upgrading') {
     return <UpgradingVersionStatus item={item} />;
   } else if (status === 'uninstalling') {

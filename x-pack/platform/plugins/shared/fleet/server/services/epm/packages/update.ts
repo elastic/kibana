@@ -55,7 +55,7 @@ export async function updatePackage(
 export async function reviewUpgrade(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  action: 'accept' | 'decline';
+  action: 'accept' | 'decline' | 'pending';
   targetVersion: string;
 }) {
   const { savedObjectsClient, pkgName, action: userAction, targetVersion } = options;
@@ -80,7 +80,7 @@ export async function reviewUpgrade(options: {
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
     pending_upgrade_review: {
       ...review,
-      action: userAction === 'accept' ? 'accepted' : 'declined',
+      action: { accept: 'accepted', decline: 'declined', pending: 'pending' }[userAction],
     },
   });
 }

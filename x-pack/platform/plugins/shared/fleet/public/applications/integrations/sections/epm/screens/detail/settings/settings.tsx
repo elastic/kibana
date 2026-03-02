@@ -156,7 +156,10 @@ export const SettingsPage: React.FC<Props> = memo(
       'installationInfo' in packageInfo
         ? packageInfo.installationInfo?.pending_upgrade_review
         : undefined;
-    const pendingUpgradeReview = rawReview && !rawReview.action ? rawReview : undefined;
+    const pendingUpgradeReview =
+      rawReview && (!rawReview.action || rawReview.action === 'pending') ? rawReview : undefined;
+    const declinedUpgradeReview =
+      rawReview && rawReview.action === 'declined' ? rawReview : undefined;
     const handleAcceptUpgrade = useCallback(() => {
       if (!pendingUpgradeReview) return;
       reviewUpgradeMutation.mutate(
@@ -203,6 +206,27 @@ export const SettingsPage: React.FC<Props> = memo(
         }
       );
     }, [pendingUpgradeReview, reviewUpgradeMutation, name, title, notifications.toasts]);
+
+    const handleReEnableUpgrade = useCallback(() => {
+      if (!declinedUpgradeReview) return;
+      reviewUpgradeMutation.mutate(
+        {
+          pkgName: name,
+          action: 'pending',
+          targetVersion: declinedUpgradeReview.target_version,
+        },
+        {
+          onSuccess: () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.fleet.integrations.settings.upgradeReviewReEnabledTitle',
+                { defaultMessage: 'Upgrade review re-enabled for {title}', values: { title } }
+              ),
+            });
+          },
+        }
+      );
+    }, [declinedUpgradeReview, reviewUpgradeMutation, name, title, notifications.toasts]);
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -415,6 +439,44 @@ export const SettingsPage: React.FC<Props> = memo(
                             </EuiButtonEmpty>
                           </EuiFlexItem>
                         </EuiFlexGroup>
+                      </EuiCallOut>
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
+                  {declinedUpgradeReview && (
+                    <>
+                      <EuiCallOut
+                        color="primary"
+                        iconType="minusInCircle"
+                        announceOnMount
+                        title={
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.declinedUpgradeReviewTitle"
+                            defaultMessage="Policy upgrade paused for version {version}"
+                            values={{
+                              version: declinedUpgradeReview.target_version,
+                            }}
+                          />
+                        }
+                      >
+                        <p>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.declinedUpgradeReviewDescription"
+                            defaultMessage="You previously dismissed the upgrade review. Click below to re-enable the review prompt."
+                          />
+                        </p>
+                        <EuiSpacer size="s" />
+                        <EuiButton
+                          size="s"
+                          onClick={handleReEnableUpgrade}
+                          isLoading={reviewUpgradeMutation.isLoading}
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.reEnableUpgradeButton"
+                            defaultMessage="Re-enable upgrade review"
+                          />
+                        </EuiButton>
                       </EuiCallOut>
                       <EuiSpacer size="l" />
                     </>

@@ -16,6 +16,7 @@ export type InstalledPackagesUIInstallationStatus =
   | 'upgrading'
   | 'upgrade_available'
   | 'pending_upgrade_review'
+  | 'declined_review'
   | 'uninstalling'
   | 'rolling_back';
 

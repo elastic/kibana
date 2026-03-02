@@ -310,6 +310,46 @@ describe('setupUpgradeManagedPackagePolicies', () => {
     expect(soClient.update).not.toHaveBeenCalled();
   });
 
+  it('should block upgrade when pending_upgrade_review.action is pending (re-enabled)', async () => {
+    const soClient = savedObjectsClientMock.create();
+
+    (getInstallations as jest.Mock).mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'custom-pkg',
+          attributes: {
+            name: 'custom_package',
+            version: '2.0.0',
+            install_status: 'installed',
+            keep_policies_up_to_date: true,
+            pending_upgrade_review: {
+              target_version: '2.0.0',
+              reason: 'deprecated',
+              created_at: '2026-01-01T00:00:00.000Z',
+              action: 'pending',
+            },
+          },
+        },
+      ],
+    });
+
+    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (async function* () {
+        yield [
+          {
+            id: 'policy-1',
+            package: { name: 'custom_package', version: '1.0.0' },
+          },
+        ];
+      })()
+    );
+
+    await setupUpgradeManagedPackagePolicies(soClient);
+
+    expect(hasNewDeprecations).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+  });
+
   it('should proceed with upgrade if pending_upgrade_review.action is accepted', async () => {
     const soClient = savedObjectsClientMock.create();
 

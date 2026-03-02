@@ -610,7 +610,11 @@ export const ReviewUpgradeRequestSchema = {
     pkgName: schema.string(),
   }),
   body: schema.object({
-    action: schema.oneOf([schema.literal('accept'), schema.literal('decline')]),
+    action: schema.oneOf([
+      schema.literal('accept'),
+      schema.literal('decline'),
+      schema.literal('pending'),
+    ]),
     target_version: schema.string(),
   }),
 };

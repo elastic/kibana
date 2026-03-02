@@ -749,7 +749,7 @@ export interface Installation {
     reason: 'deprecated';
     created_at: string;
     deprecation_details?: DeprecationInfo;
-    action?: 'accepted' | 'declined';
+    action?: 'accepted' | 'declined' | 'pending';
   };
 }
 
