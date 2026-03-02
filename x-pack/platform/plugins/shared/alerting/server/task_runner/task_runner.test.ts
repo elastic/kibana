@@ -206,6 +206,7 @@ describe('Task Runner', () => {
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
     apiKeyType: ApiKeyType.ES,
     shouldGrantUiam: false,
+    cpsEnabled: false,
   };
 
   beforeEach(() => {

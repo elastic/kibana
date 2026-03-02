@@ -201,6 +201,7 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  cpsEnabled: boolean;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

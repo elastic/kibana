@@ -255,7 +255,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -270,7 +270,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -285,7 +285,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 

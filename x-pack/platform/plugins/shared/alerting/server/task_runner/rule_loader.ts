@@ -179,6 +179,8 @@ export function getFakeKibanaRequest(
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
+    // Include URL with space path so projectRouting: 'space' can resolve the space NPRE (CPS).
+    url: new URL(`https://fake-request${path}`),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);
