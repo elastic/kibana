@@ -29,6 +29,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 
 ## Guardrails / gotchas (high signal)
 
+- **Preserve relevant comments**: if FTR test comments provide useful context (intent, workarounds, non-obvious setup), keep them in the migrated Scout spec. Drop only outdated comments.
 - Scout specs are **standalone**: don't rely on file execution order or `loadTestFile()` indexes.
 - Each Scout `test()` runs in a **fresh browser context**: if an FTR suite used multiple `it()` blocks as one journey, combine into one `test()` + `test.step()`. Do login/navigation in `beforeEach` (avoid `page`/`browserAuth`/`pageObjects` in `beforeAll`).
 - Keep **one suite per file**, avoid nested `describe`, and don't use `*.describe.configure()`.
@@ -57,7 +58,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 
 - UI: `<module-root>/test/scout*/ui/{tests,parallel_tests}/**/*.spec.ts`
 - API: `<module-root>/test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`
-- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated and should run in parallel; otherwise use `ui/tests/` + `test`.
+- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated (state is scoped to a Kibana space) and should run in parallel; otherwise use `ui/tests/` + `test`. See [Scout parallelism](docs/extend/scout/parallelism.md) for details on when to choose parallel vs sequential.
 - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
 - Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
 
