@@ -17,7 +17,7 @@ interface StreamQueryBase {
   title: string;
 }
 
-export const streamQueryTypeSchema = z.enum(['match', 'stats']);
+export const streamQueryTypeSchema = z.enum(['match', 'stats']).optional();
 export const streamQueryCategorySchema = z
   .enum(['operational', 'error', 'resource_health', 'configuration', 'security'])
   .optional();
@@ -56,9 +56,9 @@ export interface StreamQuery extends StreamQueryBase {
   severity_score?: number;
   evidence?: string[];
   description?: string;
-  type: StreamQueryType;
+  type?: StreamQueryType;
   category?: StreamQueryCategory;
-  tags: string[];
+  tags?: string[];
   source?: StreamQuerySource;
   model?: string;
   created_at?: string;
@@ -91,7 +91,7 @@ export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection
     description: z.string().optional(),
     type: streamQueryTypeSchema,
     category: streamQueryCategorySchema,
-    tags: z.array(z.string()),
+    tags: z.array(z.string()).optional(),
     source: streamQuerySourceSchema,
     model: z.string().optional(),
   })
@@ -129,7 +129,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   description: z.string().optional(),
   type: streamQueryTypeSchema,
   category: streamQueryCategorySchema,
-  tags: z.array(z.string()),
+  tags: z.array(z.string()).optional(),
   source: streamQuerySourceSchema,
   model: z.string().optional(),
 });
