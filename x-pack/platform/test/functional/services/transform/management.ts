@@ -14,6 +14,7 @@ export type TransformManagement = ProvidedType<typeof TransformManagementProvide
 
 export function TransformManagementProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertTransformListPageExists() {
@@ -70,7 +71,16 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
       } else {
         await testSubjects.click('transformButtonCreate');
       }
-      await testSubjects.existOrFail('transformSelectSourceModal');
+
+      // The create flow navigates directly to the wizard page.
+      await testSubjects.existOrFail('transformPageCreateTransform');
+
+      // Source selection is done from within the wizard via the source selector modal.
+      await testSubjects.existOrFail('transformSourceDataSelectorButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.click('transformSourceDataSelectorButton');
+        await testSubjects.existOrFail('transformSelectSourceModal', { timeout: 1000 });
+      });
     },
   };
 }

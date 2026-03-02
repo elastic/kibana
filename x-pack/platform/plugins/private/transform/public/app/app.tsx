@@ -34,7 +34,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
         component={CloneTransformSection}
       />
       <Route
-        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId?`}
         component={CreateTransformSection}
       />
       <Route path={`/`} component={TransformManagementSection} />

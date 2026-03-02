@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo } from 'react';
 
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiModal,
   EuiPageTemplate,
   EuiSkeletonText,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,12 +39,10 @@ import {
   useGetTransforms,
   useGetTransformNodes,
 } from '../../hooks';
-import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 
-import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import {
@@ -56,17 +51,7 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
-
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return {
-    dialog: css`
-      width: calc(${euiTheme.size.l} * 30);
-      min-height: calc(${euiTheme.size.l} * 25);
-    `,
-  };
-};
+import { SECTION_SLUG } from '../../common/constants';
 
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -103,8 +88,7 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { dataViewEditor } = useAppDependencies();
-  const styles = useStyles();
+  const { history } = useAppDependencies();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
@@ -155,6 +139,10 @@ export const TransformManagement: FC = () => {
 
   const { canStartStopTransform } = useTransformCapabilities();
 
+  const onCreateTransform = useCallback(() => {
+    history.push(`/${SECTION_SLUG.CREATE_TRANSFORM}`);
+  }, [history]);
+
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
 
@@ -195,46 +183,6 @@ export const TransformManagement: FC = () => {
       </>
     );
   }, [transforms, canStartStopTransform]);
-
-  const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
-  const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
-
-  const onCloseModal = useCallback(() => setIsSearchSelectionVisible(false), []);
-  const onOpenModal = () => setIsSearchSelectionVisible(true);
-
-  const onSearchSelected = useCallback((id: string, type: string) => {
-    setSavedObjectId(id);
-  }, []);
-
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  const closeDataViewEditorRef = useRef<() => void | undefined>();
-
-  const createNewDataView = useCallback(() => {
-    onCloseModal();
-    closeDataViewEditorRef.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onSearchSelected(dataView.id, 'index-pattern');
-        }
-      },
-
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, onCloseModal, onSearchSelected]);
-
-  useEffect(function cleanUpDataViewEditorFlyout() {
-    return () => {
-      // Close the editor when unmounting
-      if (closeDataViewEditorRef.current) {
-        closeDataViewEditorRef.current();
-      }
-    };
-  }, []);
-
-  if (savedObjectId !== null) {
-    return <RedirectToCreateTransform savedObjectId={savedObjectId} />;
-  }
 
   const docsLink = (
     <EuiButtonEmpty
@@ -329,7 +277,7 @@ export const TransformManagement: FC = () => {
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
                   isLoading={transformsWithoutStatsLoading}
-                  onCreateTransform={onOpenModal}
+                  onCreateTransform={onCreateTransform}
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
@@ -343,26 +291,6 @@ export const TransformManagement: FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
-
-      {isSearchSelectionVisible && (
-        <EuiModal
-          onClose={onCloseModal}
-          css={styles.dialog}
-          aria-label={i18n.translate(
-            'xpack.transform.transformList.createTransformSearchModalTitle',
-            {
-              defaultMessage: 'Create Transform - Select Data Source',
-            }
-          )}
-          data-test-subj="transformSelectSourceModal"
-        >
-          <SearchSelection
-            onSearchSelected={onSearchSelected}
-            canEditDataView={canEditDataView}
-            createNewDataView={createNewDataView}
-          />
-        </EuiModal>
-      )}
     </>
   );
 };
