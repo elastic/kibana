@@ -528,7 +528,9 @@ describe('AmazonS3', () => {
       lastModified: '2025-02-01T00:00:00.000Z',
       etag: '"etag123"',
       contentUrl: 'https://signed-url.example.com',
-      message: expect.stringContaining('File size (999999 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.'),
+      message: expect.stringContaining(
+        'File size (999999 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.'
+      ),
     });
   });
 });
