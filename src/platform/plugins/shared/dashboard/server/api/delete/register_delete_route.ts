@@ -10,20 +10,20 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   deleteRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: {
         request: {
           params: schema.object({
