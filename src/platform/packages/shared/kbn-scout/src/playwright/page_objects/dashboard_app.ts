@@ -115,7 +115,8 @@ export class DashboardApp {
   }
 
   async openNewDashboard() {
-    await this.page.testSubj.click('newItemButton');
+    await this.page.testSubj.click('newItemButton', { timeout: 30_000 });
+    await this.page.waitForLoadingIndicatorHidden();
   }
 
   private getSettingsFlyout() {

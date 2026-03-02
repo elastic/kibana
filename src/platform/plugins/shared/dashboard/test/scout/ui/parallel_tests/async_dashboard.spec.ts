@@ -19,7 +19,7 @@ import {
 } from '../constants';
 
 spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
     // install sample flights data
@@ -34,8 +34,20 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgno
           );
           return dataViews.length;
         },
-        // Sample data install can take longer than Scout's default polling window.
         { timeout: 60_000 }
+      )
+      .toBeGreaterThan(0);
+
+    // Wait for ES documents to be indexed and searchable before the test starts.
+    // The sample data install bulk-indexes without refresh, so there can be a lag
+    // (especially in serverless) between install returning and data being queryable.
+    await expect
+      .poll(
+        async () => {
+          const { count } = await esClient.count({ index: 'kibana_sample_data_flights' });
+          return count;
+        },
+        { timeout: 30_000 }
       )
       .toBeGreaterThan(0);
 

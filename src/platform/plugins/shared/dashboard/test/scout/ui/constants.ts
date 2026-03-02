@@ -80,7 +80,7 @@ export const LENS_BASIC_TIME_RANGE = {
 };
 
 export const DASHBOARD_SAVED_SEARCH_ARCHIVE =
-  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+  'src/platform/plugins/shared/dashboard/test/scout/ui/fixtures/saved_search_logstash.json';
 export const DASHBOARD_DEFAULT_INDEX_TITLE = 'logstash-*';
 
 export const MIGRATION_SMOKE_EXPORTS_DIR =
