@@ -392,15 +392,19 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelinePrivileges: { crud: canWriteTimelines },
     } = useUserPrivileges();
     useEffect(() => {
+      let cancelled = false;
       const fetchData = async () => {
         if (canWriteTimelines) {
           await installPrepackagedTimelines();
-          refetch();
-        } else {
+        }
+        if (!cancelled) {
           refetch();
         }
       };
       fetchData();
+      return () => {
+        cancelled = true;
+      };
     }, [refetch, installPrepackagedTimelines, canWriteTimelines]);
 
     useEffect(() => {
