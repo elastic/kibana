@@ -10,6 +10,7 @@ import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -39,6 +40,7 @@ export interface AppPluginSetupDependencies {
   actions: ActionsPublicPluginSetup;
   cloud?: CloudSetup;
   console?: ConsolePluginSetup;
+  features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
   ml: MlPluginSetup;
