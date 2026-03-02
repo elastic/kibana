@@ -301,36 +301,6 @@ describe('Options list popover', () => {
     });
   });
 
-  describe('allow expensive queries warning', () => {
-    test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent(contextMock);
-      const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeNull();
-    });
-
-    test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent({
-        ...contextMock,
-        componentApi: {
-          ...contextMock.componentApi,
-          allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
-        },
-      });
-      const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeInstanceOf(HTMLDivElement);
-    });
-  });
-
   describe('advanced settings', () => {
     const ensureComponentIsHidden = async ({
       displaySettings,
@@ -348,21 +318,21 @@ describe('Options list popover', () => {
 
     test('can hide exists option', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideExists: true },
+        displaySettings: { hide_exists: true },
         testSubject: 'optionsList-control-selection-exists',
       });
     });
 
     test('can hide include/exclude toggle', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideExclude: true },
+        displaySettings: { hide_exclude: true },
         testSubject: 'optionsList__includeExcludeButtonGroup',
       });
     });
 
     test('can hide sorting button', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideSort: true },
+        displaySettings: { hide_sort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });
     });

@@ -13,6 +13,13 @@ import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState }
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
+import { triggerSchemas } from '../../../../trigger_schemas';
+import type { WorkflowsResponse } from '../../model/types';
+
+export const initialWorkflowsState: WorkflowsResponse = {
+  workflows: {},
+  totalWorkflows: 0,
+};
 
 // Initial state
 const initialState: WorkflowDetailState = {
@@ -24,12 +31,15 @@ const initialState: WorkflowDetailState = {
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
-  schema: getWorkflowZodSchema({}),
+  workflows: initialWorkflowsState,
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
+  replayExecutionId: null,
   loading: initialLoadingState,
+  hasYamlSchemaValidationErrors: false,
   connectorFlyout: {
     isOpen: false,
     connectorType: undefined,
@@ -74,8 +84,14 @@ const workflowDetailSlice = createSlice({
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
     },
+    setReplayExecutionId: (state, action: { payload: string | null }) => {
+      state.replayExecutionId = action.payload;
+    },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+    },
+    setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
+      state.workflows = action.payload;
     },
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       state.execution = action.payload;
@@ -86,6 +102,10 @@ const workflowDetailSlice = createSlice({
     },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
       state.activeTab = action.payload;
+    },
+
+    setHasYamlSchemaValidationErrors: (state, action: { payload: boolean }) => {
+      state.hasYamlSchemaValidationErrors = action.payload;
     },
 
     // Connector flyout actions
@@ -146,10 +166,13 @@ export const {
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,
+  setReplayExecutionId,
   setConnectors,
+  setWorkflows,
   setExecution,
   clearExecution,
   setActiveTab,
+  setHasYamlSchemaValidationErrors,
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,
