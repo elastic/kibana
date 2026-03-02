@@ -92,6 +92,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
   [
+    '.zendesk',
+    lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
+  ],
+  [
     '.servicenow_search',
     lazy(
       () =>
