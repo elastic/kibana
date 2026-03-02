@@ -88,7 +88,7 @@ privileges: {
       ],
       // `minimal` maps `minimal_all` (= top-level only, no sub-features)
       minimal: [
-        { feature: 'feature_y', privileges: ['all'] },
+        { feature: 'feature_y', privileges: ['minimal_all'] },
       ],
     },
   },
@@ -99,7 +99,7 @@ privileges: {
         { feature: 'feature_y', privileges: ['read', 'sub_feature_priv_id'] },
       ],
       minimal: [
-        { feature: 'feature_y', privileges: ['read'] },
+        { feature: 'feature_y', privileges: ['minimal_read'] },
       ],
     },
   },
