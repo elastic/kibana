@@ -158,7 +158,7 @@ export async function createClassicStreams(
       log.info(`  Created ${created}/${count} classic streams`);
     }
 
-  if (i + CLASSIC_STREAM_BATCH_SIZE < names.length) {
+    if (i + CLASSIC_STREAM_BATCH_SIZE < names.length) {
       await sleep(1500);
     }
   }
@@ -217,7 +217,14 @@ export async function createBulkDataStreams(
       { '@timestamp': timestamp, message: 'init' },
     ]);
 
-    await es.bulk({ operations, refresh: false });
+    const bulkResult = await es.bulk({ operations, refresh: false });
+    if (bulkResult.errors) {
+      const firstFailure = bulkResult.items.find((item) => (item.create?.status ?? 201) !== 201);
+      throw new Error(
+        `Bulk data stream creation failed at offset ${i}. ` +
+          `First error: ${JSON.stringify(firstFailure?.create?.error)}`
+      );
+    }
     created += batch.length;
 
     if (created % 500 === 0 || created === count) {
@@ -539,10 +546,11 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
       });
       break;
     } catch (err) {
-      if (isConflictError(err) && attempt < MAX_RETRIES) {
+      if ((isConflictError(err) || isLockContentionError(err)) && attempt < MAX_RETRIES) {
+        const code = isLockContentionError(err) ? 422 : 409;
         const delay = RETRY_BASE_DELAY_MS * attempt;
         log.warning(
-          `Root routing update: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`
+          `Root routing update: ${code} on attempt ${attempt}, retrying in ${delay}ms...`
         );
         await sleep(delay);
       } else {
@@ -628,12 +636,13 @@ async function createLargeWiredHierarchyViaImport(
           lastError = undefined;
           break;
         }
-        if (isConflictError(err) && attempt < MAX_RETRIES) {
+        if ((isConflictError(err) || isLockContentionError(err)) && attempt < MAX_RETRIES) {
+          const code = isLockContentionError(err) ? 422 : 409;
           const delay = RETRY_BASE_DELAY_MS * attempt;
           log.warning(
             `  Batch ${
               batchIndex + 1
-            }/${totalBatches}: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`
+            }/${totalBatches}: ${code} on attempt ${attempt}, retrying in ${delay}ms...`
           );
           await sleep(delay);
         } else {

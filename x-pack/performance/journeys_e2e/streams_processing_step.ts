@@ -26,7 +26,7 @@ export const journey = new Journey({
       timeout: 30000,
     });
   })
-  .step('Configure grok processor', async ({ page, inputDelays }) => {
+  .step('Configure grok processor', async ({ page }) => {
     const comboBox = page.locator(subj('streamsAppProcessorFieldSelectorComboFieldText'));
     const comboInput = comboBox.locator('input[role="combobox"]');
     await comboInput.click();
@@ -39,11 +39,10 @@ export const journey = new Journey({
       await page.keyboard.press('Enter');
     }
 
-    const patternExpression = page.locator(subj('streamsAppPatternExpression'));
-    await patternExpression.click();
-    await page.keyboard.press('Control+A');
-    await page.keyboard.press('Backspace');
-    await patternExpression.locator('[role="textbox"]').fill('%{NUMBER:attributes.numberfield}');
+    const patternTextbox = page
+      .locator(subj('streamsAppPatternExpression'))
+      .locator('[role="textbox"]');
+    await patternTextbox.fill('%{NUMBER:attributes.numberfield}');
   })
   .step('Save processor', async ({ page }) => {
     await page.click(subj('streamsAppProcessorConfigurationSaveProcessorButton'));
