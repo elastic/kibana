@@ -143,7 +143,7 @@
               "AuditRequestHandlerContext"
             ],
             "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
