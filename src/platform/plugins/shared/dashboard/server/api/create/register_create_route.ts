@@ -16,15 +16,14 @@ import {
   getCreateResponseBodySchema,
 } from './schemas';
 import { create } from './create';
-import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
-  const { routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
-    path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id?}`,
+    path: `${basePath}/{id?}`,
     summary: 'Create a dashboard with an auto-generated ID or a specified ID',
     ...routeConfig,
   });

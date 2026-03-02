@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../common/constants';
+
 /**
  * INTERNAL_API_VERSION is the temporary version for the internal API until the
  * public API is fully implemented and stable. When the public API is ready, this
@@ -16,6 +18,7 @@
 export function getRouteConfig(isDashboardAppRequest: boolean) {
   return isDashboardAppRequest
     ? {
+        basePath: DASHBOARD_APP_API_PATH,
         routeConfig: {
           // Never make dashboard application routes public
           // These are planned to be replaced by public REST routes
@@ -33,6 +36,7 @@ export function getRouteConfig(isDashboardAppRequest: boolean) {
         routeVersion: '1',
       }
     : {
+        basePath: DASHBOARD_API_PATH,
         routeConfig: {
           // TODO change to public before FF
           access: 'internal',

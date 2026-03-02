@@ -14,15 +14,14 @@ import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { stripUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
-  const { routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const readRoute = router.get({
-    path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
     ...routeConfig,
   });

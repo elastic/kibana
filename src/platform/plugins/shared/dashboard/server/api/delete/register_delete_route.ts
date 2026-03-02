@@ -12,12 +12,11 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const { routeConfig, routeVersion } = getRouteConfig(false);
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
     ...routeConfig,
   });

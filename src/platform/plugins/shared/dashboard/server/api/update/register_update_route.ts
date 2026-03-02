@@ -14,15 +14,14 @@ import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
-import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
-  const { routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
-    path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...routeConfig,
   });

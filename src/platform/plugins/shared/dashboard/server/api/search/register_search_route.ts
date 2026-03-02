@@ -12,12 +12,11 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { getRouteConfig } from '../get_route_config';
 import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const { routeConfig, routeVersion } = getRouteConfig(false);
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const searchRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/search`,
+    path: `${basePath}/search`,
     summary: `Search dashboards`,
     ...routeConfig,
   });
