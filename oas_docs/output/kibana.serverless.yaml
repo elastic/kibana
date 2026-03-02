@@ -102,8 +102,6 @@ tags:
       Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
     x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
-<<<<<<< HEAD
-=======
     description: |
       Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
     x-displayName: Elastic Package Manager (EPM)
@@ -111,7 +109,6 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
->>>>>>> 63d16dd3a10 (adding missing descriptions for tags (#237011))
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -133,13 +130,9 @@ tags:
       Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
     x-displayName: Fleet proxies
   - name: Fleet Server hosts
-<<<<<<< HEAD
-  - name: Fleet service tokens
-=======
     description: |
       Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
     x-displayName: Fleet Server hosts
->>>>>>> 63d16dd3a10 (adding missing descriptions for tags (#237011))
   - name: Fleet uninstall tokens
     description: |
       Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
@@ -291,11 +284,7 @@ tags:
       description: Space overview
   - name: streams
     description: |
-<<<<<<< HEAD
-      Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
-=======
       Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
->>>>>>> 63d16dd3a10 (adding missing descriptions for tags (#237011))
     x-displayName: Streams
   - name: system
     x-displayName: System
