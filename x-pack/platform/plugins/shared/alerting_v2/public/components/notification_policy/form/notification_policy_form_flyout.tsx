@@ -42,7 +42,7 @@ function toCreatePayload(state: NotificationPolicyFormState): CreateNotification
   };
 }
 
-export interface NotificationPolicyFormFlyoutProps {
+interface NotificationPolicyFormFlyoutProps {
   onClose: () => void;
   onSave: (data: CreateNotificationPolicyData) => void;
   isLoading?: boolean;

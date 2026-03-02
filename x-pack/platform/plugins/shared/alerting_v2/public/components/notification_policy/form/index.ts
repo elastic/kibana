@@ -6,4 +6,3 @@
  */
 
 export { NotificationPolicyFormFlyout } from './notification_policy_form_flyout';
-export type { NotificationPolicyFormFlyoutProps } from './notification_policy_form_flyout';
