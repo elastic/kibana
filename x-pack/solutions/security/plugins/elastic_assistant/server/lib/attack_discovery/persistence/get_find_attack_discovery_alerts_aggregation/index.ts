@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME } from '@kbn/elastic-assistant-common/impl/schedules/field_names';
+import { ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME } from '@kbn/elastic-assistant-common';
 
 /**
  * Counts the unique alert IDs in attack discovery alerts

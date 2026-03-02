@@ -98,6 +98,8 @@ export {
   transformInternalReplacements,
 } from './impl/utils/attack_discovery_helpers';
 
+export * from './impl/schedules/field_names';
+
 export { transformAttackDiscoveryAlertFromApi } from './impl/utils/transform_attack_discovery_alert_from_api';
 export { transformAttackDiscoveryAlertToApi } from './impl/utils/transform_attack_discovery_alert_to_api';
 export { transformAttackDiscoveryScheduleFromApi } from './impl/utils/transform_attack_discovery_schedule_from_api';

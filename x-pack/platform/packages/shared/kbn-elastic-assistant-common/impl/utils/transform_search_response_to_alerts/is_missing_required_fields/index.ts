@@ -18,6 +18,7 @@ import {
   ALERT_ATTACK_DISCOVERY_TITLE,
 } from '../../../schedules/field_names';
 import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+
 /** Returns `true` if the document is missing fields required to create an `AttackDiscoveryAlert` */
 export const isMissingRequiredFields = (
   hit: estypes.SearchHit<AttackDiscoveryAlertDocument>

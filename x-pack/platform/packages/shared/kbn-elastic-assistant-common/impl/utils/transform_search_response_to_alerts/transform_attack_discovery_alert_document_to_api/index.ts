@@ -19,9 +19,10 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { pipe } from 'lodash/fp';
-import { getMarkdownFields, transformInternalReplacements } from '../../../..';
-import type { AttackDiscoveryApiAlert } from '../../../..';
 
+import type { AttackDiscoveryApiAlert } from '../../../schemas';
+import { transformInternalReplacements } from '../../attack_discovery_helpers';
+import { getMarkdownFields } from '../../get_attack_discovery_markdown';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_API_CONFIG,

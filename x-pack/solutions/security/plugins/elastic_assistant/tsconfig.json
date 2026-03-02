@@ -12,7 +12,7 @@
     // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "../../../../../typings/**/*",
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
