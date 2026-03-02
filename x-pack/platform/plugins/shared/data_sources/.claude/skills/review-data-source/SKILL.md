@@ -77,7 +77,7 @@ validation against the vendor API.
 - `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md` description filled in
 - `docs/reference/toc.yml` entry exists in the correct section
 - **Icon**: Data source has an icon (ConnectorIconsMap entry and, if custom, spec icon component or asset). No
-  placeholder if a brand icon exists elsewhere in the repo.
+  placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
 
 ### Naming and conventions
 
