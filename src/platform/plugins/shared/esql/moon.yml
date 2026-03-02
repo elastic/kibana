@@ -51,11 +51,12 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/inspector-plugin'
   - '@kbn/inference-plugin'
-  - '@kbn/core-elasticsearch-server'
   - '@kbn/actions-plugin'
   - '@kbn/core-http-server'
   - '@kbn/management-settings-ids'
   - '@kbn/es-types'
+  - '@kbn/agent-builder-genai-utils'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod
