@@ -56,6 +56,7 @@ export function getRouteConfig(isDashboardAppRequest: boolean) {
             },
           },
         } as const,
+        // TODO change to '2023-10-31' before FF
         routeVersion: '1',
       };
 }
