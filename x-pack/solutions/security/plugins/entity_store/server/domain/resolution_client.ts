@@ -137,7 +137,9 @@ export class ResolutionClient {
 
     if (linkResult.failures?.length) {
       this.logger.error(
-        `Failed to link some entities to target '${targetId}': ${JSON.stringify(linkResult.failures)}`
+        `Failed to link some entities to target '${targetId}': ${JSON.stringify(
+          linkResult.failures
+        )}`
       );
     }
 
@@ -195,9 +197,7 @@ export class ResolutionClient {
     });
 
     if (unlinkResult.failures?.length) {
-      this.logger.error(
-        `Failed to unlink some entities: ${JSON.stringify(unlinkResult.failures)}`
-      );
+      this.logger.error(`Failed to unlink some entities: ${JSON.stringify(unlinkResult.failures)}`);
     }
 
     return { unlinked: entityIds };
