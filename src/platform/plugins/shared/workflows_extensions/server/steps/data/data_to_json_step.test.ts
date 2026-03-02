@@ -128,15 +128,4 @@ describe('dataToJsonStepDefinition', () => {
       expect(result.error?.message).toContain('cannot be serialized to JSON');
     });
   });
-
-  describe('logging', () => {
-    it('should log stringification details', async () => {
-      const context = createMockContext({ source: { key: 'value' } });
-      await dataToJsonStepDefinition.handler(context);
-
-      expect(context.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Stringified to JSON')
-      );
-    });
-  });
 });

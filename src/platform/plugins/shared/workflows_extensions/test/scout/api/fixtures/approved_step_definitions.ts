@@ -74,7 +74,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.to_json',
-    handlerHash: 'ca8d4c23b00ddca2a1317f66cc6650b1454bffb10a794718d2be37d1dfa00510',
+    handlerHash: 'c885a6090aa64fbdb166264e5a57156fd7efc255b0a3e20bda5357d56d2bc17e',
   },
   {
     id: 'search.rerank',
