@@ -43,6 +43,8 @@ describe('extendedDataLayerConfig', () => {
       type: 'extendedDataLayer',
       layerType: LayerTypes.DATA,
       ...fullArgs,
+      xScaleType: false,
+      isHistogram: false,
       table: data,
       showLines: true,
     });

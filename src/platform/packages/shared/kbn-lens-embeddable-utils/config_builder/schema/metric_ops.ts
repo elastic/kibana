@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { filterSchema } from './filter';
-import { formatSchema } from './format';
+import { formatSchema, formatTypeSchema } from './format';
 import {
   LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
   LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
@@ -124,12 +124,19 @@ const esqlColumn = {
       description: 'Column to use',
     },
   }),
+  data_type: schema.maybe(
+    schema.string({
+      meta: { description: 'Column data type (e.g. date, number, string)' },
+    })
+  ),
+  ...labelSharedProp,
+  // format is only applicable for the columns with number data types
+  format: schema.maybe(
+    schema.conditional(schema.siblingRef('data_type'), 'number', formatTypeSchema, schema.never())
+  ),
 };
 
 export const esqlColumnSchema = schema.object(esqlColumn);
-
-export const esqlColumnOperationWithLabelAndFormatSchema =
-  genericOperationOptionsSchema.extends(esqlColumn);
 
 export const metricOperationSharedSchema =
   genericOperationOptionsSchema.extends(advancedOperationSettings);

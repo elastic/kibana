@@ -187,8 +187,8 @@ export function fromColorMappingLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
-    return {
-      mode: 'categorical',
+    const result = {
+      mode: 'categorical' as const,
       palette: colorMapping.paletteId,
       mapping: colorMapping.assignments.map(({ rules, color }) => {
         return {
@@ -198,6 +198,7 @@ export function fromColorMappingLensStateToAPI(
       }),
       ...unassignedColor,
     };
+    return result;
   }
   const colorAssignments = colorMapping.assignments.filter(
     (
@@ -221,7 +222,8 @@ export function fromColorMappingLensStateToAPI(
 }
 
 function fromColorDefAPIToLensState(
-  color: ColorMappingColorDefType
+  color: ColorMappingColorDefType,
+  defaultPalette: string = LENS_DEFAULT_COLOR_MAPPING_PALETTE
 ): ColorMapping.CategoricalColor | ColorMapping.ColorCode {
   if (color.type === 'colorCode') {
     return {
@@ -229,9 +231,10 @@ function fromColorDefAPIToLensState(
       colorCode: color.value,
     };
   }
+  const resolvedPalette = color.palette ?? defaultPalette;
   return {
     type: 'categorical',
-    paletteId: color.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
+    paletteId: resolvedPalette,
     colorIndex: color.index,
   };
 }
@@ -266,7 +269,7 @@ function fromAPIMappingToAssignments(
     return colorMapping.mapping.map((assignment) => {
       return {
         rules: fromRulesAPIToLensState(assignment.values),
-        color: fromColorDefAPIToLensState(assignment.color),
+        color: fromColorDefAPIToLensState(assignment.color, colorMapping.palette),
         touched: false,
       };
     });
@@ -275,7 +278,7 @@ function fromAPIMappingToAssignments(
     const step = colorMapping.gradient?.[index];
     return {
       rules: fromRulesAPIToLensState(assignment.values),
-      color: fromColorDefAPIToLensState(step!),
+      color: fromColorDefAPIToLensState(step!, colorMapping.palette),
       touched: false,
     };
   });
@@ -309,7 +312,11 @@ export function fromColorMappingAPIToLensState(
       ? { type: colorMapping.mode }
       : {
           type: colorMapping.mode,
-          steps: (colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? []).map((step) => ({
+          steps: (
+            colorMapping.gradient?.map((c) =>
+              fromColorDefAPIToLensState(c, colorMapping.palette)
+            ) ?? []
+          ).map((step) => ({
             ...step,
             touched: false,
           })),
@@ -317,10 +324,11 @@ export function fromColorMappingAPIToLensState(
           sort: 'asc',
         };
 
-  return {
+  const result = {
     colorMode,
     paletteId: colorMapping.palette,
     assignments,
     specialAssignments,
   };
+  return result;
 }

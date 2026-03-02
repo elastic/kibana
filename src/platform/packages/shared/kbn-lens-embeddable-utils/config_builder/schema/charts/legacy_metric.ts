@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
+import { esqlColumnSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import { applyColorToSchema, colorByValueAbsolute } from '../color';
@@ -100,9 +100,7 @@ const esqlLegacyMetricState = schema.object(
     /**
      * Metric configuration, must define operation.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
-      legacyMetricStateMetricOptionsSchema
-    ),
+    metric: esqlColumnSchema.extends(legacyMetricStateMetricOptionsSchema),
   },
   { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );

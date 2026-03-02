@@ -13,11 +13,7 @@ import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
-import {
-  metricOperationDefinitionSchema,
-  esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
-} from '../metric_ops';
+import { metricOperationDefinitionSchema, esqlColumnSchema } from '../metric_ops';
 import {
   colorByValueAbsolute,
   staticColorSchema,
@@ -350,13 +346,11 @@ export const metricStateSchemaNoESQL = schema.object({
   ),
 });
 
-const primaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema
+const primaryMetricESQL = esqlColumnSchema
   .extends(metricStatePrimaryMetricOptionsSchema)
   .extends(metricStateBackgroundChartSchemaESQL);
 
-const secondaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema.extends(
-  metricStateSecondaryMetricOptionsSchema
-);
+const secondaryMetricESQL = esqlColumnSchema.extends(metricStateSecondaryMetricOptionsSchema);
 
 export const esqlMetricState = schema.object({
   type: schema.literal('metric'),

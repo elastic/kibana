@@ -96,13 +96,39 @@ describe('Datatable ES|QL column ordering', () => {
           columnId: 'datatable_accessor_metric_0',
           fieldName: 'bytes',
           inMetricDimension: true,
-          meta: { type: 'number' },
+          meta: { type: 'string' },
         },
         {
           columnId: 'datatable_accessor_metric_1',
           fieldName: 'requests',
           inMetricDimension: true,
-          meta: { type: 'number' },
+          meta: { type: 'string' },
+        },
+      ]);
+    });
+
+    test('passes label and customLabel through when label is provided', () => {
+      const config = {
+        type: 'datatable',
+        metrics: [{ operation: 'value', column: 'bytes', label: 'Network Traffic' }],
+        rows: [{ operation: 'value', column: 'host' }],
+      } as unknown as DatatableStateESQL;
+
+      const result = getValueColumns(config);
+
+      expect(result).toEqual([
+        {
+          columnId: 'datatable_accessor_row_0',
+          fieldName: 'host',
+          meta: { type: 'string' },
+        },
+        {
+          columnId: 'datatable_accessor_metric_0',
+          fieldName: 'bytes',
+          inMetricDimension: true,
+          label: 'Network Traffic',
+          customLabel: true,
+          meta: { type: 'string' },
         },
       ]);
     });

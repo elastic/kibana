@@ -564,21 +564,13 @@ function getValueColumns(layer: MetricStateESQL) {
   }
   return [
     ...(layer.breakdown_by
-      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.column)]
+      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by)]
       : []),
-    getValueColumn(getAccessorName('metric'), primaryMetric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), primaryMetric),
     ...(primaryMetric.background_chart?.type === 'bar'
-      ? [
-          getValueColumn(
-            getAccessorName('max'),
-            primaryMetric.background_chart.max_value.column,
-            'number'
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('max'), primaryMetric.background_chart.max_value)]
       : []),
-    ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column)]
-      : []),
+    ...(secondaryMetric ? [getValueColumn(getAccessorName('secondary'), secondaryMetric)] : []),
   ];
 }
 

@@ -42,6 +42,71 @@ describe('Metric Operations Schemas', () => {
       const validated = esqlColumnSchema.validate(input);
       expect(validated).toEqual(input);
     });
+
+    it('validates with an optional label', () => {
+      const input = {
+        operation: 'value' as const,
+        column: 'bytes',
+        label: 'Network Traffic',
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates without label (label remains undefined)', () => {
+      const input = {
+        operation: 'value' as const,
+        column: 'bytes',
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated.label).toBeUndefined();
+    });
+
+    it('validates with format when data_type is number', () => {
+      const input = {
+        operation: 'value' as const,
+        column: 'bytes',
+        data_type: 'number',
+        format: { type: 'percent', decimals: 1, compact: false },
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated.format).toEqual({ type: 'percent', decimals: 1, compact: false });
+    });
+
+    it('rejects format when data_type is not number', () => {
+      const input = {
+        operation: 'value' as const,
+        column: 'host',
+        data_type: 'string',
+        format: { type: 'number', decimals: 2, compact: false },
+      };
+
+      expect(() => esqlColumnSchema.validate(input)).toThrow();
+    });
+
+    it('rejects format when data_type is missing', () => {
+      const input = {
+        operation: 'value' as const,
+        column: 'host',
+        format: { type: 'number', decimals: 2, compact: false },
+      };
+
+      expect(() => esqlColumnSchema.validate(input)).toThrow();
+    });
+
+    it('allows omitting format when data_type is number', () => {
+      const input = {
+        operation: 'value' as const,
+        column: 'bytes',
+        data_type: 'number',
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated.format).toBeUndefined();
+    });
   });
 
   describe('staticOperationDefinition', () => {

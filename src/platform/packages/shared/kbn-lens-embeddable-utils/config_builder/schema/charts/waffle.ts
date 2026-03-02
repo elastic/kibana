@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -135,14 +135,11 @@ const waffleStateSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...waffleStateSharedSchema,
-    metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
-      {
-        minSize: 1,
-        maxSize: 100,
-        meta: { description: 'Array of metric configurations (minimum 1)' },
-      }
-    ),
+    metrics: schema.arrayOf(esqlColumnSchema.extends(partitionStatePrimaryMetricOptionsSchema), {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'Array of metric configurations (minimum 1)' },
+    }),
     group_by: schema.maybe(
       schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,

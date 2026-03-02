@@ -9,11 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  fieldMetricOrFormulaOperationDefinitionSchema,
-  esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
-} from '../metric_ops';
+import { fieldMetricOrFormulaOperationDefinitionSchema, esqlColumnSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
@@ -55,7 +51,7 @@ export const regionMapStateSchemaESQL = schema.object(
     /**
      * Metric configuration
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema,
+    metric: esqlColumnSchema,
     /**
      * Configure how to break down to regions
      */

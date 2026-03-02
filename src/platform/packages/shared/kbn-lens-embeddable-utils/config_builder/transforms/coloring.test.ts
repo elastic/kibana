@@ -432,6 +432,62 @@ describe('Color util transforms', () => {
         ],
       });
     });
+
+    it('should inherit top-level palette when from_palette color has no explicit palette', () => {
+      expect(
+        fromColorMappingAPIToLensState({
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              values: ['Mary'],
+              color: { type: 'from_palette', index: 0 },
+            },
+          ],
+        })
+      ).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'kibana_palette',
+        assignments: [
+          {
+            rules: [{ type: 'raw', value: 'Mary' }],
+            color: { type: 'categorical', paletteId: 'kibana_palette', colorIndex: 0 },
+            touched: false,
+          },
+        ],
+        specialAssignments: [
+          { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
+        ],
+      });
+    });
+
+    it('should use explicit palette on from_palette color when provided', () => {
+      expect(
+        fromColorMappingAPIToLensState({
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              values: ['Mary'],
+              color: { type: 'from_palette', index: 0, palette: 'other_palette' },
+            },
+          ],
+        })
+      ).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'kibana_palette',
+        assignments: [
+          {
+            rules: [{ type: 'raw', value: 'Mary' }],
+            color: { type: 'categorical', paletteId: 'other_palette', colorIndex: 0 },
+            touched: false,
+          },
+        ],
+        specialAssignments: [
+          { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
+        ],
+      });
+    });
   });
 
   describe('round-trip conversions', () => {

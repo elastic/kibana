@@ -8,9 +8,10 @@
  */
 
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
-import { validateAccessor } from '@kbn/chart-expressions-common';
-import type { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
-import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
+import { getColumnByAccessor, validateAccessor } from '@kbn/chart-expressions-common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { ExtendedDataLayerArgs, ExtendedDataLayerFn, XScaleType } from '../types';
+import { EXTENDED_DATA_LAYER, LayerTypes, XScaleTypes } from '../constants';
 import { getAccessors, normalizeTable, getShowLines } from '../helpers';
 import {
   validateLinesVisibilityForChartType,
@@ -19,6 +20,38 @@ import {
   validatePointsRadiusForChartType,
   validateShowPointsForChartType,
 } from './validate';
+
+/**
+ * Reconciles xScaleType and isHistogram with the actual Datatable column metadata.
+ * This ensures that date columns are always rendered with a time scale and histogram
+ * behavior (enabling brush/zoom), even when the pre-computed values from the expression
+ * builder are stale (e.g. after restoring a saved ES|QL visualization that lost column
+ * type info).
+ */
+function resolveXAxisMeta(
+  args: Pick<ExtendedDataLayerArgs, 'xScaleType' | 'isHistogram'>,
+  xAccessor: string | ExpressionValueVisDimension | undefined,
+  columns: Datatable['columns']
+): Pick<ExtendedDataLayerArgs, 'xScaleType' | 'isHistogram'> {
+  if (!xAccessor) {
+    return args;
+  }
+  const column = getColumnByAccessor(xAccessor, columns);
+  if (!column) {
+    return args;
+  }
+
+  let { xScaleType, isHistogram } = args;
+
+  if (column.meta?.type === 'date') {
+    xScaleType = XScaleTypes.TIME as XScaleType;
+    isHistogram = true;
+  } else if (column.meta?.type === 'number' && xScaleType === XScaleTypes.ORDINAL) {
+    xScaleType = XScaleTypes.LINEAR as XScaleType;
+  }
+
+  return { xScaleType, isHistogram };
+}
 
 export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args, context) => {
   const table = data;
@@ -40,10 +73,13 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   const normalizedTable = normalizeTable(table, accessors.xAccessor);
 
   const showLines = getShowLines(args);
+  // const { xScaleType, isHistogram } = resolveXAxisMeta(args, accessors.xAccessor, table.columns);
 
   return {
     type: EXTENDED_DATA_LAYER,
     ...args,
+    // xScaleType,
+    // isHistogram,
     layerType: LayerTypes.DATA,
     ...accessors,
     table: normalizedTable,

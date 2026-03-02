@@ -108,6 +108,7 @@ export type {
   ExpressionValue,
   Render,
   ExpressionImage,
+  DATATABLE_COLUMN_TYPES,
   DatatableColumnType,
   DatatableRow,
   Datatable,

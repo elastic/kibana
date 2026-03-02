@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -169,10 +169,9 @@ const pieStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...pieStateSharedSchema,
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(
-        partitionStatePrimaryMetricOptionsSchema,
-        { meta: { description: 'ES|QL column reference for primary metric' } }
-      ),
+      esqlColumnSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+        meta: { description: 'ES|QL column reference for primary metric' },
+      }),
       {
         minSize: 1,
         maxSize: 100,

@@ -35,26 +35,33 @@ export const isDatatable = (datatable: unknown): datatable is Datatable =>
   (datatable as ExpressionValueBoxed | undefined)?.type === 'datatable';
 
 /**
+ * All valid column types for a `DatatableColumn`. Duplicated from KBN_FIELD_TYPES.
+ * Exported as a const array so downstream packages can build schemas from it.
+ */
+export const DATATABLE_COLUMN_TYPES = [
+  '_source',
+  'attachment',
+  'boolean',
+  'date',
+  'geo_point',
+  'geo_shape',
+  'ip',
+  'murmur3',
+  'number',
+  'string',
+  'unknown',
+  'conflict',
+  'object',
+  'nested',
+  'histogram',
+  'null',
+] as const;
+
+/**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
  * its duplicated from KBN_FIELD_TYPES
  */
-export type DatatableColumnType =
-  | '_source'
-  | 'attachment'
-  | 'boolean'
-  | 'date'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'ip'
-  | 'murmur3'
-  | 'number'
-  | 'string'
-  | 'unknown'
-  | 'conflict'
-  | 'object'
-  | 'nested'
-  | 'histogram'
-  | 'null';
+export type DatatableColumnType = (typeof DATATABLE_COLUMN_TYPES)[number];
 
 /**
  * This type represents a row in a `Datatable`.
