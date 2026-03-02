@@ -106,6 +106,7 @@ dependsOn:
   - '@kbn/crypto-browser'
   - '@kbn/cps'
   - '@kbn/kql'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

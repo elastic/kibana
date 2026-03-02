@@ -53,11 +53,11 @@ describe('ProjectPickerContainer', () => {
       getProjectRouting: jest.fn(() => undefined),
       getProjectRouting$: jest.fn(() => mockProjectRouting$),
       setProjectRouting: jest.fn(),
-      getProjectPickerAccess: jest.fn(() => mockProjectPickerAccess$.getValue()),
       getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
       getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
       getTotalProjectCount: jest.fn(() => 2),
       updateDefaultProjectRouting: jest.fn(),
+      registerAppAccess: jest.fn(),
       ...props.cpsManager,
     };
     return await act(async () => {
@@ -126,7 +126,6 @@ describe('ProjectPickerContainer', () => {
           getProjectPickerAccess$: jest.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.EDITABLE)
           ),
-          getProjectPickerAccess: jest.fn(() => ProjectRoutingAccess.EDITABLE),
         },
       });
       const button = screen.getByTestId('project-picker-button');
@@ -139,7 +138,6 @@ describe('ProjectPickerContainer', () => {
           getProjectPickerAccess$: jest.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.DISABLED)
           ),
-          getProjectPickerAccess: jest.fn(() => ProjectRoutingAccess.DISABLED),
         },
       });
       const button = screen.getByTestId('project-picker-button-disabled');
@@ -152,7 +150,6 @@ describe('ProjectPickerContainer', () => {
           getProjectPickerAccess$: jest.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.READONLY)
           ),
-          getProjectPickerAccess: jest.fn(() => ProjectRoutingAccess.READONLY),
         },
       });
       const button = screen.getByTestId('project-picker-button');
