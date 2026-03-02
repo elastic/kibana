@@ -13,6 +13,7 @@ export const convertPersistedSkill = (
 ): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
+  basePath: '/skills', // user-skills have no configurable basePath atm
   description: skill.description,
   content: skill.content,
   readonly: false,
