@@ -132,6 +132,98 @@ describe('getCpsRequestHandler', () => {
     });
   });
 
+  describe('msearch and msearch_template NDJSON APIs', () => {
+    const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN);
+
+    it.each(['msearch', 'msearch_template'])(
+      'injects project_routing as a query param for %s',
+      (apiName) => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: `/_${apiName}`,
+          meta: { name: apiName, acceptedParams: ['project_routing'] },
+          body: 'header\nbody\n',
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect((params.querystring as Record<string, unknown>)?.project_routing).toBe(
+          PROJECT_ROUTING_ORIGIN
+        );
+        expect(params.body).toBe('header\nbody\n');
+      }
+    );
+
+    it.each(['msearch', 'msearch_template'])(
+      'creates querystring object when not present for %s',
+      (apiName) => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: `/_${apiName}`,
+          meta: { name: apiName, acceptedParams: ['project_routing'] },
+          body: 'header\nbody\n',
+        };
+
+        expect(params.querystring).toBeUndefined();
+        onRequest({ scoped: true }, params, {});
+
+        expect(params.querystring).toEqual({ project_routing: PROJECT_ROUTING_ORIGIN });
+      }
+    );
+
+    it.each(['msearch', 'msearch_template'])(
+      'does not override existing project_routing in querystring for %s',
+      (apiName) => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: `/_${apiName}`,
+          meta: { name: apiName, acceptedParams: ['project_routing'] },
+          body: 'header\nbody\n',
+          querystring: { project_routing: 'custom-value' },
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect((params.querystring as Record<string, unknown>)?.project_routing).toBe(
+          'custom-value'
+        );
+      }
+    );
+
+    it.each(['msearch', 'msearch_template'])('does not inject into body for %s', (apiName) => {
+      const params: TransportRequestParams = {
+        method: 'POST',
+        path: `/_${apiName}`,
+        meta: { name: apiName, acceptedParams: ['project_routing'] },
+        body: 'header\nbody\n',
+      };
+
+      onRequest({ scoped: true }, params, {});
+
+      expect(params.body).toBe('header\nbody\n');
+    });
+
+    it.each(['msearch', 'msearch_template'])(
+      'preserves existing querystring params when injecting for %s',
+      (apiName) => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: `/_${apiName}`,
+          meta: { name: apiName, acceptedParams: ['project_routing'] },
+          body: 'header\nbody\n',
+          querystring: { max_concurrent_searches: 5 },
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect(params.querystring).toEqual({
+          max_concurrent_searches: 5,
+          project_routing: PROJECT_ROUTING_ORIGIN,
+        });
+      }
+    );
+  });
+
   describe('when CPS is disabled', () => {
     const onRequest = getCpsRequestHandler(false, PROJECT_ROUTING_ORIGIN);
 
@@ -172,6 +264,57 @@ describe('getCpsRequestHandler', () => {
       onRequest({ scoped: true }, params, {});
 
       expect((params.body as Record<string, unknown>)?.project_routing).toBeUndefined();
+    });
+
+    describe('msearch and msearch_template NDJSON APIs', () => {
+      it.each(['msearch', 'msearch_template'])(
+        'does not inject project_routing for %s',
+        (apiName) => {
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: `/_${apiName}`,
+            meta: { name: apiName, acceptedParams: ['project_routing'] },
+            body: 'header\nbody\n',
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          expect(params.querystring).toBeUndefined();
+        }
+      );
+
+      it.each(['msearch', 'msearch_template'])(
+        'strips project_routing from querystring for %s',
+        (apiName) => {
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: `/_${apiName}`,
+            meta: { name: apiName, acceptedParams: ['project_routing'] },
+            body: 'header\nbody\n',
+            querystring: { project_routing: 'should-be-removed', max_concurrent_searches: 5 },
+          };
+
+          onRequest({ scoped: true }, params, {});
+
+          expect((params.querystring as Record<string, unknown>)?.project_routing).toBeUndefined();
+          expect((params.querystring as Record<string, unknown>)?.max_concurrent_searches).toBe(5);
+        }
+      );
+
+      it.each(['msearch', 'msearch_template'])(
+        'does not fail when querystring is absent for %s',
+        (apiName) => {
+          const params: TransportRequestParams = {
+            method: 'POST',
+            path: `/_${apiName}`,
+            meta: { name: apiName, acceptedParams: ['project_routing'] },
+            body: 'header\nbody\n',
+          };
+
+          expect(() => onRequest({ scoped: true }, params, {})).not.toThrow();
+          expect(params.querystring).toBeUndefined();
+        }
+      );
     });
   });
 });

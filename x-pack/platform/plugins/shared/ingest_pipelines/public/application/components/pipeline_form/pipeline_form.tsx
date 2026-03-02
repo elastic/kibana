@@ -85,17 +85,30 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       return;
     }
 
-    if (processorStateRef.current) {
-      const state = processorStateRef.current;
-      if (await state.validate()) {
+    const editorState = processorStateRef.current;
+    if (editorState) {
+      if (await editorState.validate()) {
         // We only want to show unsaved changed prompts to the user when the form
         // hasnt been submitted.
         setHasSubmittedForm(true);
 
         // Save the form state, this will also trigger a redirect to pipelines list
-        onSave({ ...formData, ...state.getData() });
+        onSave({ ...formData, ...editorState.getData() });
       }
+      return;
     }
+
+    /**
+     * The processors editor registers its `onUpdate` handler in an effect.
+     * If the user submits before that effect fires, we can still safely save
+     * using the last known processors state (initially derived from `defaultValue`).
+     */
+    setHasSubmittedForm(true);
+    onSave({
+      ...formData,
+      processors: processorsState.processors,
+      on_failure: processorsState.onFailure,
+    });
   };
 
   const { form } = useForm<IPipelineForm>({
