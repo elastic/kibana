@@ -55,7 +55,7 @@ function DefaultEditorAggAdd({
   const addButton = (
     <EuiButtonEmpty
       size="s"
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       data-test-subj={`visEditorAdd_${groupName}`}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate('visDefaultEditor.aggAdd.addGroupButtonLabel', {

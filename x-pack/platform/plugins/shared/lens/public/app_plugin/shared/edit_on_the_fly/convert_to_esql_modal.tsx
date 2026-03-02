@@ -137,7 +137,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                       defaultMessage: 'Expand',
                     })
               }
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               disabled={!layer.isConvertibleToEsql}
             />
           );

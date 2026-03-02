@@ -57,7 +57,7 @@ export const getUnlinkLayerAction = ({
       defaultMessage: 'Unlink from library',
     }),
     isCompatible: true,
-    icon: 'unlink',
+    icon: 'linkSlash',
     'data-test-subj': 'lnsXY_annotationLayer_unlinkFromLibrary',
     order: 300,
   };
