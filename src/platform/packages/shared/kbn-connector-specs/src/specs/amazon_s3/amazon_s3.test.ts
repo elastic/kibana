@@ -15,9 +15,9 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import type { ActionContext } from '../../connector_spec';
-import { AmazonS3 } from './amazon_s3';
 
 let mockS3Send: jest.Mock;
+let mockGetSignedUrl: jest.Mock;
 
 jest.mock('@aws-sdk/client-s3', () => {
   const originalModule = jest.requireActual('@aws-sdk/client-s3');
@@ -31,6 +31,15 @@ jest.mock('@aws-sdk/client-s3', () => {
     }),
   };
 });
+
+// Mock the s3-request-presigner before loading the module under test
+jest.doMock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: jest.fn(),
+}));
+
+// Load the module under test after mocks are in place
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { AmazonS3 } = require('./amazon_s3');
 
 describe('AmazonS3', () => {
   const mockContext = {
@@ -52,6 +61,11 @@ describe('AmazonS3', () => {
     (S3Client as jest.Mock).mockImplementation(() => ({
       send: mockS3Send,
     }));
+
+    // obtain the mocked getSignedUrl function
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    mockGetSignedUrl = require('@aws-sdk/s3-request-presigner').getSignedUrl as jest.Mock;
+    mockGetSignedUrl.mockReset();
   });
 
   it('should be defined', () => {
@@ -472,5 +486,49 @@ describe('AmazonS3', () => {
     expect(mockContext.log.error).toHaveBeenCalledWith(
       `Failed to download file from S3 (bucket: my-bucket, key: missing-file.txt): ${error}`
     );
+  });
+
+  it('should return a presigned URL when file size exceeds maximum download size', async () => {
+    mockS3Send.mockResolvedValueOnce({
+      ContentType: 'application/octet-stream',
+      ContentLength: 999999,
+      LastModified: new Date('2025-02-01T00:00:00.000Z'),
+      ETag: '"etag123"',
+    });
+
+    mockGetSignedUrl.mockResolvedValue('https://signed-url.example.com');
+
+    const result = await AmazonS3.actions.downloadFile.handler(mockContext, {
+      bucket: 'big-bucket',
+      key: 'big-file.bin',
+    });
+
+    expect(mockS3Send).toHaveBeenCalledTimes(1);
+    const headCommand = mockS3Send.mock.calls[0][0] as HeadObjectCommand;
+    expect(headCommand).toBeInstanceOf(HeadObjectCommand);
+    expect(headCommand.input).toEqual({
+      Bucket: 'big-bucket',
+      Key: 'big-file.bin',
+    });
+
+    expect(mockGetSignedUrl).toHaveBeenCalledTimes(1);
+    const presignArgs = mockGetSignedUrl.mock.calls[0];
+    const presignCommand = presignArgs[1] as GetObjectCommand;
+    const presignOptions = presignArgs[2];
+
+    expect(presignCommand).toBeInstanceOf(GetObjectCommand);
+    expect(presignCommand.input).toEqual({ Bucket: 'big-bucket', Key: 'big-file.bin' });
+    expect(presignOptions).toEqual({ expiresIn: 300 });
+
+    expect(result).toEqual({
+      bucket: 'big-bucket',
+      key: 'big-file.bin',
+      contentType: 'application/octet-stream',
+      contentLength: 999999,
+      lastModified: '2025-02-01T00:00:00.000Z',
+      etag: '"etag123"',
+      contentUrl: 'https://signed-url.example.com',
+      message: expect.stringContaining('File size (999999 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.'),
+    });
   });
 });

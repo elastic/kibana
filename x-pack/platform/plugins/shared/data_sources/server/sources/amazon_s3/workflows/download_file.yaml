@@ -18,7 +18,7 @@ inputs:
     type: number
     required: false
     default: 131072
-    description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a URL will be returned for direct download from S3. Default is 128 KB."
+    description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB."
 steps:
   - name: downloadFile
     type: amazon_s3.downloadFile

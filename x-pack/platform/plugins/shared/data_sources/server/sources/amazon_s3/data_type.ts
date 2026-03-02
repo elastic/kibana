@@ -12,7 +12,7 @@ export const amazonS3DataSource: DataSource = {
   id: 'amazon_s3',
   name: 'Amazon S3',
   description: i18n.translate('xpack.dataSources.amazonS3.description', {
-    defaultMessage: 'Connect to Amazon S3 to list buckets and download files.',
+    defaultMessage: 'Connect to Amazon S3 to list buckets, objects and download files.',
   }),
 
   iconType: '.amazon_s3',

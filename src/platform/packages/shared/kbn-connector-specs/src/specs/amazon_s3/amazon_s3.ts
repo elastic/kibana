@@ -16,6 +16,7 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { ConnectorSpec } from '../../connector_spec';
 
 /**
@@ -242,7 +243,7 @@ export const AmazonS3: ConnectorSpec = {
           .positive()
           .optional()
           .describe(
-            'Maximum file size in bytes that can be downloaded for the file content. If the file exceeds this size, a URL will be returned instead of the content.'
+            'Maximum file size in bytes that can be downloaded for the file content. If the file exceeds this size, a pre-signed URL will be returned instead of the content.'
           ),
       }),
       handler: async (ctx, input) => {
@@ -268,10 +269,14 @@ export const AmazonS3: ConnectorSpec = {
 
           const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
           if (metadata.ContentLength && metadata.ContentLength > maxSize) {
-            const region = config.region || 'us-east-1';
-            const fileUrl = `https://${
-              typedInput.bucket
-            }.s3.${region}.amazonaws.com/${encodeURIComponent(typedInput.key)}`;
+            const urlString = await getSignedUrl(
+              s3Client,
+              new GetObjectCommand({
+                Bucket: typedInput.bucket,
+                Key: typedInput.key,
+              }),
+              { expiresIn: 300 } // URL expires in 5 minutes
+            );
 
             return {
               bucket: typedInput.bucket,
@@ -280,7 +285,7 @@ export const AmazonS3: ConnectorSpec = {
               contentLength: metadata.ContentLength,
               lastModified: metadata.LastModified?.toISOString(),
               etag: metadata.ETag,
-              contentUrl: fileUrl,
+              contentUrl: urlString,
               message: `File size (${metadata.ContentLength} bytes) exceeds maximum downloadable size (${maxSize} bytes). Access the file using the provided link.`,
             };
           }
