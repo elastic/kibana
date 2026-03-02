@@ -63,7 +63,7 @@ export const SearchApplicationIndices: React.FC = () => {
           defaultMessage: 'Remove this index from search application',
         }
       ),
-      icon: 'minusInCircle',
+      icon: 'minusCircle',
       isPrimary: false,
       name: (index: EnterpriseSearchApplicationIndex) =>
         i18n.translate(

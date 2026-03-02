@@ -114,7 +114,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
               data-test-subj="enterpriseSearchAddIndicesFlyoutAddSelectedButton"
               fill
               data-telemetry-id="entSearchApplications-indices-addNewIndices-submit"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={submitSelectedIndices}
               disabled={isIndicesSelectComboBoxDisabled}
             >

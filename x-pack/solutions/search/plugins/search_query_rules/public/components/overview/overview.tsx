@@ -88,7 +88,7 @@ export const QueryRulesOverview = () => {
                 <EuiButton
                   data-test-subj="queryRulesOverviewCreateButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     usageTracker?.click(AnalyticsEvents.addRulesetClicked);
                     setIsCreateModalVisible(true);

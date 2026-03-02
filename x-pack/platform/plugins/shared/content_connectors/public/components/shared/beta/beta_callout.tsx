@@ -19,7 +19,7 @@ export const BetaCallOut: React.FC<BetaCallOutProps> = ({ title, description }) 
   return (
     <EuiCallOut
       color="warning"
-      iconType="beaker"
+      iconType="flask"
       title={
         title ||
         i18n.translate('xpack.contentConnectors.betaCalloutTitle', {
