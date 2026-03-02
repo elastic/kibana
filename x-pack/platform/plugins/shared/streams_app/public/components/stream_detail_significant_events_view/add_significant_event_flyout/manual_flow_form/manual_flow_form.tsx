@@ -13,18 +13,17 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../system_selector';
+import { ConditionPanel } from '../../../data_management/shared/condition_display';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -33,7 +32,6 @@ interface Props {
   isEditMode: boolean;
   setQuery: (query: StreamQuery) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: System[];
   dataViews: DataView[];
 }
 
@@ -47,12 +45,10 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
   isEditMode,
-  systems,
   dataViews,
 }: Props) {
   const [touched, setTouched] = useState({
     title: false,
-    feature: false,
     kql: false,
     severity: false,
   });
@@ -78,17 +74,9 @@ export function ManualFlowForm({
 
   useEffect(() => {
     const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
+    const isTouched = touched.title || touched.kql || touched.severity;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
-
-  const options = [
-    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...systems.map((system) => ({
-      value: system,
-      inputDisplay: system.name,
-    })),
-  ];
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -146,51 +134,6 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
-                  { defaultMessage: 'System' }
-                )}
-              </EuiFormLabel>
-            }
-          >
-            <EuiSuperSelect
-              options={options}
-              valueOfSelected={
-                query.feature
-                  ? options.find(
-                      (option) =>
-                        option.value.name === query.feature?.name &&
-                        option.value.type === query.feature?.type
-                    )?.value
-                  : ALL_DATA_OPTION.value
-              }
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
-                { defaultMessage: 'Select system' }
-              )}
-              disabled={isSubmitting || systems.length === 0 || isEditMode}
-              onBlur={() => {
-                setTouched((prev) => ({ ...prev, feature: true }));
-              }}
-              onChange={(value) => {
-                const feature =
-                  value.type === ALL_DATA_OPTION.value.type
-                    ? undefined
-                    : {
-                        name: value.name,
-                        filter: value.filter,
-                        type: value.type,
-                      };
-                setQuery({ ...query, feature });
-                setTouched((prev) => ({ ...prev, feature: true }));
-              }}
-              fullWidth
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
                   { defaultMessage: 'Query' }
                 )}
@@ -223,6 +166,27 @@ export function ManualFlowForm({
               indexPatterns={dataViews}
             />
           </EuiFormRow>
+
+          {query.feature?.filter && (
+            <EuiFormRow
+              label={
+                <EuiFormLabel>
+                  {i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldAdditionalFilterLabel',
+                    { defaultMessage: 'Additional filter' }
+                  )}
+                </EuiFormLabel>
+              }
+              helpText={i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.manualFlow.additionalFilterHelpText',
+                {
+                  defaultMessage: 'This filter was inherited from a system and cannot be modified.',
+                }
+              )}
+            >
+              <ConditionPanel condition={query.feature.filter} />
+            </EuiFormRow>
+          )}
         </EuiForm>
 
         <EuiHorizontalRule margin="m" />
