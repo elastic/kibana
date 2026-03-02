@@ -128,3 +128,8 @@ export { validateActionFilterQuery } from './application/lib/value_validators';
 export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';
 
 export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';
+
+// Cross-plugin component exports consumed by the unified_rules plugin (shallow copy)
+export { GlobalRuleEventLogList } from './application/sections/rule_details/components/global_rule_event_log_list';
+export { RulesList } from './application/sections/rules_list/components/rules_list';
+export { default as RuleDetailsRouteWithApi } from './application/sections/rule_details/components/rule_details_route';

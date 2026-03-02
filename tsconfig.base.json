@@ -2452,6 +2452,8 @@
       "@kbn/unified-field-list-examples-plugin/*": ["examples/unified_field_list_examples/*"],
       "@kbn/unified-histogram": ["src/platform/packages/shared/kbn-unified-histogram"],
       "@kbn/unified-histogram/*": ["src/platform/packages/shared/kbn-unified-histogram/*"],
+      "@kbn/unified-rules-plugin": ["x-pack/platform/plugins/shared/unified_rules"],
+      "@kbn/unified-rules-plugin/*": ["x-pack/platform/plugins/shared/unified_rules/*"],
       "@kbn/unified-search-plugin": ["src/platform/plugins/shared/unified_search"],
       "@kbn/unified-search-plugin/*": ["src/platform/plugins/shared/unified_search/*"],
       "@kbn/unified-tabs": ["src/platform/packages/shared/kbn-unified-tabs"],

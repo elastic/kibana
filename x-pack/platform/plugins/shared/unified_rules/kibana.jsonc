@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unified-rules-plugin",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "unifiedRules",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "alerting",
+      "actions",
+      "licensing",
+      "expressions",
+      "lens",
+      "fieldsMetadata",
+      "uiActions",
+      "unifiedSearch",
+      "triggersActionsUi"
+    ],
+    "optionalPlugins": ["cloud", "features", "spaces", "serverless", "share", "contentManagement"],
+    "requiredBundles": ["triggersActionsUi", "kibanaReact", "kibanaUtils"]
+  }
+}
