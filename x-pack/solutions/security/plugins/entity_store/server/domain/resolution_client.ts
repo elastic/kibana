@@ -10,7 +10,6 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../common/domain/definitions/common_fields';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
-import { MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -22,6 +21,7 @@ import {
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
+const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
 
 interface ResolutionClientOpts {
   logger: Logger;
@@ -225,7 +225,7 @@ export class ResolutionClient {
     // 3. Query for target + all aliases in one search
     const response = await this.esClient.search<Record<string, unknown>>({
       index,
-      size: MAX_SEARCH_RESPONSE_SIZE,
+      size: MAX_RESOLUTION_SEARCH_SIZE,
       query: {
         bool: {
           should: [
@@ -271,7 +271,7 @@ export class ResolutionClient {
   }
 
   /**
-   * Logs a warning if the search response was truncated by MAX_SEARCH_RESPONSE_SIZE.
+   * Logs a warning if the search response was truncated by MAX_RESOLUTION_SEARCH_SIZE.
    */
   private warnIfTruncated(response: SearchResponse, context: string): void {
     const total =
@@ -281,7 +281,7 @@ export class ResolutionClient {
     const returned = response.hits.hits.length;
     if (total > returned) {
       this.logger.warn(
-        `${context}: search returned ${returned} of ${total} results (truncated at MAX_SEARCH_RESPONSE_SIZE=${MAX_SEARCH_RESPONSE_SIZE})`
+        `${context}: search returned ${returned} of ${total} results (truncated at MAX_RESOLUTION_SEARCH_SIZE=${MAX_RESOLUTION_SEARCH_SIZE})`
       );
     }
   }
@@ -321,7 +321,7 @@ export class ResolutionClient {
     const index = getLatestEntitiesIndexName(this.namespace);
     const response = await this.esClient.search<Record<string, unknown>>({
       index,
-      size: MAX_SEARCH_RESPONSE_SIZE,
+      size: MAX_RESOLUTION_SEARCH_SIZE,
       query: {
         bool: {
           filter: [{ terms: { [RESOLVED_TO_FIELD]: entityIds } }],

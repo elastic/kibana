@@ -45,8 +45,6 @@ export const getEntitiesAliasPattern = <TDataset extends Dataset>({
   dataset,
 }: AliasPatternOptions<TDataset>) => `${ENTITY_BASE_PREFIX}-${dataset}` as const;
 
-export const MAX_SEARCH_RESPONSE_SIZE = 10000;
-
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',
