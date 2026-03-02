@@ -35,7 +35,7 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    core: CoreStart,
+    _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
     const experimentalFeaturesEnabled = core.uiSettings.get<boolean>(
