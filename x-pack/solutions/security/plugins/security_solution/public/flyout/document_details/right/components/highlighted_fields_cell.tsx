@@ -20,6 +20,7 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
+import type { EntityIdentifiers } from '../../shared/utils';
 import { isFlyoutLink } from '../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../shared/components/preview_link';
 
@@ -54,6 +55,10 @@ export interface HighlightedFieldsCellProps {
    */
   ancestorsIndexName?: string;
   /**
+   * Entity identifiers built from EUID logic (for host.name and user.name links)
+   */
+  entityIdentifiers?: EntityIdentifiers | null;
+  /**
    * Caps the amount of values displayed in the cell.
    * If the limit is reached a "show more" button is being rendered
    */
@@ -70,6 +75,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   scopeId = '',
   showPreview = false,
   ancestorsIndexName,
+  entityIdentifiers,
   displayValuesLimit = 2,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
@@ -124,12 +130,16 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
       <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
         {showPreview && isFlyoutLink({ field, scopeId }) ? (
           <PreviewLink
-            field={field}
-            value={value}
+            entityIdentifiers={{
+              ...(entityIdentifiers ?? {}),
+              [field]: value,
+            }}
             scopeId={scopeId}
             data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
             ancestorsIndexName={ancestorsIndexName}
-          />
+          >
+            {value}
+          </PreviewLink>
         ) : field === AGENT_STATUS_FIELD_NAME ? (
           <AgentStatus
             agentId={String(value ?? '')}
@@ -141,7 +151,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
         )}
       </div>
     ),
-    [agentType, ancestorsIndexName, field, scopeId, showPreview]
+    [agentType, ancestorsIndexName, entityIdentifiers, field, scopeId, showPreview]
   );
 
   if (values === null) return null;

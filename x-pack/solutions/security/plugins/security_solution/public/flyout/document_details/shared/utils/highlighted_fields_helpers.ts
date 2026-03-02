@@ -6,8 +6,19 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityIdentifiers } from '../utils';
 import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
+import { getHostEntityIdentifiers, getUserEntityIdentifiers } from '../utils';
+import { HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+
+const filterEntityIdentifiersByPrefix = (
+  identifiers: EntityIdentifiers,
+  prefix: 'host.' | 'user.'
+): EntityIdentifiers =>
+  Object.fromEntries(
+    Object.entries(identifiers).filter(([key]) => key.startsWith(prefix))
+  );
 
 /**
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
@@ -22,6 +33,8 @@ export const convertHighlightedFieldsToTableRow = (
   showCellActions: boolean,
   ancestorsIndexName?: string
 ): HighlightedFieldsTableRow[] => {
+  const getFieldsData = (field: string) => highlightedFields[field]?.values;
+
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
     const overrideFieldName = highlightedFields[fieldName].overrideField?.field;
@@ -30,6 +43,20 @@ export const convertHighlightedFieldsToTableRow = (
     const values = overrideFieldValues?.length
       ? overrideFieldValues
       : highlightedFields[fieldName].values;
+
+    const rawEntityIdentifiers =
+      fieldName === HOST_NAME_FIELD_NAME
+        ? getHostEntityIdentifiers({} as never, getFieldsData)
+        : fieldName === USER_NAME_FIELD_NAME
+          ? getUserEntityIdentifiers({} as never, getFieldsData)
+          : null;
+
+    const entityIdentifiers =
+      rawEntityIdentifiers && fieldName === HOST_NAME_FIELD_NAME
+        ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'host.')
+        : rawEntityIdentifiers && fieldName === USER_NAME_FIELD_NAME
+          ? filterEntityIdentifiersByPrefix(rawEntityIdentifiers, 'user.')
+          : null;
 
     return {
       field,
@@ -40,6 +67,7 @@ export const convertHighlightedFieldsToTableRow = (
         scopeId,
         showCellActions,
         ancestorsIndexName,
+        ...(entityIdentifiers ? { entityIdentifiers } : {}),
       },
     };
   });

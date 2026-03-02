@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EntityIdentifiers } from '../../shared/utils';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -50,6 +51,10 @@ export interface HighlightedFieldsTableRow {
      * when clicking on "Source event" id
      */
     ancestorsIndexName?: string;
+    /**
+     * Entity identifiers (built from EUID logic) for host.name and user.name links
+     */
+    entityIdentifiers?: EntityIdentifiers | null;
   };
 }
 
@@ -83,6 +88,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       isPreview: boolean;
       showCellActions: boolean;
       ancestorsIndexName?: string;
+      entityIdentifiers?: EntityIdentifiers | null;
     }) => (
       <>
         {description.showCellActions ? (
@@ -94,6 +100,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               scopeId={description.scopeId}
               showPreview={true}
               ancestorsIndexName={description.ancestorsIndexName}
+              entityIdentifiers={description.entityIdentifiers}
             />
           </CellActions>
         ) : (
@@ -101,6 +108,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
             values={description.values}
             field={description.field}
             originalField={description.originalField}
+            entityIdentifiers={description.entityIdentifiers}
           />
         )}
       </>

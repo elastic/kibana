@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { euid } from '../../../../../../plugins/entity_store/common';
+import type { ESQuery } from '../../../../common/typed_json';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -18,30 +20,29 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { UsersType } from '../../../explore/users/store/model';
-import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
-import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import { useObservedUser } from './hooks/use_observed_user';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
-  userName: string;
   isPreviewMode: boolean;
+  /**
+   * Entity identifiers for the user (following entity store EUID logic)
+   */
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -59,29 +60,33 @@ const FIRST_RECORD_PAGINATION = {
 export const UserPanel = ({
   contextID,
   scopeId,
-  userName,
   isPreviewMode = false,
+  entityIdentifiers,
 }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
-  const userNameFilterQuery = useMemo(
-    () => (userName ? buildUserNamesFilter([userName]) : undefined),
-    [userName]
-  );
+  // Extract userName from entityIdentifiers
+  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  const effectiveUserName = useMemo<string>(() => {
+    const userNameFromIdentifiers =
+      entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0];
+    return userNameFromIdentifiers as string;
+  }, [entityIdentifiers]);
+
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
-    filterQuery: userNameFilterQuery,
+    filterQuery: entityFilters as ESQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
-  const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
+  const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
-  const observedUser = useObservedUser(userName, scopeId);
-  const email = observedUser.details.user?.email;
+  const observedUser = useObservedUser(entityIdentifiers, scopeId);
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
@@ -96,15 +101,14 @@ export const UserPanel = ({
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     EntityType.user,
-    userName,
+    effectiveUserName,
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: userName,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
@@ -120,8 +124,7 @@ export const UserPanel = ({
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    userName,
-    email,
+    entityIdentifiers,
     scopeId,
     contextID,
     isRiskScoreExist,
@@ -145,60 +148,42 @@ export const UserPanel = ({
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (observedUser.isLoading) {
-    return <FlyoutLoading />;
-  }
-
   return (
-    <AnomalyTableProvider
-      criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
-      startDate={from}
-      endDate={to}
-      skip={isInitializing}
-    >
-      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => {
-        const observedUserWithAnomalies = {
-          ...observedUser,
-          anomalies: {
-            isLoading: isLoadingAnomaliesData,
-            anomalies: anomaliesData,
-            jobNameById,
-          },
-        };
-        return (
-          <>
-            <FlyoutNavigation
-              flyoutIsExpandable={
-                hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts
-              }
-              expandDetails={openPanelFirstTab}
-              isPreviewMode={isPreviewMode}
-              isRulePreview={scopeId === TableId.rulePreview}
-            />
-            <UserPanelHeader
-              userName={userName}
-              observedUser={observedUserWithAnomalies}
-              managedUser={managedUser}
-            />
-            <UserPanelContent
-              userName={userName}
-              observedUser={observedUserWithAnomalies}
-              riskScoreState={riskScoreState}
-              recalculatingScore={recalculatingScore}
-              onAssetCriticalityChange={calculateEntityRiskScore}
-              contextID={contextID}
-              scopeId={scopeId}
-              openDetailsPanel={openDetailsPanel}
-              isPreviewMode={isPreviewMode}
-            />
-            {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
-            {isPreviewMode && (
-              <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
-            )}
-          </>
-        );
-      }}
-    </AnomalyTableProvider>
+    <>
+      <FlyoutNavigation
+        flyoutIsExpandable={hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts}
+        expandDetails={openPanelFirstTab}
+        isPreviewMode={isPreviewMode}
+        isRulePreview={scopeId === TableId.rulePreview}
+      />
+      <UserPanelHeader
+        entityIdentifiers={entityIdentifiers}
+        lastSeen={observedUser.lastSeen}
+        managedUser={managedUser}
+        userName={effectiveUserName}
+      />
+      <UserPanelContent
+        observedUser={observedUser}
+        riskScoreState={riskScoreState}
+        recalculatingScore={recalculatingScore}
+        onAssetCriticalityChange={calculateEntityRiskScore}
+        contextID={contextID}
+        scopeId={scopeId}
+        openDetailsPanel={openDetailsPanel}
+        isPreviewMode={isPreviewMode}
+        entityIdentifiers={entityIdentifiers}
+      />
+      {!isPreviewMode && assetInventoryEnabled && (
+        <UserPanelFooter entityIdentifiers={entityIdentifiers} />
+      )}
+      {isPreviewMode && (
+        <UserPreviewPanelFooter
+          entityIdentifiers={entityIdentifiers}
+          contextID={contextID}
+          scopeId={scopeId}
+        />
+      )}
+    </>
   );
 };
 

@@ -123,8 +123,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
           <EuiFlexItem key={value}>
             <CellActions field={data.field} value={value}>
               <PreviewLink
-                field={data.field}
-                value={value}
+                entityIdentifiers={{ [data.field]: value }}
                 scopeId={data.scopeId}
                 data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
               >

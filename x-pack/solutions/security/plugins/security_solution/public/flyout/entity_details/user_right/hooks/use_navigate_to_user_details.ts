@@ -13,10 +13,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { UserDetailsPanelKey } from '../../user_details_left';
 import { UserPanelKey } from '../../shared/constants';
+import type { EntityIdentifiers } from '../../../document_details/shared/utils';
 
 interface UseNavigateToUserDetailsParams {
-  userName: string;
-  email?: string[];
+  entityIdentifiers: EntityIdentifiers;
   scopeId: string;
   contextID: string;
   isRiskScoreExist: boolean;
@@ -26,8 +26,7 @@ interface UseNavigateToUserDetailsParams {
 }
 
 export const useNavigateToUserDetails = ({
-  userName,
-  email,
+  entityIdentifiers,
   scopeId,
   contextID,
   isRiskScoreExist,
@@ -37,7 +36,6 @@ export const useNavigateToUserDetails = ({
 }: UseNavigateToUserDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-
   return useCallback(
     (path: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
@@ -49,11 +47,8 @@ export const useNavigateToUserDetails = ({
         params: {
           isRiskScoreExist,
           scopeId,
-          user: {
-            name: userName,
-            email,
-          },
           path,
+          entityIdentifiers,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
         },
@@ -63,7 +58,7 @@ export const useNavigateToUserDetails = ({
         id: UserPanelKey,
         params: {
           contextID,
-          userName,
+          entityIdentifiers,
           scopeId,
         },
       };
@@ -79,13 +74,12 @@ export const useNavigateToUserDetails = ({
       openLeftPanel,
       isRiskScoreExist,
       scopeId,
-      userName,
-      email,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
       isPreviewMode,
       openFlyout,
       contextID,
+      entityIdentifiers,
     ]
   );
 };
