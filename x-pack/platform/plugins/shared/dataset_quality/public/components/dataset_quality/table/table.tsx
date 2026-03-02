@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import {
   fullDatasetNameDescription,
   fullDatasetNameLabel,
@@ -46,49 +47,30 @@ export const Table = () => {
   } = useDatasetQualityTable();
 
   const [liveAnnouncement, setLiveAnnouncement] = useState<string>('');
-  const previousToggleState = useRef({
-    showInactiveDatasets,
-    showFullDatasetNames,
-  });
 
-  useEffect(() => {
-    const previous = previousToggleState.current;
+  useUpdateEffect(() => {
+    setLiveAnnouncement(
+      showFullDatasetNames
+        ? i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesShown', {
+            defaultMessage: 'Table updated. Full dataset names shown.',
+          })
+        : i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesHidden', {
+            defaultMessage: 'Table updated. Full dataset names hidden.',
+          })
+    );
+  }, [showFullDatasetNames]);
 
-    const announcementParts: string[] = [];
-
-    if (previous.showFullDatasetNames !== showFullDatasetNames) {
-      announcementParts.push(
-        showFullDatasetNames
-          ? i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesShown', {
-              defaultMessage: 'Table updated. Full dataset names shown.',
-            })
-          : i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesHidden', {
-              defaultMessage: 'Table updated. Full dataset names hidden.',
-            })
-      );
-    }
-
-    if (previous.showInactiveDatasets !== showInactiveDatasets) {
-      announcementParts.push(
-        showInactiveDatasets
-          ? i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsShown', {
-              defaultMessage: 'Table updated. Inactive datasets shown.',
-            })
-          : i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsHidden', {
-              defaultMessage: 'Table updated. Inactive datasets hidden.',
-            })
-      );
-    }
-
-    if (announcementParts.length > 0) {
-      setLiveAnnouncement(announcementParts.join(' '));
-    }
-
-    previousToggleState.current = {
-      showInactiveDatasets,
-      showFullDatasetNames,
-    };
-  }, [showFullDatasetNames, showInactiveDatasets]);
+  useUpdateEffect(() => {
+    setLiveAnnouncement(
+      showInactiveDatasets
+        ? i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsShown', {
+            defaultMessage: 'Table updated. Inactive datasets shown.',
+          })
+        : i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsHidden', {
+            defaultMessage: 'Table updated. Inactive datasets hidden.',
+          })
+    );
+  }, [showInactiveDatasets]);
 
   return (
     <>
