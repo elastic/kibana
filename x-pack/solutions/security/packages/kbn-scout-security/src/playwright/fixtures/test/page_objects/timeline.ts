@@ -144,26 +144,9 @@ export class TimelinePage {
   }
 
   async createTimelineFromTemplate() {
-    // The collapsed actions popover re-renders continuously due to an app bug
-    // in StatefulOpenTimeline (open_timeline/index.tsx ~406-419): a useEffect
-    // on noteIds triggers refetch(), causing the table and popovers to detach.
-    // The popover can close between opening and clicking the action item, so
-    // we retry the full open→click sequence as an atomic unit.
-    const maxAttempts = 5;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        await this.collapsedActionsButton.click();
-        await this.createFromTemplateButton.waitFor({ state: 'visible', timeout: 3_000 });
-        await this.createFromTemplateButton.dispatchEvent('click');
-        return;
-      } catch {
-        if (attempt === maxAttempts) {
-          throw new Error(
-            'Failed to create timeline from template — popover keeps closing due to app re-rendering'
-          );
-        }
-      }
-    }
+    await this.collapsedActionsButton.click();
+    await this.createFromTemplateButton.waitFor({ state: 'visible', timeout: 3_000 });
+    await this.createFromTemplateButton.click();
   }
 
   async hoverSaveButton() {
