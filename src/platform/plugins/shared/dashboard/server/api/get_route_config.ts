@@ -19,7 +19,7 @@ export function getRouteConfig(isDashboardAppRequest: boolean) {
           access: 'internal',
           enableQueryVersion: true,
           description:
-            'Dashboard application CRUD routes. Do not use outside of kibana applicaiton. Intead, use dashboard REST API "/api/dashboards"',
+            'Dashboard application CRUD routes. Do not use outside of kibana applicaiton. Instead, use dashboard REST API "/api/dashboards"',
           security: {
             authz: {
               enabled: false,
