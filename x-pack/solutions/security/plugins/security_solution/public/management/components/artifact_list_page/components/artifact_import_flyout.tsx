@@ -15,6 +15,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -99,6 +101,12 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        <EuiText color="subdued" size="s">
+          <p>{labels.importFlyoutDetails}</p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
         <EuiFilePicker
           onChange={handleOnFileChange}
           disabled={isLoading}

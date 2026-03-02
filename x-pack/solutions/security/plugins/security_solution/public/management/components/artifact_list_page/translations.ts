@@ -64,6 +64,13 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Artifact list import failed',
     }
   ),
+  importFlyoutDetails: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importFlyoutDetails',
+    {
+      defaultMessage:
+        'Attention: importing your artifacts will overwrite the existing list, which results in losing all existing artifacts that can be edited by the current user.',
+    }
+  ),
   importFlyoutImportSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutImportSubmitButtonLabel',
     {
