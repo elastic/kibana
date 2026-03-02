@@ -41,8 +41,20 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
   },
   {
+    id: 'data.aggregate',
+    handlerHash: '0223bec699354d5878732a6ebcb99a2b4b43a28b4f01da293df1ab7165c33e00',
+  },
+  {
     id: 'data.dedupe',
     handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
+  },
+  {
+    id: 'data.filter',
+    handlerHash: '829a245561a33b2f8349755a4ff6b4a2953774b6f862a7a0228b93f517742c9a',
+  },
+  {
+    id: 'data.find',
+    handlerHash: 'b23058c153f427b8a8cb4a9ee1ed8c06881e3d2ed291ea7e78846e113aa0301d',
   },
   {
     id: 'data.map',
@@ -67,5 +79,25 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'security.buildAlertEntityGraph',
     handlerHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
+  },
+  {
+    id: 'cases.createCase',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.updateCase',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.getCase',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.addComment',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
+  },
+  {
+    id: 'cases.createCaseFromTemplate',
+    handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
   },
 ];

@@ -277,6 +277,8 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/as-code-filters-transforms'
+  - '@kbn/cps-utils'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

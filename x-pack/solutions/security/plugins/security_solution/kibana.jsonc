@@ -84,7 +84,8 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
-      "workflowsExtensions"
+      "workflowsExtensions",
+      "cps"
     ],
     "requiredBundles": [
       "esUiShared",
