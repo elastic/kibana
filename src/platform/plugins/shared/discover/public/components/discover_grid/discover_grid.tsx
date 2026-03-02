@@ -15,6 +15,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
@@ -24,6 +25,7 @@ import {
   LazyCascadedDocumentsLayout,
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
+import { TanstackVirtualGrid } from './tanstack_virtual_grid';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -123,6 +125,28 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       groupBySelectorRenderer,
       isCascadedDocumentsAvailable,
     ]);
+
+    const isTanstackVirtualPoc = useMemo(() => {
+      if (!isOfAggregateQueryType(query)) {
+        return false;
+      }
+      return /\/\*[\s\S]*?\btanstack\b[\s\S]*?\*\/|\/\/.*\btanstack\b/i.test(query.esql);
+    }, [query]);
+
+    if (isTanstackVirtualPoc) {
+      return (
+        <TanstackVirtualGrid
+          rows={props.rows ?? []}
+          columns={props.columns}
+          dataView={props.dataView}
+          showTimeCol={props.showTimeCol}
+          expandedDoc={props.expandedDoc}
+          setExpandedDoc={props.setExpandedDoc}
+          renderDocumentView={props.renderDocumentView}
+          columnsMeta={props.columnsMeta}
+        />
+      );
+    }
 
     return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
       <CascadedDocumentsProvider value={cascadedDocumentsContext}>

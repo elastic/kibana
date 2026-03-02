@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+const EXPAND_COL_WIDTH = 36;
+const TIMESTAMP_COL_WIDTH = 210;
+
+export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  wrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%',
+  }),
+  toolbar: css({
+    padding: euiTheme.size.s,
+    borderBottom: euiTheme.border.thin,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    flexShrink: 0,
+  }),
+  contentArea: css({
+    display: 'flex',
+    flex: 1,
+    minHeight: 0,
+  }),
+  scrollContainer: css({
+    flex: 1,
+    overflow: 'auto',
+    position: 'relative',
+    willChange: 'scroll-position',
+    minWidth: 0,
+  }),
+
+  // header
+  headerRow: css({
+    display: 'flex',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    borderBottom: euiTheme.border.thin,
+    fontWeight: euiTheme.font.weight.semiBold,
+    fontSize: euiTheme.size.m,
+  }),
+  expandHeaderCell: css({
+    flexShrink: 0,
+    width: EXPAND_COL_WIDTH,
+    borderRight: euiTheme.border.thin,
+  }),
+  timestampHeaderCell: css({
+    flexShrink: 0,
+    width: TIMESTAMP_COL_WIDTH,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    borderRight: euiTheme.border.thin,
+  }),
+  summaryHeaderCell: css({
+    flex: 1,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+  }),
+
+  // virtualised body
+  virtualOuter: css({
+    position: 'relative',
+  }),
+  virtualInner: css({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    willChange: 'transform',
+  }),
+  virtualRow: css({
+    display: 'flex',
+    borderBottom: euiTheme.border.thin,
+    contentVisibility: 'auto',
+    containIntrinsicSize: '0 34px',
+    '&:hover': {
+      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+    },
+  }),
+
+  // cells
+  expandCell: css({
+    flexShrink: 0,
+    width: EXPAND_COL_WIDTH,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRight: euiTheme.border.thin,
+  }),
+  timestampCell: css({
+    flexShrink: 0,
+    width: TIMESTAMP_COL_WIDTH,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    borderRight: euiTheme.border.thin,
+    fontSize: euiTheme.size.m,
+    fontFamily: euiTheme.font.familyCode,
+  }),
+  summaryCell: css({
+    flex: 1,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    fontSize: euiTheme.size.m,
+    fontFamily: euiTheme.font.familyCode,
+    minWidth: 0,
+  }),
+});
