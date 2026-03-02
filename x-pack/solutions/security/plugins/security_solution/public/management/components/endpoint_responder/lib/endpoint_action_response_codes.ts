@@ -312,7 +312,7 @@ const CODES = Object.freeze({
     { defaultMessage: 'Response action was canceled' }
   ),
 
-  'ra_scan_error_disabled': i18n.translate(
+  ra_scan_error_disabled: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.disabled',
     { defaultMessage: 'Malware protection is disabled.' }
   ),
