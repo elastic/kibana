@@ -118,6 +118,7 @@ const PreviewTableCellContent = memo(function PreviewTableCellContent({
         core={core}
         share={share}
         fieldFormats={fieldFormats}
+        columnsMeta={undefined}
       />
     );
   }

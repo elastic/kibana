@@ -24,6 +24,7 @@ import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
+import type { ISloTelemetryClient } from './services/telemetry';
 
 interface Props {
   core: CoreStart;
@@ -37,6 +38,7 @@ interface Props {
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   sloClient: SLORepositoryClient;
+  telemetry?: ISloTelemetryClient;
 }
 
 export const renderApp = ({
@@ -51,6 +53,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry,
   experimentalFeatures,
   sloClient,
+  telemetry,
 }: Props) => {
   const { element, history } = appMountParameters;
 
@@ -109,6 +112,7 @@ export const renderApp = ({
                 observabilityRuleTypeRegistry,
                 experimentalFeatures,
                 sloClient,
+                telemetry,
               }}
             >
               <Router history={history}>

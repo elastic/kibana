@@ -972,7 +972,6 @@
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
-        "json5",
         "load-json-file",
         "mock-fs",
         "node-fetch",
@@ -982,7 +981,6 @@
         "utility-types",
         "@types/fetch-mock",
         "@types/getos",
-        "@types/json5",
         "@types/mock-fs",
         "@types/node-fetch",
         "@types/type-detect"
@@ -2279,10 +2277,29 @@
       "enabled": true
     },
     {
-      "groupName": "vega related modules",
+      "groupName": "hjson",
       "matchDepNames": [
         "@types/hjson",
-        "hjson",
+        "hjson"
+      ],
+      "reviewers": [
+        "team:kibana-visualizations",
+        "team:fleet"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Feature:Vega",
+        "Team:Visualizations",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "vega related modules",
+      "matchDepNames": [
         "vega",
         "vega-interpreter",
         "vega-lite",
