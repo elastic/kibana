@@ -95,7 +95,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   {isTestRun && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="beaker" size="s" color="subdued" />
+                      <EuiIcon type="flask" size="s" color="subdued" />
                     </EuiFlexItem>
                   )}
                   {workflowExecutionDuration && (

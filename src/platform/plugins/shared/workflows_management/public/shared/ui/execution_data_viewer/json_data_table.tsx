@@ -279,7 +279,7 @@ const getCopyCellActionComponent = (
     }, [record.field]);
 
     return (
-      <Component onClick={copy} iconType="copyClipboard" aria-label={CopyFieldPathText}>
+      <Component onClick={copy} iconType="copy" aria-label={CopyFieldPathText}>
         {CopyFieldPathText}
       </Component>
     );

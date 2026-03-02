@@ -201,7 +201,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="list" size="l" />}
+        icon={<EuiIcon type="listBullet" size="l" />}
         title={
           <h2>
             <FormattedMessage

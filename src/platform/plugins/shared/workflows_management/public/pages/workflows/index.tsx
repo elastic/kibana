@@ -121,7 +121,7 @@ export function WorkflowsPage() {
             <EuiFlexGroup>
               {canCreateWorkflow && (
                 <EuiButton
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   color="primary"
                   size="m"
                   fill
