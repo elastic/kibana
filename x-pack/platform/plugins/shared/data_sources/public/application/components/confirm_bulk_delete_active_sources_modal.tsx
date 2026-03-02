@@ -6,10 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useGeneratedHtmlId } from '@elastic/eui';
 import type { ActiveSource } from '../../types/connector';
 
 interface ConfirmBulkDeleteActiveSourcesModalProps {

@@ -57,19 +57,15 @@ export const SourcesUtilityBar: React.FC<SourcesUtilityBarProps> = ({
             size="xs"
             color="danger"
             onClick={onBulkDelete}
+            css={({ euiTheme }) => ({
+              fontWeight: euiTheme.font.weight.semiBold,
+            })}
           >
-            <EuiText
-              size="xs"
-              css={({ euiTheme }) => ({
-                fontWeight: euiTheme.font.weight.semiBold,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.dataSources.utilityBar.deleteSelectedButton"
-                defaultMessage="Delete {count, plural, one {# source} other {# sources}}"
-                values={{ count: selectedCount }}
-              />
-            </EuiText>
+            <FormattedMessage
+              id="xpack.dataSources.utilityBar.deleteSelectedButton"
+              defaultMessage="Delete {count, plural, one {# source} other {# sources}}"
+              values={{ count: selectedCount }}
+            />
           </EuiButtonEmpty>
           <EuiButtonEmpty
             aria-label={i18n.translate('xpack.dataSources.utilityBar.selectAllAriaLabel', {
@@ -80,18 +76,14 @@ export const SourcesUtilityBar: React.FC<SourcesUtilityBarProps> = ({
             iconSize="m"
             size="xs"
             onClick={onSelectAll}
+            css={({ euiTheme }) => ({
+              fontWeight: euiTheme.font.weight.semiBold,
+            })}
           >
-            <EuiText
-              size="xs"
-              css={({ euiTheme }) => ({
-                fontWeight: euiTheme.font.weight.semiBold,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.dataSources.utilityBar.selectAllButton"
-                defaultMessage="Select all"
-              />
-            </EuiText>
+            <FormattedMessage
+              id="xpack.dataSources.utilityBar.selectAllButton"
+              defaultMessage="Select all"
+            />
           </EuiButtonEmpty>
           <EuiButtonEmpty
             aria-label={i18n.translate('xpack.dataSources.utilityBar.clearSelectionAriaLabel', {
@@ -102,18 +94,14 @@ export const SourcesUtilityBar: React.FC<SourcesUtilityBarProps> = ({
             iconSize="m"
             size="xs"
             onClick={onClearSelection}
+            css={({ euiTheme }) => ({
+              fontWeight: euiTheme.font.weight.semiBold,
+            })}
           >
-            <EuiText
-              size="xs"
-              css={({ euiTheme }) => ({
-                fontWeight: euiTheme.font.weight.semiBold,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.dataSources.utilityBar.clearSelectionButton"
-                defaultMessage="Clear selection"
-              />
-            </EuiText>
+            <FormattedMessage
+              id="xpack.dataSources.utilityBar.clearSelectionButton"
+              defaultMessage="Clear selection"
+            />
           </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiFlexItem>
