@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 import type { QueriesGetResponse, QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
 import { sortForQueriesTable } from '../../../../lib/significant_events/utils';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -133,6 +134,9 @@ const getDiscoveryQueriesRoute = createServerRoute({
         .max(1000)
         .optional()
         .describe('Number of items per page'),
+      includeRuleUnbacked: BooleanFromString.optional().describe(
+        'When true, includes queries that have not been promoted to a rule'
+      ),
     }),
   }),
   options: {
@@ -153,7 +157,16 @@ const getDiscoveryQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames, page = 1, perPage = 10 } = params.query;
+    const {
+      from,
+      to,
+      bucketSize,
+      query,
+      streamNames,
+      page = 1,
+      perPage = 10,
+      includeRuleUnbacked,
+    } = params.query;
 
     const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
       {
@@ -162,6 +175,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        filters: includeRuleUnbacked ? { ruleUnbacked: 'include' } : undefined,
       },
       { queryClient, scopedClusterClient }
     );

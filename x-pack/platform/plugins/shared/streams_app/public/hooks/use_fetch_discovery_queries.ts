@@ -35,10 +35,16 @@ export interface QueriesTableFetchResult {
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
 
 export const useFetchDiscoveryQueries = (
-  options: { name?: string; query?: string; page: number; perPage: number },
+  options: {
+    name?: string;
+    query?: string;
+    page: number;
+    perPage: number;
+    includeRuleUnbacked?: boolean;
+  },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage } = options;
+  const { name, query, page, perPage, includeRuleUnbacked } = options;
   const {
     dependencies: {
       start: {
@@ -85,6 +91,7 @@ export const useFetchDiscoveryQueries = (
             streamNames: name ? [name] : undefined,
             page,
             perPage,
+            includeRuleUnbacked,
           },
         },
         signal: signal ?? null,
@@ -122,6 +129,7 @@ export const useFetchDiscoveryQueries = (
       query,
       page,
       perPage,
+      includeRuleUnbacked,
       ...deps,
     ],
     queryFn: fetchDiscoveryQueries,
