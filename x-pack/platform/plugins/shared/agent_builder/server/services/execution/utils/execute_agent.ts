@@ -20,6 +20,7 @@ import type { RunAgentFn } from '@kbn/agent-builder-server';
 
 export const executeAgent$ = ({
   agentId,
+  executionId,
   request,
   capabilities,
   structuredOutput,
@@ -34,6 +35,7 @@ export const executeAgent$ = ({
   action,
 }: {
   agentId: string;
+  executionId: string;
   request: KibanaRequest;
   capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
@@ -51,6 +53,7 @@ export const executeAgent$ = ({
     runAgent({
       request,
       agentId,
+      executionId,
       abortSignal,
       defaultConnectorId,
       agentParams: {

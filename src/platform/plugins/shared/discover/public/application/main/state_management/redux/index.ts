@@ -81,6 +81,7 @@ export {
 } from './utils';
 
 export {
+  fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,
