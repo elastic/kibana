@@ -38,16 +38,16 @@ export interface NotificationPolicySavedObjectServiceContract {
     id: string,
     spaceId?: string
   ): Promise<{ id: string; attributes: NotificationPolicySavedObjectAttributes; version?: string }>;
+  bulkGetByIds(
+    ids: string[],
+    spaceId?: string
+  ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
     attrs: NotificationPolicySavedObjectAttributes;
     version: string;
   }): Promise<{ id: string; version?: string }>;
   delete(params: { id: string }): Promise<void>;
-  bulkGetByIds(
-    ids: string[],
-    spaceId?: string
-  ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
 }
 
 @injectable()
@@ -139,10 +139,7 @@ export class NotificationPolicySavedObjectService
 
     return result.saved_objects.map((savedObject) => {
       if ('error' in savedObject && savedObject.error) {
-        return {
-          id: savedObject.id,
-          error: savedObject.error,
-        };
+        return { id: savedObject.id, error: savedObject.error };
       }
 
       return {

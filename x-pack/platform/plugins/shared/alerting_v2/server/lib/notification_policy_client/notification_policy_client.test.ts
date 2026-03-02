@@ -455,7 +455,6 @@ describe('NotificationPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
-          // Preserves original createdBy and createdAt
           createdBy: 'creator_profile_uid',
           createdAt: '2024-12-01T00:00:00.000Z',
         }),
