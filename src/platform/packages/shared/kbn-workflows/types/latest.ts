@@ -53,6 +53,7 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
+  StepStabilityLevel,
   HttpMethod,
   StepPropertyHandler,
   PropertySelectionHandler,
