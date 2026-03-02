@@ -42,6 +42,7 @@ import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_an
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import {
+  escapeEsqlStringLiteral,
   filterFromRange,
   getOutputIdentifierField,
   getQueryIdentifierField,
@@ -420,8 +421,12 @@ export const getESQL = (
     const { identityStatsColumns } = getIdentityStatsForEsql(entityType);
     const docContainsEuidField = euid.getEuidEsqlDocumentsContainsIdFilter(entityType);
 
-    const lower = afterKeys.lower ? `${identifierField} > "${afterKeys.lower}"` : undefined;
-    const upper = afterKeys.upper ? `${identifierField} <= "${afterKeys.upper}"` : undefined;
+    const lower = afterKeys.lower
+      ? `${identifierField} > "${escapeEsqlStringLiteral(afterKeys.lower)}"`
+      : undefined;
+    const upper = afterKeys.upper
+      ? `${identifierField} <= "${escapeEsqlStringLiteral(afterKeys.upper)}"`
+      : undefined;
     if (!lower && !upper) {
       throw new Error('Either lower or upper after key must be provided for pagination');
     }

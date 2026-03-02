@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRiskScoreCalculationComplete } from './helpers';
+import { escapeEsqlStringLiteral, isRiskScoreCalculationComplete } from './helpers';
 
 describe('isRiskScoreCalculationComplete', () => {
   it('is true if both after_keys.host and after_keys.user are empty', () => {
@@ -49,5 +49,17 @@ describe('isRiskScoreCalculationComplete', () => {
     };
     // @ts-expect-error using a minimal result object for testing
     expect(isRiskScoreCalculationComplete(result)).toEqual(false);
+  });
+});
+
+describe('escapeEsqlStringLiteral', () => {
+  it('escapes double quotes and backslashes', () => {
+    const escaped = escapeEsqlStringLiteral('host:ab"cd\\name');
+    expect(escaped).toEqual('host:ab\\"cd\\\\name');
+  });
+
+  it('escapes control characters used in string literals', () => {
+    const escaped = escapeEsqlStringLiteral('host:a\nb\tc\rd');
+    expect(escaped).toEqual('host:a\\nb\\tc\\rd');
   });
 });

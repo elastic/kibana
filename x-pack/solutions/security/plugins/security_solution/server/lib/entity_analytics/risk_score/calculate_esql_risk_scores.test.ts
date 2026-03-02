@@ -81,6 +81,23 @@ describe('Calculate risk scores with ESQL', () => {
         expect(q).toContain('"user:alice"');
         expect(q).toContain('"user:zara"');
       });
+
+      it('escapes special characters in V2 after_keys range bounds', () => {
+        const q = getESQL(
+          EntityType.host,
+          {
+            lower: 'host:ab"cd\\name',
+            upper: 'host:xy\n\tz',
+          },
+          10000,
+          3500,
+          undefined,
+          true
+        );
+
+        expect(q).toContain('host_id > "host:ab\\"cd\\\\name"');
+        expect(q).toContain('host_id <= "host:xy\\n\\tz"');
+      });
     });
   });
 

@@ -203,5 +203,41 @@ export default ({ getService }: FtrProviderContext): void => {
     it('@skipInServerlessMKI resets service risk scores to zero for entities whose alerts were deleted and propagates to entity store', async () => {
       await runResetToZeroScenario({ entityType: 'service', field: 'service.name' });
     });
+
+    it('@skipInServerlessMKI resets host scores when excludedEntities contain special characters', async () => {
+      const entityType = 'host';
+      const field = 'host.name';
+      const deletedEntities = ['host-special"quote', 'host-special\\slash', 'host-special\t-tab'];
+      const allEntityNames = ['host-0', 'host-1', 'host-2', 'host-3', 'host-4', ...deletedEntities];
+
+      const documentId = uuidv4();
+      await indexListOfDocuments(
+        allEntityNames.map((name) => buildDocument({ [entityType]: { name } }, documentId))
+      );
+
+      await createAndSyncRuleAndAlerts({
+        query: `id: ${documentId}`,
+        alerts: allEntityNames.length,
+        riskScore: 40,
+      });
+
+      await riskEngineRoutes.init();
+      await waitForRiskScoresToBePresent({ es, log, scoreCount: allEntityNames.length });
+
+      await deleteAlertsByField(field, deletedEntities);
+      await riskEngineRoutes.scheduleNow();
+
+      await waitForRiskScoresToBePresent({ es, log, scoreCount: allEntityNames.length * 2 });
+
+      const allScores = normalizeScores(await readRiskScores(es));
+      const zeroScoreIds = allScores
+        .filter((score) => score.calculated_score_norm === 0)
+        .map((score) => score.id_value)
+        .sort();
+
+      expect(zeroScoreIds).to.eql(
+        deletedEntities.map((entity) => `${entityType}:${entity}`).sort()
+      );
+    });
   });
 };

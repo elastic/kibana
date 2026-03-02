@@ -416,6 +416,32 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(scores.user).to.have.length(1);
           expect(scores.user?.[0].id_value).to.equal('user:zzz');
         });
+
+        it('respects after_keys when entity IDs contain escaped characters', async () => {
+          const specialLowerId = uuidv4();
+          const specialUpperId = uuidv4();
+          const lowerUserName = 'a"user';
+          const upperUserName = 'z\\user';
+
+          const lowerDoc = buildDocument({ 'user.name': lowerUserName }, specialLowerId);
+          const upperDoc = buildDocument({ 'user.name': upperUserName }, specialUpperId);
+          await indexListOfDocuments(Array(50).fill(lowerDoc).concat(Array(50).fill(upperDoc)));
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${specialLowerId} OR ${specialUpperId}`,
+            alerts: 100,
+            riskScore: 100,
+          });
+
+          const { scores } = await riskScorePreview.preview({
+            body: {
+              after_keys: { user: { user_id: `user:${lowerUserName}` } },
+            },
+          });
+
+          expect(scores.user).to.have.length(1);
+          expect(scores.user?.[0].id_value).to.equal(`user:${upperUserName}`);
+        });
       });
 
       describe('risk score filtering', () => {

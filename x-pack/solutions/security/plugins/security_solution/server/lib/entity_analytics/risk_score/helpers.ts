@@ -83,6 +83,18 @@ export const isRiskScoreCalculationComplete = (result: RiskScoresCalculationResp
 
 export const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
 
+/**
+ * Escapes user-controlled values used inside ESQL double-quoted string literals.
+ * Keep backslash escaping first to avoid double-escaping inserted escapes.
+ */
+export const escapeEsqlStringLiteral = (value: string): string =>
+  value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');
+
 export const serializeIdentitySourceFields = (
   identitySourceFields: IdentitySourceFieldsMap
 ): string =>

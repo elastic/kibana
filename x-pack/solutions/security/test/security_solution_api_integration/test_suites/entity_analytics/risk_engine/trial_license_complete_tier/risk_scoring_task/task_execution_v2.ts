@@ -419,6 +419,44 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       });
+
+      describe('with alerts containing hosts with special-character IDs', () => {
+        const specialHostNames = [
+          'host-special"quote',
+          'host-special\\slash',
+          'host-special\t-tab',
+        ];
+        let documentId: string;
+
+        before(async () => {
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
+
+          documentId = uuidv4();
+          await indexListOfDocuments(
+            specialHostNames.map((name) => buildDocument({ host: { name } }, documentId))
+          );
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: specialHostNames.length,
+            riskScore: 40,
+          });
+        });
+
+        it('@skipInServerlessMKI calculates and persists host scores for special-character entity IDs', async () => {
+          await deleteAllRiskScores(log, es, undefined, true);
+          await riskEngineRoutes.init();
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: specialHostNames.length });
+
+          const actualIds = normalizeScores(await readRiskScores(es))
+            .map(({ id_value: idValue }) => idValue)
+            .sort();
+          const expectedIds = specialHostNames.map((name) => `host:${name}`).sort();
+
+          expect(actualIds).to.eql(expectedIds);
+        });
+      });
     });
   });
 };

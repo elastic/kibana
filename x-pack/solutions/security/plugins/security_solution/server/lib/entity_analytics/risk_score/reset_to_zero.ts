@@ -11,7 +11,12 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality';
 import type { IdentitySourceFieldsMap, RiskScoreBucket } from '../types';
-import { getOutputIdentifierField, parseIdentitySourceFields, processScores } from './helpers';
+import {
+  escapeEsqlStringLiteral,
+  getOutputIdentifierField,
+  parseIdentitySourceFields,
+  processScores,
+} from './helpers';
 import { getIndexPatternDataStream } from './configurations';
 import { persistRiskScoresToEntityStore } from './persist_risk_scores_to_entity_store';
 
@@ -139,7 +144,9 @@ const fetchEntitiesWithNonZeroScores = async ({
     : '';
   const excludedEntitiesClause =
     excludedEntities.length > 0
-      ? `AND id_value NOT IN (${excludedEntities.map((e) => `"${e}"`).join(',')})`
+      ? `AND id_value NOT IN (${excludedEntities
+          .map((e) => `"${escapeEsqlStringLiteral(e)}"`)
+          .join(',')})`
       : '';
 
   const esql = /* ESQL */ `
