@@ -12,7 +12,7 @@ import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { EntitiesNotFoundError } from '../../../domain/errors';
+import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
 
 const querySchema = z.object({
   entity_id: z.string(),
@@ -49,6 +49,9 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
         } catch (error) {
           if (error instanceof EntitiesNotFoundError) {
             return res.customError({ statusCode: 404, body: error });
+          }
+          if (error instanceof ResolutionSearchTruncatedError) {
+            return res.customError({ statusCode: 409, body: error });
           }
 
           logger.error(error);

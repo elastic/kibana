@@ -17,6 +17,7 @@ import {
   EntitiesNotFoundError,
   EntityHasAliasesError,
   MixedEntityTypesError,
+  ResolutionSearchTruncatedError,
   SelfLinkError,
 } from '../../../domain/errors';
 
@@ -66,7 +67,8 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
           if (
             error instanceof MixedEntityTypesError ||
             error instanceof ChainResolutionError ||
-            error instanceof EntityHasAliasesError
+            error instanceof EntityHasAliasesError ||
+            error instanceof ResolutionSearchTruncatedError
           ) {
             return res.customError({ statusCode: 409, body: error });
           }

@@ -13,6 +13,7 @@ import {
   EntitiesNotFoundError,
   EntityHasAliasesError,
   MixedEntityTypesError,
+  ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
 } from './errors';
@@ -34,6 +35,16 @@ const createSearchResponse = (docs: Array<Record<string, unknown>>) => ({
   hits: {
     hits: docs.map((doc) => ({ _source: doc })),
     total: { value: docs.length, relation: 'eq' as const },
+  },
+});
+
+const createTruncatedSearchResponse = (
+  docs: Array<Record<string, unknown>>,
+  actualTotal: number
+) => ({
+  hits: {
+    hits: docs.map((doc) => ({ _source: doc })),
+    total: { value: actualTotal, relation: 'eq' as const },
   },
 });
 
@@ -246,6 +257,26 @@ describe('ResolutionClient', () => {
         ResolutionUpdateError
       );
     });
+
+    it('should throw ResolutionSearchTruncatedError when findEntitiesWithAliases is truncated', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      // findEntitiesWithAliases returns truncated results (1 doc but total says 15000)
+      mockEsClient.search.mockResolvedValueOnce(
+        createTruncatedSearchResponse(
+          [createEntityDoc('alias-1', 'user', 'entity-1')],
+          15000
+        ) as never
+      );
+
+      await expect(client.linkEntities('target-1', ['entity-1'])).rejects.toThrow(
+        ResolutionSearchTruncatedError
+      );
+    });
   });
 
   describe('unlinkEntities', () => {
@@ -396,6 +427,21 @@ describe('ResolutionClient', () => {
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
 
       await expect(client.getResolutionGroup('alias-1')).rejects.toThrow(EntitiesNotFoundError);
+    });
+
+    it('should throw ResolutionSearchTruncatedError when group search is truncated', async () => {
+      const targetDoc = createEntityDoc('target-1');
+
+      // fetchEntitiesByIds
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([targetDoc]) as never);
+      // search for group — returns 1 doc but total says 15000
+      mockEsClient.search.mockResolvedValueOnce(
+        createTruncatedSearchResponse([targetDoc], 15000) as never
+      );
+
+      await expect(client.getResolutionGroup('target-1')).rejects.toThrow(
+        ResolutionSearchTruncatedError
+      );
     });
   });
 });

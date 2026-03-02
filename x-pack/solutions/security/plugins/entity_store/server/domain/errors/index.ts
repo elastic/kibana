@@ -14,4 +14,5 @@ export { EntityHasAliasesError } from './entity_has_aliases_error';
 export { SelfLinkError } from './self_link_error';
 export { EntitiesNotFoundError } from './entities_not_found_error';
 export { MixedEntityTypesError } from './mixed_entity_types_error';
+export { ResolutionSearchTruncatedError } from './resolution_search_truncated_error';
 export { ResolutionUpdateError } from './resolution_update_error';

@@ -15,6 +15,7 @@ import {
   EntitiesNotFoundError,
   EntityHasAliasesError,
   MixedEntityTypesError,
+  ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
 } from './errors';
@@ -247,7 +248,7 @@ export class ResolutionClient {
       _source: true,
     });
 
-    this.warnIfTruncated(response, `getResolutionGroup for target '${targetId}'`);
+    this.throwIfTruncated(response, `getResolutionGroup for target '${targetId}'`);
 
     // 4. Separate target from aliases
     let target: Record<string, unknown> | undefined;
@@ -280,18 +281,16 @@ export class ResolutionClient {
   }
 
   /**
-   * Logs a warning if the search response was truncated by MAX_RESOLUTION_SEARCH_SIZE.
+   * Throws if the search response was truncated by MAX_RESOLUTION_SEARCH_SIZE.
    */
-  private warnIfTruncated(response: SearchResponse, context: string): void {
+  private throwIfTruncated(response: SearchResponse, context: string): void {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
         : response.hits.total?.value ?? 0;
     const returned = response.hits.hits.length;
     if (total > returned) {
-      this.logger.warn(
-        `${context}: search returned ${returned} of ${total} results (truncated at MAX_RESOLUTION_SEARCH_SIZE=${MAX_RESOLUTION_SEARCH_SIZE})`
-      );
+      throw new ResolutionSearchTruncatedError(context, returned, total);
     }
   }
 
@@ -339,7 +338,7 @@ export class ResolutionClient {
       _source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
     });
 
-    this.warnIfTruncated(response, 'findEntitiesWithAliases');
+    this.throwIfTruncated(response, 'findEntitiesWithAliases');
 
     const result = new Map<string, string[]>();
     for (const hit of response.hits.hits) {
