@@ -139,7 +139,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload, id }) => {
           data-test-subj={getDataTestSubject('aiopsRandomSamplerOptionsButton', id)}
           onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           size="s"
         >
           {buttonText}

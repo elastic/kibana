@@ -121,7 +121,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
         />
       ),
       'data-test-subj': 'mlNodesTableRowDetailsToggle',

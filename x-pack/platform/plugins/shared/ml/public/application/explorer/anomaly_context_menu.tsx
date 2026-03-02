@@ -337,7 +337,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                 })}
                 color="text"
                 display="base"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"
                 disabled={chartsCount < 1}

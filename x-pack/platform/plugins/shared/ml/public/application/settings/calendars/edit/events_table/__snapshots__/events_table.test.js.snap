@@ -380,7 +380,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
           >
             <span
               color="inherit"
-              data-euiicon-type="plusInCircle"
+              data-euiicon-type="plusCircle"
             />
             New event
           </span>
@@ -399,7 +399,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
           >
             <span
               color="inherit"
-              data-euiicon-type="importAction"
+              data-euiicon-type="download"
             />
             Import events
           </span>
