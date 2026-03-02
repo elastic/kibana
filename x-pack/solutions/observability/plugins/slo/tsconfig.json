@@ -7,9 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../typings/**/*",
-    // Emotion theme typing
-    "./emotion.d.ts"
+    "../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -117,6 +115,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/observability-get-padded-alert-time-range-util",
     "@kbn/observability-agent-builder-plugin",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-analytics-browser"
   ]
 }
