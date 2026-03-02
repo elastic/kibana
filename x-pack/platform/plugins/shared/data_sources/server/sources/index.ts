@@ -11,11 +11,8 @@ import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
-<<<<<<< HEAD
 import { zendeskDataSource } from './zendesk';
-=======
 import { servicenowDataSource } from './servicenow';
->>>>>>> main
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
@@ -24,9 +21,6 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
-<<<<<<< HEAD
   dataCatalog.register(zendeskDataSource);
-=======
   dataCatalog.register(servicenowDataSource);
->>>>>>> main
 }
