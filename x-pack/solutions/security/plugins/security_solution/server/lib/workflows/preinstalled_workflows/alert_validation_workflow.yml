@@ -449,8 +449,6 @@ steps:
                   score: 4
                 - field: "entity.id"
                   score: 4
-                - field: "host.id"
-                  score: 4
 
                 # --- Identity-level correlation ---
                 - field: "user.id"
