@@ -10,7 +10,11 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+  OPTIONS_LIST_CONTROL,
+} from '@kbn/controls-constants';
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
