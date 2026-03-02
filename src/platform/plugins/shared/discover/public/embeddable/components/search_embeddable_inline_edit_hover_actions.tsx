@@ -68,6 +68,7 @@ export const SearchEmbeddableInlineEditHoverActions = ({
       tabs.map((tab) => (
         <EuiContextMenuItem
           icon={tab.id === selectedTabId ? 'check' : 'empty'}
+          aria-current={tab.id === selectedTabId ? 'true' : undefined}
           key={tab.id}
           onClick={() => {
             void onSelectTab(tab.id);
