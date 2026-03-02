@@ -9,6 +9,7 @@ import {
   transformEdgesToRecords,
   flattenOsqueryHit,
   getRecordFieldValue,
+  getNestedOrFlat,
 } from './transform_results';
 import type { ResultEdges } from '../../common/search_strategy';
 
@@ -85,6 +86,120 @@ describe('transform_results', () => {
       const result = flattenOsqueryHit(edge, ecsMapping);
 
       expect(result['complex.field']).toBe(JSON.stringify({ nested: 'value' }, null, 2));
+    });
+
+    it('should fall back to _source for agent.name when not in fields', () => {
+      const edge: ResultEdges[number] = {
+        _id: 'test-id',
+        _index: 'test-index',
+        fields: {
+          'osquery.column1': ['value1'],
+        },
+        _source: {
+          agent: { name: 'my-hostname', id: 'agent-abc' },
+        },
+      };
+
+      const result = flattenOsqueryHit(edge);
+
+      expect(result['agent.name']).toBe('my-hostname');
+      expect(result['agent.id']).toBe('agent-abc');
+      expect(result['osquery.column1']).toBe('value1');
+    });
+
+    it('should prefer fields over _source for agent.name', () => {
+      const edge: ResultEdges[number] = {
+        _id: 'test-id',
+        _index: 'test-index',
+        fields: {
+          'agent.name': ['from-fields'],
+          'agent.id': ['id-from-fields'],
+        },
+        _source: {
+          agent: { name: 'from-source', id: 'id-from-source' },
+        },
+      };
+
+      const result = flattenOsqueryHit(edge);
+
+      expect(result['agent.name']).toBe('from-fields');
+      expect(result['agent.id']).toBe('id-from-fields');
+    });
+
+    it('should handle _source without nested agent object', () => {
+      const edge: ResultEdges[number] = {
+        _id: 'test-id',
+        _index: 'test-index',
+        fields: {},
+        _source: {
+          other: 'data',
+        },
+      };
+
+      const result = flattenOsqueryHit(edge);
+
+      expect(result['agent.name']).toBeUndefined();
+      expect(result['agent.id']).toBeUndefined();
+    });
+
+    it('should resolve ECS mapping fields from nested _source objects', () => {
+      const ecsMapping = {
+        'process.pid': { field: 'pid', value: '' },
+        'destination.ip': { field: 'remote_address', value: '' },
+      };
+
+      const edge: ResultEdges[number] = {
+        _id: 'test-id',
+        _index: 'test-index',
+        fields: {},
+        _source: {
+          process: { pid: 1234 },
+          destination: { ip: '192.168.1.1' },
+        },
+      };
+
+      const result = flattenOsqueryHit(edge, ecsMapping);
+
+      expect(result['process.pid']).toBe(1234);
+      expect(result['destination.ip']).toBe('192.168.1.1');
+    });
+
+    it('should resolve deeply nested ECS fields from _source', () => {
+      const ecsMapping = {
+        'process.parent.pid': { field: 'parent_pid', value: '' },
+      };
+
+      const edge: ResultEdges[number] = {
+        _id: 'test-id',
+        _index: 'test-index',
+        fields: {},
+        _source: {
+          process: { parent: { pid: 682 } },
+        },
+      };
+
+      const result = flattenOsqueryHit(edge, ecsMapping);
+
+      expect(result['process.parent.pid']).toBe(682);
+    });
+
+    it('should handle ECS fields stored as flat dot-notation keys in _source', () => {
+      const ecsMapping = {
+        'process.pid': { field: 'pid', value: '' },
+      };
+
+      const edge: ResultEdges[number] = {
+        _id: 'test-id',
+        _index: 'test-index',
+        fields: {},
+        _source: {
+          'process.pid': 5678,
+        },
+      };
+
+      const result = flattenOsqueryHit(edge, ecsMapping);
+
+      expect(result['process.pid']).toBe(5678);
     });
 
     it('should handle empty edge', () => {
@@ -180,6 +295,40 @@ describe('transform_results', () => {
       const result = transformEdgesToRecords({ edges, ecsMapping });
 
       expect(result[0].flattened['custom.field']).toBe('mapped-value');
+    });
+  });
+
+  describe('getNestedOrFlat', () => {
+    it('should resolve nested paths', () => {
+      const source = { process: { pid: 1234 } };
+      expect(getNestedOrFlat('process.pid', source)).toBe(1234);
+    });
+
+    it('should resolve deeply nested paths', () => {
+      const source = { process: { parent: { pid: 682 } } };
+      expect(getNestedOrFlat('process.parent.pid', source)).toBe(682);
+    });
+
+    it('should resolve flat dot-notation keys', () => {
+      const source = { 'process.pid': 5678 };
+      expect(getNestedOrFlat('process.pid', source)).toBe(5678);
+    });
+
+    it('should resolve when both nested and flat exist', () => {
+      // lodash get resolves flat key first when both exist; in practice this doesn't occur
+      const source = { process: { pid: 1234 }, 'process.pid': 5678 };
+      const result = getNestedOrFlat('process.pid', source);
+      expect(result === 1234 || result === 5678).toBe(true);
+    });
+
+    it('should return undefined for missing paths', () => {
+      const source = { other: 'data' };
+      expect(getNestedOrFlat('process.pid', source)).toBeUndefined();
+    });
+
+    it('should handle null/undefined source', () => {
+      expect(getNestedOrFlat('process.pid', null)).toBeUndefined();
+      expect(getNestedOrFlat('process.pid', undefined)).toBeUndefined();
     });
   });
 

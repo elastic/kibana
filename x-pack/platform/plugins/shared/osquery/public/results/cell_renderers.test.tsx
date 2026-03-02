@@ -131,6 +131,34 @@ describe('cell_renderers', () => {
       expect(screen.getByText('192.168.1.1')).toBeInTheDocument();
     });
 
+    it('should render ECS field value from nested _source object', () => {
+      const renderers = getOsqueryCellRenderers({
+        getFleetAppUrl: mockGetFleetAppUrl,
+        ecsMappingColumns: ['process.pid'],
+      });
+
+      const EcsRenderer = renderers['process.pid'];
+      const props = createMockProps({}, { process: { pid: 1234 } });
+
+      render(<EcsRenderer {...props} />);
+
+      expect(screen.getByText('1234')).toBeInTheDocument();
+    });
+
+    it('should render deeply nested ECS field from _source', () => {
+      const renderers = getOsqueryCellRenderers({
+        getFleetAppUrl: mockGetFleetAppUrl,
+        ecsMappingColumns: ['process.parent.pid'],
+      });
+
+      const EcsRenderer = renderers['process.parent.pid'];
+      const props = createMockProps({}, { process: { parent: { pid: 682 } } });
+
+      render(<EcsRenderer {...props} />);
+
+      expect(screen.getByText('682')).toBeInTheDocument();
+    });
+
     it('should render "-" when ECS field is missing', () => {
       const renderers = getOsqueryCellRenderers({
         getFleetAppUrl: mockGetFleetAppUrl,
@@ -155,9 +183,9 @@ describe('cell_renderers', () => {
       const arrayValue = ['value1', 'value2'];
       const props = createMockProps({}, { 'array.field': arrayValue });
 
-      render(<EcsRenderer {...props} />);
+      const { container } = render(<EcsRenderer {...props} />);
 
-      expect(screen.getByText(JSON.stringify(arrayValue, null, 2))).toBeInTheDocument();
+      expect(container.textContent).toBe(JSON.stringify(arrayValue, null, 2));
     });
 
     it('should stringify object values', () => {
@@ -170,9 +198,9 @@ describe('cell_renderers', () => {
       const objectValue = { key: 'value' };
       const props = createMockProps({}, { 'object.field': objectValue });
 
-      render(<EcsRenderer {...props} />);
+      const { container } = render(<EcsRenderer {...props} />);
 
-      expect(screen.getByText(JSON.stringify(objectValue, null, 2))).toBeInTheDocument();
+      expect(container.textContent).toBe(JSON.stringify(objectValue, null, 2));
     });
   });
 });

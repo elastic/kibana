@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { isArray, isObject } from 'lodash/fp';
 import type { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { getNestedOrFlat } from './transform_results';
 
 interface GetOsqueryCellRenderersOptions {
   getFleetAppUrl: (agentId: string) => string;
@@ -50,8 +51,8 @@ const EcsMappingRenderer: React.FC<DataGridCellValueElementProps & { columnId: s
   row,
   columnId,
 }) => {
-  const source = row.raw._source as Record<string, unknown> | undefined;
-  const value = source?.[columnId];
+  const source = row.raw._source;
+  const value = getNestedOrFlat(columnId, source);
 
   return <>{formatValue(value)}</>;
 };

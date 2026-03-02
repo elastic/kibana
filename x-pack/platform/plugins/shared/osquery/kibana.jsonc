@@ -25,7 +25,8 @@
       "ruleRegistry",
       "security",
       "unifiedDocViewer",
-      "uiActions"
+      "uiActions",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "fleet",

@@ -22,12 +22,7 @@ import {
   EuiSkeletonText,
   EuiProgress,
   EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldSearch,
-  EuiFormRow,
-  EuiText,
-  EuiBadge,
+  EuiTablePagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,6 +36,8 @@ import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unifie
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table/src/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Query, Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../types';
@@ -60,9 +57,9 @@ import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { useOsqueryDataView } from './use_osquery_data_view';
-import { transformEdgesToRecords } from './transform_results';
+import { transformEdgesToRecords, getNestedOrFlat } from './transform_results';
 import { getOsqueryCellRenderers } from './cell_renderers';
-import { useOsqueryRowActions } from './row_actions';
+import { useOsqueryTrailingColumns } from './row_actions';
 import { OsqueryResultsFlyout } from './results_flyout';
 
 const DataContext = createContext<ResultEdges>([]);
@@ -107,11 +104,22 @@ const euiProgressCss = {
 
 const resultsTableContainerCss = {
   width: '100%',
-  maxWidth: '1200px',
+  display: 'flex' as const,
+  flexDirection: 'column' as const,
+  flex: '1 1 auto',
+  minHeight: 0,
+  height: '100%',
 };
 
-const searchBarContainerCss = {
-  marginBottom: '16px',
+const unifiedTableWrapperCss = {
+  flex: '1 1 auto',
+  minHeight: 0,
+};
+
+const gridStyleOverride = {
+  border: 'all' as const,
+  header: 'shade' as const,
+  stripes: false,
 };
 
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
@@ -166,6 +174,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     analytics,
     i18n: i18nStart,
     uiActions,
+    unifiedSearch,
+    chrome,
   } = useKibana().services;
 
   const startServices = useMemo(
@@ -235,13 +245,59 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
+  const [hasUserSetColumns, setHasUserSetColumns] = useState(false);
   const [rowHeight, setRowHeight] = useState<number>(0);
-  const [density, setDensity] = useState<DataGridDensity>(DataGridDensity.COMPACT);
+  const [density, setDensity] = useState<DataGridDensity>(DataGridDensity.EXPANDED);
   const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
 
-  // Server-side KQL filtering state (unified table only)
-  const [kuery, setKuery] = useState<string>('');
-  const [searchInput, setSearchInput] = useState<string>('');
+  // Server-side filtering state (unified table only)
+  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [filters, setFilters] = useState<Filter[]>([]);
+
+  // Build combined KQL string from query + filters for the server API
+  const kuery = useMemo(() => {
+    if (!queryHistoryRework) return undefined;
+
+    const parts: string[] = [];
+
+    // Add query bar KQL
+    if (query.query && typeof query.query === 'string' && query.query.trim()) {
+      parts.push(query.query.trim());
+    }
+
+    // Add filter pill KQL equivalents
+    for (const filter of filters) {
+      if (filter.meta?.disabled) continue;
+
+      const { key, params, negate } = filter.meta ?? {};
+      if (!key) continue;
+
+      let filterKql: string | undefined;
+      if (filter.meta?.type === 'phrase' || filter.meta?.type === 'phrases') {
+        const value = (params as { query?: string })?.query ?? params;
+        if (value !== undefined && value !== null) {
+          const escapedValue =
+            typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : String(value);
+          filterKql = `${key}: ${escapedValue}`;
+        }
+      } else if (filter.query) {
+        // Fallback: use the raw query if available
+        const matchValue = filter.query?.match?.[key] ?? filter.query?.match_phrase?.[key];
+        if (matchValue !== undefined) {
+          const val = typeof matchValue === 'object' ? matchValue.query : matchValue;
+          const escapedVal =
+            typeof val === 'string' ? `"${val.replace(/"/g, '\\"')}"` : String(val);
+          filterKql = `${key}: ${escapedVal}`;
+        }
+      }
+
+      if (filterKql) {
+        parts.push(negate ? `NOT ${filterKql}` : filterKql);
+      }
+    }
+
+    return parts.length > 0 ? parts.join(' AND ') : undefined;
+  }, [queryHistoryRework, query, filters]);
 
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
@@ -250,7 +306,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     isLive,
-    kuery: queryHistoryRework ? kuery || undefined : undefined,
+    kuery,
     sort: sortingColumns.map((sortedColumn) => ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
@@ -321,45 +377,18 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   // --- Unified DataTable path hooks ---
-  const [accumulatedEdges, setAccumulatedEdges] = useState<ResultEdges>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  useEffect(() => {
-    if (!queryHistoryRework) return;
-    if (allResultsData?.edges) {
-      if (pagination.pageIndex === 0) {
-        setAccumulatedEdges(allResultsData.edges);
-      } else {
-        setAccumulatedEdges((prev: ResultEdges) => [...prev, ...allResultsData.edges]);
-      }
-
-      setIsLoadingMore(false);
-    }
-  }, [queryHistoryRework, allResultsData?.edges, pagination.pageIndex]);
-
+  // Server-side pagination: each page change fetches fresh data from the server.
+  // No accumulated edges - rows always reflect the current page only.
   const rows = useMemo<DataTableRecord[]>(
     () =>
       queryHistoryRework
         ? transformEdgesToRecords({
-            edges: accumulatedEdges ?? [],
+            edges: allResultsData?.edges ?? [],
             ecsMapping,
           })
         : [],
-    [queryHistoryRework, accumulatedEdges, ecsMapping]
+    [queryHistoryRework, allResultsData?.edges, ecsMapping]
   );
-
-  const handleFetchMoreRecords = useCallback(() => {
-    const totalLoaded = accumulatedEdges.length;
-    const total = allResultsData?.total ?? 0;
-
-    if (totalLoaded < total && !isLoadingMore) {
-      setIsLoadingMore(true);
-      setPagination((prev) => ({
-        ...prev,
-        pageIndex: prev.pageIndex + 1,
-      }));
-    }
-  }, [accumulatedEdges.length, allResultsData?.total, isLoadingMore]);
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
 
@@ -372,12 +401,16 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [ecsMappingColumns, getFleetAppUrl]
   );
 
-  const rowAdditionalLeadingControls = useOsqueryRowActions({
+  const trailingColumns = useOsqueryTrailingColumns({
     timelines,
     appName: appName ?? '',
     liveQueryActionId,
     agentIds,
+    actionId,
+    endDate,
+    startDate,
     startServices,
+    rows,
   });
 
   // --- Shared hooks ---
@@ -492,19 +525,43 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
     ).data;
 
-    if (queryHistoryRework) {
-      setVisibleColumns((currentVisibleColumns) => {
-        const newVisibleColumns = map('id', newColumns);
+    const allColumnIds = map('id', newColumns);
 
-        return !isEqual(currentVisibleColumns, newVisibleColumns)
-          ? newVisibleColumns
-          : currentVisibleColumns;
-      });
+    if (queryHistoryRework) {
+      if (!hasUserSetColumns) {
+        // Only include ECS columns that have actual data in at least one row
+        const edges = allResultsData?.edges ?? [];
+        const ecsColumnsWithData = ecsMappingColumns.filter((col) => {
+          if (!allColumnIds.includes(col)) return false;
+
+          return edges.some((edge) => {
+            const value = getNestedOrFlat(col, edge._source);
+
+            return value !== undefined && value !== null && value !== '';
+          });
+        });
+
+        const osqueryColumns = allColumnIds.filter(
+          (col) => col !== 'agent.name' && !ecsMappingColumns.includes(col)
+        );
+
+        const defaultVisibleColumns = [
+          'agent.name',
+          ...ecsColumnsWithData.sort(),
+          ...osqueryColumns,
+        ]
+          .filter((col) => allColumnIds.includes(col))
+          .slice(0, 10);
+
+        setVisibleColumns((current) =>
+          !isEqual(current, defaultVisibleColumns) ? defaultVisibleColumns : current
+        );
+      }
     } else {
       setColumns((currentColumns) =>
-        !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
+        !isEqual(map('id', currentColumns), allColumnIds) ? newColumns : currentColumns
       );
-      setVisibleColumns(map('id', newColumns));
+      setVisibleColumns(allColumnIds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -513,6 +570,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ecsMappingColumns,
     getHeaderDisplay,
     allResultsData?.columns,
+    hasUserSetColumns,
   ]);
 
   // --- Legacy EuiDataGrid: leading control columns ---
@@ -575,31 +633,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [actionId, addToTimeline, agentIds, appName, endDate, liveQueryActionId, startDate]
   );
 
-  // --- Unified DataTable: additional controls ---
-  const externalAdditionalControls = useMemo(
-    () => (
-      <>
-        <ViewResultsInDiscoverAction
-          actionId={actionId}
-          buttonType={ViewResultsActionButtonType.button}
-          endDate={endDate}
-          startDate={startDate}
-        />
-        <ViewResultsInLensAction
-          actionId={actionId}
-          buttonType={ViewResultsActionButtonType.button}
-          endDate={endDate}
-          startDate={startDate}
-        />
-        <AddToTimelineButton field="action_id" value={actionId} />
-        {liveQueryActionId && (
-          <AddToCaseWrapper actionId={liveQueryActionId} queryId={actionId} agentIds={agentIds} />
-        )}
-      </>
-    ),
-    [actionId, agentIds, endDate, liveQueryActionId, startDate]
-  );
-
   // --- Unified DataTable: handlers ---
   const handleSort = useCallback((newSort: string[][]) => {
     setSortingColumns(
@@ -608,14 +641,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         direction: direction as 'asc' | 'desc',
       }))
     );
+    // Reset to first page when sort changes (server-side sorting)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, []);
 
   const handleSetColumns = useCallback((newColumns: string[], _hideTimeColumn: boolean) => {
+    setHasUserSetColumns(true);
     setVisibleColumns(newColumns);
-  }, []);
-
-  const handleUpdatePageIndex = useCallback((pageIndex: number) => {
-    setPagination((prev) => ({ ...prev, pageIndex }));
   }, []);
 
   const handleUpdateRowHeight = useCallback((newRowHeight: number) => {
@@ -642,75 +674,84 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     []
   );
 
-  // Search bar handlers for server-side filtering (unified table only)
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  }, []);
+  // Server-side pagination: compute total pages and handle page navigation
+  const totalResults = allResultsData?.total ?? 0;
+  const totalPages = Math.ceil(totalResults / pagination.pageSize);
 
-  const handleSearchSubmit = useCallback(() => {
-    setKuery(searchInput);
-    // Reset pagination and accumulated edges when filter changes
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    setAccumulatedEdges([]);
-  }, [searchInput]);
+  const handleServerPageChange = useCallback(
+    (pageIndex: number) => {
+      if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        showPaginationLimitToast();
 
-  const handleSearchKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        handleSearchSubmit();
+        return;
       }
+      setPagination((prev) => ({ ...prev, pageIndex }));
     },
-    [handleSearchSubmit]
+    [pagination.pageSize, showPaginationLimitToast]
   );
 
-  const handleClearSearch = useCallback(() => {
-    setSearchInput('');
-    setKuery('');
+  const handleServerPageSizeChange = useCallback(
+    (pageSize: number) => {
+      setPagination({ pageIndex: 0, pageSize });
+    },
+    []
+  );
+
+  // SearchBar query submit handler
+  const handleQuerySubmit = useCallback(
+    (payload: { query?: Query }) => {
+      if (payload.query) {
+        setQuery(payload.query);
+      }
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    },
+    []
+  );
+
+  // SearchBar filters update handler
+  const handleFiltersUpdated = useCallback((updatedFilters: Filter[]) => {
+    setFilters(updatedFilters);
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    setAccumulatedEdges([]);
   }, []);
 
-  // Cell action filter handler for server-side filtering (unified table only)
+  // Cell action filter handler - creates proper Filter objects (pill badges)
   const handleFilter = useCallback(
     (field: DataViewField, values: unknown, operation: '+' | '-') => {
-      const fieldName = field.name;
       const value = Array.isArray(values) ? values[0] : values;
-      const escapedValue =
-        typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : String(value);
+      const stringValue = typeof value === 'string' ? value : String(value);
 
-      let newFilter: string;
-      if (operation === '+') {
-        newFilter = `${fieldName}: ${escapedValue}`;
-      } else {
-        newFilter = `NOT ${fieldName}: ${escapedValue}`;
-      }
+      // Only set meta.index if the field actually exists in the DataView,
+      // otherwise the FilterBar's getDisplayValueFromFilter will throw
+      const fieldExistsInDataView = dataView?.fields.getByName(field.name) !== undefined;
 
-      // Append to existing kuery or set as new
-      const updatedKuery = kuery ? `${kuery} AND ${newFilter}` : newFilter;
+      const newFilter: Filter = {
+        meta: {
+          ...(fieldExistsInDataView && dataView?.id ? { index: dataView.id } : {}),
+          key: field.name,
+          value: stringValue,
+          params: { query: value },
+          type: 'phrase',
+          negate: operation === '-',
+          disabled: false,
+        },
+        query: {
+          match_phrase: {
+            [field.name]: value,
+          },
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      };
 
-      setSearchInput(updatedKuery);
-      setKuery(updatedKuery);
+      setFilters((prev) => [...prev, newFilter]);
       setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-      setAccumulatedEdges([]);
-
-      toasts.addSuccess({
-        title: i18n.translate('xpack.osquery.resultsTable.filterApplied', {
-          defaultMessage: 'Filter applied',
-        }),
-        text:
-          operation === '+'
-            ? i18n.translate('xpack.osquery.resultsTable.filterForApplied', {
-                defaultMessage: 'Filtering for {field}: {value}',
-                values: { field: fieldName, value: String(value) },
-              })
-            : i18n.translate('xpack.osquery.resultsTable.filterOutApplied', {
-                defaultMessage: 'Filtering out {field}: {value}',
-                values: { field: fieldName, value: String(value) },
-              }),
-      });
     },
-    [kuery, toasts]
+    [dataView]
   );
+
+  const SearchBar = unifiedSearch.ui.SearchBar;
+  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const handleCloseFlyout = useCallback(() => {
     setExpandedDoc(undefined);
@@ -735,10 +776,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           onClose={handleCloseFlyout}
           setExpandedDoc={setExpandedDoc}
           toastNotifications={toasts}
+          chrome={chrome}
         />
       );
     },
-    [dataView, handleCloseFlyout, toasts]
+    [dataView, handleCloseFlyout, toasts, chrome]
   );
 
   useEffect(
@@ -786,6 +828,26 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       <>
         {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
+        <div css={resultsTableContainerCss}>
+          {/* Unified Search Bar with KQL autocomplete and filter pills */}
+          <SearchBar
+            appName="osquery"
+            indexPatterns={indexPatterns}
+            query={query}
+            filters={filters}
+            onQuerySubmit={handleQuerySubmit}
+            onFiltersUpdated={handleFiltersUpdated}
+            showDatePicker={false}
+            showQueryInput
+            showFilterBar
+            showQueryMenu={false}
+            displayStyle="inPage"
+            placeholder={i18n.translate('xpack.osquery.resultsTable.searchPlaceholder', {
+              defaultMessage: 'Filter results using KQL',
+            })}
+            dataTestSubj="osqueryResultsSearchBar"
+          />
+
         {!allResultsData?.edges.length ? (
           <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
             <EuiCallOut
@@ -794,73 +856,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             />
           </EuiPanel>
         ) : (
-          <div css={resultsTableContainerCss}>
-            {/* KQL Search Bar for server-side filtering */}
-            <div css={searchBarContainerCss}>
-              <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate('xpack.osquery.resultsTable.searchLabel', {
-                      defaultMessage: 'Filter results (KQL)',
-                    })}
-                    helpText={
-                      <EuiText size="xs" color="subdued">
-                        <FormattedMessage
-                          id="xpack.osquery.resultsTable.searchHelpText"
-                          defaultMessage='Filter all {total} results. Example: agent.name: "my-agent" OR osquery.pid: 1234'
-                          values={{ total: allResultsData?.total ?? 0 }}
-                        />
-                      </EuiText>
-                    }
-                    fullWidth
-                  >
-                    <EuiFieldSearch
-                      placeholder={i18n.translate('xpack.osquery.resultsTable.searchPlaceholder', {
-                        defaultMessage: 'Enter KQL filter...',
-                      })}
-                      value={searchInput}
-                      onChange={handleSearchChange}
-                      onKeyDown={handleSearchKeyDown}
-                      onSearch={handleSearchSubmit}
-                      isClearable={!!searchInput}
-                      aria-label={i18n.translate('xpack.osquery.resultsTable.searchAriaLabel', {
-                        defaultMessage: 'Filter results using KQL',
-                      })}
-                      fullWidth
-                      data-test-subj="osqueryResultsKqlSearch"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {kuery && (
-                <EuiFlexGroup gutterSize="xs" alignItems="center" css={{ marginTop: '8px' }}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.osquery.resultsTable.activeFilter"
-                        defaultMessage="Active filter:"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="hollow"
-                      iconType="cross"
-                      iconSide="right"
-                      iconOnClick={handleClearSearch}
-                      iconOnClickAriaLabel={i18n.translate(
-                        'xpack.osquery.resultsTable.clearFilterAriaLabel',
-                        { defaultMessage: 'Clear filter' }
-                      )}
-                      data-test-subj="osqueryResultsClearFilter"
-                    >
-                      {kuery}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </div>
-
+          <>
+            <div css={unifiedTableWrapperCss}>
             <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
               <UnifiedDataTable
                 ariaLabelledBy="osquery-results"
@@ -869,19 +866,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 columns={visibleColumns}
                 rows={rows}
                 loadingState={
-                  isLoading
-                    ? DataLoadingState.loading
-                    : isLoadingMore
-                    ? DataLoadingState.loadingMore
-                    : DataLoadingState.loaded
+                  isLoading ? DataLoadingState.loading : DataLoadingState.loaded
                 }
-                onFetchMoreRecords={handleFetchMoreRecords}
                 expandedDoc={expandedDoc}
                 setExpandedDoc={setExpandedDoc}
                 renderDocumentView={renderDocumentView}
-                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                trailingControlColumns={trailingColumns}
                 externalCustomRenderers={externalCustomRenderers}
-                externalAdditionalControls={externalAdditionalControls}
                 sort={sortingColumns.map((col) => [col.id, col.direction])}
                 onSort={handleSort}
                 onSetColumns={handleSetColumns}
@@ -892,27 +883,36 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 showColumnTokens
                 canDragAndDropColumns
                 isSortEnabled
-                isPaginationEnabled
-                rowsPerPageState={pagination.pageSize}
-                rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-                onUpdateRowsPerPage={onChangeItemsPerPage}
-                onUpdatePageIndex={handleUpdatePageIndex}
+                isPaginationEnabled={false}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={handleUpdateRowHeight}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={handleUpdateDensity}
-                sampleSizeState={rows.length}
+                sampleSizeState={allResultsData?.total ?? 0}
                 totalHits={allResultsData?.total}
                 services={unifiedDataTableServices}
                 consumer="osquery"
-                enableInTableSearch
                 enableComparisonMode
                 controlColumnIds={CONTROL_COLUMN_IDS}
                 onFilter={handleFilter}
+                gridStyleOverride={gridStyleOverride}
               />
             </CellActionsProvider>
-          </div>
+            </div>
+
+            {/* Server-side pagination controls */}
+            <EuiTablePagination
+              pageCount={totalPages}
+              activePage={pagination.pageIndex}
+              onChangePage={handleServerPageChange}
+              itemsPerPage={pagination.pageSize}
+              onChangeItemsPerPage={handleServerPageSizeChange}
+              itemsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+              showPerPageOptions
+            />
+          </>
         )}
+        </div>
       </>
     );
   }

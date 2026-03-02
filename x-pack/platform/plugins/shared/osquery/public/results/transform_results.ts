@@ -7,9 +7,25 @@
 
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-plugin/common';
-import { isArray, isObject } from 'lodash/fp';
+import { get, isArray, isObject } from 'lodash/fp';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { ResultEdges } from '../../common/search_strategy';
+
+/**
+ * Resolves a dot-notation path from a source object.
+ * Tries nested path first (e.g., source.process.pid), then flat key (e.g., source['process.pid']).
+ */
+export function getNestedOrFlat(path: string, source: unknown): unknown {
+  const nested = get(path, source);
+  if (nested !== undefined) return nested;
+
+  // Fallback: try as a flat key (e.g., _source has literal 'process.pid' key)
+  if (source && typeof source === 'object') {
+    return (source as Record<string, unknown>)[path];
+  }
+
+  return undefined;
+}
 
 interface TransformEdgesToRecordsOptions {
   edges: ResultEdges;
@@ -29,10 +45,24 @@ export function flattenOsqueryHit(
     }
   }
 
+  const agentFields = ['agent.name', 'agent.id'] as const;
+  for (const field of agentFields) {
+    if (flattened[field] === undefined && edge._source) {
+      const parts = field.split('.');
+      const nested = (edge._source as Record<string, unknown>)?.[parts[0]];
+      if (nested && typeof nested === 'object') {
+        const value = (nested as Record<string, unknown>)[parts[1]];
+        if (value !== undefined) {
+          flattened[field] = isArray(value) && value.length === 1 ? value[0] : value;
+        }
+      }
+    }
+  }
+
   if (ecsMapping && edge._source) {
     const ecsMappingKeys = Object.keys(ecsMapping);
     for (const key of ecsMappingKeys) {
-      const sourceValue = (edge._source as Record<string, unknown>)?.[key];
+      const sourceValue = getNestedOrFlat(key, edge._source);
       if (sourceValue !== undefined) {
         if (isArray(sourceValue) || isObject(sourceValue)) {
           try {

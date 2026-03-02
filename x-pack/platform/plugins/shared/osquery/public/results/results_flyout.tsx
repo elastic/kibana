@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ChromeStart } from '@kbn/core/public';
 
 export interface OsqueryResultsFlyoutProps {
   hit: DataTableRecord;
@@ -23,6 +24,7 @@ export interface OsqueryResultsFlyoutProps {
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
   toastNotifications?: ToastsStart;
+  chrome: ChromeStart;
 }
 
 const FLYOUT_TITLE = i18n.translate('xpack.osquery.resultsTable.flyout.title', {
@@ -40,12 +42,14 @@ export const OsqueryResultsFlyout: React.FC<OsqueryResultsFlyoutProps> = ({
   onAddColumn,
   onRemoveColumn,
   toastNotifications,
+  chrome,
 }) => {
   const services = useMemo(
     () => ({
       toastNotifications,
+      chrome,
     }),
-    [toastNotifications]
+    [toastNotifications, chrome]
   );
 
   const handleAddColumn = useCallback(

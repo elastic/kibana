@@ -18,7 +18,7 @@ import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 const tableWrapperCss = {
-  paddingLeft: '10px',
+  paddingLeft: 0,
 };
 
 const LiveQueryDetailsPageComponent = () => {
@@ -70,7 +70,7 @@ const LiveQueryDetailsPageComponent = () => {
   }, [data?.status]);
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false} restrictWidth={false} restrictHeaderWidth={false}>
       <EuiFlexItem css={tableWrapperCss}>
         <PackQueriesStatusTable
           actionId={actionId}

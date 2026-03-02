@@ -7,16 +7,15 @@
 
 import React, { Fragment } from 'react';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 
-export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: euiTheme.colors.emptyShade,
+export const pageCss = {
+  background: 'transparent',
   width: '100%',
-  alignSelf: 'center',
+  alignSelf: 'center' as const,
   marginLeft: 0,
   marginRight: 0,
   flex: 1,
-});
+};
 
 export const contentCss = {
   height: '100%',

@@ -18,6 +18,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   getLazyLiveQueryField,
   getLazyOsqueryAction,
@@ -96,6 +97,7 @@ export interface StartPlugins {
   cases: CasesPublicStart;
   timelines?: OsqueryTimelinesStart;
   uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   appName?: string;
 }
 

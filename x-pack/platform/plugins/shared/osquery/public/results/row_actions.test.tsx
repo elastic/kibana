@@ -22,90 +22,70 @@ describe('useOsqueryRowActions', () => {
     }),
   };
 
-  it('should return empty array when timelines is undefined', () => {
-    const { result } = renderHook(() =>
-      useOsqueryRowActions({
-        timelines: undefined,
-        appName: 'Security',
-        liveQueryActionId: 'action-123',
-        agentIds: ['agent-1'],
-        startServices: mockStartServices,
-      })
-    );
+  const defaultProps = {
+    timelines: undefined as OsqueryTimelinesStart | undefined,
+    appName: 'Osquery',
+    liveQueryActionId: undefined as string | undefined,
+    agentIds: ['agent-1'] as string[] | undefined,
+    actionId: 'action-123',
+    endDate: undefined as string | undefined,
+    startDate: undefined as string | undefined,
+    startServices: mockStartServices,
+  };
 
-    expect(result.current).toEqual([]);
-  });
-
-  it('should return empty array when appName is not Security', () => {
-    const { result } = renderHook(() =>
-      useOsqueryRowActions({
-        timelines: mockTimelines,
-        appName: 'Osquery',
-        liveQueryActionId: 'action-123',
-        agentIds: ['agent-1'],
-        startServices: mockStartServices,
-      })
-    );
-
-    expect(result.current).toEqual([]);
-  });
-
-  it('should return timeline row action when in Security context', () => {
-    const { result } = renderHook(() =>
-      useOsqueryRowActions({
-        timelines: mockTimelines,
-        appName: 'Security',
-        liveQueryActionId: 'action-123',
-        agentIds: ['agent-1'],
-        startServices: mockStartServices,
-      })
-    );
+  it('should always return one row control column for the actions popover', () => {
+    const { result } = renderHook(() => useOsqueryRowActions(defaultProps));
 
     expect(result.current).toHaveLength(1);
-    expect(result.current[0].id).toBe('osquery-add-to-timeline');
+    expect(result.current[0].id).toBe('osquery-row-actions');
   });
 
-  it('should have proper render function for timeline action', () => {
-    const { result } = renderHook(() =>
-      useOsqueryRowActions({
-        timelines: mockTimelines,
-        appName: 'Security',
-        liveQueryActionId: 'action-123',
-        agentIds: ['agent-1'],
-        startServices: mockStartServices,
-      })
+  it('should return a render function for the popover', () => {
+    const { result } = renderHook(() => useOsqueryRowActions(defaultProps));
+
+    const actionColumn = result.current[0];
+    expect(actionColumn.render).toBeDefined();
+    expect(typeof actionColumn.render).toBe('function');
+  });
+
+  it('should return the popover regardless of timelines availability', () => {
+    const { result: withoutTimelines } = renderHook(() =>
+      useOsqueryRowActions({ ...defaultProps, timelines: undefined })
     );
 
-    const timelineAction = result.current[0];
-    expect(timelineAction.render).toBeDefined();
-    expect(typeof timelineAction.render).toBe('function');
+    const { result: withTimelines } = renderHook(() =>
+      useOsqueryRowActions({ ...defaultProps, timelines: mockTimelines, appName: 'Security' })
+    );
+
+    expect(withoutTimelines.current).toHaveLength(1);
+    expect(withTimelines.current).toHaveLength(1);
+    expect(withoutTimelines.current[0].id).toBe('osquery-row-actions');
+    expect(withTimelines.current[0].id).toBe('osquery-row-actions');
   });
 
-  it('should memoize actions based on dependencies', () => {
+  it('should memoize the result based on dependencies', () => {
     const { result, rerender } = renderHook(
-      ({ timelines, appName }) =>
-        useOsqueryRowActions({
-          timelines,
-          appName,
-          liveQueryActionId: 'action-123',
-          agentIds: ['agent-1'],
-          startServices: mockStartServices,
-        }),
-      {
-        initialProps: {
-          timelines: mockTimelines,
-          appName: 'Security',
-        },
-      }
+      (props) => useOsqueryRowActions(props),
+      { initialProps: defaultProps }
     );
 
     const firstResult = result.current;
 
-    rerender({
-      timelines: mockTimelines,
-      appName: 'Security',
-    });
+    rerender(defaultProps);
 
     expect(result.current).toBe(firstResult);
+  });
+
+  it('should return new reference when actionId changes', () => {
+    const { result, rerender } = renderHook(
+      (props) => useOsqueryRowActions(props),
+      { initialProps: defaultProps }
+    );
+
+    const firstResult = result.current;
+
+    rerender({ ...defaultProps, actionId: 'action-456' });
+
+    expect(result.current).not.toBe(firstResult);
   });
 });

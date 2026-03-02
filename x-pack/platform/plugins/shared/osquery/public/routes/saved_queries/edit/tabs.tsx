@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
+import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -95,15 +95,17 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   );
 
   return (
-    <EuiTabbedContent
-      css={euiTabbedContentCss}
-      // TODO: extend the EuiTabbedContent component to support EuiTabs props
-      // bottomBorder={false}
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      expand={false}
-    />
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      <EuiTabbedContent
+        css={euiTabbedContentCss}
+        // TODO: extend the EuiTabbedContent component to support EuiTabs props
+        // bottomBorder={false}
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        autoFocus="selected"
+        expand={false}
+      />
+    </EuiPanel>
   );
 };
 
