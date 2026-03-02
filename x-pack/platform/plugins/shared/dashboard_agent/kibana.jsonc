@@ -10,6 +10,6 @@
     "browser": true,
     "configPath": ["xpack", "dashboardAgent"],
     "requiredPlugins": ["agentBuilder", "dashboard", "dashboardMarkdown", "data"],
-    "requiredBundles": []
+    "requiredBundles": ["lens"]
   }
 }

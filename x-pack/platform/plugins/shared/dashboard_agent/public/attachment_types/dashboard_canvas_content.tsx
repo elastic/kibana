@@ -23,7 +23,9 @@ import {
   type LensApiSchemaType,
   type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 const DEFAULT_PANEL_HEIGHT = 9;
@@ -70,7 +72,12 @@ export const buildLensPanelFromApi = (
   const lensAttributes: LensAttributes = new LensConfigBuilder().fromAPIFormat(config);
 
   const lensConfig: LensSerializedAPIConfig = {
-    title: lensAttributes.title ?? config.title ?? 'Generated panel',
+    title:
+      lensAttributes.title ??
+      config.title ??
+      i18n.translate('xpack.dashboardAgent.attachments.dashboard.generatedPanelTitle', {
+        defaultMessage: 'Generated panel',
+      }),
     attributes: lensAttributes,
   };
 
@@ -80,6 +87,13 @@ export const buildLensPanelFromApi = (
     config: lensConfig,
     uid,
   };
+};
+
+export const isLensEmbeddableType = (
+  embeddableType: string,
+  rawConfig: unknown
+): rawConfig is LensAttributes => {
+  return embeddableType === LENS_EMBEDDABLE_TYPE && isLensLegacyAttributes(rawConfig);
 };
 
 export interface BuildPanelFromRawConfigOptions {
@@ -103,8 +117,8 @@ export const buildPanelFromRawConfig = ({
 }: BuildPanelFromRawConfigOptions): DashboardPanel | null => {
   const { currentX, currentY } = position;
 
-  if (embeddableType === 'lens') {
-    const lensAttributes = rawConfig as LensAttributes;
+  if (isLensEmbeddableType(embeddableType, rawConfig)) {
+    const lensAttributes = rawConfig;
     const width = getLensPanelWidth ? getLensPanelWidth(lensAttributes) : layout.largePanelWidth;
 
     let x = currentX;
