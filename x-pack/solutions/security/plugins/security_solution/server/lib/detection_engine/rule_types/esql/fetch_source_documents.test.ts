@@ -25,6 +25,16 @@ const getSearchBoolQuery = (): SearchBoolQuery => {
   return searchArgs.query.bool;
 };
 
+const rangeFilter = {
+  range: {
+    '@timestamp': {
+      lte: '2025-06-01T00:00:00.000Z',
+      gte: '2025-05-01T00:00:00.000Z',
+      format: 'strict_date_optional_time',
+    },
+  },
+};
+
 const defaultArgs = {
   isRuleAggregating: false,
   esClient: mockEsClient,
@@ -33,6 +43,10 @@ const defaultArgs = {
   hasLoggedRequestsReachedLimit: false,
   runtimeMappings: undefined,
   excludedDocuments: {},
+  from: '2025-05-01T00:00:00.000Z',
+  to: '2025-06-01T00:00:00.000Z',
+  primaryTimestamp: '@timestamp' as const,
+  secondaryTimestamp: undefined,
 };
 
 describe('fetchSourceDocuments', () => {
@@ -56,28 +70,28 @@ describe('fetchSourceDocuments', () => {
     expect(mockEsClient.search).not.toHaveBeenCalled();
   });
 
-  it('should query by ids without additional filters when filters is undefined', async () => {
+  it('should include ids and time range filter in the query', async () => {
     await fetchSourceDocuments(defaultArgs);
 
     expect(mockEsClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           bool: {
-            filter: [{ ids: { values: ['doc-1', 'doc-2'] } }],
+            filter: [{ ids: { values: ['doc-1', 'doc-2'] } }, rangeFilter],
           },
         },
       })
     );
   });
 
-  it('should query by ids without additional filters when filters is empty', async () => {
+  it('should include ids and time range filter when filters is empty', async () => {
     await fetchSourceDocuments({ ...defaultArgs, filters: [] });
 
     expect(mockEsClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           bool: {
-            filter: [{ ids: { values: ['doc-1', 'doc-2'] } }],
+            filter: [{ ids: { values: ['doc-1', 'doc-2'] } }, rangeFilter],
           },
         },
       })
@@ -87,32 +101,103 @@ describe('fetchSourceDocuments', () => {
   it('should include data tier exclusion filter in the query', async () => {
     const dataTierFilter: Filter = {
       meta: { negate: true },
-      query: {
-        terms: {
-          _tier: ['data_cold', 'data_frozen'],
-        },
-      },
+      query: { terms: { _tier: ['data_cold', 'data_frozen'] } },
     };
 
     await fetchSourceDocuments({ ...defaultArgs, filters: [dataTierFilter] });
 
     const { filter } = getSearchBoolQuery();
 
-    expect(filter).toHaveLength(2);
+    expect(filter).toHaveLength(3);
     expect(filter[0]).toEqual({ ids: { values: ['doc-1', 'doc-2'] } });
-    expect(filter[1]?.bool).toHaveProperty('must_not', [
-      { terms: { _tier: ['data_cold', 'data_frozen'] } },
-    ]);
+    expect(filter[1]).toEqual(rangeFilter);
+    expect(filter[2]).toEqual({
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }],
+      },
+    });
+  });
+
+  it('should include data stream namespace filter in the query', async () => {
+    const namespaceFilter: Filter = {
+      meta: { negate: false },
+      query: {
+        bool: {
+          filter: { terms: { 'data_stream.namespace': ['default', 'production'] } },
+        },
+      },
+    };
+
+    await fetchSourceDocuments({ ...defaultArgs, filters: [namespaceFilter] });
+
+    const { filter } = getSearchBoolQuery();
+
+    expect(filter).toHaveLength(3);
+    expect(filter[0]).toEqual({ ids: { values: ['doc-1', 'doc-2'] } });
+    expect(filter[1]).toEqual(rangeFilter);
+    expect(filter[2]).toEqual({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              filter: { terms: { 'data_stream.namespace': ['default', 'production'] } },
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+  });
+
+  it('should include both data tier and namespace filters in the query', async () => {
+    const dataTierFilter: Filter = {
+      meta: { negate: true },
+      query: { terms: { _tier: ['data_frozen'] } },
+    };
+    const namespaceFilter: Filter = {
+      meta: { negate: false },
+      query: {
+        bool: {
+          filter: { terms: { 'data_stream.namespace': ['default'] } },
+        },
+      },
+    };
+
+    await fetchSourceDocuments({
+      ...defaultArgs,
+      filters: [dataTierFilter, namespaceFilter],
+    });
+
+    const { filter } = getSearchBoolQuery();
+
+    expect(filter).toHaveLength(3);
+    expect(filter[0]).toEqual({ ids: { values: ['doc-1', 'doc-2'] } });
+    expect(filter[1]).toEqual(rangeFilter);
+    expect(filter[2]).toEqual({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              filter: { terms: { 'data_stream.namespace': ['default'] } },
+            },
+          },
+        ],
+        should: [],
+        must_not: [{ terms: { _tier: ['data_frozen'] } }],
+      },
+    });
   });
 
   it('should include excludedDocuments must_not alongside filters', async () => {
     const dataTierFilter: Filter = {
       meta: { negate: true },
-      query: {
-        terms: {
-          _tier: ['data_cold'],
-        },
-      },
+      query: { terms: { _tier: ['data_cold'] } },
     };
 
     await fetchSourceDocuments({
@@ -125,7 +210,7 @@ describe('fetchSourceDocuments', () => {
 
     const boolQuery = getSearchBoolQuery();
 
-    expect(boolQuery.filter).toBeDefined();
+    expect(boolQuery.filter).toHaveLength(3);
     expect(boolQuery.must_not).toEqual([
       {
         bool: {
@@ -133,5 +218,55 @@ describe('fetchSourceDocuments', () => {
         },
       },
     ]);
+  });
+
+  it('should use secondary timestamp when provided', async () => {
+    await fetchSourceDocuments({
+      ...defaultArgs,
+      primaryTimestamp: 'event.ingested',
+      secondaryTimestamp: '@timestamp',
+    });
+
+    const { filter } = getSearchBoolQuery();
+
+    expect(filter).toHaveLength(2);
+    expect(filter[1]).toEqual({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            range: {
+              'event.ingested': {
+                lte: '2025-06-01T00:00:00.000Z',
+                gte: '2025-05-01T00:00:00.000Z',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+          {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      lte: '2025-06-01T00:00:00.000Z',
+                      gte: '2025-05-01T00:00:00.000Z',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: { field: 'event.ingested' },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
   });
 });

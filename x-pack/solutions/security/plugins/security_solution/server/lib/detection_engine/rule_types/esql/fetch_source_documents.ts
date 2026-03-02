@@ -10,8 +10,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { logQueryRequest } from '../utils/logged_requests';
 import { getQueryFilter } from '../utils/get_query_filter';
+import { buildTimeRangeFilter } from '../utils/build_events_query';
 import * as i18n from '../translations';
 import type { SignalSource } from '../types';
 import { convertExternalIdsToDSL } from './build_esql_search_request';
@@ -35,6 +37,10 @@ interface FetchSourceDocumentsArgs {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   excludedDocuments: Record<string, ExcludedDocument[]>;
   filters?: Filter[];
+  from: string;
+  to: string;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverride | undefined;
 }
 /**
  * fetches source documents by list of their ids
@@ -51,6 +57,10 @@ export const fetchSourceDocuments = async ({
   runtimeMappings,
   excludedDocuments,
   filters,
+  from,
+  to,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
@@ -64,7 +74,8 @@ export const fetchSourceDocuments = async ({
     return {};
   }
 
-  const filterClauses: estypes.QueryDslQueryContainer[] = [{ ids: { values: ids } }];
+  const rangeFilter = buildTimeRangeFilter({ to, from, primaryTimestamp, secondaryTimestamp });
+  const filterClauses: estypes.QueryDslQueryContainer[] = [{ ids: { values: ids } }, rangeFilter];
 
   if (filters && filters.length > 0) {
     const esFilter = getQueryFilter({
