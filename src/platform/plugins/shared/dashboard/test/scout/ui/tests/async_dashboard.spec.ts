@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
@@ -18,19 +18,15 @@ import {
   SAMPLE_DATA_RANGE,
 } from '../constants';
 
-spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
-    await scoutSpace.savedObjects.cleanStandardList();
-
-    // install sample flights data
-    await apiServices.sampleData.install(SAMPLE_DATA_SET_ID, scoutSpace.id);
+test.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgnostic }, () => {
+  test.beforeAll(async ({ apiServices, esClient, uiSettings }) => {
+    await apiServices.sampleData.install(SAMPLE_DATA_SET_ID);
 
     await expect
       .poll(
         async () => {
           const { data: dataViews } = await apiServices.dataViews.find(
-            (dataView) => dataView.name === SAMPLE_DATA_VIEW || dataView.title === SAMPLE_DATA_VIEW,
-            scoutSpace.id
+            (dataView) => dataView.name === SAMPLE_DATA_VIEW || dataView.title === SAMPLE_DATA_VIEW
           );
           return dataViews.length;
         },
@@ -38,7 +34,6 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgno
       )
       .toBeGreaterThan(0);
 
-    // Wait for ES documents to be indexed and searchable before the test starts.
     // The sample data install bulk-indexes without refresh, so there can be a lag
     // (especially in serverless) between install returning and data being queryable.
     await expect
@@ -51,18 +46,17 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgno
       )
       .toBeGreaterThan(0);
 
-    await scoutSpace.uiSettings.set({
+    await uiSettings.set({
       [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: JSON.stringify(SAMPLE_DATA_RANGE),
     });
   });
 
-  spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
-    // remove sample flights data
-    await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID);
   });
 
-  spaceTest('loads dashboard and renders panels', async ({ browserAuth, page, pageObjects }) => {
-    await spaceTest.step('login and prepare Discover', async () => {
+  test('loads dashboard and renders panels', async ({ browserAuth, page, pageObjects }) => {
+    await test.step('login and prepare Discover', async () => {
       await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto();
       await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
@@ -71,13 +65,13 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgno
       expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
     });
 
-    await spaceTest.step('open flights dashboard and validate panels', async () => {
+    await test.step('open flights dashboard and validate panels', async () => {
       await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
       await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
       expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
     });
 
-    await spaceTest.step('return to dashboard and validate panels', async () => {
+    await test.step('return to dashboard and validate panels', async () => {
       await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
 
       await expect.poll(async () => await pageObjects.dashboard.getControlCount()).toBe(3);
