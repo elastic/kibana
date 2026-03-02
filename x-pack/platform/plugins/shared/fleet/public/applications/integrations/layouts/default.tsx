@@ -23,7 +23,8 @@ interface Props {
 
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection, noSpacerInContent }) => {
-    const { automaticImport } = useStartServices();
+    const { automaticImport, automaticImportVTwo } = useStartServices();
+
     const { getHref } = useLink();
     const tabs = [
       {
@@ -82,8 +83,7 @@ export const DefaultLayout: React.FC<Props> = memo(
         }
         rightColumnGrow={false}
         rightColumn={
-          ExperimentalFeaturesService.get()
-            .newBrowseIntegrationUx ? undefined : CreateIntegrationCardButton ? (
+          Boolean(automaticImportVTwo) ? undefined : CreateIntegrationCardButton ? (
             <EuiFlexItem grow={false}>
               <CreateIntegrationCardButton />
             </EuiFlexItem>
