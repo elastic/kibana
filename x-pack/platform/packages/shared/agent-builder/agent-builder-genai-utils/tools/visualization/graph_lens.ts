@@ -131,6 +131,8 @@ export const createVisualizationGraph = (
         events,
         logger,
         esClient: esClient.asCurrentUser,
+        additionalInstructions:
+          'Use human-readable column aliases in STATS/EVAL (e.g. `Unique Visitors` not `unique_visitors`). Wrap multi-word aliases in backticks.',
       });
 
       if (!generateEsqlResponse.query) {

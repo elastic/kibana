@@ -8,6 +8,11 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
+const TITLE_GUIDANCE = `TITLE RULES:
+- Omit the 'title' field when the chart already displays the information within itself (e.g. metric, gauge, tagcloud, waffle charts show their value and label directly).
+- When a title is needed, make it self-explanatory and exhaustive so that axis titles become unnecessary.
+- NEVER duplicate information across the chart title, axis titles, and metric labels.`;
+
 export const createGenerateConfigPrompt = ({
   nlQuery,
   chartType,
@@ -44,6 +49,8 @@ ${
 }
 
 ${additionalInstructions}
+
+${TITLE_GUIDANCE}
 
 Your task is to generate a ${chartType} visualization configuration based on the following information:
 
