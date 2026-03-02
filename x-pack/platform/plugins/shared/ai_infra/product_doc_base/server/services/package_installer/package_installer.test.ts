@@ -249,6 +249,7 @@ describe('PackageInstaller', () => {
         kibana: ['8.15', '8.16'],
         security: ['8.15', '8.16'],
         elasticsearch: ['8.15'],
+        openapi: [],
       });
 
       productDocClient.getInstallationStatus.mockResolvedValue({
@@ -256,6 +257,10 @@ describe('PackageInstaller', () => {
         security: { status: 'installed', version: '8.16' },
         elasticsearch: { status: 'uninstalled' },
       } as Record<ProductName, ProductInstallState>);
+
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
 
       jest.spyOn(packageInstaller, 'installPackage');
 
