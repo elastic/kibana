@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { durationToDisplayShortText } from './format_duration';
-export {
-  dateMathToRelativeParts,
-  timeRangeToDisplayText,
-  timeRangeToFullFormattedText,
-} from './format_time_range';
-export type { TimeRangeTransformOptions } from '../types';
+import React from 'react';
+
+import { PanelContainer, PanelHeader, SubPanelHeading } from '../date_range_picker_panel_ui';
+
+/** Panel for specifying a custom absolute or relative time range. */
+export function CustomTimeRangePanel() {
+  return (
+    <PanelContainer>
+      <PanelHeader>
+        <SubPanelHeading>Custom time range</SubPanelHeading>
+      </PanelHeader>
+    </PanelContainer>
+  );
+}
+CustomTimeRangePanel.PANEL_ID = 'custom-time-range-panel';
