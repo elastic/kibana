@@ -95,4 +95,17 @@ export const ConnectorIconsMap: Map<
     '.azure-blob',
     lazy(() => import(/* webpackChunkName: "connectorIconazureblob" */ './specs/azure_blob/icon')),
   ],
+  [
+    '.zendesk',
+    lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
+  ],
+  [
+    '.servicenow_search',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+        )
+    ),
+  ],
 ]);
