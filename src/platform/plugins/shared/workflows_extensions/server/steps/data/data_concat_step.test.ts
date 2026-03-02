@@ -290,7 +290,7 @@ describe('dataConcatStepDefinition', () => {
       const result = await dataConcatStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain(`exceeding the maximum of ${MAX_CONCAT_ITEMS}`);
+      expect(result.error?.message).toContain(`maximum of ${MAX_CONCAT_ITEMS}`);
     });
   });
 

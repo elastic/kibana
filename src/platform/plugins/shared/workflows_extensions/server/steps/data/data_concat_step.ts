@@ -15,21 +15,6 @@ export const MAX_ARRAYS = 50;
 const MAX_FLATTEN_DEPTH = 10;
 const ABORT_CHECK_INTERVAL = 1000;
 
-function resolveArrays(raw: unknown[], renderFn: (val: unknown) => unknown): unknown[][] {
-  return raw.map((item, i) => {
-    const rendered = renderFn(item);
-    if (rendered === null || rendered === undefined) {
-      return [];
-    }
-    if (!Array.isArray(rendered)) {
-      throw new Error(
-        `Input at index ${i} is not an array (got ${typeof rendered}). Each entry in "arrays" must resolve to an array.`
-      );
-    }
-    return rendered;
-  });
-}
-
 function deduplicateKey(item: unknown): string {
   if (item === null) return 'null';
   if (item === undefined) return 'undefined';
@@ -40,20 +25,65 @@ function deduplicateKey(item: unknown): string {
   return JSON.stringify(item);
 }
 
-function deduplicateItems(items: unknown[], abortSignal?: AbortSignal): unknown[] {
-  const seen = new Set<string>();
+function resolveToArray(rendered: unknown, index: number): unknown[] {
+  if (rendered === null || rendered === undefined) return [];
+  if (!Array.isArray(rendered)) {
+    throw new Error(
+      `Input at index ${index} is not an array (got ${typeof rendered}). Each entry in "arrays" must resolve to an array.`
+    );
+  }
+  return rendered;
+}
+
+interface ConcatOptions {
+  flattenDepth: number;
+  dedupe: boolean;
+  abortSignal?: AbortSignal;
+}
+
+/**
+ * Single-pass: resolve → flatten → dedupe → push, one item at a time.
+ * Only the final result array (and optionally a dedup Set) are held in memory.
+ */
+function concatSinglePass(
+  rawArrays: unknown[],
+  renderFn: (val: unknown) => unknown,
+  options: ConcatOptions
+): { result: unknown[] } | { error: Error } {
+  const { flattenDepth, dedupe, abortSignal } = options;
+  const seen = dedupe ? new Set<string>() : null;
   const result: unknown[] = [];
-  for (let i = 0; i < items.length; i++) {
-    if (i % ABORT_CHECK_INTERVAL === 0 && abortSignal?.aborted) {
-      break;
-    }
-    const key = deduplicateKey(items[i]);
-    if (!seen.has(key)) {
-      seen.add(key);
-      result.push(items[i]);
+  let totalCount = 0;
+
+  for (let i = 0; i < rawArrays.length; i++) {
+    const resolved = resolveToArray(renderFn(rawArrays[i]), i);
+    const items = flattenDepth > 0 ? resolved.flat(flattenDepth) : resolved;
+
+    for (const item of items) {
+      if (totalCount % ABORT_CHECK_INTERVAL === 0 && abortSignal?.aborted) {
+        return { error: new Error('Operation was aborted') };
+      }
+
+      totalCount++;
+      if (totalCount > MAX_CONCAT_ITEMS) {
+        return {
+          error: new Error(`Result exceeds the maximum of ${MAX_CONCAT_ITEMS} items.`),
+        };
+      }
+
+      if (seen) {
+        const key = deduplicateKey(item);
+        if (!seen.has(key)) {
+          seen.add(key);
+          result.push(item);
+        }
+      } else {
+        result.push(item);
+      }
     }
   }
-  return result;
+
+  return { result };
 }
 
 export const dataConcatStepDefinition = createServerStepDefinition({
@@ -75,42 +105,27 @@ export const dataConcatStepDefinition = createServerStepDefinition({
         };
       }
 
-      const resolved = resolveArrays(rawArrays, (val) =>
-        context.contextManager.renderInputTemplate(val)
+      const flattenDepth = flatten
+        ? typeof flatten === 'number'
+          ? Math.min(flatten, MAX_FLATTEN_DEPTH)
+          : 1
+        : 0;
+
+      const outcome = concatSinglePass(
+        rawArrays,
+        (val) => context.contextManager.renderInputTemplate(val),
+        { flattenDepth, dedupe, abortSignal: context.abortSignal }
       );
 
-      let result: unknown[] = ([] as unknown[]).concat(...resolved);
-
-      if (result.length > MAX_CONCAT_ITEMS) {
-        return {
-          error: new Error(
-            `Concatenated result has ${result.length} items, exceeding the maximum of ${MAX_CONCAT_ITEMS}.`
-          ),
-        };
-      }
-
-      if (flatten) {
-        const depth = typeof flatten === 'number' ? Math.min(flatten, MAX_FLATTEN_DEPTH) : 1;
-        result = result.flat(depth);
-
-        if (result.length > MAX_CONCAT_ITEMS) {
-          return {
-            error: new Error(
-              `Flattened result has ${result.length} items, exceeding the maximum of ${MAX_CONCAT_ITEMS}.`
-            ),
-          };
-        }
-      }
-
-      if (dedupe) {
-        result = deduplicateItems(result, context.abortSignal);
+      if ('error' in outcome) {
+        return { error: outcome.error };
       }
 
       context.logger.debug(
-        `Concatenated ${resolved.length} arrays into ${result.length} items (flatten: ${flatten}, dedupe: ${dedupe})`
+        `Concatenated ${rawArrays.length} arrays into ${outcome.result.length} items (flatten: ${flatten}, dedupe: ${dedupe})`
       );
 
-      return { output: result };
+      return { output: outcome.result };
     } catch (error) {
       context.logger.error('Failed to concatenate arrays', error);
       return {
