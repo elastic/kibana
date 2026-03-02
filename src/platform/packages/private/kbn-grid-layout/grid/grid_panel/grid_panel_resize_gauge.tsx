@@ -91,6 +91,7 @@ const innerStyles = ({ euiTheme }: UseEuiTheme) =>
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.2),
+    borderRadius: euiTheme.border.radius.small,
   });
 
 const textStyles = ({ euiTheme }: UseEuiTheme) =>
