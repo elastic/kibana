@@ -48,7 +48,7 @@ describe('SystemFlyoutRef', () => {
       expect(document.body.contains(container)).toBe(false);
     });
 
-    it('calls flushEmotionCache before unmount when provided', async () => {
+    it('calls flushEmotionCache after unmount when provided', async () => {
       const flushEmotionCache = jest.fn();
       const ref = new SystemFlyoutRef(container, flushEmotionCache);
       expect(flushEmotionCache).not.toHaveBeenCalled();
@@ -56,8 +56,18 @@ describe('SystemFlyoutRef', () => {
 
       await ref.close();
 
-      expect(flushEmotionCache).toHaveBeenCalledTimes(1);
       expect(mockReactDomUnmount).toHaveBeenCalledWith(container);
+      expect(flushEmotionCache).toHaveBeenCalledTimes(1);
+      expect(document.body.contains(container)).toBe(false);
+    });
+
+    it('still removes the container when flushEmotionCache throws', () => {
+      const flushEmotionCache = jest.fn(() => {
+        throw new Error('flush failed');
+      });
+      const ref = new SystemFlyoutRef(container, flushEmotionCache);
+
+      expect(() => ref.close()).toThrow('flush failed');
       expect(document.body.contains(container)).toBe(false);
     });
 

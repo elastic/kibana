@@ -35,11 +35,14 @@ export class SystemFlyoutRef implements OverlayRef {
   public close(): Promise<void> {
     if (!this._isClosed) {
       this._isClosed = true;
-      if (this.flushEmotionCache) {
-        this.flushEmotionCache();
-      }
       unmountComponentAtNode(this.container);
-      this.container.remove();
+      try {
+        if (this.flushEmotionCache) {
+          this.flushEmotionCache();
+        }
+      } finally {
+        this.container.remove();
+      }
 
       this.closeSubject.next();
       this.closeSubject.complete();
