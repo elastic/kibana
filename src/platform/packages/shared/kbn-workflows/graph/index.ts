@@ -33,8 +33,6 @@ export type {
   ExitContinueNode,
   WaitGraphNodeSchema,
   WaitGraphNode,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,
@@ -44,6 +42,10 @@ export type {
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
   GraphNodeUnion,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './types';
 
 export {
@@ -51,7 +53,6 @@ export {
   isDataSet,
   isElasticsearch,
   isKibana,
-  isHttp,
   isWait,
   isEnterForeach,
   isEnterIf,

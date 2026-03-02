@@ -56,6 +56,7 @@ const renderPipelinesEdit = async (httpSetup: TestHttpSetup) => {
   );
 
   await screen.findByTestId('pipelineForm');
+  await screen.findByTestId('descriptionField');
 };
 
 describe('<PipelinesEdit />', () => {

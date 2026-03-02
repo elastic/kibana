@@ -69,7 +69,7 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources] = await Promise.all([
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
     shouldValidateCallback(callbacks, 'getSources')
       ? retrieveSources(rootCommands, callbacks)
       : new Set<string>(),
@@ -80,6 +80,7 @@ async function validateAst(
     shouldValidateCallback(callbacks, 'getTimeseriesIndices')
       ? callbacks?.getTimeseriesIndices?.()
       : undefined,
+    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
   ]);
 
   const sourceQuery = queryString.split('|')[0];
@@ -113,6 +114,7 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const commandMessages = validateCommand(command, references, rootCommands, {
@@ -155,6 +157,7 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
@@ -232,9 +235,10 @@ function validateCommand(
   const context = {
     columns: references.columns,
     policies: references.policies,
-    sources: [...references.sources].map((source) => ({ name: source })),
+    sources: [...references.sources].map((source) => ({ name: source, hidden: false })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
+    views: references.views,
     unmappedFieldsStrategy,
   };
 

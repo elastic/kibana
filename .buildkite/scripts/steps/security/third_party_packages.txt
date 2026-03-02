@@ -31,3 +31,5 @@ yaml-language-server
 @opentelemetry/exporter-metrics-otlp-proto
 @opentelemetry/instrumentation-hapi
 simple-statistics
+monaco-promql
+react-element-to-jsx-string

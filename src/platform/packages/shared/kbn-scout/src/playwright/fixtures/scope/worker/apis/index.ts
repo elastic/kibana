@@ -20,15 +20,21 @@ import type { FleetApiService } from './fleet';
 import { getFleetApiHelper } from './fleet';
 import type { SampleDataApiService } from './sample_data';
 import { getSampleDataApiHelper } from './sample_data';
+import type { SpacesApiService } from './spaces';
+import { getSpacesApiHelper } from './spaces';
 import type { StreamsApiService } from './streams';
 import { getStreamsApiService } from './streams';
+import type { MlApiService } from './ml';
+import { getMlApiHelper } from './ml';
 
 export interface ApiServicesFixture {
   alerting: AlertingApiService;
   cases: CasesApiService;
   dataViews: DataViewsApiService;
   fleet: FleetApiService;
+  ml: MlApiService;
   sampleData: SampleDataApiService;
+  spaces: SpacesApiService;
   streams: StreamsApiService;
   core: CoreApiService;
   // add more services here
@@ -48,7 +54,9 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
         cases: getCasesApiHelper(log, kbnClient),
         dataViews: getDataViewsApiHelper(log, kbnClient),
         fleet: getFleetApiHelper(log, kbnClient),
+        ml: getMlApiHelper(log, kbnClient),
         sampleData: getSampleDataApiHelper(log, kbnClient),
+        spaces: getSpacesApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),
         core: getCoreApiHelper(log, kbnClient),
       };

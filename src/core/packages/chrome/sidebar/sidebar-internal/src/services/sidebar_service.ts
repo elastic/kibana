@@ -37,7 +37,15 @@ export class SidebarService {
 
   setup(): SidebarSetup {
     return {
-      registerApp: this.registry.registerApp,
+      registerApp: (app) => {
+        const update = this.registry.registerApp(app);
+        return (appUpdate) => {
+          update(appUpdate);
+          if (this.state.getCurrentAppId() === app.appId && !this.registry.isOpenable(app.appId)) {
+            this.state.close();
+          }
+        };
+      },
     };
   }
 
@@ -59,6 +67,10 @@ export class SidebarService {
     };
   }
 
+  stop() {
+    this.state.stop();
+  }
+
   @bind
   @memoize
   private getApp<TState = undefined, TActions = undefined>(
@@ -73,6 +85,8 @@ export class SidebarService {
           this.state.close();
         }
       },
+      getStatus: () => this.registry.getApp(appId).status,
+      getStatus$: () => this.registry.getStatus$(appId),
     };
 
     // Stateless app - return with undefined state methods

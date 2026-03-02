@@ -49,6 +49,10 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
   - '@kbn/agent-builder-common'
+  - '@kbn/scout'
+  - '@kbn/workflows'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
@@ -60,6 +64,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
