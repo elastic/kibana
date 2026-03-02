@@ -8366,14 +8366,13 @@ components:
         scriptInput:
           type: string
         timeout:
-          description: >-
-            Specify the timeout in seconds for the script execution. Example:
-            "timeout": 60
+          description: Specify the timeout in seconds for the script execution
+          example: 60
           type: integer
     RunscriptParams:
       description: |
         > warn
-        > Run script response action will only be available with v9.4.0
+        > This functionality is currently not available
       type: object
       properties:
         command:
@@ -8383,8 +8382,7 @@ components:
         comment:
           description: >-
             Add a note that explains or describes the action. You can find your
-            comment in the response actions history log. Example: "comment":
-            "Collect data"
+            comment in the response actions history log
           type: string
         config:
           type: object
@@ -8395,6 +8393,8 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
             windows:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
+      required:
+        - command
     SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
