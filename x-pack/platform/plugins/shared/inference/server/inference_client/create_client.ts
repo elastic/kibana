@@ -13,14 +13,13 @@ import type {
   BoundInferenceClient,
   InferenceClient,
   AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
   InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { InferenceAnonymizationOptions } from './anonymization_options';
 
 interface CreateClientOptions {
   request: KibanaRequest;
@@ -32,13 +31,7 @@ interface CreateClientOptions {
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
-  /** Promise resolving per-space salt for deterministic tokenization. */
-  saltPromise?: Promise<string | undefined>;
-  resolveEffectivePolicy?: (
-    target?: ChatCompleteAnonymizationTarget
-  ) => Promise<EffectivePolicy | undefined>;
-  replacementsEncryptionKey?: string;
-  usePersistentReplacements?: boolean;
+  anonymization?: InferenceAnonymizationOptions;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -59,11 +52,8 @@ export function createClient(
     esClient,
     regexWorker,
     callbacks,
-    saltPromise,
-    resolveEffectivePolicy,
     replacementsEsClient,
-    replacementsEncryptionKey,
-    usePersistentReplacements,
+    anonymization,
   } = options;
   const client = createInferenceClient({
     request,
@@ -75,10 +65,7 @@ export function createClient(
     esClient,
     replacementsEsClient,
     callbacks,
-    saltPromise,
-    resolveEffectivePolicy,
-    replacementsEncryptionKey,
-    usePersistentReplacements,
+    anonymization,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

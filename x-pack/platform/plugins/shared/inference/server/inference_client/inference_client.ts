@@ -12,11 +12,9 @@ import type {
   BoundOptions,
   InferenceClient,
   AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
   InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -25,6 +23,7 @@ import { createPromptApi } from '../prompt';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { createCallbackManager } from './callback_manager';
+import type { InferenceAnonymizationOptions } from './anonymization_options';
 
 export function createInferenceClient({
   request,
@@ -36,10 +35,7 @@ export function createInferenceClient({
   esClient,
   replacementsEsClient,
   callbacks,
-  saltPromise,
-  resolveEffectivePolicy,
-  replacementsEncryptionKey,
-  usePersistentReplacements,
+  anonymization,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -50,12 +46,7 @@ export function createInferenceClient({
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
-  saltPromise?: Promise<string | undefined>;
-  resolveEffectivePolicy?: (
-    target?: ChatCompleteAnonymizationTarget
-  ) => Promise<EffectivePolicy | undefined>;
-  replacementsEncryptionKey?: string;
-  usePersistentReplacements?: boolean;
+  anonymization?: InferenceAnonymizationOptions;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -67,12 +58,14 @@ export function createInferenceClient({
     anonymizationRulesPromise,
     regexWorker,
     esClient,
-    replacementsEsClient,
     callbackManager,
-    saltPromise,
-    resolveEffectivePolicy,
-    replacementsEncryptionKey,
-    usePersistentReplacements,
+    anonymization: {
+      ...anonymization,
+      replacements: {
+        ...anonymization?.replacements,
+        ...(replacementsEsClient ? { esClient: replacementsEsClient } : {}),
+      },
+    },
   });
 
   const chatComplete = createChatCompleteApi({

@@ -154,21 +154,25 @@ export class InferencePlugin
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
         regexWorker: this.regexWorker!,
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
-        replacementsEsClient: core.elasticsearch.client.asInternalUser,
-        saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
-        resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-          if (!anonymizationEnabled || !policyService || !target) {
-            return undefined;
-          }
-          return policyService.resolveEffectivePolicy(namespace, {
-            type: target.targetType,
-            id: target.targetId,
-          });
+        anonymization: {
+          saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
+          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
+            if (!anonymizationEnabled || !policyService || !target) {
+              return undefined;
+            }
+            return policyService.resolveEffectivePolicy(namespace, {
+              type: target.targetType,
+              id: target.targetId,
+            });
+          },
+          replacements: {
+            esClient: core.elasticsearch.client.asInternalUser,
+            encryptionKey: anonymizationEnabled
+              ? this.config.replacements.encryptionKey
+              : undefined,
+            usePersistentReplacements: anonymizationEnabled,
+          },
         },
-        replacementsEncryptionKey: anonymizationEnabled
-          ? this.config.replacements.encryptionKey
-          : undefined,
-        usePersistentReplacements: anonymizationEnabled,
       };
     };
 

@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type {
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
+  ChatCompleteOptions,
+} from '@kbn/inference-common';
+import type { EffectivePolicy } from '@kbn/anonymization-common';
+import { anonymizeMessages } from './anonymization/anonymize_messages';
+import type { RegexWorkerService } from './anonymization/regex_worker_service';
+import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
+import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
+
+interface PrepareAnonymizationOptions {
+  namespace: string;
+  logger: Logger;
+  anonymizationRules: AnonymizationRule[];
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
+  replacementsEsClient?: ElasticsearchClient;
+  replacementsEncryptionKey?: string;
+  usePersistentReplacements?: boolean;
+  saltPromise?: Promise<string | undefined>;
+  resolveEffectivePolicy?: (
+    target?: ChatCompleteAnonymizationTarget
+  ) => Promise<EffectivePolicy | undefined>;
+  metadata?: ChatCompleteOptions['metadata'];
+  system?: ChatCompleteOptions['system'];
+  messages: ChatCompleteOptions['messages'];
+}
+
+export const prepareAnonymization = async ({
+  namespace,
+  logger,
+  anonymizationRules,
+  regexWorker,
+  esClient,
+  replacementsEsClient,
+  replacementsEncryptionKey,
+  usePersistentReplacements = true,
+  saltPromise,
+  resolveEffectivePolicy,
+  metadata,
+  system,
+  messages,
+}: PrepareAnonymizationOptions) => {
+  const salt = await saltPromise;
+  const effectivePolicy = await resolveEffectivePolicy?.(metadata?.anonymization?.target);
+  if (!usePersistentReplacements) {
+    const anonymization = await anonymizeMessages({
+      system,
+      messages,
+      anonymizationRules,
+      regexWorker,
+      esClient,
+      salt: salt ?? undefined,
+      effectivePolicy,
+    });
+    return { anonymization, replacementsId: undefined, effectivePolicy };
+  }
+
+  const carriedReplacementsId = metadata?.anonymization?.replacementsId;
+  const replacementsClient = replacementsEsClient ?? esClient;
+  await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+  const repo = new ReplacementsRepository(replacementsClient, {
+    encryptionKey: replacementsEncryptionKey,
+  });
+  let replacementsId = carriedReplacementsId;
+  let existingReplacements = carriedReplacementsId
+    ? await repo.get(namespace, carriedReplacementsId)
+    : null;
+  if (carriedReplacementsId && !existingReplacements) {
+    // Recover by allocating a new doc ID when caller carries a stale/unknown one.
+    replacementsId = uuidv4();
+  }
+
+  const anonymization = await anonymizeMessages({
+    system,
+    messages,
+    anonymizationRules,
+    regexWorker,
+    esClient,
+    salt: salt ?? undefined,
+    effectivePolicy,
+    knownReplacements: existingReplacements?.replacements ?? [],
+  });
+
+  const replacements = anonymization.anonymizations.map(({ entity }) => ({
+    anonymized: entity.mask,
+    original: entity.value,
+  }));
+  const shouldPersistReplacements = Boolean(carriedReplacementsId || replacements.length);
+
+  if (!shouldPersistReplacements) {
+    return { anonymization, replacementsId: undefined, effectivePolicy };
+  }
+
+  replacementsId ??= uuidv4();
+
+  if (existingReplacements) {
+    const updated = await repo.update(namespace, replacementsId, { replacements });
+    if (!updated) {
+      // Document disappeared between get/update; recover with new doc.
+      replacementsId = uuidv4();
+      existingReplacements = null;
+    }
+  }
+
+  if (!existingReplacements) {
+    await repo.create({
+      id: replacementsId,
+      namespace,
+      createdBy: 'inference',
+      replacements,
+    });
+  }
+
+  return { anonymization, replacementsId, effectivePolicy };
+};

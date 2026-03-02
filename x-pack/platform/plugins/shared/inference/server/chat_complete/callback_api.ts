@@ -8,9 +8,6 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
-import type { ChatCompleteAnonymizationTarget } from '@kbn/inference-common/src/chat_complete/metadata';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
-import { v4 as uuidv4 } from 'uuid';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -36,12 +33,11 @@ import {
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
-import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
-import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
-import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
+import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
+import { prepareAnonymization } from './prepare_anonymization';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -51,14 +47,8 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
-  replacementsEsClient?: ElasticsearchClient;
-  replacementsEncryptionKey?: string;
-  usePersistentReplacements?: boolean;
+  anonymization?: InferenceAnonymizationOptions;
   callbackManager?: InferenceCallbackManager;
-  saltPromise?: Promise<string | undefined>;
-  resolveEffectivePolicy?: (
-    target?: ChatCompleteAnonymizationTarget
-  ) => Promise<EffectivePolicy | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -94,12 +84,8 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
-  replacementsEsClient,
-  replacementsEncryptionKey,
-  usePersistentReplacements = true,
+  anonymization,
   callbackManager,
-  saltPromise,
-  resolveEffectivePolicy,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -144,84 +130,21 @@ export function createChatCompleteCallbackApi({
           });
 
           return from(
-            (async () => {
-              const salt = await saltPromise;
-              const effectivePolicy = await resolveEffectivePolicy?.(
-                metadata?.anonymization?.target
-              );
-              if (!usePersistentReplacements) {
-                const anonymization = await anonymizeMessages({
-                  system,
-                  messages,
-                  anonymizationRules,
-                  regexWorker,
-                  esClient,
-                  salt: salt ?? undefined,
-                  effectivePolicy,
-                });
-                return { anonymization, replacementsId: undefined, effectivePolicy };
-              }
-
-              const carriedReplacementsId = metadata?.anonymization?.replacementsId;
-              const replacementsClient = replacementsEsClient ?? esClient;
-              await ensureReplacementsIndex({ esClient: replacementsClient, logger });
-              const repo = new ReplacementsRepository(replacementsClient, {
-                encryptionKey: replacementsEncryptionKey,
-              });
-              let replacementsId = carriedReplacementsId;
-              let existingReplacements = carriedReplacementsId
-                ? await repo.get(namespace, carriedReplacementsId)
-                : null;
-              if (carriedReplacementsId && !existingReplacements) {
-                // Recover by allocating a new doc ID when caller carries a stale/unknown one.
-                replacementsId = uuidv4();
-              }
-
-              const anonymization = await anonymizeMessages({
-                system,
-                messages,
-                anonymizationRules,
-                regexWorker,
-                esClient,
-                salt: salt ?? undefined,
-                effectivePolicy,
-                knownReplacements: existingReplacements?.replacements ?? [],
-              });
-
-              const replacements = anonymization.anonymizations.map(({ entity }) => ({
-                anonymized: entity.mask,
-                original: entity.value,
-              }));
-              const shouldPersistReplacements = Boolean(
-                carriedReplacementsId || replacements.length
-              );
-
-              if (!shouldPersistReplacements) {
-                return { anonymization, replacementsId: undefined, effectivePolicy };
-              }
-
-              replacementsId ??= uuidv4();
-
-              if (existingReplacements) {
-                const updated = await repo.update(namespace, replacementsId, { replacements });
-                if (!updated) {
-                  // Document disappeared between get/update; recover with new doc.
-                  replacementsId = uuidv4();
-                  existingReplacements = null;
-                }
-              }
-
-              if (!existingReplacements) {
-                await repo.create({
-                  id: replacementsId,
-                  namespace,
-                  createdBy: 'inference',
-                  replacements,
-                });
-              }
-
-              return { anonymization, replacementsId, effectivePolicy };
-            })()
+            prepareAnonymization({
+              namespace,
+              logger,
+              anonymizationRules,
+              regexWorker,
+              esClient,
+              replacementsEsClient: anonymization?.replacements?.esClient,
+              replacementsEncryptionKey: anonymization?.replacements?.encryptionKey,
+              usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+              saltPromise: anonymization?.saltPromise,
+              resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
+              metadata,
+              system,
+              messages,
+            })
           ).pipe(
             switchMap(({ anonymization, replacementsId, effectivePolicy }) => {
               const connector = executor.getConnector();
