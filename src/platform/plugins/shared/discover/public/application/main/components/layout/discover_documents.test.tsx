@@ -140,6 +140,26 @@ describe('Discover documents layout', () => {
     expect(component.find('.dscTable').exists()).toBeFalsy();
   });
 
+  test('ES|QL: should not pass onUpdateSampleSize to DiscoverGrid', async () => {
+    const component = await mountComponent({
+      fetchStatus: FetchStatus.COMPLETE,
+      hits: esHitsMock,
+      isEsqlMode: true,
+    });
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.prop('onUpdateSampleSize')).toBeUndefined();
+  });
+
+  test('should pass onUpdateSampleSize to DiscoverGrid when not in ES|QL mode', async () => {
+    const component = await mountComponent({
+      fetchStatus: FetchStatus.COMPLETE,
+      hits: esHitsMock,
+      isEsqlMode: false,
+    });
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.prop('onUpdateSampleSize')).toBeDefined();
+  });
+
   test('should set rounded width to state on resize column', async () => {
     const { toolkit } = await setup();
 
