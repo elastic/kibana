@@ -97,7 +97,7 @@ export const useLabelNodeExpandPopover = (
               },
               {
                 type: 'item',
-                iconType: 'expand',
+                iconType: 'maximize',
                 testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
                 label:
                   getNodeDocumentMode(node.data) === 'single-alert'
