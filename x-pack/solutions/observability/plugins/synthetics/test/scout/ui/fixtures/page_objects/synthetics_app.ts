@@ -279,7 +279,9 @@ export class SyntheticsAppPage {
   async deleteMonitor(monitorName: string) {
     const monitorRow = await this.getMonitorRowLocator(monitorName);
     await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    await this.page.testSubj.click('syntheticsMonitorDeleteAction');
+    await this.page
+      .locator('[data-euiportal="true"] [data-test-subj="syntheticsMonitorDeleteAction"]')
+      .click();
     await expect(this.page.testSubj.locator('confirmModalTitleText')).toBeVisible();
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
