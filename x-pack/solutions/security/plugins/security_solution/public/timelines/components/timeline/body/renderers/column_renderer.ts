@@ -33,6 +33,7 @@ export interface ColumnRenderer {
     values,
     key,
     context,
+    data,
   }: {
     asPlainText?: boolean;
     className?: string;
@@ -49,5 +50,6 @@ export interface ColumnRenderer {
     values: string[] | null | undefined;
     key?: string;
     context?: AlertsUserProfilesData;
+    data?: TimelineNonEcsData[];
   }) => React.ReactNode;
 }

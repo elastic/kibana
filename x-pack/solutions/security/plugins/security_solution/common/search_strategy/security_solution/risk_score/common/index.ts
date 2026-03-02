@@ -30,28 +30,19 @@ export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: strin
 };
 
 /**
- * Builds an Elasticsearch filter for host queries based on entityIdentifiers.
+ * Builds an Elasticsearch filter for entity queries based on entityIdentifiers.
  * Uses EUID priority from entity_store common (see getEuidDslFilterBasedOnDocument).
+ * Supports host and user entity types.
+ *
+ * @param entityType - The entity type to build the filter for ('host' or 'user')
  * @param entityIdentifiers - Key-value pairs of field names and their values (used as document for EUID)
  * @returns ESQuery filter object, or undefined if no valid identifiers found
  */
-export const buildHostFilterFromEntityIdentifiers = (
+export const buildEntityFilterFromEntityIdentifiers = (
+  entityType: EntityType,
   entityIdentifiers: Record<string, string>
 ): ESQuery | undefined => {
-  const filter = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
-  return filter as ESQuery | undefined;
-};
-
-/**
- * Builds an Elasticsearch filter for user queries based on entityIdentifiers.
- * Uses EUID priority from entity_store common (see getEuidDslFilterBasedOnDocument).
- * @param entityIdentifiers - Key-value pairs of field names and their values (used as document for EUID)
- * @returns ESQuery filter object, or undefined if no valid identifiers found
- */
-export const buildUserFilterFromEntityIdentifiers = (
-  entityIdentifiers: Record<string, string>
-): ESQuery | undefined => {
-  const filter = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+  const filter = euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers);
   return filter as ESQuery | undefined;
 };
 

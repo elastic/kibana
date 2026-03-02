@@ -75,6 +75,7 @@ describe('useFistLastSeen', () => {
       field: 'host.name',
       order: 'asc',
       value: 'some-host',
+      filterQuery: undefined,
     });
 
     expect(result.current).toEqual([
@@ -104,6 +105,7 @@ describe('useFistLastSeen', () => {
       field: 'host.name',
       order: 'desc',
       value: 'some-host',
+      filterQuery: undefined,
     });
 
     expect(result.current).toEqual([
@@ -147,5 +149,33 @@ describe('useFistLastSeen', () => {
         filterQuery,
       })
     );
+  });
+
+  it('should search with entityIdentifiers and entityType', () => {
+    mockUseSearchStrategy.mockImplementation(() => ({
+      loading: false,
+      result: { firstSeen: '2022-01-01T00:00:00.000Z' },
+      search: mockSearch,
+      refetch: jest.fn(),
+      inspect: {},
+    }));
+
+    const entityIdentifiers = { 'host.name': 'my-host', 'host.domain': 'example.com' };
+    renderHook(() =>
+      useFirstLastSeen({
+        order: Direction.asc,
+        defaultIndex: ['auditbeat-*'],
+        entityIdentifiers,
+        entityType: 'host',
+      })
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith({
+      defaultIndex: ['auditbeat-*'],
+      order: 'asc',
+      entityIdentifiers,
+      entityType: 'host',
+      filterQuery: undefined,
+    });
   });
 });

@@ -11,7 +11,7 @@ import { collectValues as collect } from './field_utils';
 export const USER_DEFINITION_VERSION = '1.0.0';
 export const USER_IDENTITY_FIELD = 'user.name';
 
-const USER_ENTITY_TYPE = 'Identity';
+const USER_ENTITY_TYPE = 'user';
 
 export const userEntityEngineDescription: EntityDescription = {
   entityType: 'user',

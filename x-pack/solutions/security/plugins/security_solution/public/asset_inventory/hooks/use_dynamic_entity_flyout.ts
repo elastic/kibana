@@ -68,8 +68,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
             params: {
               entityIdentifiers: { 'user.name': entityName },
               scopeId,
-              contextID: contextId ?? scopeId ?? 'user-panel',
-              isPreviewMode: false,
+              contextID: contextId,
             },
           },
         });

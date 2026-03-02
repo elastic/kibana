@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
@@ -40,7 +41,7 @@ export const getInsightsInputTab = ({
   entityIdentifiers,
   scopeId,
 }: {
-  entityIdentifiers: Record<string, string>;
+  entityIdentifiers: EntityIdentifiers;
   scopeId: string;
 }) => {
   return {

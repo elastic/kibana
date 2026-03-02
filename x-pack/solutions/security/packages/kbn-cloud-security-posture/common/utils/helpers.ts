@@ -5,6 +5,9 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import {
+  buildGenericEntityFlyoutPreviewQuery,
+} from '../../../../plugins/entity_store/common/domain/euid/entity_filters';
 
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
@@ -58,118 +61,22 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-/**
- * Builds a query to filter CSP findings by entity identifiers (EUID-compatible).
- * Supports both single field/value and multiple entity identifiers (Record).
- */
-export function buildGenericEntityFlyoutPreviewQuery(entityIdentifiers: Record<string, string>): {
-  bool: { filter: object[] };
-};
-export function buildGenericEntityFlyoutPreviewQuery(
-  field: string,
-  queryValue?: string,
-  status?: string,
-  queryField?: string
-): { bool: { filter: object[] } };
-export function buildGenericEntityFlyoutPreviewQuery(
-  fieldOrEntityIdentifiers: string | Record<string, string>,
-  queryValueOrStatus?: string,
-  statusOrQueryField?: string,
-  queryField?: string
-): { bool: { filter: object[] } } {
-  const isEntityIdentifiers = typeof fieldOrEntityIdentifiers === 'object';
-
-  if (isEntityIdentifiers) {
-    const entityIdentifiers = fieldOrEntityIdentifiers as Record<string, string>;
-    const status = queryValueOrStatus;
-    const queryFieldParam = statusOrQueryField;
-    const entityFilter = Object.entries(entityIdentifiers).map(([field, value]) => ({
-      term: { [field]: value },
-    }));
-    const filter: object[] = [
-      ...(entityFilter.length > 0 ? [{ bool: { must: entityFilter } }] : []),
-      ...(status && queryFieldParam
-        ? [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      [queryFieldParam]: {
-                        value: status,
-                        case_insensitive: true,
-                      },
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ]
-        : []),
-    ];
-    return { bool: { filter } };
-  }
-
-  const field = fieldOrEntityIdentifiers as string;
-  const queryValue = queryValueOrStatus;
-  const status = statusOrQueryField;
-  const queryFieldParam = queryField;
-
-  const filter: object[] = [
-    {
-      bool: {
-        should: [
-          {
-            term: {
-              [field]: `${queryValue || ''}`,
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-    ...(status && queryFieldParam
-      ? [
-          {
-            bool: {
-              should: [
-                {
-                  term: {
-                    [queryFieldParam]: {
-                      value: status,
-                      case_insensitive: true,
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ]
-      : []),
-  ];
-  return { bool: { filter } };
-}
-
 // Higher-order function for Misconfiguration
 export const buildMisconfigurationEntityFlyoutPreviewQuery = (
-  field: string,
-  queryValue?: string,
+  entityIdentifiers: Record<string, string>,
   status?: string
 ) => {
   const queryField = 'result.evaluation';
-  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
+  return buildGenericEntityFlyoutPreviewQuery(entityIdentifiers, status, queryField);
 };
 
 // Higher-order function for Vulnerability
 export const buildVulnerabilityEntityFlyoutPreviewQuery = (
-  field: string,
-  queryValue?: string,
+  entityIdentifiers: Record<string, string>,
   status?: string
 ) => {
   const queryField = 'vulnerability.severity';
-  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
+  return buildGenericEntityFlyoutPreviewQuery(entityIdentifiers, status, queryField);
 };
 
 export const buildEntityAlertsQuery = ({

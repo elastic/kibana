@@ -7,12 +7,28 @@
 
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 
+import { euid } from '../../../../../../../plugins/entity_store/common';
 import { createQueryFilterClauses } from '../../../../utils/build_query';
 
 export const buildFirstOrLastSeenQuery = (options: FirstLastSeenRequestOptions) => {
-  const { field, value, defaultIndex, order, filterQuery } = options;
+  const { defaultIndex, order, filterQuery } = options;
+  const { entityIdentifiers, entityType, field, value } = options;
 
-  const filter = [...createQueryFilterClauses(filterQuery), { term: { [field]: value } }];
+  const filterClauses = createQueryFilterClauses(filterQuery);
+
+  const entityFilter =
+    entityIdentifiers &&
+    entityType &&
+    Object.keys(entityIdentifiers).length > 0
+      ? euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers)
+      : undefined;
+
+  const filter =
+    entityFilter != null
+      ? [...filterClauses, entityFilter]
+      : field != null && value != null
+        ? [...filterClauses, { term: { [field]: value } }]
+        : filterClauses;
 
   const dslQuery = {
     allow_no_indices: true,

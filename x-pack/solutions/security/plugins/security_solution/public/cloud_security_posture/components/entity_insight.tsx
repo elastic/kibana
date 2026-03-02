@@ -6,12 +6,13 @@
  */
 
 import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
+import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
@@ -34,7 +35,7 @@ export const EntityInsight = <T,>({
   isPreviewMode,
   openDetailsPanel,
 }: {
-  entityIdentifiers: Record<string, string>;
+  entityIdentifiers: EntityIdentifiers;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
@@ -46,10 +47,7 @@ export const EntityInsight = <T,>({
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
 
-  const showVulnerabilitiesPreview = useMemo(
-    () => hasVulnerabilitiesFindings && 'host.name' in entityIdentifiers,
-    [hasVulnerabilitiesFindings, entityIdentifiers]
-  );
+  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && 'host.name' in entityIdentifiers;
 
   const { to, from } = useGlobalTime();
 

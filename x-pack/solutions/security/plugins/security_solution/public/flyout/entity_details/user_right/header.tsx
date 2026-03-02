@@ -17,52 +17,53 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../../common/components/link_to/redirect_to_users';
+import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
-import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 
 interface UserPanelHeaderProps {
-  entityIdentifiers: EntityIdentifiers;
-  lastSeen: FirstLastSeenData;
-  managedUser: ManagedUserData;
   userName: string;
+  managedUser: ManagedUserData;
+  /** When provided, used to build the user details page URL with entityIdentifiers segment */
+  entityIdentifiers?: EntityIdentifiers;
+  lastSeen: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
-
 const urlParamOverride = { timeline: { isOpen: false } };
 
 export const UserPanelHeader = ({
+  userName,
+  managedUser,
   entityIdentifiers,
   lastSeen,
-  managedUser,
-  userName,
 }: UserPanelHeaderProps) => {
-  const displayName =
-    userName ||
-    entityIdentifiers['user.name'] ||
-    (Object.values(entityIdentifiers)[0] as string) ||
-    '';
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
   const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
+  const observedUserLastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
   const lastSeenDate = useMemo(
     () =>
-      max([lastSeen.date, entraTimestamp, oktaTimestamp].map((el) => el && new Date(el))),
-    [oktaTimestamp, entraTimestamp, lastSeen]
+      max(
+        [observedUserLastSeenDate, entraTimestamp, oktaTimestamp].map((el) => el && new Date(el))
+      ),
+    [oktaTimestamp, entraTimestamp, observedUserLastSeenDate]
   );
 
+  console.log('entityIdentifiers', entityIdentifiers);
   return (
     <FlyoutHeader data-test-subj="user-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -83,39 +84,54 @@ export const UserPanelHeader = ({
         <EuiFlexItem grow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.users}
-            path={getUsersDetailsUrl(displayName)}
+            path={getTabsOnUsersDetailsUrl(
+              userName,
+              UsersTableType.events,
+              undefined,
+              entityIdentifiers
+            )}
             target={'_blank'}
             external={false}
             css={linkTitleCSS}
             override={urlParamOverride}
           >
-            <FlyoutTitle title={displayName} iconType={'user'} isLink />
+            <FlyoutTitle title={userName} iconType={'user'} isLink />
           </SecuritySolutionLinkAnchor>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {lastSeen.date && (
-                <EuiBadge data-test-subj="user-panel-header-observed-badge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.user.observedBadge"
-                    defaultMessage="Observed"
-                  />
-                </EuiBadge>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {isManaged && (
-                <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
-                    defaultMessage="Managed"
-                  />
-                </EuiBadge>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {isLoading ? (
+          <EuiFlexItem grow={true}>
+            <EuiSkeletonText
+              lines={1}
+              size="xs"
+              data-test-subj="user-panel-header-observed-badge-loading"
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {observedUserLastSeenDate && (
+                  <EuiBadge data-test-subj="user-panel-header-observed-badge" color="hollow">
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.user.observedBadge"
+                      defaultMessage="Observed"
+                    />
+                  </EuiBadge>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {isManaged && (
+                  <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
+                      defaultMessage="Managed"
+                    />
+                  </EuiBadge>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </FlyoutHeader>
   );

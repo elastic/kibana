@@ -85,6 +85,15 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'host.geo.region_iso_code' }),
     collect({ source: 'host.geo.region_name' }),
     collect({ source: 'host.geo.timezone' }),
+    // Cloud fields (used by Host Details page)
+    newestValue({ source: 'cloud.provider' }),
+    newestValue({ source: 'cloud.region' }),
+    newestValue({ source: 'cloud.instance.id' }),
+    newestValue({ source: 'cloud.machine.type' }),
+    // Agent/Endpoint fields (for endpoint metadata and Responder)
+    newestValue({ source: 'agent.id' }),
+    newestValue({ source: 'agent.type' }),
+    newestValue({ source: 'endpoint.id' }),
     ...getCommonFieldDescriptions('host'),
     ...getEntityFieldsDescriptions('host'),
   ],

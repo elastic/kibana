@@ -43,7 +43,10 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityIdentifiers } from '../../shared/utils';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -264,7 +267,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         render: (ips: string[]) => {
           return (
             <DefaultFieldRenderer
-              rowItems={ips}
+              rowItems={toFieldRendererItems(ips)}
               attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
               render={(ip) =>

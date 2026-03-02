@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../../entity_store/common/domain/euid/entity_filters';
 import {
   type CloudSecurityUiCounters,
   uiMetricService,

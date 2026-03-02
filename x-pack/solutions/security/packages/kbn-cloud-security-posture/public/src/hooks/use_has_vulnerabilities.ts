@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useVulnerabilitiesPreview } from './use_vulnerabilities_preview';
+import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../../security/plugins/entity_store/common';
 import { hasVulnerabilitiesData } from '../utils/vulnerability_helpers';
 
-export const useHasVulnerabilities = (
-  fieldOrEntityIdentifiers: string | Record<string, string>,
-  value?: string
-) => {
-  const query =
-    typeof fieldOrEntityIdentifiers === 'object'
-      ? buildGenericEntityFlyoutPreviewQuery(fieldOrEntityIdentifiers)
-      : buildGenericEntityFlyoutPreviewQuery(fieldOrEntityIdentifiers, value);
-
+export const useHasVulnerabilities = (entityIdentifiers: Record<string, string>) => {
   const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query,
+    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
     sort: [],
     enabled: true,
     pageSize: 1,

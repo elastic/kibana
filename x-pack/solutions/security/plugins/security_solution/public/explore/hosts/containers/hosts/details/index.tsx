@@ -10,7 +10,6 @@ import { useEffect, useMemo } from 'react';
 import type { inputsModel } from '../../../../../common/store';
 import type { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { HostsQueries } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { buildHostFilterFromEntityIdentifiers } from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
@@ -65,24 +64,17 @@ export const useHostDetails = (
       : null;
   const hostNameFromProps = 'hostName' in props ? props.hostName : '';
 
-  const { hostFilter, hostName } = useMemo(() => {
+  const requestEntityIdentifiers = useMemo((): Record<string, string> | null => {
     if (entityIdentifiersKey !== null) {
-      const entityIdentifiers = JSON.parse(entityIdentifiersKey) as Record<string, string>;
-      const filter = buildHostFilterFromEntityIdentifiers(entityIdentifiers);
-      const fallbackName =
-        entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0] || '';
-      return {
-        hostFilter: filter ?? (fallbackName ? { term: { 'host.name': fallbackName } } : undefined),
-        hostName: '',
-      };
+      return JSON.parse(entityIdentifiersKey) as Record<string, string>;
     }
-    return {
-      hostFilter: undefined,
-      hostName: hostNameFromProps,
-    };
+    const trimmed = hostNameFromProps?.trim();
+    return trimmed ? { 'host.name': trimmed } : null;
   }, [entityIdentifiersKey, hostNameFromProps]);
 
-  const hasValidParams = Boolean(hostFilter || (hostName && hostName.trim()));
+  const hasValidParams = Boolean(
+    requestEntityIdentifiers && Object.keys(requestEntityIdentifiers).length > 0
+  );
   const effectiveSkip = skip || !hasValidParams;
 
   const {
@@ -115,11 +107,11 @@ export const useHostDetails = (
 
   const hostDetailsRequest = useMemo(
     () =>
-      hasValidParams
+      hasValidParams && requestEntityIdentifiers
         ? {
             defaultIndex: indexNames,
+            entityIdentifiers: requestEntityIdentifiers,
             factoryQueryType: HostsQueries.details,
-            ...(hostFilter ? { hostFilter } : { hostName: (hostName ?? '').trim() }),
             timerange: {
               interval: '12h',
               from: startDate,
@@ -127,7 +119,7 @@ export const useHostDetails = (
             },
           }
         : null,
-    [endDate, hostFilter, hostName, hasValidParams, indexNames, startDate]
+    [endDate, hasValidParams, indexNames, requestEntityIdentifiers, startDate]
   );
 
   useEffect(() => {

@@ -12,6 +12,9 @@ import {
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
+
+/** Schema version for Entity Store v2 indices (matches entity_store plugin). */
+const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import { uniq } from 'lodash/fp';
 import type { AppClient } from '../../../../types';
@@ -83,6 +86,14 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
     dataset: ENTITY_LATEST,
     definitionId: buildEntityDefinitionId(entityType, namespace),
+  });
+
+/** Returns the Entity Store v2 latest index name. Uses unified index (security_${namespace}) for v2. */
+export const getEntitiesIndexNameV2 = (_entityType: EntityTypeOpenAPI, namespace: string) =>
+  entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_LATEST,
+    definitionId: `security_${namespace}`,
   });
 
 export function getEntitiesSnapshotIndexName(

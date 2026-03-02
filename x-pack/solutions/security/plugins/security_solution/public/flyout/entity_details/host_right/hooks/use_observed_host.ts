@@ -14,14 +14,14 @@ import { useFirstLastSeen } from '../../../../common/containers/use_first_last_s
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '..';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { EngineDescriptor } from '../../../../../common/api/entity_analytics';
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../shared/hooks/use_entity_from_store';
 
 export const useObservedHost = (
@@ -35,23 +35,7 @@ export const useObservedHost = (
   const isActiveTimelines = isActiveTimeline(scopeId);
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
-
-  const { data: entityStoreStatus } = useEntityStoreStatus();
-  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
-  const hasHostEngine =
-    isEntityStoreRunning &&
-    entityStoreStatus?.engines?.some(
-      (e: EngineDescriptor) => e.type === 'host' && e.status === 'started'
-    );
-
-  const entityFromStore = useEntityFromStore({
-    entityIdentifiers,
-    entityType: 'host',
-    skip: isInitializing || !hasHostEngine,
-  });
-
-  const useRawIndicesFallback =
-    !hasHostEngine || (entityFromStore.entity === null && !entityFromStore.isLoading);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -61,78 +45,81 @@ export const useObservedHost = (
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
+  const entityFromStore = useEntityFromStore({
+    entityIdentifiers,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
+
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,
     entityIdentifiers,
-    id: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
     indexNames: securityDefaultPatterns,
-    skip: isInitializing || !useRawIndicesFallback,
+    id: HOST_PANEL_RISK_SCORE_QUERY_ID,
+    skip: isInitializing || entityStoreV2Enabled,
     startDate: from,
   });
 
-  const effectiveInspect = entityFromStore.entity
-    ? entityFromStore.inspect
-    : inspectObservedHost;
-  const effectiveRefetch = entityFromStore.entity ? entityFromStore.refetch : refetch;
-
   useQueryInspector({
     deleteQuery,
-    inspect: effectiveInspect,
-    loading: entityFromStore.entity ? entityFromStore.isLoading : isLoading,
+    inspect: entityStoreV2Enabled ? entityFromStore.inspect : inspectObservedHost,
+    loading: entityStoreV2Enabled ? entityFromStore.isLoading : isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: effectiveRefetch,
+    refetch: entityStoreV2Enabled ? entityFromStore.refetch : refetch,
     setQuery,
   });
 
-  const [loadingFirstSeen, { firstSeen: firstSeenFromRaw }] = useFirstLastSeen({
+  const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
     entityIdentifiers,
     entityType: 'host',
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: isInitializing || !useRawIndicesFallback,
   });
 
-  const [loadingLastSeen, { lastSeen: lastSeenFromRaw }] = useFirstLastSeen({
+  const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
     entityIdentifiers,
     entityType: 'host',
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: isInitializing || !useRawIndicesFallback,
   });
 
-  const details =
-    entityFromStore.entity ?? hostDetails;
-  const firstSeen = entityFromStore.entity
-    ? entityFromStore.firstSeen
-    : firstSeenFromRaw;
-  const lastSeen = entityFromStore.entity
-    ? entityFromStore.lastSeen
-    : lastSeenFromRaw;
-  const isLoadingDetails = entityFromStore.entity
-    ? entityFromStore.isLoading
-    : isLoading;
-  const isLoadingFirstSeen = entityFromStore.entity ? false : loadingFirstSeen;
-  const isLoadingLastSeen = entityFromStore.entity ? false : loadingLastSeen;
-
-  return useMemo(
-    () => ({
-      details,
-      isLoading: isLoadingDetails || isLoadingLastSeen || isLoadingFirstSeen,
+  return useMemo(() => {
+    if (entityStoreV2Enabled) {
+      return {
+        details: (entityFromStore.entity ?? {}) as HostItem,
+        isLoading: entityFromStore.isLoading,
+        firstSeen: {
+          date: entityFromStore.firstSeen ?? undefined,
+          isLoading: entityFromStore.isLoading,
+        },
+        lastSeen: {
+          date: entityFromStore.lastSeen ?? undefined,
+          isLoading: entityFromStore.isLoading,
+        },
+      };
+    }
+    return {
+      details: hostDetails,
+      isLoading: isLoading || loadingLastSeen || loadingFirstSeen,
       firstSeen: {
         date: firstSeen,
-        isLoading: isLoadingFirstSeen,
+        isLoading: loadingFirstSeen,
       },
-      lastSeen: { date: lastSeen, isLoading: isLoadingLastSeen },
-    }),
-    [
-      details,
-      firstSeen,
-      isLoadingDetails,
-      lastSeen,
-      isLoadingFirstSeen,
-      isLoadingLastSeen,
-    ]
-  );
+      lastSeen: { date: lastSeen, isLoading: loadingLastSeen },
+    };
+  }, [
+    entityStoreV2Enabled,
+    entityFromStore.entity,
+    entityFromStore.firstSeen,
+    entityFromStore.isLoading,
+    entityFromStore.lastSeen,
+    firstSeen,
+    hostDetails,
+    isLoading,
+    lastSeen,
+    loadingFirstSeen,
+    loadingLastSeen,
+  ]);
 };

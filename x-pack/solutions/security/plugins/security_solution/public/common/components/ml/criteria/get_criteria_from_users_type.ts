@@ -7,14 +7,17 @@
 
 import { UsersType } from '../../../../explore/users/store/model';
 import type { CriteriaFields } from '../types';
+import type { EntityIdentifiers } from '../../../containers/anomalies/anomalies_query_tab_body/types';
 
 export const getCriteriaFromUsersType = (
   type: UsersType,
-  userName: string | undefined
+  entityIdentifiers?: EntityIdentifiers
 ): CriteriaFields[] => {
-  if (type === UsersType.details && userName != null) {
-    return [{ fieldName: 'user.name', fieldValue: userName }];
-  } else {
-    return [];
+  if (type === UsersType.details && entityIdentifiers != null) {
+    const userName = entityIdentifiers['user.name'];
+    if (userName != null) {
+      return [{ fieldName: 'user.name', fieldValue: userName }];
+    }
   }
+  return [];
 };

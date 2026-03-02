@@ -16,13 +16,19 @@ import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
+import {
+  buildEntityFilterFromEntityIdentifiers,
+  buildHostNamesFilter,
+  type HostItem,
+} from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { hostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -39,6 +45,7 @@ import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import { RiskScoreDocTooltip } from '../common';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -53,7 +60,7 @@ interface HostSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  hostName: string;
+  entityIdentifiers: Record<string, string>;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
 }
@@ -81,17 +88,31 @@ export const HostOverview = React.memo<HostSummaryProps>(
     loading,
     narrowDateRange,
     startDate,
-    hostName,
+    entityIdentifiers,
     jobNameById,
     isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
-    const filterQuery = useMemo(
-      () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-      [hostName]
+    const effectiveHostName = useMemo(
+      () =>
+        entityIdentifiers['host.name'] ||
+        entityIdentifiers['host.hostname'] ||
+        Object.entries(entityIdentifiers).find(([k]) =>
+          k.startsWith('host.')
+        )?.[1],
+      [entityIdentifiers]
     );
+    const filterQuery = useMemo(() => {
+      const euidFilter = buildEntityFilterFromEntityIdentifiers(EntityType.host, entityIdentifiers);
+      if (euidFilter) {
+        return JSON.stringify(euidFilter);
+      }
+      return effectiveHostName
+        ? JSON.stringify(buildHostNamesFilter([effectiveHostName]))
+        : undefined;
+    }, [entityIdentifiers, effectiveHostName]);
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
@@ -100,13 +121,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
-    } = useRiskScore({
+   } = useRiskScore({
       filterQuery,
       riskEntity: EntityType.host,
-      skip: hostName == null,
-      onlyLatest: false,
+     skip: effectiveHostName == null,
+    onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
+
 
     useQueryInspector({
       deleteQuery,
@@ -120,7 +142,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: HostItem) => (
         <DefaultFieldRenderer
-          rowItems={getOr([], fieldName, fieldData)}
+          rowItems={toFieldRendererItems(getOr([], fieldName, fieldData))}
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           scopeId={scopeId}
@@ -193,8 +215,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description: (
             <FirstLastSeen
               indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
+              entityIdentifiers={entityIdentifiers}
               type={FirstLastSeenType.FIRST_SEEN}
             />
           ),
@@ -204,14 +225,13 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description: (
             <FirstLastSeen
               indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
+              entityIdentifiers={entityIdentifiers}
               type={FirstLastSeenType.LAST_SEEN}
             />
           ),
         },
       ],
-      [data, scopeId, indexNames, hostName, isFlyoutOpen]
+      [data, scopeId, indexNames, entityIdentifiers, isFlyoutOpen]
     );
     const firstColumn = useMemo(
       () =>
@@ -253,15 +273,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
             title: i18n.IP_ADDRESSES,
             description: (
               <DefaultFieldRenderer
-                rowItems={getOr([], 'host.ip', data)}
+                rowItems={toFieldRendererItems(getOr([], 'host.ip', data))}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
                     <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
+                      entityIdentifiers={{ 'host.ip': ip }}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />

@@ -20,7 +20,10 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -40,6 +43,7 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreDocTooltip } from '../common';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -53,7 +57,7 @@ export interface UserSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
@@ -81,7 +85,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     narrowDateRange,
     startDate,
     endDate,
-    userName,
+    entityIdentifiers,
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
@@ -89,6 +93,20 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
+
+    // Extract user name from entityIdentifiers for buildUserNamesFilter
+    // Priority: user.name > user.id > user.email > user.entity.id > first available value
+    const userName = useMemo(() => {
+      return (
+        entityIdentifiers['user.name'] ||
+        entityIdentifiers['user.id'] ||
+        entityIdentifiers['user.email'] ||
+        entityIdentifiers['user.entity.id'] ||
+        Object.values(entityIdentifiers)[0] ||
+        ''
+      );
+    }, [entityIdentifiers]);
+
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
@@ -103,7 +121,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      skip: userName == null,
+      skip: !userName || Object.keys(entityIdentifiers).length === 0,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
@@ -121,7 +139,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: UserItem) => (
         <DefaultFieldRenderer
-          rowItems={getOr([], fieldName, fieldData)}
+          rowItems={toFieldRendererItems(getOr([], fieldName, fieldData))}
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           scopeId={scopeId}
@@ -231,8 +249,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             description: (
               <FirstLastSeen
                 indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
+                entityIdentifiers={entityIdentifiers}
                 type={FirstLastSeenType.FIRST_SEEN}
               />
             ),
@@ -242,8 +259,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             description: (
               <FirstLastSeen
                 indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
+                entityIdentifiers={entityIdentifiers}
                 type={FirstLastSeenType.LAST_SEEN}
               />
             ),
@@ -263,15 +279,14 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.HOST_IP,
             description: (
               <DefaultFieldRenderer
-                rowItems={getOr([], 'host.ip', data)}
+                rowItems={toFieldRendererItems(getOr([], 'host.ip', data))}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
                     <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
+                      entityIdentifiers={{ 'host.ip': ip }}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />
@@ -290,7 +305,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         getDefaultRenderer,
         contextID,
         scopeId,
-        userName,
+        entityIdentifiers,
         firstColumn,
         isFlyoutOpen,
       ]

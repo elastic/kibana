@@ -15,15 +15,37 @@ import {
 } from '../../../../common/constants';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
-export const getEntityType = (record: Entity): EntityType => {
-  // Looking at `entity.type` to keep backward compatibility
-  const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
+/** Keys used when entity fields are flattened at top level (e.g. from ES/search API) */
+const FLAT_ENTITY_TYPE_KEY = 'entity.type';
+const FLAT_ENTITY_ENGINE_TYPE_KEY = 'entity.EngineMetadata.Type';
 
-  if (!entityType || !Object.values(EntityType).includes(entityType as EntityType)) {
+/** Display values for entity.type (e.g. from entity store extraction) mapped to EntityType */
+const ENTITY_TYPE_DISPLAY_TO_ENUM: Record<string, EntityType> = {
+  Host: EntityType.host,
+  Identity: EntityType.user,
+  Service: EntityType.service,
+};
+
+export const getEntityType = (record: Entity): EntityType => {
+  // Prefer nested form, then flattened top-level keys (e.g. entity store / search results)
+  const recordAny = record as Record<string, unknown>;
+  const rawType =
+    record.entity?.EngineMetadata?.Type ??
+    record.entity?.type ??
+    recordAny[FLAT_ENTITY_ENGINE_TYPE_KEY] ??
+    recordAny[FLAT_ENTITY_TYPE_KEY];
+
+  if (!rawType || typeof rawType !== 'string') {
     throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
   }
 
-  return EntityType[entityType as keyof typeof EntityType];
+  const normalized =
+    ENTITY_TYPE_DISPLAY_TO_ENUM[rawType] ?? (Object.values(EntityType).includes(rawType as EntityType) ? (rawType as EntityType) : undefined);
+  if (normalized === undefined) {
+    throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
+  }
+
+  return normalized;
 };
 
 export const EntityIconByType: Record<EntityType, IconType> = {

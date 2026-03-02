@@ -10,12 +10,11 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
 import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
@@ -26,6 +25,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -109,19 +109,12 @@ export const MisconfigurationsPreview = ({
   isPreviewMode,
   openDetailsPanel,
 }: {
-  entityIdentifiers: Record<string, string>;
+  entityIdentifiers: EntityIdentifiers;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
-  const { data } = useMisconfigurationPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+  const { hasMisconfigurationFindings, passedFindings, failedFindings } =
+    useHasMisconfigurations(entityIdentifiers);
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {

@@ -160,6 +160,21 @@ describe('helpers', () => {
       expect(getEntityType(genericEntity)).toBe('generic');
     });
 
+    it('should return "host" when flattened record has entity.type "Host"', () => {
+      const record = { 'entity.type': 'Host' } as unknown as Entity;
+      expect(getEntityType(record)).toBe('host');
+    });
+
+    it('should return "user" when flattened record has entity.type "Identity"', () => {
+      const record = { 'entity.type': 'Identity' } as unknown as Entity;
+      expect(getEntityType(record)).toBe('user');
+    });
+
+    it('should return "service" when flattened record has entity.type "Service"', () => {
+      const record = { 'entity.type': 'Service' } as unknown as Entity;
+      expect(getEntityType(record)).toBe('service');
+    });
+
     it('should throw an error if the record does not match any entity type', () => {
       const unknownEntity = {
         '@timestamp': '2021-08-02T14:00:00.000Z',

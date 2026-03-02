@@ -35,7 +35,10 @@ export const euid = {
 };
 
 export type { EntityType } from './domain/definitions/entity_schema';
-export type { Entity } from './domain/definitions/entity.gen';
+export {
+    buildEntityFiltersFromEntityIdentifiers,
+    buildGenericEntityFlyoutPreviewQuery,
+} from './domain/euid';
 export type { IdentitySourceFields } from './domain/euid';
 export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
 
@@ -48,26 +51,14 @@ export const EntityStoreStatus = z.enum([
   'error',
 ]);
 
-const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
-
 export const ENTITY_STORE_ROUTES = {
-  INSTALL: `${ENTITY_STORE_BASE_ROUTE}/install`,
-  UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
-  STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
-  START: `${ENTITY_STORE_BASE_ROUTE}/start`,
-  STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
-  FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
-  CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
-  CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
-  CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
+  INSTALL: '/internal/security/entity-store/install',
+  UNINSTALL: '/internal/security/entity-store/uninstall',
+  STATUS: '/internal/security/entity-store/status',
+  START: '/internal/security/entity-store/start',
+  STOP: '/internal/security/entity-store/stop',
+  CRUD_UPSERT: '/internal/security/entity-store/entities/{entityType}',
+  CRUD_UPSERT_BULK: '/internal/security/entity-store/entities/bulk',
+  CRUD_DELETE: '/internal/security/entity-store/entities',
+  FORCE_LOG_EXTRACTION: '/internal/security/entity-store/{entityType}/force-log-extraction',
 } as const satisfies Record<string, string>;
-
-export const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (typeof error === 'string') {
-    return error;
-  }
-  return String(error);
-};

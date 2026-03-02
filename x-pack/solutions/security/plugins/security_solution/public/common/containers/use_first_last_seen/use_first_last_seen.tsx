@@ -12,10 +12,6 @@ import { useSearchStrategy } from '../use_search_strategy';
 import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import type { Direction } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
-import {
-  buildHostFilterFromEntityIdentifiers,
-  buildUserFilterFromEntityIdentifiers,
-} from '../../../../common/search_strategy/security_solution/risk_score/common';
 
 export interface FirstLastSeenArgs {
   errorMessage: string | null;
@@ -39,62 +35,53 @@ export interface UseFirstLastSeenWithField extends UseFirstLastSeenBase {
 
 export interface UseFirstLastSeenWithEntityIdentifiers extends UseFirstLastSeenBase {
   entityIdentifiers: Record<string, string>;
-  entityType: 'host' | 'user';
+  entityType: 'host' | 'user' | 'service';
   field?: never;
   value?: never;
 }
 
 export type UseFirstLastSeen = UseFirstLastSeenWithField | UseFirstLastSeenWithEntityIdentifiers;
 
-const getEntityFilterFromIdentifiers = (
-  entityIdentifiers: Record<string, string>,
-  entityType: 'host' | 'user'
-): ESQuery | undefined =>
-  entityType === 'host'
-    ? buildHostFilterFromEntityIdentifiers(entityIdentifiers)
-    : buildUserFilterFromEntityIdentifiers(entityIdentifiers);
-
-const getFieldAndValueFromEntityIdentifiers = (
-  entityIdentifiers: Record<string, string>
-): { field: string; value: string } => {
-  const entries = Object.entries(entityIdentifiers);
-  const [field, value] = entries[0] ?? ['host.name', ''];
-  return { field, value: String(value) };
-};
-
-const getStableEntityIdentifiersKey = (identifiers: Record<string, string>): string =>
-  JSON.stringify(
-    Object.fromEntries(Object.entries(identifiers).sort(([a], [b]) => a.localeCompare(b)))
-  );
-
 export const useFirstLastSeen = (props: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { order, defaultIndex, filterQuery: externalFilterQuery, skip = false } = props;
 
-  const entityIdentifiersKey =
-    'entityIdentifiers' in props && props.entityIdentifiers && props.entityType
-      ? getStableEntityIdentifiersKey(props.entityIdentifiers)
-      : null;
-  const entityType = 'entityType' in props ? props.entityType : null;
-  const fieldFromProps = 'field' in props ? props.field : '';
-  const valueFromProps = 'value' in props ? props.value : '';
+  const isEntityIdentifiersMode =
+    'entityIdentifiers' in props &&
+    props.entityIdentifiers != null &&
+    Object.keys(props.entityIdentifiers).length > 0 &&
+    'entityType' in props &&
+    props.entityType != null;
 
-  const { field, value, resolvedFilterQuery } = useMemo(() => {
-    if (entityIdentifiersKey !== null && entityType) {
-      const entityIdentifiers = JSON.parse(entityIdentifiersKey) as Record<string, string>;
-      const entityFilter = getEntityFilterFromIdentifiers(entityIdentifiers, entityType);
-      const { field: f, value: v } = getFieldAndValueFromEntityIdentifiers(entityIdentifiers);
-      const combinedFilter =
-        entityFilter && externalFilterQuery
-          ? { bool: { filter: [entityFilter, externalFilterQuery] } }
-          : entityFilter ?? externalFilterQuery;
-      return { field: f, value: v, resolvedFilterQuery: combinedFilter };
+  const entityIdentifiersFromProps =
+    'entityIdentifiers' in props ? props.entityIdentifiers : undefined;
+  const entityTypeFromProps = 'entityType' in props ? props.entityType : undefined;
+  const fieldFromProps = 'field' in props ? props.field : undefined;
+  const valueFromProps = 'value' in props ? props.value : undefined;
+
+  const searchParams = useMemo(() => {
+    if (isEntityIdentifiersMode && entityIdentifiersFromProps && entityTypeFromProps) {
+      return {
+        entityIdentifiers: entityIdentifiersFromProps,
+        entityType: entityTypeFromProps,
+        filterQuery: externalFilterQuery,
+      };
     }
-    return {
-      field: fieldFromProps,
-      value: valueFromProps,
-      resolvedFilterQuery: externalFilterQuery,
-    };
-  }, [entityIdentifiersKey, entityType, externalFilterQuery, fieldFromProps, valueFromProps]);
+    if (fieldFromProps != null && valueFromProps != null) {
+      return {
+        field: fieldFromProps,
+        value: valueFromProps,
+        filterQuery: externalFilterQuery,
+      };
+    }
+    return null;
+  }, [
+    isEntityIdentifiersMode,
+    entityIdentifiersFromProps,
+    entityTypeFromProps,
+    fieldFromProps,
+    valueFromProps,
+    externalFilterQuery,
+  ]);
 
   const { loading, result, search, error } = useSearchStrategy<typeof FirstLastSeenQuery>({
     factoryQueryType: FirstLastSeenQuery,
@@ -106,15 +93,13 @@ export const useFirstLastSeen = (props: UseFirstLastSeen): [boolean, FirstLastSe
   });
 
   useEffect(() => {
-    if (skip) return;
+    if (skip || searchParams == null) return;
     search({
       defaultIndex,
-      field,
-      value,
       order,
-      filterQuery: resolvedFilterQuery,
+      ...searchParams,
     });
-  }, [defaultIndex, field, value, order, search, resolvedFilterQuery, skip]);
+  }, [defaultIndex, order, search, searchParams, skip]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

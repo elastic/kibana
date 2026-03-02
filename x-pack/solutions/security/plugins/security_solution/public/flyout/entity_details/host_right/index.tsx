@@ -20,7 +20,7 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import {
-  buildHostFilterFromEntityIdentifiers,
+  buildEntityFilterFromEntityIdentifiers,
   buildHostNamesFilter,
 } from '../../../../common/search_strategy';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -37,15 +37,13 @@ import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface HostPanelProps extends Record<string, unknown> {
-  contextID?: string;
+  contextID: string;
   scopeId: string;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
   /**
    * Entity identifiers for the host (following entity store EUID logic)
    */
-  entityIdentifiers?: EntityIdentifiers;
-  /** @deprecated Use entityIdentifiers with 'host.name' key instead */
-  hostName?: string;
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -67,22 +65,12 @@ export const HostPanel = ({
   scopeId,
   isPreviewMode = false,
   entityIdentifiers,
-  hostName: legacyHostName,
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
   // Guard: entityIdentifiers and contextID with fallbacks to prevent "Unable to load page" errors
-  // Support legacy hostName param: when only hostName is passed, derive entityIdentifiers
-  const safeEntityIdentifiers = useMemo(
-    () =>
-      entityIdentifiers && Object.keys(entityIdentifiers).length > 0
-        ? entityIdentifiers
-        : legacyHostName
-        ? { 'host.name': legacyHostName }
-        : {},
-    [entityIdentifiers, legacyHostName]
-  );
+  const safeEntityIdentifiers = useMemo(() => entityIdentifiers ?? {}, [entityIdentifiers]);
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const hasValidIdentifiers =
     safeEntityIdentifiers && Object.keys(safeEntityIdentifiers).length > 0;
@@ -99,7 +87,7 @@ export const HostPanel = ({
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
   const hostFilterQuery = useMemo(
     () =>
-      buildHostFilterFromEntityIdentifiers(safeEntityIdentifiers) ??
+      buildEntityFilterFromEntityIdentifiers(EntityType.host, safeEntityIdentifiers) ??
       (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
     [safeEntityIdentifiers, effectiveHostName]
   );

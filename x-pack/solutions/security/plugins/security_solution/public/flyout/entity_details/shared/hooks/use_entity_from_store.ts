@@ -9,10 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { HostEntity, UserEntity } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
-import {
-  buildHostFilterFromEntityIdentifiers,
-  buildUserFilterFromEntityIdentifiers,
-} from '../../../../../common/search_strategy';
+import { euid } from '../../../../../../../plugins/entity_store/common';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 
 const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
@@ -79,10 +76,7 @@ export function useEntityFromStore(
   const { fetchEntitiesList } = useEntityAnalyticsRoutes();
 
   const hasValidIdentifiers = Object.keys(entityIdentifiers).length > 0;
-  const filter =
-    entityType === 'host'
-      ? buildHostFilterFromEntityIdentifiers(entityIdentifiers)
-      : buildUserFilterFromEntityIdentifiers(entityIdentifiers);
+    const filter = euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers);
 
   const stableIdentifiersKey = getStableEntityIdentifiersKey(entityIdentifiers);
   const queryResult = useQuery({

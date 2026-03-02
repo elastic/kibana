@@ -5,11 +5,29 @@
  * 2.0.
  */
 
-import { tableDefaults } from '@kbn/securitysolution-data-table';
-import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
-import { defaultEventHeaders } from './default_event_headers';
+import {
+  tableDefaults,
+  TableId,
+  type SubsetDataTableModel,
+} from '@kbn/securitysolution-data-table';
+import { defaultEventHeaders, hostEventsDefaultHeaders } from './default_event_headers';
 
 export const eventsDefaultModel: SubsetDataTableModel = {
   ...tableDefaults,
   columns: defaultEventHeaders,
+};
+
+/**
+ * Returns the default model (including columns) for the given table id.
+ * Hosts Events table uses columns that include all Host entity identifier fields.
+ */
+export const getEventsDefaultModelForTable = (
+  tableId: TableId
+): SubsetDataTableModel => {
+  const columns =
+    tableId === TableId.hostsPageEvents ? hostEventsDefaultHeaders : defaultEventHeaders;
+  return {
+    ...tableDefaults,
+    columns,
+  };
 };
