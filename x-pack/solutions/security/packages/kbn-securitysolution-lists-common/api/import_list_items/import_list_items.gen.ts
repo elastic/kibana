@@ -36,7 +36,7 @@ Required when importing a new list that is `list_id` is not specified.
       */
   type: ListType.optional(),
   /**
-   * Determines when changes made by the request are made visible to search.
+   * Determines when changes made by the request are made visible to search
    */
   refresh: z.enum(['true', 'false', 'wait_for']).optional(),
 });
