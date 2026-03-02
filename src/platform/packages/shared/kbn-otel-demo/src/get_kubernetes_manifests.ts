@@ -9,7 +9,6 @@
 
 import yaml from 'js-yaml';
 
-
 const OTEL_DEMO_VERSION = '1.12.0';
 const NAMESPACE = 'otel-demo';
 

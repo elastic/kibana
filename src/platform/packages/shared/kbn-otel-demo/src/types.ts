@@ -137,4 +137,3 @@ export interface ManifestOptions {
 export interface DemoManifestGenerator {
   generate(options: ManifestOptions): string;
 }
-

@@ -142,14 +142,7 @@ run(
     `,
     flags: {
       string: ['config', 'logs-index', 'scenario', 'demo', 'version'],
-      boolean: [
-        'teardown',
-        'list-demos',
-        'list-scenarios',
-        'patch',
-        'reset',
-        'rebuild-images',
-      ],
+      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset', 'rebuild-images'],
       alias: {
         c: 'config',
         s: 'scenario',

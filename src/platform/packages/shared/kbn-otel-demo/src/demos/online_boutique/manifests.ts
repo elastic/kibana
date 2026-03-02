@@ -10,7 +10,6 @@
 import yaml from 'js-yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
-
 /**
  * Creates common Kubernetes resources needed by all demos
  */
