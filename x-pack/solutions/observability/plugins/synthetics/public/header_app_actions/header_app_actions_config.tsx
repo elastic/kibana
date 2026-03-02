@@ -43,6 +43,18 @@ export function getSyntheticsHeaderAppActionsConfig(): ChromeHeaderAppActionsCon
           defaultMessage: 'New',
         })}
       />,
+      <EuiButtonIcon
+        key="refresh"
+        size="xs"
+        color="text"
+        iconType="refresh"
+        onClick={noop}
+        aria-label={i18n.translate('xpack.synthetics.headerAppActions.refreshAriaLabel', {
+          defaultMessage: 'Refresh',
+        })}
+        data-test-subj="headerGlobalNav-appActionsRefreshButton"
+      />,
+
     ],
     primaryActions: [
       <EuiButton
@@ -61,17 +73,6 @@ export function getSyntheticsHeaderAppActionsConfig(): ChromeHeaderAppActionsCon
       >
         Off
       </EuiButton>,
-      <EuiButtonIcon
-        key="refresh"
-        size="xs"
-        color="text"
-        iconType="refresh"
-        onClick={noop}
-        aria-label={i18n.translate('xpack.synthetics.headerAppActions.refreshAriaLabel', {
-          defaultMessage: 'Refresh',
-        })}
-        data-test-subj="headerGlobalNav-appActionsRefreshButton"
-      />,
     ],
     overflowPanels: [
       {

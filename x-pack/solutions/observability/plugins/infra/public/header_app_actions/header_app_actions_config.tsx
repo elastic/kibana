@@ -12,6 +12,77 @@ import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
 
 const noop = () => {};
 
+const LOGS_ANOMALIES_ALERTS_PANEL_ID = 1;
+
+/**
+ * Header app actions config for the Logs Anomalies page (/logs/anomalies).
+ * Single secondary action: Overflow (•••) with Add data, Alerts (submenu: Create rule, Manage rules), Docs, Feedback.
+ * POC: all actions are dumb (noop). Set when anomalies page mounts; clear when navigating away.
+ */
+export function getLogsAnomaliesHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
+  return {
+    overflowPanels: [
+      {
+        id: 0,
+        title: '',
+        items: [
+          {
+            name: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.overflowAddData', {
+              defaultMessage: 'Add data',
+            }),
+            icon: 'plusInCircle',
+            onClick: noop,
+          },
+          {
+            name: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.overflowAlerts', {
+              defaultMessage: 'Alerts',
+            }),
+            icon: 'bell',
+            onClick: noop,
+            panel: LOGS_ANOMALIES_ALERTS_PANEL_ID,
+          },
+          {
+            name: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.overflowDocs', {
+              defaultMessage: 'Docs',
+            }),
+            icon: 'documentation',
+            onClick: noop,
+          },
+          {
+            name: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.overflowFeedback', {
+              defaultMessage: 'Feedback',
+            }),
+            icon: 'editorComment',
+            onClick: noop,
+          },
+        ],
+      },
+      {
+        id: LOGS_ANOMALIES_ALERTS_PANEL_ID,
+        title: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.alertsPanelTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        items: [
+          {
+            name: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.createRule', {
+              defaultMessage: 'Create rule',
+            }),
+            icon: 'bell',
+            onClick: noop,
+          },
+          {
+            name: i18n.translate('xpack.infra.logsAnomaliesHeaderAppActions.manageRules', {
+              defaultMessage: 'Manage rules',
+            }),
+            icon: 'document',
+            onClick: noop,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 /**
  * Header app actions config for the Metrics app (Infrastructure inventory, Hosts, Metrics explorer).
  * Overflow menu contains the former app menu items (Feedback, Anomaly detection, Alerts and rules, Add data, Settings).

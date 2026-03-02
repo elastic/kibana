@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -22,10 +23,13 @@ import { safeDecode } from '@kbn/rison';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
+import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { NotFoundPage } from '../404';
+import { getLogsAnomaliesHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import { getLogsAppRoutes } from './routes';
 
 const LogEntryCategoriesPage = dynamic(() =>
@@ -37,6 +41,10 @@ const LogEntryRatePage = dynamic(() =>
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
+  const { chrome } = useKibanaContextForPlugin().services;
+  const location = useLocation();
+  const routes = getLogsAppRoutes();
+  const isAnomaliesPage = location.pathname.endsWith(routes.logsAnomalies.path);
 
   const uiCapabilities = application?.capabilities;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
@@ -48,11 +56,21 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-  const routes = getLogsAppRoutes();
+
+  useEffect(() => {
+    if (!chrome?.setHeaderAppActionsConfig) return;
+    if (isAnomaliesPage) {
+      chrome.setHeaderAppActionsConfig(getLogsAnomaliesHeaderAppActionsConfig());
+      return () => chrome.setHeaderAppActionsConfig(undefined);
+    }
+    chrome.setHeaderAppActionsConfig(undefined);
+  }, [isAnomaliesPage, chrome]);
 
   return (
     <>
-      {setHeaderActionMenu && theme$ && (
+      <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
+
+      {!isAnomaliesPage && setHeaderActionMenu && theme$ && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem>
@@ -121,6 +139,8 @@ export const LogsPageContent: React.FunctionComponent = () => {
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
 });
+
+const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.logsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
