@@ -98,6 +98,8 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
+  AnonymizationResponseMetadata,
+  DeanonymizedMessageData,
 } from './anonymization';
 
 export type {
