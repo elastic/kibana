@@ -12,7 +12,6 @@ export default createStatefulTestConfig<typeof services>({
   services,
   testFiles: [require.resolve('./oblt.apm.index.ts')],
   junit: {
-    reportName:
-      'Stateful Observability - Deployment-agnostic APM API Integration Tests - Group 1',
+    reportName: 'Stateful Observability - Deployment-agnostic APM API Integration Tests - Group 1',
   },
 });

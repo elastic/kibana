@@ -15,7 +15,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/synthetics/create_monitor_project_private_location'));
     loadTestFile(require.resolve('../../apis/synthetics/create_monitor_project'));
     loadTestFile(require.resolve('../../apis/synthetics/create_monitor_project_multi_space.ts'));
-    loadTestFile(require.resolve('../../apis/synthetics/create_monitor_public_api_private_location'));
+    loadTestFile(
+      require.resolve('../../apis/synthetics/create_monitor_public_api_private_location')
+    );
     loadTestFile(require.resolve('../../apis/synthetics/create_monitor_public_api'));
     loadTestFile(require.resolve('../../apis/synthetics/create_monitor'));
     loadTestFile(require.resolve('../../apis/synthetics/create_update_delete_params'));
