@@ -61,12 +61,20 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
   },
   {
+    id: 'data.parse_json',
+    handlerHash: 'f1de4bd3d12fc65492d01d59dc63af5df68f23031376b9f78738ecda2fb2067c',
+  },
+  {
     id: 'data.regex_extract',
     handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
   },
   {
     id: 'data.regex_replace',
     handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
+  },
+  {
+    id: 'data.to_json',
+    handlerHash: 'ca8d4c23b00ddca2a1317f66cc6650b1454bffb10a794718d2be37d1dfa00510',
   },
   {
     id: 'search.rerank',

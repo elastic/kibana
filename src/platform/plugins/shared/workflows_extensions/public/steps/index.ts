@@ -16,8 +16,10 @@ import {
   dataFilterStepDefinition,
   dataFindStepDefinition,
   dataMapStepDefinition,
+  dataParseJsonStepDefinition,
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
+  dataToJsonStepDefinition,
 } from './data';
 import type { PublicStepRegistry } from '../step_registry';
 
@@ -29,6 +31,8 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(dataRegexExtractStepDefinition);
   stepRegistry.register(dataRegexReplaceStepDefinition);
   stepRegistry.register(dataAggregateStepDefinition);
+  stepRegistry.register(dataParseJsonStepDefinition);
+  stepRegistry.register(dataToJsonStepDefinition);
   stepRegistry.register(AiPromptStepDefinition);
   stepRegistry.register(AiSummarizeStepDefinition);
   stepRegistry.register(AiClassifyStepDefinition);
