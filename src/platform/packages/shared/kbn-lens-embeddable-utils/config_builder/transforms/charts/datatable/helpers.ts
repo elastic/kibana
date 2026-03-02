@@ -13,7 +13,7 @@ import type {
   TextBasedLayerColumn,
 } from '@kbn/lens-common';
 import { ACCESSOR } from './constants';
-import { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 
 /**

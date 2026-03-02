@@ -230,34 +230,34 @@ export const getDatatableVisualization = ({
     const usesTransposing = state?.columns.some((c) => c.isTransposed);
 
     const title =
-    table.changeType === 'unchanged'
-      ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
-          defaultMessage: 'As table',
-        })
-      : i18n.translate('xpack.lens.datatable.visualizationOf', {
-          defaultMessage: 'Table {operations}',
-          values: {
-            operations:
-              table.label ||
-              table.columns
-                .map((col) => col.operation.label)
-                .join(
-                  i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                    defaultMessage: ' & ',
-                    description:
-                      'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-                  })
-                ),
-          },
-        });
+      table.changeType === 'unchanged'
+        ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
+            defaultMessage: 'As table',
+          })
+        : i18n.translate('xpack.lens.datatable.visualizationOf', {
+            defaultMessage: 'Table {operations}',
+            values: {
+              operations:
+                table.label ||
+                table.columns
+                  .map((col) => col.operation.label)
+                  .join(
+                    i18n.translate('xpack.lens.datatable.conjunctionSign', {
+                      defaultMessage: ' & ',
+                      description:
+                        'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
+                    })
+                  ),
+            },
+          });
 
-  const changeType = table.changeType;
-  const changeFactor =
-    changeType === 'reduced' || changeType === 'layers'
-      ? 0.3
-      : changeType === 'unchanged'
-      ? 0.5
-      : 1;
+    const changeType = table.changeType;
+    const changeFactor =
+      changeType === 'reduced' || changeType === 'layers'
+        ? 0.3
+        : changeType === 'unchanged'
+        ? 0.5
+        : 1;
 
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
@@ -652,9 +652,9 @@ export const getDatatableVisualization = ({
                 !canColor || !column.palette
                   ? undefined
                   : paletteService
-                    // The by value palette is a pseudo custom palette that is only custom from params level
-                    .get(colorByTerms ? column.palette.name : CUSTOM_PALETTE)
-                    .toExpression(paletteParams),
+                      // The by value palette is a pseudo custom palette that is only custom from params level
+                      .get(colorByTerms ? column.palette.name : CUSTOM_PALETTE)
+                      .toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
