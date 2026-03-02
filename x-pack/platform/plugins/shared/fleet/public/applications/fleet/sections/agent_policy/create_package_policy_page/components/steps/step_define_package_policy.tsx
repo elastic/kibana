@@ -361,7 +361,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"
-                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                      iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                       flush="left"
                       aria-expanded={isShowingAdvanced}

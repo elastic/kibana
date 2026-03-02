@@ -240,7 +240,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 <EuiButton
                   color="warning"
                   href={docLinks.links.fleet.remoteESOoutputTroubleshooting}
-                  iconType="popout"
+                  iconType="external"
                   target="blank"
                 >
                   <FormattedMessage
@@ -293,10 +293,10 @@ export const IntegrationStatus: React.FunctionComponent<{
                       }
                       type={
                         customAsset.sync_status === SyncStatus.FAILED
-                          ? 'errorFilled'
+                          ? 'errorFill'
                           : customAsset.sync_status === SyncStatus.WARNING
                           ? 'warning'
-                          : 'checkInCircleFilled'
+                          : 'checkCircleFill'
                       }
                     />
                   )
