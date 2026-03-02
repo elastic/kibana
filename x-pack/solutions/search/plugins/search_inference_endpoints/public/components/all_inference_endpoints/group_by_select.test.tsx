@@ -49,6 +49,17 @@ describe('GroupBySelect', () => {
     expect(getByText(/Models/i)).toBeInTheDocument();
   });
 
+  it('should render the filter button with "Service" when service is selected', () => {
+    const { getByText } = render(
+      <Wrapper>
+        <GroupBySelect value={GroupByOptions.Service} onChange={mockOnChange} />
+      </Wrapper>
+    );
+
+    expect(getByText(/Group:/i)).toBeInTheDocument();
+    expect(getByText(/Service/i)).toBeInTheDocument();
+  });
+
   it('should open the popover when the filter button is clicked', async () => {
     const { getByRole } = render(
       <Wrapper>
@@ -150,6 +161,38 @@ describe('GroupBySelect', () => {
     });
   });
 
+  it('should call onChange with GroupByOptions.Service when "Service" option is selected', async () => {
+    const { getByRole } = render(
+      <Wrapper>
+        <GroupBySelect value={GroupByOptions.None} onChange={mockOnChange} />
+      </Wrapper>
+    );
+
+    // Open popover
+    const filterButton = getByRole('button');
+    fireEvent.click(filterButton);
+
+    await waitFor(() => {
+      const options = document.querySelectorAll('[role="option"]');
+      expect(options.length).toBeGreaterThan(0);
+    });
+
+    // Find and click the "Service" option
+    const options = document.querySelectorAll('[role="option"]');
+    const serviceOption = Array.from(options).find((option) =>
+      option.textContent?.includes('Service')
+    );
+
+    expect(serviceOption).toBeDefined();
+    if (serviceOption) {
+      fireEvent.click(serviceOption);
+    }
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith(GroupByOptions.Service);
+    });
+  });
+
   it('should close the popover after selecting an option', async () => {
     const { getByRole } = render(
       <Wrapper>
@@ -194,7 +237,7 @@ describe('GroupBySelect', () => {
 
     await waitFor(() => {
       const options = document.querySelectorAll('[role="option"]');
-      expect(options.length).toBe(2);
+      expect(options.length).toBe(3);
     });
 
     // Check that the "Models" option is marked as checked

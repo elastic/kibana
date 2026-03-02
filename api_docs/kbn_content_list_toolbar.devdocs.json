@@ -161,7 +161,7 @@
         "label": "SelectionBarProps",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/selection_bar/selection_bar.tsx",
-        "lineNumber": 15,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -179,7 +179,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/selection_bar/selection_bar.tsx",
-            "lineNumber": 16,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
