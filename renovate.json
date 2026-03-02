@@ -576,6 +576,24 @@
     },
     {
       "matchDepNames": [
+        "react-element-to-jsx-string"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "matchDepNames": [
         "react-use"
       ],
       "reviewers": [
