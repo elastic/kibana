@@ -187,26 +187,29 @@ export const awsRetailStoreConfig: DemoConfig = {
       command: ['/bin/sh', '-c'],
       args: [
         `while true; do
-          curl -s http://ui:8080/home || true;
+          COOKIES=/tmp/cookies_$$;
+          rm -f $COOKIES;
+          curl -s -o /dev/null -b $COOKIES -c $COOKIES http://ui:8080/home || true;
           sleep 1;
-          curl -s http://ui:8080/catalog || true;
+          curl -s -o /dev/null -b $COOKIES -c $COOKIES http://ui:8080/catalog || true;
           sleep 1;
           PRODUCTS=$(curl -s http://catalog:8080/catalogue | grep -o '"id":"[^"]*"' | head -5 | cut -d'"' -f4 || echo "");
           for PROD in $PRODUCTS; do
-            curl -s "http://ui:8080/catalog/$PROD" || true;
+            curl -s -o /dev/null -b $COOKIES -c $COOKIES "http://ui:8080/catalog/$PROD" || true;
             sleep 0.5;
           done;
           FIRST_PROD=$(echo "$PRODUCTS" | head -1);
           if [ -n "$FIRST_PROD" ]; then
-            curl -s -X POST http://ui:8080/cart -d "productId=$FIRST_PROD" || true;
+            curl -s -o /dev/null -b $COOKIES -c $COOKIES -X POST http://ui:8080/cart -d "productId=$FIRST_PROD" || true;
           fi;
           sleep 1;
-          curl -s http://ui:8080/cart || true;
+          curl -s -o /dev/null -b $COOKIES -c $COOKIES http://ui:8080/cart || true;
           sleep 2;
-          curl -s http://ui:8080/checkout || true;
+          curl -s -o /dev/null -b $COOKIES -c $COOKIES http://ui:8080/checkout || true;
           sleep 1;
-          curl -s -X POST http://ui:8080/checkout -d "firstName=Test&lastName=User&email=test@example.com&streetAddress=123 Main St&city=Testville&state=CA&zipCode=12345" || true;
+          curl -s -o /dev/null -b $COOKIES -c $COOKIES -X POST http://ui:8080/checkout -d "firstName=Test&lastName=User&email=test@example.com&streetAddress=123 Main St&city=Testville&state=CA&zipCode=12345" || true;
           sleep 2;
+          rm -f $COOKIES;
         done`,
       ],
       env: {

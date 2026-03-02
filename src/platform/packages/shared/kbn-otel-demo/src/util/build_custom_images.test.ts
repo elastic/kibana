@@ -14,11 +14,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 describe('build_custom_images', () => {
   describe('getRepoDir', () => {
-    it('should return correct path for demo repo', () => {
-      const repoDir = getRepoDir('kubepay');
-      expect(repoDir).toBe(Path.join(REPO_ROOT, 'data', 'demo_environments', 'repos', 'kubepay'));
-    });
-
     it('should return correct path for rust-k8s-demo', () => {
       const repoDir = getRepoDir('rust-k8s-demo');
       expect(repoDir).toBe(
@@ -28,20 +23,6 @@ describe('build_custom_images', () => {
   });
 
   describe('ImageBuildConfig interface', () => {
-    it('should accept valid kubepay config', () => {
-      const config: ImageBuildConfig = {
-        gitUrl: 'https://github.com/teamlead/spring-microservices-kubernetes-demo.git',
-        preBuildCommand: './mvnw clean install -DskipTests',
-        images: [
-          { name: 'kubepay/gateway:latest', context: 'gateway/gateway-service' },
-          { name: 'kubepay/auth:latest', context: 'auth/auth-service' },
-        ],
-      };
-      expect(config.gitUrl).toContain('github.com');
-      expect(config.images).toHaveLength(2);
-      expect(config.preBuildCommand).toBeDefined();
-    });
-
     it('should accept config without preBuildCommand', () => {
       const config: ImageBuildConfig = {
         gitUrl: 'https://github.com/caulagi/rust-k8s-demo.git',

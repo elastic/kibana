@@ -61,8 +61,8 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       port: 27017,
       env: {
         MONGO_INITDB_DATABASE: 'fights',
-        MONGO_INITDB_ROOT_USERNAME: 'super',
-        MONGO_INITDB_ROOT_PASSWORD: 'super',
+        MONGO_INITDB_ROOT_USERNAME: 'superfight',
+        MONGO_INITDB_ROOT_PASSWORD: 'superfight',
       },
     },
 
@@ -172,6 +172,7 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         QUARKUS_LIQUIBASE_MONGODB_MIGRATE_AT_START: 'false',
         QUARKUS_MONGODB_CREDENTIALS_USERNAME: 'superfight',
         QUARKUS_MONGODB_CREDENTIALS_PASSWORD: 'superfight',
+        QUARKUS_MONGODB_CREDENTIALS_AUTH_SOURCE: 'admin',
         QUARKUS_STORK_HERO_SERVICE_SERVICE_DISCOVERY_ADDRESS_LIST: 'rest-heroes:8083',
         QUARKUS_STORK_VILLAIN_SERVICE_SERVICE_DISCOVERY_ADDRESS_LIST: 'rest-villains:8084',
         QUARKUS_STORK_NARRATION_SERVICE_SERVICE_DISCOVERY_ADDRESS_LIST: 'rest-narration:8087',
@@ -217,11 +218,11 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       command: ['/bin/sh', '-c'],
       args: [
         `while true; do
-          curl -s -X POST http://rest-fights:8082/api/fights/randomfighters -H 'Accept: application/json' || true;
+          curl -s -o /dev/null -X POST http://rest-fights:8082/api/fights/randomfighters -H 'Accept: application/json' || true;
           sleep 2;
           FIGHTERS=$(curl -s http://rest-fights:8082/api/fights/randomfighters -H 'Accept: application/json');
           if [ -n "$FIGHTERS" ]; then
-            curl -s -X POST http://rest-fights:8082/api/fights -H 'Content-Type: application/json' -H 'Accept: application/json' -d "$FIGHTERS" || true;
+            curl -s -o /dev/null -X POST http://rest-fights:8082/api/fights -H 'Content-Type: application/json' -H 'Accept: application/json' -d "$FIGHTERS" || true;
           fi;
           sleep 3;
         done`,

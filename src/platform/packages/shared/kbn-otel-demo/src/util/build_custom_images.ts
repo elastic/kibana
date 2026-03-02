@@ -36,6 +36,40 @@ async function dirExists(dir: string): Promise<boolean> {
   }
 }
 
+async function repoUsesLfs(repoDir: string): Promise<boolean> {
+  try {
+    const gitattributes = await Fs.readFile(Path.join(repoDir, '.gitattributes'), 'utf-8');
+    return gitattributes.includes('filter=lfs');
+  } catch {
+    return false;
+  }
+}
+
+async function isGitLfsInstalled(): Promise<boolean> {
+  try {
+    await execa.command('git lfs version', { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureLfsFiles(log: ToolingLog, repoDir: string): Promise<void> {
+  if (!(await repoUsesLfs(repoDir))) {
+    return;
+  }
+
+  if (!(await isGitLfsInstalled())) {
+    throw new Error(
+      'This repository uses Git LFS but git-lfs is not installed.\n' +
+        'Install it with: brew install git-lfs && git lfs install'
+    );
+  }
+
+  log.info('Pulling Git LFS files...');
+  await execa.command('git lfs pull', { cwd: repoDir, stdio: 'pipe' });
+}
+
 async function cloneOrUpdateRepo(
   log: ToolingLog,
   gitUrl: string,
@@ -51,6 +85,7 @@ async function cloneOrUpdateRepo(
     } catch {
       log.warning('Could not pull latest changes, using existing checkout');
     }
+    await ensureLfsFiles(log, targetDir);
     return;
   }
 
@@ -59,6 +94,7 @@ async function cloneOrUpdateRepo(
   await execa.command(`git clone --depth 1 ${gitUrl} ${targetDir}`, {
     stdio: 'pipe',
   });
+  await ensureLfsFiles(log, targetDir);
 }
 
 async function imageExistsInMinikube(imageName: string): Promise<boolean> {
