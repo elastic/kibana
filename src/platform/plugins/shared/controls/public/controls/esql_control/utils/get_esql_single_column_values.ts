@@ -25,12 +25,14 @@ export interface GetESQLSingleColumnValuesFailure {
 interface GetESQLSingleColumnValuesParams {
   query: string;
   search: ISearchGeneric;
+  signal?: AbortSignal;
   timeRange?: TimeRange;
   esqlVariables: ESQLControlVariable[];
 }
 export const getESQLSingleColumnValues = async ({
   query,
   search,
+  signal,
   timeRange,
   esqlVariables,
 }: GetESQLSingleColumnValuesParams): Promise<
@@ -41,7 +43,7 @@ export const getESQLSingleColumnValues = async ({
     const results = await getESQLResults({
       esqlQuery: query,
       search,
-      signal: undefined,
+      signal,
       filter: undefined,
       dropNullColumns: true,
       timeRange,
