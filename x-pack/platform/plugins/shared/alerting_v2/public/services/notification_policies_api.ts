@@ -46,4 +46,8 @@ export class NotificationPoliciesApi {
       { body: JSON.stringify(data) }
     );
   }
+
+  public async deleteNotificationPolicy(id: string) {
+    await this.http.delete(`${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`);
+  }
 }
