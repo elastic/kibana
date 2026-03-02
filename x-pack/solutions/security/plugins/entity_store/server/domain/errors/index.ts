@@ -15,3 +15,4 @@ export { EntityNotAliasError } from './entity_not_alias_error';
 export { SelfLinkError } from './self_link_error';
 export { EntitiesNotFoundError } from './entities_not_found_error';
 export { MixedEntityTypesError } from './mixed_entity_types_error';
+export { ResolutionUpdateError } from './resolution_update_error';

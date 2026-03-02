@@ -14,6 +14,7 @@ import {
   EntityHasAliasesError,
   EntityNotAliasError,
   MixedEntityTypesError,
+  ResolutionUpdateError,
   SelfLinkError,
 } from './errors';
 
@@ -228,6 +229,24 @@ describe('ResolutionClient', () => {
         target_id: 'target-1',
       });
     });
+
+    it('should throw ResolutionUpdateError when updateByQuery has failures', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.updateByQuery.mockResolvedValueOnce({
+        updated: 0,
+        failures: [{ index: '.entities', id: 'doc-1', cause: { reason: 'test failure' } }],
+      } as never);
+
+      await expect(client.linkEntities('target-1', ['entity-1'])).rejects.toThrow(
+        ResolutionUpdateError
+      );
+    });
   });
 
   describe('unlinkEntities', () => {
@@ -286,6 +305,18 @@ describe('ResolutionClient', () => {
       const result = await client.unlinkEntities(['alias-1', 'alias-1', 'alias-1']);
 
       expect(result).toEqual({ unlinked: ['alias-1'] });
+    });
+
+    it('should throw ResolutionUpdateError when updateByQuery has failures', async () => {
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+      mockEsClient.updateByQuery.mockResolvedValueOnce({
+        updated: 0,
+        failures: [{ index: '.entities', id: 'doc-1', cause: { reason: 'test failure' } }],
+      } as never);
+
+      await expect(client.unlinkEntities(['alias-1'])).rejects.toThrow(ResolutionUpdateError);
     });
   });
 

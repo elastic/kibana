@@ -16,6 +16,7 @@ import {
   EntityHasAliasesError,
   EntityNotAliasError,
   MixedEntityTypesError,
+  ResolutionUpdateError,
   SelfLinkError,
 } from './errors';
 
@@ -137,11 +138,7 @@ export class ResolutionClient {
     });
 
     if (linkResult.failures?.length) {
-      this.logger.error(
-        `Failed to link some entities to target '${targetId}': ${JSON.stringify(
-          linkResult.failures
-        )}`
-      );
+      throw new ResolutionUpdateError('link entities', linkResult.failures);
     }
 
     return { linked, skipped, target_id: targetId };
@@ -198,7 +195,7 @@ export class ResolutionClient {
     });
 
     if (unlinkResult.failures?.length) {
-      this.logger.error(`Failed to unlink some entities: ${JSON.stringify(unlinkResult.failures)}`);
+      throw new ResolutionUpdateError('unlink entities', unlinkResult.failures);
     }
 
     return { unlinked: entityIds };
