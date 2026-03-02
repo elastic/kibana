@@ -107,7 +107,7 @@ export const getFindChangedQueriesTool = (
   id: FIND_CHANGED_QUERIES_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Detect which rules had a significant change in alert rate within the requested time_range using Elasticsearch change_point. Always loads streams the user has access to via streamsClient; optionally filter by streams. Returns only changed rules: each with rule_id, rule_name, rule_query, change_type (from ES, e.g. spike, dip, step_change), alert_count and alert_percentage. Also returns changed_count, stable_count, total_alert_count (alerts in window across all rules; not deduplicated). When nothing changed, changed is empty and counts indicate stable rules; consider a wider time_range or compare_to_baseline. Pass changed[].rule_id to cluster_by_time.',
+    'Detect which rules had a significant change in alert rate within the requested time_range using change point detection. Always loads streams the user has access to; optionally filter by streams. Returns only changed rules: each with rule_id, rule_name, rule_query, change_type (e.g. spike, dip, step_change), alert_count and alert_percentage. Also returns changed_count, stable_count, total_alert_count (alerts in window across all rules). When nothing changed, changed is empty and counts indicate stable rules; consider a wider time_range or compare_to_baseline.',
   tags: [],
   schema,
   handler: async (input, context) => {

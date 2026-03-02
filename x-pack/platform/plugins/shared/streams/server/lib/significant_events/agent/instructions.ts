@@ -22,7 +22,7 @@ export const SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS = dedent(`
 
   ## Tool output conventions (grounding from tools)
 
-  Tools **bake in** the context you need. Wherever rule IDs appear in a result, the tool also returns **rule name** and **rule query** (or query summary) for those rules—not just UUIDs—so you can reason in human terms. Any tool that scopes by rules or filters (e.g. find_changed_queries, cluster_by_time, describe_cluster) includes **total_unique_alert_count** (after deduplication) and **excluded_rule_count** (or equivalent) when rules were filtered in, so you know what percentages are relative to: e.g. "this cluster is 40% of the 5,000 unique alerts in the current scope; 3 rules were excluded from the analysis." Use these fields to interpret impact and avoid mis-scoping.
+  Tools **bake in** the context you need. Wherever rule IDs appear in a result, the tool also returns **rule name** and **rule query** (or query summary) for those rules—not just UUIDs—so you can reason in human terms. Tools that scope by rules (e.g. find_changed_queries, compare_to_baseline) return scope stats such as **total_alert_count**, **changed_count**, **stable_count**, **new_count**, **chronic_count** so you know what percentages and impact are relative to. Use these fields to interpret impact and avoid mis-scoping.
 
   ## Normalized dimensions
 
@@ -43,7 +43,7 @@ export const SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS = dedent(`
 
   **What's different? (filter noise first)**
   - **find_changed_queries**: Requires **time_range** (from, to). Loads streams the user has access to; optionally pass **streams** to limit. Detects change points in alert rate within the window. Returns only **changed** rules: each has rule_id, rule_name, rule_query, change_type (e.g. spike, dip, step_change, trend_change), alert_count, alert_percentage. Also changed_count, stable_count, total_alert_count (alerts in window across all rules in scope). When nothing changed, changed is empty—consider a wider time_range or use **compare_to_baseline**.
-  - **compare_to_baseline**: Compare this window to a baseline in one tool. Use **baseline_type** "same_window_yesterday" or "same_window_last_week" to classify as new vs chronic vs regression. Use **baseline_type** "custom" with **baseline_range** to get significant terms unique to the current window (e.g. version appeared, error code spiked). Core SRE question: "How does this compare to baseline?" Use early to avoid chasing chronic noise, and again before emitting to validate.
+  - **compare_to_baseline**: Compare **current_window** to a baseline. Loads streams the user has access to; optionally pass **streams** to limit. Use **baseline_type** same_window_yesterday or same_window_last_week (same length, previous day/week), or custom with **baseline_range**. Returns rules classified as **new** (alerts only in current), **chronic** (in both), **stopped** (only in baseline), **regression** (in both but current ≥2× baseline). Each entry has rule_id, rule_name, rule_query, current_count, baseline_count. Also new_count, chronic_count, stopped_count, regression_count, total_alert_count_current, total_alert_count_baseline. Use to avoid chasing chronic noise and to validate before emitting.
 
   **When did it happen? (incident windows)**
   - **cluster_by_time**: Identifies **Incident Windows** (the Arena). The tool chooses the split (change-point or density-based); you may pass an optional **time_range** to zoom. Returns cluster_id, start, end, alert_count, rule_ids with **rule name and query** per rule, peak_rate, **total_unique_alert_count** and **excluded_rule_count** when scoped by rule_ids, and an optional background cluster. Use after find_changed_queries; then use group_within_window within a chosen window. Optionally pass **rule_ids** to restrict clustering to changed rules only.
@@ -68,11 +68,11 @@ export const SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS = dedent(`
   - **group_within_window** (method=by_semantic): When you need semantic grouping within a window, use group_within_window with method=by_semantic. Returns per sub-cluster: alert_count, unique_event_count, query_overlap_ratio, rule_families, top_entities, cohesion; centroid handle (similar_to_centroid_id) for sample_cluster.
 
   **Validate (avoid false positives)**
-  Before treating a cluster as an incident, check that it is not stable background or a known chronic condition. Use **compare_to_baseline**: preset (yesterday/last week) for new vs chronic vs regression, or custom baseline_range for significant terms unique to the incident. Prefer emitting insights that have been validated with this tool.
+  Before treating a cluster as an incident, check that it is not stable background or a known chronic condition. Use **compare_to_baseline**: preset (yesterday/last week) for new vs chronic vs regression, or custom with **baseline_range** to compare against a specific window. Prefer emitting insights that have been validated with this tool.
 
   ## Pipeline (high level)
 
-  **Filter** (what's new/changed vs baseline) → **When** (cluster_by_time) → **Where** (group_within_window, describe_cluster) → **Evidence** (sample_cluster, context_expansion) → **Correlate** (entity timeline, topology) → **Validate** (compare_to_baseline) → **Emit**. Tool outputs include rule names, queries, and scope stats (total_unique_alert_count, excluded_rule_count) so you stay grounded without a separate context-gathering step.
+  **Filter** (what's new/changed vs baseline) → **When** (cluster_by_time) → **Where** (group_within_window, describe_cluster) → **Evidence** (sample_cluster, context_expansion) → **Correlate** (entity timeline, topology) → **Validate** (compare_to_baseline) → **Emit**. Tool outputs include rule names, queries, and scope stats (e.g. total_alert_count, changed_count, new_count) so you stay grounded without a separate context-gathering step.
 
   ## Workflow
 
