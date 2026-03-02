@@ -59,13 +59,6 @@ export const mapToOriginalColumns: MapToColumnsExpressionFunction['fn'] = (
           ...column,
           id: originalColumn.id,
           name: getColumnName(originalColumn, column),
-          meta: {
-            ...column.meta,
-            sourceParams: {
-              ...(column.meta?.sourceParams ?? {}),
-              operationType: originalColumn.operationType,
-            },
-          },
         }));
       })
       .flat(),
