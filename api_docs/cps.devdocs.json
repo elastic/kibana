@@ -78,7 +78,7 @@
       "label": "CPSPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/cps/public/types.ts",
-      "lineNumber": 25,
+      "lineNumber": 20,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -101,7 +101,7 @@
             " | undefined"
           ],
           "path": "src/platform/plugins/shared/cps/public/types.ts",
-          "lineNumber": 26,
+          "lineNumber": 21,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -114,7 +114,64 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cps",
+        "id": "def-server.CPSServerStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "CPSServerStart",
+        "description": [],
+        "path": "src/platform/plugins/shared/cps/server/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cps",
+            "id": "def-server.CPSServerStart.createNpreClient",
+            "type": "Function",
+            "tags": [],
+            "label": "createNpreClient",
+            "description": [],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => ",
+              "INpreClient"
+            ],
+            "path": "src/platform/plugins/shared/cps/server/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "cps",
+                "id": "def-server.CPSServerStart.createNpreClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/platform/plugins/shared/cps/server/types.ts",
+                "lineNumber": 18,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -126,7 +183,7 @@
       "label": "CPSServerSetup",
       "description": [],
       "path": "src/platform/plugins/shared/cps/server/types.ts",
-      "lineNumber": 10,
+      "lineNumber": 13,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -142,7 +199,7 @@
             "() => boolean"
           ],
           "path": "src/platform/plugins/shared/cps/server/types.ts",
-          "lineNumber": 11,
+          "lineNumber": 14,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
