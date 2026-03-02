@@ -71,9 +71,38 @@ export const ZoomRegistrantSchema = z.object({
   status: z.string().optional().describe('Registration status: approved, pending, or denied'),
 });
 
+export const ZoomUserProfileSchema = z.object({
+  id: z.string().optional().describe('Zoom user ID'),
+  display_name: z.string().optional().describe('Display name'),
+  first_name: z.string().optional().describe('First name'),
+  last_name: z.string().optional().describe('Last name'),
+  email: z.string().optional().describe('Email address'),
+  type: z
+    .number()
+    .optional()
+    .describe('Account type: 1=Basic, 2=Licensed, 3=On-Prem, 99=None'),
+  role_name: z.string().optional().describe('Role name (Owner, Admin, Member)'),
+  status: z.string().optional().describe('Account status: active, inactive, or pending'),
+  timezone: z.string().optional().describe('User timezone'),
+  language: z.string().optional().describe('Preferred language'),
+  pmi: z.number().optional().describe('Personal Meeting ID'),
+  personal_meeting_url: z.string().optional().describe('Personal meeting room URL'),
+  dept: z.string().optional().describe('Department'),
+  job_title: z.string().optional().describe('Job title'),
+  company: z.string().optional().describe('Company'),
+  location: z.string().optional().describe('Location'),
+  account_id: z.string().optional().describe('Zoom account ID'),
+  created_at: z.string().optional().describe('Account creation timestamp (ISO 8601)'),
+  last_login_time: z.string().optional().describe('Last login timestamp (ISO 8601)'),
+});
+
 // ---------------------------------------------------------------------------
 // Input schemas
 // ---------------------------------------------------------------------------
+
+export const ZoomWhoAmIInputSchema = z.object({});
+export type ZoomWhoAmIInput = z.infer<typeof ZoomWhoAmIInputSchema>;
+
 
 export const ZoomListMeetingsInputSchema = z.object({
   userId: z
@@ -192,4 +221,26 @@ export const pickRegistrant = (r: AnyRecord) => ({
   first_name: r.first_name,
   last_name: r.last_name,
   status: r.status,
+});
+
+export const pickUserProfile = (u: AnyRecord) => ({
+  id: u.id,
+  display_name: u.display_name,
+  first_name: u.first_name,
+  last_name: u.last_name,
+  email: u.email,
+  type: u.type,
+  role_name: u.role_name,
+  status: u.status,
+  timezone: u.timezone,
+  language: u.language,
+  pmi: u.pmi,
+  personal_meeting_url: u.personal_meeting_url,
+  dept: u.dept,
+  job_title: u.job_title,
+  company: u.company,
+  location: u.location,
+  account_id: u.account_id,
+  created_at: u.created_at,
+  last_login_time: u.last_login_time,
 });

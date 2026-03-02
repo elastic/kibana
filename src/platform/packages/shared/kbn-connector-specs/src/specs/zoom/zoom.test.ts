@@ -655,6 +655,101 @@ describe('Zoom', () => {
     });
   });
 
+  describe('whoAmI action', () => {
+    it('should return a trimmed user profile', async () => {
+      const mockResponse = {
+        data: {
+          id: 'Wk9PTV9VU0VSX0lE',
+          first_name: 'Jane',
+          last_name: 'Dev',
+          display_name: 'Jane Dev',
+          email: 'jane.dev@example.com',
+          type: 2,
+          role_name: 'Owner',
+          pmi: 1234567890,
+          use_pmi: false,
+          personal_meeting_url: 'https://janedev.zoom.us/j/1234567890',
+          timezone: 'America/Denver',
+          verified: 1,
+          dept: 'Engineering',
+          created_at: '2019-04-05T15:24:32Z',
+          last_login_time: '2026-02-28T22:42:47Z',
+          last_client_version: '6.4.0.51205(mac)',
+          pic_url: 'https://janedev.zoom.us/p/v2/pic',
+          cms_user_id: '',
+          jid: 'Wk9PTV9VU0VSX0lE@xmpp.zoom.us',
+          group_ids: ['grp1'],
+          im_group_ids: ['im-grp1'],
+          account_id: 'ACCT_123',
+          language: 'en-US',
+          phone_country: 'US',
+          phone_number: '+1 1234567890',
+          status: 'active',
+          job_title: 'Software Engineer',
+          cost_center: 'CC-100',
+          company: 'Zoom',
+          location: 'Denver, CO',
+          custom_attributes: [{ key: 'k1', name: 'Test', value: 'val' }],
+          login_types: [1, 100],
+          role_id: '0',
+          account_number: 12345678,
+          cluster: 'aw1',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await Zoom.actions.whoAmI.handler(mockContext, {})) as Record<
+        string,
+        unknown
+      >;
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/users/me');
+      expect(result).toEqual({
+        id: 'Wk9PTV9VU0VSX0lE',
+        display_name: 'Jane Dev',
+        first_name: 'Jane',
+        last_name: 'Dev',
+        email: 'jane.dev@example.com',
+        type: 2,
+        role_name: 'Owner',
+        status: 'active',
+        timezone: 'America/Denver',
+        language: 'en-US',
+        pmi: 1234567890,
+        personal_meeting_url: 'https://janedev.zoom.us/j/1234567890',
+        dept: 'Engineering',
+        job_title: 'Software Engineer',
+        company: 'Zoom',
+        location: 'Denver, CO',
+        account_id: 'ACCT_123',
+        created_at: '2019-04-05T15:24:32Z',
+        last_login_time: '2026-02-28T22:42:47Z',
+      });
+      expect(result).not.toHaveProperty('use_pmi');
+      expect(result).not.toHaveProperty('verified');
+      expect(result).not.toHaveProperty('pic_url');
+      expect(result).not.toHaveProperty('jid');
+      expect(result).not.toHaveProperty('cms_user_id');
+      expect(result).not.toHaveProperty('group_ids');
+      expect(result).not.toHaveProperty('im_group_ids');
+      expect(result).not.toHaveProperty('phone_country');
+      expect(result).not.toHaveProperty('phone_number');
+      expect(result).not.toHaveProperty('cost_center');
+      expect(result).not.toHaveProperty('custom_attributes');
+      expect(result).not.toHaveProperty('login_types');
+      expect(result).not.toHaveProperty('role_id');
+      expect(result).not.toHaveProperty('account_number');
+      expect(result).not.toHaveProperty('cluster');
+      expect(result).not.toHaveProperty('last_client_version');
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Invalid token'));
+
+      await expect(Zoom.actions.whoAmI.handler(mockContext, {})).rejects.toThrow('Invalid token');
+    });
+  });
+
   describe('test handler', () => {
     it('should return success with full name', async () => {
       const mockResponse = {

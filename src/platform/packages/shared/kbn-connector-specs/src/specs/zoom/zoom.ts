@@ -57,6 +57,8 @@ import {
   ZoomRecordingFileSchema,
   ZoomParticipantSchema,
   ZoomRegistrantSchema,
+  ZoomUserProfileSchema,
+  ZoomWhoAmIInputSchema,
   ZoomListMeetingsInputSchema,
   ZoomGetMeetingDetailsInputSchema,
   ZoomGetPastMeetingDetailsInputSchema,
@@ -69,6 +71,7 @@ import {
   pickRecordingFile,
   pickParticipant,
   pickRegistrant,
+  pickUserProfile,
 } from './types';
 
 const ZOOM_API_BASE = 'https://api.zoom.us/v2';
@@ -121,6 +124,21 @@ export const Zoom: ConnectorSpec = {
   },
 
   actions: {
+    whoAmI: {
+      isTool: true,
+      description: i18n.translate('core.kibanaConnectorSpecs.zoom.actions.whoAmI.description', {
+        defaultMessage:
+          'Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL.',
+      }),
+      input: ZoomWhoAmIInputSchema,
+      output: ZoomUserProfileSchema,
+      handler: async (ctx) => {
+        ctx.log.debug('Zoom whoAmI — fetching /users/me');
+        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
+        return pickUserProfile(data);
+      },
+    },
+
     listMeetings: {
       isTool: true,
       description: i18n.translate(
