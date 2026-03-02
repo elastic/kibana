@@ -10,9 +10,8 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   replacements: schema.object({
-    encryptionKey: schema.string({
-      defaultValue: 'inference.replacements.default.encryption.key.change.in.production',
-    }),
+    // Must be explicitly configured to avoid a shared default across deployments.
+    encryptionKey: schema.string({ minLength: 1 }),
   }),
   workers: schema.object({
     anonymization: schema.object({

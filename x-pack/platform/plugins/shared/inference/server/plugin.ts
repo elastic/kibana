@@ -95,6 +95,10 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    this.logger.info(
+      'Persistent anonymization replacements require explicit xpack.inference.replacements.encryptionKey'
+    );
+
     this.regexWorker = new RegexWorkerService(
       this.config.workers.anonymization,
       this.logger.get('regex_worker')
