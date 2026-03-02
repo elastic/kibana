@@ -12,12 +12,12 @@ import {
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { stringifyZodError } from '@kbn/zod-helpers';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
@@ -25,7 +25,7 @@ import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } f
 @injectable()
 export class NotificationPolicyClient {
   constructor(
-    @inject(NotificationPolicySavedObjectService)
+    @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract
   ) {}
@@ -112,14 +112,12 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    const existingNotificationPolicy = await this.getNotificationPolicy({ id: params.options.id });
-    const existingAttrs: NotificationPolicySavedObjectAttributes = omit(
-      existingNotificationPolicy,
-      ['id', 'version']
-    );
+    const existingPolicy = await this.getNotificationPolicy({
+      id: params.options.id,
+    });
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
-      ...existingAttrs,
+      ...omit(existingPolicy, ['id', 'version']),
       ...parsed.data,
       updatedBy: userProfileUid,
       updatedAt: now,

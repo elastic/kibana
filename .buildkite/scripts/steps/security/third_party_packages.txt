@@ -33,3 +33,4 @@ yaml-language-server
 simple-statistics
 monaco-promql
 json-stable-stringify
+apache-arrow

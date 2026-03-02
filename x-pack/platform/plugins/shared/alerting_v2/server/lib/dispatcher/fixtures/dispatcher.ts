@@ -6,7 +6,7 @@
  */
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AlertEpisode, AlertEpisodeSuppression } from '../types';
+import type { AlertEpisode, AlertEpisodeSuppression, LastNotifiedRecord } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
   alertEpisodes: AlertEpisode[]
@@ -45,5 +45,17 @@ export const createAlertEpisodeSuppressionsResponse = (
       suppression.episode_id,
       suppression.should_suppress,
     ]),
+  };
+};
+
+export const createLastNotifiedTimestampsResponse = (
+  records: LastNotifiedRecord[] = []
+): EsqlQueryResponse => {
+  return {
+    columns: [
+      { name: 'notification_group_id', type: 'keyword' },
+      { name: 'last_notified', type: 'date' },
+    ],
+    values: records.map((r) => [r.notification_group_id, r.last_notified]),
   };
 };

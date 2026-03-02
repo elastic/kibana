@@ -43,10 +43,17 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([]),
 }));
 
+const createMockApplication = () => ({
+  currentAppId$: {
+    subscribe: () => ({ unsubscribe: () => {} }),
+  },
+});
+
 const createMockServices = () => ({
   http: httpServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
+  application: createMockApplication() as any,
 });
 
 describe('DynamicRuleForm', () => {

@@ -11,10 +11,13 @@ import { DirectorService } from './director';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createTransitionStrategyFactory } from './strategies/strategy_resolver.mock';
-import { alertEpisodeStatus, alertEventType } from '../../resources/alert_events';
+import { alertEpisodeStatus } from '../../resources/alert_events';
 import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_utils';
 import { createRuleResponse } from '../test_utils';
 import type { LatestAlertEventState } from './queries';
+import { createExecutionContext } from '../execution_context';
+
+const testExecutionContext = createExecutionContext(new AbortController().signal);
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -64,6 +67,7 @@ describe('DirectorService', () => {
     it('returns empty array when no alert events provided', async () => {
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [],
       });
 
@@ -82,6 +86,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -115,6 +120,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -148,6 +154,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -179,6 +186,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -210,6 +218,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -241,6 +250,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -279,6 +289,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents,
       });
 
@@ -317,6 +328,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -346,28 +358,29 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
       expect(result[0].episode?.id).toBe('existing-episode');
     });
 
-    it('sets type to alert on returned events', async () => {
-      const alertEvent = createAlertEvent({
-        group_hash: 'hash-1',
-        status: 'breached',
-        type: 'signal',
-        episode: undefined,
-      });
+    it('throws when execution context is already aborted before processing', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+      const abortedContext = createExecutionContext(abortController.signal);
 
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+      const alertEvent = createAlertEvent();
 
-      const result = await directorService.run({
-        rule,
-        alertEvents: [alertEvent],
-      });
+      await expect(
+        directorService.run({
+          rule,
+          executionContext: abortedContext,
+          alertEvents: [alertEvent],
+        })
+      ).rejects.toThrow(/aborted/i);
 
-      expect(result[0].type).toBe(alertEventType.alert);
+      expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
     it('propagates query service errors', async () => {
@@ -377,6 +390,7 @@ describe('DirectorService', () => {
       await expect(
         directorService.run({
           rule,
+          executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         })
       ).rejects.toThrow('Query failed');
@@ -408,6 +422,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule: ruleWithTransition,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
@@ -444,6 +459,7 @@ describe('DirectorService', () => {
 
       const result = await directorService.run({
         rule: ruleWithTransition,
+        executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 

@@ -34,7 +34,8 @@
     "@kbn/alerting-v2-schemas",
     "@kbn/yaml-rule-editor",
     "@kbn/code-editor",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/core-application-browser-mocks"
   ]
 }
 

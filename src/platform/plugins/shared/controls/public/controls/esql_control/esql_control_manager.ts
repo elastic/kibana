@@ -13,6 +13,7 @@ import {
   combineLatest,
   debounceTime,
   filter,
+  from,
   map,
   merge,
   of,
@@ -99,7 +100,6 @@ export function initializeESQLControlManager(
     (initialState.control_type as EsqlControlType) ?? ''
   );
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esql_query ?? '');
-  const title$ = new BehaviorSubject<string | undefined>(initialState.title);
   const totalCardinality$ = new BehaviorSubject<number>(
     initialState.available_options?.length ?? 0
   );
@@ -147,6 +147,7 @@ export function initializeESQLControlManager(
   let previousESQLVariables: ESQLControlVariable[] = [];
   let previousTimeRange: TimeRange | undefined;
   let hasInitialFetch = false;
+  let fetchAbortController = new AbortController();
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
@@ -179,16 +180,23 @@ export function initializeESQLControlManager(
 
         return shouldFetch;
       }),
-      switchMap(async ({ timeRange, esqlVariables }) => {
+      switchMap(({ timeRange, esqlVariables }) => {
+        fetchAbortController.abort();
+        fetchAbortController = new AbortController();
+        const { signal } = fetchAbortController;
+
         setDataLoading(true);
         const variablesInParent = esqlVariables || [];
 
-        return await getESQLSingleColumnValues({
-          query: esqlQuery$.getValue(),
-          search: dataService.search.search,
-          timeRange,
-          esqlVariables: variablesInParent,
-        });
+        return from(
+          getESQLSingleColumnValues({
+            query: esqlQuery$.getValue(),
+            search: dataService.search.search,
+            signal,
+            timeRange,
+            esqlVariables: variablesInParent,
+          })
+        );
       })
     )
     .subscribe((result) => {
@@ -275,6 +283,7 @@ export function initializeESQLControlManager(
 
   return {
     cleanup: () => {
+      fetchAbortController.abort();
       variableSubscriptions.unsubscribe();
       fetchSubscription.unsubscribe();
       availableOptionsSearchSubscription.unsubscribe();
@@ -291,8 +300,7 @@ export function initializeESQLControlManager(
       singleSelect$,
       variableType$,
       controlType$,
-      esqlQuery$,
-      title$
+      esqlQuery$
     ).pipe(map(() => undefined)),
     reinitializeState: (lastSaved?: OptionsListESQLControlState) => {
       setSelectedOptions(lastSaved?.selected_options ?? []);
@@ -302,7 +310,6 @@ export function initializeESQLControlManager(
       variableType$.next((lastSaved?.variable_type as ESQLVariableType) ?? ESQLVariableType.VALUES);
       if (lastSaved?.control_type) controlType$.next(lastSaved?.control_type as EsqlControlType);
       esqlQuery$.next(lastSaved?.esql_query ?? '');
-      title$.next(lastSaved?.title);
       temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
       previousTimeRange = undefined;
@@ -319,14 +326,12 @@ export function initializeESQLControlManager(
         variable_type: variableType$.getValue() ?? ESQLVariableType.VALUES,
         control_type: controlType$.getValue(),
         esql_query: esqlQuery$.getValue() ?? '',
-        title: title$.getValue() ?? '',
       };
     },
     internalApi: {
       selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
       availableOptions$: displayedAvailableOptions$,
       totalCardinality$,
-      title$,
       setSelectedOptions,
       setSearchString,
       field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
@@ -335,6 +340,7 @@ export function initializeESQLControlManager(
       searchStringValid$: new BehaviorSubject(true),
       invalidSelections$: temporaryStateManager.api.invalidSelections$,
       setInvalidSelections: temporaryStateManager.api.setInvalidSelections,
+      variableName$,
     },
   };
 }
