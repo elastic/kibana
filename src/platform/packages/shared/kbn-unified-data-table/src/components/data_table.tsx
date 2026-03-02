@@ -1316,7 +1316,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           css={styles.loadingAndEmpty}
           data-test-subj="unifiedDataTableLoading"
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" textAlign="center">
             <EuiLoadingSpinner />
             <EuiSpacer size="s" />
             <FormattedMessage
@@ -1340,7 +1340,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           data-document-number={0}
         >
           <EuiText size="xs" color="subdued" textAlign="center">
-            <EuiIcon type="discoverApp" size="m" color="subdued" />
+            <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden="true" />
             <EuiSpacer size="s" />
             <FormattedMessage
               id="unifiedDataTable.noResultsFound"
@@ -1572,6 +1572,9 @@ const componentStyles = {
         {
           whiteSpace: 'pre-wrap',
         },
+      '.euiDataGrid__pagination': {
+        paddingTop: 0,
+      },
     }),
   dataTable: css({
     flexGrow: 1,
