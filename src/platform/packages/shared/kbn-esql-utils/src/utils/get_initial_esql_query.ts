@@ -39,9 +39,18 @@ const getFinalWhereClause = (timeFilter?: string, queryFilter?: string) => {
  * If there is @timestamp field in the index, we don't add the WHERE clause
  * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
  * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command
+ * When a timeFieldName exists and appendSortByTimestamp is true (the default), a SORT DESC clause
+ * on the dataView timeFieldName is appended right after the source command.
  * @param dataView
+ * @param query
+ * @param options
  */
-export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
+export function getInitialESQLQuery(
+  dataView: DataView,
+  query?: Query,
+  options?: { appendSortByTimestamp?: boolean }
+): string {
+  const { appendSortByTimestamp = true } = options ?? {};
   const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
@@ -53,6 +62,7 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
 
   const whereClause = getFinalWhereClause(filterByTimeParams, filterBySearchText);
   const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+  const sortClause = appendSortByTimestamp && timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
 
-  return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}`;
+  return `${sourceCommand} ${dataView.getIndexPattern()}${sortClause}${whereClause}`;
 }
