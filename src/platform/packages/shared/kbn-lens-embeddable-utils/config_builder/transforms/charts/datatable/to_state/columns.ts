@@ -11,9 +11,11 @@ import type { DatatableState } from '../../../../schema';
 import {
   fromColorMappingAPIToLensState,
   fromColorByValueAPIToLensState,
+  isColorMappingColor,
+  isColorByValueColor,
   isLegacyColorPalette,
 } from '../../../coloring';
-import { getAccessorName, isColorByValueColor, isColorMappingColor } from '../helpers';
+import { getAccessorName } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
