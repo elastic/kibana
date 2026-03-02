@@ -59,7 +59,7 @@ const featuresSchema = {
             description:
               'The evidences that support the feature. Can be a short sentence or a `key: value` string.',
           },
-          evidence_document_ids: {
+          evidence_doc_ids: {
             type: 'array',
             items: {
               type: 'string',
