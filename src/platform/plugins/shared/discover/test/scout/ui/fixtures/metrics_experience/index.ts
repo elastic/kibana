@@ -11,8 +11,8 @@ import type { PageObjects } from '@kbn/scout';
 import type {
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-} from '@kbn/scout/src/playwright/test/ui/parallel_run_fixtures';
-import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout';
+} from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { MetricsExperiencePage } from './page_objects';
 
 export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
@@ -21,11 +21,20 @@ export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures
   };
 }
 
-export const spaceTest = baseSpaceTest.extend<
+export const spaceTest = spaceBaseTest.extend<
   MetricsExperienceTestFixtures,
   ScoutParallelWorkerFixtures
 >({
-  pageObjects: async ({ pageObjects, page }, use) => {
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: MetricsExperienceTestFixtures['pageObjects'];
+      page: MetricsExperienceTestFixtures['page'];
+    },
+    use: (pageObjects: MetricsExperienceTestFixtures['pageObjects']) => Promise<void>
+  ) => {
     const extendedPageObjects = {
       ...pageObjects,
       metricsExperience: createLazyPageObject(MetricsExperiencePage, page),

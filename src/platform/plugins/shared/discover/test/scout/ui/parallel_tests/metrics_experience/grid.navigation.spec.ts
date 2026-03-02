@@ -22,7 +22,7 @@ import {
   PAGINATION,
   DEFAULT_TIME_RANGE,
   DEFAULT_CONFIG,
-} from '../../fixtures/metrics';
+} from '../../fixtures/metrics_experience';
 
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
@@ -42,10 +42,7 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime({
-        from: DEFAULT_TIME_RANGE.from,
-        to: DEFAULT_TIME_RANGE.to,
-      });
+      await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
