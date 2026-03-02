@@ -10,7 +10,6 @@ import type { Store, AnyAction } from 'redux';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
-import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
@@ -81,7 +80,6 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    isSplitPanel,
     showPanelOnClick,
   }: {
     /**
@@ -100,10 +98,9 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID: string;
-    history?: HistoryPackageHistoryInterface<never>;
+    history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    isSplitPanel?: boolean;
     showPanelOnClick?: () => void;
   }) {
     // create the spy middleware (for debugging tests)
@@ -133,9 +130,7 @@ export class Simulator {
       [resolverMiddlewareFactory(dataAccessLayer), this.spyMiddleware.middleware]
     );
 
-    // If needed, create a fake 'history' instance.
-    // Resolver will use to read and write query string values.
-    this.history = history ?? createMemoryHistory();
+    this.history = history;
 
     // Used for `KibanaContextProvider`
     const coreStart = coreMock.createStart();
@@ -156,7 +151,6 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        isSplitPanel={isSplitPanel}
         showPanelOnClick={showPanelOnClick}
       />
     );

@@ -6,6 +6,7 @@
  */
 
 import { Simulator } from '../../test_utilities/simulator';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildren } from '../../data_access_layer/mocks/no_ancestors_two_children';
 import { nudgeAnimationDuration } from '../../store/camera/scaling_constants';
 import '../../test_utilities/extend_jest';
@@ -35,6 +36,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
       dataAccessLayer,
       databaseDocumentID,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},
@@ -110,8 +112,8 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     ).toYieldEqualTo({ showPanelButton: 0 });
   });
 
-  describe('when split mode is enabled', () => {
-    it('should display the view button when callback is available', async () => {
+  describe('when show panel callback is available', () => {
+    it('should display the view button', async () => {
       const {
         metadata: { databaseDocumentID },
         dataAccessLayer,
@@ -122,10 +124,10 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
-        isSplitPanel: true,
         showPanelOnClick,
       });
 
@@ -137,30 +139,6 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
       ).toYieldEqualTo({ showPanelButton: 1 });
       (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
       expect(showPanelOnClick).toHaveBeenCalled();
-    });
-
-    it('should not display the view button when callback is not available', async () => {
-      const {
-        metadata: { databaseDocumentID },
-        dataAccessLayer,
-      } = noAncestorsTwoChildren();
-
-      simulator = new Simulator({
-        dataAccessLayer,
-        databaseDocumentID,
-        resolverComponentInstanceID,
-        indices: [],
-        shouldUpdate: false,
-        filters: {},
-        isSplitPanel: true,
-      });
-
-      await expect(
-        simulator.map(() => ({
-          showPanelButton: simulator.testSubject('resolver:graph-controls:show-panel-button')
-            .length,
-        }))
-      ).toYieldEqualTo({ showPanelButton: 0 });
     });
   });
 

@@ -146,7 +146,6 @@ export const AnalyzeGraph: FC = () => {
         indices={selectedPatterns}
         shouldUpdate={shouldUpdate}
         filters={filters}
-        isSplitPanel
         showPanelOnClick={onClick}
       />
     </div>

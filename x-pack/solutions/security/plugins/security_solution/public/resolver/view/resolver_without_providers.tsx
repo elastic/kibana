@@ -17,11 +17,10 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { GraphContainer, StyledMapContainer, StyledPanel } from './styles';
+import { GraphContainer, StyledMapContainer } from './styles';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import type { ResolverProps } from '../types';
-import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
@@ -43,7 +42,6 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
-      isSplitPanel = false,
       showPanelOnClick,
     }: ResolverProps,
     refToForward
@@ -165,25 +163,16 @@ export const ResolverWithoutProviders = React.memo(
                     projectionMatrix={projectionMatrix}
                     node={treeNode}
                     timeAtRender={timeAtRender}
-                    onClick={isSplitPanel ? showPanelOnClick : undefined}
+                    onClick={showPanelOnClick}
                   />
                 );
               })}
             </GraphContainer>
-            {!isSplitPanel && (
-              <StyledPanel hasBorder>
-                <PanelRouter id={resolverComponentInstanceID} />
-              </StyledPanel>
-            )}
           </>
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls
-          id={resolverComponentInstanceID}
-          isSplitPanel={isSplitPanel}
-          showPanelOnClick={showPanelOnClick}
-        />
+        <GraphControls id={resolverComponentInstanceID} showPanelOnClick={showPanelOnClick} />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );
