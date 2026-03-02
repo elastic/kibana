@@ -21,6 +21,9 @@ export { RULE_FORM_ID } from './form/rule_form';
 // Form components (lazy loaded) - for embedding in custom forms
 export { DynamicRuleForm, StandaloneRuleForm } from './form';
 
+// Context - for consumers who need custom integrations
+export { RuleFormServicesProvider, useRuleFormServices } from './form';
+
 // Types
 export type {
   FormValues,

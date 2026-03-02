@@ -18,9 +18,7 @@ import {
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,19 +31,10 @@ import { QueryFieldGroup } from './field_groups/query_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
 import { useCreateRule } from './hooks/use_create_rule';
+import { RuleFormServicesProvider, type RuleFormServices } from './contexts';
 
 /** Form ID constant - only one rule form should exist at a time */
 export const RULE_FORM_ID = 'ruleV2Form';
-
-export interface RuleFormServices {
-  http: HttpStart;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-  application: ApplicationStart;
-  /** Required when includeSubmission is true */
-  notifications?: NotificationsStart;
-}
-
 export interface RuleFormProps {
   services: RuleFormServices;
   /**
@@ -333,7 +322,7 @@ const RuleFormContent: React.FC<RuleFormContentProps> = ({
             )}
             <RuleDetailsFieldGroup />
             <EuiSpacer size="m" />
-            <RuleExecutionFieldGroup services={services} />
+            <RuleExecutionFieldGroup />
           </EuiForm>
           {renderSubmissionButtons()}
         </>
@@ -405,13 +394,16 @@ const RuleFormInner: React.FC<RuleFormProps> = (props) => {
  * When includeSubmission is false, it calls onSubmit with form values.
  *
  * Includes its own QueryClientProvider for react-query hooks used by field components.
+ * Services are provided via RuleFormServicesProvider context, eliminating prop drilling.
  */
 export const RuleForm: React.FC<RuleFormProps> = (props) => {
   const queryClient = useMemo(() => new QueryClient(), []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RuleFormInner {...props} />
+      <RuleFormServicesProvider services={props.services}>
+        <RuleFormInner {...props} />
+      </RuleFormServicesProvider>
     </QueryClientProvider>
   );
 };

@@ -6,14 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RuleFormFlyout } from './rule_form_flyout';
 import { StandaloneRuleForm } from '../form/standalone_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
+import type { RuleFormServices } from '../form/contexts';
 
 export interface StandaloneRuleFormFlyoutProps {
   /** Whether to use push flyout or overlay */
@@ -23,13 +21,7 @@ export interface StandaloneRuleFormFlyoutProps {
   /** Initial query for the rule (only used on mount) */
   query: string;
   /** Required services */
-  services: {
-    http: HttpStart;
-    data: DataPublicPluginStart;
-    dataViews: DataViewsPublicPluginStart;
-    notifications: NotificationsStart;
-    application: ApplicationStart;
-  };
+  services: RuleFormServices;
 }
 
 /**
