@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
-import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  createBadRequestError,
+  HookLifecycle,
+  isToolNotFoundError,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
@@ -49,11 +54,18 @@ export const runTool = async <TParams = Record<string, unknown>>({
   const { toolId, ...scopedParams } = toolExecutionParams;
 
   const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
-    ToolType,
-    any,
-    ZodObject<any>
-  >;
+
+  let tool: InternalToolDefinition<ToolType, any, ZodType<any>>;
+  try {
+    tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<ToolType, any, ZodType<any>>;
+  } catch (error) {
+    if (isToolNotFoundError(error) && scopedParams.source === 'agent') {
+      return {
+        results: [createErrorResult(`Tool ${toolId} not found`)],
+      };
+    }
+    throw error;
+  }
 
   if (trackingService) {
     try {
@@ -144,6 +156,15 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
+        if (source === 'agent') {
+          return {
+            results: [
+              createErrorResult(
+                `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
+              ),
+            ],
+          };
+        }
         throw createBadRequestError(
           `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
         );
@@ -236,7 +257,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     promptManager,
     stateManager,
     filestore,
-    skillServiceStart,
+    skillRegistry,
     toolManager,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -262,7 +283,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     resultStore: resultStore.asReadonly(),
     attachments: attachmentStateManager,
     skills: await createSkillsService({
-      skillServiceStart,
+      skillRegistry,
       toolsServiceStart: toolsService,
       request,
       spaceId,

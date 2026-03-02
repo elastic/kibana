@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -371,7 +372,7 @@ describe('MCP tool_type', () => {
           data: mockToolsResponse,
         });
 
-        const mockZodSchema = { _def: { typeName: 'ZodObject' } };
+        const mockZodSchema = z.object({ query: z.string() });
         mockJsonSchemaToZod.mockReturnValue(mockZodSchema as any);
 
         const schema = await dynamicProps.getSchema();
@@ -383,8 +384,30 @@ describe('MCP tool_type', () => {
             subActionParams: {},
           },
         });
-        expect(mockJsonSchemaToZod).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
+        expect(mockJsonSchemaToZod).toHaveBeenCalledWith({
+          type: 'object',
+          ...mockToolsResponse.tools[0].inputSchema,
+        });
         expect(schema).toBe(mockZodSchema);
+      });
+
+      it('should fall back to empty object schema when jsonSchemaToZod returns non-object type', async () => {
+        const toolType = getMcpToolType({ actions: mockActions });
+        const dynamicProps = await toolType.getDynamicProps(testConfig, {
+          request: mockRequest,
+          spaceId: 'default',
+        });
+
+        mockActionsClient.execute.mockResolvedValue({
+          status: 'ok',
+          data: mockToolsResponse,
+        });
+
+        mockJsonSchemaToZod.mockReturnValue(z.string() as any);
+
+        const schema = await dynamicProps.getSchema();
+
+        expect(schema).toBeInstanceOf(z.ZodObject);
       });
 
       it('should return empty schema when listTools fails', async () => {

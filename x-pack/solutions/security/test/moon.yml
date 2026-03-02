@@ -53,6 +53,10 @@ dependsOn:
   - '@kbn/cloud-security-posture-graph'
   - '@kbn/kubernetes-security-plugin'
   - '@kbn/securitysolution-list-constants'
+  - '@kbn/evals'
+  - '@kbn/core'
+  - '@kbn/es-archiver'
+  - '@kbn/gen-ai-functional-testing'
 tags:
   - test-helper
   - package

@@ -1,0 +1,240 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod';
+import { tool } from '@langchain/core/tools';
+import type { Skill } from '@kbn/agent-builder-common/skills';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import type { GetOsqueryAppContextFn } from './utils';
+import { getOneChatContext } from './utils';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { savedQuerySavedObjectType } from '../../../common/types';
+import type { SavedQuerySavedObject } from '../../common/types';
+import { convertECSMappingToObject } from '../../routes/utils';
+import { getInstalledSavedQueriesMap } from '../../routes/saved_query/utils';
+
+const SAVED_QUERIES_SKILL: Omit<Skill, 'tools'> = {
+  namespace: 'osquery.saved_queries',
+  name: 'Osquery Saved Queries',
+  description: 'List and retrieve saved osquery queries',
+  content: `# Osquery Saved Queries
+
+List and get details of saved osquery queries.
+
+## Response Format (MANDATORY)
+
+### When listing queries:
+- If queries exist: "Found X saved queries:" then list names, IDs, and query SQL
+- If no queries: "No saved queries found."
+
+### When getting a specific query:
+Show the query details from tool results: name, ID, SQL, platform, description.
+
+## FORBIDDEN
+- Do NOT explain what saved queries are
+- Do NOT suggest how to create saved queries
+- Do NOT add any information not in tool results
+`,
+};
+
+/**
+ * Creates a LangChain tool for listing saved osquery queries with pagination.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for listing saved queries
+ * @internal
+ */
+const createListSavedQueriesTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async ({ page, pageSize, sort, sortOrder }, config) => {
+      const onechatContext = getOneChatContext(config);
+      if (!onechatContext) {
+        throw new Error('OneChat context not available');
+      }
+
+      const osqueryContext = getOsqueryContext();
+      if (!osqueryContext) {
+        throw new Error('Osquery context not available');
+      }
+
+      const { request } = onechatContext;
+      const space = await osqueryContext.service.getActiveSpace(request);
+      const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+      const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+        osqueryContext,
+        request
+      );
+
+      const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
+        type: savedQuerySavedObjectType,
+        page: page || 1,
+        perPage: pageSize,
+        sortField: sort || 'id',
+        sortOrder: sortOrder || 'desc',
+      });
+
+      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        spaceScopedClient,
+        spaceId
+      );
+
+      const savedObjects = savedQueries.saved_objects.map((savedObject) => {
+        const ecsMapping = savedObject.attributes.ecs_mapping;
+        const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];
+        const prebuiltByOriginId =
+          !prebuiltById && savedObject.originId
+            ? prebuiltSavedQueriesMap[savedObject.originId]
+            : false;
+
+        return {
+          saved_object_id: savedObject.id,
+          id: savedObject.attributes.id,
+          query: savedObject.attributes.query,
+          description: savedObject.attributes.description,
+          interval: savedObject.attributes.interval,
+          timeout: savedObject.attributes.timeout,
+          platform: savedObject.attributes.platform,
+          ecs_mapping: ecsMapping ? convertECSMappingToObject(ecsMapping) : undefined,
+          created_at: savedObject.attributes.created_at,
+          created_by: savedObject.attributes.created_by,
+          updated_at: savedObject.attributes.updated_at,
+          updated_by: savedObject.attributes.updated_by,
+          prebuilt: !!(prebuiltById || prebuiltByOriginId),
+        };
+      });
+
+      return JSON.stringify({
+        data: savedObjects,
+        total: savedQueries.total,
+        page: savedQueries.page,
+        per_page: savedQueries.per_page,
+      });
+    },
+    {
+      name: 'list_saved_queries',
+      description: 'List saved osquery queries with pagination support',
+      schema: z.object({
+        page: z.number().optional().describe('Page number (default: 1)'),
+        pageSize: z.number().optional().describe('Number of items per page'),
+        sort: z.string().optional().describe('Field to sort by (default: id)'),
+        sortOrder: z.enum(['asc', 'desc']).optional().describe('Sort order (default: desc)'),
+      }),
+    }
+  );
+
+/**
+ * Creates a LangChain tool for retrieving a specific saved query by ID.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for getting saved query details
+ * @internal
+ */
+const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async ({ saved_query_id: savedQueryId }, config) => {
+      const onechatContext = getOneChatContext(config);
+      if (!onechatContext) {
+        throw new Error('OneChat context not available');
+      }
+
+      const osqueryContext = getOsqueryContext();
+      if (!osqueryContext) {
+        throw new Error('Osquery context not available');
+      }
+
+      const { request } = onechatContext;
+      const space = await osqueryContext.service.getActiveSpace(request);
+      const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+      const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+        osqueryContext,
+        request
+      );
+
+      const savedObject = await spaceScopedClient.get<SavedQuerySavedObject>(
+        savedQuerySavedObjectType,
+        savedQueryId
+      );
+
+      const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        spaceScopedClient,
+        spaceId
+      );
+
+      const ecsMapping = savedObject.attributes.ecs_mapping;
+      const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];
+      const prebuiltByOriginId =
+        !prebuiltById && savedObject.originId
+          ? prebuiltSavedQueriesMap[savedObject.originId]
+          : false;
+
+      const data = {
+        saved_object_id: savedObject.id,
+        id: savedObject.attributes.id,
+        query: savedObject.attributes.query,
+        description: savedObject.attributes.description,
+        interval: savedObject.attributes.interval,
+        timeout: savedObject.attributes.timeout,
+        platform: savedObject.attributes.platform,
+        ecs_mapping: ecsMapping ? convertECSMappingToObject(ecsMapping) : undefined,
+        created_at: savedObject.attributes.created_at,
+        created_by: savedObject.attributes.created_by,
+        updated_at: savedObject.attributes.updated_at,
+        updated_by: savedObject.attributes.updated_by,
+        prebuilt: !!(prebuiltById || prebuiltByOriginId),
+      };
+
+      return JSON.stringify({ data });
+    },
+    {
+      name: 'get_saved_query',
+      description: 'Get details of a specific saved osquery query by ID',
+      schema: z.object({
+        saved_query_id: z.string().describe('The saved query ID to retrieve'),
+      }),
+    }
+  );
+
+/**
+ * Creates the Saved Queries skill for listing and retrieving saved osquery queries.
+ *
+ * Saved queries are reusable osquery SQL queries that can be referenced by ID
+ * when running live queries. They help standardize common queries and reduce errors.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing `list_saved_queries` and `get_saved_query` tools.
+ *
+ * @example
+ * ```typescript
+ * const savedQueriesSkill = getSavedQueriesSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes two tools:
+ * // - list_saved_queries: List queries with pagination (page, pageSize, sort, sortOrder)
+ * // - get_saved_query: Get detailed query information (saved_query_id)
+ * ```
+ *
+ * @remarks
+ * Saved query data includes:
+ * - Query SQL and metadata (id, description)
+ * - Scheduling configuration (interval, timeout)
+ * - Platform targeting (windows, darwin, linux)
+ * - ECS field mappings for result normalization
+ * - Prebuilt status for system-provided queries
+ *
+ * @see {@link getLiveQuerySkill} for running saved queries and browsing table schemas
+ */
+export const getSavedQueriesSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => ({
+  ...SAVED_QUERIES_SKILL,
+  tools: [
+    createListSavedQueriesTool(getOsqueryContext),
+    createGetSavedQueryTool(getOsqueryContext),
+  ],
+});

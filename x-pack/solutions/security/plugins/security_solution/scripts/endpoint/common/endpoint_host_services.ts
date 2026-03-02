@@ -34,6 +34,13 @@ export interface CreateAndEnrollEndpointHostOptions
   useClosestVersionMatch?: boolean;
   /** If the local cache of agent downloads should be used. Defaults to `true` */
   useCache?: boolean;
+  /**
+   * Multipass image alias/name to use (e.g. `lts`, `24.04`, `ubuntu:24.04`).
+   * Note: `26.04`/`26.04 LTS` may not exist yet depending on Multipass/Ubuntu release state.
+   */
+  multipassImage?: string;
+  /** VM manager to use. When omitted, falls back to vagrant in CI and multipass otherwise. */
+  vmType?: 'multipass' | 'vagrant';
 }
 
 export interface CreateAndEnrollEndpointHostResponse {
@@ -57,11 +64,18 @@ export const createAndEnrollEndpointHost = async ({
   forceVersion = false,
   useClosestVersionMatch = false,
   useCache = true,
+  multipassImage,
+  vmType: vmTypeOverride,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const log = prefixedOutputLogger('createAndEnrollEndpointHost()', _log);
-  let agentVersion = version;
+  let agentVersion = version || kibanaPackageJson.version;
 
   if (!forceVersion) {
+    if (!agentVersion || agentVersion === kibanaPackageJson.version) {
+      // Get version matching current stack if not provided or using default
+      const { getAgentVersionMatchingCurrentStack } = await import('./fleet_services');
+      agentVersion = await getAgentVersionMatchingCurrentStack(kbnClient, log);
+    }
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     if (isServerless) {
       agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
@@ -75,25 +89,28 @@ export const createAndEnrollEndpointHost = async ({
   const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
 
   // TODO: remove dependency on env. var and keep function pure
-  const hostVm = process.env.CI
-    ? await createVm({
-        type: 'vagrant',
-        name: vmName,
-        log,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        agentDownload: agentDownload!,
-        disk,
-        cpus,
-        memory,
-      })
-    : await createVm({
-        type: 'multipass',
-        log,
-        name: vmName,
-        disk,
-        cpus,
-        memory,
-      });
+  const resolvedVmType = vmTypeOverride ?? (process.env.CI ? 'vagrant' : 'multipass');
+  const hostVm =
+    resolvedVmType === 'vagrant'
+      ? await createVm({
+          type: 'vagrant',
+          name: vmName,
+          log,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          agentDownload: agentDownload!,
+          disk,
+          cpus,
+          memory,
+        })
+      : await createVm({
+          type: 'multipass',
+          log,
+          name: vmName,
+          disk,
+          cpus,
+          memory,
+          image: multipassImage,
+        });
 
   const { id: agentId } = await enrollHostVmWithFleet({
     kbnClient,

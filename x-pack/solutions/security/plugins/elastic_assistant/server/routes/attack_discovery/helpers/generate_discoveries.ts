@@ -17,9 +17,14 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
+export interface GenerateAttackDiscoveriesConfig extends AttackDiscoveryGenerationConfig {
+  /** If true, skips the workflow status filter (open/acknowledged) allowing alerts of any status */
+  allowAllWorkflowStatuses?: boolean;
+}
+
 export interface GenerateAttackDiscoveriesParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
-  config: AttackDiscoveryGenerationConfig;
+  config: GenerateAttackDiscoveriesConfig;
   esClient: ElasticsearchClient;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
@@ -44,6 +49,7 @@ export const generateAttackDiscoveries = async ({
     replacements,
     size,
     start,
+    allowAllWorkflowStatuses,
   } = config;
 
   // callback to accumulate the latest replacements:
@@ -69,6 +75,7 @@ export const generateAttackDiscoveries = async ({
     savedObjectsClient,
     size,
     start,
+    allowAllWorkflowStatuses,
   });
 
   return { anonymizedAlerts, attackDiscoveries, replacements: latestReplacements };

@@ -57,6 +57,10 @@ export const getListItemsOverview = async ({
 
     logger.debug(`Returning value list items metrics response: ${JSON.stringify(aggs, null, 2)}`);
 
+    if (!aggs?.max_items_per_list) {
+      return { ...METRICS_ITEMS_DEFAULT_STATE, total: hits?.total?.value ?? 0 };
+    }
+
     return {
       total: hits.total.value || 0,
       max_items_per_list: aggs.max_items_per_list.value || 0,

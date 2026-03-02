@@ -90,6 +90,34 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alert-grouping-execution": [
+    "completedAt",
+    "error",
+    "isDryRun",
+    "metrics",
+    "spaceId",
+    "startedAt",
+    "status",
+    "triggeredBy",
+    "workflowId"
+  ],
+  "alert-grouping-workflow": [
+    "alertFilter",
+    "apiConfig",
+    "attackDiscoveryConfig",
+    "caseTemplate",
+    "createdAt",
+    "createdBy",
+    "description",
+    "enabled",
+    "groupingConfig",
+    "name",
+    "schedule",
+    "spaceId",
+    "tags",
+    "updatedAt",
+    "updatedBy"
+  ],
   "alerting_rule_template": [
     "description",
     "name",
@@ -127,6 +155,11 @@
     "timestamp"
   ],
   "application_usage_totals": [],
+  "attack-discovery-batch-cache": [
+    "batchSize",
+    "connectorId",
+    "updatedAt"
+  ],
   "background-task-node": [
     "id",
     "last_seen"
@@ -149,6 +182,19 @@
     "name",
     "tags",
     "template_key"
+  ],
+  "case-trigger": [
+    "action",
+    "conditions",
+    "createdAt",
+    "createdBy",
+    "description",
+    "enabled",
+    "eventType",
+    "lastTriggered",
+    "name",
+    "spaceId",
+    "triggerCount"
   ],
   "cases": [
     "assignees",

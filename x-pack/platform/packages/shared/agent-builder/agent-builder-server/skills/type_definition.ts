@@ -28,13 +28,20 @@ export type SkillsDirectoryStructure = Directory<{
     platform: FileDirectory<{
       dashboard: FileDirectory;
     }>;
+    dashboards: FileDirectory<{}>;
+    fleet: FileDirectory<{}>;
+    ml: FileDirectory<{}>;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
-      entities: FileDirectory<{}>;
+      cases: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
+      endpoints: FileDirectory<{}>;
+      entities: FileDirectory<{}>;
+      network: FileDirectory<{}>;
+      'threat-intel': FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
@@ -99,6 +106,11 @@ export interface SkillDefinition<
    * E.g. the "case_triage" skill type exposes the "platform.core.cases" tool that way.
    */
   getRegistryTools?: () => MaybePromise<string[]>;
+
+  /**
+   * @deprecated Use `getRegistryTools` instead.
+   */
+  getAllowedTools?: () => MaybePromise<string[]>;
 
   /**
    * Can be used to expose tools which are specific to the skill.

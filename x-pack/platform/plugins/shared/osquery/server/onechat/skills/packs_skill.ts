@@ -1,0 +1,214 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod';
+import { tool } from '@langchain/core/tools';
+import type { Skill } from '@kbn/agent-builder-common/skills';
+import { filter, map } from 'lodash';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { GetOsqueryAppContextFn } from './utils';
+import { getOneChatContext } from './utils';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { packSavedObjectType } from '../../../common/types';
+import type { PackSavedObject } from '../../common/types';
+import { convertSOQueriesToPack } from '../../routes/pack/utils';
+import { convertShardsToObject } from '../../routes/utils';
+
+const PACKS_SKILL: Omit<Skill, 'tools'> = {
+  namespace: 'osquery.packs',
+  name: 'Osquery Packs',
+  description: 'List and retrieve osquery packs',
+  content: `# Osquery Packs
+
+List and get details of osquery query packs.
+
+## Response Format (MANDATORY)
+
+### When listing packs:
+- If packs exist: "Found X packs:" then list names, IDs, and query counts
+- If no packs: "No packs found."
+
+### When getting a specific pack:
+Show pack details from tool results: name, ID, queries, enabled status.
+
+## FORBIDDEN
+- Do NOT explain what packs are
+- Do NOT suggest how to create packs
+- Do NOT add any information not in tool results
+`,
+};
+
+/**
+ * Creates a LangChain tool for listing osquery packs with pagination.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for listing packs
+ * @internal
+ */
+const createListPacksTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async ({ page, pageSize, sort, sortOrder }, config) => {
+      const onechatContext = getOneChatContext(config);
+      if (!onechatContext) {
+        throw new Error('OneChat context not available');
+      }
+
+      const osqueryContext = getOsqueryContext();
+      if (!osqueryContext) {
+        throw new Error('Osquery context not available');
+      }
+
+      const { request } = onechatContext;
+      const [coreStart] = await osqueryContext.getStartServices();
+
+      const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+        osqueryContext,
+        request
+      );
+
+      const soClientResponse = await spaceScopedClient.find<PackSavedObject>({
+        type: packSavedObjectType,
+        page: page ?? 1,
+        perPage: pageSize ?? 20,
+        sortField: sort ?? 'updated_at',
+        sortOrder: sortOrder ?? 'desc',
+      });
+
+      const packs = map(soClientResponse.saved_objects, (pack) => {
+        const policyIds = map(
+          filter(pack.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
+          'id'
+        );
+
+        return {
+          saved_object_id: pack.id,
+          name: pack.attributes.name,
+          description: pack.attributes.description,
+          enabled: pack.attributes.enabled,
+          created_at: pack.attributes.created_at,
+          updated_at: pack.attributes.updated_at,
+          policy_ids: policyIds,
+        };
+      });
+
+      return JSON.stringify({
+        data: packs,
+        total: soClientResponse.total,
+        page: soClientResponse.page,
+        per_page: soClientResponse.per_page,
+      });
+    },
+    {
+      name: 'list_packs',
+      description: 'List osquery packs with pagination support',
+      schema: z.object({
+        page: z.number().optional().describe('Page number (default: 1)'),
+        pageSize: z.number().optional().describe('Number of items per page (default: 20)'),
+        sort: z.string().optional().describe('Field to sort by (default: updated_at)'),
+        sortOrder: z.enum(['asc', 'desc']).optional().describe('Sort order (default: desc)'),
+      }),
+    }
+  );
+
+/**
+ * Creates a LangChain tool for retrieving a specific osquery pack by ID.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext
+ * @returns A LangChain tool configured for getting pack details
+ * @internal
+ */
+const createGetPackTool = (getOsqueryContext: GetOsqueryAppContextFn) =>
+  tool(
+    async ({ pack_id }, config) => {
+      const onechatContext = getOneChatContext(config);
+      if (!onechatContext) {
+        throw new Error('OneChat context not available');
+      }
+
+      const osqueryContext = getOsqueryContext();
+      if (!osqueryContext) {
+        throw new Error('Osquery context not available');
+      }
+
+      const { request } = onechatContext;
+
+      const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+        osqueryContext,
+        request
+      );
+
+      const { attributes, references, id, ...rest } = await spaceScopedClient.get<PackSavedObject>(
+        packSavedObjectType,
+        pack_id
+      );
+
+      const policyIds = map(
+        filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
+        'id'
+      );
+      const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+
+      const data = {
+        saved_object_id: id,
+        name: attributes.name,
+        description: attributes.description,
+        version: attributes.version,
+        enabled: attributes.enabled,
+        created_at: attributes.created_at,
+        created_by: attributes.created_by,
+        updated_at: attributes.updated_at,
+        updated_by: attributes.updated_by,
+        queries: convertSOQueriesToPack(attributes.queries),
+        shards: convertShardsToObject(attributes.shards),
+        policy_ids: policyIds,
+        read_only: attributes.version !== undefined && osqueryPackAssetReference,
+        ...rest,
+      };
+
+      return JSON.stringify({ data });
+    },
+    {
+      name: 'get_pack',
+      description: 'Get details of a specific osquery pack by ID',
+      schema: z.object({
+        pack_id: z.string().describe('The pack ID to retrieve'),
+      }),
+    }
+  );
+
+/**
+ * Creates the Packs skill for listing and retrieving osquery packs.
+ *
+ * Packs are collections of osquery queries that can be scheduled to run on agents.
+ * This skill provides read-only access to browse and inspect pack configurations.
+ *
+ * @param getOsqueryContext - Factory function that returns the OsqueryAppContext at runtime.
+ *                            This allows lazy initialization and proper dependency injection.
+ * @returns A Skill object containing `list_packs` and `get_pack` tools.
+ *
+ * @example
+ * ```typescript
+ * const packsSkill = getPacksSkill(() => osqueryAppContext);
+ *
+ * // The skill exposes two tools:
+ * // - list_packs: List all packs with pagination (page, pageSize, sort, sortOrder)
+ * // - get_pack: Get detailed information about a specific pack (pack_id)
+ * ```
+ *
+ * @remarks
+ * Pack data includes:
+ * - Basic metadata (name, description, enabled status)
+ * - Query configurations with scheduling information
+ * - Assigned agent policy IDs
+ * - Version and read-only status for prebuilt packs
+ *
+ * @see {@link getLiveQuerySkill} for running pack queries
+ */
+export const getPacksSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => ({
+  ...PACKS_SKILL,
+  tools: [createListPacksTool(getOsqueryContext), createGetPackTool(getOsqueryContext)],
+});

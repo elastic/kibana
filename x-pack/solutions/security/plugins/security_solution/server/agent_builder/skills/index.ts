@@ -6,5 +6,6 @@
  */
 
 export { alertAnalysisSampleSkill as alertAnalysisSkill } from './alert_analysis_skill';
+export { ALERT_TRIAGE_SKILL } from './alert_triage_skill';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 export { registerSkills } from './register_skills';

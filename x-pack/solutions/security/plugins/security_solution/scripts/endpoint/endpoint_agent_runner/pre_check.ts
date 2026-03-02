@@ -40,10 +40,16 @@ const checkVmRunner = async () => {
     const version = await execa('multipass', ['--version']);
 
     log.verbose(`Using 'multipass': ${version.stdout}`);
+    // Ensure the daemon/socket is reachable (multipass CLI may exist but service may be stopped).
+    await execa('multipass', ['list']);
   } catch (err) {
     log.verbose(err);
     throw new Error(
-      `Mutipass not found on local machine [${err.message}]. Install it from: https://multipass.run\n\n`
+      `Multipass is not usable on this machine right now.\n\n` +
+        `Common causes:\n` +
+        `- Multipass is not installed (install from: https://multipass.run)\n` +
+        `- Multipass is installed but the daemon/socket is not running (e.g. 'cannot connect to the multipass socket')\n\n` +
+        `Original error: ${err.message}\n`
     );
   }
 };

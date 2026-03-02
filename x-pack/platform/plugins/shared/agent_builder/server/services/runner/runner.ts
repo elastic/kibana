@@ -47,7 +47,7 @@ import { createPromptManager, getAgentPromptStorageState } from './utils/prompts
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
-import type { SkillServiceStart } from '../skills';
+import type { SkillServiceStart, SkillRegistry } from '../skills';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -80,7 +80,7 @@ export interface CreateScopedRunnerDeps {
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
-  skillServiceStart: SkillServiceStart;
+  skillRegistry: SkillRegistry;
   toolManager: ToolManager;
   filestore: IFileStore;
 }
@@ -96,8 +96,10 @@ export type CreateRunnerDeps = Omit<
   | 'stateManager'
   | 'filestore'
   | 'toolManager'
+  | 'skillRegistry'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
+  skillServiceStart: SkillServiceStart;
 };
 
 export class RunnerManager {
@@ -163,7 +165,7 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, ...runnerDeps } = deps;
+  const { modelProviderFactory, skillServiceStart, ...runnerDeps } = deps;
 
   const createScopedRunnerWithDeps = async ({
     request,
@@ -180,11 +182,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
   }): Promise<ScopedRunner> => {
-    // Create skill registry (single entry point for all skill access)
-    const skillRegistry = await runnerDeps.skillServiceStart.getRegistry({ request });
-    const allSkills = await skillRegistry.list();
-
-    const { resultStore, filestore } = createStore({ conversation, skills: allSkills });
+    const skillRegistry = await skillServiceStart.getRegistry({ request });
+    const { resultStore, skillsStore, filestore } = await createStore({
+      conversation,
+      skillRegistry,
+    });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -203,6 +205,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       abortSignal,
       resultStore,
       attachmentStateManager,
+      skillRegistry,
       stateManager,
       promptManager,
       filestore,

@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-continue": "off",
+    "require-atomic-updates": "off"
+  }
+}

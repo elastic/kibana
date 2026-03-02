@@ -139,6 +139,8 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { assistantTools } from './assistant/tools';
+// TODO: Re-import after migrating legacy skills to SkillDefinition format
+// import { getAlertTriageSkill, getEntityAnalyticsSkill } from './assistant/skills';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
@@ -243,7 +245,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private registerAgentBuilderAttachmentsAndTools(
     agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
     core: SecuritySolutionPluginCoreSetupDependencies,
-    logger: Logger
+    logger: Logger,
+    plugins: SecuritySolutionPluginSetupDependencies
   ): void {
     if (!agentBuilder) {
       return;
@@ -252,7 +255,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerTools(
+      agentBuilder,
+      core,
+      logger,
+      plugins,
+      experimentalFeatures,
+      endpointAppContextService
+    ).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -267,7 +277,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
-      options: { endpointAppContextService },
+      options: {
+        endpointAppContextService,
+        osquerySetup: plugins.osquery,
+      },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
@@ -687,7 +700,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    // TODO: Migrate legacy skills (getAlertTriageSkill, getEntityAnalyticsSkill) to SkillDefinition format.
+    // They currently use the old Skill type with LangChain tools, which is incompatible with registerSkill.
+
+    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger, plugins);
 
     return {
       setProductFeaturesConfigurator:

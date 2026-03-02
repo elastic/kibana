@@ -114,6 +114,14 @@ export const attackDiscoverySearchTool = (
               values: esqlResponse.values,
             },
           },
+          {
+            type: ToolResultType.other,
+            data: {
+              operation: 'search',
+              index: `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`,
+              alertIds,
+            },
+          },
         ];
 
         return { results };

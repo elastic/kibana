@@ -34,9 +34,6 @@
       "esUiShared",
       "workflowsExtensions",
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
     "optionalPlugins": [
       "cloud",
       "evals",

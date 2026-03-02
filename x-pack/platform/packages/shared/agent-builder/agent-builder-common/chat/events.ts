@@ -10,6 +10,7 @@ import type { ToolResult } from '../tools/tool_result';
 import type { ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
+import type { Plan, AgentMode } from './plan';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -26,6 +27,9 @@ export enum ChatEventType {
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
+  planCreated = 'plan_created',
+  planUpdated = 'plan_updated',
+  modeSuggestion = 'mode_suggestion',
 }
 
 export type ChatEventBase<
@@ -285,6 +289,54 @@ export const isConversationIdSetEvent = (
   return event.type === ChatEventType.conversationIdSet;
 };
 
+// Plan created
+
+export interface PlanCreatedEventData {
+  plan: Plan;
+}
+
+export type PlanCreatedEvent = ChatEventBase<ChatEventType.planCreated, PlanCreatedEventData>;
+
+export const isPlanCreatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is PlanCreatedEvent => {
+  return event.type === ChatEventType.planCreated;
+};
+
+// Plan updated
+
+export interface PlanUpdatedEventData {
+  plan: Plan;
+}
+
+export type PlanUpdatedEvent = ChatEventBase<ChatEventType.planUpdated, PlanUpdatedEventData>;
+
+export const isPlanUpdatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is PlanUpdatedEvent => {
+  return event.type === ChatEventType.planUpdated;
+};
+
+// Mode suggestion
+
+export interface ModeSuggestionEventData {
+  /** The mode the agent suggests switching to */
+  suggested_mode: AgentMode;
+  /** Reason for the suggestion */
+  reason: string;
+}
+
+export type ModeSuggestionEvent = ChatEventBase<
+  ChatEventType.modeSuggestion,
+  ModeSuggestionEventData
+>;
+
+export const isModeSuggestionEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ModeSuggestionEvent => {
+  return event.type === ChatEventType.modeSuggestion;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -299,7 +351,10 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
-  | RoundCompleteEvent;
+  | RoundCompleteEvent
+  | PlanCreatedEvent
+  | PlanUpdatedEvent
+  | ModeSuggestionEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

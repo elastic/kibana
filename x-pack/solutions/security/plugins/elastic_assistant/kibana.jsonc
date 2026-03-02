@@ -36,7 +36,9 @@
       "discover"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cases",
+      "cloud",
+      "workflowsExtensions"
     ],
     "requiredBundles": [
       "kibanaReact",

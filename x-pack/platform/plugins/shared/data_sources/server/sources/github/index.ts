@@ -5,3 +5,12 @@
  * 2.0.
  */
 export { githubDataSource } from './data_type';
+export {
+  createIssueAggregator,
+  type IssueAggregator,
+  type IssueAggregatorConfig,
+  type GitHubIssue,
+  type AggregatedIssue,
+  type IssueSource,
+  type IssueAggregationResult,
+} from './issue_aggregator';

@@ -38,6 +38,27 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
+const SKILL_SELECTION_SCHEMA = schema.arrayOf(
+  schema.object(
+    {
+      skill_ids: schema.arrayOf(
+        schema.string({
+          meta: {
+            description:
+              'Skill ID to be available to the agent. Use "*" to select all built-in skills.',
+          },
+        }),
+        {
+          meta: { description: 'Array of skill IDs that the agent can use.' },
+        }
+      ),
+    },
+    {
+      meta: { description: 'Skill selection configuration for the agent.' },
+    }
+  )
+);
+
 export function registerAgentRoutes({
   router,
   getInternalServices,
@@ -182,6 +203,7 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  skills: schema.maybe(SKILL_SELECTION_SCHEMA),
                   workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
@@ -300,6 +322,7 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    skills: schema.maybe(SKILL_SELECTION_SCHEMA),
                     workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({

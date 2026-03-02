@@ -10,7 +10,7 @@ import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ChatEventType, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
@@ -36,6 +36,7 @@ import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
+import { getPlanningTools, type PlanState } from '../planning/tools';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -137,6 +138,42 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
+  // Initialize plan state from conversation.
+  // If a plan exists with status 'draft', promote it to 'ready' since the user
+  // chose to execute in agent mode (via "Approve & Execute" or mode toggle).
+  const existingPlan = conversation?.state?.plan;
+  const planWasPromoted = existingPlan?.status === 'draft';
+  const planState: PlanState = {
+    current: planWasPromoted ? { ...existingPlan, status: 'ready' as const } : existingPlan,
+  };
+
+  // When planning feature is enabled, add planning tools to agent mode
+  if (experimentalFeatures.planning) {
+    const planningTools = getPlanningTools({
+      eventEmitter,
+      planState,
+      agentMode: 'agent',
+      toolProvider,
+      runner: context.runner,
+      request,
+    });
+
+    // Filter to only the relevant tools for agent mode:
+    // - always: create_plan (agent can self-plan)
+    // - suggest_planning_mode (if no plan exists yet)
+    // - update_plan (if a plan exists)
+    const relevantPlanningTools = planningTools.filter((tool) => {
+      if (tool.id === 'planning.create_plan') return true;
+      if (tool.id === 'planning.suggest_planning_mode') return !planState.current;
+      if (tool.id === 'planning.update_plan') return !!planState.current;
+      // list_available_tools is always useful
+      if (tool.id === 'planning.list_available_tools') return true;
+      return false;
+    });
+
+    staticTools.push(...relevantPlanningTools);
+  }
+
   // First add static tools
   await Promise.all([
     toolManager.addTools({
@@ -181,6 +218,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    plan: planState.current,
   });
 
   const agentGraph = createAgentGraph({
@@ -240,7 +278,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      getConversationState: () => getConversationState({ promptManager, toolManager }),
+      getConversationState: () => getConversationState({ promptManager, toolManager, planState }),
       pendingRound,
       startTime,
       modelProvider,
@@ -259,6 +297,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     },
   });
 
+  // Emit plan_updated event AFTER subscription is established so the client receives it.
+  // The manualEvents$ Subject does not buffer — events emitted before subscription are lost.
+  if (planWasPromoted && planState.current) {
+    eventEmitter({
+      type: ChatEventType.planUpdated,
+      data: { plan: planState.current },
+    } as ChatAgentEvent);
+  }
+
   const round = await extractRound(events$);
   return {
     round,
@@ -268,13 +315,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 const getConversationState = ({
   promptManager,
   toolManager,
+  planState,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
+  planState: PlanState;
 }): ConversationInternalState => {
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
+    plan: planState.current,
   };
 };
 

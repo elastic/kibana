@@ -44,4 +44,8 @@ export const queryKeys = {
         ['tools', 'namespace', 'validate', namespace, connectorId] as const,
     },
   },
+  skills: {
+    all: ['skills', 'list'] as const,
+    byId: (skillId?: string) => ['skills', skillId],
+  },
 };

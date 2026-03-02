@@ -60,11 +60,27 @@ import {
   randomAgentPolicyName,
   waitForHostToEnroll,
 } from '../fleet_services';
-import { getLocalhostRealIp } from '../network_services';
+import { getAllExternalIpv4Addresses, getLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
 import { fetchActiveSpace } from '../spaces';
 
 export const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
+
+const isPrivateIpv4 = (hostname: string): boolean => {
+  // Only handle IPv4 literals; hostnames / IPv6 are treated as non-private here.
+  const match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!match) return false;
+
+  const parts = match.slice(1).map((p) => Number(p));
+  if (parts.some((p) => Number.isNaN(p) || p < 0 || p > 255)) return false;
+
+  const [a, b] = parts;
+  // RFC1918 ranges:
+  // - 10.0.0.0/8
+  // - 172.16.0.0/12
+  // - 192.168.0.0/16
+  return a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
+};
 
 interface StartedServer {
   /** The type of virtualization used to start the server */
@@ -275,9 +291,9 @@ const startFleetServerWithDocker = async ({
   const localhostRealIp = getLocalhostRealIp();
   const fleetServerUrl = `https://${localhostRealIp}:${port}`;
   const isServerless = await isServerlessKibanaFlavor(kbnClient);
-  const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
   const containerName = `dev-fleet-server.${port}`;
   let fleetServerVersionInfo = '';
+  const localIps = getAllExternalIpv4Addresses();
 
   log.info(
     `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
@@ -290,9 +306,16 @@ const startFleetServerWithDocker = async ({
     return log.indent(4, async () => {
       const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
       let containerId = '';
+      let esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
 
-      if (isLocalhost(esURL.hostname) || esURL.hostname === localhostRealIp) {
-        esURL.hostname = 'host.docker.internal';
+      // If the output is configured to a local address, make sure it is reachable from inside Docker.
+      // This also covers stale configs from previous runs that may have used bridge/tunnel interfaces.
+      if (
+        isLocalhost(esURL.hostname) ||
+        localIps.includes(esURL.hostname) ||
+        isPrivateIpv4(esURL.hostname)
+      ) {
+        esURL.hostname = localhostRealIp;
       }
 
       if (isServerless) {
@@ -309,6 +332,18 @@ const startFleetServerWithDocker = async ({
       // Create the `elastic` network to use with all containers
       await maybeCreateDockerNetwork(log);
       try {
+        // Ensure Fleet's ES output is updated BEFORE we start Fleet Server, otherwise the container can start
+        // with a stale local bridge/tunnel IP and never enroll.
+        await updateFleetElasticsearchOutputHostNames(kbnClient, log);
+        esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
+        if (
+          isLocalhost(esURL.hostname) ||
+          localIps.includes(esURL.hostname) ||
+          isPrivateIpv4(esURL.hostname)
+        ) {
+          esURL.hostname = localhostRealIp;
+        }
+
         const dockerArgs = isServerless
           ? getFleetServerStandAloneDockerArgs({
               containerName,
@@ -339,6 +374,16 @@ const startFleetServerWithDocker = async ({
       ${error}`);
             }
           });
+
+        // If a previous run created the container without `--rm`, `docker kill` leaves it behind.
+        // Ensure the name is fully freed up before re-running.
+        await execa('docker', ['rm', '-f', containerName]).catch((error) => {
+          if (!/no such container/i.test(error.message)) {
+            log.verbose(
+              `Attempt to remove existing fleet-server container with name [${containerName}] was unsuccessful:\n${error}`
+            );
+          }
+        });
 
         log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
@@ -637,7 +682,76 @@ const addFleetServerHostToFleetSettings = async (
   });
 };
 
-const updateFleetElasticsearchOutputHostNames = async (
+/**
+ * Removes invalid Fleet Server host entries from Fleet settings and ensures the provided Fleet Server URL exists.
+ * This is helpful when VMs/containers cannot route to `localhost` and need the host's real LAN IP.
+ */
+export const cleanupAndAddFleetServerHostSettings = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  fleetServerUrl: string
+): Promise<void> => {
+  log.info(`Ensuring Fleet Server host settings contain: ${fleetServerUrl}`);
+
+  return log.indent(4, async () => {
+    const localhostRealIp = getLocalhostRealIp();
+    const existingFleetServerHostList = await fetchFleetServerHostList(kbnClient);
+
+    let hasCorrectUrl = false;
+
+    for (const fleetServerEntry of existingFleetServerHostList.items) {
+      if (fleetServerEntry.host_urls.includes(fleetServerUrl)) {
+        hasCorrectUrl = true;
+      } else {
+        const hasInvalidUrl = fleetServerEntry.host_urls.some((url) => {
+          try {
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname;
+            return (
+              hostname === 'localhost' ||
+              hostname === '127.0.0.1' ||
+              (isPrivateIpv4(hostname) && hostname !== localhostRealIp)
+            );
+          } catch {
+            return false;
+          }
+        });
+
+        if (hasInvalidUrl && !fleetServerEntry.is_preconfigured) {
+          log.info(
+            `Removing invalid Fleet Server host entry: ${fleetServerEntry.name} (${fleetServerEntry.id})`
+          );
+          try {
+            await kbnClient
+              .request({
+                method: 'DELETE',
+                path: fleetServerHostsRoutesService.getDeletePath(fleetServerEntry.id),
+                headers: {
+                  'elastic-api-version': API_VERSIONS.public.v1,
+                },
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
+            log.info(
+              `Successfully removed invalid Fleet Server host entry: ${fleetServerEntry.id}`
+            );
+          } catch (error) {
+            log.warning(
+              `Failed to remove invalid Fleet Server host entry ${fleetServerEntry.id}: ${error}`
+            );
+          }
+        }
+      }
+    }
+
+    if (!hasCorrectUrl) {
+      await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
+    } else {
+      log.info('Fleet Server host URL is already correctly configured');
+    }
+  });
+};
+
+export const updateFleetElasticsearchOutputHostNames = async (
   kbnClient: KbnClient,
   log: ToolingLog
 ): Promise<void> => {
@@ -646,29 +760,56 @@ const updateFleetElasticsearchOutputHostNames = async (
   return log.indent(4, async () => {
     try {
       const localhostRealIp = getLocalhostRealIp();
+      const localIps = getAllExternalIpv4Addresses();
       const fleetOutputs = await fetchFleetOutputs(kbnClient);
 
-      // make sure that all ES hostnames are using localhost real IP
+      log.info(`Current localhost IP: ${localhostRealIp}`);
+      log.verbose(`Local IPs: ${localIps.join(', ')}`);
+
+      // Make sure that local ES hostnames use an IP reachable from Docker/VMs (avoid localhost + bridge addresses)
       for (const { id, ...output } of fleetOutputs.items) {
         if (output.type === 'elasticsearch') {
           if (output.hosts) {
             let needsUpdating = false;
             const updatedHosts: Output['hosts'] = [];
 
+            log.info(
+              `Checking Elasticsearch output [${
+                output.name
+              } (id: ${id})] with hosts: ${output.hosts.join(', ')}`
+            );
+
             for (const host of output.hosts) {
-              const hostURL = new URL(host);
+              try {
+                const hostURL = new URL(host);
+                const hostname = hostURL.hostname;
 
-              if (isLocalhost(hostURL.hostname)) {
-                needsUpdating = true;
-                hostURL.hostname = localhostRealIp;
-                updatedHosts.push(hostURL.toString());
+                // Check if this host needs updating:
+                // 1. It's localhost/127.0.0.1
+                // 2. It's in the local IPs list but not the correct one
+                // 3. It's a private IP (192.168.x.x, 10.x.x.x, 172.16-31.x.x) but not the correct one
+                const isLocalhostValue = isLocalhost(hostname);
+                const isLocalIp = localIps.includes(hostname);
+                const isPrivateIp = isPrivateIpv4(hostname);
+                const isWrongIp = hostname !== localhostRealIp;
 
-                log.verbose(
-                  `Fleet Settings for Elasticsearch Output [Name: ${
-                    output.name
-                  } (id: ${id})]: Host [${host}] updated to [${hostURL.toString()}]`
-                );
-              } else {
+                if ((isLocalhostValue || isLocalIp || isPrivateIp) && isWrongIp) {
+                  needsUpdating = true;
+                  hostURL.hostname = localhostRealIp;
+                  // Remove trailing slash to match original format
+                  const updatedUrl = hostURL.toString().replace(/\/$/, '');
+                  updatedHosts.push(updatedUrl);
+
+                  log.info(
+                    `Fleet Settings for Elasticsearch Output [Name: ${output.name} (id: ${id})]: Host [${host}] will be updated to [${updatedUrl}]`
+                  );
+                } else {
+                  updatedHosts.push(host);
+                  log.verbose(`Host [${host}] is correct, no update needed`);
+                }
+              } catch (error) {
+                // If URL parsing fails, keep the original host
+                log.warning(`Failed to parse host URL [${host}]: ${error}`);
                 updatedHosts.push(host);
               }
             }
@@ -679,7 +820,11 @@ const updateFleetElasticsearchOutputHostNames = async (
                 hosts: updatedHosts,
               };
 
-              log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
+              log.info(
+                `Updating Fleet Settings for Output [${
+                  output.name
+                } (id: ${id})] with hosts: ${updatedHosts.join(', ')}`
+              );
 
               await kbnClient
                 .request<GetOneOutputResponse>({
@@ -689,6 +834,12 @@ const updateFleetElasticsearchOutputHostNames = async (
                   body: update,
                 })
                 .catch(catchAxiosErrorFormatAndThrow);
+
+              log.info(
+                `Successfully updated Fleet Settings for Output [${output.name} (id: ${id})]`
+              );
+            } else {
+              log.info(`No update needed for Elasticsearch output [${output.name} (id: ${id})]`);
             }
           }
         }

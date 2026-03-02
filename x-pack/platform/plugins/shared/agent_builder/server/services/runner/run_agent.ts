@@ -47,7 +47,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     promptManager,
     stateManager,
     filestore,
-    skillServiceStart,
+    skillRegistry,
     toolManager,
   } = manager.deps;
 
@@ -63,6 +63,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const experimentalFeatures: ExperimentalFeatures = {
     filestore: experimentalFeaturesEnabled,
     skills: experimentalFeaturesEnabled,
+    planning: experimentalFeaturesEnabled,
   };
 
   return {
@@ -92,7 +93,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     skills: await createSkillsService({
-      skillServiceStart,
+      skillRegistry,
       toolsServiceStart: toolsService,
       request,
       spaceId,

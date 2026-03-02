@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { StaticToolRegistration, ToolRegistry } from '@kbn/agent-builder-server/tools';
 import type { AnyToolTypeDefinition } from './tool_types';
 import type { ToolHealthClient } from './health';
 
 export interface ToolsServiceSetup {
-  register<RunInput extends ZodObject<any>>(tool: StaticToolRegistration<RunInput>): void;
+  register<RunInput extends ZodType<any>>(tool: StaticToolRegistration<RunInput>): void;
 }
 
 export interface ToolsServiceStart {

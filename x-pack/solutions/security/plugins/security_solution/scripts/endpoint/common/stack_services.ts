@@ -113,7 +113,7 @@ class KbnClientExtended extends KbnClient {
 export const createRuntimeServices = async ({
   kibanaUrl: _kibanaUrl,
   elasticsearchUrl,
-  fleetServerUrl = 'https://localhost:8220',
+  fleetServerUrl: _fleetServerUrl,
   username: _username,
   password: _password,
   spaceId,
@@ -125,6 +125,7 @@ export const createRuntimeServices = async ({
   useCertForSsl = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   const kibanaUrl = spaceId ? buildUrlWithSpaceId(_kibanaUrl, spaceId) : _kibanaUrl;
+  const fleetServerUrl = _fleetServerUrl || 'https://localhost:8220';
   let username = _username;
   let password = _password;
   let esUsername = _esUsername;

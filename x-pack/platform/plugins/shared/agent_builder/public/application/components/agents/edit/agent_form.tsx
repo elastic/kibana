@@ -29,7 +29,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import { filterToolsBySelection, type AgentDefinition } from '@kbn/agent-builder-common';
+import {
+  filterToolsBySelection,
+  type AgentDefinition,
+  type SkillSelection,
+} from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -51,7 +55,9 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
+import { SkillsTab } from './tabs/skills_tab';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const BUTTON_IDS = {
@@ -79,6 +85,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { manageAgents } = useUiPrivileges();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -134,6 +141,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     isSubmitting,
     submit,
     tools,
+    skills,
     error,
   } = useAgentEdit({
     editingAgentId,
@@ -217,6 +225,15 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     return filterToolsBySelection(tools, agentTools).length;
   }, [tools, agentTools]);
 
+  const agentSkills = watch('configuration.skills') as SkillSelection[] | undefined;
+  const activeSkillsCount = useMemo(() => {
+    if (!agentSkills || agentSkills.length === 0) return skills.length;
+    const hasWildcard = agentSkills.some((s) => s.skill_ids.includes('*'));
+    if (hasWildcard) return skills.length;
+    const explicitIds = new Set(agentSkills.flatMap((s) => s.skill_ids));
+    return skills.filter((skill) => explicitIds.has(skill.id)).length;
+  }, [skills, agentSkills]);
+
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
@@ -259,6 +276,36 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      ...(isExperimentalFeaturesEnabled
+        ? [
+            {
+              id: 'skills',
+              name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+                defaultMessage: 'Skills',
+              }),
+              content: (
+                <SkillsTab
+                  control={control}
+                  skills={skills}
+                  isLoading={isLoading}
+                  isFormDisabled={isFormDisabled || !manageAgents}
+                />
+              ),
+              append: (
+                <EuiNotificationBadge
+                  color="subdued"
+                  css={css`
+                    block-size: 20px;
+                    min-inline-size: ${euiTheme.size.l};
+                    padding: 0 ${euiTheme.size.xs};
+                  `}
+                >
+                  {activeSkillsCount}
+                </EuiNotificationBadge>
+              ),
+            },
+          ]
+        : []),
     ],
     [
       control,
@@ -266,10 +313,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       isCreateMode,
       isFormDisabled,
       tools,
+      skills,
       isLoading,
       euiTheme,
       activeToolsCount,
+      activeSkillsCount,
       manageAgents,
+      isExperimentalFeaturesEnabled,
     ]
   );
 

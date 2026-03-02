@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodType } from '@kbn/zod';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
@@ -107,7 +107,7 @@ export type ToolReturnSummarizerFn = (
 /**
  * Built-in tool, as registered as static tool.
  */
-export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
+export interface BuiltinToolDefinition<RunInput extends ZodType<any> = ZodType<any>>
   extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
     BuiltInToolSpecificConfig {
   /**
@@ -143,7 +143,7 @@ export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
 export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;
 export type StaticWorkflowTool = StaticToolRegistrationMixin<WorkflowToolDefinition>;
 
-export type StaticToolRegistration<RunInput extends ZodObject<any> = ZodObject<any>> =
+export type StaticToolRegistration<RunInput extends ZodType<any> = ZodType<any>> =
   | BuiltinToolDefinition<RunInput>
   | StaticEsqlTool
   | StaticIndexSearchTool

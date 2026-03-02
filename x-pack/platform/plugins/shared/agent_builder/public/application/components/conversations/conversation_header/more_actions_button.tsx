@@ -34,6 +34,8 @@ import { appPaths } from '../../../utils/app_paths';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+
 const fullscreenLabels = {
   actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
     defaultMessage: 'More',
@@ -70,6 +72,9 @@ const fullscreenLabels = {
   }),
   tools: i18n.translate('xpack.agentBuilder.conversationActions.tools', {
     defaultMessage: 'View all tools',
+  }),
+  skills: i18n.translate('xpack.agentBuilder.conversationActions.skills', {
+    defaultMessage: 'View all skills',
   }),
   sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
     defaultMessage: 'View all sources',
@@ -132,6 +137,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     services: { application, uiSettings },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
 
   const closePopover = () => {
@@ -225,6 +231,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
+    ...(isExperimentalFeaturesEnabled
+      ? [
+          <EuiContextMenuItem
+            key="skills"
+            icon="sparkles"
+            onClick={closePopover}
+            href={createAgentBuilderUrl(appPaths.skills.list)}
+            data-test-subj="agentBuilderActionsSkills"
+          >
+            {fullscreenLabels.skills}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(isDataSourcesEnabled
       ? [
           <EuiContextMenuItem

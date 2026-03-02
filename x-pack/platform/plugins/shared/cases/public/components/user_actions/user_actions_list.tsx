@@ -60,6 +60,11 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
       border-bottom: 0;
     }
   }
+    
+  & [data-test-subj="comment-externalReference-.attack-discovery"] > [class*="euiTimelineItemEvent-top"] {
+    overflow: hidden;
+  }
+}
 `;
 
 export type UserActionListProps = Omit<

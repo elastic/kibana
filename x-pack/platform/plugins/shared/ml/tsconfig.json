@@ -15,7 +15,9 @@
     "public/**/*.json",
     "server/**/*.json"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
@@ -145,6 +147,8 @@
     "@kbn/file-upload",
     "@kbn/file-upload-common",
     "@kbn/kql",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
     "@kbn/as-code-filters-transforms",
   ]
 }

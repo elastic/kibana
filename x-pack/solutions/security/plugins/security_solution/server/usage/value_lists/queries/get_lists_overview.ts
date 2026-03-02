@@ -39,6 +39,10 @@ export const getListsOverview = async ({
     const response = await esClient.search(query);
     const { aggregations: aggs, hits } = response as unknown as ListsOverviewAggsResponse;
 
+    if (!aggs?.by_type) {
+      return { ...METRICS_LISTS_DEFAULT_STATE, total: hits?.total?.value ?? 0 };
+    }
+
     type MetricKeys = keyof typeof METRICS_LISTS_DEFAULT_STATE;
 
     const listTypes = aggs.by_type.buckets.reduce((aggResult, typeBucket) => {

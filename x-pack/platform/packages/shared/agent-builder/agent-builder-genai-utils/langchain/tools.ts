@@ -118,6 +118,8 @@ export const toolToLangchain = async ({
 
   const schema = await tool.getSchema();
 
+  const normalizedSchema = schema instanceof z.ZodObject ? schema : z.object({});
+
   return toTool(
     async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
       const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
@@ -155,15 +157,16 @@ export const toolToLangchain = async ({
     },
     {
       name: toolId ?? tool.id,
-      schema: addReasoningParam
-        ? z.object({
-            _reasoning: z
-              .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
-            ...schema.shape,
-          })
-        : schema,
+      schema:
+        addReasoningParam && 'shape' in normalizedSchema
+          ? z.object({
+              _reasoning: z
+                .string()
+                .optional()
+                .describe('Brief reasoning of why you are calling this tool'),
+              ...(normalizedSchema.shape as Record<string, z.ZodTypeAny>),
+            })
+          : normalizedSchema,
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',

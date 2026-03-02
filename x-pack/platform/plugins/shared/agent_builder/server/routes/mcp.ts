@@ -123,10 +123,11 @@ To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/expl
           // Expose tools scoped to the request
           for (const tool of tools) {
             const toolSchema = await tool.getSchema();
+            const shape = 'shape' in toolSchema ? toolSchema.shape : {};
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,
-              toolSchema.shape,
+              shape as Record<string, any>,
               async (args: { [x: string]: any }) => {
                 const toolResult = await registry.execute({
                   toolId: tool.id,

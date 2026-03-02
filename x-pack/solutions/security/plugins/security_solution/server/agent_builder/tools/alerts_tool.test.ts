@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { OtherResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
@@ -98,6 +99,31 @@ describe('alertsTool', () => {
       const result = tool.schema.safeParse(invalidInput);
 
       expect(result.success).toBe(false);
+    });
+
+    it('validates workflow status update schema (set_workflow_status)', () => {
+      const validInput = {
+        operation: 'set_workflow_status',
+        alertIds: ['abc'],
+        status: 'acknowledged',
+        confirm: true,
+      };
+
+      const result = tool.schema.safeParse(validInput);
+
+      expect(result.success).toBe(true);
+    });
+
+    it('validates workflow status update schema (acknowledge)', () => {
+      const validInput = {
+        operation: 'acknowledge',
+        alertIds: ['abc'],
+        confirm: true,
+      };
+
+      const result = tool.schema.safeParse(validInput);
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -247,7 +273,7 @@ describe('alertsTool', () => {
       );
     });
 
-    it('returns results from runSearchTool', async () => {
+    it('returns normalized results envelope (raw contains runSearchTool output)', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       const runSearchToolResult = { results: mockResults };
       (runSearchTool as jest.Mock).mockResolvedValue(runSearchToolResult);
@@ -260,7 +286,88 @@ describe('alertsTool', () => {
         })
       );
 
-      expect(result).toEqual({ results: runSearchToolResult });
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.operation).toBe(
+        'search'
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.index).toBe(
+        `${DEFAULT_ALERTS_INDEX}-default`
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.isCount).toBe(false);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        runSearchToolResult
+      );
+    });
+
+    it('uses deterministic fallback DSL for structured host/user/hash queries (avoids LLM DSL failures)', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        hits: { total: { value: 1, relation: 'eq' }, hits: [] },
+      } as unknown as Awaited<ReturnType<typeof mockEsClient.asCurrentUser.search>>);
+
+      const result = await tool.handler(
+        {
+          query:
+            'alerts on host SRVWIN02 or user Administrator or file hash 8dd620d9aeb35960bb766458c8890ede987c33d239cf730f93fe49d90ae759dd in the last 7 days',
+        },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          events: mockEvents as ToolHandlerContext['events'],
+        })
+      );
+
+      expect(runSearchTool).not.toHaveBeenCalled();
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalled();
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        expect.objectContaining({ strategy: 'fallback_dsl' })
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.index).toBe(
+        `${DEFAULT_ALERTS_INDEX}-default`
+      );
+    });
+
+    it('does deterministic get-by-id lookup when query requests an alert id (avoids misclassifying id as file hash)', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+      mockEsClient.asCurrentUser.search.mockResolvedValue({
+        hits: { total: { value: 1, relation: 'eq' }, hits: [{ _id: 'abc', _source: {} }] },
+      } as unknown as Awaited<ReturnType<typeof mockEsClient.asCurrentUser.search>>);
+
+      const alertId = '5eefb66806a174d0df2b95891489dc67edbedffaad6d9f39c1bf81d1555a3e83';
+      const result = await tool.handler(
+        { query: `Find the security alert with id "${alertId}".` },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          events: mockEvents as ToolHandlerContext['events'],
+        })
+      );
+
+      expect(runSearchTool).not.toHaveBeenCalled();
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: `${DEFAULT_ALERTS_INDEX}-default`,
+          size: 1,
+        })
+      );
+
+      const callArgs = (mockEsClient.asCurrentUser.search as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query?.bool?.should).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ ids: { values: [alertId] } }),
+          expect.objectContaining({ term: { 'kibana.alert.uuid': alertId } }),
+        ])
+      );
+
+      expect(result.results).toHaveLength(1);
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        expect.objectContaining({ strategy: 'get_by_id' })
+      );
+      expect((result.results[0] as OtherResult<Record<string, unknown>>).data.raw).toEqual(
+        expect.objectContaining({ alertId })
+      );
     });
   });
 });

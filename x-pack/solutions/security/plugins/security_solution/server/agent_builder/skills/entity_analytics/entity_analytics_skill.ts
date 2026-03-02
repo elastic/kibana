@@ -13,6 +13,8 @@ import {
   getRiskScoreEsqlTool,
   getAssetCriticalityEsqlTool,
   getAssetCriticalityInlineTool,
+  getBulkCriticalityInlineTool,
+  getRiskEngineManagementInlineTool,
 } from './inline_tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
@@ -97,6 +99,29 @@ Steps:
 4. When results are returned, determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD} points).
 5. Present the findings in a concise format showing the previous risk score, current risk score, and whether the change is significant.
 
+## Bulk Asset Criticality
+
+Use the 'security.entity_analytics.bulk_criticality' tool to set criticality levels for multiple entities at once.
+- Accepts an array of records with id_field (host.name, user.name, or service.name), id_value, and criticality_level
+- Criticality levels: low_impact, medium_impact, high_impact, extreme_impact
+- Requires confirm: true
+
+### Example: Set criticality for multiple hosts
+1. Call bulk_criticality with records: [{ id_field: "host.name", id_value: "server-01", criticality_level: "extreme_impact" }, ...]
+
+## Risk Engine Management
+
+Use the 'security.entity_analytics.risk_engine' tool to manage the risk engine lifecycle:
+- \`status\` — Check if the risk engine is installed, enabled, or disabled (read-only)
+- \`enable\` — Enable risk scoring (requires confirm: true)
+- \`disable\` — Disable risk scoring (requires confirm: true)
+- \`schedule_now\` — Trigger an immediate risk score recalculation (requires confirm: true)
+
+### Example: Check and enable risk engine
+1. Call risk_engine with operation: "status" to check current state
+2. If disabled, call with operation: "enable" and confirm: true
+3. To trigger an immediate calculation, call with operation: "schedule_now" and confirm: true
+
 ## Important dependencies
 - Risk score questions require the **Risk Engine** to be enabled and risk indices to exist.
 - Asset criticality questions require asset criticality data to be ingested into the entity analytics asset criticality index.
@@ -124,8 +149,11 @@ Provide a short table with the key fields:
 
 Then add 1-2 bullets with key observations (e.g., highest criticality, biggest score gap, which entities to investigate further).
 `,
-    getInlineTools: () =>
-      FF_DYNAMICALLY_GENERATE_ESQL
+    getInlineTools: () => [
+      ...(FF_DYNAMICALLY_GENERATE_ESQL
         ? [getRiskScoreEsqlTool(ctx), getAssetCriticalityEsqlTool(ctx)]
-        : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
+        : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)]),
+      getBulkCriticalityInlineTool(ctx),
+      getRiskEngineManagementInlineTool(ctx),
+    ],
   });

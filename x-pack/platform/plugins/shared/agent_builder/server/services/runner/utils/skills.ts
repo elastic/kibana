@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SkillsService, ExecutableTool } from '@kbn/agent-builder-server/runner';
 import type { Runner, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { ToolType } from '@kbn/agent-builder-common';
-import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { SkillServiceStart } from '../../skills';
+import type { SkillBoundedTool, InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillRegistry } from '../../skills';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../../tools/tool_types';
 import { convertTool } from '../../tools/builtin/converter';
 import { toExecutableTool } from '../../tools/utils/tool_conversion';
@@ -20,20 +20,23 @@ import { isDisabledDefinition } from '../../tools/tool_types/definitions';
 import { ToolAvailabilityCache } from '../../tools/builtin/availability_cache';
 import type { ToolsServiceStart } from '../../tools';
 
+const isBuiltinSkill = (skill: InternalSkillDefinition): boolean => {
+  return 'basePath' in skill && skill.basePath !== undefined;
+};
+
 export const createSkillsService = async ({
-  skillServiceStart,
+  skillRegistry,
   toolsServiceStart,
   runner,
   request,
   spaceId,
 }: {
-  skillServiceStart: SkillServiceStart;
+  skillRegistry: SkillRegistry;
   toolsServiceStart: ToolsServiceStart;
   runner: Runner;
   request: KibanaRequest;
   spaceId: string;
 }): Promise<SkillsService> => {
-  const skillRegistry = await skillServiceStart.getRegistry({ request });
   const toolConverterFn = createSkillToolConverter({
     request,
     spaceId,
@@ -42,13 +45,15 @@ export const createSkillsService = async ({
   });
 
   return {
-    list: () => skillRegistry.list(),
-    get: async (skillId) => {
-      try {
-        return await skillRegistry.get(skillId);
-      } catch {
-        return undefined;
+    list: async () => {
+      return skillRegistry.listSkillDefinitions();
+    },
+    getSkillDefinition: async (skillId) => {
+      const skill = await skillRegistry.get(skillId);
+      if (skill && isBuiltinSkill(skill)) {
+        return skill;
       }
+      return undefined;
     },
     convertSkillTool: toolConverterFn,
   };

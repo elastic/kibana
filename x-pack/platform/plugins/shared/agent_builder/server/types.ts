@@ -150,9 +150,6 @@ export interface ExecutionStart {
   getExecution: AgentExecutionService['getExecution'];
 }
 
-/**
- * Setup contract of the agentBuilder plugin.
- */
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.

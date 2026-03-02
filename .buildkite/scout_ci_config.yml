@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - apm
     - banners
     - cloud_security_posture

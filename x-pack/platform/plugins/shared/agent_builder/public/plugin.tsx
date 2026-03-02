@@ -10,13 +10,16 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
+  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { BehaviorSubject } from 'rxjs';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp } from './register';
+import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -27,6 +30,7 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
+  SkillsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -62,6 +66,7 @@ export class AgentBuilderPlugin
     >
 {
   logger: Logger;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private conversationActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
@@ -96,6 +101,7 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
+      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
@@ -135,6 +141,7 @@ export class AgentBuilderPlugin
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
+    const skillsService = new SkillsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -151,12 +158,20 @@ export class AgentBuilderPlugin
       docLinksService,
       navigationService,
       toolsService,
+      skillsService,
       startDependencies,
       accessChecker,
       eventsService,
     };
 
     this.internalServices = internalServices;
+
+    const isExperimentalFeaturesEnabled = core.uiSettings.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+    if (isExperimentalFeaturesEnabled) {
+      enableSkillsDeepLink(this.appUpdater$);
+    }
 
     setSidebarServices(core, internalServices);
 

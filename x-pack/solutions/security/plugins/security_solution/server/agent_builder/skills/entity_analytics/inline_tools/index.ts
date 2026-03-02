@@ -7,3 +7,5 @@
 
 export { getRiskScoreInlineTool, getRiskScoreEsqlTool } from './risk_score';
 export { getAssetCriticalityInlineTool, getAssetCriticalityEsqlTool } from './asset_criticality';
+export { getBulkCriticalityInlineTool } from './bulk_criticality';
+export { getRiskEngineManagementInlineTool } from './risk_engine';

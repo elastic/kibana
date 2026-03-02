@@ -11,7 +11,15 @@
 export interface HostVm {
   type: SupportedVmManager;
   name: string;
-  exec: (command: string, options?: { silent?: boolean }) => Promise<HostVmExecResponse>;
+  /**
+   * Optional OS/platform hint for the VM. This is primarily used by non-Linux VM managers (e.g. UTM)
+   * so enrollment/install steps can be OS-specific.
+   */
+  platform?: 'windows' | 'darwin' | 'linux';
+  exec: (
+    command: string,
+    options?: { silent?: boolean; shell?: boolean }
+  ) => Promise<HostVmExecResponse>;
   mount: (localDir: string, hostVmDir: string) => Promise<HostVmMountResponse>;
   unmount: (hostVmDir: string) => Promise<void>;
   /** @deprecated use `upload` */
@@ -26,7 +34,7 @@ export interface HostVm {
   start: () => void;
 }
 
-export type SupportedVmManager = 'multipass' | 'vagrant';
+export type SupportedVmManager = 'multipass' | 'vagrant' | 'utm' | 'gcp';
 export interface HostVmExecResponse {
   stdout: string;
   stderr: string;

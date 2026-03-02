@@ -113,6 +113,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
+                evalThreadId: randomUUID(),
                 traceId,
               };
 
@@ -153,6 +154,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 evaluationRuns.push({
                   name: evaluatorName,
                   result,
+                  runKey,
+                  exampleIndex,
+                  repetition: rep,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                 });

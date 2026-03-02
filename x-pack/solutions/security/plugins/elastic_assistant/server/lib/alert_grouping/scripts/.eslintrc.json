@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "no-console": "off",
+    "no-process-exit": "off",
+    "no-continue": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-explicit-any": "off"
+  }
+}

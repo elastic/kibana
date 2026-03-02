@@ -86,6 +86,8 @@
     "@kbn/react-query",
     "@kbn/react-kibana-mount",
     "@kbn/tooling-log",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server"
   ]
 }

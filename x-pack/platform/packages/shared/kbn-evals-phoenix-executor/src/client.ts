@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
 import type { DatasetInfo } from '@arizeai/phoenix-client/dist/esm/types/datasets';
@@ -185,46 +186,64 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         trustUpstreamDataset,
       } = options;
 
-      const datasetId = trustUpstreamDataset
-        ? (await this.getDatasetByName(dataset.name)).id
-        : (await this.syncDataSet(dataset)).datasetId;
+      // Phoenix can occasionally reset connections locally (e.g., container restart or transient overload).
+      // Retry to avoid flaking the entire suite.
+      const ran = await pRetry(
+        async () => {
+          const datasetId = trustUpstreamDataset
+            ? (await this.getDatasetByName(dataset.name)).id
+            : (await this.syncDataSet(dataset)).datasetId;
 
-      const experiments = await import('@arizeai/phoenix-client/experiments');
+          const experiments = await import('@arizeai/phoenix-client/experiments');
 
-      const ran = await experiments.runExperiment({
-        client: this.phoenixClient,
-        dataset: { datasetId },
-        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
-        // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
-        task: task as any,
-        experimentMetadata: {
-          ...experimentMetadata,
-          model: this.options.model,
-          runId: this.options.runId,
-        },
-        setGlobalTracerProvider: false,
-        evaluators: evaluators.map((evaluator) => {
-          return {
-            name: evaluator.name,
-            kind: evaluator.kind,
-            evaluate: ({ input, output, expected, metadata: md }: any) => {
-              return evaluator.evaluate({
-                expected: expected ?? null,
-                input,
-                metadata: md ?? {},
-                output,
-              });
+          return await experiments.runExperiment({
+            client: this.phoenixClient,
+            dataset: { datasetId },
+            experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
+            // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
+            task: task as any,
+            experimentMetadata: {
+              model: this.options.model,
+              runId: this.options.runId,
+              ...experimentMetadata,
             },
-          };
-        }) as any,
-        logger: {
-          error: this.options.log.error.bind(this.options.log),
-          info: this.options.log.info.bind(this.options.log),
-          log: this.options.log.info.bind(this.options.log),
+            setGlobalTracerProvider: false,
+            evaluators: evaluators.map((evaluator) => {
+              return {
+                name: evaluator.name,
+                kind: evaluator.kind,
+                evaluate: ({ input, output, expected, metadata: md }: any) => {
+                  return evaluator.evaluate({
+                    expected: expected ?? null,
+                    input,
+                    metadata: md ?? {},
+                    output,
+                  });
+                },
+              };
+            }) as any,
+            logger: {
+              error: this.options.log.error.bind(this.options.log),
+              info: this.options.log.info.bind(this.options.log),
+              log: this.options.log.info.bind(this.options.log),
+            },
+            repetitions: this.options.repetitions ?? 1,
+            concurrency,
+          });
         },
-        repetitions: this.options.repetitions ?? 1,
-        concurrency,
-      });
+        {
+          retries: 2,
+          minTimeout: 1000,
+          onFailedAttempt: (err) => {
+            this.options.log.warning(
+              new Error(
+                `Phoenix runExperiment failed (attempt=${err.attemptNumber}); retrying...`,
+                { cause: err }
+              )
+            );
+          },
+        }
+      );
 
       // Translate Phoenix's ExperimentRun structure to Kibana's TaskRun format
       const phoenixRuns: Record<string, ExperimentRun> = ran.runs ?? {};

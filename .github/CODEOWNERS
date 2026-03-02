@@ -896,6 +896,7 @@ x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualization
 x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
+x-pack/packages/ai-infra/ai-infra-common @elastic/appex-ai-infra
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/ai-infra/security-labs-artifact-builder @elastic/security-generative-ai
 x-pack/packages/kbn-synthetics-private-location @elastic/actionable-obs-team
@@ -2699,6 +2700,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_evals @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - Cloud Security Posture
 
