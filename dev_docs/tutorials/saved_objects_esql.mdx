@@ -1,0 +1,151 @@
+---
+id: kibDevTutorialSavedObjectsEsql
+slug: /kibana-dev-docs/tutorials/saved-objects-esql
+title: Saved Object `esql` method
+description: Learn how to use the `esql` method to query Saved Objects using ES|QL.
+date: 2026-03-02
+tags: ['kibana', 'dev', 'tutorials', 'saved-objects', 'esql']
+---
+
+`SavedObjectsClientContract.esql` allows you to query Saved Objects using [ES|QL (Elasticsearch Query Language)](https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql). It returns tabular results (columns and values) directly from Elasticsearch, which can be useful for analytics, aggregations, and cross-type queries that don't fit the `find` or `search` methods.
+
+## Relationship to `find` and `search`
+
+| Method | Use case | Response format |
+|--------|----------|----------------|
+| `find` | Simple filtering and pagination of saved objects | Structured `SavedObject[]` |
+| `search` | Complex queries using Elasticsearch Query DSL | Raw Elasticsearch search hits |
+| `esql` | Tabular queries using ES|QL syntax | Tabular columns + values |
+
+Use `esql` when you need ES|QL-specific features like `STATS`, `EVAL`, `ENRICH`, or pipe-based query composition.
+
+<DocCallOut title="With great power comes great responsibility">
+  While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Carefully consider how you would like to use this method in your plugin to unlock value for users.
+</DocCallOut>
+
+## Basic usage
+
+```ts
+import { isResponseError } from '@kbn/es-errors';
+import { MY_TYPE } from './saved_objects';
+
+/** ...inside a route handler: */
+async (ctx, req, res) => {
+  const core = await ctx.core;
+  const savedObjectsClient = core.savedObjects.client;
+  try {
+    const result = await savedObjectsClient.esql({
+      type: [MY_TYPE],
+      namespaces: ['default'],
+      query: `FROM .kibana
+        | WHERE type == "${MY_TYPE}"
+        | KEEP ${MY_TYPE}.title, ${MY_TYPE}.description
+        | SORT ${MY_TYPE}.title
+        | LIMIT 100`,
+    });
+    return res.ok({ body: { columns: result.columns, values: result.values } });
+  } catch (e) {
+    if (isResponseError(e)) {
+      log.error(JSON.stringify(e.meta.body, null, 2));
+    }
+    throw e;
+  }
+}
+```
+
+See the full example in the Kibana repository at `examples/saved_objects`.
+
+## Safe query construction with `esql` tagged template
+
+When interpolating user input into ES|QL queries, **never** use string concatenation. Instead, use the `esql` tagged template from `@kbn/esql-language` or ES|QL named parameters.
+
+### Using the `esql` tagged template (recommended)
+
+The `esql` tagged template from `@kbn/esql-language` provides safe query construction with named parameters via `?paramName` placeholders. Call `.toRequest()` to get the `{ query, params }` object that can be spread into the `esql()` options:
+
+```ts
+import { esql } from '@kbn/esql-language';
+
+const userInput = req.body.searchTerm;
+
+const request = esql({ searchTerm: userInput })`
+  FROM .kibana
+  | WHERE type == "my-type"
+  | WHERE my-type.title LIKE ?searchTerm
+  | LIMIT 100
+`.toRequest();
+
+const result = await savedObjectsClient.esql({
+  type: ['my-type'],
+  namespaces: ['default'],
+  ...request, // spreads { query, params }
+});
+```
+
+### Using ES|QL positional parameters (alternative)
+
+ES|QL also supports positional `?` placeholders natively:
+
+```ts
+const result = await savedObjectsClient.esql({
+  type: ['my-type'],
+  namespaces: ['default'],
+  query: 'FROM .kibana | WHERE my-type.title LIKE ? | LIMIT 100',
+  params: [{ type: 'keyword' as const, value: userInput }],
+});
+```
+
+## Security model
+
+### Index controlled server-side
+
+The `esql` method controls which Elasticsearch index is queried server-side. While your ES|QL `query` string may contain a `FROM` clause, the actual index access is determined by the saved objects system. The `filter` parameter is used to inject security restrictions.
+
+### Space and type filtering
+
+When you call `esql()`, namespace (space) and type filters are automatically injected into the `filter` parameter of the ES|QL request. This works the same way as the `search` method:
+
+1. `spacesExtension.getSearchableNamespaces()` resolves which namespaces the user can access
+2. `securityExtension.authorizeFind()` checks RBAC permissions
+3. A namespace bool filter is constructed and merged with any user-provided `filter`
+
+If the user is not authorized to access any of the requested namespaces or types, an empty response is returned.
+
+### User-provided filters are merged, not replaced
+
+If you provide a `filter` in the options, it is merged with the security filter using `{ bool: { must: [securityFilter, yourFilter] } }`. Your filter is never used in isolation.
+
+## Encrypted attributes
+
+Saved object types that use the Encrypted Saved Objects (ESO) plugin have their encrypted attribute values **stripped** (replaced with `null`) in ES|QL results. This is because ES|QL returns tabular data, and the AAD (Additional Authenticated Data) required for decryption cannot be reliably reconstructed from flat column/value pairs.
+
+For example, if a `connector` type has an encrypted `secrets` attribute, the ES|QL response will contain `null` for the `connector.secrets` column.
+
+## Response structure
+
+The `esql` method returns the raw ES|QL response with `columns` and `values`:
+
+```json
+{
+  "columns": [
+    { "name": "index-pattern.title", "type": "keyword" },
+    { "name": "type", "type": "keyword" }
+  ],
+  "values": [
+    ["logs-*", "index-pattern"],
+    ["metrics-*", "index-pattern"]
+  ]
+}
+```
+
+## When to use
+
+- You need ES|QL-specific operations like `STATS`, `EVAL`, `ENRICH`, `DISSECT`, or `GROK`
+- You want tabular results for analytics or reporting
+- You need to compute aggregations across saved object types
+
+## When not to use
+
+- You want structured `SavedObject` instances with `id`, `attributes`, `references` - use `find` instead
+- You need Elasticsearch Query DSL features like runtime mappings or aggregation trees - use `search` instead
+- Simple filtering and pagination - use `find` instead
