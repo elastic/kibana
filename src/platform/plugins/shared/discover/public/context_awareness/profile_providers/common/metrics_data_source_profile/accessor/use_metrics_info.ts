@@ -64,6 +64,8 @@ export function useMetricsInfo(
     fetchParams.abortController,
     fetchParams.filters,
     fetchParams.esqlVariables,
+    fetchParams.dataView,
+    fetchParams.timeRange,
     services.data.search.search,
     services.uiSettings,
   ]);
