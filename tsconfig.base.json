@@ -840,6 +840,8 @@
       "@kbn/core-user-settings-server-mocks/*": ["src/core/packages/user-settings/server-mocks/*"],
       "@kbn/cps": ["src/platform/plugins/shared/cps"],
       "@kbn/cps/*": ["src/platform/plugins/shared/cps/*"],
+      "@kbn/cps-common": ["src/platform/packages/private/kbn-cps-common"],
+      "@kbn/cps-common/*": ["src/platform/packages/private/kbn-cps-common/*"],
       "@kbn/cps-server-utils": ["src/platform/packages/shared/kbn-cps-server-utils"],
       "@kbn/cps-server-utils/*": ["src/platform/packages/shared/kbn-cps-server-utils/*"],
       "@kbn/cps-utils": ["src/platform/packages/shared/kbn-cps-utils"],
