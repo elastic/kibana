@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { ClassicFieldDefinitionConfig, FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
@@ -120,15 +120,16 @@ export const buildSchemaSavePayload = (
 
     // Persist:
     // - mapped fields (real overrides)
-    // - doc-only overrides (description-only), even if status is 'unmapped'
-    // - inherited fields with description overrides defined on THIS stream
+    // - doc-only overrides (description-only), even if status is 'unmapped' (wired streams only)
+    // - inherited fields with description overrides defined on THIS stream (wired streams only)
     if (field.status === 'mapped') {
       // UI-only pseudo-type; never persist.
       if (field.type === 'system') {
         return acc;
       }
       acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
-    } else if (field.status === 'unmapped' && hasNonEmptyDescription) {
+    } else if (field.status === 'unmapped' && hasNonEmptyDescription && isWired) {
+      // Classic streams don't support description-only field overrides
       acc[field.name] = { description: field.description!.trim() };
     } else if (field.status === 'inherited' && hasNonEmptyDescription && isWired) {
       // For inherited fields, check if the description differs from the inherited one.
@@ -156,7 +157,9 @@ export const buildSchemaSavePayload = (
         : {
             classic: {
               ...definition.stream.ingest.classic,
-              field_overrides: persistedFields,
+              // Safe cast: we only add description-only fields for wired streams,
+              // so classic fields will always have a type
+              field_overrides: persistedFields as Record<string, ClassicFieldDefinitionConfig>,
             },
           }),
     },

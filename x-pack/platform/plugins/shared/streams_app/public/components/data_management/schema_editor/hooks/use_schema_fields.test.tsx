@@ -578,40 +578,5 @@ describe('useSchemaFields', () => {
         })
       );
     });
-
-    it('extracts doc-only fields (no type) from classic stream definition as doc-only overrides', () => {
-      // Similar to wired streams, classic streams with typeless doc-only fields.
-      // They are returned with status: 'unmapped' (no type property).
-      const definition = createMockClassicStreamDefinition({
-        stream: {
-          name: 'logs.classic-test',
-          description: '',
-          updated_at: '2024-01-01T00:00:00.000Z',
-          ingest: {
-            lifecycle: { inherit: {} },
-            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
-            settings: {},
-            failure_store: { inherit: {} },
-            classic: {
-              field_overrides: {
-                'attributes.documented_field': {
-                  description: 'Classic stream documented field',
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const fields = getDefinitionFields(definition);
-
-      expect(fields).toContainEqual(
-        expect.objectContaining({
-          name: 'attributes.documented_field',
-          description: 'Classic stream documented field',
-          status: 'unmapped', // Doc-only fields are returned with status 'unmapped'
-        })
-      );
-    });
   });
 });
