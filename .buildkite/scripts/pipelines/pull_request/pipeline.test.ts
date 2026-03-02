@@ -8,6 +8,7 @@
  */
 
 import { load as yamlLoad } from 'js-yaml';
+import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
 
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
@@ -138,7 +139,7 @@ describe('pull_request pipeline generation', () => {
   });
 
   it('includes FIPS verification step when FIPS label is present', async () => {
-    process.env.GITHUB_PR_LABELS = 'ci:enable-fips-140-2-agent';
+    process.env.GITHUB_PR_LABELS = FIPS_GH_LABELS[FIPS_VERSION.TWO];
     const emitted = waitForEmission();
 
     await importPipelineModule();
