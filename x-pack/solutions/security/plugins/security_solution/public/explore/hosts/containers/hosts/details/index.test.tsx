@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { ID, useHostDetails } from '.';
-import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import { useEntitiesListQuery } from '../../../../entity_analytics/components/entity_store/hooks/use_entities_list_query';
+import { useGetEndpointDetails } from '../../../../management/hooks';
 
-jest.mock('../../../../../common/containers/use_search_strategy', () => ({
-  useSearchStrategy: jest.fn(),
+jest.mock('../../../../../entity_analytics/components/entity_store/hooks/use_entities_list_query', () => ({
+  useEntitiesListQuery: jest.fn(),
 }));
-const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
-const mockSearch = jest.fn();
+jest.mock('../../../../../management/hooks', () => ({
+  useGetEndpointDetails: jest.fn(),
+}));
+
+const mockUseEntitiesListQuery = useEntitiesListQuery as jest.Mock;
+const mockUseGetEndpointDetails = useGetEndpointDetails as jest.Mock;
 
 const defaultProps = {
   endDate: '2020-07-08T08:20:18.966Z',
-  hostName: 'my-macbook',
+  entityIdentifiers: { 'host.name': 'my-macbook' },
   id: ID,
   indexNames: ['fakebeat-*'],
   skip: false,
@@ -28,26 +33,30 @@ const defaultProps = {
 describe('useHostDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        hostDetails: {},
-      },
-      search: mockSearch,
+    mockUseEntitiesListQuery.mockReturnValue({
+      data: { records: [], total: 0, inspect: {} },
+      isLoading: false,
       refetch: jest.fn(),
-      inspect: {},
     });
+    mockUseGetEndpointDetails.mockReturnValue({ data: undefined });
   });
 
-  it('runs search', () => {
+  it('fetches from entity store', () => {
     renderHook(() => useHostDetails(defaultProps), {
       wrapper: TestProviders,
     });
 
-    expect(mockSearch).toHaveBeenCalled();
+    expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityTypes: ['host'],
+        page: 1,
+        perPage: 1,
+        skip: false,
+      })
+    );
   });
 
-  it('does not run search when skip = true', () => {
+  it('does not fetch when skip = true', () => {
     const props = {
       ...defaultProps,
       skip: true,
@@ -56,18 +65,30 @@ describe('useHostDetails', () => {
       wrapper: TestProviders,
     });
 
-    expect(mockSearch).not.toHaveBeenCalled();
+    expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: true,
+      })
+    );
   });
-  it('skip = true will cancel any running request', () => {
-    const props = {
-      ...defaultProps,
-    };
-    const { rerender } = renderHook(() => useHostDetails(props), {
-      wrapper: TestProviders,
-    });
-    props.skip = true;
-    act(() => rerender());
-    expect(mockUseSearchStrategy).toHaveBeenCalledTimes(2);
-    expect(mockUseSearchStrategy.mock.calls[1][0].abort).toEqual(true);
+
+  it('does not fetch when entityIdentifiers produce no filter', () => {
+    mockUseEntitiesListQuery.mockClear();
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityIdentifiers: {},
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: true,
+      })
+    );
   });
 });

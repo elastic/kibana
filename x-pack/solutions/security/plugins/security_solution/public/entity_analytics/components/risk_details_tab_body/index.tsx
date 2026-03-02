@@ -18,16 +18,11 @@ import { usersSelectors } from '../../../explore/users/store';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import {
-  buildEntityNameFilter,
-  buildHostFilterFromEntityIdentifiers,
-  EntityType,
-} from '../../../../common/search_strategy';
+import { buildEntityNameFilter, EntityType } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
-import { useHostRiskScoresFromEntityStore } from '../../api/hooks/use_host_risk_scores_from_entity_store';
-import { useUserRiskScoresFromEntityStore } from '../../api/hooks/use_user_risk_scores_from_entity_store';
+import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
@@ -39,24 +34,11 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
 const RiskDetailsTabBodyComponent: React.FC<
-  Pick<
-    ComponentsQueryProps,
-    'startDate' | 'endDate' | 'setQuery' | 'deleteQuery' | 'filterQuery'
-  > & {
+  Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
     riskEntity: EntityType;
-    entityIdentifiers?: Record<string, string>;
   }
-> = ({
-  entityName,
-  startDate,
-  endDate,
-  setQuery,
-  deleteQuery,
-  riskEntity,
-  filterQuery: filterQueryProp,
-  entityIdentifiers = {},
-}) => {
+> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
   const queryId = useMemo(
     () =>
       riskEntity === EntityType.host
@@ -71,71 +53,29 @@ const RiskDetailsTabBodyComponent: React.FC<
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
 
+  const timerange = useMemo(
+    () => ({
+      from: startDate,
+      to: endDate,
+    }),
+    [startDate, endDate]
+  );
+
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${queryId} contributors`);
 
-  const querySkip = !contributorsToggleStatus;
-
-  const legacyFilterQuery = useMemo(
+  const filterQuery = useMemo(
     () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 
-  const hostEntityStoreFilterQuery = useMemo(() => {
-    if (filterQueryProp && typeof filterQueryProp === 'string') {
-      return filterQueryProp;
-    }
-    if (entityName && riskEntity === EntityType.host) {
-      const hasHostIdentifiers = Object.keys(entityIdentifiers).some((k) => k.startsWith('host.'));
-      const euidFilter = hasHostIdentifiers
-        ? buildHostFilterFromEntityIdentifiers(entityIdentifiers as Record<string, string>)
-        : undefined;
-      return euidFilter ? JSON.stringify(euidFilter) : JSON.stringify(legacyFilterQuery);
-    }
-    return undefined;
-  }, [filterQueryProp, entityName, riskEntity, legacyFilterQuery, entityIdentifiers]);
-
-  const userEntityStoreFilterQuery = useMemo(() => {
-    if (filterQueryProp && typeof filterQueryProp === 'string') {
-      return filterQueryProp;
-    }
-    if (entityName && riskEntity === EntityType.user) {
-      return JSON.stringify(legacyFilterQuery);
-    }
-    return undefined;
-  }, [filterQueryProp, entityName, riskEntity, legacyFilterQuery]);
-
-  const {
-    data: hostData,
-    loading: hostLoading,
-    refetch: hostRefetch,
-    inspect: hostInspect,
-    hasEngineBeenInstalled: hostHasEngine,
-  } = useHostRiskScoresFromEntityStore({
-    filterQuery: hostEntityStoreFilterQuery,
-    pagination: { cursorStart: 0, querySize: 1 },
-    skip: riskEntity !== EntityType.host || querySkip,
+  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
+    filterQuery,
+    onlyLatest: false,
+    riskEntity,
+    skip: !contributorsToggleStatus,
+    timerange,
   });
-
-  const {
-    data: userData,
-    loading: userLoading,
-    refetch: userRefetch,
-    inspect: userInspect,
-    hasEngineBeenInstalled: userHasEngine,
-  } = useUserRiskScoresFromEntityStore({
-    filterQuery: userEntityStoreFilterQuery,
-    pagination: { cursorStart: 0, querySize: 1 },
-    skip: riskEntity !== EntityType.user || querySkip,
-  });
-
-  const data = riskEntity === EntityType.host ? hostData : userData;
-  const loading = riskEntity === EntityType.host ? hostLoading : userLoading;
-  const refetch = riskEntity === EntityType.host ? hostRefetch : userRefetch;
-  const inspect = riskEntity === EntityType.host ? hostInspect : userInspect;
-  const hasEngineBeenInstalled = riskEntity === EntityType.host ? hostHasEngine : userHasEngine;
-  const hostRiskScore = hostData?.[0];
-  const userRiskScore = userData?.[0];
 
   useQueryInspector({
     queryId,
@@ -184,21 +124,12 @@ const RiskDetailsTabBodyComponent: React.FC<
     <>
       <StyledEuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          {hostRiskScore && riskEntity === EntityType.host && (
+          {data?.[0] && (
             <TopRiskScoreContributorsAlerts
               toggleStatus={contributorsToggleStatus}
               toggleQuery={toggleContributorsQuery}
-              riskScore={hostRiskScore}
-              riskEntity={EntityType.host}
-              loading={loading}
-            />
-          )}
-          {userRiskScore && riskEntity === EntityType.user && (
-            <TopRiskScoreContributorsAlerts
-              toggleStatus={contributorsToggleStatus}
-              toggleQuery={toggleContributorsQuery}
-              riskScore={userRiskScore}
-              riskEntity={EntityType.user}
+              riskScore={data[0]}
+              riskEntity={riskEntity}
               loading={loading}
             />
           )}
