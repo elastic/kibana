@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { durationToDisplayShortText } from './format_duration';
-export {
-  dateMathToRelativeParts,
-  timeRangeToDisplayText,
-  timeRangeToFullFormattedText,
-} from './format_time_range';
-export type { TimeRangeTransformOptions } from '../types';
+import React from 'react';
+
+import { PanelContainer, PanelHeader, SubPanelHeading } from '../date_range_picker_panel_ui';
+
+/** Calendar-based date selection panel. */
+export function CalendarPanel() {
+  return (
+    <PanelContainer>
+      <PanelHeader>
+        <SubPanelHeading>Calendar</SubPanelHeading>
+      </PanelHeader>
+    </PanelContainer>
+  );
+}
+CalendarPanel.PANEL_ID = 'calendar-panel';
