@@ -579,14 +579,19 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
-      /* TODO: DateRangePicker does not yet support the following SuperDatePicker props:
-       * Auto-refresh (coming soon): isPaused, refreshInterval, refreshMinInterval,
-       *   onRefresh, onRefreshChange, isAutoRefreshOnly
-       * General (coming soon): isDisabled, locale, className, width (fullWidth?),
+      /**
+       * TODO: DateRangePicker does not yet support the following SuperDatePicker props:
+       * - General (coming soon): isDisabled, locale, className, width (fullWidth?),
        *   timeZoneDisplayProps
+       * - Auto-refresh (coming soonish): isPaused, refreshInterval, refreshMinInterval,
+       *   onRefresh, onRefreshChange, isAutoRefreshOnly
+       *
+       * TODO: make `DateRangePicker` controlled — `key` forces a remount when
+       * the time range changes externally (a workaround until the `value` prop is added)
        */
       const datePicker = (
         <DateRangePicker
+          key={`${props.dateRangeFrom}-${props.dateRangeTo}`}
           defaultValue={dateRangeDefaultValue}
           onChange={onDateRangeChange}
           dateFormat={uiSettings.get('dateFormat')}
