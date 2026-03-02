@@ -42,7 +42,7 @@ export const SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS = dedent(`
   Prefer the Streams tools below for alert-triaging workflows. Use platform tools (generateEsql, executeEsql, listIndices, getIndexMapping, getDocumentById, productDocumentation) only when you need ad-hoc queries, index inspection, or documentation.
 
   **What's different? (filter noise first)**
-  - **find_changed_queries**: Compare current window to a configurable **baseline_range**. Detects rate change, entity cardinality, new-entity appearance, severity shift; returns **rule IDs per state** (new, stopped, changed, stable) with **rule name and query** per rule, and **total_unique_alert_count** / **excluded_rule_count** so percentages are interpretable. Use **focus_on** (new, stopped, changed, or all) to get only the rule IDs you need. Pass rule IDs from "new", "stopped", or "changed" as **rule_ids** to cluster_by_time; omit stable rule IDs to filter out background noise. Start here when you want to focus on what changed.
+  - **find_changed_queries**: Requires **time_range** (from, to). Loads streams the user has access to; optionally pass **streams** to limit. Detects change points in alert rate within the window. Returns only **changed** rules: each has rule_id, rule_name, rule_query, change_type (e.g. spike, dip, step_change, trend_change), alert_count, alert_percentage. Also changed_count, stable_count, total_alert_count (alerts in window across all rules in scope). When nothing changed, changed is empty—consider a wider time_range or use **compare_to_baseline**.
   - **compare_to_baseline**: Compare this window to a baseline in one tool. Use **baseline_type** "same_window_yesterday" or "same_window_last_week" to classify as new vs chronic vs regression. Use **baseline_type** "custom" with **baseline_range** to get significant terms unique to the current window (e.g. version appeared, error code spiked). Core SRE question: "How does this compare to baseline?" Use early to avoid chasing chronic noise, and again before emitting to validate.
 
   **When did it happen? (incident windows)**
@@ -76,7 +76,7 @@ export const SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS = dedent(`
 
   ## Workflow
 
-  1. **What's different?** Use find_changed_queries (with focus_on e.g. new, changed) and/or compare_to_baseline to avoid chasing chronic noise. Results include rule name and query for each rule ID, plus total and excluded counts so percentages are interpretable. Feed rule IDs in new/stopped/changed states into clustering.
+  1. **What's different?** Use find_changed_queries to get rules with a change point in the timeline; use compare_to_baseline when you need baseline comparison (new vs chronic).
   2. **When did it happen?** Use cluster_by_time to get Incident Windows (start/end/alert_count). Pass **rule_ids** from step 1 to restrict to changed rules. Outputs include rule metadata and scope stats. Prioritize windows by alert_count or peak_rate.
   3. **Where is the impact?** For each priority window, use group_within_window (by_attribute, by_frequent_patterns, or by_semantic) then describe_cluster (with rank_dimensions when multiple clusters). If the same entity fires multiple rules, the entity is often the issue—prefer by_attribute.
   4. **What does it look like?** Use sample_cluster with a predicate handle for diverse samples; use context_expansion on key alerts to fetch surrounding logs and related-entity context.
