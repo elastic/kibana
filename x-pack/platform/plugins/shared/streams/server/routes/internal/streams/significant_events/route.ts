@@ -14,7 +14,7 @@ import {
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {

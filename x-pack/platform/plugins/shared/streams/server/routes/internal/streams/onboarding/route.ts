@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
