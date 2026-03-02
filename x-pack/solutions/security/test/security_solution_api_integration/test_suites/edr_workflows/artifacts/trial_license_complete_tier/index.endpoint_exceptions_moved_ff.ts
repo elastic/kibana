@@ -18,8 +18,7 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/250470
-  describe.skip('Endpoint Exceptions with feature flag enabled', function () {
+  describe('Endpoint Exceptions with feature flag enabled', function () {
     const ingestManager = getService('ingestManager');
     const rolesUsersProvider = getService('rolesUsersProvider');
     const kbnClient = getService('kibanaServer');
