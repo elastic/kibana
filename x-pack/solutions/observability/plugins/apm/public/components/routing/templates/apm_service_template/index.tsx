@@ -15,6 +15,7 @@ import {
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
 } from '@kbn/observability-agent-builder-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
+import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ServiceSloContextProvider } from '../../../../context/service_slo/service_slo_context';
@@ -44,9 +45,11 @@ interface Props {
 
 export function ApmServiceTemplate(props: Props) {
   return (
-    <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
-    </ApmServiceContextProvider>
+    <ApmIndexSettingsContextProvider>
+      <ApmServiceContextProvider>
+        <TemplateWithContext {...props} />
+      </ApmServiceContextProvider>
+    </ApmIndexSettingsContextProvider>
   );
 }
 
