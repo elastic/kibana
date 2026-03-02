@@ -13,7 +13,7 @@ export function FailedToLoadResponse() {
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="alert" color="danger" size="s" />
+        <EuiIcon type="warning" color="danger" size="s" />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s" color="danger">
