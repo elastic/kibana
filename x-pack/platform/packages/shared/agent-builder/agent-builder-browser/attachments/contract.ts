@@ -7,7 +7,11 @@
 
 import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
-import type { UnknownAttachment, AttachmentVersion } from '@kbn/agent-builder-common/attachments';
+import type {
+  UnknownAttachment,
+  AttachmentVersion,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
   PRIMARY = 'primary',
@@ -32,10 +36,12 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   attachment: TAttachment;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
+  /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
+  isCanvas: boolean;
   /** Function to update the attachment's origin reference */
-  updateOrigin: (originId: string) => Promise<void>;
-  /** Callback to open the attachment in canvas mode (expanded flyout view) */
-  openCanvas: () => void;
+  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
+  openCanvas?: () => void;
 }
 
 /**
@@ -78,8 +84,15 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
+   *
+   * The optional `registerActionButtons` callback allows the rendered content to
+   * dynamically register action buttons that appear in the canvas header. This is
+   * useful when buttons depend on state only available at runtime.
    */
-  renderCanvasContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderCanvasContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    registerActionButtons: (buttons: ActionButton[]) => void
+  ) => ReactNode;
   /**
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.
