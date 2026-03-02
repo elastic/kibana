@@ -116,7 +116,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [useEuiMinBreakpoint('xl')]: {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
     },
-    marginRight: euiTheme.size.s,
+    marginRight: euiTheme.size.xs,
     maxWidth: '320px',
     height: '28px',
     input: {

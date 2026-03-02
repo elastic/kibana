@@ -116,11 +116,12 @@ export const toNavigationItems = (
     );
   }
 
+  // Use Elastic logo and generic label in the side nav; solution context is shown in the header next to the space selector.
   const logoItem: SideNavLogo = {
     href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: getIcon(logoNode),
+    iconType: 'logoElastic',
     id: warnIfMissing(logoNode, 'id', 'kibana'),
-    label: warnIfMissing(logoNode, 'title', 'Kibana'),
+    label: 'Kibana',
     'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
   };
 

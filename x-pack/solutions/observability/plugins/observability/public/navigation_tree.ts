@@ -9,11 +9,34 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { lazy } from 'react';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+const LazyIconBriefcase = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+);
+const LazyIconMl = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
+);
+const LazyIconProductStreamsWired = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
+    default: iconProductStreamsWired,
+  }))
+);
+const LazyIconProductCloudInfra = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
+    default: iconProductCloudInfra,
+  }))
+);
+const LazyAgentBuilderIcon = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
+    default: iconRobot,
+  }))
+);
+
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -62,11 +85,9 @@ function createNavTree({
           defaultMessage: 'Discover',
         }),
         link: 'discover',
-        icon: 'productDiscover',
       },
       {
         link: 'dashboards',
-        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
@@ -88,7 +109,7 @@ function createNavTree({
             link: 'observability-overview:cases_create',
           },
         ],
-        icon: 'briefcase',
+        icon: LazyIconBriefcase,
       },
       {
         link: 'slo',
@@ -98,7 +119,7 @@ function createNavTree({
         ? [
             {
               link: 'streams' as const,
-              icon: 'productStreamsWired',
+              icon: LazyIconProductStreamsWired,
             },
           ]
         : []),
@@ -206,7 +227,7 @@ function createNavTree({
           defaultMessage: 'Infrastructure',
         }),
         renderAs: 'panelOpener',
-        icon: 'productCloudInfra',
+        icon: LazyIconProductCloudInfra,
         children: [
           {
             children: [
@@ -269,7 +290,7 @@ function createNavTree({
         : [
             {
               link: 'agent_builder' as const,
-              icon: 'productAgent',
+              icon: LazyAgentBuilderIcon,
             },
           ]),
       {
@@ -278,7 +299,7 @@ function createNavTree({
           defaultMessage: 'Machine Learning',
         }),
         renderAs: 'panelOpener',
-        icon: 'productML',
+        icon: LazyIconMl,
         children: [
           {
             title: '',
@@ -652,6 +673,7 @@ export const createDefinition = (
   id: 'oblt',
   title,
   icon: 'logoObservability',
+  homePage: 'observability-overview',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
@@ -664,4 +686,5 @@ export const createDefinition = (
       })
     )
   ),
+  dataTestSubj: 'observabilitySideNav',
 });

@@ -409,19 +409,7 @@ export const ProjectHeader = ({
               <EuiHeaderSectionItem>
                 <HeaderNavControls navControls$={observables.navControlsCenter$} />
               </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem
-                css={css`
-                  gap: ${euiTheme.size.s};
-                `}
-              >
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
-              </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem
-                css={css`
-                  margin-left: ${euiTheme.size.xs};
-                `}
-              >
+              <EuiHeaderSectionItem>
                 <HeaderHelpMenu
                   isServerless={isServerless}
                   globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
@@ -433,7 +421,10 @@ export const ProjectHeader = ({
                   kibanaVersion={kibanaVersion}
                   navigateToUrl={application.navigateToUrl}
                 />
-              </EuiHeaderSectionItem>              
+              </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsRight$} />
+              </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
         </div>

@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonEmptyProps, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
@@ -38,14 +39,17 @@ import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
-const helpMenuButtonCss = css`
-  min-inline-size: 28px;
-  min-block-size: 28px;
-  inline-size: 28px;
-  block-size: 28px;
-  padding: 2px;
-  margin-right: 4px;
-`;
+const getHelpMenuButtonCss = (euiTheme: { colors: { borderBasePlain?: string } }) =>
+  css`
+    min-inline-size: 28px;
+    min-block-size: 28px;
+    inline-size: 28px;
+    block-size: 28px;
+    padding: 2px;
+    margin-right: 4px;
+    background-color: transparent;
+    border: 1px solid ${euiTheme.colors.borderBasePlain ?? 'transparent'};
+  `;
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -175,7 +179,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
           defaultMessage: 'Help menu',
         })}
         onClick={this.onMenuButtonClick}
-        css={helpMenuButtonCss}
+        css={getHelpMenuButtonCss(theme.euiTheme as Parameters<typeof getHelpMenuButtonCss>[0])}
       >
         <EuiIcon type="question" size="m" />
       </EuiHeaderSectionItemButton>
@@ -426,9 +430,9 @@ const createCustomLink = (
 ) => {
   return (
     <Fragment key={`helpButton${index}`}>
-      <EuiButtonEmpty color="text" {...buttonProps} size="s" flush="left">
+      <EuiButtonIcon color="text" {...buttonProps} size="s" flush="left">
         {text}
-      </EuiButtonEmpty>
+      </EuiButtonIcon>
       {addSpacer && <EuiSpacer size="xs" />}
     </Fragment>
   );

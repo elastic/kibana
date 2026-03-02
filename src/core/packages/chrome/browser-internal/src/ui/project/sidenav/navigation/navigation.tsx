@@ -65,11 +65,12 @@ export const Navigation = (props: ChromeNavigationProps) => {
 
   const { navItems, logoItem, activeItemId, solutionId } = state;
 
+  // POC: Side nav home node hidden (logo={undefined}); main header Elastic logo goes to solution home when in a solution.
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
-        logo={logoItem}
+        logo={undefined}
         sidePanelFooter={
           <NavigationFeedbackSnippet
             isEnabled={isFeedbackEnabled}

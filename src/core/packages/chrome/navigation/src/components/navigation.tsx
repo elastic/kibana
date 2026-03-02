@@ -49,8 +49,9 @@ export interface NavigationProps {
   items: NavigationStructure;
   /**
    * The logo object containing the route ID, href, label, and type.
+   * Optional: when undefined, the side nav logo (home node) is not rendered (home is shown in the main header only).
    */
-  logo: SideNavLogo;
+  logo?: SideNavLogo;
   /**
    * Required by the grid layout to set the width of the navigation slot.
    */
@@ -105,7 +106,7 @@ export const Navigation = ({
     visuallyActiveSubpageId,
     isSidePanelOpen,
     openerNode,
-  } = useNavigation(isCollapsed, items, logo.id, activeItemId);
+  } = useNavigation(isCollapsed, items, logo?.id, activeItemId);
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
@@ -135,13 +136,14 @@ export const Navigation = ({
       id={NAVIGATION_ROOT_SELECTOR}
     >
       <SideNav isCollapsed={isCollapsed}>
-        <SideNav.Logo
+        {/* POC: Side nav logo (home node) commented out; home is shown in the main header only and overrides to solution home when in a solution. */}
+        {/* <SideNav.Logo
           isCollapsed={isCollapsed}
           isCurrent={actualActiveItemId === logo.id}
           isHighlighted={visuallyActivePageId === logo.id}
           onClick={() => onItemClick?.(logo)}
           {...logo}
-        />
+        /> */}
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (
