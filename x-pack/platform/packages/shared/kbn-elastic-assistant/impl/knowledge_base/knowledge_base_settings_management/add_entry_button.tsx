@@ -70,11 +70,11 @@ export const AddEntryButton: React.FC<Props> = React.memo(
         button={
           <EuiButton
             data-test-subj="addEntry"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={onButtonClick}
           >
-            <EuiIcon type="plusInCircle" />
+            <EuiIcon type="plusCircle" />
             {i18n.NEW}
           </EuiButton>
         }

@@ -282,7 +282,7 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(container.querySelector('[data-euiicon-type="eyeClosed"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="eyeSlash"]')).not.toBeNull();
       expect(container.querySelector('[data-euiicon-type="eye"]')).toBeNull();
     });
 
@@ -296,7 +296,7 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(container.querySelector('[data-euiicon-type="eyeClosed"]')).toBeNull();
+      expect(container.querySelector('[data-euiicon-type="eyeSlash"]')).toBeNull();
       expect(container.querySelector('[data-euiicon-type="eye"]')).not.toBeNull();
     });
 

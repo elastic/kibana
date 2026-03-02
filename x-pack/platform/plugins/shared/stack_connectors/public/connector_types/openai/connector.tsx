@@ -318,7 +318,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                       <EuiButtonIcon
                         color="danger"
                         onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
+                        iconType="minusCircle"
                         aria-label={i18nAuth.DELETE_BUTTON}
                         css={{ marginTop: '28px' }}
                       />
@@ -327,7 +327,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                 ))}
                 <EuiSpacer size="m" />
                 <EuiButtonEmpty
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={addItem}
                   data-test-subj="openAIAddHeaderButton"
                 >

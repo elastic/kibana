@@ -254,7 +254,7 @@ const TakeActionComponent: React.FC<Props> = ({
       <EuiButtonEmpty
         data-test-subj="takeActionPopoverButton"
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={onButtonClick}
         size={buttonSize}
       >
