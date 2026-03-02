@@ -915,7 +915,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   Specifies the maximum number of alerts that a rule can generate each time detection checks run.
 
     ::::{warning}
-    The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload, however setting a value higher than the default (`1000`) is not recommended or supported. Doing so could strain system resources and lead to performance issues, delays in alert processing, and potential disruptions during high alert activity periods.
+    The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload. While it is technically possible to increase this value above 1000, doing so is not recommended and not supported. Increasing this limit can significantly affect {{kib}} and {{es}} performance and memory usage. Carefully evaluate the impact on your deployment before making this change.
     ::::
 
     Data type: `int`
