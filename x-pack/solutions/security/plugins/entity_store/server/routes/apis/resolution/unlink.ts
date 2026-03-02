@@ -12,7 +12,7 @@ import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { EntitiesNotFoundError, EntityNotAliasError } from '../../../domain/errors';
+import { EntitiesNotFoundError } from '../../../domain/errors';
 
 const bodySchema = z.object({
   entity_ids: z.array(z.string()).min(1).max(1000),
@@ -49,9 +49,6 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
         } catch (error) {
           if (error instanceof EntitiesNotFoundError) {
             return res.customError({ statusCode: 404, body: error });
-          }
-          if (error instanceof EntityNotAliasError) {
-            return res.badRequest({ body: error });
           }
 
           logger.error(error);

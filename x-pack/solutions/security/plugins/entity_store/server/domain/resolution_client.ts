@@ -14,7 +14,6 @@ import {
   ChainResolutionError,
   EntitiesNotFoundError,
   EntityHasAliasesError,
-  EntityNotAliasError,
   MixedEntityTypesError,
   ResolutionUpdateError,
   SelfLinkError,
@@ -38,6 +37,7 @@ export interface LinkResult {
 
 export interface UnlinkResult {
   unlinked: string[];
+  skipped: string[];
 }
 
 export interface ResolutionGroup {
@@ -168,28 +168,32 @@ export class ResolutionClient {
       throw new EntitiesNotFoundError(missingIds);
     }
 
-    // 4. Validate: all have resolved_to (are aliases)
-    const notAliases: string[] = [];
+    // 4. Categorize: aliases to unlink vs non-aliases to skip
+    const toUnlink: string[] = [];
+    const skipped: string[] = [];
+
     for (const entityId of entityIds) {
       const entity = entities.get(entityId)!;
       const resolvedTo = entity[RESOLVED_TO_FIELD] as string | undefined;
-      if (!resolvedTo) {
-        notAliases.push(entityId);
+      if (resolvedTo) {
+        toUnlink.push(entityId);
+      } else {
+        skipped.push(entityId);
       }
     }
 
-    if (notAliases.length > 0) {
-      throw new EntityNotAliasError(notAliases);
+    if (toUnlink.length === 0) {
+      return { unlinked: [], skipped };
     }
 
     // 5. Batch updateByQuery: remove resolved_to field
-    this.logger.debug(`Unlinking ${entityIds.length} entities`);
+    this.logger.debug(`Unlinking ${toUnlink.length} entities`);
 
     const unlinkResult = await this.esClient.updateByQuery({
       index,
       query: {
         bool: {
-          filter: [{ terms: { [ENTITY_ID_FIELD]: entityIds } }],
+          filter: [{ terms: { [ENTITY_ID_FIELD]: toUnlink } }],
         },
       },
       script: {
@@ -206,7 +210,7 @@ export class ResolutionClient {
       throw new ResolutionUpdateError('unlink entities', unlinkResult.failures);
     }
 
-    return { unlinked: entityIds };
+    return { unlinked: toUnlink, skipped };
   }
 
   /**

@@ -11,7 +11,6 @@ export { EntityStoreNotRunningError } from './entity_store_not_running';
 export { BadCRUDRequestError } from './bad_crud_request_error';
 export { ChainResolutionError } from './chain_resolution_error';
 export { EntityHasAliasesError } from './entity_has_aliases_error';
-export { EntityNotAliasError } from './entity_not_alias_error';
 export { SelfLinkError } from './self_link_error';
 export { EntitiesNotFoundError } from './entities_not_found_error';
 export { MixedEntityTypesError } from './mixed_entity_types_error';

@@ -12,7 +12,6 @@ import {
   ChainResolutionError,
   EntitiesNotFoundError,
   EntityHasAliasesError,
-  EntityNotAliasError,
   MixedEntityTypesError,
   ResolutionUpdateError,
   SelfLinkError,
@@ -258,7 +257,7 @@ describe('ResolutionClient', () => {
 
       const result = await client.unlinkEntities(['alias-1']);
 
-      expect(result).toEqual({ unlinked: ['alias-1'] });
+      expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
       expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           script: expect.objectContaining({
@@ -275,25 +274,29 @@ describe('ResolutionClient', () => {
       await expect(client.unlinkEntities(['alias-1'])).rejects.toThrow(EntitiesNotFoundError);
     });
 
-    it('should throw EntityNotAliasError when entities are not aliases', async () => {
+    it('should skip non-alias entities', async () => {
       const standaloneDoc = createEntityDoc('entity-1');
 
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([standaloneDoc]) as never);
 
-      await expect(client.unlinkEntities(['entity-1'])).rejects.toThrow(EntityNotAliasError);
+      const result = await client.unlinkEntities(['entity-1']);
+
+      expect(result).toEqual({ unlinked: [], skipped: ['entity-1'] });
+      expect(mockEsClient.updateByQuery).not.toHaveBeenCalled();
     });
 
-    it('should throw EntityNotAliasError listing only non-alias entities', async () => {
+    it('should unlink aliases and skip non-aliases in mixed input', async () => {
       const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
       const standaloneDoc = createEntityDoc('entity-1');
 
       mockEsClient.search.mockResolvedValueOnce(
         createSearchResponse([aliasDoc, standaloneDoc]) as never
       );
+      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
 
-      await expect(client.unlinkEntities(['alias-1', 'entity-1'])).rejects.toThrow(
-        EntityNotAliasError
-      );
+      const result = await client.unlinkEntities(['alias-1', 'entity-1']);
+
+      expect(result).toEqual({ unlinked: ['alias-1'], skipped: ['entity-1'] });
     });
 
     it('should deduplicate entity_ids', async () => {
@@ -304,7 +307,7 @@ describe('ResolutionClient', () => {
 
       const result = await client.unlinkEntities(['alias-1', 'alias-1', 'alias-1']);
 
-      expect(result).toEqual({ unlinked: ['alias-1'] });
+      expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
     });
 
     it('should throw ResolutionUpdateError when updateByQuery has failures', async () => {
