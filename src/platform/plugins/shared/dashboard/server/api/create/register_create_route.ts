@@ -9,7 +9,7 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import { getRouteConfig } from '../get_route_config';
 import {
   createRequestParamsSchema,
   getCreateRequestBodySchema,
@@ -22,15 +22,16 @@ export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
+  const { routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
     path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id?}`,
     summary: 'Create a dashboard with an auto-generated ID or a specified ID',
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   createRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
           params: createRequestParamsSchema,

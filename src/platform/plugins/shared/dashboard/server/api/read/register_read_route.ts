@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { stripUnmappedKeys } from '../scope_tooling';
@@ -20,15 +20,16 @@ export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
   isDashboardAppRequest: boolean
 ) {
+  const { routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const readRoute = router.get({
     path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id}`,
     summary: `Get a dashboard`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   readRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
           params: schema.object({
