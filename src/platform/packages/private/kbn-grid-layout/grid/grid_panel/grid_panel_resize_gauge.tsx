@@ -37,13 +37,16 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
           return;
         }
         const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
-        const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
+
         if (!ref) {
           setIsResizing(false);
           return;
         }
 
-        if (isPanelActive) {
+        const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
+        const isResize = activePanel?.type === 'resize';
+
+        if (isPanelActive && isResize) {
           setIsResizing(true);
           setWidth(currentPanel.width);
           setHeight(currentPanel.height);
