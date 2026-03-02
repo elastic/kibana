@@ -10,8 +10,8 @@ import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import type { AgentPolicy } from '../../types';
-
 import { isAgentlessEnabled } from '../utils/agentless';
+
 import { syncAgentlessDeployments } from './deployment_sync';
 
 jest.mock('../agent_policy');
