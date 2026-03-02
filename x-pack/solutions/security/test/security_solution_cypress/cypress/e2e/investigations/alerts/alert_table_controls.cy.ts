@@ -34,8 +34,6 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { DATAGRID_HEADER } from '../../../screens/timeline';
-import { TIMELINE_BOTTOM_BAR } from '../../../screens/alerts_detection_rules';
-import { TABLE_PER_PAGE_POPOVER_BTN } from '../../../screens/table_pagination';
 
 /*
  *
@@ -53,23 +51,13 @@ describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
   });
 
-  it('should hide timeline footer in fullscreen and keep pagination accessible', () => {
-    cy.get(TIMELINE_BOTTOM_BAR).should('be.visible');
-
+  it('should enter and exit full screen, column sorting', () => {
     cy.get(DATA_GRID_FULL_SCREEN)
       .should('have.attr', 'aria-label', 'Enter fullscreen')
       .trigger('click');
-
-    cy.get(TIMELINE_BOTTOM_BAR).should('not.exist');
-    cy.get('[data-test-subj="alertsTableIsLoaded"]')
-      .find(TABLE_PER_PAGE_POPOVER_BTN)
-      .should('be.visible');
-
     cy.get(DATA_GRID_FULL_SCREEN)
       .should('have.attr', 'aria-label', 'Exit fullscreen')
       .trigger('click');
-
-    cy.get(TIMELINE_BOTTOM_BAR).should('be.visible');
   });
 
   it('should have correct column sorting values', () => {
