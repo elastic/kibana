@@ -26,7 +26,6 @@ import { Location } from '../types';
 
 export enum MmrPosition {
   AFTER_MMR_KEYWORD = 'after_mmr_keyword',
-  AFTER_QUERY_VECTOR = 'after_query_vector',
   AFTER_ON_KEYWORD = 'after_on_keyword',
   AFTER_FIELD = 'after_field',
   AFTER_LIMIT_KEYWORD = 'after_limit_keyword',
@@ -164,13 +163,6 @@ export function getPosition(command: ESQLAstMmrCommand): MmrPosition {
       return MmrPosition.AFTER_ON_KEYWORD;
     }
     return MmrPosition.AFTER_FIELD;
-  }
-
-  if (command.queryVector) {
-    if (command.queryVector.incomplete) {
-      return MmrPosition.AFTER_MMR_KEYWORD;
-    }
-    return MmrPosition.AFTER_QUERY_VECTOR;
   }
 
   return MmrPosition.AFTER_MMR_KEYWORD;

@@ -8,10 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstMmrCommand } from '../../../types';
-import { suggestForExpression } from '../../definitions/utils';
+import type { ESQLAstAllCommands, ESQLAstField, ESQLAstMmrCommand } from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import {
   mmrLambdaMapSuggestion,
   mmrLambdaValueSuggestion,
@@ -50,31 +50,32 @@ export async function autocomplete(
     case MmrPosition.AFTER_MMR_KEYWORD: {
       const queryVectorExpression = mmrCommand.queryVector;
 
-      if (queryVectorExpression && !Array.isArray(queryVectorExpression)) {
-        const { suggestions } = await suggestForExpression({
-          query,
-          command,
-          expressionRoot: queryVectorExpression,
-          cursorPosition,
-          location: Location.MMR,
-          context,
-          callbacks,
-        });
-
-        if (suggestions.length > 0) {
-          return suggestions;
-        }
+      if (command.args.length === 0) {
+        return [
+          onCompleteItem,
+          mmrQueryVectorSuggestion,
+          ...getMmrVectorValueSuggestions(callbacks, context),
+        ];
       }
 
-      return [
-        onCompleteItem,
-        mmrQueryVectorSuggestion,
-        ...getMmrVectorValueSuggestions(callbacks, context),
-      ];
-    }
+      const suggestions = await suggestFieldsList(
+        query,
+        command,
+        [queryVectorExpression as ESQLAstField],
+        Location.MMR,
+        callbacks,
+        context,
+        cursorPosition,
+        {
+          afterCompleteSuggestions: [onCompleteItem],
+          includePipeAndCommaSuggestions: false,
+          allowSingleColumnFields: true,
+          preferredExpressionType: 'dense_vector',
+        }
+      );
 
-    case MmrPosition.AFTER_QUERY_VECTOR:
-      return [onCompleteItem];
+      return suggestions.length > 0 ? suggestions : [onCompleteItem];
+    }
 
     case MmrPosition.AFTER_ON_KEYWORD:
       return getVectorFieldSuggestions(innerText, callbacks, context);
