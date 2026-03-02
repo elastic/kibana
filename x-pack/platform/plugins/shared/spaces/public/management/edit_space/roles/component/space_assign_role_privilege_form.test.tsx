@@ -479,7 +479,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+      await waitFor(() =>
+        expect(screen.getByTestId('custom-privilege-button')).toBeInTheDocument()
+      );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
@@ -539,7 +541,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+      await waitFor(() =>
+        expect(screen.getByTestId('custom-privilege-button')).toBeInTheDocument()
+      );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
