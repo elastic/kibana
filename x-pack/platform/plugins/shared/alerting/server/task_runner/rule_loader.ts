@@ -178,7 +178,7 @@ export function getFakeKibanaRequest(
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path,
+    path: '/',
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

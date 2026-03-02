@@ -316,6 +316,5 @@ function getTaskRunnerContext() {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
     basePathService: mockBasePathService,
-    logger: mockLogger,
   };
 }
