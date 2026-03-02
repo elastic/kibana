@@ -30,6 +30,7 @@ import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { backfillClientMock } from '../../../../../backfill_client/backfill_client.mock';
 import type { GetGapAutoFillSchedulerParams } from '../types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 describe('deleteGapAutoFillScheduler()', () => {
   const kibanaVersion = 'v8.0.0';
@@ -75,6 +76,8 @@ describe('deleteGapAutoFillScheduler()', () => {
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     eventLogger,
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
   };
 
   function setupSchedulerSo(attrs?: Partial<GapAutoFillSchedulerSO>) {
