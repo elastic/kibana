@@ -12,7 +12,8 @@ import { schema } from './schema';
 import type { CasesConfigurationUI } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
+import { createFormSerializer, createFormDeserializer } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { type UseSubmitCaseValue } from './use_submit_case';
 
