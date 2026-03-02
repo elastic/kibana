@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "237070"
+prs:
+- "237070"
 issues:
 - https://github.com/elastic/kibana/issues/235477
 type: enhancement
@@ -89,7 +90,7 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- Sharing
+- Sharing and reporting
 - Discover
-- ES|QL
+- ES|QL editor
 title: Discover to dashboard with controls, saving the histogram

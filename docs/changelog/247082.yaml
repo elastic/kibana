@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,11 +81,12 @@
 #   - security
 #   - other
 
-pr: "247082"
+prs:
+- "247082"
 type: enhancement
 products:
 - product: kibana
   target: 9.3.0
 areas:
-- Management
+- Elastic Observability solution
 title: Add abort support and silent mode for stream description generation

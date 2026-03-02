@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "245311"
+prs:
+- "245311"
 issues:
 - https://github.com/elastic/kibana/issues/244961
 - https://github.com/elastic/kibana/issues/244715
@@ -91,6 +92,6 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- Search
+- Elasticsearch solution
 title: Deprecate feature flag (part 1 of 2)
 description: Adds a new getting started page within the Elasticsearch solution which offers hands on feature tutorials. This page defaults as the initial destination for users creating a new Elasticsearch project.

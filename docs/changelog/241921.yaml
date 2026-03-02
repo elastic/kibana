@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,16 +81,15 @@
 #   - security
 #   - other
 
-pr: "241921"
+prs:
+- "241921"
 issues:
 - https://github.com/elastic/kibana/issues/237401
 type: enhancement
 products:
 - product: kibana
   target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
 - Elastic Observability solution
-- ES|QL
+- ES|QL editor
 title: Supports subqueries in our apps

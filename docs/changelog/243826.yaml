@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "243826"
+prs:
+- "243826"
 issues:
 - https://github.com/elastic/kibana/issues/243688
 type: bug-fix
@@ -89,6 +90,6 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- Management
+- Elastic Observability solution
 title: "\U0001F30A [Streams] \U0001F41E Prevent retention page crash for certain ILM policies"
 description: Fixes a crash on UI Streams > retention page when a stream has defined an index lifecycle (ILM) policy that omits expected lifecycle phases or all of it phases starts at `0`.

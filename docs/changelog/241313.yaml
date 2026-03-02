@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,13 +81,12 @@
 #   - security
 #   - other
 
-pr: "241313"
+prs:
+- "241313"
 type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
-- Management
+- Elastic Observability solution
 title: "\U0001F30A Streams: Speed up field simulation"

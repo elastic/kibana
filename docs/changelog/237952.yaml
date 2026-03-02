@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,12 +81,13 @@
 #   - security
 #   - other
 
-pr: "237952"
+prs:
+- "237952"
 type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
 areas:
-- Management
+- Data management
 title: Fix @custom component template creation
 description: Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data-streams and a popup would appear asking to rollover conflicting ones.

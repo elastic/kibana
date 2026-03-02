@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,12 +81,13 @@
 #   - security
 #   - other
 
-pr: "248462"
+prs:
+- "248462"
 type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
 areas:
-- Search
+- Elasticsearch solution
 title: 'Fix: Only run ML saved object check if saving semantic text mapping'
 description: Fixes an issue when running Elasticsearch with a Basic license, where users might encounter errors when updating index mappings, even when adding non-ML field types. This issue has been resolved so that mapping updates now work as expected, while advanced semantic text features continue to require the appropriate license.

@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "245975"
+prs:
+- "245975"
 issues:
 - https://github.com/elastic/kibana/issues/241646
 type: enhancement
@@ -89,6 +90,6 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- Management
+- Elastic Observability solution
 title: Add classic stream creation flyout to Streams page
 description: Adds a new flyout to create classic streams directly from the Streams page. The UI includes validation to prevent duplicate stream names and detect index template priority conflicts and ensuring streams are created with the expected configuration.

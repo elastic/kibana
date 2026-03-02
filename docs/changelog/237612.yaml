@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,12 +81,13 @@
 #   - security
 #   - other
 
-pr: "237612"
+prs:
+- "237612"
 type: enhancement
 products:
 - product: kibana
   target: 9.3.0
 areas:
-- Search
+- Elasticsearch solution
 title: Remove global empty state redirect
 description: Users will now land on the Elasticsearch home page by default instead of being redirected to the create index page. This ensures immediate access to tutorials and educational content, improving discoverability of Kibana features while removing the previous global empty state redirect.
