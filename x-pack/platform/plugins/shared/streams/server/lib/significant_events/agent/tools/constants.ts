@@ -10,7 +10,6 @@ import { toolNamespaces } from '@kbn/agent-builder-common';
 const ns = toolNamespaces.streams;
 
 export const STREAMS_TOOL_IDS = {
-  gather_context: `${ns}.gather_context`,
   find_changed_queries: `${ns}.find_changed_queries`,
   cluster_by_time: `${ns}.cluster_by_time`,
   group_within_window: `${ns}.group_within_window`,

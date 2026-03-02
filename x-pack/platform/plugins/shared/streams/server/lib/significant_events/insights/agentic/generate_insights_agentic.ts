@@ -20,7 +20,7 @@ const DEFAULT_MAX_STEPS = 10;
 
 /**
  * Generates insights using the agentic flow: a single call to executeAsReasoningAgent
- * with the Significant Events agent instructions and tools (gather_context,
+ * with the Significant Events agent instructions and tools (find_changed_queries,
  * find_changed_queries, cluster_by_time, etc.). The agent uses tools to explore
  * and must complete by calling submit_insights.
  *

@@ -15,7 +15,6 @@ import {
   SIGNIFICANT_EVENTS_AGENT_ANSWER_INSTRUCTIONS,
 } from '../../agent/instructions';
 import { STREAMS_TOOL_IDS } from '../../agent/tools/constants';
-import { getGatherContextTool } from '../../agent/tools/gather_context';
 import { getFindChangedQueriesTool } from '../../agent/tools/find_changed_queries';
 import { getClusterByTimeTool } from '../../agent/tools/cluster_by_time';
 import { getGroupWithinWindowTool } from '../../agent/tools/group_within_window';
@@ -50,7 +49,6 @@ interface StreamToolWithSchema {
 export function getInsightsAgentPromptToolDefinitions(
   deps: SignificantEventsAgentToolDependencies
 ): Record<string, { description: string; schema: ToolSchema }> {
-  const gatherContext = getGatherContextTool(deps) as StreamToolWithSchema;
   const findChangedQueries = getFindChangedQueriesTool(deps) as StreamToolWithSchema;
   const clusterByTime = getClusterByTimeTool(deps) as StreamToolWithSchema;
   const groupWithinWindow = getGroupWithinWindowTool(deps) as StreamToolWithSchema;
@@ -63,10 +61,6 @@ export function getInsightsAgentPromptToolDefinitions(
   const embeddingSearchSimilar = getEmbeddingSearchSimilarTool(deps) as StreamToolWithSchema;
 
   return {
-    [STREAMS_TOOL_IDS.gather_context]: {
-      description: gatherContext.description,
-      schema: toolSchemaFromZod(gatherContext.schema),
-    },
     [STREAMS_TOOL_IDS.find_changed_queries]: {
       description: findChangedQueries.description,
       schema: toolSchemaFromZod(findChangedQueries.schema),
@@ -127,7 +121,7 @@ const systemPromptTemplate = `${SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS}
 
 ${SIGNIFICANT_EVENTS_AGENT_ANSWER_INSTRUCTIONS}`;
 
-const userPromptTemplate = `Time range: {{{from}}} to {{{to}}}.
+const userPromptTemplate = `Relevant time range for analysis: {{{from}}} to {{{to}}}.
 {{#stream_names}}Streams to analyze: {{{stream_names}}}.
 {{/stream_names}}
 Use the tools to gather context, cluster, and analyze. When you have finished, you MUST call \`${SUBMIT_INSIGHTS_TOOL_NAME}\` exactly once with your final list of Insights (or an empty array if none).`;

@@ -15,7 +15,6 @@ import {
 import type { SignificantEventsAgentToolDependencies } from './tool_dependencies';
 import {
   STREAMS_TOOL_IDS,
-  getGatherContextTool,
   getFindChangedQueriesTool,
   getClusterByTimeTool,
   getGroupWithinWindowTool,
@@ -35,7 +34,6 @@ const SIGNIFICANT_EVENTS_AGENT_TOOL_IDS = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.productDocumentation,
-  STREAMS_TOOL_IDS.gather_context,
   STREAMS_TOOL_IDS.find_changed_queries,
   STREAMS_TOOL_IDS.cluster_by_time,
   STREAMS_TOOL_IDS.group_within_window,
@@ -58,7 +56,6 @@ export function registerSignificantEventsAgent(
   agentBuilder: AgentBuilderPluginSetup,
   deps: SignificantEventsAgentToolDependencies
 ): void {
-  agentBuilder.tools.register(getGatherContextTool(deps));
   agentBuilder.tools.register(getFindChangedQueriesTool(deps));
   agentBuilder.tools.register(getClusterByTimeTool(deps));
   agentBuilder.tools.register(getGroupWithinWindowTool(deps));

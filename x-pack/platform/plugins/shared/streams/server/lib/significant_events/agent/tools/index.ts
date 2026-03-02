@@ -8,7 +8,6 @@
 export { STREAMS_TOOL_IDS } from './constants';
 export type { StreamsToolId } from './constants';
 
-export { getGatherContextTool, GATHER_CONTEXT_TOOL_ID } from './gather_context';
 export { getFindChangedQueriesTool, FIND_CHANGED_QUERIES_TOOL_ID } from './find_changed_queries';
 export { getClusterByTimeTool, CLUSTER_BY_TIME_TOOL_ID } from './cluster_by_time';
 export { getGroupWithinWindowTool, GROUP_WITHIN_WINDOW_TOOL_ID } from './group_within_window';

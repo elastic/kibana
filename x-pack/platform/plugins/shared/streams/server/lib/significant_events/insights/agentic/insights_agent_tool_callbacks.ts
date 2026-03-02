@@ -10,7 +10,6 @@ import type { ToolCallback, ToolCall, ToolCallbackResult } from '@kbn/inference-
 import { z } from '@kbn/zod';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
-import { getGatherContextTool } from '../../agent/tools/gather_context';
 import { getFindChangedQueriesTool } from '../../agent/tools/find_changed_queries';
 import { getClusterByTimeTool } from '../../agent/tools/cluster_by_time';
 import { getGroupWithinWindowTool } from '../../agent/tools/group_within_window';
@@ -78,7 +77,6 @@ export function createInsightsAgentToolCallbacks(
   const context = { request };
   const callbacks: Record<string, ToolCallback> = {};
 
-  registerCallback(callbacks, getGatherContextTool(deps) as unknown as StreamToolAdapter, context);
   registerCallback(
     callbacks,
     getFindChangedQueriesTool(deps) as unknown as StreamToolAdapter,
