@@ -6,7 +6,7 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+import type { CcsLogsExtractionClient } from '../ccs_logs_extraction_client';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
