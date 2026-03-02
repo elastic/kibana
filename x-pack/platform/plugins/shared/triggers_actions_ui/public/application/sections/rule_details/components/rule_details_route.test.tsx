@@ -15,7 +15,7 @@ import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import type { Rule } from '../../../../types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRegisterCpsPickerAccess } from '../../../hooks/use_register_cps_picker_access';
+import { useCpsPickerAccess } from '../../../hooks/use_register_cps_picker_access';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 jest.mock('../../../../common/lib/kibana');
 
@@ -39,8 +39,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('../../../hooks/use_register_cps_picker_access');
-const mockRegisterCpsPickerAccess = jest.fn();
-jest.mocked(useRegisterCpsPickerAccess).mockReturnValue(mockRegisterCpsPickerAccess);
+const mockUseCpsPickerAccess = jest.mocked(useCpsPickerAccess);
 
 function renderWithIntl(ui: React.ReactElement) {
   return render(
@@ -136,35 +135,7 @@ describe('rule_details_route', () => {
     });
   });
 
-  it("sets the CPS picker access to DISABLED if the rule doesn't have a UIAM API key", async () => {
-    await setup();
-    const rule = mockRule();
-    const ruleType = {
-      id: rule.ruleTypeId,
-      name: 'type name',
-      authorizedConsumers: ['consumer'],
-    };
-    const { loadRuleTypes, loadActionTypes, resolveRule } = mockApis();
-
-    loadRuleTypes.mockImplementationOnce(async () => [ruleType]);
-    loadActionTypes.mockImplementation(async () => []);
-    resolveRule.mockImplementationOnce(async () => rule);
-
-    renderWithIntl(
-      <RuleDetailsRoute
-        {...mockRouterProps(rule)}
-        {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }}
-      />
-    );
-
-    await waitFor(() => {
-      expect(resolveRule).toHaveBeenCalledWith(rule.id);
-    });
-
-    expect(mockRegisterCpsPickerAccess).toHaveBeenCalledWith(ProjectRoutingAccess.DISABLED);
-  });
-
-  it('sets the CPS picker access to READONLY if the rule does have a UIAM API key', async () => {
+  it('sets the CPS picker access to READONLY', async () => {
     await setup();
     const rule = mockRule();
     const ruleType = {
@@ -189,7 +160,7 @@ describe('rule_details_route', () => {
       expect(resolveRule).toHaveBeenCalledWith(rule.id);
     });
 
-    expect(mockRegisterCpsPickerAccess).toHaveBeenCalledWith(ProjectRoutingAccess.READONLY);
+    expect(mockUseCpsPickerAccess).toHaveBeenCalledWith(ProjectRoutingAccess.READONLY);
   });
 });
 

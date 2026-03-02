@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '../../common/lib';
 
 /**
- * Returns a function to dynamically set the CPS global project picker
- * access state only for the current matching route
+ * Set the CPS global project picker access state only for the current matching route
  */
-export const useRegisterCpsPickerAccess = () => {
+export const useCpsPickerAccess = (access: ProjectRoutingAccess) => {
   const { application, cps } = useKibana().services;
   const routeMatch = useRouteMatch();
   const currentAppId = useObservable(application.currentAppId$);
-  const [access, setAccess] = useState(ProjectRoutingAccess.DISABLED);
 
   useEffect(() => {
     if (!currentAppId || !cps?.cpsManager) {
@@ -36,6 +34,4 @@ export const useRegisterCpsPickerAccess = () => {
       cps?.cpsManager?.registerAppAccess(currentAppId, () => ProjectRoutingAccess.DISABLED);
     };
   }, [access, cps, currentAppId, routeMatch]);
-
-  return setAccess;
 };

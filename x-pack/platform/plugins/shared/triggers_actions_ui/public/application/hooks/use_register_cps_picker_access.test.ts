@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '../../common/lib';
-import { useRegisterCpsPickerAccess } from './use_register_cps_picker_access';
+import { useCpsPickerAccess } from './use_register_cps_picker_access';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('react-router-dom', () => ({
@@ -45,22 +45,22 @@ describe('useRegisterCpsPickerAccess', () => {
     registerAppAccess.mock.calls[registerAppAccess.mock.calls.length - 1]?.[1];
 
   it('registers access for the current app and matches the route', () => {
-    renderHook(() => useRegisterCpsPickerAccess());
+    renderHook(() => useCpsPickerAccess(ProjectRoutingAccess.READONLY));
 
     expect(registerAppAccess).toHaveBeenCalledTimes(1);
     expect(registerAppAccess).toHaveBeenCalledWith('app-id', expect.any(Function));
 
     const callback = getRegisteredCallback();
-    expect(callback?.('/app/alerts/rule/123')).toBe(ProjectRoutingAccess.DISABLED);
+    expect(callback?.('/app/alerts/rule/123')).toBe(ProjectRoutingAccess.READONLY);
     expect(callback?.('/app/alerts/rule/999')).toBe(ProjectRoutingAccess.DISABLED);
   });
 
-  it('updates the access value when setAccess is called', () => {
-    const { result } = renderHook(() => useRegisterCpsPickerAccess());
-
-    act(() => {
-      result.current(ProjectRoutingAccess.READONLY);
+  it('updates the access value when rerendered with a new access', () => {
+    const { rerender } = renderHook(({ access }) => useCpsPickerAccess(access), {
+      initialProps: { access: ProjectRoutingAccess.DISABLED },
     });
+
+    rerender({ access: ProjectRoutingAccess.READONLY });
 
     expect(registerAppAccess).toHaveBeenCalledTimes(3);
     const callback = getRegisteredCallback();
@@ -69,7 +69,7 @@ describe('useRegisterCpsPickerAccess', () => {
   });
 
   it('resets access to disabled on unmount', () => {
-    const { unmount } = renderHook(() => useRegisterCpsPickerAccess());
+    const { unmount } = renderHook(() => useCpsPickerAccess(ProjectRoutingAccess.READONLY));
 
     unmount();
 
@@ -82,7 +82,7 @@ describe('useRegisterCpsPickerAccess', () => {
     // @ts-expect-error invalid app value
     mockCurrentAppId$.next(undefined);
 
-    renderHook(() => useRegisterCpsPickerAccess());
+    renderHook(() => useCpsPickerAccess(ProjectRoutingAccess.READONLY));
 
     expect(registerAppAccess).not.toHaveBeenCalled();
   });
@@ -97,7 +97,7 @@ describe('useRegisterCpsPickerAccess', () => {
       },
     } as any);
 
-    renderHook(() => useRegisterCpsPickerAccess());
+    renderHook(() => useCpsPickerAccess(ProjectRoutingAccess.READONLY));
 
     expect(registerAppAccess).not.toHaveBeenCalled();
   });

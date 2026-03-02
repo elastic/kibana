@@ -11,7 +11,7 @@ import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
-import { useRegisterCpsPickerAccess } from '../../hooks/use_register_cps_picker_access';
+import { useCpsPickerAccess } from '../../hooks/use_register_cps_picker_access';
 import { useKibana } from '../../../common/lib/kibana';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
@@ -66,7 +66,7 @@ export const RuleFormRoute = () => {
     templateId,
   });
 
-  const registerCpsPickerAccess = useRegisterCpsPickerAccess();
+  useCpsPickerAccess(ProjectRoutingAccess.READONLY);
 
   const ruleTypeId = ruleTypeIdParams ?? ruleTemplate?.ruleTypeId;
 
@@ -89,7 +89,6 @@ export const RuleFormRoute = () => {
     if (ruleTypeId || templateId) {
       setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('createRule')]);
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
-      registerCpsPickerAccess(ProjectRoutingAccess.READONLY);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeId, templateId, id, getUrlForApp, useUnifiedRulesPage]);
@@ -119,7 +118,6 @@ export const RuleFormRoute = () => {
           actionTypeRegistry,
           contentManagement,
           uiActions,
-          registerCpsPickerAccess,
           ...startServices,
         }}
         initialValues={ruleTemplate}

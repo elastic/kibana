@@ -89,7 +89,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     fieldsMetadata,
     contentManagement,
     uiActions,
-    registerCpsPickerAccess,
   } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
@@ -131,7 +130,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           initialMetadata={initialMetadata}
           initialEditStep={initialEditStep}
           focusTrapProps={focusTrapProps}
-          registerCpsPickerAccess={registerCpsPickerAccess}
         />
       );
     }
@@ -200,7 +198,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     initialMetadata,
     initialEditStep,
     focusTrapProps,
-    registerCpsPickerAccess,
     consumer,
     multiConsumerSelection,
     hideInterval,
