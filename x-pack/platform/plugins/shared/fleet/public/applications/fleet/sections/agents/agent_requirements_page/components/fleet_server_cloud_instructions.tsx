@@ -71,7 +71,7 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
           <>
             <EuiButton
               iconSide="right"
-              iconType="popout"
+              iconType="external"
               fill
               isLoading={false}
               type="submit"

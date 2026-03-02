@@ -77,7 +77,7 @@ export const EisCostTour = ({
                 data-test-subj="eisCostsTourCtaBtn"
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
               >
                 {i18n.translate('xpack.fleet.eisCosts.tour.cta', {
                   defaultMessage: 'Learn more',

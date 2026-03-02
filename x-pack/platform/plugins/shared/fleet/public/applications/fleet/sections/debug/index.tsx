@@ -206,7 +206,7 @@ export const DebugPage: React.FunctionComponent<{
                     defaultMessage: 'Troubleshooting Guide',
                   }),
                   href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
-                  iconType: 'popout',
+                  iconType: 'external',
                   target: '_blank',
                 },
               ]}

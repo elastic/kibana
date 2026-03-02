@@ -61,7 +61,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
               />
             }
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               <FormattedMessage
