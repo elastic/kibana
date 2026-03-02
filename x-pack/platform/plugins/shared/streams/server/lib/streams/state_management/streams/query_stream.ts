@@ -6,7 +6,8 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { validateQuery } from '@kbn/esql-language';
+import { Parser, validateQuery } from '@kbn/esql-language';
+import type { ESQLSource, ESQLCommand } from '@kbn/esql-language';
 import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
 import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
@@ -23,6 +24,32 @@ import type { StateDependencies, StreamChange } from '../types';
 
 interface QueryStreamChanges extends StreamChanges {
   query_streams: boolean;
+}
+
+/**
+ * Extracts the source names (FROM clause targets) from an ES|QL query.
+ * @param esql - The ES|QL query string to parse
+ * @returns Array of source names referenced in the FROM clause
+ */
+export function getSourcesFromEsqlQuery(esql: string): string[] {
+  try {
+    const { root } = Parser.parse(esql);
+    const sourceCommand = root.commands.find(
+      (cmd: ESQLCommand) => cmd.name === 'from' || cmd.name === 'ts'
+    );
+
+    if (!sourceCommand) {
+      return [];
+    }
+
+    const args = sourceCommand.args as ESQLSource[];
+    return args
+      .filter((arg): arg is ESQLSource => arg.sourceType === 'index')
+      .map((source) => source.name);
+  } catch {
+    // If parsing fails, return empty array - syntax validation will catch this separately
+    return [];
+  }
 }
 
 export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definition> {
@@ -211,6 +238,46 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
         errors.push(
           new Error(`ES|QL query execution validation failed: ${getErrorMessage(error)}`)
         );
+      }
+
+      // Validate that child query streams reference their parent stream's data source
+      const parentId = getParentId(this._definition.name);
+      if (parentId) {
+        const querySources = getSourcesFromEsqlQuery(this._definition.query.esql);
+
+        const parentStream = desiredState.get(parentId);
+
+        if (!parentStream) {
+          errors.push(
+            new Error(
+              `Parent stream "${parentId}" not found for query stream "${this._definition.name}"`
+            )
+          );
+        } else {
+          // Determine valid parent references based on parent stream type
+          // - Classic streams are referenced by data stream name (parent-name)
+          // - Wired and Query streams have ES|QL views ($.parent-name)
+          const isParentClassicStream = Streams.ClassicStream.Definition.is(
+            parentStream.definition
+          );
+
+          const expectedParentSource = isParentClassicStream ? parentId : getEsqlViewName(parentId);
+
+          if (querySources.length === 0) {
+            errors.push(
+              new Error(
+                `Query stream "${this._definition.name}" must have a FROM clause referencing the parent stream "${expectedParentSource}"`
+              )
+            );
+          } else if (!querySources.includes(expectedParentSource)) {
+            errors.push(
+              new Error(
+                `Query stream "${this._definition.name}" must reference its parent stream "${expectedParentSource}" in the FROM clause. ` +
+                  `Found: FROM ${querySources.join(', ')}`
+              )
+            );
+          }
+        }
       }
     }
 
