@@ -46,9 +46,9 @@ import {
 } from '../common';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
-import { OBSERVABILITY_AGENT_ID, OBSERVABILITY_SESSION_TAG } from '../common/constants';
 
-export { OBSERVABILITY_AGENT_ID, OBSERVABILITY_SESSION_TAG };
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
+export const OBSERVABILITY_SESSION_TAG = 'observability';
 
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
@@ -165,7 +165,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       const isObservabilityApp =
         currentApp?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
 
-      // Only call agent methods when the state actually changes
       if (isObservabilityApp === this.lastIsObservabilityApp) {
         return;
       }

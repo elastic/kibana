@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SESSION_TAG,
-} from '@kbn/observability-shared-plugin/common';
+// Agent ID
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
