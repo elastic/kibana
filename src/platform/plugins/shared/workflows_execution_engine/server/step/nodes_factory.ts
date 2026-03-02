@@ -20,7 +20,8 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  HttpGraphNode,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
@@ -35,7 +36,6 @@ import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
-import { HttpStepImpl } from './http_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
@@ -61,8 +61,8 @@ import {
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
-import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -74,7 +74,6 @@ export class NodesFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies
@@ -155,6 +154,7 @@ export class NodesFactory {
     return this.createGenericStepNode(stepExecutionRuntime);
   }
 
+  // eslint-disable-next-line complexity
   private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
@@ -263,12 +263,6 @@ export class NodesFactory {
           stepLogger
         );
       case 'atomic':
-        // Default atomic step (connector-based)
-        // eslint-disable-next-line no-console
-        console.log(
-          '[NodesFactory] Creating AtomicStepImpl for node.type=atomic, stepType:',
-          node.stepType
-        );
         return new AtomicStepImpl(
           node as AtomicGraphNode,
           stepExecutionRuntime,
@@ -276,14 +270,38 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger
         );
-      case 'http':
-        return new HttpStepImpl(
-          node as HttpGraphNode,
+      case 'workflow.execute':
+      case 'workflow.executeAsync':
+        if (!this.dependencies.workflowsExecutionEngine) {
+          throw new Error('WorkflowsExecutionEngine is not available in dependencies');
+        }
+        if (!this.dependencies.workflowRepository) {
+          throw new Error('WorkflowRepository is not available in dependencies');
+        }
+        if (!this.dependencies.workflowExecutionRepository) {
+          throw new Error('WorkflowExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.stepExecutionRepository) {
+          throw new Error('StepExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.spaceId) {
+          throw new Error('spaceId is not available in dependencies');
+        }
+        if (!this.dependencies.request) {
+          throw new Error('request is not available in dependencies');
+        }
+        return new WorkflowExecuteStepImpl({
+          node: node as WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode,
           stepExecutionRuntime,
-          stepLogger,
-          this.urlValidator,
-          this.workflowRuntime
-        );
+          workflowExecutionRuntime: this.workflowRuntime,
+          workflowRepository: this.dependencies.workflowRepository,
+          spaceId: this.dependencies.spaceId,
+          request: this.dependencies.request,
+          workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
+          workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
+          stepExecutionRepository: this.dependencies.stepExecutionRepository,
+          workflowLogger: this.workflowLogger,
+        });
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);
     }
