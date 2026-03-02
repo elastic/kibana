@@ -6,7 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { RunContext } from '@kbn/agent-builder-server';
+import type {
+  RunContext,
+  RunAgentStackEntry,
+  RunToolStackEntry,
+} from '@kbn/agent-builder-server/runner';
+import type { ToolCallSource } from '@kbn/agent-builder-server/runner/runner';
 
 export const createEmptyRunContext = ({
   runId = uuidv4(),
@@ -17,28 +22,40 @@ export const createEmptyRunContext = ({
   };
 };
 
+export const createToolStackEntry = (props: Omit<RunToolStackEntry, 'type'>): RunToolStackEntry => {
+  return { type: 'tool', ...props };
+};
+
 export const forkContextForToolRun = ({
-  toolId,
   parentContext,
+  ...toolEntry
 }: {
   toolId: string;
+  toolCallId?: string;
+  source?: ToolCallSource;
   parentContext: RunContext;
 }): RunContext => {
   return {
     ...parentContext,
-    stack: [...parentContext.stack, { type: 'tool', toolId }],
+    stack: [...parentContext.stack, createToolStackEntry(toolEntry)],
   };
 };
 
+const createAgentStackEntry = (props: Omit<RunAgentStackEntry, 'type'>): RunAgentStackEntry => {
+  return { type: 'agent', ...props };
+};
+
 export const forkContextForAgentRun = ({
-  agentId,
   parentContext,
+  ...agentEntry
 }: {
   agentId: string;
+  conversationId?: string;
+  executionId?: string;
   parentContext: RunContext;
 }): RunContext => {
   return {
     ...parentContext,
-    stack: [...parentContext.stack, { type: 'agent', agentId }],
+    stack: [...parentContext.stack, createAgentStackEntry(agentEntry)],
   };
 };
