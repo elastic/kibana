@@ -39,7 +39,7 @@ export interface TanstackVirtualGridProps {
 
 const ROW_HEIGHT = 90;
 const OVERSCAN = 10;
-const MAX_SUMMARY_FIELDS = 10;
+const MAX_SUMMARY_FIELDS = 80;
 
 const formatTimestamp = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
