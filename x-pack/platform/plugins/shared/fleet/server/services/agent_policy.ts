@@ -1858,13 +1858,13 @@ class AgentPolicyService {
     await pMap(
       deployedPolicyIds,
       async (policyId) => {
-        const latestRevisionIdx = await this.getLatestFleetPolicyRevision(esClient, policyId);
+        const latestFleetPolicy = await this.getLatestFleetPolicy(esClient, policyId);
         const soRevision = policiesMap[policyId]?.revision;
-        if (latestRevisionIdx != null && soRevision && latestRevisionIdx !== soRevision) {
+        if (latestFleetPolicy && soRevision && latestFleetPolicy.revision_idx !== soRevision) {
           logger.warn(
             `Policy [${policyId}] has mismatched revisions after deploy: ` +
               `.kibana_ingest revision [${soRevision}], ` +
-              `.fleet-policies revision_idx [${latestRevisionIdx}]`
+              `.fleet-policies revision_idx [${latestFleetPolicy.revision_idx}]`
           );
         }
       },
@@ -1961,36 +1961,12 @@ class AgentPolicyService {
     }
   }
 
-  private async getLatestFleetPolicyRevision(
-    esClient: ElasticsearchClient,
-    agentPolicyId: string
-  ): Promise<number | null> {
-    const res = await esClient.search<Pick<FleetServerPolicy, 'revision_idx'>>({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      rest_total_hits_as_int: true,
-      _source: ['revision_idx'],
-      query: {
-        term: {
-          policy_id: agentPolicyId,
-        },
-      },
-      size: 1,
-      sort: [{ revision_idx: { order: 'desc' } }],
-    });
-
-    if ((res.hits.total as number) === 0) {
-      return null;
-    }
-
-    return res.hits.hits[0]._source?.revision_idx ?? null;
-  }
-
   public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
     const res = await esClient.search<FleetServerPolicy>({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
+      _source: ['revision_idx', 'policy_id'],
       query: {
         term: {
           policy_id: agentPolicyId,
