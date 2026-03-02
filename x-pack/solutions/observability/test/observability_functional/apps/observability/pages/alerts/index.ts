@@ -228,7 +228,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
           expect(
             await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-          ).to.eql('Observability');
+          ).to.eql('Rules');
         });
       });
 

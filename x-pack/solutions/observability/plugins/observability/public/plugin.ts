@@ -43,7 +43,6 @@ import type {
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  getIsExperimentalFeatureEnabled,
   type TriggersAndActionsUIPublicPluginSetup,
   type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -87,7 +86,6 @@ import {
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
-  RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
@@ -214,16 +212,6 @@ export class Plugin
       order: 8001,
       path: ALERTS_PATH,
       visibleIn: [],
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: RULES_PATH,
-          visibleIn: [],
-        },
-      ],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -506,12 +494,10 @@ export class Plugin
       )
     );
 
-    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(unifiedRulesPage),
+      useRulesLink: createUseRulesLink(),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -535,12 +521,10 @@ export class Plugin
       );
     });
 
-    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(unifiedRulesPage),
+      useRulesLink: createUseRulesLink(),
     };
   }
 }

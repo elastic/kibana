@@ -73,8 +73,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/create_use_rules_link', () => ({
-  createUseRulesLink: jest.fn((unifiedRulesPage: boolean) => () => ({
-    href: unifiedRulesPage ? '/app/rules' : '/app/observability/alerts/rules',
+  createUseRulesLink: jest.fn(() => () => ({
+    href: '/app/rules',
     onClick: jest.fn(),
   })),
 }));
@@ -254,7 +254,7 @@ describe('AlertsPage with all capabilities', () => {
       await waitFor(() => {
         const manageRulesLink = wrapper!.getByTestId('manageRulesPageButton');
         expect(manageRulesLink).toBeInTheDocument();
-        expect(manageRulesLink.getAttribute('href')).toBe('/app/observability/alerts/rules');
+        expect(manageRulesLink.getAttribute('href')).toBe('/app/rules');
       });
     });
   });
