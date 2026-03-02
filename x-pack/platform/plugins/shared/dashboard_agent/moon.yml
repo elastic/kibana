@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-common-2'
-  - '@kbn/agent-builder-genai-utils'
   - '@kbn/dashboard-markdown'
   - '@kbn/management-settings-ids'
   - '@kbn/lens-plugin'
