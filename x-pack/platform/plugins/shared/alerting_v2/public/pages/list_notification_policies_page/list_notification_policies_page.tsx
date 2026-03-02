@@ -20,8 +20,11 @@ import {
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { CreateNotificationPolicyData } from '@kbn/alerting-v2-schemas';
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
+import { NotificationPolicyFlyout } from '../../components/notification_policy/flyout_form';
+import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
 
 const DEFAULT_PER_PAGE = 20;
@@ -29,6 +32,18 @@ const DEFAULT_PER_PAGE = 20;
 export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  const createMutation = useCreateNotificationPolicy();
+
+  const handleSave = useCallback(
+    (data: CreateNotificationPolicyData) => {
+      createMutation.mutate(data, {
+        onSuccess: () => setIsFlyoutOpen(false),
+      });
+    },
+    [createMutation]
+  );
 
   const { data, isLoading, isError, error } = useFetchNotificationPolicies({
     page: page + 1,
@@ -132,7 +147,7 @@ export const ListNotificationPoliciesPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton key="create-policy" onClick={() => {}}>
+          <EuiButton key="create-policy" onClick={() => setIsFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.alertingV2.notificationPoliciesList.createPolicyButton"
               defaultMessage="Create policy"
@@ -170,6 +185,13 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage: 'Notification Policies',
         })}
       />
+      {isFlyoutOpen && (
+        <NotificationPolicyFlyout
+          onClose={() => setIsFlyoutOpen(false)}
+          onSave={handleSave}
+          isLoading={createMutation.isLoading}
+        />
+      )}
     </>
   );
 };

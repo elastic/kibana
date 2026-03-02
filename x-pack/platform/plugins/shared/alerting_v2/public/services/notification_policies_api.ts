@@ -8,7 +8,10 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateNotificationPolicyData,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
 export interface FindNotificationPoliciesResponse {
@@ -26,6 +29,13 @@ export class NotificationPoliciesApi {
     return this.http.get<FindNotificationPoliciesResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
       { query: { page: params.page, perPage: params.perPage } }
+    );
+  }
+
+  public async createNotificationPolicy(data: CreateNotificationPolicyData) {
+    return this.http.post<NotificationPolicyResponse>(
+      INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
+      { body: JSON.stringify(data) }
     );
   }
 }
