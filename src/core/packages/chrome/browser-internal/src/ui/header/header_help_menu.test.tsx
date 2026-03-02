@@ -75,7 +75,7 @@ describe('HeaderHelpMenu', () => {
 
   test('it renders legacy content when only content is provided', () => {
     const content = jest.fn(() => () => {});
-    const component = renderAndOpenMenu({
+    renderAndOpenMenu({
       helpExtension$: new BehaviorSubject<ChromeHelpExtension | undefined>({
         appName: 'Test App',
         content,
