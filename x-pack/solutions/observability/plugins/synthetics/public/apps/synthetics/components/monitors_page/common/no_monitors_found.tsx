@@ -13,7 +13,7 @@ import { useUrlParams } from '../../../hooks';
 export function NoMonitorsFound() {
   return (
     <EuiEmptyPrompt
-      iconType="search"
+      iconType="magnify"
       iconColor="subdued"
       title={<span>{NO_MONITORS_FOUND_HEADING}</span>}
       titleSize="s"

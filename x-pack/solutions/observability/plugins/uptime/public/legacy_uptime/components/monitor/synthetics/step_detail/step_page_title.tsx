@@ -36,7 +36,7 @@ export const StepPageTitleContent = ({
               data-test-subj="syntheticsStepPageTitleContentButton"
               onClick={handlePreviousStep}
               disabled={!hasPreviousStep}
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -56,7 +56,7 @@ export const StepPageTitleContent = ({
               data-test-subj="syntheticsStepPageTitleContentButton"
               onClick={handleNextStep}
               disabled={!hasNextStep}
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -64,7 +64,7 @@ export const StepDuration = ({
     <EuiButtonEmpty
       data-test-subj="syntheticsStepDurationButton"
       onMouseEnter={() => setDurationPopoverOpenIndex(step.synthetics.step?.index ?? null)}
-      iconType={compactView ? undefined : 'visArea'}
+      iconType={compactView ? undefined : 'chartArea'}
     >
       {stepDurationText}
     </EuiButtonEmpty>

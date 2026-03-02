@@ -217,7 +217,7 @@ export const MetricsAlertDropdown = () => {
             buttonRef={alertsButtonRef}
             color="primary"
             iconSide={'right'}
-            iconType={'arrowDown'}
+            iconType={'chevronSingleDown'}
             onClick={togglePopover}
             data-test-subj="infrastructure-alerts-and-rules"
           >

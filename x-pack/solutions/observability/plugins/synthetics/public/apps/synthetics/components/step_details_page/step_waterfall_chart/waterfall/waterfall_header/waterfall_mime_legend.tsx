@@ -91,7 +91,7 @@ export const WaterfallMimeLegend = ({
           <EuiButtonEmpty
             data-test-subj="syntheticsWaterfallCustomMarksButton"
             size="xs"
-            iconType={showCustomMarks ? 'eye' : 'eyeClosed'}
+            iconType={showCustomMarks ? 'eye' : 'eyeSlash'}
             iconSize="s"
             onClick={() => {
               setShowCustomMarks(!showCustomMarks);

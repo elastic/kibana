@@ -75,7 +75,7 @@ export const MonitorStatusHeader = ({
           href={viewDetailsUrl}
           data-test-subj="monitorStatusChartViewHistoryButton"
           size="xs"
-          iconType="list"
+          iconType="listBullet"
         >
           {labels.VIEW_HISTORY_LABEL}
         </EuiButtonEmpty>

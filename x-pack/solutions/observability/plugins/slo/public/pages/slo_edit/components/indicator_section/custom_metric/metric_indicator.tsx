@@ -327,7 +327,7 @@ export function MetricIndicator({
               data-test-subj="customMetricIndicatorAddMetricButton"
               color={'primary'}
               size="xs"
-              iconType={'plusInCircleFilled'}
+              iconType={'plusCircle'}
               onClick={handleAddMetric}
               isDisabled={disableAdd}
               aria-label={i18n.translate(

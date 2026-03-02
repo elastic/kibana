@@ -102,7 +102,7 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
             defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
             values: { count: items.length },
           })}{' '}
-          <EuiIcon type="arrowDown" size="s" />
+          <EuiIcon type="chevronSingleDown" size="s" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
