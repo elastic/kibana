@@ -70,7 +70,7 @@ describe('fetchSourceDocuments', () => {
     expect(mockEsClient.search).not.toHaveBeenCalled();
   });
 
-  it('should include ids and time range filter in the query', async () => {
+  it('should include ids, time range filter, and sort in the query', async () => {
     await fetchSourceDocuments(defaultArgs);
 
     expect(mockEsClient.search).toHaveBeenCalledWith(
@@ -80,6 +80,7 @@ describe('fetchSourceDocuments', () => {
             filter: [{ ids: { values: ['doc-1', 'doc-2'] } }, rangeFilter],
           },
         },
+        sort: [{ '@timestamp': { order: 'asc', unmapped_type: 'date' } }],
       })
     );
   });
@@ -220,14 +221,18 @@ describe('fetchSourceDocuments', () => {
     ]);
   });
 
-  it('should use secondary timestamp when provided', async () => {
+  it('should use secondary timestamp for range filter and sort when provided', async () => {
     await fetchSourceDocuments({
       ...defaultArgs,
       primaryTimestamp: 'event.ingested',
       secondaryTimestamp: '@timestamp',
     });
 
-    const { filter } = getSearchBoolQuery();
+    const searchCall = mockEsClient.search.mock.calls[0][0] as {
+      query: { bool: SearchBoolQuery };
+      sort: estypes.Sort;
+    };
+    const { filter } = searchCall.query.bool;
 
     expect(filter).toHaveLength(2);
     expect(filter[1]).toEqual({
@@ -268,5 +273,10 @@ describe('fetchSourceDocuments', () => {
         ],
       },
     });
+
+    expect(searchCall.sort).toEqual([
+      { 'event.ingested': { order: 'asc', unmapped_type: 'date' } },
+      { '@timestamp': { order: 'asc', unmapped_type: 'date' } },
+    ]);
   });
 });

@@ -101,12 +101,20 @@ export const fetchSourceDocuments = async ({
     },
   };
 
+  const sort: estypes.Sort = [
+    { [primaryTimestamp]: { order: 'asc', unmapped_type: 'date' } },
+    ...(secondaryTimestamp
+      ? [{ [secondaryTimestamp]: { order: 'asc' as const, unmapped_type: 'date' as const } }]
+      : []),
+  ];
+
   const searchBody = {
     query: idsQuery.query,
     _source: true,
     fields: ['*'],
     size: 2 * ids.length, // allows supporting multiple documents with the same _id across different indices
     runtime_mappings: runtimeMappings,
+    sort,
   };
   const ignoreUnavailable = true;
 
