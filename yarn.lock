@@ -6157,6 +6157,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-common@link:src/platform/packages/private/kbn-cps-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps-server-utils@link:src/platform/packages/shared/kbn-cps-server-utils":
   version "0.0.0"
   uid ""
@@ -6718,6 +6722,10 @@
   uid ""
 
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-endpoint@link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint":
   version "0.0.0"
   uid ""
 

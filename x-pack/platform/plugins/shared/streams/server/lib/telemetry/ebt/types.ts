@@ -61,6 +61,19 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_type: StreamType;
 }
 
+interface StreamsFeaturesIdentifiedProps {
+  total_duration_ms: number;
+  identification_duration_ms: number;
+  inferred_total_count: number;
+  inferred_dedup_count: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  total_tokens_used: number;
+  stream_name: string;
+  stream_type: StreamType;
+  state: 'success' | 'failure' | 'canceled';
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -69,4 +82,5 @@ export {
   type StreamsSignificantEventsQueriesGeneratedProps,
   type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
+  type StreamsFeaturesIdentifiedProps,
 };
