@@ -514,7 +514,7 @@ export class StreamsApp {
     ).toBeVisible({ timeout: 30000 });
   }
   async getProcessorPatternText() {
-    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+    return await this.page.getByTestId('streamsAppProcessorDescription').textContent();
   }
 
   async clickSaveProcessor() {
@@ -672,7 +672,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.page.getByLabel('Source Field').fill(value);
+    await this.processorFieldComboBox.setCustomSingleOption(value);
   }
 
   async fillDateProcessorFormatInput(value: string) {

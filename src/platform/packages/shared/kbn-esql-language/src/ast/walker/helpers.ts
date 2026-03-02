@@ -66,7 +66,7 @@ export const templateToPredicate = (
     for (const key of keys) {
       const matcher = template[key];
       if (matcher instanceof Array) {
-        if (!(matcher as any[]).includes(node[key])) {
+        if (!(matcher as unknown[]).includes(node[key])) {
           return false;
         }
       } else if (matcher instanceof RegExp) {
@@ -87,7 +87,7 @@ export const templateToPredicate = (
 export const replaceProperties = (obj: object, replacement: object) => {
   for (const key in obj) {
     if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(obj, key))
-      delete (obj as any)[key];
+      delete (obj as Record<string, unknown>)[key];
   }
   Object.assign(obj, replacement);
 };

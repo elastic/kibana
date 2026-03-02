@@ -25,7 +25,7 @@ import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
-import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
+import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
@@ -108,6 +108,7 @@ describe('TaskPollingLifecycle', () => {
         update_by_query: 1000,
       },
       auto_calculate_default_ech_capacity: false,
+      api_key_type: ApiKeyType.ES,
     },
     basePathService: httpServiceMock.createBasePath(),
     taskStore: mockTaskStore,

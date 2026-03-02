@@ -36,6 +36,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/slack_webhook'));
     loadTestFile(require.resolve('./connector_types/slack_api'));
     loadTestFile(require.resolve('./connector_types/webhook'));
+    loadTestFile(require.resolve('./connector_types/http'));
     loadTestFile(require.resolve('./connector_types/xmatters'));
     loadTestFile(require.resolve('./connector_types/tines'));
     loadTestFile(require.resolve('./connector_types/torq'));

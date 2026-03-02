@@ -154,72 +154,74 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgentHandler
     );
 
-  // Get effective config
-  router.versioned
-    .get({
-      path: AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN,
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
-        },
-      },
-      summary: `Get an agent's effective config`,
-      description: `Get an agent's effective config by ID.`,
-      options: {
-        tags: ['oas-tag:Elastic Agents'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: GetAgentEffectiveConfigRequestSchema,
-          response: {
-            200: {
-              description: 'OK: A successful request.',
-              body: () => GetAgentEffectiveConfigResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
-              description: 'A bad request.',
-            },
+  if (experimentalFeatures.enableOpAMP) {
+    // Get effective config
+    router.versioned
+      .get({
+        path: AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
           },
         },
+        summary: `Get an agent's effective config`,
+        description: `Get an agent's effective config by ID.`,
         options: {
-          oasOperationObject: () => ({
-            responses: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetAgentEffectiveConfigRequestSchema,
+            response: {
               200: {
-                content: {
-                  'application/json': {
-                    examples: {
-                      successResponse: {
-                        value: {
-                          effective_config: {},
-                        },
-                      },
-                    },
-                  },
-                },
+                description: 'OK: A successful request.',
+                body: () => GetAgentEffectiveConfigResponseSchema,
               },
               400: {
-                content: {
-                  'application/json': {
-                    examples: {
-                      badRequestResponse: {
-                        value: {
-                          message: 'Bad Request',
+                body: genericErrorResponse,
+                description: 'A bad request.',
+              },
+            },
+          },
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            effective_config: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
                         },
                       },
                     },
                   },
                 },
               },
-            },
-          }),
+            }),
+          },
         },
-      },
-      getAgentEffectiveConfigHandler
-    );
+        getAgentEffectiveConfigHandler
+      );
+  }
 
   // Migrate
   // Single agent migration
