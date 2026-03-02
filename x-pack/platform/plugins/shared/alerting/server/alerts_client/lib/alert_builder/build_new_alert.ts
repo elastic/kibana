@@ -73,20 +73,6 @@ export function snoozeEntryToAadFields(
   return fields;
 }
 
-/**
- * Builds a map of instanceId ---> AAD snooze fields from the rule's snoozedInstances.
- * Used by tests and any caller that needs the map without an Alert instance.
- */
-export function buildSnoozeFromRuleMap(
-  ruleData?: AlertRuleData
-): Map<string, Partial<Record<string, unknown>>> {
-  const map = new Map<string, Partial<Record<string, unknown>>>();
-  for (const entry of ruleData?.snoozedInstances ?? []) {
-    map.set(entry.instanceId, snoozeEntryToAadFields(entry));
-  }
-  return map;
-}
-
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
