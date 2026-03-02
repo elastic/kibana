@@ -22,9 +22,11 @@ export const SUB_ACTION = {
 } as const;
 
 /** Schema for MongoDB connector configuration. database is the database this connector is bound to. */
-export const MongoConnectorConfigSchema = z.object({
-  database: z.string().min(1),
-}).strict();
+export const MongoConnectorConfigSchema = z
+  .object({
+    database: z.string().min(1),
+  })
+  .strict();
 
 /**
  * Schema for MongoDB connector secrets.
