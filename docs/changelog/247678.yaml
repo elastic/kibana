@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "247678"
+prs:
+- "247678"
 type: bug-fix
 products:
 - product: kibana
@@ -90,4 +91,5 @@ products:
   target: 9.3.0
 areas:
 - Elastic Security solution
+- Detection rules and alerts
 title: fixes "Rule settings pop-up remain open on clicking 'Save' button after enabling/ disabling auto gap fill."

@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "239634"
+prs:
+- "239634"
 type: feature
 products:
 - product: kibana
@@ -90,6 +91,6 @@ products:
   target: 9.3.0
 areas:
 - Data ingestion and Fleet
-- Elastic Security solution
+- Detection rules and alerts
 title: Extracts Rules/Alerts/Exceptions permission to new Rules feature privileges
 description: Rules feature privileges are added to ESS. Access to Rules may now be explicitly set on both ESS and Serverless for user roles.
