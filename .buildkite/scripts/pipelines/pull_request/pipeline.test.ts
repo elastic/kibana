@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { load as yamlLoad } from 'js-yaml';
+
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
 const mockGetAgentImageConfig = jest.fn();
-const mockEmitPipeline = jest.fn();
-const mockGetPipeline = jest.fn();
-const mockPrHasFIPSLabel = jest.fn();
 const mockRunPreBuild = jest.fn();
 const mockGetEvalPipeline = jest.fn();
 
-jest.mock('#pipeline-utils', () => ({
-  areChangesSkippable: mockAreChangesSkippable,
-  doAnyChangesMatch: mockDoAnyChangesMatch,
-  getAgentImageConfig: mockGetAgentImageConfig,
-  emitPipeline: mockEmitPipeline,
-  getPipeline: mockGetPipeline,
-  prHasFIPSLabel: mockPrHasFIPSLabel,
-}));
+jest.mock('#pipeline-utils', () => {
+  const actual = jest.requireActual('#pipeline-utils');
+  return {
+    ...actual,
+    areChangesSkippable: mockAreChangesSkippable,
+    doAnyChangesMatch: mockDoAnyChangesMatch,
+    getAgentImageConfig: mockGetAgentImageConfig,
+  };
+});
 
 jest.mock('./pre_build', () => ({
   runPreBuild: mockRunPreBuild,
@@ -35,15 +35,25 @@ jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
 
 const ORIGINAL_ENV = process.env;
 
-const flushAsyncWork = async (iterations = 60) => {
-  for (let i = 0; i < iterations; i++) {
-    await new Promise<void>((resolve) => setImmediate(resolve));
-  }
-};
-
 const importPipelineModule = async () => {
   await jest.isolateModulesAsync(async () => {
     await import('./pipeline');
+  });
+};
+
+const waitForEmission = () => {
+  return new Promise<string>((resolve) => {
+    jest.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+      resolve(String(args[0]));
+    });
+  });
+};
+
+const waitForExit = () => {
+  return new Promise<number>((resolve) => {
+    jest.spyOn(process, 'exit').mockImplementation(((code: number) => {
+      resolve(code);
+    }) as never);
   });
 };
 
@@ -58,10 +68,7 @@ describe('pull_request pipeline generation', () => {
 
     mockAreChangesSkippable.mockResolvedValue(false);
     mockDoAnyChangesMatch.mockResolvedValue(false);
-    mockGetAgentImageConfig.mockReturnValue('agent-image-yaml');
-    mockGetPipeline.mockImplementation((pipelinePath: string) => `yaml:${pipelinePath}`);
-    mockPrHasFIPSLabel.mockReturnValue(false);
-    mockEmitPipeline.mockImplementation(() => undefined);
+    mockGetAgentImageConfig.mockReturnValue('agents:\n  provider: gcp\n');
     mockRunPreBuild.mockResolvedValue(undefined);
     mockGetEvalPipeline.mockReturnValue(null);
   });
@@ -74,88 +81,86 @@ describe('pull_request pipeline generation', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('emits an empty pipeline when changes are skippable', async () => {
+  it('emits valid empty pipeline when changes are skippable', async () => {
     mockAreChangesSkippable.mockResolvedValueOnce(true);
+    const emitted = waitForEmission();
 
     await importPipelineModule();
-    await flushAsyncWork();
+    const output = await emitted;
 
-    expect(mockEmitPipeline).toHaveBeenCalledTimes(1);
-    expect(mockEmitPipeline).toHaveBeenCalledWith(['steps: []']);
+    const parsed = yamlLoad(output) as Record<string, unknown>;
+    expect(parsed).toEqual({ steps: [] });
     expect(mockRunPreBuild).not.toHaveBeenCalled();
   });
 
-  it('emits renovate-only pipeline and skips pre-build', async () => {
+  it('emits valid renovate-only pipeline and skips pre-build', async () => {
     mockAreChangesSkippable.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
 
     await importPipelineModule();
-    await flushAsyncWork();
+    const output = await emitted;
 
     expect(mockRunPreBuild).not.toHaveBeenCalled();
-    expect(mockEmitPipeline).toHaveBeenCalledWith([
-      'agent-image-yaml',
-      'yaml:.buildkite/pipelines/pull_request/renovate.yml',
-    ]);
     expect(warnSpy).toHaveBeenCalledWith(
       'Isolated changes to renovate.json. Skipping main PR pipeline.'
     );
+
+    const parsed = yamlLoad(output) as Record<string, unknown>;
+    expect(parsed).toHaveProperty('steps');
+    expect(output).toContain('renovate.sh');
   });
 
-  it('waits for pre-build completion before emitting the main pipeline skeleton', async () => {
-    let resolvePreBuild: () => void = () => {};
-    const preBuildPromise = new Promise<void>((resolve) => {
-      resolvePreBuild = resolve;
-    });
-    mockRunPreBuild.mockReturnValue(preBuildPromise);
+  it('waits for pre-build then emits valid YAML with base pipeline structure', async () => {
+    let resolvePreBuild!: () => void;
+    mockRunPreBuild.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolvePreBuild = resolve;
+      })
+    );
+
+    const emitted = waitForEmission();
 
     await importPipelineModule();
-    await flushAsyncWork(10);
+    await new Promise((r) => setImmediate(r));
 
-    expect(mockEmitPipeline).not.toHaveBeenCalled();
+    expect(console.log).not.toHaveBeenCalled();
 
     resolvePreBuild();
-    await flushAsyncWork();
+    const output = await emitted;
 
-    expect(mockEmitPipeline).toHaveBeenCalledTimes(1);
-    const emittedPipeline = mockEmitPipeline.mock.calls[0][0] as string[];
-
-    expect(emittedPipeline).toEqual([
-      'agent-image-yaml',
-      'yaml:.buildkite/pipelines/pull_request/base.yml',
-      'yaml:.buildkite/pipelines/pull_request/api_contracts.yml',
-      'yaml:.buildkite/pipelines/pull_request/post_build.yml',
-    ]);
-    expect(mockRunPreBuild.mock.invocationCallOrder[0]).toBeLessThan(
-      mockEmitPipeline.mock.invocationCallOrder[0]
-    );
+    const parsed = yamlLoad(output) as Record<string, unknown>;
+    expect(parsed).toHaveProperty('steps');
+    const steps = parsed.steps as unknown[];
+    expect(steps.length).toBeGreaterThan(0);
+    expect(output).toContain('Build Kibana Distribution');
+    expect(output).toContain('post_build.sh');
   });
 
-  it('includes FIPS verification pipeline when FIPS label is present', async () => {
-    mockPrHasFIPSLabel.mockReturnValue(true);
+  it('includes FIPS verification step when FIPS label is present', async () => {
+    process.env.GITHUB_PR_LABELS = 'ci:enable-fips-140-2-agent';
+    const emitted = waitForEmission();
 
     await importPipelineModule();
-    await flushAsyncWork();
+    const output = await emitted;
 
-    const emittedPipeline = mockEmitPipeline.mock.calls[0][0] as string[];
-    expect(emittedPipeline).toContain('yaml:.buildkite/pipelines/fips/verify_fips_enabled.yml');
+    expect(output).toContain('Verify FIPS Enabled');
   });
 
   it('does not emit pipeline and exits when pre-build fails', async () => {
-    const testError = new Error('pre-build failed');
-    mockRunPreBuild.mockRejectedValue(testError);
-
+    mockRunPreBuild.mockRejectedValue(new Error('pre-build failed'));
     const errorSpy = jest.spyOn(console, 'error').mockImplementation();
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const logSpy = jest.spyOn(console, 'log');
+    const exited = waitForExit();
 
     await importPipelineModule();
-    await flushAsyncWork();
+    const exitCode = await exited;
 
-    expect(mockEmitPipeline).not.toHaveBeenCalled();
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(exitCode).toBe(1);
+    expect(logSpy).not.toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith(
       expect.stringContaining('Error while generating the pipeline steps:'),
-      testError
+      expect.any(Error)
     );
   });
 });
