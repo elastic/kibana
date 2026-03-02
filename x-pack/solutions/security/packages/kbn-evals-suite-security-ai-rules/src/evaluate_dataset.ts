@@ -349,8 +349,7 @@ export function createEvaluateDataset({
     log,
     predictionExtractor: (output: unknown) =>
       (output as RuleGenerationTaskOutput)?.generatedRule?.query ?? '',
-    groundTruthExtractor: (expected: unknown) =>
-      (expected as Partial<ReferenceRule>)?.query ?? '',
+    groundTruthExtractor: (expected: unknown) => (expected as Partial<ReferenceRule>)?.query ?? '',
   });
 
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
