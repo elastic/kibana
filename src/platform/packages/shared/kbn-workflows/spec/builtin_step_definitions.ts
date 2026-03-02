@@ -9,10 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  ConsoleStepInputSchema,
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   IfStepConfigSchema,
   WaitStepInputSchema,
+  WorkflowExecuteAsyncStepOutputSchema,
+  WorkflowExecuteStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
 
@@ -27,6 +30,22 @@ export type BuiltInStepDefinition = BaseStepDefinition;
  * and outputSchema.
  */
 export const builtInStepDefinitions: BaseStepDefinition[] = [
+  {
+    id: 'console',
+    label: 'Console',
+    description: 'Log a message for debugging and observability',
+    category: StepCategory.Kibana,
+    inputSchema: ConsoleStepInputSchema,
+    outputSchema: z.string(),
+    documentation: {
+      examples: [
+        `- name: log_payload
+  type: console
+  with:
+    message: "{{ steps.fetch_data.output | json }}"`,
+      ],
+    },
+  },
   {
     id: 'if',
     label: 'If',
@@ -106,6 +125,42 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   with:
     user_name: "{{ steps.get_user.output.body.name }}"
     alert_count: "{{ steps.search_alerts.output.hits.total.value }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.execute',
+    label: 'Execute Workflow',
+    description: 'Execute another workflow and wait for it to complete',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowExecuteStepInputSchema,
+    outputSchema: z.unknown(),
+    documentation: {
+      examples: [
+        `- name: run_child_workflow
+  type: workflow.execute
+  with:
+    workflow-id: "child_workflow"
+    inputs:
+      alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.executeAsync',
+    label: 'Execute Workflow (Async)',
+    description: 'Start another workflow and continue without waiting for completion',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowExecuteStepInputSchema,
+    outputSchema: WorkflowExecuteAsyncStepOutputSchema,
+    documentation: {
+      examples: [
+        `- name: start_child_workflow
+  type: workflow.executeAsync
+  with:
+    workflow-id: "child_workflow"
+    inputs:
+      alertId: "{{ workflow.event.id }}"`,
       ],
     },
   },

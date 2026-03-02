@@ -474,12 +474,18 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const ConsoleStepInputSchema = z.object({
+  message: z.unknown().optional(),
+});
+
 // Base schema shared by both workflow.execute and workflow.executeAsync
+export const WorkflowExecuteStepInputSchema = z.object({
+  'workflow-id': z.string().min(1),
+  inputs: z.record(z.string(), z.unknown()).optional(),
+});
+
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
-  with: z.object({
-    'workflow-id': z.string().min(1),
-    inputs: z.record(z.string(), z.unknown()).optional(),
-  }),
+  with: WorkflowExecuteStepInputSchema,
 });
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
@@ -491,6 +497,14 @@ export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.executeAsync'),
 });
 export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
+
+export const WorkflowExecuteAsyncStepOutputSchema = z.object({
+  workflowId: z.string(),
+  executionId: z.string(),
+  awaited: z.boolean(),
+  status: z.string(),
+  startedAt: z.string().optional(),
+});
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
