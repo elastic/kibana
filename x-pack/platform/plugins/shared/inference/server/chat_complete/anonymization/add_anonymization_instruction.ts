@@ -34,7 +34,8 @@ export function addAnonymizationInstruction(
     return system;
   }
 
-  const nerClasses = ['PER', 'LOC', 'ORG', 'MISC'];
+  const hasNerRules = rules.some((r) => r.type === 'NER' && r.enabled);
+  const nerClasses = hasNerRules ? ['PER', 'LOC', 'ORG', 'MISC'] : [];
 
   const regexClasses = rules
     .filter((r): r is RegexAnonymizationRule => r.type === 'RegExp' && r.enabled)
@@ -54,7 +55,7 @@ export function addAnonymizationInstruction(
     : [];
 
   const customClasses = [...new Set([...regexClasses, ...fieldPolicyClasses])];
-  const allClasses = [...nerClasses, ...customClasses];
+  const allClasses = [...new Set([...nerClasses, ...customClasses])];
   const exampleTokens = allClasses.map((c) => `\`${c}_abc123\``).join(', ');
 
   return dedent(

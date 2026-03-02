@@ -75,4 +75,20 @@ describe('generateToken', () => {
 
     expect(token1).not.toBe(token2);
   });
+
+  it('throws when secret is empty', () => {
+    expect(() => generateToken('', entityClass, field, value)).toThrow(
+      'Secret must be non-empty for token generation'
+    );
+  });
+
+  it('clamps hash length to valid range', () => {
+    const tokenMin = generateToken(secret, entityClass, field, value, 0);
+    const hashPartMin = tokenMin.replace(`${entityClass}_`, '');
+    expect(hashPartMin).toHaveLength(1);
+
+    const tokenMax = generateToken(secret, entityClass, field, value, 100);
+    const hashPartMax = tokenMax.replace(`${entityClass}_`, '');
+    expect(hashPartMax).toHaveLength(64);
+  });
 });

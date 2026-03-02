@@ -189,6 +189,7 @@ export class ReplacementsRepository {
     await this.esClient.index({
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
       id,
+      op_type: 'create',
       document: doc,
       refresh: 'wait_for',
     });

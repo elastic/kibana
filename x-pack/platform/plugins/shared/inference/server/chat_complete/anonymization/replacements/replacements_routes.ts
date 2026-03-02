@@ -22,7 +22,8 @@ const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.mes
 
 const toStatusCode = (err: unknown): number => (err as { statusCode?: number })?.statusCode ?? 500;
 
-let replacementsIndexEnsured = false;
+const INDEX_ENSURE_CACHE_MS = 60_000;
+let replacementsIndexEnsuredAt = 0;
 
 const resolveReplacementsContext = async (
   context: RequestHandlerContext,
@@ -32,9 +33,9 @@ const resolveReplacementsContext = async (
   const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  if (!replacementsIndexEnsured) {
+  if (Date.now() - replacementsIndexEnsuredAt > INDEX_ENSURE_CACHE_MS) {
     await ensureReplacementsIndex({ esClient, logger: options.logger });
-    replacementsIndexEnsured = true;
+    replacementsIndexEnsuredAt = Date.now();
   }
 
   const repo = new ReplacementsRepository(esClient, options);

@@ -11,24 +11,28 @@ import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
 /**
  * Recursively walks a value and replaces all string leaves using the provided
- * replacement function. This avoids JSON round-tripping which breaks when
- * original PII values contain JSON-special characters (`"`, `\`, newlines).
+ * replacement function, collecting deanonymization metadata from every leaf.
  */
 function deanonymizeStructure(
   value: unknown,
-  replaceFn: (s: string) => { output: string }
+  replaceFn: (s: string) => { output: string; deanonymizations: Deanonymization[] },
+  collectedDeanonymizations: Deanonymization[]
 ): unknown {
   if (typeof value === 'string') {
-    return replaceFn(value).output;
+    const { output, deanonymizations } = replaceFn(value);
+    collectedDeanonymizations.push(...deanonymizations);
+    return output;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => deanonymizeStructure(item, replaceFn));
+    return value.map((item) =>
+      deanonymizeStructure(item, replaceFn, collectedDeanonymizations)
+    );
   }
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>).map(([k, v]) => [
         k,
-        deanonymizeStructure(v, replaceFn),
+        deanonymizeStructure(v, replaceFn, collectedDeanonymizations),
       ])
     );
   }
@@ -67,14 +71,16 @@ export function deanonymize<TMessage extends Message>(
   }
 
   const anonymized = getAnonymizableMessageParts(message);
+  const allDeanonymizations: Deanonymization[] = [];
 
   if (anonymized.content && typeof anonymized.content === 'string') {
     const { content, ...rest } = anonymized;
 
     const contentDeanonymization = replace(anonymized.content);
+    allDeanonymizations.push(...contentDeanonymization.deanonymizations);
 
     const deanonymizedRest = !isEmpty(rest)
-      ? (deanonymizeStructure(rest, replace) as typeof rest)
+      ? (deanonymizeStructure(rest, replace, allDeanonymizations) as typeof rest)
       : undefined;
 
     return {
@@ -83,17 +89,21 @@ export function deanonymize<TMessage extends Message>(
         ...(deanonymizedRest ?? {}),
         content: contentDeanonymization.output,
       },
-      deanonymizations: contentDeanonymization.deanonymizations,
+      deanonymizations: allDeanonymizations,
     };
   }
 
-  const deanonymizedParts = deanonymizeStructure(anonymized, replace) as typeof anonymized;
+  const deanonymizedParts = deanonymizeStructure(
+    anonymized,
+    replace,
+    allDeanonymizations
+  ) as typeof anonymized;
 
   return {
     message: {
       ...message,
       ...deanonymizedParts,
     },
-    deanonymizations: [],
+    deanonymizations: allDeanonymizations,
   };
 }
