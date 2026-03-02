@@ -420,6 +420,19 @@
     "timestampField",
     "type"
   ],
+  "entity-store-global-state-v1": [
+    "entityMaintainers",
+    "entityMaintainers.id",
+    "entityMaintainers.interval",
+    "entityMaintainers.taskStatus",
+    "historySnapshot",
+    "historySnapshot.frequency",
+    "historySnapshot.lastError",
+    "historySnapshot.lastError.message",
+    "historySnapshot.lastError.timestamp",
+    "historySnapshot.lastExecutionTimestamp",
+    "historySnapshot.status"
+  ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",

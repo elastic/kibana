@@ -1417,6 +1417,48 @@
       }
     }
   },
+  "entity-store-global-state-v1": {
+    "dynamic": false,
+    "properties": {
+      "entityMaintainers": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "interval": {
+            "type": "keyword"
+          },
+          "taskStatus": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "historySnapshot": {
+        "properties": {
+          "frequency": {
+            "type": "keyword"
+          },
+          "lastError": {
+            "properties": {
+              "message": {
+                "type": "text"
+              },
+              "timestamp": {
+                "type": "date"
+              }
+            }
+          },
+          "lastExecutionTimestamp": {
+            "type": "date"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
@@ -3050,8 +3092,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text",
-        "index": false
+        "index": false,
+        "type": "text"
       },
       "description": {
         "type": "text"
