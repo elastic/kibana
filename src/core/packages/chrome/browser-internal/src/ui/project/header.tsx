@@ -407,12 +407,7 @@ export const ProjectHeader = ({
             )}
 
             <EuiHeaderSection side="right">
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsCenter$} />
-              </EuiHeaderSectionItem>
-
-              {/* Global header prototype: Help menu hidden (Docs/Feedback in overflow)
-              <EuiHeaderSectionItem>
+            <EuiHeaderSectionItem>
                 <HeaderHelpMenu
                   isServerless={isServerless}
                   globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
@@ -425,7 +420,11 @@ export const ProjectHeader = ({
                   navigateToUrl={application.navigateToUrl}
                 />
               </EuiHeaderSectionItem>
-              */}
+
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+              </EuiHeaderSectionItem>
+
 
               <EuiHeaderSectionItem
                 css={css`

@@ -22,6 +22,8 @@ export interface ChromeHelpMenuLink {
   href?: string;
   onClick?: () => void;
   dataTestSubj?: string;
+  /** EUI icon type (e.g. 'document', 'logoGithub') shown before the link label */
+  iconType?: string;
 }
 
 /**
