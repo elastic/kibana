@@ -7,7 +7,8 @@
 
 import { EuiComment, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { memo, useEffect, useState, useMemo } from 'react';
+import { useGetActionDetails } from '../../../management/hooks/response_actions/use_get_action_details';
 import type {
   LogsEndpointActionWithHosts,
   ActionDetails,
