@@ -198,47 +198,48 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   );
 
   const renderInlineEditFooter = () => (
-    <div
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="s"
+      justifyContent="flexEnd"
       css={{
-        paddingInline: euiTheme.size.s,
-        paddingBlockEnd: euiTheme.size.s,
+        padding: euiTheme.size.s,
+        borderTop: euiTheme.border.thin,
       }}
     >
-      <EuiFlexGroup responsive={false} gutterSize="xs" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            color="primary"
-            data-test-subj="discoverEmbeddableInlineEditDiscardButton"
-            css={{ minInlineSize: 'initial' }}
-            onClick={() => {
-              void inlineEditing.onCancel();
-            }}
-          >
-            {i18n.translate('discover.embeddable.inlineEdit.discardButton', {
-              defaultMessage: 'Discard',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size={'xs' as 's'}
-            color="primary"
-            fill
-            data-test-subj="discoverEmbeddableInlineEditApplyButton"
-            css={{ minInlineSize: 'initial' }}
-            onClick={() => {
-              void inlineEditing.onApply();
-            }}
-            disabled={!inlineEditing.hasPendingChanges}
-          >
-            {i18n.translate('discover.embeddable.inlineEdit.applyButton', {
-              defaultMessage: 'Apply',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          color="primary"
+          data-test-subj="discoverEmbeddableInlineEditDiscardButton"
+          css={{ minInlineSize: 'initial' }}
+          onClick={() => {
+            void inlineEditing.onCancel();
+          }}
+        >
+          {i18n.translate('discover.embeddable.inlineEdit.discardButton', {
+            defaultMessage: 'Discard',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          color="primary"
+          fill
+          data-test-subj="discoverEmbeddableInlineEditApplyButton"
+          css={{ minInlineSize: 'initial' }}
+          onClick={() => {
+            void inlineEditing.onApply();
+          }}
+          disabled={!inlineEditing.hasPendingChanges}
+        >
+          {i18n.translate('discover.embeddable.inlineEdit.applyButton', {
+            defaultMessage: 'Apply',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   if (!isEditMode && isSelectedTabDeleted) {
@@ -315,6 +316,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
           showColumnTokens
           showFullScreenButton={false}
           className="unifiedDataTable"
+          css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
         />
       )}
     </SavedSearchEmbeddableBase>
