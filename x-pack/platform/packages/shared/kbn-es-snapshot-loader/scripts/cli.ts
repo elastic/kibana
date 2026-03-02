@@ -141,6 +141,8 @@ Usage: node scripts/es_snapshot_loader <command> [options]
 
 Commands:
   restore    Restore a snapshot directly to Elasticsearch
+             Supports index renaming (--rename-pattern/--rename-replacement)
+             and graceful no-match handling (--allow-no-matches)
   replay     Restore a snapshot with timestamp transformation for data streams
 
 Run 'node scripts/es_snapshot_loader <command> --help' for more information.
@@ -164,8 +166,17 @@ function runRestoreCli(): void {
 
   run(
     async ({ log, flags }) => {
-      const { 'snapshot-name': snapshotName, indices: indicesFlag } = flags as CommonFlags & {
+      const {
+        'snapshot-name': snapshotName,
+        indices: indicesFlag,
+        'rename-pattern': renamePattern,
+        'rename-replacement': renameReplacement,
+        'allow-no-matches': allowNoMatches,
+      } = flags as CommonFlags & {
         indices?: string;
+        'rename-pattern'?: string;
+        'rename-replacement'?: string;
+        'allow-no-matches'?: boolean;
       };
 
       const repository = resolveRepositoryFromFlags(flags as CommonFlags);
@@ -177,6 +188,8 @@ function runRestoreCli(): void {
       log.info(`Repository type: ${repository.type}`);
       if (snapshotName) log.info(`Snapshot name: ${snapshotName}`);
       if (indices) log.info(`Index patterns: ${indices.join(', ')}`);
+      if (renamePattern) log.info(`Rename pattern: ${renamePattern} → ${renameReplacement}`);
+      if (allowNoMatches) log.info(`Allow no matches: true`);
 
       const result = await restoreSnapshot({
         esClient,
@@ -184,6 +197,9 @@ function runRestoreCli(): void {
         repository,
         snapshotName,
         indices,
+        renamePattern,
+        renameReplacement,
+        allowNoMatches,
       });
 
       if (result.success) {
@@ -209,11 +225,25 @@ function runRestoreCli(): void {
           'gcs-base-path',
           'gcs-client',
           'indices',
+          'rename-pattern',
+          'rename-replacement',
         ],
+        boolean: ['allow-no-matches'],
         help: `
       Usage: node scripts/es_snapshot_loader restore [options]
       ${COMMON_FLAGS_HELP}
       --indices             Comma-separated index patterns to restore
+
+      --rename-pattern      Regex pattern for renaming restored indices
+                            (ES rename_pattern). Must be used with --rename-replacement.
+                            Example: (.+)
+
+      --rename-replacement  Replacement string for renamed indices
+                            (ES rename_replacement). Must be used with --rename-pattern.
+                            Example: tmp-$1
+
+      --allow-no-matches    When set, a restore that matches no indices succeeds
+                            silently instead of throwing an error
         `,
         allowUnexpected: false,
       },

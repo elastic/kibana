@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/test/cspm_agentless_scout.sh
-    cancel_on_build_failing: true
     label: 'CSPM Agentless Scout E2E Tests'
     agents:
       machineType: n2-standard-8

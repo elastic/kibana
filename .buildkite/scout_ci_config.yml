@@ -36,6 +36,8 @@ plugins:
     - streams
     - streams_app
     - transform
+    - uptime
+    - ux
     - workflows_extensions
     - workflows_management
   disabled:
