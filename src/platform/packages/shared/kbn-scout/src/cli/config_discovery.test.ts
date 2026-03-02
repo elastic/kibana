@@ -919,6 +919,180 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // The actual serverRunFlags computation happens in the function, so we just verify the configs are processed
   });
 
+  describe('validates configs have runnable tests', () => {
+    const moduleWithNoRunnableTests: ScoutTestableModuleWithConfigs = {
+      name: 'pluginEmpty',
+      group: 'groupEmpty',
+      type: 'plugin' as const,
+      visibility: 'private' as const,
+      root: 'x-pack/platform/plugins/private/pluginEmpty',
+      configs: [
+        {
+          path: 'pluginEmpty/config.playwright.config.ts',
+          category: 'ui',
+          type: 'playwright',
+          manifest: {
+            path: 'pluginEmpty/config.playwright.config.ts',
+            exists: true,
+            sha1: 'empty123',
+            tests: [
+              {
+                id: 'skippedTest',
+                title: 'Skipped Test',
+                expectedStatus: 'skipped',
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+                tags: ['@local-stateful-classic'],
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    it('filters out modules with only skipped tests before "--validate" runs', () => {
+      // Configs with no passed .spec.ts tests produce empty tags via collectUniqueTags,
+      // so they are removed by filterModulesByTargetTags before validation runs.
+      // This test verifies that such modules don't cause errors.
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'validate') return true;
+        return false;
+      });
+
+      mockTestableModules.modules = [moduleWithNoRunnableTests];
+
+      (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
+    });
+
+    it('throws when "--save" finds configs with no runnable tests', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'save') return true;
+        return false;
+      });
+
+      const modulesReturnedByCiFilter: ModuleDiscoveryInfo[] = [
+        {
+          name: 'pluginEmpty',
+          group: 'groupEmpty',
+          type: 'plugin',
+          configs: [
+            {
+              path: 'pluginEmpty/config.playwright.config.ts',
+              hasTests: false,
+              tags: ['@local-stateful-classic'],
+              serverRunFlags: ['--arch stateful --domain classic'],
+              usesParallelWorkers: false,
+            },
+          ],
+        },
+      ];
+
+      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(modulesReturnedByCiFilter);
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+        /1 Scout Playwright config\(s\) have no runnable tests/
+      );
+    });
+
+    it('does not throw when all configs have runnable tests', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'validate') return true;
+        return false;
+      });
+
+      (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
+    });
+
+    it('reports multiple configs without tests in the error', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'save') return true;
+        return false;
+      });
+
+      const modulesReturnedByCiFilter: ModuleDiscoveryInfo[] = [
+        {
+          name: 'pluginA',
+          group: 'groupA',
+          type: 'plugin',
+          configs: [
+            {
+              path: 'pluginA/config1.playwright.config.ts',
+              hasTests: false,
+              tags: ['@local-stateful-classic'],
+              serverRunFlags: ['--arch stateful --domain classic'],
+              usesParallelWorkers: false,
+            },
+          ],
+        },
+        {
+          name: 'pluginB',
+          group: 'groupB',
+          type: 'plugin',
+          configs: [
+            {
+              path: 'pluginB/config2.playwright.config.ts',
+              hasTests: false,
+              tags: ['@local-stateful-classic'],
+              serverRunFlags: ['--arch stateful --domain classic'],
+              usesParallelWorkers: false,
+            },
+          ],
+        },
+      ];
+
+      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(modulesReturnedByCiFilter);
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+        /2 Scout Playwright config\(s\) have no runnable tests/
+      );
+      expect(log.error).toHaveBeenCalledWith(
+        expect.stringContaining('[pluginA] pluginA/config1.playwright.config.ts')
+      );
+      expect(log.error).toHaveBeenCalledWith(
+        expect.stringContaining('[pluginB] pluginB/config2.playwright.config.ts')
+      );
+    });
+
+    it('throws when "--save --flatten" finds configs with no runnable tests', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'save') return true;
+        if (flag === 'flatten') return true;
+        return false;
+      });
+
+      const modulesReturnedByCiFilter: ModuleDiscoveryInfo[] = [
+        {
+          name: 'pluginEmpty',
+          group: 'groupEmpty',
+          type: 'plugin',
+          configs: [
+            {
+              path: 'pluginEmpty/config.playwright.config.ts',
+              hasTests: false,
+              tags: ['@local-stateful-classic'],
+              serverRunFlags: ['--arch stateful --domain classic'],
+              usesParallelWorkers: false,
+            },
+          ],
+        },
+      ];
+
+      (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(modulesReturnedByCiFilter);
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+        /1 Scout Playwright config\(s\) have no runnable tests/
+      );
+    });
+  });
+
   describe('"--flatten" flag', () => {
     beforeEach(() => {
       // Set up modules with different groups and serverRunFlags for flatten testing
