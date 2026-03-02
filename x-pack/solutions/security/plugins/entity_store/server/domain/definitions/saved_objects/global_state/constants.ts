@@ -5,7 +5,39 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+
+export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
+
+export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
+export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
+export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '30s';
+export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
+export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '25s';
+
+export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
+export const LogExtractionConfig = z.object({
+  filter: z.string().default(''),
+  additionalIndexPatterns: z.array(z.string()).default([]),
+  fieldHistoryLength: z.number().int().default(10),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .default(LOG_EXTRACTION_DELAY_DEFAULT),
+  docsLimit: z.number().int().positive().default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
+});
 
 export type EntityMaintainerTaskStatus = z.infer<typeof EntityMaintainerTaskStatus>;
 export const EntityMaintainerTaskStatus = z.enum(['not_started', 'started', 'stopped']);
@@ -20,13 +52,13 @@ export const EntityMaintainer = z.object({
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 
-export type HistorySnapshot = z.infer<typeof HistorySnapshot>;
-export const HistorySnapshot = z.object({
+export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
+export const HistorySnapshotState = z.object({
   status: HistorySnapshotStatus.default('stopped'),
   frequency: z
     .string()
     .regex(/[smdh]$/)
-    .default('24h'),
+    .default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
   lastExecutionTimestamp: z.string().optional(),
   lastError: z
     .object({
@@ -36,8 +68,9 @@ export const HistorySnapshot = z.object({
     .optional(),
 });
 
-export type GlobalState = z.infer<typeof GlobalState>;
-export const GlobalState = z.object({
+export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
+export const EntityStoreGlobalState = z.object({
   entityMaintainers: z.array(EntityMaintainer).default([]),
-  historySnapshot: HistorySnapshot,
+  historySnapshot: HistorySnapshotState,
+  logsExtraction: LogExtractionConfig,
 });

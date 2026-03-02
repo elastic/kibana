@@ -76,6 +76,7 @@ export async function createRequestHandlerContext({
     esClient,
     dataViewsService,
     engineDescriptorClient,
+    globalStateClient,
     ccsLogsExtractionClient,
   });
 

@@ -6,8 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { EngineDescriptor } from './definitions/saved_objects';
+import type {
+  EngineDescriptor,
+  EngineLogExtractionState,
+  LogExtractionConfig,
+} from './definitions/saved_objects';
 import type { EntityStoreStatus } from '../../common';
+
+export type MergedLogExtractionState = LogExtractionConfig & EngineLogExtractionState;
+
+export type EngineDescriptorWithMergedLogExtraction = EngineDescriptor & {
+  logExtractionState: MergedLogExtractionState;
+};
 export type { EntityStoreStatus };
 
 export const EngineComponentResource = z.enum([
@@ -41,5 +51,8 @@ export type EngineComponentStatus = BaseComponentStatus | TaskComponentStatus;
 
 export interface GetStatusResult {
   status: EntityStoreStatus;
-  engines: Array<EngineDescriptor | (EngineDescriptor & { components: EngineComponentStatus[] })>;
+  engines: Array<
+    | EngineDescriptorWithMergedLogExtraction
+    | (EngineDescriptorWithMergedLogExtraction & { components: EngineComponentStatus[] })
+  >;
 }

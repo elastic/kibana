@@ -1389,6 +1389,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-discovery-api-key": "10.0.0",
         "entity-engine-descriptor-v2": "10.2.0",
         "entity-engine-status": "10.2.0",
+        "entity-store-global-state": "10.1.0",
         "epm-packages": "10.5.0",
         "epm-packages-assets": "10.0.0",
         "event-annotation-group": "10.0.0",

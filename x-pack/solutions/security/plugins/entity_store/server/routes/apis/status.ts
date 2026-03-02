@@ -12,14 +12,17 @@ import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import type { EntityStoreStatus, GetStatusResult } from '../../domain/types';
-import type { LogExtractionState } from '../../domain/definitions/saved_objects';
+import type {
+  EntityStoreStatus,
+  GetStatusResult,
+  MergedLogExtractionState,
+} from '../../domain/types';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
 type LogExtractionStateForV1 = Omit<
-  LogExtractionState,
+  MergedLogExtractionState,
   'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
 >;
 interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {

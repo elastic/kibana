@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
-import type { GlobalState } from './constants';
-import { GlobalState as GlobalStateSchema, HistorySnapshot } from './constants';
+import Boom from '@hapi/boom';
+import { EntityStoreGlobalState, HistorySnapshotState, LogExtractionConfig } from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
 
 export class EntityStoreGlobalStateClient {
@@ -18,25 +21,24 @@ export class EntityStoreGlobalStateClient {
     private readonly logger: Logger
   ) {}
 
-  async get(): Promise<GlobalState | null> {
-    const id = this.getSavedObjectId();
-    try {
-      const { attributes } = await this.soClient.get<GlobalState>(
-        EntityStoreGlobalStateTypeName,
-        id
-      );
-      return attributes;
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return null;
-      }
-      throw error;
-    }
+  async find(): Promise<EntityStoreGlobalState | undefined> {
+    const response = await this.findResponse();
+    return response.total === 0 ? undefined : response.saved_objects[0].attributes;
   }
 
-  async init(initialState?: Partial<GlobalState>): Promise<GlobalState> {
-    const existing = await this.get();
-    if (existing !== null) {
+  async findOrThrow(): Promise<EntityStoreGlobalState> {
+    const response = await this.find();
+    if (response === undefined) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'No global state found for this namespace'
+      );
+    }
+    return response;
+  }
+
+  async init(initialState?: Partial<EntityStoreGlobalState>): Promise<EntityStoreGlobalState> {
+    const existing = await this.find();
+    if (existing != null) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'Found existing global state for this namespace'
       );
@@ -45,15 +47,17 @@ export class EntityStoreGlobalStateClient {
     const id = this.getSavedObjectId();
     this.logger.debug(`Creating global state with id ${id}`);
 
-    const historySnapshot = HistorySnapshot.parse(initialState?.historySnapshot ?? {});
+    const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
     const entityMaintainers = initialState?.entityMaintainers ?? [];
-    const defaultState: GlobalState = {
+    const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
+    const defaultState: EntityStoreGlobalState = {
       entityMaintainers,
       historySnapshot,
+      logsExtraction,
     };
-    const parsed = GlobalStateSchema.parse(defaultState);
+    const parsed = EntityStoreGlobalState.parse(defaultState);
 
-    const { attributes } = await this.soClient.create<GlobalState>(
+    const { attributes } = await this.soClient.create<EntityStoreGlobalState>(
       EntityStoreGlobalStateTypeName,
       parsed,
       { id }
@@ -62,11 +66,11 @@ export class EntityStoreGlobalStateClient {
     return attributes;
   }
 
-  async update(partial: Partial<GlobalState>): Promise<Partial<GlobalState>> {
-    await this.getOrThrow();
+  async update(partial: Partial<EntityStoreGlobalState>): Promise<Partial<EntityStoreGlobalState>> {
+    await this.findOrThrow();
 
     const id = this.getSavedObjectId();
-    const { attributes } = await this.soClient.update<GlobalState>(
+    const { attributes } = await this.soClient.update<EntityStoreGlobalState>(
       EntityStoreGlobalStateTypeName,
       id,
       partial,
@@ -80,24 +84,32 @@ export class EntityStoreGlobalStateClient {
   }
 
   async delete(): Promise<void> {
-    await this.getOrThrow();
+    const response = await this.findResponse();
+    if (response.total === 0) {
+      return;
+    }
 
-    const id = this.getSavedObjectId();
-    this.logger.debug(`Deleting global state with id ${id}`);
-    await this.soClient.delete(EntityStoreGlobalStateTypeName, id);
+    try {
+      const id = response.saved_objects[0].id;
+      this.logger.debug(`Deleting global state with id ${id}`);
+      await this.soClient.delete(EntityStoreGlobalStateTypeName, id);
+    } catch (error) {
+      if (Boom.isBoom(error, 404)) {
+        return;
+      }
+      throw error;
+    }
   }
 
   private getSavedObjectId(): string {
     return `entity-store-global-state-${this.namespace}`;
   }
 
-  private async getOrThrow(): Promise<GlobalState> {
-    const state = await this.get();
-    if (state === null) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
-        'No global state found for this namespace'
-      );
-    }
-    return state;
+  private findResponse(): Promise<SavedObjectsFindResponse<EntityStoreGlobalState>> {
+    return this.soClient.find<EntityStoreGlobalState>({
+      type: EntityStoreGlobalStateTypeName,
+      namespaces: [this.namespace],
+      perPage: 1,
+    });
   }
 }

@@ -11,7 +11,10 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
 import { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
-import { DELAY_DEFAULT, LOOKBACK_PERIOD_DEFAULT } from '../../../domain/definitions/saved_objects';
+import {
+  LOG_EXTRACTION_DELAY_DEFAULT,
+  LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+} from '../../../domain/definitions/saved_objects';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h
@@ -155,8 +158,8 @@ function isValidHistorySnapshotFrequency(frequency: string): boolean {
 }
 
 function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): boolean {
-  const lookbackPeriodValue = lookbackPeriod ?? LOOKBACK_PERIOD_DEFAULT;
-  const delayValue = delay ?? DELAY_DEFAULT;
+  const lookbackPeriodValue = lookbackPeriod ?? LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT;
+  const delayValue = delay ?? LOG_EXTRACTION_DELAY_DEFAULT;
   try {
     const lookbackPeriodMs = parseDurationToMs(lookbackPeriodValue);
     const delayMs = parseDurationToMs(delayValue);

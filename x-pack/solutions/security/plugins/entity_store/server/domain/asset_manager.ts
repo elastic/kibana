@@ -19,8 +19,10 @@ import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
   type EngineDescriptorClient,
+  type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
-  type LogExtractionState,
+  HistorySnapshotState,
+  LogExtractionConfig,
 } from './definitions/saved_objects';
 import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../routes/constants';
 import {
@@ -34,6 +36,7 @@ import type {
   EntityStoreStatus,
   EngineComponentStatus,
   EngineComponentResource,
+  EngineDescriptorWithMergedLogExtraction,
   GetStatusResult,
 } from './types';
 import { getExtractEntityTaskId } from '../tasks/extract_entity_task';
@@ -102,10 +105,13 @@ export class AssetManager {
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
-      await Promise.all([
-        this.initGlobalState(historySnapshotParams),
+      const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
+      const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtractionParams)),
+      await Promise.all([
+        this.initGlobalState(logsExtraction, historySnapshot),
+
+        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
         scheduleEntityMaintainerTasks({
           logger: this.logger,
@@ -129,12 +135,9 @@ export class AssetManager {
     }
   }
 
-  public async start(request: KibanaRequest, type: EntityType) {
+  public async start(request: KibanaRequest, type: EntityType, { frequency }: LogExtractionConfig) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
-      const {
-        logExtractionState: { frequency },
-      } = await this.engineDescriptorClient.findOrThrow(type);
 
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
 
@@ -175,7 +178,6 @@ export class AssetManager {
       if (!engines.some((e) => e.type === type)) {
         return false;
       }
-      const wasLastEngine = engines.length === 1;
       const definition = getEntityDefinition(type, this.namespace);
       await this.stop(type);
 
@@ -193,7 +195,8 @@ export class AssetManager {
         }),
       ]);
 
-      if (wasLastEngine) {
+      const remainingEngines = await this.engineDescriptorClient.getAll();
+      if (remainingEngines.length === 0) {
         this.logger.debug(`Deleting global state because last engine was uninstalled`);
         await this.globalStateClient.delete();
       }
@@ -212,8 +215,12 @@ export class AssetManager {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const engines = await this.engineDescriptorClient.getAll();
-      const status = this.calculateEntityStoreStatus(engines);
+      const [rawEngines, globalState] = await Promise.all([
+        this.engineDescriptorClient.getAll(),
+        this.globalStateClient.find(),
+      ]);
+      const engines = this.mergeEnginesWithLogExtractionConfig(rawEngines, globalState);
+      const status = this.calculateEntityStoreStatus(rawEngines);
 
       if (withComponents) {
         const enginesWithComponents = await Promise.all(
@@ -229,25 +236,46 @@ export class AssetManager {
     }
   }
 
-  private async initGlobalState(historySnapshotParams?: HistorySnapshotBodyParams): Promise<void> {
-    const existing = await this.globalStateClient.get();
-    if (existing === null) {
-      const historySnapshot = {
-        status: 'stopped' as const,
-        frequency: historySnapshotParams?.frequency ?? '24h',
-      };
-      await this.globalStateClient.init({ historySnapshot });
+  private mergeEnginesWithLogExtractionConfig(
+    rawEngines: EngineDescriptor[],
+    globalState?: EntityStoreGlobalState
+  ): EngineDescriptorWithMergedLogExtraction[] {
+    const config = globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+    return rawEngines.map((engine) => ({
+      ...engine,
+      logExtractionState: {
+        ...config,
+        ...engine.logExtractionState,
+      } as EngineDescriptorWithMergedLogExtraction['logExtractionState'],
+    }));
+  }
+
+  private async initGlobalState(
+    logsExtraction: LogExtractionConfig,
+    historySnapshot: HistorySnapshotState
+  ): Promise<void> {
+    const existing = await this.globalStateClient.find();
+    if (existing == null) {
+      await this.globalStateClient.init({ historySnapshot, logsExtraction });
+      return;
     }
+
+    await this.globalStateClient.update({ logsExtraction, historySnapshot });
+  }
+
+  public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
+    const globalState = await this.globalStateClient.find();
+    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
   }
 
   private async initEntity(
     request: KibanaRequest,
     type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
+    logsExtractionConfig: LogExtractionConfig
   ): Promise<boolean> {
-    const installed = await this.install(type, logExtractionParams);
+    const installed = await this.install(type);
     if (installed) {
-      await this.start(request, type);
+      await this.start(request, type, logsExtractionConfig);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,
@@ -288,10 +316,7 @@ export class AssetManager {
     });
   }
 
-  public async install(
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
-  ): Promise<boolean> {
+  public async install(type: EntityType): Promise<boolean> {
     try {
       const { engines } = await this.getStatus();
       if (engines.some((e) => e.type === type)) {
@@ -300,9 +325,8 @@ export class AssetManager {
 
       this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
       const definition = getEntityDefinition(type, this.namespace);
-      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
       await Promise.all([
-        this.engineDescriptorClient.init(type, initialState),
+        this.engineDescriptorClient.init(type),
         installElasticsearchAssets({
           esClient: this.esClient,
           logger: this.logger,
@@ -321,8 +345,8 @@ export class AssetManager {
   }
 
   private async getEngineWithComponents(
-    engine: EngineDescriptor
-  ): Promise<EngineDescriptor & { components: EngineComponentStatus[] }> {
+    engine: EngineDescriptorWithMergedLogExtraction
+  ): Promise<EngineDescriptorWithMergedLogExtraction & { components: EngineComponentStatus[] }> {
     const definition = getEntityDefinition(engine.type, this.namespace);
     const components = await this.getComponentsForEngine(engine.type, definition);
     return { ...engine, components };

@@ -9,7 +9,7 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-export const EntityStoreGlobalStateTypeName = 'entity-store-global-state-v1';
+export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 
 export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
@@ -33,6 +33,19 @@ export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = 
             timestamp: { type: 'date' },
           },
         },
+      },
+    },
+    logsExtraction: {
+      type: 'object',
+      properties: {
+        filter: { type: 'text' },
+        additionalIndexPatterns: { type: 'keyword' },
+        fieldHistoryLength: { type: 'integer' },
+        lookbackPeriod: { type: 'keyword' },
+        delay: { type: 'keyword' },
+        docsLimit: { type: 'integer' },
+        timeout: { type: 'keyword' },
+        frequency: { type: 'keyword' },
       },
     },
   },
@@ -60,9 +73,21 @@ const historySnapshotSchema = schema.object({
   ),
 });
 
+const logExtractionSchema = schema.object({
+  filter: schema.maybe(schema.string()),
+  additionalIndexPatterns: schema.maybe(schema.arrayOf(schema.string())),
+  fieldHistoryLength: schema.maybe(schema.number()),
+  lookbackPeriod: schema.maybe(schema.string()),
+  delay: schema.maybe(schema.string()),
+  docsLimit: schema.maybe(schema.number()),
+  timeout: schema.maybe(schema.string()),
+  frequency: schema.maybe(schema.string()),
+});
+
 const globalStateSchemaV1 = schema.object({
   entityMaintainers: schema.arrayOf(entityMaintainerSchema),
   historySnapshot: historySnapshotSchema,
+  logsExtraction: logExtractionSchema,
 });
 
 const version1: SavedObjectsFullModelVersion = {
