@@ -402,7 +402,6 @@ export const EarsConnectionsSection: React.FC = () => {
                 {accessToken && (
                   <EuiFlexItem>
                     <EuiCallOut
-                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.workplaceai.gettingStarted.earsSection.gotAccessToken"

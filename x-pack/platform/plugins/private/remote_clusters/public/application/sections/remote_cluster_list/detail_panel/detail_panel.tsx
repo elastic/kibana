@@ -84,7 +84,7 @@ export class DetailPanel extends Component<Props> {
         data-test-subj="remoteClusterDetailClusterNotFound"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="warning" color="danger" aria-hidden={true} />
+          <EuiIcon size="m" type="warning" color="danger" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
