@@ -86,24 +86,6 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
       filename:
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel.playwright.config.ts',
     },
-    // Valid: Scout config file with single prefix
-    {
-      code: '',
-      filename:
-        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/awesome.playwright.config.ts',
-    },
-    // Valid: Scout config file with underscore in prefix
-    {
-      code: '',
-      filename:
-        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/awesome_parallel.playwright.config.ts',
-    },
-    // Valid: Scout config file with hyphen in prefix
-    {
-      code: '',
-      filename:
-        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/awesome-parallel.playwright.config.ts',
-    },
     // Valid: global.setup.ts in tests directory
     {
       code: '',
@@ -238,21 +220,21 @@ ruleTester.run('@kbn/eslint/scout_test_file_naming', rule, {
         },
       ],
     },
-    // Invalid: Playwright config with multiple dot-delimited prefixes
+    // Invalid: Non-standard Playwright config file with dot separator
     {
       code: '',
       filename:
-        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/really.awesome.playwright.config.ts',
+        'src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts',
       errors: [
         {
           messageId: 'invalidPlaywrightConfigName',
           data: {
-            actual: 'really.awesome.playwright.config.ts',
+            actual: 'metrics_experience_parallel.playwright.config.ts',
           },
         },
       ],
     },
-    // Invalid: Playwright config without dot separator before playwright
+    // Invalid: Non-standard Playwright config file without dot separator
     {
       code: '',
       filename:
