@@ -28,9 +28,11 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 
-const mockAnalyzerPreview = jest.fn(() => <div data-test-subj="analyzerPreviewStub" />);
+const mockAnalyzerPreview = jest.fn((indices: string) => (
+  <div data-test-subj="analyzerPreviewStub" />
+));
 jest.mock('./analyzer_preview', () => ({
-  AnalyzerPreview: () => mockAnalyzerPreview(),
+  AnalyzerPreview: (indices: string) => mockAnalyzerPreview(indices),
 }));
 
 const mockNavigateToAnalyzer = jest.fn();
@@ -62,14 +64,14 @@ const renderAnalyzerPreview = (context = mockContextValue) =>
 
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    jest.clearAllMocks();
 
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSourcererDataView as jest.Mock).mockReturnValue({
       selectedPatterns: ['old-analyzer-pattern'],
     });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['experimental-analyzer-pattern']);
-
     (useDataView as jest.Mock).mockReturnValue({
       status: 'ready',
       dataView: {
@@ -82,8 +84,6 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should render AnalyzerPreview with experimental patterns when the new picker is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
     renderAnalyzerPreview();
 
     expect(mockAnalyzerPreview).toHaveBeenCalledWith(

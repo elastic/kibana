@@ -30,7 +30,7 @@ interface Cache {
 
 export interface AnalyzerPreviewProps {
   /**
-   *
+   * The list of indices from the data view, used as fallback if the indices cannot be found in the document data.
    */
   dataViewIndices: string[];
 }
