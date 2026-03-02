@@ -55,10 +55,6 @@ import {
 } from './fieldlist_cache';
 import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
 
-function getLayerReferenceName(layerId: string) {
-  return `textBasedLanguages-datasource-layer-${layerId}`;
-}
-
 const getSelectedFieldsFromColumns = memoizeOne(
   (columns: TextBasedLayerColumn[]) =>
     columns
@@ -368,17 +364,7 @@ export function getTextBasedDatasource({
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {
-      const references: Reference[] = [];
-      Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
-        if (index) {
-          references.push({
-            type: 'index-pattern',
-            id: index,
-            name: getLayerReferenceName(layerId),
-          });
-        }
-      });
-      return { state: { layers }, references };
+      return { state: { layers }, references: [] };
     },
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
