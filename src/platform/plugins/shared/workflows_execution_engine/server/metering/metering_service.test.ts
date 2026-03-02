@@ -9,13 +9,12 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { UsageRecord, UsageReportingService } from '@kbn/usage-api-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
 import { BUCKET_SIZE_MS, METERING_SOURCE_ID, WORKFLOWS_USAGE_TYPE } from './constants';
 import { WorkflowsMeteringService } from './metering_service';
-import type { UsageRecord } from './types';
-import type { UsageReportingService } from './usage_reporting_service';
 
 const createMockExecution = (
   overrides: Partial<EsWorkflowExecution> = {}
@@ -80,8 +79,6 @@ describe('WorkflowsMeteringService', () => {
     mockUsageReportingService = createMockUsageReportingService();
     mockLogger = createMockLogger();
     meteringService = new WorkflowsMeteringService(mockUsageReportingService, mockLogger);
-    // Mock the internal delay to be instant so tests run fast
-    jest.spyOn(WorkflowsMeteringService.prototype as any, 'delay').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -309,72 +306,6 @@ describe('WorkflowsMeteringService', () => {
 
       const record: UsageRecord = mockUsageReportingService.reportUsage.mock.calls[0][0][0];
       expect(record.usage.metadata!.triggered_by).toBe('unknown');
-    });
-  });
-
-  describe('retry logic', () => {
-    it('should retry on failure and succeed on second attempt', async () => {
-      mockUsageReportingService.reportUsage
-        .mockResolvedValueOnce({ ok: false, status: 500 } as any)
-        .mockResolvedValueOnce({ ok: true, status: 200 } as any);
-
-      const execution = createMockExecution();
-      const cloudSetup = createMockCloudSetup();
-
-      await meteringService.reportWorkflowExecution(execution, cloudSetup);
-
-      expect(mockUsageReportingService.reportUsage).toHaveBeenCalledTimes(2);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully reported metering')
-      );
-    });
-
-    it('should log error after all retries exhausted', async () => {
-      mockUsageReportingService.reportUsage.mockResolvedValue({
-        ok: false,
-        status: 503,
-      } as any);
-
-      const execution = createMockExecution();
-      const cloudSetup = createMockCloudSetup();
-
-      await meteringService.reportWorkflowExecution(execution, cloudSetup);
-
-      expect(mockUsageReportingService.reportUsage).toHaveBeenCalledTimes(3);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to report workflow metering')
-      );
-    });
-
-    it('should retry on network errors', async () => {
-      mockUsageReportingService.reportUsage
-        .mockRejectedValueOnce(new Error('ECONNREFUSED'))
-        .mockResolvedValueOnce({ ok: true, status: 200 } as any);
-
-      const execution = createMockExecution();
-      const cloudSetup = createMockCloudSetup();
-
-      await meteringService.reportWorkflowExecution(execution, cloudSetup);
-
-      expect(mockUsageReportingService.reportUsage).toHaveBeenCalledTimes(2);
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('ECONNREFUSED'));
-    });
-
-    it('should not throw when metering fails (errors are caught internally)', async () => {
-      mockUsageReportingService.reportUsage.mockRejectedValue(new Error('catastrophic failure'));
-
-      const execution = createMockExecution();
-      const cloudSetup = createMockCloudSetup();
-
-      // Should not throw - errors are caught internally
-      await expect(
-        meteringService.reportWorkflowExecution(execution, cloudSetup)
-      ).resolves.toBeUndefined();
-
-      // Error should be logged
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to report workflow metering')
-      );
     });
   });
 
