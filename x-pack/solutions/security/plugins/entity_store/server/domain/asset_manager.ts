@@ -19,9 +19,10 @@ import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
   type EngineDescriptorClient,
+  type EntityStoreGlobalStateClient,
   type LogExtractionState,
 } from './definitions/saved_objects';
-import type { LogExtractionBodyParams } from '../routes/constants';
+import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -61,6 +62,7 @@ interface AssetManagerDependencies {
   esClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
+  globalStateClient: EntityStoreGlobalStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
@@ -73,6 +75,7 @@ export class AssetManager {
   private readonly esClient: ElasticsearchClient;
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
+  private readonly globalStateClient: EntityStoreGlobalStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
@@ -84,6 +87,7 @@ export class AssetManager {
     this.esClient = deps.esClient;
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
+    this.globalStateClient = deps.globalStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
@@ -94,11 +98,14 @@ export class AssetManager {
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logExtractionParams?: LogExtractionBodyParams
+    logsExtractionParams?: LogExtractionBodyParams,
+    historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
       await Promise.all([
-        ...entityTypes.map((type) => this.initEntity(request, type, logExtractionParams)),
+        this.initGlobalState(historySnapshotParams),
+
+        ...entityTypes.map((type) => this.initEntity(request, type, logsExtractionParams)),
 
         scheduleEntityMaintainerTasks({
           logger: this.logger,
@@ -168,6 +175,7 @@ export class AssetManager {
       if (!engines.some((e) => e.type === type)) {
         return false;
       }
+      const wasLastEngine = engines.length === 1;
       const definition = getEntityDefinition(type, this.namespace);
       await this.stop(type);
 
@@ -184,6 +192,12 @@ export class AssetManager {
           logger: this.logger,
         }),
       ]);
+
+      if (wasLastEngine) {
+        this.logger.debug(`Deleting global state because last engine was uninstalled`);
+        await this.globalStateClient.delete();
+      }
+
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
       this.analytics.reportEvent(ENTITY_STORE_DELETION_EVENT, {
         entityType: type,
@@ -212,6 +226,17 @@ export class AssetManager {
     } catch (error) {
       this.logger.error('Error getting status', { error });
       throw error;
+    }
+  }
+
+  private async initGlobalState(historySnapshotParams?: HistorySnapshotBodyParams): Promise<void> {
+    const existing = await this.globalStateClient.get();
+    if (existing === null) {
+      const historySnapshot = {
+        status: 'stopped' as const,
+        frequency: historySnapshotParams?.frequency ?? '24h',
+      };
+      await this.globalStateClient.init({ historySnapshot });
     }
   }
 

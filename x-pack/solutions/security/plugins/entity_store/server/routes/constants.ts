@@ -8,6 +8,7 @@
 import type { AuthzEnabled } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { LogExtractionState } from '../domain/definitions/saved_objects';
+import { HistorySnapshot, LogExtractionState } from '../domain/definitions/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -33,4 +34,9 @@ export const LogExtractionBodyParams = LogExtractionState.pick({
   frequency: true,
   delay: true,
   docsLimit: true,
+}).partial();
+
+export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
+export const HistorySnapshotBodyParams = HistorySnapshot.pick({
+  frequency: true,
 }).partial();

@@ -9,15 +9,17 @@ import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
 import { fromKueryExpression } from '@kbn/es-query';
 import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
-import { LogExtractionBodyParams } from '../../constants';
+import { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 import { DELAY_DEFAULT, LOOKBACK_PERIOD_DEFAULT } from '../../../domain/definitions/saved_objects';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
+const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h
 
 export const BodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
   logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
+  historySnapshot: HistorySnapshotBodyParams.optional().superRefine(validateHistorySnapshotParams),
 });
 
 export function validateKql(kql: string): { isValid: boolean; errorMsg?: string } {
@@ -128,6 +130,28 @@ function validateLogExtractionParams(
   validateFrequencyParam(data, ctx);
   validateAdditionalIndexPatterns(data, ctx);
   validateDelayVsLookbackPeriod(data, ctx);
+}
+
+function validateHistorySnapshotParams(
+  data: z.infer<typeof HistorySnapshotBodyParams> | undefined,
+  ctx: z.RefinementCtx
+): void {
+  if (!data?.frequency) return;
+  if (!isValidHistorySnapshotFrequency(data.frequency)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['frequency'],
+      message: 'must be a valid duration of at least 1 hour (e.g. 1h, 24h)',
+    });
+  }
+}
+
+function isValidHistorySnapshotFrequency(frequency: string): boolean {
+  try {
+    return parseDurationToMs(frequency) >= MIN_HISTORY_SNAPSHOT_FREQUENCY_MS;
+  } catch {
+    return false;
+  }
 }
 
 function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): boolean {
