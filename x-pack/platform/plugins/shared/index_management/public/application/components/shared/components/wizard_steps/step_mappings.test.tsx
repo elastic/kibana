@@ -9,10 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
-import {
-  setupEnvironment,
-  WithAppDependencies,
-} from '../../../../../../__jest__/client_integration/helpers/setup_environment';
+import { WithAppDependencies } from '../../../../../../__jest__/client_integration/helpers/setup_environment';
 import { StepMappings } from './step_mappings';
 
 jest.mock('@kbn/code-editor');

@@ -13,10 +13,7 @@ import * as fixtures from '../../../../test/fixtures';
 import { serializeAsESLifecycle } from '../../../../common/lib';
 import type { WizardContent } from './template_form';
 import { TemplateForm } from './template_form';
-import {
-  setupEnvironment,
-  WithAppDependencies,
-} from '../../../../__jest__/client_integration/helpers/setup_environment';
+import { setupEnvironment } from '../../../../__jest__/client_integration/helpers/setup_environment';
 
 jest.mock('@kbn/code-editor');
 
