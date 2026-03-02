@@ -25,6 +25,7 @@ import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
+import type { TaskEventLogger } from './task';
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
@@ -55,6 +56,8 @@ interface EsError extends Error {
     };
   };
 }
+
+const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
 
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
@@ -122,6 +125,7 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
+    eventLogger: eventLoggerMock,
   };
 
   beforeEach(() => {

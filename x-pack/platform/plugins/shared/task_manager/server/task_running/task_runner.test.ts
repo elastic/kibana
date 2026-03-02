@@ -2656,7 +2656,7 @@ describe('TaskManagerRunner', () => {
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
           },
-          message: `Task bar "${id}" failed.`,
+          message: `Task bar "${id}" failed with a taskRunError.`,
         });
       });
 

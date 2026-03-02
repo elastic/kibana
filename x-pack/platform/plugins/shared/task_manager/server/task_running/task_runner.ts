@@ -890,7 +890,7 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               taskTiming,
               EVENT_LOG_OUTCOMES.failure,
-              `Task ${this.taskType} "${this.id}" failed.`,
+              `Task ${this.taskType} "${this.id}" failed with a taskRunError.`,
               taskRunError
             );
           } else {
