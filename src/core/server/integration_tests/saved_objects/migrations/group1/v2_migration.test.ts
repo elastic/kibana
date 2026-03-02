@@ -9,7 +9,7 @@
 
 import { join } from 'path';
 import { omit } from 'lodash';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -199,7 +199,7 @@ describe('v2 migration', () => {
 
         expect(lineWithPit).toBeTruthy();
 
-        const id = JSON5.parse(lineWithPit!).message.split(':')[1];
+        const id = parse(lineWithPit!).message.split(':')[1];
         expect(id).toBeTruthy();
 
         await expect(
