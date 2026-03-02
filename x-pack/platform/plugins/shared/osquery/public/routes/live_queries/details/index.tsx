@@ -70,7 +70,7 @@ const LiveQueryDetailsPageComponent = () => {
   }, [data?.status]);
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false} restrictWidth={false} restrictHeaderWidth={false}>
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
       <EuiFlexItem css={tableWrapperCss}>
         <PackQueriesStatusTable
           actionId={actionId}

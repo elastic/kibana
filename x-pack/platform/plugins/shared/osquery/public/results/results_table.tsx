@@ -23,6 +23,7 @@ import {
   EuiProgress,
   EuiIconTip,
   EuiTablePagination,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -111,6 +112,7 @@ const resultsTableContainerCss = {
   height: '100%',
 };
 
+
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
   minHeight: 0,
@@ -121,6 +123,7 @@ const gridStyleOverride = {
   header: 'shade' as const,
   stripes: false,
 };
+
 
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 250, 500];
@@ -148,6 +151,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   addToTimeline,
 }) => {
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const { euiTheme } = useEuiTheme();
+
+  const searchBarWrapperCss = useMemo(
+    () => ({
+      padding: '16px',
+      backgroundColor: euiTheme.colors.body,
+    }),
+    [euiTheme.colors.body]
+  );
 
   const [isLive, setIsLive] = useState(true);
 
@@ -753,6 +765,106 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const SearchBar = unifiedSearch.ui.SearchBar;
   const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
+  // Collect all dot-notation field paths present in the result _source documents.
+  // This captures ECS fields (e.g. process.name, host.ip) that are stored in
+  // _source but may not appear in the ES `fields` response.
+  const sourceFieldNames = useMemo(() => {
+    const names = new Set<string>();
+    const edges = allResultsData?.edges ?? [];
+    if (!edges.length) return names;
+
+    // Flatten nested _source objects into dot-notation paths
+    const collectPaths = (obj: unknown, prefix = '') => {
+      if (!obj || typeof obj !== 'object') return;
+      for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+        const path = prefix ? `${prefix}.${key}` : key;
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          collectPaths(value, path);
+        } else {
+          names.add(path);
+        }
+      }
+    };
+
+    // Sample first few edges to discover fields (no need to scan all)
+    for (const edge of edges.slice(0, 5)) {
+      if (edge._source) {
+        collectPaths(edge._source);
+      }
+    }
+
+    return names;
+  }, [allResultsData?.edges]);
+
+  // Create a filtered data view for the SearchBar that only shows fields from
+  // the current result set (not all ECS fields from the index mapping).
+  const searchBarIndexPatterns = useMemo(() => {
+    if (!dataView || !allResultsData?.columns?.length) return indexPatterns;
+
+    // Collect all field names that are relevant to the current results
+    const resultFieldNames = new Set<string>();
+
+    // Add agent.name (always shown)
+    resultFieldNames.add('agent.name');
+    resultFieldNames.add('agent.id');
+
+    // Add ECS mapping columns (these need to appear in suggestions even before typing)
+    for (const col of ecsMappingColumns) {
+      resultFieldNames.add(col);
+    }
+
+    // Add all columns from ES `fields` response (osquery.*, action_id, etc.)
+    for (const col of allResultsData.columns) {
+      resultFieldNames.add(col);
+      if (col.startsWith('osquery.') && !col.endsWith('.number')) {
+        resultFieldNames.add(`${col}.number`);
+      }
+    }
+
+    // Add all fields discovered from _source (ECS fields like process.name, host.ip)
+    for (const name of sourceFieldNames) {
+      resultFieldNames.add(name);
+    }
+
+    // Filter the data view fields to only include result-relevant fields
+    const filteredFields = dataView.fields.filter(
+      (field) => resultFieldNames.has(field.name) || field.name === '@timestamp'
+    );
+
+    // If filtering didn't reduce the field list, just use the original
+    if (filteredFields.length >= dataView.fields.length) return indexPatterns;
+
+    // Create a lightweight wrapper that the SearchBar can use for suggestions
+    const filteredDataView = {
+      ...dataView,
+      fields: filteredFields,
+      getFieldByName: (name: string) => filteredFields.find((f) => f.name === name),
+    };
+
+    return [filteredDataView] as typeof indexPatterns;
+  }, [dataView, allResultsData?.columns, ecsMappingColumns, sourceFieldNames, indexPatterns]);
+
+  // Scope value suggestions to only documents belonging to this action.
+  // Without this, typing `osquery.name: ` would suggest values from ALL osquery
+  // results across all actions, not just the current one.
+  const filtersForSuggestions = useMemo<Filter[]>(
+    () => [
+      {
+        meta: {
+          index: dataView?.id,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'action_id',
+          params: { query: actionId },
+        },
+        query: { match_phrase: { action_id: actionId } },
+        $state: { store: FilterStateStore.APP_STATE },
+      },
+    ],
+    [actionId, dataView?.id]
+  );
+
   const handleCloseFlyout = useCallback(() => {
     setExpandedDoc(undefined);
   }, []);
@@ -830,23 +942,26 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         <div css={resultsTableContainerCss}>
           {/* Unified Search Bar with KQL autocomplete and filter pills */}
-          <SearchBar
-            appName="osquery"
-            indexPatterns={indexPatterns}
-            query={query}
-            filters={filters}
-            onQuerySubmit={handleQuerySubmit}
-            onFiltersUpdated={handleFiltersUpdated}
-            showDatePicker={false}
-            showQueryInput
-            showFilterBar
-            showQueryMenu={false}
-            displayStyle="inPage"
-            placeholder={i18n.translate('xpack.osquery.resultsTable.searchPlaceholder', {
-              defaultMessage: 'Filter results using KQL',
-            })}
-            dataTestSubj="osqueryResultsSearchBar"
-          />
+          <div css={searchBarWrapperCss}>
+            <SearchBar
+              appName="osquery"
+              indexPatterns={searchBarIndexPatterns}
+              query={query}
+              filters={filters}
+              filtersForSuggestions={filtersForSuggestions}
+              onQuerySubmit={handleQuerySubmit}
+              onFiltersUpdated={handleFiltersUpdated}
+              showDatePicker={false}
+              showQueryInput
+              showFilterBar
+              showQueryMenu={false}
+              displayStyle="withBorders"
+              placeholder={i18n.translate('xpack.osquery.resultsTable.searchPlaceholder', {
+                defaultMessage: 'Search results (KQL)',
+              })}
+              dataTestSubj="osqueryResultsSearchBar"
+            />
+          </div>
 
         {!allResultsData?.edges.length ? (
           <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
