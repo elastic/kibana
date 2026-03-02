@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '../../common/lib';
-import { useCpsPickerAccess } from './use_register_cps_picker_access';
+import { useCpsPickerAccess } from './use_cps_picker_access';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('react-router-dom', () => ({

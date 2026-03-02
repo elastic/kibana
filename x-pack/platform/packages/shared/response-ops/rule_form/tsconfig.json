@@ -38,6 +38,5 @@
     "@kbn/actions-plugin",
     "@kbn/react-hooks",
     "@kbn/response-ops-rules-apis",
-    "@kbn/cps-utils",
   ]
 }

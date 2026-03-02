@@ -11,7 +11,7 @@ import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
-import { useCpsPickerAccess } from '../../hooks/use_register_cps_picker_access';
+import { useCpsPickerAccess } from '../../hooks/use_cps_picker_access';
 import { useKibana } from '../../../common/lib/kibana';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';

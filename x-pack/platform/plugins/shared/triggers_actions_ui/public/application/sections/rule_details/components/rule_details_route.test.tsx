@@ -15,7 +15,7 @@ import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import type { Rule } from '../../../../types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useCpsPickerAccess } from '../../../hooks/use_register_cps_picker_access';
+import { useCpsPickerAccess } from '../../../hooks/use_cps_picker_access';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 jest.mock('../../../../common/lib/kibana');
 
@@ -38,7 +38,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_register_cps_picker_access');
+jest.mock('../../../hooks/use_cps_picker_access');
 const mockUseCpsPickerAccess = jest.mocked(useCpsPickerAccess);
 
 function renderWithIntl(ui: React.ReactElement) {
