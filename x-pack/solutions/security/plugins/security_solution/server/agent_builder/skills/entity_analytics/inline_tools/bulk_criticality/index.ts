@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getRiskScoreInlineTool, getRiskScoreEsqlTool } from './risk_score';
-export { getAssetCriticalityInlineTool, getAssetCriticalityEsqlTool } from './asset_criticality';
+export const ENTITY_ANALYTICS_BULK_CRITICALITY_INLINE_TOOL_ID =
+  'security.entity_analytics.bulk_criticality';
+
 export { getBulkCriticalityInlineTool } from './bulk_criticality';
-export { getRiskEngineManagementInlineTool } from './risk_engine';

@@ -21,6 +21,8 @@ import { detectionRulesTool } from './detection_rules_tool';
 import { casesTool } from './cases_tool';
 import { exceptionListsTool } from './exception_lists_tool';
 import { timelinesTool } from './timelines_tool';
+import { endpointResponseActionsTool } from './endpoint_response_actions_tool';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin
@@ -30,7 +32,8 @@ export const registerTools = async (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   setupPlugins: SecuritySolutionPluginSetupDependencies,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  endpointAppContextService: EndpointAppContextService
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -41,4 +44,5 @@ export const registerTools = async (
   agentBuilder.tools.register(casesTool(core));
   agentBuilder.tools.register(exceptionListsTool({ core, lists: setupPlugins.lists }));
   agentBuilder.tools.register(timelinesTool(core));
+  agentBuilder.tools.register(endpointResponseActionsTool(endpointAppContextService));
 };

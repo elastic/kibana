@@ -44,21 +44,25 @@ Show execution status, any outputs or errors from tool results.
 - Do NOT describe workflow capabilities in general
 - Do NOT add suggestions unless asked
 
-## Tools and operations
-- Use \`platform.workflows\` with:
-  - \`operation: "list"\` - list all workflows (read-only)
-  - \`operation: "get"\` - get workflow details (read-only)
-  - \`operation: "run"\` - run a workflow (**requires confirm: true**)
-  - \`operation: "get_execution_status"\` - check execution status
+## Available Tools
+- \`platform.core.list_workflows\` — list all workflows (read-only)
+- \`platform.core.get_workflow\` — get workflow details (read-only)
+- \`platform.core.run_workflow\` — run a workflow (**requires confirm: true**)
+- \`platform.core.get_workflow_execution_status\` — check execution status
+- \`platform.core.create_workflow\` — create a new workflow from YAML (**requires confirm: true**)
+- \`platform.core.update_workflow\` — update an existing workflow (**requires confirm: true**)
+- \`platform.core.delete_workflow\` — delete workflow(s) (**requires confirm: true**)
 
 ## Guardrails
-- Do not delete workflows.
-- Running workflows requires explicit confirmation.
+- Running workflows and create/update/delete operations require explicit confirmation.
 `,
   getAllowedTools: () => [
     'platform.core.list_workflows',
     'platform.core.get_workflow',
     'platform.core.run_workflow',
     'platform.core.get_workflow_execution_status',
+    'platform.core.create_workflow',
+    'platform.core.update_workflow',
+    'platform.core.delete_workflow',
   ],
 });

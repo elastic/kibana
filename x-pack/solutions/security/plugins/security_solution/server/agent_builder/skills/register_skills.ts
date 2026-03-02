@@ -21,7 +21,7 @@ import { SECURITY_ALERT_SUPPRESSION_READONLY_SKILL } from './security_alert_supp
 import { SECURITY_ATTACK_DISCOVERY_SKILL } from './security_attack_discovery_skill';
 import { SECURITY_CASES_SKILL } from './security_cases_skill';
 import { SECURITY_DETECTION_RULES_SKILL } from './security_detection_rules_skill';
-import { SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL } from './security_endpoint_response_actions_readonly_skill';
+import { SECURITY_ENDPOINT_RESPONSE_ACTIONS_SKILL } from './security_endpoint_response_actions_skill';
 import { SECURITY_ENDPOINT_READONLY_SKILL } from './security_endpoint_readonly_skill';
 import { SECURITY_EXCEPTION_LISTS_SKILL } from './security_exception_lists_skill';
 import { SECURITY_NETWORK_SKILL } from './security_network_skill';
@@ -77,7 +77,7 @@ export const registerSkills = async ({
     agentBuilder.skills.register(SECURITY_THREAT_INTEL_SKILL),
     agentBuilder.skills.register(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL),
     agentBuilder.skills.register(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL),
-    agentBuilder.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
+    agentBuilder.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_SKILL),
   ]);
   if (experimentalFeatures.automaticTroubleshootingSkill) {
     agentBuilder.skills.register(

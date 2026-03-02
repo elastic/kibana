@@ -152,6 +152,27 @@ const createRuleParamsSchema = z.object({
     .describe('Required for create. Set to true only if the user explicitly confirmed.'),
 });
 
+const patchRuleParamsSchema = z.object({
+  id: z.string().describe('Alerting rule id of the rule to patch'),
+  name: z.string().optional().describe('Updated rule name'),
+  description: z.string().optional().describe('Updated rule description'),
+  risk_score: z.number().int().min(0).max(100).optional().describe('Updated risk score (0-100)'),
+  severity: z.enum(['low', 'medium', 'high', 'critical']).optional().describe('Updated severity level'),
+  query: z.string().optional().describe('Updated query string (KQL, EQL, or ES|QL)'),
+  language: z.enum(['kuery', 'lucene', 'eql', 'esql']).optional().describe('Updated query language'),
+  tags: z.array(z.string()).optional().describe('Updated tags'),
+  enabled: z.boolean().optional().describe('Enable or disable the rule'),
+  interval: z.string().optional().describe('Updated run interval, e.g., "5m"'),
+  from: z.string().optional().describe('Updated time range start, e.g., "now-6m"'),
+  to: z.string().optional().describe('Updated time range end, e.g., "now"'),
+  note: z.string().optional().describe('Updated investigation guide'),
+  references: z.array(z.string()).optional().describe('Updated reference URLs'),
+  false_positives: z.array(z.string()).optional().describe('Updated known false positives'),
+  max_signals: z.number().int().optional().describe('Maximum alerts per execution'),
+  index: z.array(z.string()).optional().describe('Updated index patterns'),
+  confirm: z.literal(true).describe('Required for patch. Set to true only if the user explicitly confirmed.'),
+});
+
 const schema = z.discriminatedUnion('operation', [
   z.object({
     operation: z.literal('find'),
@@ -183,6 +204,10 @@ const schema = z.discriminatedUnion('operation', [
     operation: z.literal('create'),
     params: createRuleParamsSchema,
   }),
+  z.object({
+    operation: z.literal('patch'),
+    params: patchRuleParamsSchema,
+  }),
 ]);
 
 export const detectionRulesTool = (
@@ -192,7 +217,7 @@ export const detectionRulesTool = (
   return {
     id: securityTool('detection_rules'),
     type: ToolType.builtin,
-    description: 'Find/get, enable/disable, and create Security detection rules (no delete).',
+    description: 'Find/get, enable/disable, create, and patch Security detection rules (no delete).',
     schema,
     confirmation: {
       askUser: 'once',
@@ -276,6 +301,63 @@ export const detectionRulesTool = (
                   operation: 'create',
                   item: createdRule,
                   message: `Detection rule "${createdRule.name}" created successfully with id: ${createdRule.id}`,
+                },
+              },
+            ],
+          };
+        }
+        case 'patch': {
+          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequest(request);
+
+          const { confirm: _confirmPatch, id, ...patchFields } = input.params;
+
+          const existingRule = await rulesClient.get({ id });
+          const ruleParams = existingRule.params as Record<string, unknown>;
+          const updatedParams: Record<string, unknown> = { ...ruleParams };
+
+          const paramFieldMappings: Array<[string, string]> = [
+            ['query', 'query'],
+            ['language', 'language'],
+            ['index', 'index'],
+            ['severity', 'severity'],
+            ['risk_score', 'riskScore'],
+            ['max_signals', 'maxSignals'],
+            ['references', 'references'],
+            ['false_positives', 'falsePositives'],
+            ['note', 'note'],
+            ['from', 'from'],
+            ['to', 'to'],
+            ['description', 'description'],
+          ];
+          for (const [inputKey, paramKey] of paramFieldMappings) {
+            const value = (patchFields as Record<string, unknown>)[inputKey];
+            if (value !== undefined) {
+              updatedParams[paramKey] = value;
+            }
+          }
+
+          const updatePayload: Record<string, unknown> = {
+            params: updatedParams,
+          };
+          if (patchFields.name !== undefined) updatePayload.name = patchFields.name;
+          if (patchFields.tags !== undefined) updatePayload.tags = patchFields.tags;
+          if (patchFields.enabled !== undefined) updatePayload.enabled = patchFields.enabled;
+          if (patchFields.interval !== undefined)
+            updatePayload.schedule = { interval: patchFields.interval };
+
+          const updatedRule = await rulesClient.update({
+            id,
+            data: updatePayload as unknown as Parameters<typeof rulesClient.update>[0]['data'],
+          });
+
+          return {
+            results: [
+              {
+                type: 'other',
+                data: {
+                  operation: 'patch',
+                  item: updatedRule,
+                  message: `Detection rule "${updatedRule.name}" updated successfully`,
                 },
               },
             ],

@@ -30,6 +30,9 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
+  createWorkflow: platformCoreTool('create_workflow'),
+  updateWorkflow: platformCoreTool('update_workflow'),
+  deleteWorkflow: platformCoreTool('delete_workflow'),
 } as const;
 
 export const attachmentTools = {

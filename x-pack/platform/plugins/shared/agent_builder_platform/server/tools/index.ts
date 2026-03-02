@@ -24,6 +24,7 @@ import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
+import { createWorkflowTool, updateWorkflowTool, deleteWorkflowTool } from './workflow_crud';
 
 export const registerTools = ({
   coreSetup,
@@ -50,7 +51,10 @@ export const registerTools = ({
 
   if (setupDeps.workflowsManagement) {
     tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement })
+      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      createWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      updateWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement }),
+      deleteWorkflowTool({ workflowsManagement: setupDeps.workflowsManagement })
     );
   }
 
