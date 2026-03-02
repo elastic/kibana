@@ -31,6 +31,14 @@ export function buildWorkflowContext(
   const normalizedInputsSchema = normalizeInputsToJsonSchema(
     workflowExecution.workflowDefinition.inputs
   );
+
+  // Extract parent workflow information from context if available
+  const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
+  const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
+    | string
+    | undefined;
+  const parentDepth = workflowExecution.context?.parentDepth as number | undefined;
+
   const inputsWithDefaults = applyInputDefaults(
     workflowExecution.context?.inputs as Record<string, unknown> | undefined,
     normalizedInputsSchema
@@ -56,5 +64,13 @@ export function buildWorkflowContext(
     event: workflowExecution.context?.event,
     inputs: inputsWithDefaults,
     now: new Date(),
+    parent:
+      parentWorkflowId && parentWorkflowExecutionId
+        ? {
+            workflowId: parentWorkflowId,
+            executionId: parentWorkflowExecutionId,
+            depth: parentDepth !== undefined ? parentDepth + 1 : 0,
+          }
+        : undefined,
   };
 }
