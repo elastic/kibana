@@ -297,7 +297,7 @@ function ToggleAccordionButton({
               onClick();
             }}
           >
-            <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
+            <EuiIcon type={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ position: 'relative' }}>

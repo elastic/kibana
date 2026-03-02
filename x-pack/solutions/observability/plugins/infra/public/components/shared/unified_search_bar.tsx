@@ -43,7 +43,7 @@ export const UnifiedSearchBar = ({
     <SearchBar
       appName={'infra'}
       displayStyle="inPage"
-      iconType="search"
+      iconType="magnify"
       indexPatterns={metricsView && [metricsView.dataViewReference]}
       placeholder={
         showPlaceholder
