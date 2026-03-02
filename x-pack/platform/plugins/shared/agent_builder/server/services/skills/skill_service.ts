@@ -11,7 +11,10 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type { PersistedSkillCreateRequest, PersistedSkillUpdateRequest } from '@kbn/agent-builder-common';
+import type {
+  PersistedSkillCreateRequest,
+  PersistedSkillUpdateRequest,
+} from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
