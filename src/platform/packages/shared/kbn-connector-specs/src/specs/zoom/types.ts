@@ -77,10 +77,7 @@ export const ZoomUserProfileSchema = z.object({
   first_name: z.string().optional().describe('First name'),
   last_name: z.string().optional().describe('Last name'),
   email: z.string().optional().describe('Email address'),
-  type: z
-    .number()
-    .optional()
-    .describe('Account type: 1=Basic, 2=Licensed, 3=On-Prem, 99=None'),
+  type: z.number().optional().describe('Account type: 1=Basic, 2=Licensed, 3=On-Prem, 99=None'),
   role_name: z.string().optional().describe('Role name (Owner, Admin, Member)'),
   status: z.string().optional().describe('Account status: active, inactive, or pending'),
   timezone: z.string().optional().describe('User timezone'),
@@ -102,7 +99,6 @@ export const ZoomUserProfileSchema = z.object({
 
 export const ZoomWhoAmIInputSchema = z.object({});
 export type ZoomWhoAmIInput = z.infer<typeof ZoomWhoAmIInputSchema>;
-
 
 export const ZoomListMeetingsInputSchema = z.object({
   userId: z
