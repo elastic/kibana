@@ -921,8 +921,7 @@ export const getDatatableVisualization = ({
               defaultMessage="Color settings in {count, plural, one {column} other {columns}} {columnList} are incompatible and have been temporarily disabled. Fix the issue to update the colors automatically, or edit the color configuration manually."
               values={{
                 count: mismatchedColumnLabels.length,
-                columnList: <strong>{columnList}</strong>,
-                fixLabel: <strong>{'Fix'}</strong>,
+                columnList: <strong>{columnList}</strong>
               }}
             />
             {setState && fixedState && (
