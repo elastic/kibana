@@ -166,7 +166,7 @@ describe('initialize edit api', () => {
       state: {},
     });
 
-    const { onEdit } = initializeEditApi({
+    const editApi = initializeEditApi({
       uuid: 'test',
       parentApi: {
         getAppContext: jest.fn().mockReturnValue({
@@ -180,7 +180,7 @@ describe('initialize edit api', () => {
       getTitle: () => 'test-title',
     });
 
-    await onEdit();
+    await editApi?.onEdit();
     expect(mockedNavigate).toBeCalledTimes(1);
     expect(mockedNavigate).toBeCalledWith('discover', {
       path: '/mock-url-for-onedit',

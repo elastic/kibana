@@ -11,15 +11,18 @@ import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import React, { useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiLink,
+  EuiFlexGroup,
   EuiPopover,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import type { CSSObject } from '@emotion/serialize';
 import { isTabDeleted } from '../utils/is_tab_deleted';
 
 interface SearchEmbeddableInlineEditHoverActionsProps {
@@ -64,98 +67,88 @@ export const SearchEmbeddableInlineEditHoverActions = ({
     () =>
       tabs.map((tab) => (
         <EuiContextMenuItem
-          icon={tab.id === selectedTabId ? 'check' : undefined}
+          icon={tab.id === selectedTabId ? 'check' : 'empty'}
+          aria-current={tab.id === selectedTabId ? 'true' : undefined}
           key={tab.id}
           onClick={() => {
             void onSelectTab(tab.id);
             setIsPopoverOpen(false);
           }}
         >
-          {tab.label}
+          <EuiTextTruncate text={tab.label} truncation="middle" width={euiTheme.base * 20} />
         </EuiContextMenuItem>
       )),
-    [onSelectTab, selectedTabId, tabs]
+    [euiTheme.base, onSelectTab, selectedTabId, tabs]
+  );
+
+  const buttonStyles = useMemo<CSSObject>(
+    () => ({
+      height: euiTheme.size.l,
+      paddingInline: euiTheme.size.xs,
+    }),
+    [euiTheme.size.l, euiTheme.size.xs]
   );
 
   return (
-    <div css={{ display: 'flex' }}>
-      <div
-        css={{
-          alignItems: 'center',
-          display: 'flex',
-          flexWrap: 'nowrap',
-          gap: euiTheme.size.xs,
-          paddingInline: euiTheme.size.xs,
+    <EuiFlexGroup
+      responsive={false}
+      alignItems="center"
+      wrap={false}
+      gutterSize="xs"
+      css={{ paddingInline: `${euiTheme.size.xs} 0 !important` }}
+    >
+      <EuiButtonEmpty
+        flush="both"
+        size="s"
+        data-test-subj="discoverEmbeddableInlineEditEditInDiscoverLink"
+        onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+          event.preventDefault();
+          void onEditInDiscover();
         }}
+        css={buttonStyles}
       >
-        <EuiLink
-          css={{
-            paddingInline: euiTheme.size.xs,
-            whiteSpace: 'nowrap',
-          }}
-          data-test-subj="discoverEmbeddableInlineEditEditInDiscoverLink"
-          onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-            event.preventDefault();
-            void onEditInDiscover();
-          }}
-        >
-          {i18n.translate('discover.embeddable.inlineEdit.editInDiscoverLinkLabel', {
-            defaultMessage: 'Edit in Discover',
+        {i18n.translate('discover.embeddable.inlineEdit.editInDiscoverLinkLabel', {
+          defaultMessage: 'Edit in Discover',
+        })}
+      </EuiButtonEmpty>
+      <EuiPopover
+        anchorPosition="downRight"
+        button={
+          <EuiButton
+            aria-label={i18n.translate('discover.embeddable.inlineEdit.selectTabButtonAriaLabel', {
+              defaultMessage: 'Select tab',
+            })}
+            color={isSelectedTabDeleted ? 'danger' : 'primary'}
+            data-test-subj="discoverEmbeddableInlineEditSelectTabAction"
+            disabled={tabs.length === 0}
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={() => setIsPopoverOpen((open) => !open)}
+            size="s"
+            css={[buttonStyles, { marginInlineEnd: euiTheme.size.xs }]}
+          >
+            <EuiTextTruncate
+              text={selectedTabLabel}
+              truncation="middle"
+              width={euiTheme.base * 10}
+            />
+          </EuiButton>
+        }
+        closePopover={() => setIsPopoverOpen(false)}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+        offset={euiTheme.base / 2}
+      >
+        <EuiContextMenuPanel
+          data-test-subj="discoverEmbeddableInlineEditSelectTabPopover"
+          items={items}
+          size="s"
+          title={i18n.translate('discover.embeddable.inlineEdit.selectTabMenuTitle', {
+            defaultMessage: 'Selected tab',
           })}
-        </EuiLink>
-        <EuiPopover
-          anchorPosition="downRight"
-          button={
-            <EuiButtonEmpty
-              aria-label={i18n.translate(
-                'discover.embeddable.inlineEdit.selectTabButtonAriaLabel',
-                {
-                  defaultMessage: 'Select tab',
-                }
-              )}
-              color={isSelectedTabDeleted ? 'danger' : 'primary'}
-              css={{
-                height: euiTheme.size.l,
-                maxInlineSize: 280,
-              }}
-              data-test-subj="discoverEmbeddableInlineEditSelectTabAction"
-              disabled={tabs.length === 0}
-              iconSide="right"
-              iconType="arrowDown"
-              onClick={() => setIsPopoverOpen((open) => !open)}
-              size="s"
-            >
-              <span
-                css={{
-                  alignItems: 'center',
-                  display: 'inline-flex',
-                  gap: euiTheme.size.xs,
-                  maxInlineSize: 230,
-                  minWidth: 0,
-                }}
-              >
-                <span
-                  css={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {selectedTabLabel}
-                </span>
-              </span>
-            </EuiButtonEmpty>
-          }
-          closePopover={() => setIsPopoverOpen(false)}
-          isOpen={isPopoverOpen}
-          panelPaddingSize="none"
-        >
-          <EuiContextMenuPanel
-            data-test-subj="discoverEmbeddableInlineEditSelectTabPopover"
-            items={items}
-          />
-        </EuiPopover>
-      </div>
-    </div>
+          css={{ '.euiContextMenuPanel__title': { padding: euiTheme.size.s } }}
+        />
+      </EuiPopover>
+    </EuiFlexGroup>
   );
 };

@@ -70,9 +70,11 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem css={{ minHeight: 0 }}>{children}</EuiFlexItem>
+      <EuiFlexGroup css={{ minHeight: 0 }} responsive={false} direction="column" gutterSize="none">
+        <EuiFlexItem css={{ minHeight: 0 }}>{children}</EuiFlexItem>
 
-      {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
+        {Boolean(append) && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
+      </EuiFlexGroup>
 
       <SearchResponseWarningsBadge warnings={interceptedWarnings ?? []} />
     </EuiFlexGroup>

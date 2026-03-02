@@ -17,7 +17,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FetchContext, HasEditCapabilities } from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   apiCanFocusPanel,
   apiPublishesChildren,
@@ -32,7 +32,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -41,12 +40,17 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
-import type { SearchEmbeddableApi } from './types';
+import type { SearchEmbeddableApi, SearchEmbeddableSerializedAttributes } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
+
+// This type forces our snapshot to include all keys so we don't overlook new ones
+type InlineEditSnapshot = {
+  [K in keyof Required<SearchEmbeddableSerializedAttributes>]: SearchEmbeddableSerializedAttributes[K];
+};
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -105,8 +109,7 @@ export const getSearchEmbeddableFactory = ({
       const overrideHoverActions$ = isInlineEditing$;
 
       const tabs = runtimeState.tabs ?? [];
-      let inlineEditOriginalTab: DiscoverSessionTab | undefined;
-      let inlineEditStateSnapshot: Record<string, unknown> | undefined;
+      let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
 
       const isSelectedTabDeleted = (tabId: string | undefined, availableTabs: typeof tabs = tabs) =>
         isTabDeleted(tabId, availableTabs);
@@ -127,7 +130,9 @@ export const getSearchEmbeddableFactory = ({
       const titleManager = initializeTitleManager(initialState);
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
-      const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
+      const searchEmbeddable = await initializeSearchEmbeddableApi({
+        initialState: runtimeState,
+        dataLoading$,
         discoverServices,
       });
 
@@ -149,7 +154,7 @@ export const getSearchEmbeddableFactory = ({
         if (!tab) return false;
 
         try {
-          await searchEmbeddable.switchToTab(tab);
+          await searchEmbeddable.reinitializeState(tab);
 
           return true;
         } catch (error) {
@@ -165,7 +170,6 @@ export const getSearchEmbeddableFactory = ({
         inlineEditDirty$.next(false);
         draftSelectedTabId$.next(selectedTabId$.getValue());
 
-        inlineEditOriginalTab = undefined;
         inlineEditStateSnapshot = undefined;
 
         setFocusedPanelId();
@@ -175,12 +179,13 @@ export const getSearchEmbeddableFactory = ({
         if (isInlineEditing$.getValue()) return;
 
         const currentTabId = selectedTabId$.getValue();
-
-        inlineEditOriginalTab = tabs.find((t) => t.id === currentTabId);
-
-        const { stateManager } = searchEmbeddable;
+        const {
+          stateManager,
+          api: { savedSearch$ },
+        } = searchEmbeddable;
 
         inlineEditStateSnapshot = {
+          serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
           sort: stateManager.sort.getValue(),
           columns: stateManager.columns.getValue(),
           grid: stateManager.grid.getValue(),
@@ -233,23 +238,17 @@ export const getSearchEmbeddableFactory = ({
       };
 
       const cancelInlineTabSelection = async () => {
-        if (!isInlineEditing$.getValue()) return;
+        if (!isInlineEditing$.getValue() || !inlineEditStateSnapshot) return;
 
-        if (inlineEditOriginalTab && draftSelectedTabId$.getValue() !== inlineEditOriginalTab.id) {
+        if (inlineEditDirty$.getValue()) {
           try {
-            await searchEmbeddable.switchToTab(inlineEditOriginalTab);
+            await searchEmbeddable.reinitializeState(inlineEditStateSnapshot);
           } catch (error) {
             blockingError$.next(error as Error);
             dataLoading$.next(false);
           }
         }
-        if (inlineEditStateSnapshot) {
-          const { stateManager: sm } = searchEmbeddable;
 
-          for (const [key, value] of Object.entries(inlineEditStateSnapshot)) {
-            (sm[key as keyof typeof sm] as BehaviorSubject<unknown>)?.next(value);
-          }
-        }
         stopInlineEditing();
       };
 
@@ -311,55 +310,37 @@ export const getSearchEmbeddableFactory = ({
           timeRangeManager.reinitializeState(lastSaved);
           titleManager.reinitializeState(lastSaved);
           if (lastSaved) {
-            const currentTabId = draftSelectedTabId$.getValue();
-
             const lastSavedRuntimeState = await deserializeState({
               serializedState: lastSaved,
               discoverServices,
             });
 
             selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-
-            const isLastSavedSelectedTabDeleted = isSelectedTabDeleted(
-              lastSavedRuntimeState.selectedTabId,
-              lastSavedRuntimeState.tabs ?? tabs
-            );
-
-            const resolvedTabId = isLastSavedSelectedTabDeleted
-              ? undefined
-              : lastSavedRuntimeState.selectedTabId;
-
-            const resolvedTab = resolvedTabId
-              ? tabs.find((t) => t.id === resolvedTabId)
-              : undefined;
-
-            if (currentTabId !== resolvedTabId && resolvedTab) {
-              await searchEmbeddable.switchToTab(resolvedTab);
-            }
-            searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+            await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
           }
           stopInlineEditing();
         },
       });
 
-      const { onEdit: navigateToDiscover, ...editApiWithoutOnEdit } = initializeEditApi({
+      const editApi = initializeEditApi({
         uuid,
         parentApi,
         partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
         discoverServices,
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
-      }) as Partial<HasEditCapabilities & { getEditHref: () => Promise<string> }>;
+      });
 
       const api: SearchEmbeddableApi = finalizeApi({
         ...unsavedChangesApi,
         ...titleManager.api,
-        ...(searchEmbeddable.api as typeof searchEmbeddable.api &
-          Required<Pick<SearchEmbeddableApi, 'filters$' | 'query$' | 'setFilters' | 'setQuery'>>),
+        ...searchEmbeddable.api,
         ...timeRangeManager.api,
         ...drilldownsManager.api,
-        ...editApiWithoutOnEdit,
-        ...(navigateToDiscover
+        ...editApi,
+        // If editing is enabled and it's a by ref embeddable,
+        // override default save-and-return logic with inline editing
+        ...(editApi && savedObjectId$.getValue()
           ? {
               onEdit: startInlineEditing,
               overrideHoverActions$,
@@ -367,7 +348,7 @@ export const getSearchEmbeddableFactory = ({
                 <SearchEmbeddableInlineEditHoverActions
                   draftSelectedTabId$={draftSelectedTabId$}
                   tabs={tabs}
-                  onEditInDiscover={navigateToDiscover}
+                  onEditInDiscover={editApi.onEdit}
                   onSelectTab={previewInlineTabSelection}
                 />
               ),

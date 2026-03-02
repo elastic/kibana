@@ -22,11 +22,7 @@ import type {
   ProjectRoutingOverrides,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
-import type {
-  DiscoverGridSettings,
-  DiscoverSessionTab,
-  SavedSearch,
-} from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
@@ -37,12 +33,12 @@ import {
   type Query,
 } from '@kbn/es-query';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
-  SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
@@ -92,24 +88,24 @@ const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) =
   }
 };
 
-export const initializeSearchEmbeddableApi = async (
-  initialState: SearchEmbeddableRuntimeState,
-  {
-    discoverServices,
-  }: {
-    discoverServices: DiscoverServices;
-  }
-): Promise<{
+export const initializeSearchEmbeddableApi = async ({
+  initialState,
+  dataLoading$,
+  discoverServices,
+}: {
+  initialState: SearchEmbeddableSerializedAttributes;
+  dataLoading$: BehaviorSubject<boolean | undefined>;
+  discoverServices: DiscoverServices;
+}): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
-    Partial<PublishesWritableUnifiedSearch> &
+    Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
     PublishesProjectRoutingOverrides;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => void;
-  switchToTab: (tab: DiscoverSessionTab) => Promise<void>;
+  reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
@@ -210,6 +206,37 @@ export const initializeSearchEmbeddableApi = async (
     stateManager.columns.next(columns);
   };
 
+  const reinitializeState = async (state: SearchEmbeddableSerializedAttributes) => {
+    // Trigger dataLoading$ and clear rows$ to show the initial loading state
+    dataLoading$.next(true);
+    rows$.next([]);
+
+    const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
+      discoverServices,
+      state.serializedSearchSource
+    );
+
+    // Ensure all state updates happen synchronously to prevent multiple reloads
+    searchSource$.next(newSearchSource);
+
+    if (newDataView) dataViews$.next([newDataView]);
+
+    const newQuery = newSearchSource.getField('query');
+    const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;
+
+    query$.next(newQuery);
+    filters$.next(newFilters);
+    sort$.next(state.sort);
+    columns$.next(state.columns);
+    grid$.next(state.grid);
+    sampleSize$.next(state.sampleSize);
+    rowsPerPage$.next(state.rowsPerPage);
+    rowHeight$.next(state.rowHeight);
+    headerRowHeight$.next(state.headerRowHeight);
+    savedSearchViewMode$.next(state.viewMode);
+    density$.next(state.density);
+  };
+
   /** Keep the saved search in sync with any state changes */
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
@@ -266,43 +293,6 @@ export const initializeSearchEmbeddableApi = async (
       viewMode: 'referenceEquality',
       density: 'referenceEquality',
     },
-    reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => {
-      sort$.next(lastSaved?.sort);
-      columns$.next(lastSaved?.columns);
-      grid$.next(lastSaved?.grid);
-      sampleSize$.next(lastSaved?.sampleSize);
-      rowsPerPage$.next(lastSaved?.rowsPerPage);
-      rowHeight$.next(lastSaved?.rowHeight);
-      headerRowHeight$.next(lastSaved?.headerRowHeight);
-      savedSearchViewMode$.next(lastSaved?.viewMode);
-      density$.next(lastSaved?.density);
-    },
-    switchToTab: async (tab: DiscoverSessionTab) => {
-      sort$.next(tab.sort);
-      columns$.next(tab.columns);
-      grid$.next(tab.grid);
-      sampleSize$.next(tab.sampleSize);
-      rowsPerPage$.next(tab.rowsPerPage);
-      rowHeight$.next(tab.rowHeight);
-      headerRowHeight$.next(tab.headerRowHeight);
-      savedSearchViewMode$.next(tab.viewMode);
-      density$.next(tab.density);
-
-      const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
-        discoverServices,
-        tab.serializedSearchSource
-      );
-
-      searchSource$.next(newSearchSource);
-
-      if (newDataView) dataViews$.next([newDataView]);
-
-      const newQuery = newSearchSource.getField('query');
-      const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;
-
-      query$.next(newQuery);
-      filters$.next(newFilters);
-      projectRoutingOverrides$.next(getProjectRoutingOverrides(newQuery));
-    },
+    reinitializeState,
   };
 };

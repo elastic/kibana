@@ -238,7 +238,7 @@ describe('saved search embeddable', () => {
 
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL, savedObjectId: 'id' },
       });
       const navigateToEditor = jest.fn();
 
