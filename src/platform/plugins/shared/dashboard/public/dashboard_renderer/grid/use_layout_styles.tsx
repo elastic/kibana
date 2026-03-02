@@ -61,6 +61,28 @@ export const useLayoutStyles = () => {
         }
       }
 
+      // styles for the panel grid size gauge that appears when resizing
+      .kbnGridPanel--resizeGauge {
+        padding: ${euiTheme.size.xs};
+        z-index: ${euiTheme.levels.menu};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-radius: ${euiTheme.border.radius.small};
+
+        & .kbnGridPanel--resizeGauge--inner {
+          padding: ${euiTheme.size.s};
+          height: ${euiTheme.size.l};
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+          border-radius: ${euiTheme.border.radius.small};
+        }
+
+        & .kbnGridPanel--resizeGauge--text {
+          font-weight: ${euiTheme.font.weight.medium};
+        }
+      }
+
       .kbnGridPanel:hover .kbnGridPanel--resizeHandle {
         z-index: ${euiTheme.levels.maskBelowHeader};
 

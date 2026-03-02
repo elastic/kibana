@@ -8,8 +8,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiPanel, EuiText, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
 import { useGridPanelState } from './use_panel_grid_data';
@@ -21,7 +19,6 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [isResizing, setIsResizing] = useState(false);
 
   const panel$ = useGridPanelState({ panelId });
-  const { euiTheme } = useEuiTheme();
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(() => {
@@ -58,42 +55,24 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     return () => {
       activePanelStyleSubscription.unsubscribe();
     };
-  }, [panel$, gridLayoutStateManager, euiTheme.levels.modal]);
+  }, [panel$, gridLayoutStateManager]);
 
   return isResizing ? (
-    <EuiPanel css={outerStyles} hasShadow={false} paddingSize="none">
-      <div css={innerStyles}>
-        <EuiText css={textStyles} size="s">
+    <div css={outerStyles} className="kbnGridPanel--resizeGauge">
+      <div className="kbnGridPanel--resizeGauge--inner">
+        <span className="kbnGridPanel--resizeGauge--text">
           {width}x{height}
-        </EuiText>
+        </span>
       </div>
-    </EuiPanel>
+    </div>
   ) : null;
 });
 
-const outerStyles = ({ euiTheme }: UseEuiTheme) =>
+const outerStyles = () =>
   css({
     right: '0',
     top: '0',
-    padding: euiTheme.size.xs,
     position: 'absolute',
-    zIndex: euiTheme.levels.menu,
-  });
-
-const innerStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    padding: euiTheme.size.s,
-    height: euiTheme.size.l,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.2),
-    borderRadius: euiTheme.border.radius.small,
-  });
-
-const textStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    fontWeight: euiTheme.font.weight.medium,
   });
 
 ResizeGauge.displayName = 'KbnGridLayoutResizeGauge';
