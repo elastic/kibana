@@ -73,6 +73,14 @@ export const predefinedStepTypes = [
     displayName: 'HTTP',
   },
   {
+    actionTypeId: 'workflow.execute',
+    displayName: 'Workflow Execute',
+  },
+  {
+    actionTypeId: 'workflow.executeAsync',
+    displayName: 'Workflow Execute Async',
+  },
+  {
     actionTypeId: 'manual',
     displayName: 'Manual',
   },
@@ -460,7 +468,7 @@ async function injectDynamicShadowIcons(
       } else if (connectorType.startsWith('.')) {
         className = connectorType.substring(1);
       } else if (connectorType.includes('.')) {
-        className = connectorType.split('.')[0];
+        className = connectorType.replaceAll('.', '-');
       } else {
         className = connectorType;
       }
