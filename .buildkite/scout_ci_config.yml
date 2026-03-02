@@ -13,6 +13,7 @@ plugins:
     - security_solution
     - spaces
     - streams_app
+    - synthetics
     - transform
     - dashboard
     - uptime
