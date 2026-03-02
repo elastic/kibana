@@ -868,6 +868,126 @@ Object {
             },
             Object {
               "additionalProperties": false,
+              "description": "Split a string field into an array using a separator",
+              "properties": Object {
+                "action": Object {
+                  "const": "split",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "from": Object {
+                  "description": "Source field to split into an array",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when source field is missing",
+                  "type": "boolean",
+                },
+                "preserve_trailing": Object {
+                  "description": "Preserve empty trailing fields in the split result",
+                  "type": "boolean",
+                },
+                "separator": Object {
+                  "description": "Regex separator used to split the field value into an array",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "to": Object {
+                  "description": "Target field for the split array (defaults to source)",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/__schema1",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "from",
+                "separator",
+              ],
+              "title": "Split",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "description": "Sort the elements of an array field in ascending or descending order",
+              "properties": Object {
+                "action": Object {
+                  "const": "sort",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "from": Object {
+                  "description": "Array field to sort",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when source field is missing",
+                  "type": "boolean",
+                },
+                "order": Object {
+                  "description": "Sort order - \\"asc\\" (ascending) or \\"desc\\" (descending). Defaults to \\"asc\\"",
+                  "enum": Array [
+                    "asc",
+                    "desc",
+                  ],
+                  "type": "string",
+                },
+                "to": Object {
+                  "description": "Target field for the sorted array (defaults to source)",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/__schema1",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "from",
+              ],
+              "title": "Sort",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
               "description": "Convert field values to another data type",
               "properties": Object {
                 "action": Object {
@@ -1183,6 +1303,8 @@ Object {
                 "lowercase",
                 "trim",
                 "join",
+                "split",
+                "sort",
                 "convert",
                 "concat",
                 "manual_ingest_pipeline",
