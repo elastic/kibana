@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/constants';
@@ -54,7 +54,7 @@ import { getColumns } from '../../components/alerts_table/common/get_columns';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';
-import { getObservabilityAlertsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
+// import { getObservabilityAlertsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
@@ -127,7 +127,6 @@ function InternalAlertsPage() {
     cases,
     settings,
     charts,
-    chrome,
     dataViews,
     observabilityAIAssistant,
     share: {
@@ -319,16 +318,17 @@ function InternalAlertsPage() {
 
   const manageRulesHref = useRulesLink().href;
 
-  useEffect(() => {
-    if (chrome?.setHeaderAppActionsConfig && manageRulesHref) {
-      chrome.setHeaderAppActionsConfig(
-        getObservabilityAlertsHeaderAppActionsConfig(manageRulesHref)
-      );
-      return () => {
-        chrome.setHeaderAppActionsConfig(undefined);
-      };
-    }
-  }, [chrome, manageRulesHref]);
+  // Header "Manage rules" button commented out; button is shown in-page on the metrics row instead.
+  // useEffect(() => {
+  //   if (chrome?.setHeaderAppActionsConfig && manageRulesHref) {
+  //     chrome.setHeaderAppActionsConfig(
+  //       getObservabilityAlertsHeaderAppActionsConfig(manageRulesHref)
+  //     );
+  //     return () => {
+  //       chrome.setHeaderAppActionsConfig(undefined);
+  //     };
+  //   }
+  // }, [chrome, manageRulesHref]);
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -359,7 +359,6 @@ function InternalAlertsPage() {
                 uiSettings,
               }}
             />
-            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             {hasInitialControlLoadingFinished ? (
@@ -379,18 +378,42 @@ function InternalAlertsPage() {
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-              {renderRuleStats(
-                ruleStats,
-                manageRulesHref as string,
-                ruleStatsLoading,
-                locators.get<RulesLocatorParams>(rulesLocatorID),
-                { includeManageRulesInPageHeader: false }
-              ).map((item, index) => (
-                <EuiFlexItem key={index} grow={false}>
-                  {item}
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="l"
+              responsive={false}
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+                  {renderRuleStats(
+                    ruleStats,
+                    manageRulesHref as string,
+                    ruleStatsLoading,
+                    locators.get<RulesLocatorParams>(rulesLocatorID),
+                    { includeManageRulesInPageHeader: false }
+                  ).map((item, index) => (
+                    <EuiFlexItem key={index} grow={false}>
+                      {item}
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {manageRulesHref && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="manageRulesPageButton"
+                    href={manageRulesHref}
+                    iconType="gear"
+                    fill
+                    size="s"
+                  >
+                    {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+                      defaultMessage: 'Manage Rules',
+                    })}
+                  </EuiButton>
                 </EuiFlexItem>
-              ))}
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
