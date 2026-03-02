@@ -19,15 +19,15 @@ import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 function getEuiIconType(type: string) {
   switch (type) {
     case 'field':
-      return 'kqlField';
+      return 'queryField';
     case 'value':
-      return 'kqlValue';
+      return 'queryValue';
     case 'recentSearch':
       return 'search';
     case 'conjunction':
-      return 'kqlSelector';
+      return 'querySelector';
     case 'operator':
-      return 'kqlOperand';
+      return 'queryOperand';
     default:
       throw new Error(`Unknown type: ${type}`);
   }

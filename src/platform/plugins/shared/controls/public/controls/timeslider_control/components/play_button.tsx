@@ -36,7 +36,7 @@ export function PlayButton(props: Props) {
     <EuiButtonIcon
       onClick={props.isPaused ? props.onPlay : props.onPause}
       disabled={props.disablePlayButton}
-      iconType={props.isPaused ? 'playFilled' : 'pause'}
+      iconType={props.isPaused ? 'play' : 'pause'}
       size="s"
       display="fill"
       aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(props.isPaused)}
