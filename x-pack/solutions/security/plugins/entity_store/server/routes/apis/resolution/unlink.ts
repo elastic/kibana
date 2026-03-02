@@ -6,16 +6,17 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
-import {
-  ResolutionUnlinkRequestBody,
-  type ResolutionUnlinkResponse,
-} from '../../../../common/api/resolution/unlink.gen';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { EntitiesNotFoundError, EntityNotAliasError } from '../../../domain/errors';
+
+const bodySchema = z.object({
+  entity_ids: z.array(z.string()).min(1),
+});
 
 export function registerResolutionUnlink(router: EntityStorePluginRouter) {
   router.versioned
@@ -32,11 +33,11 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ResolutionUnlinkRequestBody),
+            body: buildRouteValidationWithZod(bodySchema),
           },
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse<ResolutionUnlinkResponse>> => {
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const { logger, resolutionClient } = await ctx.entityStore;
 
         logger.debug('Resolution Unlink API called');
