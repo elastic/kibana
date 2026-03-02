@@ -50,7 +50,7 @@ kbn-evals-suite-security-ai-rules/
 
 ### Method 1: Run suite and print comparison table (Recommended)
 
-The `summary` command runs the suite and prints a colour-coded model comparison table at the end. It also persists all scores to Elasticsearch so the same run can be re-summarised later.
+The `summary` command runs the suite and prints a colour-coded model comparison table at the end. It also persists all scores to Elasticsearch so the same run can be re-summarized later.
 
 ```bash
 node scripts/evals summary --suite security-ai-rules \
@@ -68,7 +68,7 @@ node scripts/evals summary --suite security-ai-rules \
 | `--project <name>` | Playwright project to run | (all projects) |
 | `--dry-run` | Print the command that would run without executing it | `false` |
 
-### Method 2: Summarise a previous run (no re-run)
+### Method 2: summarize a previous run (no re-run)
 
 If you already have a run ID from a previous execution, pass it as a positional argument to skip re-running and just print the table:
 
@@ -79,9 +79,9 @@ node scripts/evals summary <run-id>
 ### Method 3: Run suite without summary table
 
 ```bash
-node scripts/evals run --suite security-ai-rules \
-  --evaluation-connector-id gpt-4o \
-  --evaluations-es-url http://elastic:changeme@localhost:9200
+EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 \
+EVALUATION_CONNECTOR_ID=gpt-4o \
+node scripts/evals run --suite security-ai-rules
 ```
 
 ### Example: Multi-model comparison
@@ -89,6 +89,8 @@ node scripts/evals run --suite security-ai-rules \
 By default, the suite runs against all connectors configured in `kibana.dev.yml`. Simply configure the models you want to compare and run a single command:
 
 ```bash
+EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 \
+EVALUATION_CONNECTOR_ID=gpt-4o \
 node scripts/evals summary --suite security-ai-rules \
   --evaluation-connector-id gpt-4o
 ```
