@@ -83,7 +83,6 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
-    const skillsServiceStart = this.services.skills.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -94,13 +93,19 @@ export class ServiceManager {
       actions,
     });
 
+    const skillsServiceStart = this.services.skills.start({
+      elasticsearch,
+      spaces,
+      logger: logger.get('skills'),
+      getToolRegistry: tools.getRegistry,
+    });
+
     const agents = this.services.agents.start({
       spaces,
       security,
       elasticsearch,
       uiSettings,
       savedObjects,
-      getRunner,
       toolsService: tools,
     });
 
@@ -120,6 +125,7 @@ export class ServiceManager {
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
       trackingService,
+      analyticsService,
       hooks,
     });
     runner = runnerFactory.getRunner();
@@ -142,6 +148,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
       uiSettings,
       savedObjects,
       spaces,
@@ -157,6 +164,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
       attachmentsService: attachments,
       uiSettings,
       savedObjects,
