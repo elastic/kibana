@@ -49,8 +49,21 @@ export const getRuleIdsWithGapsParamsSchema = schema.object({
   ruleIds: schema.maybe(schema.arrayOf(schema.string())),
 });
 
+export const gapsSummarySchema = schema.object({
+  totalUnfilledDurationMs: schema.number(),
+  totalInProgressDurationMs: schema.number(),
+  totalFilledDurationMs: schema.number(),
+  totalDurationMs: schema.number(),
+  rulesByGapFillStatus: schema.object({
+    unfilled: schema.number(),
+    inProgress: schema.number(),
+    filled: schema.number(),
+  }),
+});
+
 export const getRuleIdsWithGapsResponseSchema = schema.object({
   total: schema.number(),
   ruleIds: schema.arrayOf(schema.string()),
   latestGapTimestamp: schema.maybe(schema.number()),
+  summary: gapsSummarySchema,
 });
