@@ -806,9 +806,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   const resourceFileOverrides: Record<string, string> = resources
     ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
-      acc[basename(filePath)] = resolve(process.cwd(), filePath);
-      return acc;
-    }, {} as Record<string, string>)
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
     : {};
 
   const tierSpecificRolesFileExists = (filePath: string): boolean => {
@@ -870,7 +870,8 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     ...(await getOperatorVolume(esProjectTypeFromKbn.get(projectType)!)),
 
     '--volume',
-    `${ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+    `${
+      ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`
@@ -991,17 +992,17 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     },
     ...(options.ssl
       ? {
-        tls: {
-          ca: [fs.readFileSync(CA_CERT_PATH)],
-          // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-          // for the ip which is not validated. As such we are getting the error
-          // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-          // To work around that we are overriding the function checkServerIdentity too
-          checkServerIdentity: () => {
-            return undefined;
+          tls: {
+            ca: [fs.readFileSync(CA_CERT_PATH)],
+            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+            // for the ip which is not validated. As such we are getting the error
+            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+            // To work around that we are overriding the function checkServerIdentity too
+            checkServerIdentity: () => {
+              return undefined;
+            },
           },
-        },
-      }
+        }
       : {}),
   });
 
@@ -1334,11 +1335,11 @@ export async function runDockerSnapshotContainer(
     requestTimeout: 30_000,
     ...(options.ssl
       ? {
-        tls: {
-          ca: [fs.readFileSync(CA_CERT_PATH)],
-          checkServerIdentity: () => undefined,
-        },
-      }
+          tls: {
+            ca: [fs.readFileSync(CA_CERT_PATH)],
+            checkServerIdentity: () => undefined,
+          },
+        }
       : {}),
   });
 
