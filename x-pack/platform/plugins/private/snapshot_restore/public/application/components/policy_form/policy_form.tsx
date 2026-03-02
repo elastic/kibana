@@ -170,7 +170,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep > 1 ? (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     onClick={() => onBack()}
                     disabled={!validation.isValid}
                   >
@@ -185,7 +185,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                     onClick={() => onNext()}
                     iconSide="right"
                     disabled={!validation.isValid}

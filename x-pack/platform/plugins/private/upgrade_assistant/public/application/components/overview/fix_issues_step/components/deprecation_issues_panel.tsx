@@ -78,7 +78,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
             <DeprecationIssue
               type="critical"
               color="danger"
-              iconType="errorFilled"
+              iconType="errorFill"
               message={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.deprecationStats.criticalDeprecationsTitle"
@@ -97,7 +97,7 @@ export const DeprecationIssuesPanel = (props: Props) => {
             <DeprecationIssue
               type="warning"
               color="warning"
-              iconType="warningFilled"
+              iconType="warningFill"
               message={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.deprecationStats.warningDeprecationsTitle"

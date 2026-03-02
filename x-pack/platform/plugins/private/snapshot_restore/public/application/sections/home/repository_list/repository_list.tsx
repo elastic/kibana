@@ -123,7 +123,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           <EuiButton
             {...reactRouterNavigate(history, linkToAddRepository())}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="registerRepositoryButton"
           >
             <FormattedMessage
