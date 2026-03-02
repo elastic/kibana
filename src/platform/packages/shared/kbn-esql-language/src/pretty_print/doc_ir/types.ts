@@ -12,27 +12,27 @@
  *
  * - `string` — literal text (must not contain newline characters).
  * - `Doc[]` — concatenation of documents, rendered left to right.
- * - `DocCommand` — a formatting instruction node.
+ * - `DocNode` — a formatting instruction node.
  */
-export type Doc = string | Doc[] | DocCommand;
+export type Doc = string | Doc[] | AnyNode;
 
 /**
- * Discriminated union of all document commands.
+ * All possible document nodes.
  */
-export type DocCommand =
-  | GroupDoc
-  | FillDoc
-  | IndentDoc
-  | IndentIfBreakDoc
-  | AlignDoc
-  | IfBreakDoc
-  | LineDoc
-  | LineSuffixDoc
-  | LineSuffixBoundaryDoc
-  | BreakParentDoc
-  | LabelDoc
-  | TrimDoc
-  | CursorDoc;
+export type AnyNode =
+  | GroupNode
+  | FillNode
+  | IndentNode
+  | IndentIfBreakNode
+  | AlignNode
+  | IfBreakNode
+  | LineNode
+  | LineSuffixNode
+  | LineSuffixBoundaryNode
+  | BreakParentNode
+  | LabelNode
+  | TrimNode
+  | CursorNode;
 
 /**
  * The core break-decision unit. The layout engine first tries to render
@@ -40,17 +40,16 @@ export type DocCommand =
  * remaining line width, it switches to break mode — replacing every `line`
  * and `softline` inside with a newline + indentation.
  *
- * When `expandedStates` is provided this becomes a **conditional group**
- * (aka `conditionalGroup`): the engine tries each state in order (most
- * compact first) and uses the first one that fits. If none fits, the last
- * state is rendered in break mode.
+ * When `expandedStates` is provided this becomes a **conditional group**:
+ * the engine tries each state in order (most compact first) and uses the first
+ * one that fits. If none fits, the last state is rendered in break mode.
  *
  * Setting `shouldBreak` to `true` forces break mode unconditionally.
  *
  * An `id` allows other commands (`ifBreak`, `indentIfBreak`) to query
  * this group's resolved mode.
  */
-export interface GroupDoc {
+export interface GroupNode {
   readonly type: 'group';
   readonly contents: Doc;
   readonly shouldBreak?: boolean;
@@ -68,7 +67,7 @@ export interface GroupDoc {
  * Unlike `group` (all-or-nothing), `fill` makes per-item break decisions,
  * producing partially filled lines.
  */
-export interface FillDoc {
+export interface FillNode {
   readonly type: 'fill';
   readonly parts: Doc[];
 }
@@ -76,20 +75,19 @@ export interface FillDoc {
 /**
  * Increases indentation by one tab level for `contents`.
  */
-export interface IndentDoc {
+export interface IndentNode {
   readonly type: 'indent';
   readonly contents: Doc;
 }
 
 /**
  * Conditionally indents `contents` based on whether the group identified
- * by `groupId` is in break mode. An optimized form of
- * `ifBreak(indent(doc), doc, { groupId })`.
+ * by `groupId` is in break mode.
  *
  * When `negate` is `true` the behavior is inverted: indent when the
  * referenced group is flat, don't indent when broken.
  */
-export interface IndentIfBreakDoc {
+export interface IndentIfBreakNode {
   readonly type: 'indent-if-break';
   readonly contents: Doc;
   readonly groupId: symbol;
@@ -102,13 +100,14 @@ export interface IndentIfBreakDoc {
  * width.
  *
  * Special values for `n`:
+ *
  * - Positive integer — add `n` spaces of alignment.
  * - `-1` — dedent by one level (reverses one `indent` or `align`).
  * - `Number.NEGATIVE_INFINITY` — reset indentation to the root level.
  * - `{ type: 'root' }` — mark current indentation as the root position
  *   for `literalline`.
  */
-export interface AlignDoc {
+export interface AlignNode {
   readonly type: 'align';
   readonly n: number | { type: 'root' };
   readonly contents: Doc;
@@ -121,7 +120,7 @@ export interface AlignDoc {
  * Common use cases: trailing commas only in broken lists, different
  * separators depending on layout mode.
  */
-export interface IfBreakDoc {
+export interface IfBreakNode {
   readonly type: 'if-break';
   readonly breakContents: Doc;
   readonly flatContents: Doc;
@@ -133,16 +132,16 @@ export interface IfBreakDoc {
  *
  * | `soft` | `hard` | `literal` | Flat mode        | Break mode         |
  * |--------|--------|-----------|------------------|--------------------|
- * | false  | false  | false     | space `" "`      | newline + indent   | → `line`
- * | true   | false  | false     | nothing `""`     | newline + indent   | → `softline`
- * | false  | true   | false     | newline + indent | newline + indent   | → `hardline`
- * | false  | true   | true      | newline + root   | newline + root     | → `literalline`
+ * | false  | false  | false     | space `" "`      | newline + indent   | `line`
+ * | true   | false  | false     | nothing `""`     | newline + indent   | `softline`
+ * | false  | true   | false     | newline + indent | newline + indent   | `hardline`
+ * | false  | true   | true      | newline + root   | newline + root     | `literalline`
  *
  * When `literal` is `true`, the newline preserves trailing whitespace on
  * the preceding line and indents to the root position (set by `markAsRoot`)
  * rather than the current nesting level. Used for embedded/template content.
  */
-export interface LineDoc {
+export interface LineNode {
   readonly type: 'line';
   readonly soft?: boolean;
   readonly hard?: boolean;
@@ -158,7 +157,7 @@ export interface LineDoc {
  *
  * Without `lineSuffix`, the comment would appear before the semicolon.
  */
-export interface LineSuffixDoc {
+export interface LineSuffixNode {
   readonly type: 'line-suffix';
   readonly contents: Doc;
 }
@@ -168,7 +167,7 @@ export interface LineSuffixDoc {
  * rather than waiting for a natural line break. Prevents trailing comments
  * from leaking across syntactic boundaries (e.g., past a closing brace).
  */
-export interface LineSuffixBoundaryDoc {
+export interface LineSuffixBoundaryNode {
   readonly type: 'line-suffix-boundary';
 }
 
@@ -179,16 +178,16 @@ export interface LineSuffixBoundaryDoc {
  * Processed during the `propagateBreaks` pre-pass which walks the Doc
  * tree and sets `shouldBreak` on every enclosing `GroupDoc`.
  */
-export interface BreakParentDoc {
+export interface BreakParentNode {
   readonly type: 'break-parent';
 }
 
 /**
  * Annotates a doc with an opaque label for heuristic introspection by
  * language-specific printers. Has no effect on layout. Useful when a
- * printer needs to inspect sub-docs (e.g., "is this a method chain?").
+ * printer needs to inspect sub-docs.
  */
-export interface LabelDoc {
+export interface LabelNode {
   readonly type: 'label';
   readonly label: unknown;
   readonly contents: Doc;
@@ -197,7 +196,7 @@ export interface LabelDoc {
 /**
  * Removes trailing whitespace from the output at the current position.
  */
-export interface TrimDoc {
+export interface TrimNode {
   readonly type: 'trim';
 }
 
@@ -207,6 +206,6 @@ export interface TrimDoc {
  * locate the cursor in the output string. Useful for editor
  * format-on-save integrations that need to preserve cursor position.
  */
-export interface CursorDoc {
+export interface CursorNode {
   readonly type: 'cursor';
 }
