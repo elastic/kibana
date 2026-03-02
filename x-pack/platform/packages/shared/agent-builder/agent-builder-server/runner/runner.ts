@@ -104,15 +104,25 @@ export interface RunContext {
   stack: RunContextStackEntry[];
 }
 
+export interface RunAgentStackEntry {
+  type: 'agent';
+  agentId: string;
+  conversationId?: string;
+  executionId?: string;
+}
+
+export interface RunToolStackEntry {
+  type: 'tool';
+  toolId: string;
+  toolCallId?: string;
+  source?: ToolCallSource;
+}
+
 /**
  * Represents an element in the run context's stack.
  * Used to follow nested / chained execution.
  */
-export type RunContextStackEntry =
-  /** tool invocation */
-  | { type: 'tool'; toolId: string }
-  /** agent invocation */
-  | { type: 'agent'; agentId: string };
+export type RunContextStackEntry = RunAgentStackEntry | RunToolStackEntry;
 
 export type ToolCallSource = 'agent' | 'user' | 'mcp' | 'unknown';
 
