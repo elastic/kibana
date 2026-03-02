@@ -3046,8 +3046,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text",
-        "index": false
+        "index": false,
+        "type": "text"
       },
       "description": {
         "type": "text"
@@ -4399,6 +4399,9 @@
     "properties": {
       "attempts": {
         "type": "integer"
+      },
+      "cost": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"
