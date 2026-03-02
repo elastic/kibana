@@ -162,7 +162,7 @@ describe('Table', () => {
         id: 'someAction',
         render: () => <div>action!</div>,
         refreshOnFinish: () => true,
-        euiAction: { name: 'foo', description: 'bar', icon: 'beaker', type: 'icon' },
+        euiAction: { name: 'foo', description: 'bar', icon: 'flask', type: 'icon' },
         registerOnFinishCallback: (callback: Function) => callback(), // call the callback immediately for this test
         setActionContext: () => null,
       } as any,

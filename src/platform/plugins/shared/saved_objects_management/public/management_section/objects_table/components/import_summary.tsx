@@ -153,7 +153,7 @@ const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
     case 'created':
       return (
         <EuiIconTip
-          type={'checkInCircleFilled'}
+          type={'checkCircleFill'}
           color={'success'}
           content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
             defaultMessage: 'Created',
