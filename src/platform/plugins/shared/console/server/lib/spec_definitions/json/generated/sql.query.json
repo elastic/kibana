@@ -23,6 +23,7 @@
       "_sql"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-query",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-sql-query",
     "availability": {
       "stack": true,
       "serverless": true

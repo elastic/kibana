@@ -99,6 +99,23 @@ node scripts/es_snapshot_loader restore \
   --snapshot-url file:///path/to/snapshot \
   --es-url http://elastic:changeme@localhost:9200 \
   --indices "my-index-*,other-index-*"
+
+# Restore into temporary indices
+node scripts/es_snapshot_loader restore \
+  --repo-type gcs \
+  --gcs-bucket obs-ai-datasets \
+  --gcs-base-path otel-demo/snapshots \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --indices "my-features-*" \
+  --rename-pattern "(.+)" \
+  --rename-replacement "tmp-$1"
+
+# Restore with allow-no-matches (succeed even if no indices match)
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --indices "optional-index-*" \
+  --allow-no-matches
 ```
 
 ### Replay
@@ -152,9 +169,12 @@ Notes:
 
 ### Restore-specific Options
 
-| Flag        | Description                               |
-| ----------- | ----------------------------------------- |
-| `--indices` | Comma-separated index patterns to restore |
+| Flag                    | Description                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `--indices`             | Comma-separated index patterns to restore                                                        |
+| `--rename-pattern`      | Regex applied to index names during restore (ES `rename_pattern`). Must pair with `--rename-replacement` |
+| `--rename-replacement`  | Replacement string for renamed indices (ES `rename_replacement`). Must pair with `--rename-pattern`      |
+| `--allow-no-matches`    | When set, a restore that matches no indices succeeds silently instead of throwing an error        |
 
 ### Replay-specific Options
 
@@ -180,6 +200,27 @@ const result = await restoreSnapshot({
 
 if (result.success) {
   console.log(`Restored ${result.restoredIndices.length} indices`);
+}
+```
+
+### Restore with Rename and Allow No Matches
+
+```typescript
+import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
+
+const result = await restoreSnapshot({
+  esClient,
+  log,
+  repository: createGcsRepository({ bucket: 'my-bucket', basePath: 'snapshots' }),
+  snapshotName: 'my-snapshot',
+  indices: ['features-*'],
+  renamePattern: '(.+)',
+  renameReplacement: 'tmp-$1',
+  allowNoMatches: true,
+});
+
+if (result.success) {
+  console.log(`Restored ${result.restoredIndices.length} indices to temp location`);
 }
 ```
 

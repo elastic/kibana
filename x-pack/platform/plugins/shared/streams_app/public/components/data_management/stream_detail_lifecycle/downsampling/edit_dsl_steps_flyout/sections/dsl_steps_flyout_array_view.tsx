@@ -25,7 +25,7 @@ import {
   type DslStepsFlyoutFormInternal,
   type PreservedTimeUnit,
 } from '../form';
-import { getDoubledDurationFromPrevious, toMilliseconds } from '../../shared';
+import { downsamplingHelpText, getDoubledDurationFromPrevious, toMilliseconds } from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
 import { useStyles } from '../use_styles';
 import { StepPanel } from './step_panel';
@@ -48,6 +48,8 @@ export interface DslStepsFlyoutArrayViewProps {
   tabHasErrors: (stepPath: string) => boolean;
   pruneToStepPaths: (stepPaths: string[]) => void;
   reindexErrorsAfterRemoval: (removedIndex: number) => void;
+  dataRetentionMs?: number;
+  dataRetentionEsFormat?: string;
 }
 
 export const DslStepsFlyoutArrayView = ({
@@ -59,6 +61,8 @@ export const DslStepsFlyoutArrayView = ({
   tabHasErrors,
   pruneToStepPaths,
   reindexErrorsAfterRemoval,
+  dataRetentionMs,
+  dataRetentionEsFormat,
 }: DslStepsFlyoutArrayViewProps) => {
   const { items, form } = arrayField;
   const { sectionStyles, headerStyles, headerNoStepsStyles } = useStyles();
@@ -323,6 +327,11 @@ export const DslStepsFlyoutArrayView = ({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {downsamplingHelpText}
+            </EuiText>
+          </EuiFlexItem>
 
           {items.length > 0 && (
             <EuiFlexItem grow={false}>
@@ -386,6 +395,8 @@ export const DslStepsFlyoutArrayView = ({
               onRemoveStep={removeStep}
               dataTestSubj={dataTestSubj}
               timeUnitOptions={TIME_UNIT_OPTIONS}
+              dataRetentionMs={dataRetentionMs}
+              dataRetentionEsFormat={dataRetentionEsFormat}
             />
           ))
         )}
