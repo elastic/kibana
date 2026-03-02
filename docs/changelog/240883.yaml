@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,15 +81,14 @@
 #   - security
 #   - other
 
-pr: "240883"
+prs:
+- "240883"
 issues:
 - https://github.com/elastic/kibana/issues/238630
 type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
-- product: observability
-  target: 9.3.0
 areas:
-- Management
+- Elastic Observability solution
 title: Fix wrapping issues in Processing and Streams partitions AI suggestions

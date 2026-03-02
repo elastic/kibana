@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "246069"
+prs:
+- "246069"
 issues:
 - https://github.com/elastic/kibana/issues/244000
 type: bug-fix
@@ -89,6 +90,6 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- Kibana security
+- Kibana platform
 title: Fix case sensitivity of fields in role page
 description: Fixes an issue where fields were not case-sensitive in Kibana's user interface for creating and updating roles, though fields are case-sensitive in Elasticsearch.

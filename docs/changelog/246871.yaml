@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "246871"
+prs:
+- "246871"
 issues:
 - https://github.com/elastic/kibana/issues/246803
 type: bug-fix
@@ -89,5 +90,5 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- ES|QL
+- ES|QL editor
 title: Fixes not recognized GROK patterns

@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,9 +81,12 @@
 #   - security
 #   - other
 
-pr: "238533"
+prs:
+- "238533"
 type: enhancement
 products:
 - product: kibana
   target: 9.3.0
+areas:
+- Investigations
 title: Add agent id as default observables type

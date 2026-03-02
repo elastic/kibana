@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,12 +81,13 @@
 #   - security
 #   - other
 
-pr: "237812"
+prs:
+- "237812"
 type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
 areas:
-- Search
+- Elasticsearch solution
 title: 'fix: Add sync check for saved objects for trained models.'
 description: Index management mappings editor now syncs model deployment status correctly. This fixes a case where user couldn't save `semantic_text` fields during deployment without forcing.

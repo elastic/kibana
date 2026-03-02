@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,12 +81,13 @@
 #   - security
 #   - other
 
-pr: "237654"
+prs:
+- "237654"
 type: bug-fix
 products:
 - product: kibana
   target: 9.3.0
 areas:
-- Search
+- Elasticsearch solution
 title: pass retriever query via body param instead of query in JS tutorial
 description: Fixes an issue where the retriever query copied from the "Search your data" JavaScript tutorial fails with a `parsing_exception` when passed via the query parameter in the Node.js Elasticsearch client. Retriever queries must be passed via the body parameter to ensure they are serialized correctly.

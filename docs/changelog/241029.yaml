@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "241029"
+prs:
+- "241029"
 issues:
 - https://github.com/elastic/kibana/issues/241024
 type: enhancement
@@ -89,6 +90,6 @@ products:
 - product: kibana
   target: 9.3.0
 areas:
-- Kibana security
+- Kibana platform
 title: Enforce object_src in our CSP
 description: Enforces the `object_src 'none'` directive in Kibana's Content Security Policy. Introduces a new `csp.object_src` configuration option to control its behavior.
