@@ -53,7 +53,6 @@ ${skill.content}`;
 
 /**
  * Creates VFS file entries for a skill that has a basePath.
- * Only skills with basePath should be passed to this function (builtin skills).
  */
 export const createSkillEntries = (
   skill: MountableSkill

@@ -30,6 +30,7 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
+  SkillsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -57,12 +58,12 @@ import { createVisualizationAttachmentDefinition } from './application/component
 
 export class AgentBuilderPlugin
   implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
+  Plugin<
+    AgentBuilderPluginSetup,
+    AgentBuilderPluginStart,
+    AgentBuilderSetupDependencies,
+    AgentBuilderStartDependencies
+  >
 {
   logger: Logger;
   private conversationActiveConfig: EmbeddableConversationProps = {};
@@ -140,6 +141,7 @@ export class AgentBuilderPlugin
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
+    const skillsService = new SkillsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
@@ -164,6 +166,7 @@ export class AgentBuilderPlugin
       docLinksService,
       navigationService,
       toolsService,
+      skillsService,
       startDependencies,
       accessChecker,
       eventsService,
@@ -267,7 +270,7 @@ export class AgentBuilderPlugin
               agentBuilderService={agentBuilderService}
             />,
             element,
-            () => {}
+            () => { }
           );
 
           return () => {

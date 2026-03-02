@@ -81,16 +81,16 @@ describe('getSkillsInstructions', () => {
     });
   });
 
-  describe('when skills are available', () => {
-    it('returns formatted skills list', async () => {
+  describe('when only builtin skills are available', () => {
+    it('returns formatted skills list under builtin_skills', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
-        'skills/platform/core/test-skill/SKILL.md',
+        '/skills/platform/core/test-skill/SKILL.md',
         'test-skill',
         'A test skill'
       );
       const skill2 = createSkillFileEntry(
-        'skills/security/alerts/alert-skill/SKILL.md',
+        '/skills/security/alerts/alert-skill/SKILL.md',
         'alert-skill',
         'An alert skill'
       );
@@ -102,17 +102,15 @@ describe('getSkillsInstructions', () => {
       expect(result).toContain(
         'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.'
       );
-      expect(result).toContain(
-        'Skills provide specialized knowledge, domain-specific instructions, and access to inline tools that produce more accurate results than general-purpose alternatives.'
-      );
-      expect(result).toContain('<available_skills>');
-      expect(result).toContain('</available_skills>');
+      expect(result).toContain('<builtin_skills>');
+      expect(result).toContain('</builtin_skills>');
+      expect(result).not.toContain('<user_skills>');
     });
 
     it('includes skill entries in XML format', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
-        'skills/platform/core/test-skill/SKILL.md',
+        '/skills/platform/core/test-skill/SKILL.md',
         'test-skill',
         'A test skill description'
       );
@@ -120,7 +118,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<skill path="skills/platform/core/test-skill/SKILL.md">');
+      expect(result).toContain('<skill path="/skills/platform/core/test-skill/SKILL.md">');
       expect(result).toContain('<name>test-skill</name>');
       expect(result).toContain('<description>A test skill description</description>');
       expect(result).toContain('</skill>');
@@ -129,17 +127,17 @@ describe('getSkillsInstructions', () => {
     it('sorts skills by path', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
-        'skills/platform/core/z-skill/SKILL.md',
+        '/skills/platform/core/z-skill/SKILL.md',
         'z-skill',
         'Z skill'
       );
       const skill2 = createSkillFileEntry(
-        'skills/platform/core/a-skill/SKILL.md',
+        '/skills/platform/core/a-skill/SKILL.md',
         'a-skill',
         'A skill'
       );
       const skill3 = createSkillFileEntry(
-        'skills/platform/core/m-skill/SKILL.md',
+        '/skills/platform/core/m-skill/SKILL.md',
         'm-skill',
         'M skill'
       );
@@ -158,7 +156,7 @@ describe('getSkillsInstructions', () => {
     it('filters out non-skill file entries', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
-        'skills/platform/core/test-skill/SKILL.md',
+        '/skills/platform/core/test-skill/SKILL.md',
         'test-skill',
         'A test skill'
       );
@@ -174,17 +172,17 @@ describe('getSkillsInstructions', () => {
     it('handles multiple skills with different paths', async () => {
       const filesystem = createMockFileStore();
       const skill1 = createSkillFileEntry(
-        'skills/platform/core/core-skill/SKILL.md',
+        '/skills/platform/core/core-skill/SKILL.md',
         'core-skill',
         'Core skill'
       );
       const skill2 = createSkillFileEntry(
-        'skills/security/alerts/alert-skill/SKILL.md',
+        '/skills/security/alerts/alert-skill/SKILL.md',
         'alert-skill',
         'Alert skill'
       );
       const skill3 = createSkillFileEntry(
-        'skills/observability/monitoring/monitor-skill/SKILL.md',
+        '/skills/observability/monitoring/monitor-skill/SKILL.md',
         'monitor-skill',
         'Monitor skill'
       );
@@ -200,7 +198,7 @@ describe('getSkillsInstructions', () => {
     it('includes all skill metadata in XML format', async () => {
       const filesystem = createMockFileStore();
       const skill = createSkillFileEntry(
-        'skills/platform/core/complex-skill/SKILL.md',
+        '/skills/platform/core/complex-skill/SKILL.md',
         'complex-skill',
         'A complex skill with a longer description that explains what it does'
       );
@@ -210,11 +208,87 @@ describe('getSkillsInstructions', () => {
 
       const skillBlock = result.match(/<skill[^>]*>[\s\S]*?<\/skill>/)?.[0];
       expect(skillBlock).toBeDefined();
-      expect(skillBlock).toContain('path="skills/platform/core/complex-skill/SKILL.md"');
+      expect(skillBlock).toContain('path="/skills/platform/core/complex-skill/SKILL.md"');
       expect(skillBlock).toContain('<name>complex-skill</name>');
       expect(skillBlock).toContain(
         '<description>A complex skill with a longer description that explains what it does</description>'
       );
+    });
+  });
+
+  describe('when user-created skills are available', () => {
+    it('renders user-created skills in a separate high-priority section', async () => {
+      const filesystem = createMockFileStore();
+      const userSkill = createSkillFileEntry(
+        '/skills/user/incident-triage/SKILL.md',
+        'incident-triage',
+        'Triage security incidents'
+      );
+      const builtinSkill = createSkillFileEntry(
+        '/skills/platform/core/data-exploration/SKILL.md',
+        'data-exploration',
+        'Explore data'
+      );
+      filesystem.glob.mockResolvedValue([userSkill, builtinSkill]);
+
+      const result = await getSkillsInstructions({ filesystem });
+
+      expect(result).toContain('### User-created skills (HIGHEST PRIORITY)');
+      expect(result).toContain('<user_skills>');
+      expect(result).toContain('</user_skills>');
+      expect(result).toContain('<builtin_skills>');
+      expect(result).toContain('### Built-in skills');
+    });
+
+    it('places user-created skills before builtin skills', async () => {
+      const filesystem = createMockFileStore();
+      const userSkill = createSkillFileEntry(
+        '/skills/user/incident-triage/SKILL.md',
+        'incident-triage',
+        'Triage security incidents'
+      );
+      const builtinSkill = createSkillFileEntry(
+        '/skills/platform/core/data-exploration/SKILL.md',
+        'data-exploration',
+        'Explore data'
+      );
+      filesystem.glob.mockResolvedValue([userSkill, builtinSkill]);
+
+      const result = await getSkillsInstructions({ filesystem });
+
+      const userSkillsIndex = result.indexOf('<user_skills>');
+      const builtinSkillsIndex = result.indexOf('<builtin_skills>');
+      expect(userSkillsIndex).toBeLessThan(builtinSkillsIndex);
+    });
+
+    it('includes priority instructions for user-created skills', async () => {
+      const filesystem = createMockFileStore();
+      const userSkill = createSkillFileEntry(
+        '/skills/user/my-skill/SKILL.md',
+        'my-skill',
+        'My custom skill'
+      );
+      filesystem.glob.mockResolvedValue([userSkill]);
+
+      const result = await getSkillsInstructions({ filesystem });
+
+      expect(result).toContain('MUST be checked and loaded FIRST');
+      expect(result).toContain('always takes precedence over built-in skills');
+    });
+
+    it('handles only user-created skills without builtin section', async () => {
+      const filesystem = createMockFileStore();
+      const userSkill = createSkillFileEntry(
+        '/skills/user/my-skill/SKILL.md',
+        'my-skill',
+        'My custom skill'
+      );
+      filesystem.glob.mockResolvedValue([userSkill]);
+
+      const result = await getSkillsInstructions({ filesystem });
+
+      expect(result).toContain('<user_skills>');
+      expect(result).not.toContain('<builtin_skills>');
     });
   });
 

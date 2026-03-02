@@ -29,7 +29,6 @@ export class SkillsStoreImpl implements WritableSkillsStore {
 
   add(skill: InternalSkillDefinition): void {
     this.skills.set(skill.id, skill);
-    // Only mount skills with a basePath to the VFS (builtin skills)
     if (skill.basePath) {
       const mountable = skill as InternalSkillDefinition & { basePath: string };
       const entries = createSkillEntries(mountable);

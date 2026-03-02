@@ -118,7 +118,7 @@ describe('SkillClient', () => {
     it('filters by space and skill id in query', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
-      await client.get('test-skill').catch(() => {});
+      await client.get('test-skill').catch(() => { });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -208,6 +208,7 @@ describe('SkillClient', () => {
         name: 'New Skill',
         description: 'A new skill',
         content: 'Content',
+        tool_ids: [],
       });
 
       expect(result.id).toBe('new-skill');
@@ -225,6 +226,7 @@ describe('SkillClient', () => {
           name: 'My Skill',
           description: 'desc',
           content: 'content',
+          tool_ids: [],
         })
         .catch((e) => e);
 

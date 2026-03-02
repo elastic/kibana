@@ -19,6 +19,7 @@ import type {
   UpdateSkillResponse,
 } from '../../common/http_api/skills';
 import { publicApiPath } from '../../common/constants';
+import { internalToPublicDefinition } from '../services/skills/utils';
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from './route_security';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
@@ -63,9 +64,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const skills = await registry.list();
+        const publicSkills = await Promise.all(skills.map(internalToPublicDefinition));
         return response.ok<ListSkillsResponse>({
           body: {
-            results: skills,
+            results: publicSkills,
           },
         });
       }, featureFlagConfig)
@@ -107,23 +109,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
           });
         }
 
-        // Convert SkillDefinition to PublicSkillDefinition if needed
-        const publicSkill: GetSkillResponse =
-          'readonly' in skill
-            ? (skill as GetSkillResponse)
-            : {
-                id: skill.id,
-                name: skill.name,
-                description: skill.description,
-                content: skill.content,
-                referenced_content: skill.referencedContent?.map((rc) => ({
-                  name: rc.name,
-                  relativePath: rc.relativePath,
-                  content: rc.content,
-                })),
-                readonly: true,
-              };
-
+        const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<GetSkillResponse>({
           body: publicSkill,
         });
@@ -181,8 +167,9 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const createRequest: CreateSkillPayload = request.body;
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
+        const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<CreateSkillResponse>({
-          body: skill,
+          body: publicSkill,
         });
       }, featureFlagConfig)
     );
@@ -246,8 +233,9 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const update: UpdateSkillPayload = request.body;
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
+        const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<UpdateSkillResponse>({
-          body: skill,
+          body: publicSkill,
         });
       }, featureFlagConfig)
     );

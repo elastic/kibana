@@ -82,6 +82,8 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const [sortField, setSortField] = useState<keyof PublicSkillDefinition>('id');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 20;
 
   const isAllSelected = hasSkillSelectionWildcard(selectedSkills);
 
@@ -232,19 +234,28 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       <EuiSpacer size="m" />
 
       <EuiBasicTable
-        items={displaySkills}
+        items={displaySkills.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)}
         columns={columns}
         itemId="id"
+        pagination={{
+          pageIndex,
+          pageSize,
+          totalItemCount: displaySkills.length,
+          showPerPageOptions: false,
+        }}
         sorting={{
           sort: {
             field: sortField,
             direction: sortDirection,
           },
         }}
-        onChange={({ sort }: CriteriaWithPagination<PublicSkillDefinition>) => {
+        onChange={({ sort, page }: CriteriaWithPagination<PublicSkillDefinition>) => {
           if (sort) {
             setSortField(sort.field);
             setSortDirection(sort.direction);
+          }
+          if (page) {
+            setPageIndex(page.index);
           }
         }}
         noItemsMessage={

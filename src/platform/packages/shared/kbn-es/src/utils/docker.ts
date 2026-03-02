@@ -1195,6 +1195,14 @@ const DEFAULT_DOCKER_SNAPSHOT_ESARGS: Array<[string, string]> = [
   ['ingest.geoip.downloader.enabled', 'false'],
   ['search.check_ccs_compatibility', 'true'],
 
+  // ES 9.x Docker images auto-configure TLS on first startup, which causes the
+  // HTTP health-check to fail with ECONNRESET / socket hang up.  Explicitly
+  // disable HTTP and transport SSL so the snapshot container is reachable over
+  // plain HTTP (matching the local non-Docker snapshot behaviour).  When the
+  // caller passes --ssl these entries are overridden by the SSL block below.
+  ['xpack.security.http.ssl.enabled', 'false'],
+  ['xpack.security.transport.ssl.enabled', 'false'],
+
   ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 ];
 

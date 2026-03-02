@@ -16,11 +16,11 @@ export const convertPersistedSkill = (
   description: skill.description,
   content: skill.content,
   readonly: false,
+  basePath: 'skills/user',
   referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,
     content: rc.content,
   })),
   getRegistryTools: () => skill.tool_ids ?? [],
-  // Persisted skills have no inline tools or basePath
 });

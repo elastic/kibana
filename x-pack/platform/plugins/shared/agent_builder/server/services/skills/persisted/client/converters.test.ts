@@ -113,6 +113,7 @@ describe('createAttributes', () => {
       name: 'My Skill',
       description: 'desc',
       content: 'content',
+      tool_ids: [],
     };
 
     const properties = createAttributes({
@@ -129,6 +130,7 @@ describe('createAttributes', () => {
       name: 'My Skill',
       description: 'desc',
       content: 'content',
+      tool_ids: [],
       referenced_content: [{ name: 'ref.md', relativePath: '/ref.md', content: 'data' }],
     };
 
