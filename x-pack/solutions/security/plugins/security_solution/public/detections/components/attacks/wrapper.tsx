@@ -52,6 +52,25 @@ export const Wrapper = React.memo(() => {
     [dataView, status, newDataViewPickerEnabled]
   );
 
+  const loadedContent = useMemo(() => {
+    if (isDataViewError) {
+      return (
+        <EuiEmptyPrompt
+          color="danger"
+          data-test-subj={DATA_VIEW_ERROR_TEST_ID}
+          iconType="error"
+          title={<h2>{DATAVIEW_ERROR}</h2>}
+        />
+      );
+    }
+
+    if (isDataViewUninitialized) {
+      return <UninitializedDataViewEmptyState dataView={dataView} />;
+    }
+
+    return <AttacksPageContent dataView={dataView} />;
+  }, [isDataViewError, isDataViewUninitialized, dataView]);
+
   return (
     <EuiSkeletonLoading
       data-test-subj={DATA_VIEW_LOADING_PROMPT_TEST_ID}
@@ -79,22 +98,7 @@ export const Wrapper = React.memo(() => {
           <EuiSkeletonRectangle height={600} width="100%" />
         </div>
       }
-      loadedContent={
-        <>
-          {isDataViewError ? (
-            <EuiEmptyPrompt
-              color="danger"
-              data-test-subj={DATA_VIEW_ERROR_TEST_ID}
-              iconType="error"
-              title={<h2>{DATAVIEW_ERROR}</h2>}
-            />
-          ) : isDataViewUninitialized ? (
-            <UninitializedDataViewEmptyState dataView={dataView} />
-          ) : (
-            <AttacksPageContent dataView={dataView} />
-          )}
-        </>
-      }
+      loadedContent={loadedContent}
     />
   );
 });
