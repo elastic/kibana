@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
 import { useGridPanelState } from './use_panel_grid_data';
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { i18n } from '@kbn/i18n';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [width, setWidth] = useState(0);
@@ -61,7 +62,10 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     <div css={outerStyles} className="kbnGridPanel--resizeGauge">
       <div className="kbnGridPanel--resizeGauge--inner">
         <span className="kbnGridPanel--resizeGauge--text">
-          {width}x{height}
+          {i18n.translate('kbnGridLayout.resizeGauge.widthByHeight', {
+            defaultMessage: '{width}x{height}',
+            values: { width, height },
+          })}
         </span>
       </div>
     </div>
