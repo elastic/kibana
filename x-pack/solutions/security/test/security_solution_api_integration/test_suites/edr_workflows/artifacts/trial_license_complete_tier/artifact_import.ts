@@ -25,7 +25,7 @@ import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
-import type { Role } from '@kbn/security-plugin-types-common';
+import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createSupertestErrorLogger } from '../../utils';
@@ -76,7 +76,6 @@ const ENDPOINT_ARTIFACTS: {
 
 export default function artifactImportAPIIntegrationTests({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
@@ -88,30 +87,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  const createSupertestWithCustomRole = async (
-    name: string,
-    siemPrivileges: string[],
-    spaces: string[] = ['*']
-  ) => {
-    const role = buildRole(name, siemPrivileges, spaces);
-
-    // custom solution to have custom roles in both ess and serverless utils.
-    // it'd be nice to have the same interface for both utils services in the future
-    if ('createSuperTestWithCustomRole' in utils) {
-      // serverless utils...
-      return utils.createSuperTestWithCustomRole({
-        name: role.name,
-        privileges: {
-          elasticsearch: role.elasticsearch,
-          kibana: role.kibana,
-        },
-      });
-    } else {
-      // ess utils...
-      const loadedRole = await rolesUsersProvider.loader.create(role);
-      return utils.createSuperTest(loadedRole.username);
-    }
-  };
+  const createSupertestWithCustomRole = async (...roleParameters: Parameters<typeof buildRole>) =>
+    utils.createSuperTestWithCustomRole(buildRole(...roleParameters));
 
   describe('@ess @serverless @skipInServerlessMKI Import Endpoint artifacts API', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
@@ -694,18 +671,24 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
   });
 }
 
-const buildRole = (name: string, siemPrivileges: string[], spaces: string[] = ['*']): Role => ({
+const buildRole = (
+  name: string,
+  siemPrivileges: string[],
+  spaces: string[] = ['*']
+): CustomRole => ({
   name,
-  kibana: [
-    {
-      base: [],
-      feature: {
-        [SECURITY_FEATURE_ID]: siemPrivileges,
+  privileges: {
+    kibana: [
+      {
+        base: [],
+        feature: {
+          [SECURITY_FEATURE_ID]: siemPrivileges,
+        },
+        spaces,
       },
-      spaces,
-    },
-  ],
-  elasticsearch: { cluster: [], indices: [], run_as: [] },
+    ],
+    elasticsearch: { cluster: [], indices: [] },
+  },
 });
 
 const anEndpointArtifactErrorOf = (message: string) => (res: { body: { message: string } }) =>

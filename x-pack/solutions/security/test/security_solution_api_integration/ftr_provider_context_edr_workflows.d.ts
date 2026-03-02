@@ -8,9 +8,4 @@
 import type { GenericFtrProviderContext } from '@kbn/test';
 
 import type { services } from './config/ess/services_edr_workflows';
-import type { svlServices } from './config/serverless/services_edr_workflows';
-
-export type FtrProviderContext = GenericFtrProviderContext<
-  typeof services | typeof svlServices,
-  {}
->;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
