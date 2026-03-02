@@ -58,7 +58,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
   }
 
   function getChart() {
-    const chartHeight = slo.indicator.type === 'sli.metric.timeslice' ? 150 : 200;
+    const chartHeight = 200;
 
     if (isLoading) {
       return (
