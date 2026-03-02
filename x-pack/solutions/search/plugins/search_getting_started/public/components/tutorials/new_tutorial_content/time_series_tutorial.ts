@@ -6,10 +6,12 @@
  */
 
 import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import { sampleTimeSeriesData } from './sample_data_sets';
 
 const timeSeriesTutorialSteps: TutorialStep[] = [
   {
     id: 'create_template',
+    type: 'apiCall',
     header: '## Step 1: Create an index template for time series',
     description:
       'Create an index template that configures a time series data stream (TSDS). The template defines dimension fields (for grouping), metric fields (for measurements), and a timestamp. The `index.mode: time_series` setting enables TSDS optimizations.',
@@ -54,36 +56,28 @@ const timeSeriesTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'ingest_data',
+    type: 'ingestData',
     header: '## Step 2: Ingest weather sensor data',
     description:
-      'Create the `kibana_sample_weather_data_stream` data stream by bulk-indexing sensor readings. The data stream is automatically created on first write because it matches the template pattern.',
-    apiSnippet: `PUT kibana_sample_weather_data_stream/_bulk
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T08:00:00Z", "sensor_id":"STATION_1", "location": "base", "temperature": 24.1 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:30:00Z", "sensor_id":"STATION_2", "location": "base", "temperature": 34.2 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:15:00Z", "sensor_id":"STATION_2", "location": "satellite", "temperature": 30.2 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:20:00Z", "sensor_id":"STATION_3", "location": "satellite", "temperature": 20.4 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:25:00Z", "sensor_id":"STATION_4", "location": "base", "temperature": 12.4 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:10:00Z", "sensor_id":"STATION_4", "location": "base", "temperature": 44.4 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:35:00Z", "sensor_id":"STATION_5", "location": "satellite", "temperature": 32.9 }
-{ "create":{ } }
-{ "@timestamp": "2026-03-01T09:00:00Z", "sensor_id":"STATION_5", "location": "base", "temperature": 23.5 }`,
-    valuesToInsert: [],
+      'Create the `{{index_name}}` data stream by bulk-indexing sensor readings. The data stream is automatically created on first write because it matches the template pattern. Each sensor reading has the following shape:',
+    apiSnippet: `POST /{{index_name}}/_bulk
+{
+  "@timestamp": "2026-03-01T08:00:00Z",
+  "sensor_id": "STATION_1",
+  "location": "base",
+  "temperature": 24.1
+}`,
+    valuesToInsert: ['index_name'],
     valuesToSave: {
       bulk_items: 'items.length',
       has_errors: 'errors',
     },
     explanation:
-      '{{bulk_items}} sensor readings were indexed. Errors: {{has_errors}}. The data stream `kibana_sample_weather_data_stream` was created automatically on the first write. Data streams use `create` (not `index`) in bulk operations because they are append-only.',
+      '{{bulk_items}} sensor readings were indexed. Errors: {{has_errors}}. The data stream `{{index_name}}` was created automatically on the first write. Data streams use `create` (not `index`) in bulk operations because they are append-only.',
   },
   {
     id: 'range_query',
+    type: 'apiCall',
     header: '## Step 3: Query recent readings',
     description:
       'Search for the 5 most recent temperature readings sorted from highest to lowest. The `range` filter on `@timestamp` restricts results to a recent window.',
@@ -113,6 +107,7 @@ const timeSeriesTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'sensor_aggregation',
+    type: 'apiCall',
     header: '## Step 4: Aggregate temperature by sensor',
     description:
       'Use a `terms` aggregation on `sensor_id` with nested `date_histogram` and `avg`/`min`/`max` sub-aggregations to compute temperature statistics per sensor over daily intervals.',
@@ -163,6 +158,7 @@ const timeSeriesTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'location_aggregation',
+    type: 'apiCall',
     header: '## Step 5: Break down by sensor and location',
     description:
       'Add a nested `terms` aggregation on `location` inside each sensor bucket. This shows how dimension fields enable multi-level drill-down in time series data.',
@@ -217,6 +213,7 @@ const timeSeriesTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'pipeline_aggregation',
+    type: 'apiCall',
     header: '## Step 6: Pipeline aggregation with moving function',
     description:
       'Use a pipeline aggregation to compute a moving sum over the last 3 hourly average temperatures. This demonstrates how to analyze trends in time series data by chaining aggregations together.',
@@ -268,7 +265,10 @@ export const timeSeriesTutorial: TutorialDefinition = {
   title: 'Time series data streams',
   description:
     'Set up a time series data stream (TSDS) with dimension and metric fields, ingest sensor data, and run aggregations.',
-  globalVariables: {},
+  globalVariables: {
+    index_name: 'kibana_sample_weather_data_stream',
+  },
+  sampleData: sampleTimeSeriesData,
   summary: {
     text: 'You created a time series data stream with dimension and metric fields, ingested sensor readings, queried by time range, and built multi-level aggregations including pipeline analytics. These patterns are the foundation for real-time monitoring dashboards.',
     links: [

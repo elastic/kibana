@@ -6,10 +6,12 @@
  */
 
 import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import { sampleBasicsData } from './sample_data_sets';
 
 const basicsTutorialSteps: TutorialStep[] = [
   {
     id: 'create_index',
+    type: 'apiCall',
     header: '## Step 1: Create an index',
     description:
       'Create a new index named `kibana_sample_data_basics`. This uses dynamic mapping — Elasticsearch will automatically detect field types when documents are indexed.',
@@ -23,6 +25,7 @@ const basicsTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'index_single_doc',
+    type: 'apiCall',
     header: '## Step 2: Index a single document',
     description:
       'Add a book to the `{{index_name}}` index using the `_doc` endpoint. Elasticsearch auto-generates a unique `_id` for the document.',
@@ -42,29 +45,27 @@ const basicsTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'bulk_index',
+    type: 'ingestData',
     header: '## Step 3: Bulk index multiple documents',
     description:
-      'Use the `_bulk` API to add several documents to `{{index_name}}` in a single request. This is far more efficient than indexing documents one at a time.',
-    apiSnippet: `POST /_bulk
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "The Handmaids Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}`,
+      'Use the `_bulk` API to add several documents to `{{index_name}}` in a single request. This is far more efficient than indexing documents one at a time. Each document has the following shape:',
+    apiSnippet: `POST /{{index_name}}/_bulk
+{
+  "name": "Revelation Space",
+  "author": "Alastair Reynolds",
+  "release_date": "2000-03-15",
+  "page_count": 585
+}`,
     valuesToInsert: ['index_name'],
     valuesToSave: {
       bulk_items: 'items.length',
     },
     explanation:
-      '{{bulk_items}} documents were added to `{{index_name}}` in a single bulk request. Combined with the first document, the index now has 6 books.',
+      '{{bulk_items}} documents were added to `{{index_name}}` in a single bulk request. Combined with the first document, the index now has multiple books.',
   },
   {
     id: 'dynamic_mapping',
+    type: 'apiCall',
     header: '## Step 4: See dynamic mapping in action',
     description:
       'Index a document with a new `language` field that does not exist in any prior documents. Elasticsearch dynamically adds it to the mapping.',
@@ -85,6 +86,7 @@ const basicsTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'view_mapping',
+    type: 'apiCall',
     header: '## Step 5: Inspect the mapping',
     description:
       'View the current mapping of `{{index_name}}` to see how Elasticsearch inferred the type of every field, including the dynamically added `language` field.',
@@ -99,6 +101,7 @@ const basicsTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'search_all',
+    type: 'apiCall',
     header: '## Step 6: Search all documents',
     description:
       'Run a search with no query to retrieve all documents from `{{index_name}}`. Elasticsearch returns the top 10 hits by default.',
@@ -112,6 +115,7 @@ const basicsTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'match_query',
+    type: 'apiCall',
     header: '## Step 7: Full-text search with match',
     description:
       'Use a `match` query to search for "brave" in the `name` field. This is the standard full-text search query — Elasticsearch analyzes both the query text and the indexed field to find relevant matches.',
@@ -142,6 +146,7 @@ export const basicsTutorial: TutorialDefinition = {
   globalVariables: {
     index_name: 'kibana_sample_data_basics',
   },
+  sampleData: sampleBasicsData,
   summary: {
     text: 'You created an index, indexed documents individually and in bulk, saw dynamic mapping in action, and ran full-text searches. These are the building blocks for every Elasticsearch use case.',
     links: [

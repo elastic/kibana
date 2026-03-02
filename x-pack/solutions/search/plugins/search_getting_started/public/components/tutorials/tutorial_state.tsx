@@ -11,7 +11,7 @@ import type {
   SnippetVariableKey,
   TutorialSlug,
 } from '../../hooks/use_tutorial_content';
-import { useTutorialContent } from '../../hooks/use_tutorial_content';
+import { useTutorialContent, BULK_INGEST_SNIPPET_PREFIX } from '../../hooks/use_tutorial_content';
 import {
   useExecuteTutorialStep,
   insertValues,
@@ -62,7 +62,7 @@ const resolveStepContent = (
 
 export const useTutorialState = (slug: TutorialSlug) => {
   const execute = useExecuteTutorialStep();
-  const { steps: rawSteps, globalVariables } = useTutorialContent(slug);
+  const { steps: rawSteps, globalVariables, sampleData } = useTutorialContent(slug);
   const initialSavedValues = useMemo(() => ({ ...globalVariables }), [globalVariables]);
 
   const [state, setState] = useState<TutorialState>(() => ({
@@ -109,7 +109,11 @@ export const useTutorialState = (slug: TutorialSlug) => {
 
       try {
         const currentValues = savedValuesRef.current;
-        const result = await execute(step, currentValues);
+        const stepToExecute =
+          step.type === 'ingestData' && sampleData
+            ? { ...step, apiSnippet: `${BULK_INGEST_SNIPPET_PREFIX}\n${sampleData}` }
+            : step;
+        const result = await execute(stepToExecute, currentValues);
 
         setState((prev) => {
           const nextStepStates = [...prev.stepStates];
@@ -124,8 +128,7 @@ export const useTutorialState = (slug: TutorialSlug) => {
         return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        const failedResponse =
-          err instanceof StepExecutionError ? err.response : undefined;
+        const failedResponse = err instanceof StepExecutionError ? err.response : undefined;
         setState((prev) => {
           const nextStepStates = [...prev.stepStates];
           nextStepStates[stepIndex] = {
@@ -138,7 +141,7 @@ export const useTutorialState = (slug: TutorialSlug) => {
         throw err;
       }
     },
-    [execute, rawSteps]
+    [execute, rawSteps, sampleData]
   );
 
   const advanceStep = useCallback(() => {

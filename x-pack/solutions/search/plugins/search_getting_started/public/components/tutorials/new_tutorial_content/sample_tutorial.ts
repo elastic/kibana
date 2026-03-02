@@ -6,10 +6,12 @@
  */
 
 import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import { sampleBookCatalogData } from './sample_data_sets';
 
 const sampleTutorialSteps: TutorialStep[] = [
   {
     id: 'create_index',
+    type: 'apiCall',
     header: '## Step 1: Create an index',
     description:
       'Create a new index with mappings for a book catalog. This sets up the schema that defines how your data is stored and searched.',
@@ -35,20 +37,18 @@ const sampleTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'index_documents',
+    type: 'ingestData',
     header: '## Step 2: Index sample documents',
     description:
-      'Add some documents to the `{{index_name}}` index using the bulk API. This is the most efficient way to index multiple documents at once.',
+      'Add documents to the `{{index_name}}` index using the bulk API. Each document in the sample dataset has the following shape:',
     apiSnippet: `POST /{{index_name}}/_bulk
-{ "index": {} }
-{ "title": "Snow Crash", "author": "Neal Stephenson", "genre": "sci-fi", "publish_year": 1992, "description": "A pizza deliverer in a dystopian future discovers a new drug that affects people in both the virtual and physical worlds." }
-{ "index": {} }
-{ "title": "Neuromancer", "author": "William Gibson", "genre": "sci-fi", "publish_year": 1984, "description": "A washed-up hacker is hired for one last job involving a powerful artificial intelligence." }
-{ "index": {} }
-{ "title": "Dune", "author": "Frank Herbert", "genre": "sci-fi", "publish_year": 1965, "description": "A young nobleman navigates politics and ecology on a desert planet that produces the most valuable substance in the universe." }
-{ "index": {} }
-{ "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "fiction", "publish_year": 1925, "description": "A mysterious millionaire's obsession with recapturing a lost love during the Jazz Age." }
-{ "index": {} }
-{ "title": "To Kill a Mockingbird", "author": "Harper Lee", "genre": "fiction", "publish_year": 1960, "description": "A young girl witnesses her father defend a Black man accused of a crime in the Depression-era South." }`,
+{
+  "title": "Snow Crash",
+  "author": "Neal Stephenson",
+  "genre": "sci-fi",
+  "publish_year": 1992,
+  "description": "A pizza deliverer in a dystopian future..."
+}`,
     valuesToInsert: ['index_name'],
     valuesToSave: {
       docs_indexed: 'items.length',
@@ -58,6 +58,7 @@ const sampleTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'full_text_search',
+    type: 'apiCall',
     header: '## Step 3: Run a full-text search',
     description:
       'Search across the `{{index_name}}` index using a multi-match query. This searches the `title` and `description` fields for the given text.',
@@ -82,6 +83,7 @@ const sampleTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'filtered_search',
+    type: 'apiCall',
     header: '## Step 4: Add a filter',
     description:
       'Combine a full-text query with a filter to narrow results. Filters on `keyword` fields like `genre` are fast because they skip relevance scoring.',
@@ -112,6 +114,7 @@ const sampleTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'aggregation',
+    type: 'apiCall',
     header: '## Step 5: Aggregate your data',
     description:
       'Run an aggregation to get a breakdown of documents by `genre`. Aggregations let you compute summaries over your data alongside search results.',
@@ -143,6 +146,7 @@ export const sampleTutorial: TutorialDefinition = {
   globalVariables: {
     index_name: 'book_catalog',
   },
+  sampleData: sampleBookCatalogData,
   summary: {
     text: 'You created an index, indexed documents with the bulk API, ran full-text and filtered queries, and computed aggregations. These are the building blocks for any search experience on Elasticsearch.',
     links: [

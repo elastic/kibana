@@ -6,10 +6,12 @@
  */
 
 import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import { sampleAgentBuilderData } from './sample_data_sets';
 
 const agentBuilderTutorialSteps: TutorialStep[] = [
   {
     id: 'create_sample_data',
+    type: 'apiCall',
     header: '## Step 1: Create sample data',
     description:
       'Create an index with book data that agents and tools will work with throughout this tutorial.',
@@ -33,22 +35,17 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'bulk_index',
+    type: 'ingestData',
     header: '## Step 2: Index sample books',
     description:
-      'Add books to `{{index_name}}` using the bulk API so the agent has data to query.',
-    apiSnippet: `POST /_bulk
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Fahrenheit 451", "author": "Ray Bradbury", "release_date": "1953-10-15", "page_count": 227}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
-{ "index" : { "_index" : "{{index_name}}" } }
-{"name": "The Handmaids Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}`,
+      'Add books to `{{index_name}}` using the bulk API so the agent has data to query. Each document has the following shape:',
+    apiSnippet: `POST /{{index_name}}/_bulk
+{
+  "name": "Snow Crash",
+  "author": "Neal Stephenson",
+  "release_date": "1992-06-01",
+  "page_count": 470
+}`,
     valuesToInsert: ['index_name'],
     valuesToSave: {
       bulk_items: 'items.length',
@@ -58,6 +55,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'chat_default_agent',
+    type: 'apiCall',
     header: '## Step 3: Chat with the default agent',
     description:
       'Send a message to the default agent using the converse API. The agent uses its built-in tools to query `{{index_name}}` and respond with information about the data.',
@@ -74,6 +72,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'list_tools',
+    type: 'apiCall',
     header: '## Step 4: List available tools',
     description:
       'View all available tools, including the built-in platform tools. Tools are reusable functions that agents call to perform specific tasks like searching indices and generating queries.',
@@ -85,6 +84,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'create_custom_tool',
+    type: 'apiCall',
     header: '## Step 5: Create a custom ES|QL tool',
     description:
       'Create a custom tool that runs a specific ES|QL query against `{{index_name}}`. Custom tools let you predefine queries so agents can execute them efficiently without reasoning through the full query from scratch.',
@@ -116,6 +116,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'run_custom_tool',
+    type: 'apiCall',
     header: '## Step 6: Run the custom tool',
     description:
       'Execute the `{{tool_id}}` tool directly with parameters to find the 2 longest books published before 1960.',
@@ -134,6 +135,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'create_agent',
+    type: 'apiCall',
     header: '## Step 7: Create a custom agent',
     description:
       'Create an agent that combines instructions with a curated set of tools. This agent is scoped to the `{{index_name}}` index and uses both the custom tool and built-in platform tools.',
@@ -169,6 +171,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'chat_custom_agent',
+    type: 'apiCall',
     header: '## Step 8: Chat with the custom agent',
     description:
       'Send a question to `{{agent_id}}` and observe how it uses the custom tool to answer efficiently. Compare the token usage here with the default agent in Step 3.',
@@ -194,6 +197,7 @@ export const agentBuilderTutorial: TutorialDefinition = {
   globalVariables: {
     index_name: 'kibana_sample_data_agents',
   },
+  sampleData: sampleAgentBuilderData,
   summary: {
     text: 'You created sample data, chatted with the default agent, built a custom ES|QL tool with parameters, assembled a custom agent with curated tools, and saw how purpose-built tools reduce token usage and improve accuracy.',
     links: [

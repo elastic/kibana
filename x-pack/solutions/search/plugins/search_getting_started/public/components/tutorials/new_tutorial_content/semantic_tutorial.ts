@@ -6,10 +6,12 @@
  */
 
 import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import { sampleSemanticData } from './sample_data_sets';
 
 const semanticTutorialSteps: TutorialStep[] = [
   {
     id: 'create_index',
+    type: 'apiCall',
     header: '## Step 1: Create an index with semantic_text',
     description:
       'Create an index with a `semantic_text` field type. This field automatically generates vector embeddings from your text using an inference model, enabling meaning-based search out of the box.',
@@ -32,16 +34,14 @@ const semanticTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'ingest_documents',
+    type: 'ingestData',
     header: '## Step 2: Ingest documents',
     description:
-      'Add documents to `{{index_name}}` using the bulk API. During ingestion, the inference model automatically generates vector embeddings for each document.',
-    apiSnippet: `POST /_bulk?pretty
-{ "index": { "_index": "{{index_name}}" } }
-{"text":"Yellowstone National Park is one of the largest national parks in the United States. It ranges from Wyoming to Montana and Idaho, and contains an area of 2,219,791 acres across three different states. Its most famous for hosting the geyser Old Faithful and is centered on the Yellowstone Caldera, the largest super volcano on the American continent. Yellowstone is host to hundreds of species of animal, many of which are endangered or threatened. Most notably, it contains free-ranging herds of bison and elk, alongside bears, cougars and wolves. The national park receives over 4.5 million visitors annually and is a UNESCO World Heritage Site."}
-{ "index": { "_index": "{{index_name}}" } }
-{"text":"Yosemite National Park is a United States National Park, covering over 750,000 acres of land in California. A UNESCO World Heritage Site, the park is best known for its granite cliffs, waterfalls and giant sequoia trees. Yosemite hosts over four million visitors in most years, with a peak of five million visitors in 2016. The park is home to a diverse range of wildlife, including mule deer, black bears, and the endangered Sierra Nevada bighorn sheep."}
-{ "index": { "_index": "{{index_name}}" } }
-{"text":"Rocky Mountain National Park is one of the most popular national parks in the United States. It receives over 4.5 million visitors annually, and is known for its mountainous terrain, including Longs Peak, which is the highest peak in the park. The park is home to a variety of wildlife, including elk, mule deer, moose, and bighorn sheep."}`,
+      'Add documents to `{{index_name}}` using the bulk API. During ingestion, the inference model automatically generates vector embeddings for each document. Each document has the following shape:',
+    apiSnippet: `POST /{{index_name}}/_bulk
+{
+  "text": "Yellowstone National Park is one of the largest national parks..."
+}`,
     valuesToInsert: ['index_name'],
     valuesToSave: {
       items_count: 'items.length',
@@ -51,6 +51,7 @@ const semanticTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'semantic_search',
+    type: 'apiCall',
     header: '## Step 3: Run a semantic search',
     description:
       'Search `{{index_name}}` using a natural language question. Because the `text` field is `semantic_text`, a standard `match` query automatically performs semantic search — ranking results by meaning, not just keyword overlap.',
@@ -72,6 +73,7 @@ const semanticTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'filtered_search',
+    type: 'apiCall',
     header: '## Step 4: Combine semantic search with filters',
     description:
       'Use a `bool` query to combine semantic search (in the `must` clause for relevance scoring) with a filter (in the `filter` clause for fast, score-neutral restriction). Results are limited to 2 and sorted by score.',
@@ -110,6 +112,7 @@ const semanticTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'min_score_search',
+    type: 'apiCall',
     header: '## Step 5: Use min_score for quality thresholds',
     description:
       'Set a `min_score` threshold to only return documents that meet a minimum relevance bar. Documents scoring below this threshold are excluded entirely.',
@@ -139,6 +142,7 @@ export const semanticTutorial: TutorialDefinition = {
   globalVariables: {
     index_name: 'kibana_sample_data_semantic',
   },
+  sampleData: sampleSemanticData,
   summary: {
     text: 'You created an index with semantic_text, ingested documents with auto-generated embeddings, ran natural language queries, and applied filters and quality thresholds. Semantic search finds relevant results even when query words do not exactly match document text.',
     links: [

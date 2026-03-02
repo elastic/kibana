@@ -9,11 +9,12 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +50,11 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
       el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     prevStepRef.current = state.currentStep;
+  }, [state.currentStep]);
+
+  const scrollToCurrentStep = useCallback(() => {
+    const el = stepRefs.current.get(state.currentStep);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [state.currentStep]);
 
   const handleExecute = useCallback(
@@ -109,15 +115,26 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued" data-test-subj="tutorialStepProgress">
-                {i18n.translate('xpack.searchGettingStarted.tutorial.runner.stepProgress', {
-                  defaultMessage: 'Step {current} of {total}',
-                  values: {
-                    current: Math.min(state.currentStep + 1, steps.length),
-                    total: steps.length,
-                  },
-                })}
-              </EuiText>
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.searchGettingStarted.tutorial.runner.jumpToStep',
+                  { defaultMessage: 'Jump to current step' }
+                )}
+              >
+                <EuiButtonEmpty
+                  size="s"
+                  onClick={scrollToCurrentStep}
+                  data-test-subj="tutorialStepProgress"
+                >
+                  {i18n.translate('xpack.searchGettingStarted.tutorial.runner.stepProgress', {
+                    defaultMessage: 'Step {current} of {total}',
+                    values: {
+                      current: Math.min(state.currentStep + 1, steps.length),
+                      total: steps.length,
+                    },
+                  })}
+                </EuiButtonEmpty>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

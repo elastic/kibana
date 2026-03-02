@@ -6,10 +6,12 @@
  */
 
 import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import { sampleEsqlData } from './sample_data_sets';
 
 const esqlTutorialSteps: TutorialStep[] = [
   {
     id: 'create_index',
+    type: 'apiCall',
     header: '## Step 1: Create the index and mapping',
     description:
       'Create the `kibana_sample_data_esql` index with explicit field mappings. Each text field gets a `.keyword` sub-field for exact filtering alongside full-text search.',
@@ -36,29 +38,30 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'bulk_index',
+    type: 'ingestData',
     header: '## Step 2: Index sample blog posts',
     description:
-      'Add sample recipe blog posts to `{{index_name}}` using the bulk API with `refresh=wait_for` to ensure the documents are immediately searchable.',
-    apiSnippet: `POST /{{index_name}}/_bulk?refresh=wait_for
-{"index":{"_id":"1"}}
-{"title":"Perfect Pancakes: A Fluffy Breakfast Delight","description":"Learn the secrets to making the fluffiest pancakes, so amazing you won't believe your tastebuds. This recipe uses buttermilk and a special folding technique to create light, airy pancakes that are perfect for lazy Sunday mornings.","author":"Maria Rodriguez","date":"2023-05-01","category":"Breakfast","tags":["pancakes","breakfast","easy recipes"],"rating":4.8}
-{"index":{"_id":"2"}}
-{"title":"Spicy Thai Green Curry: A Vegetarian Adventure","description":"Dive into the flavors of Thailand with this vibrant green curry. Packed with vegetables and aromatic herbs, this dish is both healthy and satisfying. Don't worry about the heat - you can easily adjust the spice level to your liking.","author":"Liam Chen","date":"2023-05-05","category":"Main Course","tags":["thai","vegetarian","curry","spicy"],"rating":4.6}
-{"index":{"_id":"3"}}
-{"title":"Classic Beef Stroganoff: A Creamy Comfort Food","description":"Indulge in this rich and creamy beef stroganoff. Tender strips of beef in a savory mushroom sauce, served over a bed of egg noodles. It's the ultimate comfort food for chilly evenings.","author":"Emma Watson","date":"2023-05-10","category":"Main Course","tags":["beef","pasta","comfort food"],"rating":4.7}
-{"index":{"_id":"4"}}
-{"title":"Vegan Chocolate Avocado Mousse","description":"Discover the magic of avocado in this rich, vegan chocolate mousse. Creamy, indulgent, and secretly healthy, it's the perfect guilt-free dessert for chocolate lovers.","author":"Alex Green","date":"2023-05-15","category":"Dessert","tags":["vegan","chocolate","avocado","healthy dessert"],"rating":4.5}
-{"index":{"_id":"5"}}
-{"title":"Crispy Oven-Fried Chicken","description":"Get that perfect crunch without the deep fryer! This oven-fried chicken recipe delivers crispy, juicy results every time. A healthier take on the classic comfort food.","author":"Maria Rodriguez","date":"2023-05-20","category":"Main Course","tags":["chicken","oven-fried","healthy"],"rating":4.9}`,
+      'Add sample recipe blog posts to `{{index_name}}` using the bulk API. Each document has the following shape:',
+    apiSnippet: `POST /{{index_name}}/_bulk
+{
+  "title": "Perfect Pancakes: A Fluffy Breakfast Delight",
+  "description": "Learn the secrets to making the fluffiest pancakes...",
+  "author": "Maria Rodriguez",
+  "date": "2023-05-01",
+  "category": "Breakfast",
+  "tags": ["pancakes", "breakfast", "easy recipes"],
+  "rating": 4.8
+}`,
     valuesToInsert: ['index_name'],
     valuesToSave: {
       bulk_items: 'items.length',
     },
     explanation:
-      '{{bulk_items}} blog posts were indexed into `{{index_name}}`. With `refresh=wait_for`, documents are available for search immediately — no waiting for the next refresh interval.',
+      '{{bulk_items}} blog posts were indexed into `{{index_name}}`. Documents are available for search after the next refresh interval.',
   },
   {
     id: 'basic_search',
+    type: 'apiCall',
     header: '## Step 3: Basic full-text search with ES|QL',
     description:
       'Run your first ES|QL query. The `FROM` source reads from the index, `WHERE` with the `:` operator performs full-text search, and `LIMIT` caps the result count.',
@@ -80,6 +83,7 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'keep_and_sort',
+    type: 'apiCall',
     header: '## Step 4: Select fields and sort by relevance',
     description:
       'Use `KEEP` to select specific fields, `METADATA _score` to surface the relevance score, and `SORT _score DESC` to rank results by relevance.',
@@ -103,6 +107,7 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'exact_filter',
+    type: 'apiCall',
     header: '## Step 5: Exact-match filtering',
     description:
       'Filter by exact value using the `.keyword` sub-field with `==`. Unlike full-text search, exact filtering is a binary yes/no check with no relevance scoring.',
@@ -125,6 +130,7 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'match_and_logic',
+    type: 'apiCall',
     header: '## Step 6: Require all search terms with AND logic',
     description:
       'Use the `MATCH` function with the `"operator": "AND"` option to require all terms. Unlike the default OR logic, this returns only documents containing every search term.',
@@ -145,6 +151,7 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'multi_field_boost',
+    type: 'apiCall',
     header: '## Step 7: Search across fields with boosting',
     description:
       'Search multiple fields simultaneously and boost the `title` field to 2x. Documents matching in the title get ranked higher than those matching only in the description or tags.',
@@ -168,6 +175,7 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
   {
     id: 'advanced_scoring',
+    type: 'apiCall',
     header: '## Step 8: Custom scoring with EVAL',
     description:
       'Build a custom scoring pipeline using `EVAL` to combine the relevance score with business logic — boosting Main Course items and recently published posts.',
@@ -205,6 +213,7 @@ export const esqlTutorial: TutorialDefinition = {
   globalVariables: {
     index_name: 'kibana_sample_data_esql',
   },
+  sampleData: sampleEsqlData,
   summary: {
     text: 'You ran full-text searches, filtered by exact values, controlled relevance with boosting and AND logic, and built custom scoring pipelines with EVAL. ES|QL combines search, filtering, and transformation in a single piped query.',
     links: [

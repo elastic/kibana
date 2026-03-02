@@ -8,6 +8,8 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiButton,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownFormat,
@@ -22,7 +24,7 @@ import { StepExplanation } from './step_explanation';
 import {
   getResponseHighlightLines,
   getSnippetHighlightLines,
-} from '../../hooks/highlight_utils';
+} from './new_tutorial_content/utils/highlight_utils';
 
 export interface TutorialStepCardProps {
   step: ResolvedStep;
@@ -47,6 +49,7 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
   const isCompleted = state.status === 'completed';
   const isFailed = state.status === 'failed';
   const isRunning = state.status === 'running';
+  const isIngestData = step.source.type === 'ingestData';
 
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -80,6 +83,7 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
     (isCompleted || isFailed || retryInProgress) && isCurrentStep && !isLastStep;
   const showCompleteButton =
     (isCompleted || isFailed || retryInProgress) && isCurrentStep && isLastStep;
+  const canIngest = isReady && !isRunning && !isCompleted;
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj={`tutorialStep-${stepIndex}`}>
@@ -90,16 +94,58 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
       </EuiText>
       <EuiSpacer size="m" />
 
-      <StepCodeSection
-        apiSnippet={resolved.apiSnippet}
-        status={state.status}
-        response={state.response}
-        error={state.error}
-        isReady={isReady}
-        onExecute={onExecute}
-        apiSnippetHighlightLines={apiSnippetHighlightLines}
-        responseHighlightLines={responseHighlightLines}
-      />
+      {isIngestData ? (
+        <>
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="m"
+            isCopyable
+          >
+            {resolved.apiSnippet}
+          </EuiCodeBlock>
+          <EuiSpacer size="m" />
+          <EuiButton
+            fill={!isCompleted}
+            iconType={isCompleted ? 'check' : 'download'}
+            color={isCompleted ? 'success' : 'primary'}
+            isLoading={isRunning}
+            isDisabled={!canIngest}
+            onClick={onExecute}
+            data-test-subj={`tutorialStep-${stepIndex}-ingest`}
+          >
+            {isCompleted
+              ? i18n.translate('xpack.searchGettingStarted.tutorial.step.ingested', {
+                  defaultMessage: 'Documents ingested',
+                })
+              : i18n.translate('xpack.searchGettingStarted.tutorial.step.ingest', {
+                  defaultMessage: 'Ingest sample documents',
+                })}
+          </EuiButton>
+          {isFailed && state.error && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                color="danger"
+                iconType="error"
+                size="s"
+                title={state.error}
+              />
+            </>
+          )}
+        </>
+      ) : (
+        <StepCodeSection
+          apiSnippet={resolved.apiSnippet}
+          status={state.status}
+          response={state.response}
+          error={state.error}
+          isReady={isReady}
+          onExecute={onExecute}
+          apiSnippetHighlightLines={apiSnippetHighlightLines}
+          responseHighlightLines={responseHighlightLines}
+        />
+      )}
 
       <EuiSpacer size="m" />
 
