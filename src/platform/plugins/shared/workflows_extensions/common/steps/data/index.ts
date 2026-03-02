@@ -52,3 +52,9 @@ export {
   type DataAggregateStepInputSchema,
   type DataAggregateStepOutputSchema,
 } from './data_aggregate_step';
+export {
+  DataConcatStepTypeId,
+  dataConcatStepCommonDefinition,
+  type DataConcatStepInputSchema,
+  type DataConcatStepOutputSchema,
+} from './data_concat_step';
