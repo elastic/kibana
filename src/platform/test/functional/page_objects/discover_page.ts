@@ -732,7 +732,7 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async selectDataViewMode() {
+  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
     // Find the selected tab and open its menu
     const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
     for (const tabElement of tabElements) {
@@ -748,6 +748,13 @@ export class DiscoverPageObject extends FtrService {
         await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
         await this.header.waitUntilLoadingHasFinished();
         await this.waitUntilSearchingHasFinished();
+        if (options?.discardModal) {
+          await this.testSubjects.exists('discover-esql-to-dataview-modal');
+          await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+          await this.retry.waitFor('the modal to close', async () => {
+            return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
+          });
+        }
         return;
       }
     }
