@@ -24,9 +24,10 @@ const DIAGONAL_GRADIENT_END_PERCENT = 66.24;
 const DIAGONAL_GRADIENT_ANGLE = 135;
 const HORIZONTAL_GRADIENT_ANGLE = 90;
 const VERTICAL_GRADIENT_ANGLE = 180;
-const ANGLE_BOOST = 30;
 const HOVER_GRADIENT_START_PERCENT = 18;
 const HOVER_GRADIENT_END_PERCENT = 83;
+// Text buttons are wider than icon-only, so steepen the gradient angle to match the design.
+const ANGLE_BOOST = 30;
 
 const linearGradientCss = ({
   angle,
