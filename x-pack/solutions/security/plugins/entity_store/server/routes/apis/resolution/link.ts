@@ -22,7 +22,7 @@ import {
 
 const bodySchema = z.object({
   target_id: z.string(),
-  entity_ids: z.array(z.string()).min(1),
+  entity_ids: z.array(z.string()).min(1).max(1000),
 });
 
 export function registerResolutionLink(router: EntityStorePluginRouter) {

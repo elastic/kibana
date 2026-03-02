@@ -15,7 +15,7 @@ import { wrapMiddlewares } from '../../middleware';
 import { EntitiesNotFoundError, EntityNotAliasError } from '../../../domain/errors';
 
 const bodySchema = z.object({
-  entity_ids: z.array(z.string()).min(1),
+  entity_ids: z.array(z.string()).min(1).max(1000),
 });
 
 export function registerResolutionUnlink(router: EntityStorePluginRouter) {
