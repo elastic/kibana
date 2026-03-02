@@ -10,7 +10,7 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getSkillsInstructions } from '../../../../skills/prompts';
-import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
+import { getConversationAttachmentsSection } from '../../utils/attachment_presentation';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
@@ -46,9 +46,6 @@ export const getResearchAgentPrompt = async (
         ? await getBaseSystemMessage(params)
         : await getResearchSystemMessage(params),
     ],
-    ...getConversationAttachmentsSystemMessages(
-      params.processedConversation.versionedAttachmentPresentation
-    ),
     ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
@@ -59,7 +56,7 @@ export const getBaseSystemMessage = async ({
     research: { instructions: customInstructions },
   },
   conversationTimestamp,
-  processedConversation: { attachmentTypes },
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
   filestore,
   experimentalFeatures,
@@ -87,6 +84,8 @@ ${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
 
@@ -101,7 +100,7 @@ export const getResearchSystemMessage = async ({
     research: { instructions: customInstructions },
   },
   conversationTimestamp,
-  processedConversation: { attachmentTypes },
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
   filestore,
   experimentalFeatures,
@@ -206,6 +205,8 @@ ${customInstructionsBlock(customInstructions)}
 ${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
+
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
