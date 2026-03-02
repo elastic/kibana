@@ -12,6 +12,7 @@ import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
 import { zoomDataSource } from './zoom';
+import { servicenowDataSource } from './servicenow';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
@@ -21,4 +22,5 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
   dataCatalog.register(zoomDataSource);
+  dataCatalog.register(servicenowDataSource);
 }

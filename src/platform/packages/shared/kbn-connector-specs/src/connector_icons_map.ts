@@ -90,5 +90,17 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+<<<<<<< zoom_data_source
   ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
+=======
+  [
+    '.servicenow_search',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+        )
+    ),
+  ],
+>>>>>>> main
 ]);
