@@ -33,6 +33,7 @@ import type { RunningQuery } from '../../../common/types';
 
 interface QueryDetailFlyoutProps {
   query: RunningQuery;
+  notAvailableLabel: string;
   isStopRequested: boolean;
   onClose: () => void;
   onStopQuery: (taskId: string) => void;
@@ -64,12 +65,14 @@ function formatRuntime(startTime: number): string {
 
 export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   query,
+  notAvailableLabel,
   isStopRequested,
   onClose,
   onStopQuery,
 }) => {
   const { url, capabilities } = useRunningQueriesAppContext();
   const canCancelTasks = capabilities.canCancelTasks;
+  const source = query.source?.trim();
 
   const { rangeFrom, rangeTo } = useMemo(() => {
     const from = new Date(query.startTime);
@@ -86,6 +89,10 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
       defaultMessage: 'Inspect in Discover',
     }
   );
+
+  const flyoutAriaLabel = i18n.translate('xpack.runningQueries.flyout.ariaLabel', {
+    defaultMessage: 'Running query details',
+  });
 
   const inspectInDiscoverLinkProps = useMemo(() => {
     if (!query.traceId) {
@@ -109,7 +116,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   }, [discoverLocator, query.traceId, rangeFrom, rangeTo]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" maxWidth={691}>
+    <EuiFlyout aria-label={flyoutAriaLabel} onClose={onClose} size="m" maxWidth={691}>
       <EuiFlyoutBody>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -172,7 +179,13 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               defaultMessage: 'Source',
             })}
           </strong>{' '}
-          <EuiLink>{query.source}</EuiLink>
+          {source ? (
+            <EuiLink>{source}</EuiLink>
+          ) : (
+            <EuiText color="subdued">
+              <em>{notAvailableLabel}</em>
+            </EuiText>
+          )}
         </EuiText>
 
         {query.remoteSearch && (

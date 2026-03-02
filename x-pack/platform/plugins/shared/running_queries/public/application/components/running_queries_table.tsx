@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiTextColor,
   type EuiBasicTableColumn,
   type SearchFilterConfig,
 } from '@elastic/eui';
@@ -35,12 +36,21 @@ interface RunningQueriesTableProps {
   onCancelQuery: (taskId: string) => Promise<boolean>;
 }
 
+type TableRunningQuery = RunningQuery & { sourceDisplay: string; sourceAvailable: boolean };
+
+export const notAvailableLabel = i18n.translate('xpack.runningQueries.table.notAvailableLabel', {
+  defaultMessage: 'Not available',
+});
+
 export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   queries,
   onCancelQuery,
 }) => {
   const { capabilities } = useRunningQueriesAppContext();
   const canCancelTasks = capabilities.canCancelTasks;
+  const tableCaption = i18n.translate('xpack.runningQueries.table.caption', {
+    defaultMessage: 'Long running queries',
+  });
 
   const [selectedQuery, setSelectedQuery] = useState<RunningQuery | null>(null);
   const [runTimeValue, setRunTimeValue] = useState<number | null>(null);
@@ -94,15 +104,28 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
     setTaskIdToStop(null);
   }, [onCancelQuery, selectedQuery, taskIdToStop]);
 
+  const queriesWithSourceDisplay: TableRunningQuery[] = useMemo(
+    () =>
+      queries.map((q) => {
+        const source = q.source.trim();
+        return {
+          ...q,
+          sourceDisplay: source.length > 0 ? source : notAvailableLabel,
+          sourceAvailable: source.length > 0,
+        };
+      }),
+    [notAvailableLabel, queries]
+  );
+
   const filteredQueries = useMemo(() => {
-    if (runTimeValue === null) return queries;
+    if (runTimeValue === null) return queriesWithSourceDisplay;
     const sinceMs = moment()
       .subtract(runTimeValue, runTimeUnit as moment.unitOfTime.DurationConstructor)
       .valueOf();
-    return queries.filter((q) => q.startTime <= sinceMs);
-  }, [queries, runTimeValue, runTimeUnit]);
+    return queriesWithSourceDisplay.filter((q) => q.startTime <= sinceMs);
+  }, [queriesWithSourceDisplay, runTimeValue, runTimeUnit]);
 
-  const columns: Array<EuiBasicTableColumn<RunningQuery>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<TableRunningQuery>> = useMemo(
     () => [
       {
         field: 'taskId',
@@ -111,7 +134,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         }),
         width: '300px',
         sortable: true,
-        render: (taskId: string, query: RunningQuery) => (
+        render: (taskId: string, query: TableRunningQuery) => (
           <EuiLink onClick={() => setSelectedQuery(query)}>{taskId}</EuiLink>
         ),
       },
@@ -124,12 +147,20 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         sortable: true,
       },
       {
-        field: 'source',
+        field: 'sourceDisplay',
         name: i18n.translate('xpack.runningQueries.table.sourceColumn', {
           defaultMessage: 'Source',
         }),
         width: '150px',
         sortable: true,
+        render: (source: string, query: TableRunningQuery) =>
+          query.sourceAvailable ? (
+            source
+          ) : (
+            <EuiTextColor color="subdued">
+              <em>{source}</em>
+            </EuiTextColor>
+          ),
       },
       {
         field: 'startTime',
@@ -157,8 +188,8 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         }),
         width: '240px',
         align: 'right',
-        render: (value: unknown, record?: RunningQuery) => {
-          const query = (record ?? value) as RunningQuery | undefined;
+        render: (value: unknown, record?: TableRunningQuery) => {
+          const query = (record ?? value) as TableRunningQuery | undefined;
           if (!query) return null;
 
           if (stopRequestedTaskIds.has(query.taskId)) {
@@ -208,8 +239,8 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   );
 
   const uniqueSources = useMemo(
-    () => [...new Set(queries.map((q) => q.source).filter((s) => s.trim().length > 0))],
-    [queries]
+    () => [...new Set(queriesWithSourceDisplay.map((q) => q.sourceDisplay))],
+    [queriesWithSourceDisplay]
   );
   const uniqueQueryTypes = useMemo(
     () => [...new Set(queries.map((q) => q.queryType).filter((s) => s.trim().length > 0))],
@@ -256,7 +287,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
       },
       {
         type: 'field_value_selection',
-        field: 'source',
+        field: 'sourceDisplay',
         name: i18n.translate('xpack.runningQueries.table.sourceFilter', {
           defaultMessage: 'Source',
         }),
@@ -270,6 +301,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   return (
     <>
       <EuiInMemoryTable
+        tableCaption={tableCaption}
         items={filteredQueries}
         columns={columns}
         search={{
