@@ -75,6 +75,8 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
     "@kbn/expect",
+    "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-feature-flags-server",
     "@kbn/scout",
     "@kbn/mock-idp-utils"
   ],
