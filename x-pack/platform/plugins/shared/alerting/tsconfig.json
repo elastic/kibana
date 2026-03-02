@@ -76,6 +76,9 @@
     "@kbn/expect",
     "@kbn/core-feature-flags-server-mocks",
     "@kbn/core-feature-flags-server",
+    "@kbn/cps",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
   ],
   "exclude": ["target/**/*"]
 }
