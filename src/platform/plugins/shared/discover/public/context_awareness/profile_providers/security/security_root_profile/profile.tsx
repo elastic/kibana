@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent, PropsWithChildren } from 'react';
+import type { FunctionComponent } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
@@ -19,7 +19,6 @@ import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
 import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
 
 interface SecurityRootProfileContext {
-  appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
   getSecuritySolutionCellRenderer?: (
     fieldName: string
   ) => FunctionComponent<DataGridCellValueElementProps> | undefined;

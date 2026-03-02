@@ -101,7 +101,7 @@ export const simple: LensAttributes = {
   ],
 } satisfies LensAttributes;
 
-export const withXAndYAxes: LensAttributes = {
+export const withXAndYAxes = {
   title: 'Lens Heatmap - DSL - With X and Y Axes',
   description: 'Count of records with timestamp on x-axis and extension.keyword on y-axis',
   state: {
@@ -196,7 +196,6 @@ export const withXAndYAxes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
       indexpattern: {
         layers: {},
       },
@@ -218,7 +217,24 @@ export const withXAndYAxes: LensAttributes = {
   ],
 } satisfies LensAttributes;
 
-export const withDynamicColors: LensAttributes = {
+export const withSortPredicates = {
+  ...withXAndYAxes,
+  title: 'Lens Heatmap - DSL - With Sort Predicates',
+  description: 'Heatmap with x-axis ascending and y-axis descending sort',
+  state: {
+    ...withXAndYAxes.state,
+    visualization: {
+      ...withXAndYAxes.state.visualization,
+      gridConfig: {
+        ...withXAndYAxes.state.visualization.gridConfig,
+        xSortPredicate: 'asc',
+        ySortPredicate: 'desc',
+      },
+    },
+  },
+} satisfies LensAttributes;
+
+export const withDynamicColors = {
   title: 'Lens Heatmap - DSL - With Dynamic Colors',
   description: 'Count of records with timestamp on x-axis and extension.keyword on y-axis',
   state: {
@@ -372,7 +388,6 @@ export const withDynamicColors: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
       indexpattern: {
         layers: {},
       },
