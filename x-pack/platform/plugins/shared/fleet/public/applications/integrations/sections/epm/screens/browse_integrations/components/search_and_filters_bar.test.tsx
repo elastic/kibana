@@ -12,10 +12,17 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 const mockUseUrlFilters = jest.fn();
 const mockUseAddUrlFilters = jest.fn();
+const mockUseUrlCategories = jest.fn();
+const mockUseSetUrlCategory = jest.fn();
 
 jest.mock('../hooks/url_filters', () => ({
   useUrlFilters: () => mockUseUrlFilters(),
   useAddUrlFilters: () => mockUseAddUrlFilters(),
+}));
+
+jest.mock('../hooks/url_categories', () => ({
+  useUrlCategories: () => mockUseUrlCategories(),
+  useSetUrlCategory: () => mockUseSetUrlCategory(),
 }));
 
 jest.mock('../../../../../hooks', () => ({}));
@@ -33,6 +40,11 @@ describe('SearchAndFiltersBar', () => {
       status: undefined,
     });
     mockUseAddUrlFilters.mockReturnValue(mockAddUrlFilters);
+    mockUseUrlCategories.mockReturnValue({
+      category: '',
+      subCategory: undefined,
+    });
+    mockUseSetUrlCategory.mockReturnValue(jest.fn());
   });
 
   function renderSearchAndFiltersBar() {
@@ -58,12 +70,12 @@ describe('SearchAndFiltersBar', () => {
         status: ['deprecated'],
       });
 
-      const { getByTestId, container } = renderSearchAndFiltersBar();
+      const { getByTestId } = renderSearchAndFiltersBar();
       const button = getByTestId('browseIntegrations.searchBar.statusBtn');
 
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-      const badge = container.querySelector('.euiNotificationBadge');
+      const badge = button.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
     });
@@ -153,7 +165,7 @@ describe('SearchAndFiltersBar', () => {
         status: ['deprecated'],
       });
 
-      const { getByTestId, container } = renderSearchAndFiltersBar();
+      const { getByTestId } = renderSearchAndFiltersBar();
 
       // Search should show query
       const searchInput = getByTestId('browseIntegrations.searchBar.input') as HTMLInputElement;
@@ -162,7 +174,7 @@ describe('SearchAndFiltersBar', () => {
       // Status filter should show count
       const statusButton = getByTestId('browseIntegrations.searchBar.statusBtn');
       expect(statusButton).toHaveClass('euiFilterButton-hasActiveFilters');
-      const badge = container.querySelector('.euiNotificationBadge');
+      const badge = statusButton.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
 

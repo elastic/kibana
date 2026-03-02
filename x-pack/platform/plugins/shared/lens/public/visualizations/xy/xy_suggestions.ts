@@ -22,7 +22,7 @@ import { getColorMappingDefaults } from '../../utils';
 import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
 const COLUMN_SORT_ORDER = {
   document: 0,
@@ -39,11 +39,6 @@ const COLUMN_SORT_ORDER = {
   murmur3: 11,
 };
 
-/**
- * Generate suggestions for the xy chart.
- *
- * @param opts
- */
 /**
  * For TS/PromQL ES|QL queries, prefers 'line' when the x-axis uses a date column (time series),
  * Otherwise returns undefined so the default series type is used.
@@ -67,6 +62,11 @@ function getPreferredSeriesTypeForTimeSeriesQuery(
   }
 }
 
+/**
+ * Generate suggestions for the xy chart.
+ *
+ * @param opts
+ */
 export function getSuggestions({
   table,
   state,
@@ -134,6 +134,7 @@ function getSuggestionForColumns(
     requestedSeriesType: seriesType,
     mainPalette,
     allowMixed,
+    datasourceId,
     query,
   };
 
@@ -234,6 +235,7 @@ function getSuggestionsForLayer({
   requestedSeriesType,
   mainPalette,
   allowMixed,
+  datasourceId,
   query,
 }: {
   layerId: string;
@@ -247,6 +249,7 @@ function getSuggestionsForLayer({
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  datasourceId?: string;
   query?: SuggestionRequest['query'];
 }): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
@@ -271,6 +274,14 @@ function getSuggestionsForLayer({
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
   };
+
+  if (
+    changeType === 'initial' &&
+    xValue?.operation.dataType === 'date' &&
+    datasourceId === 'formBased'
+  ) {
+    return buildSuggestion({ ...options, seriesType: 'line' });
+  }
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // For TS/PromQL time series, prefer line as the visible default; otherwise bar_stacked
@@ -585,8 +596,7 @@ function buildSuggestion({
       : undefined,
   };
 
-  const hasDateHistogramDomain =
-    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+  const hasDateHistogramDomain = isDateHistogramOperation(xValue?.operation);
 
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
@@ -627,7 +637,8 @@ function buildSuggestion({
     yLeftScale: currentState?.yLeftScale,
     yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
-      x: true,
+      // Default X axis title to "None" for date histogram to reduce redundant information
+      x: !hasDateHistogramDomain,
       yLeft: true,
       yRight: true,
     },

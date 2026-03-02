@@ -9,6 +9,7 @@ plugins:
     - custom_branding
     - dashboard
     - data_views
+    - discover
     - discover_enhanced
     - entity_store
     - exploratory_view
@@ -34,7 +35,11 @@ plugins:
     - spaces
     - streams
     - streams_app
+    - synthetics
     - transform
+    - triggers_actions_ui
+    - uptime
+    - ux
     - workflows_extensions
     - workflows_management
   disabled:

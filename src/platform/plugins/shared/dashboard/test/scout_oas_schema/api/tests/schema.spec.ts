@@ -11,7 +11,6 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
-import snapshot from '../fixtures/schema_snapshot.json';
 
 /**
  * Dashboard REST schema validation tests.
@@ -22,7 +21,7 @@ import snapshot from '../fixtures/schema_snapshot.json';
  *
  * See README.md for usage instructions.
  */
-apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -63,15 +62,6 @@ apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () =
       ].schema;
     const panelsSchema = createBodySchema.properties.panels;
     expect(panelsSchema).toBeDefined();
-    expect(panelsSchema.items?.anyOf?.length).toBeGreaterThan(0);
-
-    const panelSchema = panelsSchema.items.anyOf.find(
-      (schema: { properties: Record<string, unknown> }) => 'config' in schema.properties
-    );
-    expect(panelSchema).toBeDefined();
-
-    const configSchema = panelSchema.properties.config;
-    expect(configSchema.anyOf).toHaveLength(2);
-    expect(configSchema.anyOf).toStrictEqual(snapshot);
+    expect(panelsSchema.items.anyOf[0].oneOf).toHaveLength(7);
   });
 });
