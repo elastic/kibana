@@ -11,10 +11,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { runBumpDiff } from '../src/diff/run_bump_diff';
-import { BumpServiceError } from '../src/diff/errors';
-import { parseBumpDiff } from '../src/diff/parse_bump_diff';
-import { applyAllowlist } from '../src/diff/breaking_rules';
+import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
 import { formatFailure } from '../src/report/format_failure';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
@@ -172,8 +169,8 @@ run(
 
     try {
       const currentPath = resolve(process.cwd(), opts.specPath);
-      const diffEntries = runBumpDiff(basePath, currentPath);
-      const allBreakingChanges = parseBumpDiff(diffEntries);
+      const diffEntries = runOasdiff(basePath, currentPath);
+      const allBreakingChanges = parseOasdiff(diffEntries);
 
       if (allBreakingChanges.length === 0) {
         log.success('No breaking changes detected');
@@ -210,15 +207,6 @@ run(
       throw new Error(
         `Found ${breakingChanges.length} breaking change(s) affecting Terraform provider APIs`
       );
-    } catch (error) {
-      if (error instanceof BumpServiceError) {
-        log.warning(`${error.message}`);
-        log.warning(
-          'Skipping API contract check — results are inconclusive due to external service failure.'
-        );
-        return;
-      }
-      throw error;
     } finally {
       cleanup(basePath);
     }
