@@ -14,26 +14,99 @@ import { deleteIndex } from '../delete_index';
 import { indexDocuments } from '../index_documents';
 import { DEFAULT_ELSER, getSemanticTextMapping } from '../create_index';
 
-interface Document {
+interface Document extends OpenAPIV3.OperationObject {
   path: string;
   method: string;
-  description: string | undefined;
-  summary: string | undefined;
-  parameters: (OpenAPIV3.ReferenceObject | OpenAPIV3.ParameterObject)[] | undefined;
-  response: OpenAPIV3.ReferenceObject | OpenAPIV3.ResponseObject;
-  example: unknown;
-  tags?: string[];
-  externalDocs?: OpenAPIV3.ExternalDocumentationObject;
-  operationId?: string;
-  requestBody?: OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject;
-  responses?: OpenAPIV3.ResponsesObject;
-  callbacks?: { [callback: string]: OpenAPIV3.ReferenceObject | OpenAPIV3.CallbackObject };
-  deprecated?: boolean;
-  security?: OpenAPIV3.SecurityRequirementObject[];
-  servers?: OpenAPIV3.ServerObject[];
+  'x-codeSamples'?: {
+    lang: string;
+    source: string;
+  }[];
 }
 
-function generateDocuments(openApiSpec: OpenAPIV3.Document): Document[] {
+/**
+ * Resolves $refs in an OpenAPI operation object by replacing references with their resolved content.
+ */
+function resolveOperationRefs(
+  operation: OpenAPIV3.OperationObject,
+  spec: OpenAPIV3.Document,
+  excludeKeys: string[] = []
+): OpenAPIV3.OperationObject {
+  const resolvedCache = new Map<string, unknown>();
+  const excludeKeySet = new Set(excludeKeys);
+
+  function resolveRef(ref: string): unknown {
+    if (!ref.startsWith('#/')) {
+      return null; // Skip external refs (e.g., URLs)
+    }
+
+    const segments = ref.slice(2).split('/');
+    let current: unknown = spec;
+
+    for (const segment of segments) {
+      if (typeof current !== 'object' || current === null) {
+        return null;
+      }
+      current = (current as Record<string, unknown>)[segment];
+    }
+
+    if (typeof current !== 'object' || current === null) {
+      return null;
+    }
+
+    return current;
+  }
+
+  function recursiveResolve(obj: unknown): unknown {
+    if (obj === null || typeof obj !== 'object') return obj;
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => recursiveResolve(item));
+    }
+
+    const objRecord = obj as Record<string, unknown>;
+
+    // Handle $ref - resolve and replace with referenced content
+    if ('$ref' in objRecord && typeof objRecord.$ref === 'string') {
+      const ref = objRecord.$ref;
+
+      // Return cached result if already resolved
+      if (resolvedCache.has(ref)) {
+        return resolvedCache.get(ref);
+      }
+
+      const resolved = resolveRef(ref);
+      if (resolved) {
+        const finalResolved = recursiveResolve(resolved);
+        resolvedCache.set(ref, finalResolved); // Cache the resolved result
+        return finalResolved;
+      }
+      return objRecord;
+    }
+
+    // Traverse object and resolve nested values
+    let hasChanges = false;
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(objRecord)) {
+      // Skip excluded keys - they are returned as-is without resolving references
+      const resolvedValue = excludeKeySet.has(key) ? value : recursiveResolve(value);
+      result[key] = resolvedValue;
+
+      if (resolvedValue !== value) {
+        hasChanges = true;
+      }
+    }
+
+    // Only return new object if something actually changed
+    return hasChanges ? result : objRecord;
+  }
+
+  return recursiveResolve(operation) as OpenAPIV3.OperationObject;
+}
+
+function generateDocuments(openApiSpec: OpenAPIV3.Document, logger: ToolingLog): Document[] {
+  logger.info(`Resolving OpenAPI references...`);
+
   const documents = Object.entries(openApiSpec.paths)
     .map(([path, methods]) => {
       if (!methods) {
@@ -49,68 +122,19 @@ function generateDocuments(openApiSpec: OpenAPIV3.Document): Document[] {
         if (!operation || typeof operation === 'string' || !('operationId' in operation)) {
           throw new Error(`Invalid operation for path ${path} and method ${method}`);
         }
-        const parameters = operation.parameters?.map((param) => {
-          if ('$ref' in param) {
-            const ref = param.$ref as string;
-            const refName = ref.replace('#/components/parameters/', '');
-            const resolvedParam = openApiSpec.components?.parameters?.[refName];
-            return resolvedParam || param;
-          }
-          if ('$ref' in param && (!('schema' in param) || !param.schema)) {
-            return param;
-          }
 
-          const { schema } = param as { schema: OpenAPIV3.SchemaObject };
+        // Resolve references in operation specs, excluding responses and requestBody
+        const resolvedOperation = resolveOperationRefs(operation, openApiSpec, [
+          'responses',
+          'requestBody',
+        ]);
 
-          if (schema && '$ref' in schema) {
-            const ref = schema.$ref as string;
-            const refName = ref.replace('#/components/schemas/', '');
-            const resolvedSchema = openApiSpec.components?.schemas?.[refName];
-            return { ...param, schema: resolvedSchema || schema };
-          }
-
-          return param;
-        });
-
-        let response = operation.responses?.['200'];
-
-        if (response && '$ref' in response) {
-          const ref = response.$ref as string;
-          const refName = ref.replace('#/components/responses/', '');
-          const resolvedResponse = openApiSpec.components?.responses?.[refName];
-          response = resolvedResponse || response;
-        }
-        if (
-          response &&
-          typeof response === 'object' &&
-          'content' in response &&
-          response.content &&
-          response.content['application/json']
-        ) {
-          const { schema } = response.content['application/json'] as {
-            schema: OpenAPIV3.SchemaObject;
-          };
-          if (schema && '$ref' in schema) {
-            const ref = schema.$ref as string;
-            const refName = ref.replace('#/components/schemas/', '');
-            const resolvedSchema = openApiSpec.components?.schemas?.[refName];
-            response.content['application/json'].schema = resolvedSchema || schema;
-          }
-        }
-
-        return {
-          ...operation,
-          path,
-          method,
-          description: operation.description,
-          summary: operation.summary,
-          parameters,
-          response,
-          example: (operation as Record<string, unknown>)['x-codeSamples'],
-        };
+        return JSON.parse(JSON.stringify({ ...resolvedOperation, path, method }));
       });
     })
     .flat();
+
+  logger.info(`Resolved ${documents.length} OpenAPI operations`);
   return documents;
 }
 
@@ -157,7 +181,7 @@ async function createOpenAPIIndex({
           type: 'object',
           enabled: false,
         },
-        example: {
+        'x-codeSamples': {
           type: 'object',
           enabled: false,
         },
@@ -195,7 +219,7 @@ function transformDocumentsToIndexFormat(documents: Document[]): Array<Record<st
       // Store complete data for tool generation (but don't index deeply)
       parameters: doc.parameters ?? [],
       responses: doc.responses ?? {},
-      example: doc.example ?? [],
+      'x-codeSamples': doc['x-codeSamples'] ?? [],
     };
     if (doc.method && doc.path) {
       payload.endpoint = `${doc.method.toUpperCase()} ${doc.path}`;
@@ -217,7 +241,7 @@ export async function ingestOpenApiSpec({
   logger: ToolingLog;
   inferenceId?: string;
 }) {
-  const documents = generateDocuments(openApiSpec);
+  const documents = generateDocuments(openApiSpec, logger);
 
   // Save documents to temporary directory
   const tmpDir = Path.join(__dirname, '__tmp__');
