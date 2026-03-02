@@ -132,6 +132,7 @@ const NavControlPopoverUI = ({
         background-color: transparent !important;
         block-size: 28px;
         margin-left: 4px;
+        max-width: 200px;
       `}
     >
       {spaceButtonLabel}

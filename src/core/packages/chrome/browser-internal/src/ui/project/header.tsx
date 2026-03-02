@@ -77,15 +77,14 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       display: flex;
       margin-right: ${size.xs};
       &:after {
-        background: ${colors.lightShade};
         content: '';
         flex-shrink: 0;
         margin-block-start: ${size.xs};
         margin-block-end: 0;
         margin-inline: ${size.s};
-        block-size: 16px;
+        block-size: 8px;
         inline-size: 1px;
-        transform: translateY(-1px) rotate(15deg);
+        // transform: translateY(-1px) rotate(15deg);
       }
     }
   `,
@@ -141,6 +140,7 @@ const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =>
         blockSize: '28px',
         minWidth: '28px',
         minHeight: '28px',
+        color: euiTheme.colors.textSubdued,
         // borderRadius: 'inherit',
 
         '&:hover, &:active, &:focus': {
