@@ -28,6 +28,7 @@ import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { getRule } from '../../../rule/methods/get/get_rule';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 jest.mock('../../../rule/methods/get/get_rule');
 
@@ -117,6 +118,8 @@ describe('findGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();

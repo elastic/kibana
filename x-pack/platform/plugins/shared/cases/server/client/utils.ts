@@ -53,6 +53,10 @@ import {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
+  isLegacyAttachmentRequest,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
@@ -65,7 +69,13 @@ import {
   isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
+import type {
+  AttachmentRequest,
+  AttachmentRequestV2,
+  CasesFindRequestSortFields,
+} from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
@@ -154,6 +164,73 @@ const decodeExternalReferenceAttachment = (
     const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
 
     attachmentType.schemaValidator?.(metadata);
+  }
+};
+
+/**
+ * Decode and validate unified value attachment payload.
+ * Validates the data structure using the schema validator from the registry.
+ */
+const decodeUnifiedValueAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  const attachmentType = unifiedRegistry.get(attachment.type);
+  if (attachmentType.schemaValidator) {
+    attachmentType.schemaValidator(attachment.data);
+  }
+};
+
+/**
+ * Decode and validate unified reference attachment payload.
+ * Validates the metadata using the schema validator from the registry.
+ */
+const decodeUnifiedReferenceAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  const attachmentType = unifiedRegistry.get(attachment.type);
+  if (attachmentType.schemaValidator) {
+    attachmentType.schemaValidator(attachment.metadata ?? null);
+  }
+};
+
+export const decodeUnifiedCommentRequest = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isUnifiedValueAttachmentRequest(attachment)) {
+    decodeUnifiedValueAttachment(attachment, unifiedRegistry);
+  } else if (isUnifiedReferenceAttachmentRequest(attachment)) {
+    decodeUnifiedReferenceAttachment(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
+  }
+};
+
+export const decodeCommentRequestV2 = (
+  attachment: AttachmentRequestV2,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isLegacyAttachmentRequest(attachment)) {
+    decodeCommentRequest(attachment, externalRefRegistry);
+  } else if (isUnifiedAttachmentRequest(attachment)) {
+    decodeUnifiedCommentRequest(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
   }
 };
 

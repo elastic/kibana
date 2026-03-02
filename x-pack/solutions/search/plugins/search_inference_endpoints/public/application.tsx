@@ -36,3 +36,28 @@ export const renderApp = async (
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
+
+export const renderInferenceEndpointsMgmtApp = async (
+  core: CoreStart,
+  services: AppPluginStartDependencies,
+  element: HTMLElement
+) => {
+  const { InferenceEndpointsOverview } = await import('./inference_endpoints_overview');
+
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider services={{ ...core, ...services }}>
+        <I18nProvider>
+          <Router history={services.history}>
+            <InferenceEndpointsOverview />
+          </Router>
+        </I18nProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
