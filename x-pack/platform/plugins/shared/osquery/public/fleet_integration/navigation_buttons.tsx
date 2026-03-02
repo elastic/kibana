@@ -73,7 +73,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem>
         <EuiCard
-          icon={<EuiIcon size="xl" type="console" />}
+          icon={<EuiIcon size="xl" type="commandLine" />}
           title={i18n.translate('xpack.osquery.fleetIntegration.runLiveQueriesButtonText', {
             defaultMessage: 'Run live queries',
           })}

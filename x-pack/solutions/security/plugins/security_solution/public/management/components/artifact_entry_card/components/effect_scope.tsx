@@ -119,7 +119,7 @@ const WithContextMenu = memo<WithContextMenuProps>(
           ...policyMenuItem,
           hoverInfo:
             hasHref && canReadPolicies ? (
-              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
+              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="external">
                 <FormattedMessage
                   id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
                   defaultMessage="View details"

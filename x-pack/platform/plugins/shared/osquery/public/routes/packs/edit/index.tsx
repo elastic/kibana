@@ -72,7 +72,12 @@ const EditPackPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="chevronSingleLeft"
+            {...queryDetailsLinkProps}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.osquery.editPack.viewPackListTitle"
               defaultMessage="View {queryName} details"

@@ -331,7 +331,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   <EuiButtonIcon
                     data-test-subj={getTestId('inputTextSubmitButton')}
                     aria-label="submit-command"
-                    iconType="playFilled"
+                    iconType="play"
                     color="primary"
                     isDisabled={disableArrowButton}
                     onClick={handleSubmitButton}
