@@ -32,14 +32,18 @@ export const DiscoverHistogramLayout = ({
     (tab) => tab.unifiedHistogramConfig$
   );
 
+  const histogramKey = localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX;
+  const initialLayoutPropsMap = useMemo(
+    () =>
+      selectInitialUnifiedHistogramLayoutPropsMap(
+        mainContentProps.stateContainer.runtimeStateManager,
+        currentTabId
+      ),
+    [mainContentProps.stateContainer.runtimeStateManager, currentTabId]
+  );
   // Use layoutPropsMap from tab, or fall back to initial props (incl. default for new tabs)
   // so the layout always renders and the chart can mount/populate layoutPropsMap
-  const baseLayoutProps =
-    layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX] ??
-    selectInitialUnifiedHistogramLayoutPropsMap(
-      mainContentProps.stateContainer.runtimeStateManager,
-      currentTabId
-    )[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX];
+  const baseLayoutProps = layoutPropsMap[histogramKey] ?? initialLayoutPropsMap[histogramKey];
 
   const layoutProps = useMemo(() => {
     if (!baseLayoutProps) return null;
@@ -65,12 +69,12 @@ export const DiscoverHistogramLayout = ({
         min-height: 0;
 
         ${hideDataTable
-          ? `
-          [data-test-subj='unifiedHistogramResizableButton'] {
-            pointer-events: none;
-            cursor: default;
-          }
-        `
+          ? css`
+              .kbnResizableLayout__resizeButton {
+                pointer-events: none;
+                cursor: default;
+              }
+            `
           : ''}
       `}
     >
