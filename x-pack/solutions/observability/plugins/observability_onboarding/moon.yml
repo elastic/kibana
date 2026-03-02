@@ -54,6 +54,8 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
   - '@kbn/core-security-server'
+  - '@kbn/streams-plugin'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

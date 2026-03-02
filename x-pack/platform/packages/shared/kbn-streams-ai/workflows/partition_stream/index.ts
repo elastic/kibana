@@ -22,6 +22,18 @@ import {
 } from './features_tool';
 
 const strictConditionSchema = DeepStrict(conditionSchema);
+export type PartitionSuggestionsReason = 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+
+// Must be a `type` alias, not an `interface`. Interfaces lack implicit index
+// signatures, so `Observable<ServerSentEventBase<..., PartitionStreamResponse>>`
+// would not be assignable to `Observable<ServerSentEvent>` (which requires
+// `Record<string, unknown>`), causing the route handler return type to collapse
+// to `never`.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type PartitionStreamResponse = {
+  partitions: Array<{ name: string; condition: Condition }>;
+  reason?: PartitionSuggestionsReason;
+};
 
 export async function partitionStream({
   definition,
@@ -34,7 +46,7 @@ export async function partitionStream({
   signal,
   getFeatures,
 }: {
-  definition: Streams.ingest.all.Definition;
+  definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -47,7 +59,11 @@ export async function partitionStream({
     minConfidence?: number;
     limit?: number;
   }): Promise<Feature[]>;
-}): Promise<Array<{ name: string; condition: Condition }>> {
+}): Promise<PartitionStreamResponse> {
+  const enabledChildConditions = definition.ingest.wired.routing
+    .filter((route) => route.status !== 'disabled')
+    .map((route) => route.where);
+
   const initialClusters = await clusterLogs({
     esClient,
     start,
@@ -55,17 +71,49 @@ export async function partitionStream({
     index: definition.name,
     logger,
     partitions: [],
+    excludeConditions: enabledChildConditions,
     size: 1000,
   });
 
   // No need to involve reasoning if there are no initial clusters
   if (initialClusters.length === 0) {
-    return [];
+    return { partitions: [], reason: 'no_clusters' };
   }
 
   // No need to involve reasoning if there are no sample documents
   if (initialClusters.every((cluster) => cluster.clustering.sampled === 0)) {
-    return [];
+    // If there are enabled child conditions, we need to determine whether:
+    // - All data is already partitioned (all_data_partitioned), or
+    // - There are simply no samples in the time range (no_samples)
+    // We do this by checking if at least one doc exists without exclusions
+    if (enabledChildConditions.length > 0) {
+      const countResponse = await esClient.count({
+        index: definition.name,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': { gte: start, lte: end, format: 'epoch_millis' },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      const hasAnyDocsWithoutExclusion = countResponse.count > 0;
+
+      return {
+        partitions: [],
+        reason: hasAnyDocsWithoutExclusion ? 'all_data_partitioned' : 'no_samples',
+      };
+    }
+
+    return {
+      partitions: [],
+      reason: 'no_samples',
+    };
   }
 
   const response = await executeAsReasoningAgent({
@@ -121,6 +169,7 @@ export async function partitionStream({
           end,
           index: toolCall.function.arguments.index,
           partitions,
+          excludeConditions: enabledChildConditions,
           logger,
         });
 
@@ -150,8 +199,13 @@ export async function partitionStream({
         };
       }) ?? [];
 
-  return proposedPartitions.filter(
+  const partitions = proposedPartitions.filter(
     ({ condition }) =>
       strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
   );
+
+  return {
+    partitions,
+    reason: partitions.length === 0 ? 'no_clusters' : undefined,
+  };
 }
