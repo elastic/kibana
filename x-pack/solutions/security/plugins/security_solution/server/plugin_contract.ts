@@ -48,10 +48,6 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
-  WorkflowsServerPluginSetup,
-  WorkflowsServerPluginStart,
-} from '@kbn/workflows-management-plugin/server';
-import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
@@ -80,7 +76,6 @@ export interface SecuritySolutionPluginSetupDependencies {
   kql: KqlServerPluginSetup;
   share?: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
-  workflowsManagement?: WorkflowsServerPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
@@ -104,7 +99,6 @@ export interface SecuritySolutionPluginStartDependencies {
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
   llmTasks?: LlmTasksPluginStart;
-  workflowsManagement?: WorkflowsServerPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 

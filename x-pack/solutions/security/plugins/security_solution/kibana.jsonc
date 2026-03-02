@@ -84,7 +84,6 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
-      "workflowsManagement",
       "workflowsExtensions"
     ],
     "requiredBundles": [
