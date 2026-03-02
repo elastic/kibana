@@ -66,7 +66,7 @@ export function SuccessCallout() {
     <EuiCallOut
       title={fieldLimitMitigationSuccessMessage}
       color="success"
-      iconType="checkInCircleFilled"
+      iconType="checkCircleFill"
       data-test-subj="datasetQualityDetailsDegradedFlyoutNewLimitSetSuccessCallout"
     >
       <EuiLink
@@ -87,13 +87,13 @@ export function ManualRolloverCallout() {
     <EuiCallOut
       title={fieldLimitMitigationPartiallyFailedMessage}
       color="danger"
-      iconType="checkInCircleFilled"
+      iconType="checkCircleFill"
     >
       <p>{fieldLimitMitigationPartiallyFailedMessageDescription}</p>
       <EuiButton
         data-test-subj="datasetQualityNewLimitSetManualRollover"
         onClick={triggerRollover}
-        iconType="popout"
+        iconType="external"
         size="s"
         title={fieldLimitMitigationRolloverButton}
         color="danger"

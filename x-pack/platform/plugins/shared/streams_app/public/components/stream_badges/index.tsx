@@ -64,7 +64,7 @@ export function ClassicStreamBadge() {
     >
       <EuiBadge
         color="hollow"
-        iconType="streamsClassic"
+        iconType="productStreamsClassic"
         iconSide="left"
         tabIndex={0}
         data-test-subj="classicStreamBadge"
@@ -81,7 +81,7 @@ export function WiredStreamBadge() {
   return (
     <EuiBadge
       color="hollow"
-      iconType="streamsWired"
+      iconType="productStreamsWired"
       iconSide="left"
       data-test-subj="wiredStreamBadge"
     >
