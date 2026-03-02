@@ -73,7 +73,6 @@ describe('<AnalyzerPreview />', () => {
     const wrapper = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      isActiveTimeline: false,
       documentId: 'eventId',
       indices: ['rule-indices'],
     });
@@ -88,7 +87,6 @@ describe('<AnalyzerPreview />', () => {
     const wrapper = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      isActiveTimeline: false,
       documentId: 'eventId',
       indices: ['index'],
     });
@@ -105,7 +103,6 @@ describe('<AnalyzerPreview />', () => {
     const wrapper = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      isActiveTimeline: false,
       documentId: 'ancestors-id',
       indices: ['rule-indices'],
     });
