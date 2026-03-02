@@ -4350,6 +4350,24 @@
       "enabled": true
     },
     {
+      "groupName": "mongodb",
+      "matchDepNames": [
+        "mongodb"
+      ],
+      "reviewers": [
+        "team:workchat-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "antlr4",
       "matchDepNames": [
         "antlr4"
