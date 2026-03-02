@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
   type ToolSelection,
+  type UserIdAndName,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -21,7 +22,7 @@ import { duplicateName } from '../../utils/duplicate_name';
 import { searchParamNames } from '../../search_param_names';
 import { cleanInvalidToolReferences } from '../../utils/tool_selection_utils';
 
-export type AgentEditState = Omit<AgentDefinition, 'type' | 'readonly'>;
+export type AgentEditState = Omit<AgentDefinition, 'type' | 'readonly' | 'created_by'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
@@ -33,6 +34,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  visibility: 'public',
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -62,6 +64,7 @@ export function useAgentEdit({
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
   const { agent, isLoading: agentLoading, error: agentError } = useAgentBuilderAgentById(agentId);
+  const [owner, setOwner] = useState<UserIdAndName | undefined>();
 
   const createMutation = useMutation({
     mutationFn: (data: AgentEditState) => agentService.create(data),
@@ -93,15 +96,18 @@ export function useAgentEdit({
   useEffect(() => {
     if (!agentId) {
       setState(emptyState());
+      setOwner(undefined);
       return;
     }
 
     if (agent) {
-      const { type, ...agentState } = agent;
+      const { type, created_by, ...agentState } = agent;
+      agentState.visibility = agentState.visibility ?? 'public';
       if (isClone) {
         agentState.id = duplicateName(agentState.id);
       }
       setState(agentState);
+      setOwner(created_by);
     }
   }, [agentId, agent, isClone]);
 
@@ -127,6 +133,7 @@ export function useAgentEdit({
     isSubmitting: createMutation.isLoading || updateMutation.isLoading,
     submit,
     tools,
+    owner,
     error: toolsError || agentError,
   };
 }

@@ -6,6 +6,7 @@
  */
 
 import type {
+  EuiBadgeProps,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -13,6 +14,7 @@ import type {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,13 +25,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type AgentDefinition } from '@kbn/agent-builder-common';
+import { useQuery } from '@kbn/react-query';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
+import {
+  canEditAgentByVisibility,
+  type AgentBuilderCurrentUser,
+} from '../../../utils/agent_access';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -37,6 +45,9 @@ import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
+  visibility: i18n.translate('xpack.agentBuilder.agents.visibilityColumn', {
+    defaultMessage: 'Visibility',
+  }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
 };
 
@@ -59,11 +70,94 @@ const actionLabels = {
   }),
 };
 
+const getAgentVisibility = (agent: AgentDefinition): NonNullable<AgentDefinition['visibility']> =>
+  agent.visibility ?? 'public';
+
+const getVisibilityBadgeLabel = (visibility: NonNullable<AgentDefinition['visibility']>) => {
+  switch (visibility) {
+    case 'private':
+      return i18n.translate('xpack.agentBuilder.agents.visibility.private', {
+        defaultMessage: 'Private',
+      });
+    case 'shared':
+      return i18n.translate('xpack.agentBuilder.agents.visibility.shared', {
+        defaultMessage: 'Shared',
+      });
+    case 'public':
+      return i18n.translate('xpack.agentBuilder.agents.visibility.public', {
+        defaultMessage: 'Public',
+      });
+  }
+};
+
+const getVisibilityBadgeColor = (
+  visibility: NonNullable<AgentDefinition['visibility']>
+): EuiBadgeProps['color'] => {
+  switch (visibility) {
+    case 'private':
+      return 'hollow';
+    case 'shared':
+      return 'primary';
+    case 'public':
+      return 'success';
+  }
+};
+
+const renderAgentVisibilityBadge = (agent: AgentDefinition) => {
+  if (agent.readonly) {
+    return (
+      <EuiBadge color="accent" data-test-subj="agentBuilderAgentsListVisibilityBuiltInBadge">
+        {i18n.translate('xpack.agentBuilder.agents.visibility.builtIn', {
+          defaultMessage: 'Read-only',
+        })}
+      </EuiBadge>
+    );
+  }
+
+  const visibility = getAgentVisibility(agent);
+  const visibilityLabel = getVisibilityBadgeLabel(visibility);
+  const visibilityColor = getVisibilityBadgeColor(visibility);
+
+  return (
+    <EuiBadge
+      color={visibilityColor}
+      data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
+    >
+      {visibilityLabel}
+    </EuiBadge>
+  );
+};
+
+const canCurrentUserEditAgent = ({
+  agent,
+  manageAgents,
+  currentUser,
+}: {
+  agent: AgentDefinition;
+  manageAgents: boolean;
+  currentUser?: AgentBuilderCurrentUser;
+}) => {
+  if (agent.readonly || !manageAgents) {
+    return false;
+  }
+
+  return canEditAgentByVisibility({
+    visibility: agent.visibility,
+    owner: agent.created_by,
+    currentUser,
+  });
+};
+
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { manageAgents } = useUiPrivileges();
+  const { services } = useKibana();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
+  const { data: currentUser } = useQuery({
+    queryKey: ['agentBuilder', 'currentUser'],
+    queryFn: async () => services.userProfile.getCurrent(),
+  });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
@@ -74,6 +168,8 @@ export const AgentsList: React.FC = () => {
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
+    const canEditAgent = (agent: AgentDefinition) =>
+      canCurrentUserEditAgent({ agent, manageAgents, currentUser });
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
       field: 'name',
@@ -81,7 +177,7 @@ export const AgentsList: React.FC = () => {
       render: (name: string, agent: AgentDefinition) => (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            {agent.readonly ? (
+            {!canEditAgent(agent) ? (
               <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
                 {name}
               </EuiText>
@@ -115,6 +211,12 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
+    const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+      name: columnNames.visibility,
+      render: renderAgentVisibilityBadge,
+      'data-test-subj': 'agentBuilderAgentsListVisibility',
+    };
+
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
       actions: [
         {
@@ -137,7 +239,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id })),
-          available: (agent) => !agent.readonly && manageAgents,
+          available: (agent) => canEditAgent(agent),
         },
         {
           type: 'icon',
@@ -157,7 +259,7 @@ export const AgentsList: React.FC = () => {
             return (
               <EuiToolTip position="right" content={actionLabels.deleteDescription} delay="long">
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiIcon type="trash" color="danger" />
+                  <EuiIcon type="trash" color="danger" aria-hidden={true} />
                   <EuiLink
                     data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
                     onClick={() => {
@@ -171,13 +273,13 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          available: (agent) => !agent.readonly && manageAgents,
+          available: (agent) => canEditAgent(agent),
         },
       ],
     };
 
-    return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents]);
+    return [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions];
+  }, [createAgentBuilderUrl, currentUser, deleteAgent, manageAgents]);
 
   const errorMessage = useMemo(
     () =>
@@ -202,6 +304,9 @@ export const AgentsList: React.FC = () => {
   return (
     <EuiInMemoryTable
       data-test-subj="agentBuilderAgentsListTable"
+      tableCaption={i18n.translate('xpack.agentBuilder.agents.listTableCaption', {
+        defaultMessage: 'List of agents',
+      })}
       rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
       items={agents}
       itemId={(agent) => agent.id}
