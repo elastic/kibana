@@ -9,9 +9,9 @@ import {
   EuiComboBox,
   EuiFieldText,
   EuiFormRow,
-  EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -20,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN, WORKFLOW_OPTIONS } from './constants';
 import type { NotificationPolicyFormState } from './types';
-import { FREQUENCY_OPTIONS, WORKFLOW_OPTIONS } from './constants';
 
 export const NotificationPolicyForm = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
@@ -29,265 +29,293 @@ export const NotificationPolicyForm = () => {
 
   return (
     <>
-      <EuiPanel hasBorder>
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.basicInfo.title"
-              defaultMessage="Basic information"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.notificationPolicy.form.basicInfo.description"
-            defaultMessage="Define the name and description for this policy"
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <Controller
-          name="name"
-          control={control}
-          rules={{
-            required: i18n.translate('xpack.alertingV2.notificationPolicy.form.name.required', {
-              defaultMessage: 'Name is required.',
-            }),
-          }}
-          render={({ field: { ref, ...field }, fieldState: { error } }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.notificationPolicy.form.name', {
-                defaultMessage: 'Name',
-              })}
-              fullWidth
-              isInvalid={!!error}
-              error={error?.message}
-            >
-              <EuiFieldText
-                {...field}
-                inputRef={ref}
-                fullWidth
-                isInvalid={!!error}
-                placeholder={i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.name.placeholder',
-                  { defaultMessage: 'Add policy name' }
-                )}
+      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.form.basicInfo.title"
+                defaultMessage="Basic information"
               />
-            </EuiFormRow>
-          )}
-        />
-        <Controller
-          name="description"
-          control={control}
-          rules={{
-            required: i18n.translate(
-              'xpack.alertingV2.notificationPolicy.form.description.required',
-              { defaultMessage: 'Description is required.' }
-            ),
-          }}
-          render={({ field: { ref, ...field }, fieldState: { error } }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.notificationPolicy.form.description', {
-                defaultMessage: 'Description',
-              })}
-              fullWidth
-              isInvalid={!!error}
-              error={error?.message}
-            >
-              <EuiTextArea
-                {...field}
-                inputRef={ref}
-                fullWidth
-                isInvalid={!!error}
-                placeholder={i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.description.placeholder',
-                  { defaultMessage: 'Add policy description' }
-                )}
-                rows={3}
-              />
-            </EuiFormRow>
-          )}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      <EuiPanel hasBorder>
-        <EuiTitle size="xs">
-          <h3>
+            </h3>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.matchConditions.title"
-              defaultMessage="Match conditions"
+              id="xpack.alertingV2.notificationPolicy.form.basicInfo.description"
+              defaultMessage="Define the name and description for this policy"
             />
-          </h3>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.notificationPolicy.form.matchConditions.description"
-            defaultMessage="Define conditions that must be met for this policy to trigger"
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <Controller
-          name="matcher"
-          control={control}
-          render={({ field: { ref, ...field } }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.notificationPolicy.form.matcher', {
-                defaultMessage: 'Matcher',
-              })}
-              fullWidth
-            >
-              <EuiFieldText
-                {...field}
-                inputRef={ref}
-                fullWidth
-                placeholder={i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.matcher.placeholder',
-                  { defaultMessage: 'e.g. data.severity : "critical" and data.env : "prod"' }
-                )}
-              />
-            </EuiFormRow>
-          )}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      <EuiPanel hasBorder>
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.grouping.title"
-              defaultMessage="Grouping configuration"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.notificationPolicy.form.grouping.description"
-            defaultMessage="Group notifications by specific fields to reduce alert noise"
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <Controller
-          name="groupBy"
-          control={control}
-          render={({ field }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.notificationPolicy.form.groupBy', {
-                defaultMessage: 'Fields',
-              })}
-              fullWidth
-            >
-              <EuiComboBox
-                fullWidth
-                placeholder={i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
-                  { defaultMessage: 'Add field name (ex: host.name, service)' }
-                )}
-                selectedOptions={field.value.map((g: string) => ({ label: g }))}
-                onCreateOption={(value) => {
-                  field.onChange([...field.value, value]);
-                }}
-                onChange={(options) => {
-                  field.onChange(options.map((o) => o.label));
-                }}
-                noSuggestions
-              />
-            </EuiFormRow>
-          )}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      <EuiPanel hasBorder>
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.frequency.title"
-              defaultMessage="Frequency and timing configuration"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.alertingV2.notificationPolicy.form.frequency.description"
-            defaultMessage="Control when and how often notifications are sent"
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <Controller
-          name="frequency.type"
-          control={control}
-          render={({ field: { ref, ...field } }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.notificationPolicy.form.frequencyType', {
-                defaultMessage: 'Frequency',
-              })}
-              fullWidth
-            >
-              <EuiSelect {...field} inputRef={ref} fullWidth options={FREQUENCY_OPTIONS} />
-            </EuiFormRow>
-          )}
-        />
-        {frequency.type === 'throttle' && (
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <Controller
-            name="frequency.interval"
+            name="name"
             control={control}
             rules={{
-              required: i18n.translate(
-                'xpack.alertingV2.notificationPolicy.form.throttleInterval.required',
-                { defaultMessage: 'Throttle interval is required.' }
-              ),
+              required: i18n.translate('xpack.alertingV2.notificationPolicy.form.name.required', {
+                defaultMessage: 'Name is required.',
+              }),
             }}
             render={({ field: { ref, ...field }, fieldState: { error } }) => (
               <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.throttleInterval', {
-                  defaultMessage: 'Throttle interval',
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.name', {
+                  defaultMessage: 'Name',
                 })}
-                helpText={i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.throttleInterval.help',
-                  { defaultMessage: 'e.g. 1h, 5m, 30s' }
-                )}
                 fullWidth
                 isInvalid={!!error}
                 error={error?.message}
               >
-                <EuiFieldText {...field} inputRef={ref} fullWidth isInvalid={!!error} />
+                <EuiFieldText
+                  {...field}
+                  inputRef={ref}
+                  fullWidth
+                  isInvalid={!!error}
+                  placeholder={i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.name.placeholder',
+                    { defaultMessage: 'Add policy name' }
+                  )}
+                />
               </EuiFormRow>
             )}
           />
-        )}
-      </EuiPanel>
+          <Controller
+            name="description"
+            control={control}
+            rules={{
+              required: i18n.translate(
+                'xpack.alertingV2.notificationPolicy.form.description.required',
+                { defaultMessage: 'Description is required.' }
+              ),
+            }}
+            render={({ field: { ref, ...field }, fieldState: { error } }) => (
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.description', {
+                  defaultMessage: 'Description',
+                })}
+                fullWidth
+                isInvalid={!!error}
+                error={error?.message}
+              >
+                <EuiTextArea
+                  {...field}
+                  inputRef={ref}
+                  fullWidth
+                  isInvalid={!!error}
+                  placeholder={i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.description.placeholder',
+                    { defaultMessage: 'Add policy description' }
+                  )}
+                  rows={3}
+                />
+              </EuiFormRow>
+            )}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer size="m" />
 
-      <EuiPanel hasBorder>
-        <EuiTitle size="xs">
-          <h3>
+      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.form.matchConditions.title"
+                defaultMessage="Match conditions"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.destination.title"
-              defaultMessage="Destination"
+              id="xpack.alertingV2.notificationPolicy.form.matchConditions.description"
+              defaultMessage="Define conditions that must be met for this policy to trigger"
             />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <Controller
-          name="workflowId"
-          control={control}
-          render={({ field: { ref, ...field } }) => (
-            <EuiFormRow
-              label={i18n.translate('xpack.alertingV2.notificationPolicy.form.workflow', {
-                defaultMessage: 'Workflow',
-              })}
-              fullWidth
-            >
-              <EuiSelect {...field} inputRef={ref} fullWidth options={WORKFLOW_OPTIONS} />
-            </EuiFormRow>
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
+          <Controller
+            name="matcher"
+            control={control}
+            render={({ field: { ref, ...field } }) => (
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.matcher', {
+                  defaultMessage: 'Matcher',
+                })}
+                fullWidth
+              >
+                <EuiFieldText
+                  {...field}
+                  inputRef={ref}
+                  fullWidth
+                  placeholder={i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.matcher.placeholder',
+                    { defaultMessage: 'e.g. data.severity : "critical" and data.env : "prod"' }
+                  )}
+                />
+              </EuiFormRow>
+            )}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
+      <EuiSpacer size="m" />
+
+      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.form.grouping.title"
+                defaultMessage="Grouping configuration"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.alertingV2.notificationPolicy.form.grouping.description"
+              defaultMessage="Group notifications by specific fields to reduce alert noise"
+            />
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
+          <Controller
+            name="groupBy"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.groupBy', {
+                  defaultMessage: 'Fields',
+                })}
+                fullWidth
+              >
+                <EuiComboBox
+                  fullWidth
+                  placeholder={i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
+                    { defaultMessage: 'Add field name (ex: host.name, service)' }
+                  )}
+                  selectedOptions={field.value.map((g: string) => ({ label: g }))}
+                  onCreateOption={(value) => {
+                    field.onChange([...field.value, value]);
+                  }}
+                  onChange={(options) => {
+                    field.onChange(options.map((o) => o.label));
+                  }}
+                  noSuggestions
+                />
+              </EuiFormRow>
+            )}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
+      <EuiSpacer size="m" />
+
+      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.form.frequency.title"
+                defaultMessage="Frequency and timing configuration"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.alertingV2.notificationPolicy.form.frequency.description"
+              defaultMessage="Control when and how often notifications are sent"
+            />
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
+          <Controller
+            name="frequency.type"
+            control={control}
+            render={({ field: { ref, ...field } }) => (
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.frequencyType', {
+                  defaultMessage: 'Frequency',
+                })}
+                fullWidth
+              >
+                <EuiSelect {...field} inputRef={ref} fullWidth options={FREQUENCY_OPTIONS} />
+              </EuiFormRow>
+            )}
+          />
+          {frequency.type === 'throttle' && (
+            <Controller
+              name="frequency.interval"
+              control={control}
+              rules={{
+                pattern: {
+                  value: THROTTLE_INTERVAL_PATTERN,
+                  message: i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.throttleInterval.pattern',
+                    {
+                      defaultMessage:
+                        'Invalid throttle interval. Must be in the format of 1h, 5m, 30s',
+                    }
+                  ),
+                },
+                required: i18n.translate(
+                  'xpack.alertingV2.notificationPolicy.form.throttleInterval.required',
+                  { defaultMessage: 'Throttle interval is required.' }
+                ),
+              }}
+              render={({ field: { ref, ...field }, fieldState: { error } }) => (
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.throttleInterval',
+                    {
+                      defaultMessage: 'Throttle interval',
+                    }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.alertingV2.notificationPolicy.form.throttleInterval.help',
+                    { defaultMessage: 'e.g. 1h, 5m, 30s' }
+                  )}
+                  fullWidth
+                  isInvalid={!!error}
+                  error={error?.message}
+                >
+                  <EuiFieldText {...field} inputRef={ref} fullWidth isInvalid={!!error} />
+                </EuiFormRow>
+              )}
+            />
           )}
-        />
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
+      <EuiSpacer size="m" />
+
+      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.form.destination.title"
+                defaultMessage="Destination"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
+          <Controller
+            name="workflowId"
+            control={control}
+            render={({ field: { ref, ...field } }) => (
+              <EuiFormRow
+                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.workflow', {
+                  defaultMessage: 'Workflow',
+                })}
+                fullWidth
+              >
+                <EuiSelect {...field} inputRef={ref} fullWidth options={WORKFLOW_OPTIONS} />
+              </EuiFormRow>
+            )}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
     </>
   );
 };

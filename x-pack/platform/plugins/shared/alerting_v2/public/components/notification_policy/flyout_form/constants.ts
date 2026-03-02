@@ -27,3 +27,5 @@ export const FREQUENCY_OPTIONS = [
     }),
   },
 ];
+
+export const THROTTLE_INTERVAL_PATTERN = /^[1-9][0-9]*[dhms]$/;
