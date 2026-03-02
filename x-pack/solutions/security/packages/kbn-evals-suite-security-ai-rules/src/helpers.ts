@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser } from '@kbn/esql-language';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
 /**
@@ -25,51 +26,16 @@ export function extractMitreTechniques(rule: Partial<ReferenceRule>): Set<string
 }
 
 /**
- * ES|QL syntax validation.
- * Checks that the query starts with a valid ES|QL source command and has balanced delimiters.
+ * ES|QL syntax validation using the official @kbn/esql-language parser.
  */
 export function validateEsqlSyntax(query: string): { valid: boolean; error?: string } {
   if (!query || query.trim().length === 0) {
     return { valid: false, error: 'Query is empty' };
   }
 
-  const trimmed = query.trim().toUpperCase();
-
-  // ES|QL queries must start with a source command
-  const validSourceCommands = ['FROM ', 'ROW ', 'SHOW ', 'METRICS '];
-  const hasValidSourceCommand = validSourceCommands.some((cmd) => trimmed.startsWith(cmd));
-
-  if (!hasValidSourceCommand) {
-    return {
-      valid: false,
-      error: `ES|QL query must start with a source command: ${validSourceCommands
-        .map((c) => c.trim())
-        .join(', ')}`,
-    };
-  }
-
-  // Check for balanced parentheses
-  let parenCount = 0;
-  for (const char of query) {
-    if (char === '(') parenCount++;
-    if (char === ')') parenCount--;
-    if (parenCount < 0) {
-      return { valid: false, error: 'Unbalanced parentheses: too many closing parens' };
-    }
-  }
-  if (parenCount !== 0) {
-    return { valid: false, error: 'Unbalanced parentheses: unclosed parens' };
-  }
-
-  // Check for balanced quotes
-  const singleQuoteCount = (query.match(/'/g) || []).length;
-  const doubleQuoteCount = (query.match(/"/g) || []).length;
-
-  if (singleQuoteCount % 2 !== 0) {
-    return { valid: false, error: 'Unbalanced single quotes' };
-  }
-  if (doubleQuoteCount % 2 !== 0) {
-    return { valid: false, error: 'Unbalanced double quotes' };
+  const errors = Parser.parseErrors(query);
+  if (errors.length > 0) {
+    return { valid: false, error: errors[0].message };
   }
 
   return { valid: true };
