@@ -165,7 +165,7 @@ export const PrivateLocationsTable = ({
           isLoading={loading}
           disabled={!canSave || !canManagePrivateLocations}
           onClick={openFlyout}
-          iconType="plusInCircle"
+          iconType="plusCircle"
         >
           {ADD_LABEL}
         </EuiButton>
