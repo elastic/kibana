@@ -254,6 +254,17 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // API definition
   // --------------------------------------------------------------------------------------
+  /** Get full serialized state (including by-value / library state e.g. colors) for copy/transfer. */
+  function getSerializedStateForPanel(childApi: DefaultEmbeddableApi): object {
+    if (apiHasLibraryTransforms(childApi)) {
+      return childApi.getSerializedStateByValue();
+    }
+    if (apiHasSerializableState(childApi)) {
+      return childApi.serializeState();
+    }
+    return {};
+  }
+
   function getDashboardPanelFromId(panelId: string) {
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
@@ -262,9 +273,21 @@ export function initializeLayoutManager(
     return {
       type: childLayout.type,
       grid: childLayout.grid,
-      serializedState: apiHasSerializableState(childApi) ? childApi.serializeState() : {},
+      serializedState: getSerializedStateForPanel(childApi),
     };
   }
+
+  const getDashboardPanelFromIdAsync = async (panelId: string) => {
+    const childLayout = layout$.value.panels[panelId];
+    if (!childLayout) throw new PanelNotFoundError();
+    const childApi = await getChildApi(panelId);
+    if (!childApi) throw new PanelNotFoundError();
+    return {
+      type: childLayout.type,
+      grid: childLayout.grid,
+      serializedState: getSerializedStateForPanel(childApi),
+    };
+  };
 
   async function getPanelTitles(): Promise<string[]> {
     const titles: string[] = [];
@@ -714,6 +737,7 @@ export function initializeLayoutManager(
       restorePanel,
       restoreLayout,
       getDashboardPanelFromId,
+      getDashboardPanelFromIdAsync,
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 

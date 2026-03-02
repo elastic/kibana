@@ -14,6 +14,7 @@ import {
   EuiPortal,
   EuiPopover,
 } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import {
   applySelectedPanelsLayout,
@@ -21,8 +22,12 @@ import {
 } from '../../dashboard_api/layout_manager/apply_selected_panels_layout';
 import {
   dashboardClonePanelActionStrings,
+  dashboardCopyToDashboardActionStrings,
   dashboardPanelContextMenuStrings,
 } from '../../dashboard_actions/_dashboard_actions_strings';
+import { CopyToDashboardModal } from '../../dashboard_actions/copy_to_dashboard_modal';
+import { coreServices } from '../../services/kibana_services';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 
 export interface PanelContextMenuContextValue {
   openContextMenu: (panelId: string, position: { x: number; y: number }) => void;
@@ -137,6 +142,39 @@ export const PanelContextMenu = ({
     [dashboardApi, effectivePanelIds, onClose]
   );
 
+  const handleCopyToDashboard = useCallback(() => {
+    if (!panelId || effectivePanelIds.size === 0) {
+      onClose();
+      return;
+    }
+    dashboardApi.setSelectedPanelIds(effectivePanelIds);
+    onClose();
+    const layout = dashboardApi.layout$.getValue();
+    const panelLayout = layout.panels[panelId];
+    const panelType = panelLayout?.type ?? 'unknown';
+    const api = {
+      type: panelType,
+      uuid: panelId,
+      parentApi: dashboardApi,
+    };
+    const session = coreServices.overlays.openModal(
+      toMountPoint(
+        <CopyToDashboardModal closeModal={() => session.close()} api={api} />,
+        coreServices
+      ),
+      {
+        maxWidth: 400,
+        'data-test-subj': 'copyToDashboardPanel',
+      }
+    );
+  }, [dashboardApi, panelId, effectivePanelIds, onClose]);
+
+  const canCopyToDashboard = useMemo(() => {
+    const { createNew: canCreateNew, showWriteControls: canEditExisting } =
+      getDashboardCapabilities();
+    return Boolean(canCreateNew || canEditExisting);
+  }, []);
+
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const canGroup = effectivePanelIds.size >= 2;
     const layoutSubPanelId = 1;
@@ -151,6 +189,16 @@ export const PanelContextMenu = ({
             onClick: handleDuplicate,
             'data-test-subj': 'dashboardPanelContextMenuDuplicate',
           },
+          ...(canCopyToDashboard
+            ? [
+                {
+                  name: dashboardCopyToDashboardActionStrings.getDisplayName(),
+                  icon: 'exit' as const,
+                  onClick: handleCopyToDashboard,
+                  'data-test-subj': 'dashboardPanelContextMenuCopyToDashboard',
+                },
+              ]
+            : []),
           {
             name: dashboardPanelContextMenuStrings.getRemoveLabel(),
             icon: 'trash',
@@ -199,10 +247,12 @@ export const PanelContextMenu = ({
     ];
   }, [
     handleDuplicate,
+    handleCopyToDashboard,
     handleRemove,
     handleGroup,
     handleLayoutSubAction,
     effectivePanelIds.size,
+    canCopyToDashboard,
   ]);
 
   if (!position || !panelId) return null;

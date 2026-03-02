@@ -170,6 +170,11 @@ export type DashboardApi = CanExpandPanels &
       grid: GridData;
       serializedState: object;
     };
+    getDashboardPanelFromIdAsync?: (id: string) => Promise<{
+      type: string;
+      grid: GridData;
+      serializedState: object;
+    }>;
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
