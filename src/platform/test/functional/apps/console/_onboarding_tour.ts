@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const retry = getService('retry');
 
   describe('console onboarding tour', function describeIndexTests() {
@@ -31,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const isTourStepOpen = async (tourStepDataSubj: string) => {
-      const exists = await testSubjects.exists(tourStepDataSubj);
+      const exists = await find.existsByCssSelector(`[data-test-subj="${tourStepDataSubj}"]`);
       if (!exists) return false;
 
       const classAttribute = await testSubjects.getAttribute(tourStepDataSubj, 'class');
