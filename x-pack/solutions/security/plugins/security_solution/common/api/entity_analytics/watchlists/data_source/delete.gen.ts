@@ -16,9 +16,13 @@
 
 import { z } from '@kbn/zod';
 
-export type DeleteEntitySourceRequestParams = z.infer<typeof DeleteEntitySourceRequestParams>;
-export const DeleteEntitySourceRequestParams = z.object({
+export type DeleteWatchlistEntitySourceRequestParams = z.infer<
+  typeof DeleteWatchlistEntitySourceRequestParams
+>;
+export const DeleteWatchlistEntitySourceRequestParams = z.object({
   watchlist_id: z.string(),
   id: z.string(),
 });
-export type DeleteEntitySourceRequestParamsInput = z.input<typeof DeleteEntitySourceRequestParams>;
+export type DeleteWatchlistEntitySourceRequestParamsInput = z.input<
+  typeof DeleteWatchlistEntitySourceRequestParams
+>;

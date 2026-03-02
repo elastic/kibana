@@ -7,7 +7,7 @@ info:
 paths:
   /api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}:
     put:
-      operationId: UpdateEntitySource
+      operationId: UpdateWatchlistEntitySource
       x-codegen-enabled: true
       summary: Update an entity source configuration
       parameters:

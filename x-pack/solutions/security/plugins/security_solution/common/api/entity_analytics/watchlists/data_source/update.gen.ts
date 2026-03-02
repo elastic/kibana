@@ -18,16 +18,26 @@ import { z } from '@kbn/zod';
 
 import { UpdateEntitySourceNoadditionalProps, MonitoringEntitySource } from './common.gen';
 
-export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;
-export const UpdateEntitySourceRequestParams = z.object({
+export type UpdateWatchlistEntitySourceRequestParams = z.infer<
+  typeof UpdateWatchlistEntitySourceRequestParams
+>;
+export const UpdateWatchlistEntitySourceRequestParams = z.object({
   watchlist_id: z.string(),
   id: z.string(),
 });
-export type UpdateEntitySourceRequestParamsInput = z.input<typeof UpdateEntitySourceRequestParams>;
+export type UpdateWatchlistEntitySourceRequestParamsInput = z.input<
+  typeof UpdateWatchlistEntitySourceRequestParams
+>;
 
-export type UpdateEntitySourceRequestBody = z.infer<typeof UpdateEntitySourceRequestBody>;
-export const UpdateEntitySourceRequestBody = UpdateEntitySourceNoadditionalProps;
-export type UpdateEntitySourceRequestBodyInput = z.input<typeof UpdateEntitySourceRequestBody>;
+export type UpdateWatchlistEntitySourceRequestBody = z.infer<
+  typeof UpdateWatchlistEntitySourceRequestBody
+>;
+export const UpdateWatchlistEntitySourceRequestBody = UpdateEntitySourceNoadditionalProps;
+export type UpdateWatchlistEntitySourceRequestBodyInput = z.input<
+  typeof UpdateWatchlistEntitySourceRequestBody
+>;
 
-export type UpdateEntitySourceResponse = z.infer<typeof UpdateEntitySourceResponse>;
-export const UpdateEntitySourceResponse = MonitoringEntitySource;
+export type UpdateWatchlistEntitySourceResponse = z.infer<
+  typeof UpdateWatchlistEntitySourceResponse
+>;
+export const UpdateWatchlistEntitySourceResponse = MonitoringEntitySource;

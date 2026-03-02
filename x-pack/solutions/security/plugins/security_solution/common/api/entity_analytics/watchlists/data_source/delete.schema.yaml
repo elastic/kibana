@@ -7,7 +7,7 @@ info:
 paths:
   /api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}:
     delete:
-      operationId: DeleteEntitySource
+      operationId: DeleteWatchlistEntitySource
       x-codegen-enabled: true
       summary: Delete an entity source configuration
       parameters:

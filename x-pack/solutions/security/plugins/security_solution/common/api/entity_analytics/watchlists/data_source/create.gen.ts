@@ -18,14 +18,20 @@ import { z } from '@kbn/zod';
 
 import { EntitySourceType, Matcher, Filter, MonitoringEntitySource } from './common.gen';
 
-export type CreateEntitySourceRequestParams = z.infer<typeof CreateEntitySourceRequestParams>;
-export const CreateEntitySourceRequestParams = z.object({
+export type CreateWatchlistEntitySourceRequestParams = z.infer<
+  typeof CreateWatchlistEntitySourceRequestParams
+>;
+export const CreateWatchlistEntitySourceRequestParams = z.object({
   watchlist_id: z.string(),
 });
-export type CreateEntitySourceRequestParamsInput = z.input<typeof CreateEntitySourceRequestParams>;
+export type CreateWatchlistEntitySourceRequestParamsInput = z.input<
+  typeof CreateWatchlistEntitySourceRequestParams
+>;
 
-export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
-export const CreateEntitySourceRequestBody = z
+export type CreateWatchlistEntitySourceRequestBody = z.infer<
+  typeof CreateWatchlistEntitySourceRequestBody
+>;
+export const CreateWatchlistEntitySourceRequestBody = z
   .object({
     type: EntitySourceType,
     name: z.string(),
@@ -35,7 +41,11 @@ export const CreateEntitySourceRequestBody = z
     filter: Filter.optional(),
   })
   .strict();
-export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
+export type CreateWatchlistEntitySourceRequestBodyInput = z.input<
+  typeof CreateWatchlistEntitySourceRequestBody
+>;
 
-export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
-export const CreateEntitySourceResponse = MonitoringEntitySource;
+export type CreateWatchlistEntitySourceResponse = z.infer<
+  typeof CreateWatchlistEntitySourceResponse
+>;
+export const CreateWatchlistEntitySourceResponse = MonitoringEntitySource;

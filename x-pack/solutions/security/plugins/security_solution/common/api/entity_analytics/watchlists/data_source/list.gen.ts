@@ -19,8 +19,10 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { MonitoringEntitySource } from './common.gen';
 
-export type ListEntitySourcesRequestQuery = z.infer<typeof ListEntitySourcesRequestQuery>;
-export const ListEntitySourcesRequestQuery = z.object({
+export type ListWatchlistEntitySourcesRequestQuery = z.infer<
+  typeof ListWatchlistEntitySourcesRequestQuery
+>;
+export const ListWatchlistEntitySourcesRequestQuery = z.object({
   type: z.string().optional(),
   managed: BooleanFromString.optional(),
   name: z.string().optional(),
@@ -29,16 +31,22 @@ export const ListEntitySourcesRequestQuery = z.object({
   sort_field: z.string().optional(),
   sort_order: z.enum(['asc', 'desc']).optional(),
 });
-export type ListEntitySourcesRequestQueryInput = z.input<typeof ListEntitySourcesRequestQuery>;
+export type ListWatchlistEntitySourcesRequestQueryInput = z.input<
+  typeof ListWatchlistEntitySourcesRequestQuery
+>;
 
-export type ListEntitySourcesRequestParams = z.infer<typeof ListEntitySourcesRequestParams>;
-export const ListEntitySourcesRequestParams = z.object({
+export type ListWatchlistEntitySourcesRequestParams = z.infer<
+  typeof ListWatchlistEntitySourcesRequestParams
+>;
+export const ListWatchlistEntitySourcesRequestParams = z.object({
   watchlist_id: z.string(),
 });
-export type ListEntitySourcesRequestParamsInput = z.input<typeof ListEntitySourcesRequestParams>;
+export type ListWatchlistEntitySourcesRequestParamsInput = z.input<
+  typeof ListWatchlistEntitySourcesRequestParams
+>;
 
-export type ListEntitySourcesResponse = z.infer<typeof ListEntitySourcesResponse>;
-export const ListEntitySourcesResponse = z.object({
+export type ListWatchlistEntitySourcesResponse = z.infer<typeof ListWatchlistEntitySourcesResponse>;
+export const ListWatchlistEntitySourcesResponse = z.object({
   sources: z.array(MonitoringEntitySource),
   page: z.number().int().min(1),
   per_page: z.number().int().min(1).max(10000),

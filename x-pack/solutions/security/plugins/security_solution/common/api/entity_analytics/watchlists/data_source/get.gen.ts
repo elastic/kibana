@@ -18,12 +18,16 @@ import { z } from '@kbn/zod';
 
 import { MonitoringEntitySource } from './common.gen';
 
-export type GetEntitySourceRequestParams = z.infer<typeof GetEntitySourceRequestParams>;
-export const GetEntitySourceRequestParams = z.object({
+export type GetWatchlistEntitySourceRequestParams = z.infer<
+  typeof GetWatchlistEntitySourceRequestParams
+>;
+export const GetWatchlistEntitySourceRequestParams = z.object({
   watchlist_id: z.string(),
   id: z.string(),
 });
-export type GetEntitySourceRequestParamsInput = z.input<typeof GetEntitySourceRequestParams>;
+export type GetWatchlistEntitySourceRequestParamsInput = z.input<
+  typeof GetWatchlistEntitySourceRequestParams
+>;
 
-export type GetEntitySourceResponse = z.infer<typeof GetEntitySourceResponse>;
-export const GetEntitySourceResponse = MonitoringEntitySource;
+export type GetWatchlistEntitySourceResponse = z.infer<typeof GetWatchlistEntitySourceResponse>;
+export const GetWatchlistEntitySourceResponse = MonitoringEntitySource;

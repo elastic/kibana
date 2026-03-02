@@ -7,7 +7,7 @@ info:
 paths:
   /api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}:
     get:
-      operationId: GetEntitySource
+      operationId: GetWatchlistEntitySource
       x-codegen-enabled: true
       summary: Get an entity source configuration by ID
       parameters:

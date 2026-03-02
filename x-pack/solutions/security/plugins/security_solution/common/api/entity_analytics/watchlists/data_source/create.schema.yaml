@@ -7,7 +7,7 @@ info:
 paths:
   /api/entity_analytics/watchlists/{watchlist_id}/entity_source:
     post:
-      operationId: CreateEntitySource
+      operationId: CreateWatchlistEntitySource
       x-codegen-enabled: true
       summary: Create a new entity source configuration
       parameters:
