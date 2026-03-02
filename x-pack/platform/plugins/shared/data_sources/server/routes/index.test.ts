@@ -888,7 +888,10 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
+        call[0].path?.includes('{id}')
+      );
+      const routeHandler = deleteCall?.[1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -946,7 +949,15 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
+        call[0].path?.includes('{id}')
+      );
+      const routeHandler = deleteCall?.[1];
+
+      if (!routeHandler) {
+        throw new Error('Route handler not found for DELETE /api/data_sources/{id}');
+      }
+
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -973,7 +984,10 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
+        call[0].path?.includes('{id}')
+      );
+      const routeHandler = deleteCall?.[1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'nonexistent' },
       });
@@ -991,7 +1005,7 @@ describe('registerRoutes', () => {
     });
   });
 
-  describe('DELETE /api/data_sources/_bulk_delete', () => {
+  describe('POST /api/data_sources/_bulk_delete', () => {
     let routeHandler: any;
 
     const createBulkMockDataSource = (id: string) => ({
@@ -1178,7 +1192,10 @@ describe('DELETE /api/data_sources', () => {
 
     registerRoutes(dependencies);
 
-    routeHandler = mockRouter.delete.mock.calls[0][1];
+    const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
+      (call) => call[0].path === '/api/data_sources'
+    );
+    routeHandler = deleteCall?.[1];
   });
 
   describe('success', () => {

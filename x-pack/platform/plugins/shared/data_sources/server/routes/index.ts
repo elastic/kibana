@@ -507,7 +507,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   );
 
   // Bulk delete selected data sources synchronously (inline).
-  // This is intended for time being until we have a design update for asynchronous bulk deletion.
+  // This is intended for the time being until we have a design update for asynchronous bulk deletion.
   router.post(
     {
       path: BULK_DELETE_API_ROUTE,
@@ -553,14 +553,14 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
         const results: BulkDeleteDataSourceResult[] = deleteResults.map((result, index) => {
           if (result.status !== 'fulfilled') {
-            logger.error(
-              `Failed to delete data source ${ids[index]}: ${(result.reason as Error)?.message}`
-            );
+            const errorMessage =
+              result.reason instanceof Error ? result.reason.message : String(result.reason);
+            logger.error(`Failed to delete data source ${ids[index]}: ${errorMessage}`);
             return {
               id: ids[index],
               success: false,
               fullyDeleted: false,
-              error: (result.reason as Error)?.message ?? 'Unknown error',
+              error: errorMessage,
             };
           }
 
