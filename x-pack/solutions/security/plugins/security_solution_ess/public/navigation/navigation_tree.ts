@@ -74,7 +74,7 @@ export const createNavigationTree = (
     },
     {
       id: SecurityPageName.assetInventory,
-      icon: 'editorChecklist',
+      icon: 'listCheck',
       link: securityLink(SecurityPageName.assetInventory),
     },
     defaultNavigationTree.assets(services),
@@ -85,7 +85,7 @@ export const createNavigationTree = (
       id: 'launchpad',
       title: i18nStrings.launchPad.title,
       renderAs: 'panelOpener',
-      icon: 'launch',
+      icon: 'rocket',
       children: [
         {
           children: [
@@ -122,7 +122,7 @@ export const createNavigationTree = (
     {
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     {
       id: DATA_MANAGEMENT_NAV_ID,

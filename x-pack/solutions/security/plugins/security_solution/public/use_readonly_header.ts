@@ -25,7 +25,7 @@ export function useReadonlyHeader(tooltip: string) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip,
-        iconType: 'glasses',
+        iconType: 'readOnly',
       });
     }
 
