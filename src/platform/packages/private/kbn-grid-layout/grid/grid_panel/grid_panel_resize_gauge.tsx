@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { combineLatest, filter, map, pairwise, skip, startWith } from 'rxjs';
 import { useGridPanelState } from './use_panel_grid_data';
@@ -64,22 +64,33 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   }, [panel$, gridLayoutStateManager, euiTheme.levels.modal]);
 
   return isResizing ? (
-    <div css={styles}>
-      <EuiText size="s">
-        {width}x{height}
-      </EuiText>
-    </div>
+    <EuiPanel css={outerStyles} paddingSize="none">
+      <div css={innerStyles}>
+        <EuiText size="s">
+          {width}x{height}
+        </EuiText>
+      </div>
+    </EuiPanel>
   ) : null;
 });
 
-const styles = ({ euiTheme }: UseEuiTheme) =>
+const outerStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
-    right: '0',
-    top: '0',
-    margin: euiTheme.size.xs,
-    padding: euiTheme.size.s,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    left: euiTheme.size.m,
+    top: `-${euiTheme.size.l}`,
+    padding: euiTheme.size.xs,
     position: 'absolute',
+    zIndex: euiTheme.levels.menu,
+  });
+
+const innerStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    padding: euiTheme.size.s,
+    height: euiTheme.size.l,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
   });
 
 ResizeGauge.displayName = 'KbnGridLayoutResizeGauge';
