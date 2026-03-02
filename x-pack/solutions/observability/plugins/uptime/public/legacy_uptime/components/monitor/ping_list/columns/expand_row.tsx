@@ -55,7 +55,7 @@ export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) 
             })
           : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
       }
-      iconType={expandedRows[item.docId] ? 'arrowUp' : 'arrowDown'}
+      iconType={expandedRows[item.docId] ? 'chevronSingleUp' : 'chevronSingleDown'}
     />
   );
 };

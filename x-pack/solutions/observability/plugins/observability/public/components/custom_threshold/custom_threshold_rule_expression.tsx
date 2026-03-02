@@ -591,7 +591,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
       <EuiSpacer size="s" />
       <SearchBar
         appName="Custom threshold rule"
-        iconType="search"
+        iconType="magnify"
         indexPatterns={dataView ? [dataView] : undefined}
         allowSavingQueries
         showQueryInput
@@ -680,7 +680,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage

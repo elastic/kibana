@@ -141,7 +141,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
           color="primary"
           aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
           data-test-subj="xpack.synthetics.alertsPopover.toggleButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
         >
