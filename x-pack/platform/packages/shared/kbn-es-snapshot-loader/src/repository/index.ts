@@ -6,5 +6,6 @@
  */
 
 export type * from './types';
+export * from './fs_repository';
 export * from './gcs_repository';
 export * from './url_repository';
