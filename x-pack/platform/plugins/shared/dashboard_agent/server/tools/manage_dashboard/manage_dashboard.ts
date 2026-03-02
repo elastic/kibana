@@ -28,7 +28,6 @@ import {
   resolvePanelsFromAttachments,
   type VisualizationFailure,
 } from './utils';
-import { buildVisualizationsFromQueriesWithLLM } from './visualization_generation';
 import { dashboardOperationSchema, executeDashboardOperations } from './operations';
 
 const manageDashboardSchema = z.object({
@@ -58,15 +57,14 @@ This tool executes ordered dashboard operations against a dashboard attachment i
 Use operations[] to:
 1. set metadata
 2. upsert markdown
-3. add generated panels in bulk
-4. add panels from attachments
-5. remove panels
+3. add panels from attachments
+4. remove panels
 
 The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while operations run, and always returns the latest dashboard attachment state.`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
-      { logger, attachments, esClient, modelProvider, events }
+      { logger, attachments, events }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
@@ -99,15 +97,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
           operations,
           logger,
-          generatePanels: (items, onPanelCreated) =>
-            buildVisualizationsFromQueriesWithLLM({
-              queries: items,
-              modelProvider,
-              esClient,
-              events,
-              onPanelCreated,
-              logger,
-            }),
           resolvePanelsFromAttachments: (attachmentIds) =>
             resolvePanelsFromAttachments({
               attachmentIds,
