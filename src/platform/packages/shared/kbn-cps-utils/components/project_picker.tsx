@@ -25,9 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { ProjectsData } from '../types';
+import type { UseFetchProjectsResult } from './use_fetch_projects';
 import { ProjectPickerContent } from './project_picker_content';
-import { useFetchProjects } from './use_fetch_projects';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
 import { CPSIconDisabled } from './cps_icon';
@@ -35,7 +34,7 @@ import { CPSIconDisabled } from './cps_icon';
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  fetchProjects: (routing?: ProjectRouting) => Promise<ProjectsData | null>;
+  projects: UseFetchProjectsResult;
   totalProjectCount: number;
   isReadonly?: boolean;
   settingsComponent?: React.ReactNode;
@@ -44,7 +43,7 @@ export interface ProjectPickerProps {
 export const ProjectPicker = ({
   projectRouting,
   onProjectRoutingChange,
-  fetchProjects,
+  projects,
   totalProjectCount,
   isReadonly = false,
   settingsComponent,
@@ -53,10 +52,7 @@ export const ProjectPicker = ({
   const styles = useMemoCss(projectPickerStyles);
   const { isTourOpen, closeTour } = useProjectPickerTour();
 
-  const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
-    fetchProjects,
-    projectRouting
-  );
+  const { originProject, linkedProjects, isLoading, error } = projects;
 
   if (totalProjectCount <= 1 || (!isLoading && !originProject && !error)) {
     return null;
@@ -145,7 +141,7 @@ export const ProjectPicker = ({
         <ProjectPickerContent
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
-          projects={{ originProject, linkedProjects, isLoading, error }}
+          projects={projects}
           isReadonly={isReadonly}
         />
       </EuiPopover>

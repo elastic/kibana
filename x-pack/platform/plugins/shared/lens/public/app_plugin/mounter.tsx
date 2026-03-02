@@ -40,6 +40,7 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';
@@ -253,6 +254,8 @@ export async function mountApp(
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
+
+  lensServices.cps?.cpsManager?.registerAppAccess('lens', () => ProjectRoutingAccess.EDITABLE);
 
   const { datasourceMap, visualizationMap } = instance;
   const storeDeps = {
