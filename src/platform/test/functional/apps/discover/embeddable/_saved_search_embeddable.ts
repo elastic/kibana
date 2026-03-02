@@ -354,7 +354,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedTabs_tabsBar', { timeout: 1000 })).to.be(false);
-      await discover.saveAsSearch('Rendering Test: saved as search');
+      await discover.saveAsSearch('Rendering Test: saved as search by-value');
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
       await Promise.all([
