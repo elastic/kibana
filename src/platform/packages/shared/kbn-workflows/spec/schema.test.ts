@@ -200,7 +200,7 @@ describe('ConcurrencySettingsSchema', () => {
         maxQueueSize: 10,
       });
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data.strategy === 'queue') {
         expect(result.data.strategy).toBe('queue');
         expect(result.data.maxQueueSize).toBe(10);
       }
@@ -287,7 +287,7 @@ describe('ConcurrencySettingsSchema', () => {
         maxQueueSize: 5,
       });
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data.strategy === 'queue') {
         expect(result.data.maxQueueSize).toBe(5);
       }
     });

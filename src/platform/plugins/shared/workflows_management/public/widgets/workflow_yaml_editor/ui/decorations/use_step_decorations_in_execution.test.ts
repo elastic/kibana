@@ -116,6 +116,7 @@ const createExecution = (
   stepExecutions,
   duration: 60000,
   triggeredBy: 'manual',
+  createdAt: '2023-01-01T00:00:00Z',
   yaml: 'version: "1"\nname: test',
 });
 

@@ -81,6 +81,7 @@ describe('WorkflowExecutionPanel', () => {
     },
     stepExecutions: [],
     duration: 5000,
+    createdAt: '2024-01-01T10:00:00Z',
     yaml: 'version: "1"\nname: Test Workflow',
   };
 
