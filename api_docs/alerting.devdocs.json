@@ -2575,7 +2575,7 @@
         "label": "BulkOperationError",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-        "lineNumber": 168,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2588,7 +2588,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 169,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2604,7 +2604,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2620,7 +2620,7 @@
               "{ id: string; name: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

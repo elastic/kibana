@@ -24,6 +24,7 @@ export type ServerError = IHttpFetchError<ResponseErrorBody>;
 interface UseExchangeCodeInput {
   provider: EarsOAuthProvider;
   code: string;
+  pkceCodeVerifier: string;
 }
 
 export const useExchangeCode = (): UseMutationResult<
@@ -35,8 +36,8 @@ export const useExchangeCode = (): UseMutationResult<
 
   return useMutation<ExchangeCodeResponse, ServerError, UseExchangeCodeInput>({
     mutationKey: ['workplace_ai', 'ears', 'exchange_code'],
-    mutationFn: async ({ provider, code }: UseExchangeCodeInput) => {
-      const body: ExchangeCodeRequest = { code };
+    mutationFn: async ({ provider, code, pkceCodeVerifier }: UseExchangeCodeInput) => {
+      const body: ExchangeCodeRequest = { code, pkce_verifier: pkceCodeVerifier };
       return http.post<ExchangeCodeResponse>(`${EARS_API_PATH}/${provider}/oauth/token`, {
         body: JSON.stringify(body),
       });
