@@ -33,14 +33,6 @@ const toStatusCode = (err: unknown): number => {
   return directStatus ?? metaStatus ?? 500;
 };
 
-const validateFieldRules = (fieldRules: FieldRule[]): string | undefined => {
-  for (const rule of fieldRules) {
-    if (rule.anonymized && !rule.entityClass) {
-      return 'entityClass is required when anonymized is true';
-    }
-  }
-};
-
 const validateGlobalProfileRules = (fieldRules: FieldRule[]): string | undefined => {
   if (fieldRules.length > 0) {
     return 'Global anonymization profile cannot contain fieldRules';
@@ -88,10 +80,6 @@ export const registerProfileRoutes = (
             return response.badRequest({ body: { message: parseResult.error.message } });
           }
           const body = parseResult.data;
-          const validationError = validateFieldRules(body.rules.fieldRules);
-          if (validationError) {
-            return response.badRequest({ body: { message: validationError } });
-          }
           if (isGlobalProfileTarget(body.targetType, body.targetId)) {
             const globalProfileValidation = validateGlobalProfileRules(body.rules.fieldRules);
             if (globalProfileValidation) {
@@ -271,13 +259,6 @@ export const registerProfileRoutes = (
             return response.badRequest({ body: { message: parseResult.error.message } });
           }
           const body = parseResult.data;
-
-          if (body.rules?.fieldRules) {
-            const validationError = validateFieldRules(body.rules.fieldRules);
-            if (validationError) {
-              return response.badRequest({ body: { message: validationError } });
-            }
-          }
 
           const { namespace, repo, username } = await resolveRouteContext(context);
           const existing = await repo.get(namespace, request.params.id);

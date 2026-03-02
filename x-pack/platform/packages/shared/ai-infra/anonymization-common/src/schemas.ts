@@ -44,19 +44,24 @@ export const tokenSourceTypeSchema = z.enum(TOKEN_SOURCE_TYPES);
 const tokenSourceRefValueSchema = z.union([z.string(), z.number(), z.boolean()]);
 export const tokenSourceRefSchema = z.record(z.string(), tokenSourceRefValueSchema);
 
-export const fieldRuleSchema = z.object({
-  /** ECS or custom field name (e.g., `host.name`). */
-  field: z.string(),
-  /** Whether this field is permitted for use as context. */
-  allowed: z.boolean(),
-  /** Whether this field's value should be tokenized/masked when included. */
-  anonymized: z.boolean(),
-  /**
-   * Token prefix/class label (e.g., `HOST_NAME`, `USER_NAME`).
-   * Required when `anonymized` is true.
-   */
-  entityClass: anonymizationEntityClassSchema.optional(),
-});
+export const fieldRuleSchema = z
+  .object({
+    /** ECS or custom field name (e.g., `host.name`). */
+    field: z.string(),
+    /** Whether this field is permitted for use as context. */
+    allowed: z.boolean(),
+    /** Whether this field's value should be tokenized/masked when included. */
+    anonymized: z.boolean(),
+    /**
+     * Token prefix/class label (e.g., `HOST_NAME`, `USER_NAME`).
+     * Required when `anonymized` is true.
+     */
+    entityClass: anonymizationEntityClassSchema.optional(),
+  })
+  .refine((rule) => !rule.anonymized || Boolean(rule.entityClass), {
+    message: 'entityClass is required when anonymized is true',
+    path: ['entityClass'],
+  });
 
 export const regexRuleSchema = z.object({
   /** Unique rule identifier. */
