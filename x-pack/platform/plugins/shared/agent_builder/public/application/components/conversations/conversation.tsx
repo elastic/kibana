@@ -124,6 +124,10 @@ const ConversationContent: React.FC = () => {
     padding-bottom: ${euiTheme.size.base};
   `;
 
+  const inputWrapperStyles = css`
+    position: relative;
+  `;
+
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;
   }
@@ -153,18 +157,16 @@ const ConversationContent: React.FC = () => {
         </EuiFlexGroup>
         {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
-      {isOverridesPanelOpen && (
-        <EuiFlexItem
-          css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
-          grow={false}
-        >
-          <AgentOverridesPanel onClose={closeOverridesPanel} />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
+        css={[
+          conversationElementWidthStyles,
+          conversationElementPaddingStyles,
+          inputPaddingStyles,
+          inputWrapperStyles,
+        ]}
         grow={false}
       >
+        {isOverridesPanelOpen && <AgentOverridesPanel onClose={closeOverridesPanel} />}
         <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
       </EuiFlexItem>
     </EuiFlexGroup>
