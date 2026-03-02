@@ -69,6 +69,7 @@ export const NotificationPolicyForm = () => {
                   inputRef={ref}
                   fullWidth
                   isInvalid={!!error}
+                  data-test-subj="nameInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.name.placeholder',
                     { defaultMessage: 'Add policy name' }
@@ -100,6 +101,7 @@ export const NotificationPolicyForm = () => {
                   inputRef={ref}
                   fullWidth
                   isInvalid={!!error}
+                  data-test-subj="descriptionInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.description.placeholder',
                     { defaultMessage: 'Add policy description' }
@@ -146,6 +148,7 @@ export const NotificationPolicyForm = () => {
                   {...field}
                   inputRef={ref}
                   fullWidth
+                  data-test-subj="matcherInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.matcher.placeholder',
                     { defaultMessage: 'e.g. data.severity : "critical" and data.env : "prod"' }
@@ -189,6 +192,7 @@ export const NotificationPolicyForm = () => {
               >
                 <EuiComboBox
                   fullWidth
+                  data-test-subj="groupByInput"
                   placeholder={i18n.translate(
                     'xpack.alertingV2.notificationPolicy.form.groupBy.placeholder',
                     { defaultMessage: 'Add field name (ex: host.name, service)' }
@@ -238,7 +242,13 @@ export const NotificationPolicyForm = () => {
                 })}
                 fullWidth
               >
-                <EuiSelect {...field} inputRef={ref} fullWidth options={FREQUENCY_OPTIONS} />
+                <EuiSelect
+                  {...field}
+                  inputRef={ref}
+                  fullWidth
+                  options={FREQUENCY_OPTIONS}
+                  data-test-subj="frequencySelect"
+                />
               </EuiFormRow>
             )}
           />
@@ -278,7 +288,13 @@ export const NotificationPolicyForm = () => {
                   isInvalid={!!error}
                   error={error?.message}
                 >
-                  <EuiFieldText {...field} inputRef={ref} fullWidth isInvalid={!!error} />
+                  <EuiFieldText
+                    {...field}
+                    inputRef={ref}
+                    fullWidth
+                    isInvalid={!!error}
+                    data-test-subj="throttleIntervalInput"
+                  />
                 </EuiFormRow>
               )}
             />
@@ -307,6 +323,7 @@ export const NotificationPolicyForm = () => {
               <EuiComboBox
                 fullWidth
                 isInvalid={!!error}
+                data-test-subj="destinationsInput"
                 aria-label={i18n.translate(
                   'xpack.alertingV2.notificationPolicy.form.destination.ariaLabel',
                   { defaultMessage: 'Destination' }

@@ -107,7 +107,7 @@ export const NotificationPolicyFormFlyout = ({
     <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="m" ownFocus>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
-          <h2>
+          <h2 data-test-subj="title">
             {isEditMode ? (
               <FormattedMessage
                 id="xpack.alertingV2.notificationPolicy.flyout.editTitle"
@@ -130,7 +130,7 @@ export const NotificationPolicyFormFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+            <EuiButtonEmpty onClick={onClose} isLoading={isLoading} data-test-subj="cancelButton">
               <FormattedMessage
                 id="xpack.alertingV2.notificationPolicy.flyout.cancel"
                 defaultMessage="Cancel"
@@ -143,6 +143,7 @@ export const NotificationPolicyFormFlyout = ({
               onClick={methods.handleSubmit(onSubmitValid)}
               isLoading={isLoading}
               disabled={!methods.formState.isValid}
+              data-test-subj="submitButton"
             >
               {isEditMode ? (
                 <FormattedMessage
