@@ -29,7 +29,7 @@ describe('Dashboard Renderer', () => {
         overrides: {
           pinned_panels: [
             {
-              type: 'optionsListControl',
+              type: 'options_list_control',
             },
           ] as DashboardPinnedPanelsState,
         },

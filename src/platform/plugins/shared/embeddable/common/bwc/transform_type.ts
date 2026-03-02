@@ -13,5 +13,21 @@ export function transformType(type: string) {
     return 'markdown';
   }
 
+  if (type === 'timeSlider') {
+    return 'time_slider_control';
+  }
+
+  if (type === 'rangeSliderControl') {
+    return 'range_slider_control';
+  }
+
+  if (type === 'optionsListControl') {
+    return 'options_list_control';
+  }
+
+  if (type === 'esqlControl') {
+    return 'esql_control';
+  }
+
   return type;
 }
