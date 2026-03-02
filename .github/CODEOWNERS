@@ -1085,7 +1085,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
-x-pack/platform/plugins/shared/alerting_v2 @elastic/response-ops
+x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience
@@ -1880,7 +1880,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 
 
 # Alerting alerting_v2
-/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/response-ops
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/rna-project-team
 
 ### END Observability Plugins
 

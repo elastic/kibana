@@ -9,6 +9,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import type {
   AttachmentRequest,
+  AttachmentRequestV2,
   CaseResolveResponse,
   CasesFindResponse,
   CasesSimilarResponse,
@@ -93,7 +94,7 @@ export const convertAttachmentsToCamelCase = (attachments: Attachment[]): Attach
   return attachments.map((attachment) => convertAttachmentToCamelCase(attachment));
 };
 
-export const convertAttachmentToCamelCase = (attachment: AttachmentRequest): AttachmentUI => {
+export const convertAttachmentToCamelCase = (attachment: AttachmentRequestV2): AttachmentUI => {
   if (isCommentRequestTypeExternalReference(attachment)) {
     return convertAttachmentToCamelExceptProperty(attachment, 'externalReferenceMetadata');
   }
@@ -102,7 +103,7 @@ export const convertAttachmentToCamelCase = (attachment: AttachmentRequest): Att
     return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
   }
 
-  return convertToCamelCase<AttachmentRequest, AttachmentUI>(attachment);
+  return convertToCamelCase<AttachmentRequestV2, AttachmentUI>(attachment);
 };
 
 export const convertUserActionsToCamelCase = (userActions: UserActions) => {

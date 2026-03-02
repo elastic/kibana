@@ -6,8 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { hasState, type StateWith } from '../type_guards';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
+import { guardedMapStep } from '../stream_utils';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -19,31 +19,17 @@ export class ValidateRuleStep implements RuleExecutionStep {
 
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
-  private isStepReady(state: Readonly<RulePipelineState>): state is StateWith<'rule'> {
-    return hasState(state, ['rule']);
-  }
+  public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    return guardedMapStep(streamState, ['rule'], (state) => {
+      if (!state.rule.enabled) {
+        this.logger.debug({
+          message: `[${this.name}] Rule ${state.input.ruleId} is disabled, halting`,
+        });
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input } = state;
+        return { type: 'halt', reason: 'rule_disabled', state };
+      }
 
-    this.logger.debug({
-      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
+      return { type: 'continue', state };
     });
-
-    if (!this.isStepReady(state)) {
-      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
-      return { type: 'halt', reason: 'state_not_ready' };
-    }
-
-    if (!state.rule.enabled) {
-      this.logger.debug({ message: `[${this.name}] Rule ${input.ruleId} is disabled, halting` });
-      return { type: 'halt', reason: 'rule_disabled' };
-    }
-
-    this.logger.debug({
-      message: `[${this.name}] Rule ${input.ruleId} is valid and enabled`,
-    });
-
-    return { type: 'continue' };
   }
 }

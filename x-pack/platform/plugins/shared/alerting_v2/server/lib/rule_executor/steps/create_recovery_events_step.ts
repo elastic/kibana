@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import { stableStringify } from '@kbn/std';
 import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
 import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import {
@@ -21,10 +21,10 @@ import {
 } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { getActiveAlertGroupHashesQuery, type ActiveAlertGroupHash } from '../queries';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
-import { hasState, type StateWith } from '../type_guards';
+import { guardedExpandStep } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/alert_events';
+import type { ExecutionContext } from '../../execution_context';
 
 @injectable()
 export class CreateRecoveryEventsStep implements RuleExecutionStep {
@@ -36,78 +36,57 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     @inject(QueryServiceScopedToken) private readonly scopedQueryService: QueryServiceContract
   ) {}
 
-  private isStepReady(
-    state: Readonly<RulePipelineState>
-  ): state is StateWith<'rule' | 'alertEvents'> {
-    return hasState(state, ['rule', 'alertEvents']);
-  }
+  public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    const step = this;
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input } = state;
+    return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
+      const { input, rule, alertEventsBatch } = state;
 
-    this.logger.debug({
-      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
-    });
+      if (rule.kind !== 'alert') {
+        step.logger.debug({
+          message: `[${step.name}] Skipping recovery for non-alert rule ${input.ruleId}`,
+        });
+        yield { type: 'continue', state };
+        return;
+      }
 
-    if (!this.isStepReady(state)) {
-      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
-      return { type: 'halt', reason: 'state_not_ready' };
-    }
+      const activeGroupHashes = await step.fetchActiveAlertGroupHashes(
+        rule.id,
+        input.executionContext
+      );
 
-    const { rule, alertEvents } = state;
+      if (activeGroupHashes.length === 0) {
+        step.logger.debug({
+          message: `[${step.name}] No active alerts to recover for rule ${input.ruleId}`,
+        });
+        yield { type: 'continue', state };
+        return;
+      }
 
-    if (rule.kind !== 'alert') {
-      this.logger.debug({
-        message: `[${this.name}] Skipping recovery for non-alert rule ${input.ruleId}`,
+      const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
+
+      const recoveryEvents =
+        recoveryType === recoveryPolicyType.query
+          ? await step.buildQueryRecovery({ rule, input, activeGroupHashes })
+          : buildRecoveryAlertEvents({
+              ruleId: rule.id,
+              ruleVersion: 1,
+              activeGroupHashes,
+              breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
+              scheduledTimestamp: input.scheduledAt,
+            });
+
+      step.logger.debug({
+        message: `[${step.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
       });
-      return { type: 'continue', data: { alertEvents } };
-    }
 
-    const activeGroupHashes = await this.fetchActiveAlertGroupHashes(input.ruleId);
-
-    if (activeGroupHashes.length === 0) {
-      this.logger.debug({
-        message: `[${this.name}] No active alerts to recover for rule ${input.ruleId}`,
-      });
-      return { type: 'continue', data: { alertEvents } };
-    }
-
-    const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
-
-    const recoveryEvents =
-      recoveryType === recoveryPolicyType.query
-        ? await this.buildQueryRecovery({ rule, input, activeGroupHashes })
-        : this.buildNoBreachRecovery({ rule, input, alertEvents, activeGroupHashes });
-
-    this.logger.debug({
-      message: `[${this.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
-    });
-
-    return {
-      type: 'continue',
-      data: { alertEvents: [...alertEvents, ...recoveryEvents] },
-    };
-  }
-
-  private buildNoBreachRecovery({
-    rule,
-    input,
-    alertEvents,
-    activeGroupHashes,
-  }: {
-    rule: RuleResponse;
-    input: RulePipelineState['input'];
-    alertEvents: AlertEvent[];
-    activeGroupHashes: ActiveAlertGroupHash[];
-  }): AlertEvent[] {
-    const breachedGroupHashes = new Set(alertEvents.map((event) => event.group_hash));
-
-    return buildRecoveryAlertEvents({
-      ruleId: rule.id,
-      ruleVersion: 1,
-      activeGroupHashes,
-      breachedGroupHashes,
-      scheduledTimestamp: input.scheduledAt,
+      yield {
+        type: 'continue',
+        state: {
+          ...state,
+          alertEventsBatch: [...alertEventsBatch, ...recoveryEvents],
+        },
+      };
     });
   }
 
@@ -142,7 +121,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       query: effectiveQuery,
       filter: queryPayload.filter,
       params: queryPayload.params,
-      abortSignal: input.abortSignal,
+      abortSignal: input.executionContext.signal,
     });
 
     return buildQueryRecoveryAlertEvents({
@@ -156,16 +135,18 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     });
   }
 
-  private async fetchActiveAlertGroupHashes(ruleId: string): Promise<ActiveAlertGroupHash[]> {
+  private async fetchActiveAlertGroupHashes(
+    ruleId: string,
+    executionContext: ExecutionContext
+  ): Promise<ActiveAlertGroupHash[]> {
     const request = getActiveAlertGroupHashesQuery({ ruleId }).toRequest();
-    const response = await this.internalQueryService.executeQuery({
+    return this.internalQueryService.executeQueryRows<ActiveAlertGroupHash>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       filter: request.filter,
+      abortSignal: executionContext.signal,
     });
-
-    return queryResponseToRecords<ActiveAlertGroupHash>(response);
   }
 }

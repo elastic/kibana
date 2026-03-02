@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import {
   LoggerServiceToken,
@@ -14,7 +14,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
-import { hasState, type StateWith } from '../type_guards';
+import { guardedExpandStep } from '../stream_utils';
 
 /**
  * Returns the query to execute for this rule.
@@ -39,66 +39,44 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  private isStepReady(state: Readonly<RulePipelineState>): state is StateWith<'rule'> {
-    return hasState(state, ['rule']);
-  }
+  public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    const step = this;
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input } = state;
+    return guardedExpandStep(streamState, ['rule'], async function* (state) {
+      const { input, rule } = state;
 
-    this.logger.debug({
-      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
-    });
+      const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
+      const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
+      const timeField = rule.time_field;
 
-    if (!this.isStepReady(state)) {
-      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
-      return { type: 'halt', reason: 'state_not_ready' };
-    }
+      const queryPayload = getQueryPayload({
+        query: effectiveQuery,
+        timeField,
+        lookbackWindow,
+      });
 
-    const { rule } = state;
+      step.logger.debug({
+        message: () =>
+          `[${step.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
+            query: effectiveQuery,
+            filter: queryPayload.filter,
+            params: queryPayload.params,
+          })}`,
+      });
 
-    const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
-    // Use schedule.lookback if provided, otherwise fall back to the execution interval.
-    const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
-    const timeField = rule.time_field;
-
-    const queryPayload = getQueryPayload({
-      query: effectiveQuery,
-      timeField,
-      lookbackWindow,
-    });
-
-    this.logger.debug({
-      message: () =>
-        `[${this.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
-          query: effectiveQuery,
-          filter: queryPayload.filter,
-          params: queryPayload.params,
-        })}`,
-    });
-
-    let esqlResponse;
-
-    try {
-      esqlResponse = await this.queryService.executeQuery({
+      const esqlRowBatchStream = step.queryService.executeQueryStream({
         query: effectiveQuery,
         filter: queryPayload.filter,
         params: queryPayload.params,
-        abortSignal: input.abortSignal,
+        abortSignal: input.executionContext.signal,
       });
-    } catch (error) {
-      if (input.abortSignal.aborted) {
-        throw new Error('Search has been aborted due to cancelled execution');
+
+      for await (const batch of esqlRowBatchStream) {
+        yield {
+          type: 'continue',
+          state: { ...state, queryPayload, esqlRowBatch: batch },
+        };
       }
-
-      throw error;
-    }
-
-    const rowCount = Array.isArray(esqlResponse.values) ? esqlResponse.values.length : 0;
-    this.logger.debug({
-      message: `[${this.name}] Query returned ${rowCount} rows for rule ${input.ruleId}`,
     });
-
-    return { type: 'continue', data: { queryPayload, esqlResponse } };
   }
 }

@@ -13,7 +13,7 @@ import { LoggerServiceToken } from '../logger_service/logger_service';
 
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
-  docs: TDocument[];
+  docs: readonly TDocument[];
 }
 
 export interface StorageServiceContract {
@@ -47,7 +47,7 @@ export class StorageService implements StorageServiceContract {
     try {
       const response = await this.esClient.bulk({
         operations,
-        refresh: 'wait_for',
+        refresh: false,
       });
 
       this.logBulkIndexResponse({ index, docsCount: docs.length, response });

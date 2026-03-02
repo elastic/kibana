@@ -22,7 +22,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-server",
     "@kbn/logging",
-    "@kbn/es-types",
     "@kbn/spaces-utils",
     "@kbn/core-di",
     "@kbn/core-di-browser",
@@ -55,7 +54,8 @@
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/eval-kql"
   ],
   "exclude": ["target/**/*"]
 }

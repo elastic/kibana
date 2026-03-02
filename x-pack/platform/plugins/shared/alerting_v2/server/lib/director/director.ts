@@ -7,6 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { inject, injectable } from 'inversify';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -14,14 +15,14 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
 import { alertEpisodeStatus, alertEventType, type AlertEvent } from '../../resources/alert_events';
-import type { RuleResponse } from '../rules_client/types';
-import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
+import type { ExecutionContext } from '../execution_context';
 
 interface RunDirectorParams {
   rule: RuleResponse;
-  alertEvents: AlertEvent[];
+  alertEvents: readonly AlertEvent[];
+  executionContext: ExecutionContext;
 }
 
 interface CalculateNextStateParams {
@@ -45,41 +46,62 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
     if (alertEvents.length === 0) {
       return [];
     }
 
     const strategy = this.strategyFactory.getStrategy(rule);
-    const groupHashes = Array.from(new Set(alertEvents.map((event) => event.group_hash)));
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(rule.id, groupHashes);
+    executionContext.throwIfAborted();
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
+  }
 
-    const alertsWithNextEpisode = alertEvents.map((currentAlertEvent) =>
-      this.getAlertEventWithNextEpisode({
-        rule,
-        currentAlertEvent,
-        previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-        strategy,
-      })
+  private async processAlertEvents(
+    rule: RuleResponse,
+    alertEvents: readonly AlertEvent[],
+    strategy: ITransitionStrategy,
+    executionContext: ExecutionContext
+  ): Promise<AlertEvent[]> {
+    const scope = executionContext.createScope();
+    const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
+    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
+      rule,
+      groupHashes,
+      executionContext
     );
 
-    return alertsWithNextEpisode;
+    scope.add(() => alertStateByGroupHash.clear());
+
+    try {
+      executionContext.throwIfAborted();
+
+      return alertEvents.map((currentAlertEvent) =>
+        this.getAlertEventWithNextEpisode({
+          rule,
+          currentAlertEvent,
+          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
+          strategy,
+        })
+      );
+    } finally {
+      await scope.disposeAll();
+    }
   }
 
   private async fetchLatestAlertStateByGroupHash(
-    ruleId: string,
-    groupHashes: string[]
+    rule: RuleResponse,
+    groupHashes: string[],
+    context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
-    const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
-    const response = await this.queryService.executeQuery({
+    const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
+    const records = await this.queryService.executeQueryRows<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       filter: request.filter,
+      abortSignal: context.signal,
     });
-
-    const records = queryResponseToRecords<LatestAlertEventState>(response);
 
     return new Map(records.map((record) => [record.group_hash, record]));
   }
