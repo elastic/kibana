@@ -42,6 +42,12 @@ const NEGATIVE_CASE_NA = {
   explanation: 'Not applicable: negative case — model should reject this request',
 };
 
+const NON_ESQL_REFERENCE_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation: 'Not applicable: reference rule is not ES|QL',
+};
+
 /**
  * Wraps an evaluator so it returns N/A for negative-case examples (category === 'negative').
  * These are prompts where the model should refuse to generate a rule, so production-quality
@@ -55,6 +61,25 @@ function skipNegativeCases(
     evaluate: async (args) => {
       if (args.expected?.category === 'negative') {
         return NEGATIVE_CASE_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
+/**
+ * Wraps an evaluator so it returns N/A when the reference rule is not ES|QL.
+ * The ES|QL Functional Equivalence evaluator prompt expects ES|QL on both sides;
+ * comparing a generated ES|QL query against an EQL/kuery/empty ground truth is meaningless.
+ */
+function skipNonEsqlReferences(
+  evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
+): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      if (args.expected?.language !== 'esql') {
+        return NON_ESQL_REFERENCE_NA;
       }
       return evaluator.evaluate(args);
     },
@@ -365,7 +390,7 @@ export function createEvaluateDataset({
     skipNegativeCases(createSeverityMatchEvaluator()),
     skipNegativeCases(createRiskScoreMatchEvaluator()),
     // LLM — ES|QL functional equivalence via @kbn/evals built-in evaluator
-    skipNegativeCases(esqlEquivalenceEvaluator),
+    skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator)),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
     // Re-enable when running thorough multi-model comparisons.
     // skipNegativeCases(createRuleNameEvaluator(evaluators)),
@@ -389,6 +414,7 @@ export function createEvaluateDataset({
             const taskResult = await chatClient.generateRule(input.prompt);
 
             if (!taskResult.generatedRule) {
+              log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
               return { error: taskResult.error || 'No rule returned from agent' };
             }
 
