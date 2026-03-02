@@ -13,6 +13,7 @@ import type {
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
+  StepStabilityLevel,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
 import type {
@@ -101,3 +102,11 @@ export const isHttpMethod = (method: string): method is HttpMethod =>
 
 export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
   BuiltInStepProperties.includes(property as BuiltInStepProperty);
+
+const BUILTIN_STEP_STABILITY: Partial<Record<BuiltInStepType, StepStabilityLevel>> = {
+  'workflow.execute': 'tech_preview',
+  'workflow.executeAsync': 'tech_preview',
+};
+
+export const getBuiltInStepStability = (type: string): StepStabilityLevel | undefined =>
+  BUILTIN_STEP_STABILITY[type as BuiltInStepType];

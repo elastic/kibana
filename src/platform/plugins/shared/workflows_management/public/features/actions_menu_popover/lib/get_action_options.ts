@@ -192,6 +192,30 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      {
+        id: 'workflow.execute',
+        label: i18n.translate('workflows.actionsMenu.workflowExecute', {
+          defaultMessage: 'Execute Workflow',
+        }),
+        description: i18n.translate('workflows.actionsMenu.workflowExecuteDescription', {
+          defaultMessage: 'Execute another workflow synchronously and wait for the result',
+        }),
+        iconType: 'nested',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+        stability: 'tech_preview',
+      },
+      {
+        id: 'workflow.executeAsync',
+        label: i18n.translate('workflows.actionsMenu.workflowExecuteAsync', {
+          defaultMessage: 'Execute Workflow (Async)',
+        }),
+        description: i18n.translate('workflows.actionsMenu.workflowExecuteAsyncDescription', {
+          defaultMessage: 'Execute another workflow asynchronously without waiting for the result',
+        }),
+        iconType: 'nested',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+        stability: 'tech_preview',
+      },
     ],
   };
   const elasticSearchGroup: ActionOptionData = {
