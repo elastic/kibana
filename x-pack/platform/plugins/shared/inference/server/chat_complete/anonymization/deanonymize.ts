@@ -24,9 +24,7 @@ function deanonymizeStructure(
     return output;
   }
   if (Array.isArray(value)) {
-    return value.map((item) =>
-      deanonymizeStructure(item, replaceFn, collectedDeanonymizations)
-    );
+    return value.map((item) => deanonymizeStructure(item, replaceFn, collectedDeanonymizations));
   }
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
