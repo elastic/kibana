@@ -97,6 +97,7 @@ import {
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
   performSearch,
+  performEsql,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
 import { performChangeOwnership } from './apis/change_ownership';
@@ -356,7 +357,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    * {@inheritDoc ISavedObjectsRepository.esql}
    */
   async esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse> {
-    throw new Error('esql method not yet implemented');
+    return performEsql({ options, rawClient: this.options.client }, this.apiExecutionContext);
   }
 
   /**
