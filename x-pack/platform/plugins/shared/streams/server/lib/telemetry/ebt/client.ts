@@ -14,6 +14,7 @@ import type {
   StreamsStateErrorProps,
   StreamsSystemIdentificationIdentifiedProps,
   StreamsProcessingPipelineSuggestedProps,
+  StreamsFeaturesIdentifiedProps,
 } from './types';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
@@ -23,6 +24,7 @@ import {
   STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+  STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
 } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
@@ -89,5 +91,9 @@ export class EbtTelemetryClient {
 
   public trackProcessingPipelineSuggested(params: StreamsProcessingPipelineSuggestedProps) {
     this.analytics.reportEvent(STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE, params);
+  }
+
+  public trackFeaturesIdentified(params: StreamsFeaturesIdentifiedProps) {
+    this.analytics.reportEvent(STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE, params);
   }
 }

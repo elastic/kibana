@@ -17,7 +17,7 @@ import type {
   ServiceMapEdge,
 } from '../../../../common/service_map';
 import { MarkerType } from '@xyflow/react';
-import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
+import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -27,36 +27,12 @@ import {
   SPAN_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 
-// Mock the EUI theme
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          primary: MOCK_EUI_THEME.colors.primary,
-          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
-          lightShade: MOCK_EUI_THEME.colors.lightShade,
-          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
-          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
-          text: MOCK_EUI_THEME.colors.textPrimary,
-          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
-        },
-        size: {
-          xs: '4px',
-          s: '8px',
-          m: '12px',
-          l: '24px',
-          xxs: '2px',
-        },
-        border: {
-          radius: { medium: '4px' },
-          width: { thin: '1px', thick: '2px' },
-        },
-        levels: { header: 1000, menu: 2000 },
-        font: { family: 'Inter, sans-serif' },
-      },
+      euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
       colorMode: 'LIGHT',
     }),
   };

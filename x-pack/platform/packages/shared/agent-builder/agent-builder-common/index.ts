@@ -183,4 +183,8 @@ export {
   skillIdRegexp,
 } from './skills';
 export * from './telemetry';
-export { getLatestVersion, type VersionedAttachment } from './attachments';
+export {
+  getLatestVersion,
+  type VersionedAttachment,
+  type UpdateOriginResponse,
+} from './attachments';

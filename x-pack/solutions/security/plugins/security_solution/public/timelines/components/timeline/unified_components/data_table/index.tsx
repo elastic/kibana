@@ -32,7 +32,7 @@ import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
-import { KibanaContextProvider, useKibana } from '../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   OnFetchMoreRecords,
@@ -56,6 +56,7 @@ import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { OverviewTab } from '../../../../../flyout_v2/document/tabs/overview_tab';
+import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -182,14 +183,13 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         if (newFlyoutSystemEnabled) {
           const hit: DataTableRecord = buildDataTableRecord(eventData.raw);
           overlays.openSystemFlyout(
-            <KibanaContextProvider services={services}>
-              <OverviewTab hit={hit} />
-            </KibanaContextProvider>,
+            flyoutProviders({ services, children: <OverviewTab hit={hit} /> }),
             {
+              ownFocus: false,
               // @ts-ignore EUI to fix this typing issue
               resizable: true,
+              size: 's',
               type: 'overlay',
-              ownFocus: false,
             }
           );
         } else {
