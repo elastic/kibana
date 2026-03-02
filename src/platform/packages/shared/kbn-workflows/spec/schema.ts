@@ -134,15 +134,28 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+/** Schema for the `with` block of custom triggers (KQL condition to filter when the workflow runs). */
+const CustomTriggerWithSchema = z
+  .object({
+    condition: z.string().optional(),
+  })
+  .optional();
+
 /**
  * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
  * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
+ * Custom triggers allow a `with.condition` clause for KQL filtering.
  */
 export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
   if (customTriggerIds.length === 0) {
     return TriggerSchema;
   }
-  const customSchemas = customTriggerIds.map((id) => z.object({ type: z.literal(id) }));
+  const customSchemas = customTriggerIds.map((id) =>
+    z.object({
+      type: z.literal(id),
+      with: CustomTriggerWithSchema,
+    })
+  );
   return z.discriminatedUnion('type', [
     AlertRuleTriggerSchema,
     ScheduledTriggerSchema,
@@ -218,33 +231,19 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
   .object({
-    skip_ssl_verification: z.boolean().optional(),
-    follow_redirects: z.boolean().optional(),
-    max_redirects: z.number().optional(),
-    keep_alive: z.boolean().optional(),
+    skip_ssl_verification: z
+      .boolean()
+      .optional()
+      .describe('Skip SSL/TLS certificate verification for the request'),
+    follow_redirects: z
+      .boolean()
+      .optional()
+      .describe('Whether to follow HTTP redirects. Defaults to true'),
+    max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
+    keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
-
-export const HttpStepSchema = BaseStepSchema.extend({
-  type: z.literal('http'),
-  with: z.object({
-    url: z.string().min(1),
-    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
-    headers: z
-      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-      .optional()
-      .default({}),
-    body: z.any().optional(),
-    timeout: z.string().optional().default('30s'),
-    fetcher: FetcherConfigSchema,
-  }),
-})
-  .merge(StepWithIfConditionSchema)
-  .merge(StepWithForEachSchema)
-  .merge(TimeoutPropSchema)
-  .merge(StepWithOnFailureSchema);
-export type HttpStep = z.infer<typeof HttpStepSchema>;
 
 // Generic Elasticsearch step schema for backend validation
 export const ElasticsearchStepSchema = BaseStepSchema.extend({
@@ -281,14 +280,14 @@ export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
 // Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
 export const KibanaStepMetaSchema = {
-  forceServerInfo: z
+  use_server_info: z
     .boolean()
     .optional()
-    .describe('Force using the server info URL (internal host:port) instead of the public URL'),
-  forceLocalhost: z
+    .describe('Use the server info URL (internal host:port) instead of the public URL'),
+  use_localhost: z
     .boolean()
     .optional()
-    .describe('Force using localhost:5601 instead of the configured URL'),
+    .describe('Use localhost:5601 instead of the configured URL'),
   debug: z
     .boolean()
     .optional()
@@ -338,19 +337,6 @@ export const KibanaStepSchema = BaseStepSchema.extend({
   ]),
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
-
-export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
-  const schema = HttpStepSchema.extend({
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial().required({ type: true });
-  }
-
-  return schema;
-}
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
@@ -439,6 +425,24 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+// Base schema shared by both workflow.execute and workflow.executeAsync
+const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
+  with: z.object({
+    'workflow-id': z.string().min(1),
+    inputs: z.record(z.string(), z.unknown()).optional(),
+  }),
+});
+
+export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.execute'),
+});
+export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
+
+export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.executeAsync'),
+});
+export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
@@ -505,11 +509,12 @@ const StepSchema = z.lazy(() =>
     IfStepSchema,
     WaitStepSchema,
     DataSetStepSchema,
-    HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
+    WorkflowExecuteStepSchema,
+    WorkflowExecuteAsyncStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -522,7 +527,8 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
-  HttpStepSchema.shape.type.value,
+  WorkflowExecuteStepSchema.shape.type.value,
+  WorkflowExecuteAsyncStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -718,6 +724,13 @@ export const WorkflowContextSchema = z.object({
   inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
+  parent: z
+    .object({
+      workflowId: z.string(),
+      executionId: z.string(),
+      depth: z.number().optional(),
+    })
+    .optional(),
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 

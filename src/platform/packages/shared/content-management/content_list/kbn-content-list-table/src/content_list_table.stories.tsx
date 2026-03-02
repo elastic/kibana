@@ -8,7 +8,9 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import reactElementToJSXString from 'react-element-to-jsx-string';
 import {
   EuiPanel,
   EuiSpacer,
@@ -29,6 +31,7 @@ import {
   useContentListSearch,
   useContentListPagination,
   useContentListConfig,
+  useContentListSelection,
 } from '@kbn/content-list-provider';
 import type {
   ContentListItem,
@@ -36,6 +39,7 @@ import type {
   FindItemsParams,
   FindItemsResult,
 } from '@kbn/content-list-provider';
+import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
 import { ContentListTable } from './content_list_table';
 
@@ -58,6 +62,8 @@ const createStoryFindItems = (options?: {
 }) => {
   const { items = MOCK_DASHBOARDS, delay = 0, isEmpty = false } = options ?? {};
 
+  const availableItems = items;
+
   return async (params: FindItemsParams): Promise<FindItemsResult> => {
     // Simulate network delay.
     if (delay > 0) {
@@ -70,7 +76,7 @@ const createStoryFindItems = (options?: {
     }
 
     // Use mock findItems for sorting logic.
-    const mockFindItems = createMockFindItems({ items });
+    const mockFindItems = createMockFindItems({ items: availableItems });
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
       filters: {},
@@ -93,20 +99,82 @@ const createStoryFindItems = (options?: {
 };
 
 // =============================================================================
+// JSX Serialization
+// =============================================================================
+
+// NOTE: `formatComponentName`, `toJsx`, and `StateDiagnosticPanel` are
+// duplicated from `@kbn/content-list-docs/stories_helpers`. The docs package
+// depends on this table package, so importing back would create a circular
+// reference. If a shared storybook-helpers package is introduced, consolidate
+// these copies there.
+
+/**
+ * Part suffixes whose export names follow the `{Preset}{Part}` pattern
+ * (e.g. `NameColumn`, `EditAction`). Used as a fallback when the assembly
+ * `displayName` is unavailable at runtime.
+ */
+const PART_SUFFIXES = ['Column', 'Action'];
+
+/**
+ * Map assembly-generated `displayName` values to consumer-facing names.
+ *
+ * @see [`factory.ts`](../../../kbn-content-list-assembly/src/factory.ts) for the
+ * `generateDisplayName` function that produces assembly-style names.
+ */
+const formatComponentName = (element: React.ReactNode): string => {
+  const type = (element as ReactElement | undefined)?.type as unknown as
+    | { displayName?: string; name?: string }
+    | undefined;
+  const rawName: string = type?.displayName ?? type?.name ?? 'Unknown';
+
+  // Assembly names follow "Assembly.part[.preset]".
+  const segments = rawName.split('.');
+  if (segments.length >= 2) {
+    return segments
+      .slice(1)
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('.');
+  }
+
+  // Fallback: handle export names like `NameColumn` → `Column.Name`.
+  for (const suffix of PART_SUFFIXES) {
+    if (rawName.endsWith(suffix) && rawName !== suffix) {
+      return `${suffix}.${rawName.slice(0, -suffix.length)}`;
+    }
+  }
+
+  // Strip trailing `Component` from wrapper names.
+  if (rawName.endsWith('Component') && rawName !== 'Component') {
+    return rawName.slice(0, -'Component'.length);
+  }
+
+  return rawName;
+};
+
+/** Convert a React element to a formatted JSX string. */
+const toJsx = (element: ReactElement): string =>
+  reactElementToJSXString(element, {
+    displayName: formatComponentName,
+    showFunctions: true,
+    functionValue: (fn) => (fn.name ? `${fn.name}()` : '…'),
+    showDefaultProps: false,
+    sortProps: false,
+    useBooleanShorthandSyntax: true,
+    useFragmentShortSyntax: true,
+    filterProps: ['key'],
+  });
+
+// =============================================================================
 // State Diagnostic Panel
 // =============================================================================
 
 interface StateDiagnosticPanelProps {
   /** Whether the panel is open by default. */
   defaultOpen?: boolean;
-  /** Whether the description is shown. */
-  showDescription?: boolean;
-  /** Whether the custom type column is shown. */
-  showTypeColumn?: boolean;
-  /** Whether the actions column is shown. */
-  showActions?: boolean;
-  /** Whether custom actions (Share, Archive) are mixed in alongside presets. */
-  showCustomActions?: boolean;
+  /** React element to serialize and display as JSX source code. */
+  element: ReactElement;
+  /** Whether selection is enabled. */
+  showSelection?: boolean;
 }
 
 /**
@@ -114,64 +182,22 @@ interface StateDiagnosticPanelProps {
  */
 const StateDiagnosticPanel = ({
   defaultOpen = false,
-  showDescription = true,
-  showTypeColumn = true,
-  showActions = false,
-  showCustomActions = false,
+  element,
+  showSelection = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const { items, totalItems, isLoading, isFetching, error } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
   const { search } = useContentListSearch();
   const pagination = useContentListPagination();
+  const { selectedIds, selectedCount } = useContentListSelection();
   const config = useContentListConfig();
-
-  // Generate JSX code based on current configuration.
-  const tableJsx = useMemo(() => {
-    const columnChildren: string[] = [];
-
-    // Name column with optional description.
-    if (showDescription) {
-      columnChildren.push('  <Column.Name showDescription />');
-    } else {
-      columnChildren.push('  <Column.Name showDescription={false} />');
-    }
-
-    // Custom type column.
-    if (showTypeColumn) {
-      columnChildren.push(`  <Column
-    id="type"
-    name="Type"
-    width="20%"
-    render={(item) => <EuiBadge>{item.type}</EuiBadge>}
-  />`);
-    }
-
-    // Actions column.
-    if (showActions) {
-      const actionLines = ['    <Action.Edit />'];
-
-      if (showCustomActions) {
-        actionLines.push(
-          `    <Action id="share" name="Share" icon="share" … />`,
-          `    <Action id="archive" name="Archive" icon="folderClosed" … />`
-        );
-      }
-
-      actionLines.push('    <Action.Delete />');
-
-      columnChildren.push(`  <Column.Actions>\n${actionLines.join('\n')}\n  </Column.Actions>`);
-    }
-
-    return `<ContentListTable title="…">
-${columnChildren.join('\n')}
-</ContentListTable>`;
-  }, [showDescription, showTypeColumn, showActions, showCustomActions]);
+  const tableJsx = useMemo(() => toJsx(element), [element]);
 
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiPanel color="subdued" hasBorder paddingSize={isOpen ? 'm' : 's'}>
+      <EuiPanel color="plain" hasBorder={false} hasShadow={false} paddingSize={isOpen ? 'm' : 's'}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -193,6 +219,11 @@ ${columnChildren.join('\n')}
                   {items.length}/{totalItems} items
                 </EuiBadge>
               </EuiFlexItem>
+              {selectedCount > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">{selectedCount} selected</EuiBadge>
+                </EuiFlexItem>
+              )}
               {isLoading && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="primary">Loading…</EuiBadge>
@@ -222,6 +253,16 @@ ${columnChildren.join('\n')}
                   )}
                 </EuiText>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>Selection:</strong>{' '}
+                  {config.supports.selection ? (
+                    <EuiBadge color="success">Enabled</EuiBadge>
+                  ) : (
+                    <EuiBadge color="hollow">Disabled</EuiBadge>
+                  )}
+                </EuiText>
+              </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
@@ -231,7 +272,7 @@ ${columnChildren.join('\n')}
                 <EuiTitle size="xxs">
                   <h3>Sort</h3>
                 </EuiTitle>
-                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s" transparentBackground>
                   {JSON.stringify({ field: sortField, direction: sortDirection }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
@@ -239,7 +280,7 @@ ${columnChildren.join('\n')}
                 <EuiTitle size="xxs">
                   <h3>Search</h3>
                 </EuiTitle>
-                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s" transparentBackground>
                   {JSON.stringify({ search, isFetching }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
@@ -248,7 +289,7 @@ ${columnChildren.join('\n')}
                   <EuiTitle size="xxs">
                     <h3>Pagination</h3>
                   </EuiTitle>
-                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s" transparentBackground>
                     {JSON.stringify(
                       {
                         pageIndex: pagination.pageIndex,
@@ -261,11 +302,25 @@ ${columnChildren.join('\n')}
                   </EuiCodeBlock>
                 </EuiFlexItem>
               )}
+              {showSelection && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>Selection</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s" transparentBackground>
+                    {JSON.stringify(
+                      { selectedCount, selectedIds: selectedIds.slice(0, 5) },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={2} style={{ minWidth: 300 }}>
                 <EuiTitle size="xxs">
                   <h3>Table JSX</h3>
                 </EuiTitle>
-                <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s">
+                <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" transparentBackground>
                   {tableJsx}
                 </EuiCodeBlock>
               </EuiFlexItem>
@@ -294,7 +349,7 @@ ${columnChildren.join('\n')}
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content Management/Content List/Table',
+  title: 'Content List/Components/Table',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -323,6 +378,7 @@ interface PlaygroundArgs {
   showTypeColumn: boolean;
   showActions: boolean;
   showCustomActions: boolean;
+  showSelection: boolean;
   hasClickableRows: boolean;
   showDiagnostics: boolean;
 }
@@ -333,7 +389,7 @@ const { Column, Action } = ContentListTable;
 
 /**
  * Wrapper component for the Playground story.
- * Handles stable prop references via useMemo.
+ * Handles stable prop references via `useMemo`.
  */
 const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -361,6 +417,10 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     return { findItems };
   }, [args.isLoading, args.hasItems]);
 
+  // Use a ref to keep `getHref` stable while still logging to the actions panel.
+  const entityNameRef = useRef(args.entityName);
+  entityNameRef.current = args.entityName;
+
   const itemConfig = useMemo(() => {
     const config: ContentListItemConfig = {};
 
@@ -370,9 +430,6 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
 
     if (args.showActions) {
       config.getEditUrl = (item) => `#/${args.entityName}/${item.id}/edit`;
-      // NOTE: `Action.Delete` is currently a no-op stub. This handler exists so
-      // `buildDeleteAction` sees `onDelete` and renders the trash icon. The toast
-      // below won't fire until the Delete Orchestration PR wires the actual flow.
       config.onDelete = async (items) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
         const names = items.map((item) => item.title).join(', ');
@@ -403,8 +460,38 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     [addToast]
   );
 
+  // Build a display element representing the consumer-facing JSX.
+  // `toJsx()` (inside `StateDiagnosticPanel`) serializes it automatically.
+  const displayElement = useMemo(
+    () => (
+      <ContentListTable
+        title={`${args.entityNamePlural} table`}
+        compressed={args.compressed}
+        tableLayout={args.tableLayout}
+      >
+        <Column.Name showDescription={args.showDescription} />
+        <Column.UpdatedAt />
+        {args.showTypeColumn && (
+          <Column
+            id="type"
+            name="Type"
+            width="20%"
+            render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+          />
+        )}
+      </ContentListTable>
+    ),
+    [
+      args.entityNamePlural,
+      args.compressed,
+      args.tableLayout,
+      args.showDescription,
+      args.showTypeColumn,
+    ]
+  );
+
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.showActions}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.showActions}-${args.showSelection}`;
 
   return (
     <>
@@ -420,59 +507,62 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
             initialSort: { field: 'title', direction: 'asc' },
           },
           pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
+          selection: args.showSelection,
         }}
       >
-        <ContentListTable
-          title={`${args.entityNamePlural} table`}
-          compressed={args.compressed}
-          tableLayout={args.tableLayout}
-        >
-          <Column.Name showDescription={args.showDescription} />
-          <Column.UpdatedAt />
-          {args.showTypeColumn && (
-            <Column
-              id="type"
-              name="Type"
-              width="20%"
-              render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+        <EuiPanel paddingSize="xl">
+          <ContentListToolbar />
+          <EuiSpacer size="m" />
+          <ContentListTable
+            title={`${args.entityNamePlural} table`}
+            compressed={args.compressed}
+            tableLayout={args.tableLayout}
+          >
+            <Column.Name showDescription={args.showDescription} />
+            <Column.UpdatedAt />
+            {args.showTypeColumn && (
+              <Column
+                id="type"
+                name="Type"
+                width="20%"
+                render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+              />
+            )}
+            {args.showActions && (
+              <Column.Actions>
+                <Action.Edit />
+                {args.showCustomActions && (
+                  <>
+                    <Action
+                      id="share"
+                      name="Share"
+                      description="Share with team"
+                      icon="share"
+                      type="icon"
+                      onClick={handleShare}
+                    />
+                    <Action
+                      id="archive"
+                      name="Archive"
+                      description="Move to archive"
+                      icon="folderClosed"
+                      type="icon"
+                      onClick={handleArchive}
+                    />
+                  </>
+                )}
+                <Action.Delete />
+              </Column.Actions>
+            )}
+          </ContentListTable>
+          {args.showDiagnostics && (
+            <StateDiagnosticPanel
+              defaultOpen
+              element={displayElement}
+              showSelection={args.showSelection}
             />
           )}
-          {args.showActions && (
-            <Column.Actions>
-              <Action.Edit />
-              {args.showCustomActions && (
-                <>
-                  <Action
-                    id="share"
-                    name="Share"
-                    description="Share with team"
-                    icon="share"
-                    type="icon"
-                    onClick={handleShare}
-                  />
-                  <Action
-                    id="archive"
-                    name="Archive"
-                    description="Move to archive"
-                    icon="folderClosed"
-                    type="icon"
-                    onClick={handleArchive}
-                  />
-                </>
-              )}
-              <Action.Delete />
-            </Column.Actions>
-          )}
-        </ContentListTable>
-        {args.showDiagnostics && (
-          <StateDiagnosticPanel
-            defaultOpen
-            showDescription={args.showDescription}
-            showTypeColumn={args.showTypeColumn}
-            showActions={args.showActions}
-            showCustomActions={args.showCustomActions}
-          />
-        )}
+        </EuiPanel>
       </ContentListProvider>
       <EuiGlobalToastList toasts={toasts} dismissToast={removeToast} toastLifeTimeMs={3000} />
     </>
@@ -492,6 +582,7 @@ export const Table: PlaygroundStory = {
     showTypeColumn: false,
     showActions: true,
     showCustomActions: false,
+    showSelection: true,
     hasClickableRows: true,
     showDescription: true,
     entityName: 'dashboard',
@@ -563,6 +654,12 @@ export const Table: PlaygroundStory = {
         'Mix in custom Share and Archive actions alongside the built-in presets, demonstrating custom `Action` components.',
       table: { category: 'Actions' },
       if: { arg: 'showActions' },
+    },
+    showSelection: {
+      control: 'boolean',
+      description:
+        'Enable row selection with checkboxes. Shows a delete button in the toolbar that clears the selection when clicked.',
+      table: { category: 'Selection' },
     },
     hasClickableRows: {
       control: 'boolean',

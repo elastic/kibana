@@ -163,7 +163,7 @@ export async function pickTestGroupRunOrder() {
       ? process.env.JEST_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build'];
+      : [];
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
@@ -286,6 +286,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_UNIT_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 4,
         concurrency: 3,
         names: jestUnitConfigs,
       },
@@ -294,6 +295,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 2,
         concurrency: 1,
         names: jestIntegrationConfigs,
       },
@@ -304,6 +306,7 @@ export async function pickTestGroupRunOrder() {
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
+        warmupMin: 3,
         names,
       })),
     ],

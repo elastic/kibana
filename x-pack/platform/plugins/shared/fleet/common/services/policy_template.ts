@@ -20,6 +20,7 @@ import type {
   RegistryVarsEntry,
   RegistryDataStream,
   InstallablePackage,
+  NewPackagePolicy,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -36,11 +37,12 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
 const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
-  title: 'Use APM Server',
+  title: 'Use Elastic APM',
   description: 'enables the apm collector and processor.',
   multi: false,
   required: false,
   show_user: true,
+  default: true,
 };
 
 export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
@@ -71,11 +73,11 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   if (isIntegrationPolicyTemplate(policyTemplate)) {
     return policyTemplate.inputs || [];
   }
-
   const input: RegistryInput = {
     type: policyTemplate.input,
     title: policyTemplate.title,
     description: policyTemplate.description,
+    ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
   };
 
   return [input];
@@ -181,6 +183,16 @@ const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
+  const enabledPolicyTemplates = new Set(
+    packagePolicy?.inputs
+      .filter((input) => input.enabled)
+      .map((input) => input.policy_template)
+      .filter((policyTemplate): policyTemplate is string => !!policyTemplate) ?? []
+  );
+  return enabledPolicyTemplates.size > 1;
+};
 
 export function filterPolicyTemplatesTiles<T>(
   templatesBehavior: string | undefined,

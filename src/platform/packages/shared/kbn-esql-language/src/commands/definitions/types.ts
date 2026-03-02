@@ -209,6 +209,7 @@ export enum PromQLFunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
+  SCALAR_CONVERSION = 'scalar_conversion',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -474,6 +475,14 @@ export interface ValidationErrors {
   invalidMapParameterValueType: {
     message: string;
     type: { paramName: string; expectedType: string; actualType: string };
+  };
+  mmrQueryVectorWrongType: {
+    message: string;
+    type: { type: string };
+  };
+  mmrOnFieldWrongType: {
+    message: string;
+    type: { type: string };
   };
 }
 

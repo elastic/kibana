@@ -171,7 +171,7 @@ const SortControls = () => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="sortable" aria-label="Sortable" />
+        <EuiIcon type="sortable" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">Sort by:</EuiText>
@@ -193,7 +193,7 @@ const SortControls = () => {
 };
 
 const meta: Meta<StoryArgs> = {
-  title: 'Content Management/Content List',
+  title: 'Content List/Components',
   parameters: { layout: 'padded' },
   argTypes: {
     entityName: { control: 'text', description: 'Singular entity name' },
