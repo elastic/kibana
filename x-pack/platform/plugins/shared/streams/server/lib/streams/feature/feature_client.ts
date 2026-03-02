@@ -27,7 +27,7 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
-  FEATURE_EVIDENCE_SOURCES,
+  FEATURE_EVIDENCE_DOCUMENT_IDS,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -242,7 +242,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [FEATURE_PROPERTIES]: feature.properties,
     [FEATURE_CONFIDENCE]: feature.confidence,
     [FEATURE_EVIDENCE]: feature.evidence,
-    [FEATURE_EVIDENCE_SOURCES]: feature.evidence_sources,
+    [FEATURE_EVIDENCE_DOCUMENT_IDS]: feature.evidence_document_ids,
     [FEATURE_STATUS]: feature.status,
     [FEATURE_LAST_SEEN]: feature.last_seen,
     [FEATURE_TAGS]: feature.tags,
@@ -264,7 +264,7 @@ function fromStorage(feature: StoredFeature): Feature {
     properties: feature[FEATURE_PROPERTIES],
     confidence: feature[FEATURE_CONFIDENCE],
     evidence: feature[FEATURE_EVIDENCE],
-    evidence_sources: feature[FEATURE_EVIDENCE_SOURCES],
+    evidence_document_ids: feature[FEATURE_EVIDENCE_DOCUMENT_IDS],
     status: feature[FEATURE_STATUS],
     last_seen: feature[FEATURE_LAST_SEEN],
     tags: feature[FEATURE_TAGS],
