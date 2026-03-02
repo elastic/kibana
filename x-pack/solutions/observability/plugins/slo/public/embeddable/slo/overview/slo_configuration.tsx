@@ -58,7 +58,6 @@ function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps
   >();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
   const [hasError, setHasError] = useState(false);
-  const showAllGroupByInstances = selectedInstanceId === ALL_VALUE;
 
   const hasGroupBy = selectedSloDefinition?.groupBy
     ? selectedSloDefinition.groupBy.length > 0 && !selectedSloDefinition.groupBy.includes(ALL_VALUE)
@@ -73,9 +72,8 @@ function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps
     const remoteName: string | undefined = selectedSloDefinition?.remote?.remoteName;
 
     onCreate({
-      show_all_group_by_instances: showAllGroupByInstances,
       slo_id: selectedSloDefinition.id,
-      slo_instance_id: selectedInstanceId ?? ALL_VALUE,
+      slo_instance_id: hasGroupBy ? selectedInstanceId ?? ALL_VALUE : undefined,
       remote_name: remoteName,
       overview_mode: 'single',
     });

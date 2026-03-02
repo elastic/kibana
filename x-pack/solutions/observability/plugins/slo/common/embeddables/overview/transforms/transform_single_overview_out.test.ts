@@ -23,7 +23,6 @@ describe('transformSingleOverviewOut', () => {
       Object {
         "overview_mode": "single",
         "remote_name": "legacy-remote",
-        "show_all_group_by_instances": true,
         "slo_id": "legacy-slo-id",
         "slo_instance_id": "legacy-instance-id",
         "title": "Test Title",
@@ -45,6 +44,56 @@ describe('transformSingleOverviewOut', () => {
         "slo_id": "new-slo-id",
         "slo_instance_id": "new-instance-id",
         "title": "Test Title",
+      }
+    `);
+  });
+
+  it('should drop slo_instance_id for legacy non-grouped SLOs with sloInstanceId "*" and showAllGroupByInstances false', () => {
+    expect(
+      transformSingleOverviewOut({
+        sloId: 'non-grouped-slo-id',
+        sloInstanceId: '*',
+        overviewMode: 'single',
+        showAllGroupByInstances: false,
+      } as unknown as OverviewEmbeddableState)
+    ).toMatchInlineSnapshot(`
+      Object {
+        "overview_mode": "single",
+        "slo_id": "non-grouped-slo-id",
+      }
+    `);
+  });
+
+  it('should keep slo_instance_id for legacy grouped SLOs with sloInstanceId "*" and showAllGroupByInstances true', () => {
+    expect(
+      transformSingleOverviewOut({
+        sloId: 'grouped-slo-id',
+        sloInstanceId: '*',
+        overviewMode: 'single',
+        showAllGroupByInstances: true,
+      } as unknown as OverviewEmbeddableState)
+    ).toMatchInlineSnapshot(`
+      Object {
+        "overview_mode": "single",
+        "slo_id": "grouped-slo-id",
+        "slo_instance_id": "*",
+      }
+    `);
+  });
+
+  it('should keep slo_instance_id for legacy grouped SLOs with a specific instance', () => {
+    expect(
+      transformSingleOverviewOut({
+        sloId: 'grouped-slo-id',
+        sloInstanceId: 'specific-instance-id',
+        overviewMode: 'single',
+        showAllGroupByInstances: false,
+      } as unknown as OverviewEmbeddableState)
+    ).toMatchInlineSnapshot(`
+      Object {
+        "overview_mode": "single",
+        "slo_id": "grouped-slo-id",
+        "slo_instance_id": "specific-instance-id",
       }
     `);
   });

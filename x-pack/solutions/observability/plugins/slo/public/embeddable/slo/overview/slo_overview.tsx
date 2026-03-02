@@ -24,7 +24,6 @@ interface Props {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
   remoteName?: string;
-  showAllGroupByInstances?: boolean;
   reloadSubject?: Subject<boolean>;
 }
 
