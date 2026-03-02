@@ -364,7 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discover
           .getSavedSearchTitle()
           .then((lastBreadcrumb) =>
-            expect(lastBreadcrumb).to.be('Rendering Test: saved as search')
+            expect(lastBreadcrumb).to.be('Rendering Test: saved as search by-value')
           ),
         testSubjects
           .exists('unifiedTabs_tabsBar', { timeout: 1000 })
