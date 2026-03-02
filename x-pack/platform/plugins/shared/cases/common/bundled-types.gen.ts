@@ -293,6 +293,10 @@ export const Settings = z.object({
    * Turns alert syncing on or off.
    */
   syncAlerts: z.boolean(),
+  /**
+   * Auto extracts observables
+   */
+  extractObservables: z.boolean().optional(),
 });
 
 /**
