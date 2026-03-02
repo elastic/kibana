@@ -353,8 +353,7 @@ export const getSearchEmbeddableFactory = ({
       const api: SearchEmbeddableApi = finalizeApi({
         ...unsavedChangesApi,
         ...titleManager.api,
-        ...(searchEmbeddable.api as typeof searchEmbeddable.api &
-          Required<Pick<SearchEmbeddableApi, 'filters$' | 'query$' | 'setFilters' | 'setQuery'>>),
+        ...searchEmbeddable.api,
         ...timeRangeManager.api,
         ...drilldownsManager.api,
         ...editApi,

@@ -33,6 +33,7 @@ import {
   type Query,
 } from '@kbn/es-query';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
@@ -98,7 +99,7 @@ export const initializeSearchEmbeddableApi = async ({
 }): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
-    Partial<PublishesWritableUnifiedSearch> &
+    Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
     PublishesProjectRoutingOverrides;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
