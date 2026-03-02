@@ -225,7 +225,7 @@ export const AttachmentsMenu = ({
                 color="text"
                 display="base"
                 isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

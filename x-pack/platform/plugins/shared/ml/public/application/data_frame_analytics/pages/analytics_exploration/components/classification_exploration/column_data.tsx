@@ -102,7 +102,7 @@ export function getTrailingControlColumns(
                     defaultMessage: 'Show actions',
                   }
                 )}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 color="text"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               />

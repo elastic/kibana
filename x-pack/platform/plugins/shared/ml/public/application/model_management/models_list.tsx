@@ -316,7 +316,9 @@ export const ModelsList: FC<Props> = ({
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
+            iconType={
+              itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
           />
         );
       },
@@ -615,7 +617,7 @@ export const ModelsList: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType={'plusInCircle'}
+              iconType={'plusCircle'}
               color={'primary'}
               onClick={setIsAddModelFlyoutVisible.bind(null, true)}
               data-test-subj="mlModelsAddTrainedModelButton"

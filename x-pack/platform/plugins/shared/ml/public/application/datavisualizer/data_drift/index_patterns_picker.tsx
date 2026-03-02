@@ -99,7 +99,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
             <EuiButton
               size="m"
               fill
-              iconType="plusInCircleFilled"
+              iconType="plusCircle"
               onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
               disabled={!canEditDataView}
               data-test-subj={'dataDriftCreateDataViewButton'}
