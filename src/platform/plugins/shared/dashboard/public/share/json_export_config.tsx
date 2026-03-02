@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs, type ExportShare } from '@kbn/share-plugin/public';
 import type { ShareContext } from '@kbn/share-plugin/public/types';
@@ -34,6 +35,19 @@ export const getShareMenuItems =
         defaultMessage: 'JSON',
       }),
       exportType: 'dashboard_export_source',
+      flyoutHeaderContent: (
+        <EuiBetaBadge
+          label={i18n.translate('dashboard.exportSource.technicalPreviewBadgeLabel', {
+            defaultMessage: 'TECHNICAL PREVIEW',
+          })}
+          tooltipContent={i18n.translate('dashboard.exportSource.technicalPreviewBadgeTooltip', {
+            defaultMessage:
+              'This functionality is experimental and not supported. It may change or be removed at any time.',
+          })}
+          size="s"
+          data-test-subj="dashboardExportJsonTechnicalPreviewBadge"
+        />
+      ),
       generateExportButtonLabel: i18n.translate('dashboard.exportSource.downloadButtonLabel', {
         defaultMessage: 'Download JSON',
       }),

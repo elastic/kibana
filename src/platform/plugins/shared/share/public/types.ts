@@ -152,6 +152,10 @@ export interface ExportShare
       disabled?: boolean;
       helpText?: ReactNode;
       generateExportButtonLabel?: ReactNode;
+      /**
+       * Optional content rendered in the export flyout header, below the title.
+       */
+      flyoutHeaderContent?: ReactNode;
       generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
       renderCopyURIButton?: boolean;
       warnings?: Array<{ title: string; message: string }>;

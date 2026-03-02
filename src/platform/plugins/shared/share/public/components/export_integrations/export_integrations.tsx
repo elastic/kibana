@@ -18,6 +18,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFormRow,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiButton,
@@ -198,6 +199,12 @@ export function ManagedFlyout({
             />
           </h2>
         </EuiTitle>
+        {exportIntegration.config.flyoutHeaderContent ? (
+          <React.Fragment>
+            <EuiSpacer size="s" />
+            {exportIntegration.config.flyoutHeaderContent}
+          </React.Fragment>
+        ) : null}
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
         <EuiFlexGroup css={{ height: '100%' }} direction="column">
