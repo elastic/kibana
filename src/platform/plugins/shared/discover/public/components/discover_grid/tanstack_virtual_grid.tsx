@@ -23,6 +23,7 @@ import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { SourceDocument } from '@kbn/unified-data-table';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getTanstackVirtualGridStyles } from './tanstack_virtual_grid.styles';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -35,7 +36,55 @@ export interface TanstackVirtualGridProps {
   setExpandedDoc?: UnifiedDataTableProps['setExpandedDoc'];
   renderDocumentView?: UnifiedDataTableProps['renderDocumentView'];
   columnsMeta?: DataTableColumnsMeta;
+  query?: AggregateQuery;
 }
+
+interface StatsByInfo {
+  byFields: string[];
+  orderedColumns: string[];
+}
+
+/**
+ * Parses a STATS ... BY query and reorders columns:
+ * BY fields first, then count-like fields, then remaining aggregations.
+ */
+const parseStatsByColumns = (
+  query: AggregateQuery | undefined,
+  columns: string[]
+): StatsByInfo | undefined => {
+  if (!query || !('esql' in query)) return undefined;
+
+  const esql = query.esql;
+  const byMatch = esql.match(/\bSTATS\b[\s\S]+?\bBY\b\s+(.+?)(?:\||$)/i);
+  if (!byMatch) return undefined;
+
+  const byFields = byMatch[1]
+    .split(',')
+    .map((f) => f.trim())
+    .filter(Boolean);
+
+  if (byFields.length === 0) return undefined;
+
+  const bySet = new Set(byFields);
+  const countFields: string[] = [];
+  const otherFields: string[] = [];
+
+  for (const col of columns) {
+    if (col === '_source') continue;
+    if (bySet.has(col)) continue;
+    if (/count/i.test(col)) {
+      countFields.push(col);
+    } else {
+      otherFields.push(col);
+    }
+  }
+
+  const orderedColumns = [...byFields, ...countFields, ...otherFields].filter((col) =>
+    columns.includes(col)
+  );
+
+  return { byFields, orderedColumns };
+};
 
 const ROW_HEIGHT = 90;
 const OVERSCAN = 10;
@@ -69,6 +118,12 @@ const formatTimestamp = (value: unknown): string => {
   return String(value);
 };
 
+const formatCellValue = (value: unknown): string => {
+  if (value === null || value === undefined) return '-';
+  if (Array.isArray(value)) return value.join(', ');
+  return String(value);
+};
+
 /**
  * A single virtualised row, extracted to avoid closure allocations in the hot path.
  */
@@ -85,6 +140,8 @@ const VirtualRow = React.memo(
     shouldShowFieldHandler,
     columnsMeta,
     styles,
+    statsByInfo,
+    rowHeight,
   }: {
     row: DataTableRecord;
     virtualRow: VirtualItem;
@@ -97,6 +154,8 @@ const VirtualRow = React.memo(
     shouldShowFieldHandler: (fieldName: string) => boolean;
     columnsMeta: DataTableColumnsMeta | undefined;
     styles: ReturnType<typeof getTanstackVirtualGridStyles>;
+    statsByInfo: StatsByInfo | undefined;
+    rowHeight: number;
   }) => {
     const handleExpandClick = useCallback(
       (e: React.MouseEvent) => {
@@ -121,9 +180,8 @@ const VirtualRow = React.memo(
     const filteredRow = useMemo(() => filterNullFields(row), [row]);
 
     return (
-      <div data-index={virtualRow.index} style={{ height: ROW_HEIGHT }}>
+      <div data-index={virtualRow.index} style={{ height: rowHeight }}>
         <div css={styles.virtualRow} role="row" tabIndex={0}>
-          {/* expand button */}
           <div css={styles.expandCell} role="gridcell">
             <EuiButtonIcon
               size="xs"
@@ -138,27 +196,47 @@ const VirtualRow = React.memo(
             />
           </div>
 
-          {/* timestamp */}
-          {showTimeCol && timeFieldName && (
-            <div css={styles.timestampCell} role="gridcell" title={String(timestampValue ?? '')}>
-              {formatTimestamp(timestampValue)}
-            </div>
+          {statsByInfo ? (
+            statsByInfo.orderedColumns.map((col) => {
+              const val = row.flattened[col];
+              const isByField = statsByInfo.byFields.includes(col);
+              return (
+                <div
+                  key={col}
+                  css={isByField ? styles.byCell : styles.aggCell}
+                  role="gridcell"
+                  title={formatCellValue(val)}
+                >
+                  {formatCellValue(val)}
+                </div>
+              );
+            })
+          ) : (
+            <>
+              {showTimeCol && timeFieldName && (
+                <div
+                  css={styles.timestampCell}
+                  role="gridcell"
+                  title={String(timestampValue ?? '')}
+                >
+                  {formatTimestamp(timestampValue)}
+                </div>
+              )}
+              <div css={styles.summaryCell} role="gridcell">
+                <SourceDocument
+                  useTopLevelObjectColumns={false}
+                  row={filteredRow}
+                  columnId="_source"
+                  dataView={dataView}
+                  shouldShowFieldHandler={shouldShowFieldHandler}
+                  maxEntries={MAX_SUMMARY_FIELDS}
+                  fieldFormats={fieldFormats}
+                  columnsMeta={columnsMeta}
+                  isCompressed
+                />
+              </div>
+            </>
           )}
-
-          {/* summary */}
-          <div css={styles.summaryCell} role="gridcell">
-            <SourceDocument
-              useTopLevelObjectColumns={false}
-              row={filteredRow}
-              columnId="_source"
-              dataView={dataView}
-              shouldShowFieldHandler={shouldShowFieldHandler}
-              maxEntries={MAX_SUMMARY_FIELDS}
-              fieldFormats={fieldFormats}
-              columnsMeta={columnsMeta}
-              isCompressed
-            />
-          </div>
         </div>
       </div>
     );
@@ -170,6 +248,8 @@ const VirtualRow = React.memo(
  * Activated by adding a comment containing "tanstack" in an ES|QL query.
  * Used purely for A-B testing virtualisation performance.
  */
+const STATS_ROW_HEIGHT = 34;
+
 export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.memo(
   ({
     rows,
@@ -180,6 +260,7 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
     renderDocumentView,
     columnsMeta,
     columns,
+    query,
   }) => {
     const { euiTheme } = useEuiTheme();
     const { fieldFormats } = useDiscoverServices();
@@ -189,6 +270,9 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
 
     const timeFieldName = dataView.timeFieldName;
 
+    const statsByInfo = useMemo(() => parseStatsByColumns(query, columns), [query, columns]);
+    const rowHeight = statsByInfo ? STATS_ROW_HEIGHT : ROW_HEIGHT;
+
     const shouldShowFieldHandler = useMemo(() => {
       const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
       return getShouldShowFieldHandler(dataViewFields, dataView, true);
@@ -197,7 +281,7 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
     const rowVirtualizer = useVirtualizer({
       count: rows.length,
       getScrollElement: () => parentRef.current,
-      estimateSize: () => ROW_HEIGHT,
+      estimateSize: () => rowHeight,
       overscan: OVERSCAN,
       initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
     });
@@ -260,20 +344,36 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
 
         <div css={styles.contentArea}>
           <div ref={parentRef} css={styles.scrollContainer} role="grid">
-            {/* header */}
             <div css={styles.headerRow} role="row">
               <div css={styles.expandHeaderCell} role="columnheader" />
-              {showTimeCol && timeFieldName && (
-                <div css={styles.timestampHeaderCell} role="columnheader" title={timeFieldName}>
-                  {timeFieldName}
-                </div>
+              {statsByInfo ? (
+                statsByInfo.orderedColumns.map((col) => {
+                  const isByField = statsByInfo.byFields.includes(col);
+                  return (
+                    <div
+                      key={col}
+                      css={isByField ? styles.byHeaderCell : styles.aggHeaderCell}
+                      role="columnheader"
+                      title={col}
+                    >
+                      {col}
+                    </div>
+                  );
+                })
+              ) : (
+                <>
+                  {showTimeCol && timeFieldName && (
+                    <div css={styles.timestampHeaderCell} role="columnheader" title={timeFieldName}>
+                      {timeFieldName}
+                    </div>
+                  )}
+                  <div css={styles.summaryHeaderCell} role="columnheader" title="Summary">
+                    Summary
+                  </div>
+                </>
               )}
-              <div css={styles.summaryHeaderCell} role="columnheader" title="Summary">
-                Summary
-              </div>
             </div>
 
-            {/* virtualised body */}
             <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
               <div
                 css={styles.virtualInner}
@@ -295,6 +395,8 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
                       shouldShowFieldHandler={shouldShowFieldHandler}
                       columnsMeta={columnsMeta}
                       styles={styles}
+                      statsByInfo={statsByInfo}
+                      rowHeight={rowHeight}
                     />
                   );
                 })}
@@ -302,7 +404,6 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
             </div>
           </div>
 
-          {/* document flyout */}
           {canRenderDocumentView && currentExpandedDoc && (
             <span className="dscTable__flyout">
               {renderDocumentView!(currentExpandedDoc, rows, columns, setExpandedDoc!, columnsMeta)}

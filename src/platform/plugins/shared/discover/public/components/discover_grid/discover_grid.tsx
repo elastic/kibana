@@ -144,6 +144,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           setExpandedDoc={props.setExpandedDoc}
           renderDocumentView={props.renderDocumentView}
           columnsMeta={props.columnsMeta}
+          query={isOfAggregateQueryType(query) ? query : undefined}
         />
       );
     }

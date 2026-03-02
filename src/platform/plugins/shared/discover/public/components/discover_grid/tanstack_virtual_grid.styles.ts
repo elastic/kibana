@@ -125,4 +125,52 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
     minWidth: 0,
     lineHeight: 1.5,
   }),
+
+  // STATS ... BY column styles
+  byHeaderCell: css({
+    flex: 1,
+    padding: `0 ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    borderRight: euiTheme.border.thin,
+    fontWeight: euiTheme.font.weight.bold,
+    minWidth: 0,
+  }),
+  aggHeaderCell: css({
+    flex: 1,
+    padding: `0 ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    borderRight: euiTheme.border.thin,
+    minWidth: 0,
+    '&:last-child': {
+      borderRight: 'none',
+    },
+  }),
+  byCell: css({
+    flex: 1,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    borderRight: euiTheme.border.thin,
+    fontWeight: euiTheme.font.weight.semiBold,
+    minWidth: 0,
+  }),
+  aggCell: css({
+    flex: 1,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    borderRight: euiTheme.border.thin,
+    fontFamily: euiTheme.font.familyCode,
+    fontSize: euiTheme.size.m,
+    minWidth: 0,
+    '&:last-child': {
+      borderRight: 'none',
+    },
+  }),
 });
