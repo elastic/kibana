@@ -2859,7 +2859,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", removeLimit: boolean | undefined, query: ",
+          ", query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2892,8 +2892,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 45,
-            "columnNumber": 3,
+            "lineNumber": 44,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2901,23 +2901,6 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getInitialESQLQuery.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "removeLimit",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 46,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.getInitialESQLQuery.$3",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -2933,8 +2916,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 47,
-            "columnNumber": 3,
+            "lineNumber": 44,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
