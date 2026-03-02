@@ -26,7 +26,7 @@ export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttach
         label: 'See attachment',
         onClick: () => {},
         isPrimary: true,
-        iconType: 'arrowRight',
+        iconType: 'chevronSingleRight',
       },
     ],
     children: AttachmentContentLazy,

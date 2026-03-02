@@ -52,7 +52,7 @@ export const TemplatesListHeader: React.FC = () => {
                 <LinkButton
                   onClick={openFlyout}
                   href={'#'}
-                  iconType="importAction"
+                  iconType="download"
                   isDisabled={false}
                   aria-label={i18n.IMPORT_TEMPLATE}
                   isEmpty={true}
@@ -66,7 +66,7 @@ export const TemplatesListHeader: React.FC = () => {
                   fill
                   onClick={navigateToCasesCreateTemplate}
                   href={getCasesCreateTemplateUrl()}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   data-test-subj="create-template-button"
                 >
                   {i18n.CREATE_TEMPLATE}
