@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './pick_scout_test_group_run_order';
-export * from './paths';
-export * from './test_tracks';
-export * from './test_distribution_strategies';
+import path from 'node:path';
+import { getKibanaDir } from '#pipeline-utils';
+
+export const SCOUT_OUTPUT_ROOT = path.resolve(getKibanaDir(), '.scout');
+
+export const SCOUT_TEST_LANE_LOADS_PATH = path.resolve(SCOUT_OUTPUT_ROOT, 'test_lane_loads.json');

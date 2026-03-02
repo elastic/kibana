@@ -43,6 +43,7 @@ steps:
     depends_on:
       - build
     env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       UIAM_COSMOSDB_DOCKER_IMAGE: $UIAM_COSMOSDB_IMAGE
       SERVERLESS_TESTS_ONLY: 'true'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
