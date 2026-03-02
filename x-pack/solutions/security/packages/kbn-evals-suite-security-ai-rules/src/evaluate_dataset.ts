@@ -12,6 +12,8 @@ import type {
   Example,
   EvalsExecutorClient,
 } from '@kbn/evals';
+import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReferenceRule } from '../datasets/sample_rules';
 import type { SecurityRuleGenerationClient } from './chat_client';
@@ -268,53 +270,8 @@ function createRejectionEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOu
 }
 
 // ---------------------------------------------------------------------------
-// LLM evaluators — use built-in @kbn/evals criteria evaluator
+// LLM evaluators
 // ---------------------------------------------------------------------------
-
-/**
- * Checks that the generated ES|QL query is functionally equivalent to the expected query —
- * i.e. it would produce the same detection results on the same data, regardless of language
- * differences (reference rules may be in EQL while generated rules are always ES|QL).
- */
-function createEsqlFunctionalEquivalenceEvaluator(
-  evaluators: DefaultEvaluators
-): Evaluator<RuleExample, RuleGenerationTaskOutput> {
-  return {
-    name: 'ESQL Functional Equivalence',
-    kind: 'LLM',
-    evaluate: async ({ input, output, expected, metadata }) => {
-      if (!expected?.query) {
-        return {
-          score: null,
-          label: 'N/A',
-          explanation: 'No reference query to compare against',
-        };
-      }
-
-      if (!output?.generatedRule) {
-        return {
-          score: 0,
-          label: 'FAIL',
-          explanation: 'No rule was generated',
-        };
-      }
-
-      const generatedQuery = output.generatedRule.query ?? '(no query generated)';
-      const expectedQuery = expected.query;
-
-      const criteriaEval = evaluators.criteria([
-        `The generated ES|QL query should be functionally equivalent to the expected query — ` +
-          `detecting the same threat patterns and producing the same results on the same data, ` +
-          `even if they use different query languages (EQL vs ES|QL), different syntax, ` +
-          `different field ordering, or different column names. ` +
-          `Expected query: ${expectedQuery} ` +
-          `Generated query: ${generatedQuery}`,
-      ]);
-
-      return criteriaEval.evaluate({ input, output: output.generatedRule, expected, metadata });
-    },
-  };
-}
 
 /**
  * Checks that the generated rule name semantically matches the expected rule name —
@@ -378,27 +335,38 @@ export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
+  inferenceClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityRuleGenerationClient;
+  inferenceClient: BoundInferenceClient;
   log: ToolingLog;
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
+  const esqlEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
+    inferenceClient,
+    log,
+    predictionExtractor: (output: unknown) =>
+      (output as RuleGenerationTaskOutput)?.generatedRule?.query ?? '',
+    groundTruthExtractor: (expected: unknown) =>
+      (expected as Partial<ReferenceRule>)?.query ?? '',
+  });
+
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    skipNegativeCases(createQuerySyntaxValidityEvaluator()), // syntax + FROM wildcard check (G)
-    skipNegativeCases(createFieldCoverageEvaluator()), // required fields incl. riskScore (B partial)
+    skipNegativeCases(createQuerySyntaxValidityEvaluator()),
+    skipNegativeCases(createFieldCoverageEvaluator()),
     skipNegativeCases(createRuleTypeLanguageEvaluator()),
-    skipNegativeCases(createMitreAccuracyEvaluator()), // F1 score + invalidFormat metadata (H-A)
-    skipNegativeCases(createSeverityValidityEvaluator()), // enum check (A)
-    skipNegativeCases(createRiskScoreValidityEvaluator()), // 0–100 range check (B)
-    skipNegativeCases(createIntervalFormatEvaluator()), // duration string format (C)
-    skipNegativeCases(createLookbackGapEvaluator()), // from >= interval coverage (D)
-    skipNegativeCases(createSeverityMatchEvaluator()), // vs expected severity (E)
-    skipNegativeCases(createRiskScoreMatchEvaluator()), // vs expected riskScore with tolerance (F)
-    // LLM — functional/semantic equivalence via built-in @kbn/evals criteria evaluator
-    skipNegativeCases(createEsqlFunctionalEquivalenceEvaluator(evaluators)),
+    skipNegativeCases(createMitreAccuracyEvaluator()),
+    skipNegativeCases(createSeverityValidityEvaluator()),
+    skipNegativeCases(createRiskScoreValidityEvaluator()),
+    skipNegativeCases(createIntervalFormatEvaluator()),
+    skipNegativeCases(createLookbackGapEvaluator()),
+    skipNegativeCases(createSeverityMatchEvaluator()),
+    skipNegativeCases(createRiskScoreMatchEvaluator()),
+    // LLM — ES|QL functional equivalence via @kbn/evals built-in evaluator
+    skipNegativeCases(esqlEquivalenceEvaluator),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
     // Re-enable when running thorough multi-model comparisons.
     // skipNegativeCases(createRuleNameEvaluator(evaluators)),
