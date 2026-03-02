@@ -11,6 +11,7 @@ import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import { summarizeFilestoreToolReturn } from './utils';
 
 const schema = z.object({
   pattern: z.string().describe('The pattern to search for'),
@@ -38,6 +39,7 @@ export const grepTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
+    summarizeToolReturn: summarizeFilestoreToolReturn,
     handler: async ({ pattern, globPattern, context, fixed }, ctx) => {
       const matches = await filestore.grep(pattern, globPattern, { context, fixed });
 

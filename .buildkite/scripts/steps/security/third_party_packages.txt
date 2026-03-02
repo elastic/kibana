@@ -33,3 +33,4 @@ yaml-language-server
 simple-statistics
 monaco-promql
 mongodb
+react-element-to-jsx-string
