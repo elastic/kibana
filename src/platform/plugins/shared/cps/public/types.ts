@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ICPSManager } from '@kbn/cps-utils';
+import type { ICPSManager, CPSAppAccessResolver } from '@kbn/cps-utils';
 
 export interface CPSPluginSetup {
   cpsEnabled?: boolean;
+  /**
+   * Register a dynamic access resolver for a specific app during plugin setup.
+   * See {@link ICPSManager.registerAppAccess} for details.
+   */
+  registerAppAccess(appId: string, resolver: CPSAppAccessResolver): void;
 }
 
 export interface CPSConfigType {

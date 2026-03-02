@@ -14,18 +14,30 @@ import type { ProjectRouting } from '@kbn/es-query';
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
+export const CACHE_TTL_MS = 15_000; // cache keeps data for 15 seconds
+
+interface CacheEntry {
+  data: ProjectsData | null;
+  fetchedAt: number;
+}
 
 export interface ProjectFetcher {
   fetchProjects: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
 }
 
 /**
- * Creates project fetcher with retry logic.
+ * Creates project fetcher with retry logic, in-flight deduplication, and short-lived caching.
+ *
+ * - Concurrent calls with the same `projectRouting` share a single HTTP round-trip.
+ * - Successful responses are cached for {@link CACHE_TTL_MS}; subsequent calls within that
+ *   window return the cached result without a network request.
+ * - Errors are never cached — the next call always retries.
  */
 export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFetcher {
-  async function fetchProjectsWithRetry(
-    projectRouting?: ProjectRouting
-  ): Promise<ProjectsData | null> {
+  const inFlightRequests = new Map<ProjectRouting | undefined, Promise<ProjectsData | null>>();
+  const cache = new Map<ProjectRouting | undefined, CacheEntry>();
+
+  async function fetchWithRetry(projectRouting?: ProjectRouting): Promise<ProjectsData | null> {
     let lastError: Error = new Error('');
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -61,11 +73,27 @@ export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFe
   }
 
   return {
-    /**
-     * Fetches projects from the server with retry logic.
-     */
-    fetchProjects: async (projectRouting?: ProjectRouting): Promise<ProjectsData | null> => {
-      return await fetchProjectsWithRetry(projectRouting);
+    fetchProjects: (projectRouting?: ProjectRouting): Promise<ProjectsData | null> => {
+      const cached = cache.get(projectRouting);
+      if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+        return Promise.resolve(cached.data);
+      }
+
+      const existing = inFlightRequests.get(projectRouting);
+      if (existing) {
+        return existing;
+      }
+
+      const promise = fetchWithRetry(projectRouting)
+        .then((data) => {
+          cache.set(projectRouting, { data, fetchedAt: Date.now() });
+          return data;
+        })
+        .finally(() => {
+          inFlightRequests.delete(projectRouting);
+        });
+      inFlightRequests.set(projectRouting, promise);
+      return promise;
     },
   };
 }
