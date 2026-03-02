@@ -15,6 +15,8 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture', 'http', 'rest', 'api']
   Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit.
 
   Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
+
+  Always make sure to preview the OAS you generated before merging it to `main`, run `make help` in `<REPO_ROOT>/oas_docs` for preview commands.
 </DocCallOut>
 
 ### Important components
