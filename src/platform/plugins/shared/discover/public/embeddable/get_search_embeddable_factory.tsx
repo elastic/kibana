@@ -17,7 +17,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FetchContext, HasEditCapabilities } from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   apiCanFocusPanel,
   apiPublishesChildren,
@@ -341,14 +341,14 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
-      const { onEdit: navigateToDiscover, ...editApiWithoutOnEdit } = initializeEditApi({
+      const editApi = initializeEditApi({
         uuid,
         parentApi,
         partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
         discoverServices,
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
-      }) as Partial<HasEditCapabilities & { getEditHref: () => Promise<string> }>;
+      });
 
       const api: SearchEmbeddableApi = finalizeApi({
         ...unsavedChangesApi,
@@ -357,8 +357,10 @@ export const getSearchEmbeddableFactory = ({
           Required<Pick<SearchEmbeddableApi, 'filters$' | 'query$' | 'setFilters' | 'setQuery'>>),
         ...timeRangeManager.api,
         ...drilldownsManager.api,
-        ...editApiWithoutOnEdit,
-        ...(navigateToDiscover
+        ...editApi,
+        // If editing is enabled and it's a by ref embeddable,
+        // override default save-and-return logic with inline editing
+        ...(editApi && savedObjectId$.getValue()
           ? {
               onEdit: startInlineEditing,
               overrideHoverActions$,
@@ -366,7 +368,7 @@ export const getSearchEmbeddableFactory = ({
                 <SearchEmbeddableInlineEditHoverActions
                   draftSelectedTabId$={draftSelectedTabId$}
                   tabs={tabs}
-                  onEditInDiscover={navigateToDiscover}
+                  onEditInDiscover={editApi.onEdit}
                   onSelectTab={previewInlineTabSelection}
                 />
               ),

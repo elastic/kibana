@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type {
   FetchContext,
-  HasAppContext,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesSavedObjectId,
@@ -53,10 +52,7 @@ export async function getAppTarget(
   };
 }
 
-export function initializeEditApi<
-  ParentApiType = unknown,
-  ReturnType = ParentApiType extends HasAppContext ? HasEditCapabilities : {}
->({
+export function initializeEditApi({
   uuid,
   parentApi,
   partialApi,
@@ -65,21 +61,22 @@ export function initializeEditApi<
   getTitle,
 }: {
   uuid: string;
-  parentApi?: ParentApiType;
+  parentApi?: unknown;
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
   discoverServices: DiscoverServices;
-}): ReturnType {
+}): HasEditCapabilities | undefined {
   /**
    * If the parent is providing context, then the embeddable state transfer service can be used
    * and editing should be allowed; otherwise, do not provide editing capabilities
    */
   if (!parentApi || !apiHasAppContext(parentApi)) {
-    return {} as ReturnType;
+    return;
   }
+
   const parentApiContext = parentApi.getAppContext();
 
   return {
@@ -130,5 +127,5 @@ export function initializeEditApi<
     getEditHref: async () => {
       return (await getAppTarget(partialApi, discoverServices))?.editPath;
     },
-  } as ReturnType;
+  };
 }
