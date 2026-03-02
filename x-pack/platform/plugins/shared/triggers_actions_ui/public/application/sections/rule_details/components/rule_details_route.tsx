@@ -10,6 +10,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { useRegisterCpsPickerAccess } from '../../../hooks/use_register_cps_picker_access';
 import type { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
@@ -79,6 +81,8 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     loadData();
   }, [ruleId, http, loadActionTypes, loadRuleTypes, resolveRule, toasts, refreshToken]);
 
+  const registerCpsPickerAccess = useRegisterCpsPickerAccess();
+
   useEffect(() => {
     if (rule) {
       const outcome = (rule as ResolvedRule).outcome;
@@ -94,8 +98,13 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
           ),
         });
       }
+      // Configure the global CPS picker in readonly mode if the rule is CPS-enabled,
+      // disable otherwise
+      registerCpsPickerAccess(
+        rule.uiamApiKey != null ? ProjectRoutingAccess.READONLY : ProjectRoutingAccess.DISABLED
+      );
     }
-  }, [rule, spacesApi, basePath]);
+  }, [rule, spacesApi, basePath, registerCpsPickerAccess]);
 
   const getLegacyUrlConflictCallout = () => {
     const outcome = (rule as ResolvedRule).outcome;
