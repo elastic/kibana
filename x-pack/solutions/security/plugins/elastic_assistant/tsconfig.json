@@ -12,8 +12,8 @@
     // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "../../../../../typings/**/*"
-, "../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/utils/transform_search_response_to_alerts/is_missing_required_fields", "../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/utils/transform_search_response_to_alerts"  ],
+    "../../../../../typings/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-http-server",
