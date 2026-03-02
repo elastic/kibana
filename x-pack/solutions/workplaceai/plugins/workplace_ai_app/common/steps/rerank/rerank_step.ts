@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { StepCategory } from '@kbn/workflows';
 
 /**
  * Step type ID for the rerank workflow step
@@ -84,7 +85,7 @@ export const rerankStepCommonDefinition: CommonStepDefinition<
   typeof RerankConfigSchema
 > = {
   id: RerankStepTypeId,
-  category: 'elasticsearch',
+  category: StepCategory.Elasticsearch,
   label: i18n.translate('xpack.workplaceai.rerankStep.label', {
     defaultMessage: 'Rerank Results',
   }),

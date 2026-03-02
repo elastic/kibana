@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -57,7 +58,7 @@ export const externalStepCommonDefinition: CommonStepDefinition<
   typeof ConfigSchema
 > = {
   id: ExternalStepTypeId,
-  category: 'external',
+  category: StepCategory.External,
   label: i18n.translate('workflowsExtensionsExample.externalStep.label', {
     defaultMessage: 'External Step',
   }),

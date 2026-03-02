@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -45,7 +46,7 @@ export const setVarStepCommonDefinition: CommonStepDefinition<
   SetVarStepOutputSchema
 > = {
   id: SetVarStepTypeId,
-  category: 'data',
+  category: StepCategory.Data,
   label: i18n.translate('workflowsExtensionsExample.setVarStep.label', {
     defaultMessage: 'Set Variable',
   }),

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { StepCategory } from '@kbn/workflows';
 import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 import { i18n } from '@kbn/i18n';
 
@@ -127,7 +128,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   RunAgentStepConfigSchema
 > = {
   id: RunAgentStepTypeId,
-  category: 'ai',
+  category: StepCategory.Ai,
   label: i18n.translate('xpack.agentBuilder.runAgentStep.label', {
     defaultMessage: 'Run Agent',
   }),
