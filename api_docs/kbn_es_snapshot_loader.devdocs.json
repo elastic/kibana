@@ -310,7 +310,7 @@
         "label": "LoadResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-        "lineNumber": 42,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -323,7 +323,7 @@
             "label": "success",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -336,7 +336,7 @@
             "label": "snapshotName",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -352,7 +352,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -368,7 +368,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -384,7 +384,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -400,7 +400,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -426,7 +426,7 @@
           " extends BaseConfig"
         ],
         "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -442,7 +442,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -458,7 +458,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -646,6 +646,58 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
             "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.renamePattern",
+            "type": "string",
+            "tags": [],
+            "label": "renamePattern",
+            "description": [
+              "\nOptional index rename during restore. This is useful to restore into a\ntemporary location to avoid clobbering existing indices.\n\nBoth values must be provided to enable renaming."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.renameReplacement",
+            "type": "string",
+            "tags": [],
+            "label": "renameReplacement",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-snapshot-loader",
+            "id": "def-common.RestoreConfig.allowNoMatches",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowNoMatches",
+            "description": [
+              "\nWhen true, a restore that matches no indices is treated as a successful\nno-op (restoring nothing) instead of an error."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-es-snapshot-loader/src/types.ts",
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
