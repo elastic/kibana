@@ -39,12 +39,14 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 export interface AppDependencies {
   analytics: AnalyticsServiceStart;
   application: ApplicationStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
+  cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   dataViewEditor?: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
