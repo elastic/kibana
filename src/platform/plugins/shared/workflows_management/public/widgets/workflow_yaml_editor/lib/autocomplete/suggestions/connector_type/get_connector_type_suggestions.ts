@@ -12,11 +12,12 @@ import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
-  HttpStepSchema,
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -113,7 +114,7 @@ export function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
+      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType, {});
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -230,14 +231,19 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Variable,
     },
     {
-      schema: HttpStepSchema,
-      description: 'Make HTTP requests',
-      icon: monaco.languages.CompletionItemKind.Reference,
-    },
-    {
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
+    },
+    {
+      schema: WorkflowExecuteStepSchema,
+      description: 'Execute another workflow (synchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowExecuteAsyncStepSchema,
+      description: 'Execute another workflow (asynchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
     },
   ];
 

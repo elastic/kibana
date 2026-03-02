@@ -8,11 +8,12 @@
 import { expect } from '@kbn/scout/api';
 import type { RedactProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { tags } from '@kbn/scout';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Redact Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should redact IP address with default prefix/suffix', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-redact-ip-basic';

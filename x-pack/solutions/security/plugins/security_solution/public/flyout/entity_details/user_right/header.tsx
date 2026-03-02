@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
@@ -61,7 +68,15 @@ export const UserPanelHeader = ({
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'user-panel-header-lastSeen'}>
-            {lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />}
+            {isLoading ? (
+              <EuiSkeletonText
+                lines={1}
+                size="xs"
+                data-test-subj="user-panel-header-lastSeen-loading"
+              />
+            ) : (
+              lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />
+            )}
             <EuiSpacer size="xs" />
           </EuiText>
         </EuiFlexItem>

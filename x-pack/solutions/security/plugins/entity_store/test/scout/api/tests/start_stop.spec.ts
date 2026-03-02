@@ -45,7 +45,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
         responseType: 'json',
         body: { entityTypes },
       });
-      expect(installResponse.statusCode).toBe(200);
+      expect(installResponse.statusCode).toBe(201);
 
       // 2. Verify the task for the entity is running (scheduled)
       let task = await kbnClient.savedObjects.get({ type: 'task', id: taskId });

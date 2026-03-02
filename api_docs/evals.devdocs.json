@@ -1,0 +1,166 @@
+{
+  "id": "evals",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "evals",
+      "id": "def-public.EvalsPublicSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "EvalsPublicSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+      "lineNumber": 10,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "evals",
+      "id": "def-public.EvalsPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "EvalsPublicStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "evals",
+          "id": "def-public.EvalsPublicStart.TraceWaterfall",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "TraceWaterfall",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<{ traceId: string; }, any> | React.FunctionComponent<{ traceId: string; }>"
+          ],
+          "path": "x-pack/platform/plugins/shared/evals/public/types.ts",
+          "lineNumber": 13,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "evals",
+      "id": "def-server.EvalsPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "EvalsPluginSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
+      "lineNumber": 10,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "evals",
+      "id": "def-server.EvalsPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "EvalsPluginStart",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "evals",
+        "id": "def-common.APP_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "APP_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/evals\""
+        ],
+        "path": "x-pack/platform/plugins/shared/evals/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "evals",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"evals\""
+        ],
+        "path": "x-pack/platform/plugins/shared/evals/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "evals",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Evaluations\""
+        ],
+        "path": "x-pack/platform/plugins/shared/evals/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

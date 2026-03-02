@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -40,13 +47,20 @@ export const HostPanelHeader = ({ entityIdentifiers, lastSeen }: HostPanelHeader
     () => lastSeen?.date && new Date(lastSeen.date),
     [lastSeen?.date]
   );
-
   return (
     <FlyoutHeader data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'host-panel-header-lastSeen'}>
-            {lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />}
+            {isLoading ? (
+              <EuiSkeletonText
+                lines={1}
+                size="xs"
+                data-test-subj="host-panel-header-lastSeen-loading"
+              />
+            ) : (
+              lastSeenDateFormatted && <PreferenceFormattedDate value={lastSeenDateFormatted} />
+            )}
             <EuiSpacer size="xs" />
           </EuiText>
         </EuiFlexItem>

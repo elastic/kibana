@@ -1,0 +1,54 @@
+version: '1'
+name: 'sources.github.search'
+description: 'Search through GitHub code, repositories, issues, pull requests, and users'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: tool_name
+    type: choice
+    options:
+      - search_code
+      - search_repositories
+      - search_issues
+      - search_pull_requests
+      - search_users
+    required: true
+    description: "Name of the search tool to use based on the choices"
+  - name: query
+    type: string
+    required: true
+    description: "The query to search for. Use github query syntax."
+  - name: order
+    type: string
+    default: "desc"
+    required: false
+    description: "Sort order. Valid values: asc, desc"
+  - name: page
+    type: number
+    default: 1
+    required: false
+    description: "The page number"
+  - name: per_page
+    type: number
+    default: 10
+    required: false
+    description: "The number of results per page"
+  - name: sort
+    type: string
+    default: "created"
+    required: false
+    description: "Sort field. Valid values: comments, reactions, reactions-+1, reactions--1, reactions-smile, reactions-thinking_face, reactions-heart, reactions-tada, interactions, created, updated"
+steps:
+  - name: search-github
+    type: mcp.callTool
+    connector-id: <%= mcp-stack-connector-id %>
+    with:
+      name: "${{inputs.tool_name}}"
+      arguments:
+        query: "${{inputs.query}}"
+        order: "${{inputs.order}}"
+        page: "${{inputs.page}}"
+        perPage: "${{inputs.per_page}}"
+        sort: "${{inputs.sort}}"

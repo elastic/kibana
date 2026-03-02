@@ -11,7 +11,7 @@ import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands } from '../../../types';
 import type { ESQLPolicy, ISuggestionItem } from '../types';
 import { getSafeInsertText } from '../../definitions/utils/autocomplete/helpers';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 export const ENRICH_MODES = [
   {

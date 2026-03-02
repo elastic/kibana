@@ -34,6 +34,7 @@ import type {
 import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE, SearchStatus } from '../../../common';
 import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
+import { strategyToString } from '../../../common';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './status/get_session_status';
 import { updateSessionStatus } from './status/update_session_status';
@@ -298,7 +299,7 @@ export class SearchSessionService implements ISearchSessionService {
 
     const searchInfo: SearchSessionRequestInfo = {
       id: searchId,
-      strategy,
+      strategy: strategyToString(strategy),
     };
 
     if (!this.trackIdBatchQueueMap.has(sessionId)) {
@@ -401,7 +402,17 @@ export class SearchSessionService implements ISearchSessionService {
       })
     );
 
-    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses) };
+    const sessionsData: SearchSessionStatusesResponse['sessions'] = {};
+    sessions.forEach((session) => {
+      sessionsData[session.id] = {
+        name: session.attributes.name,
+        restoreState: session.attributes.restoreState,
+        locatorId: session.attributes.locatorId,
+        appId: session.attributes.appId,
+      };
+    });
+
+    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses), sessions: sessionsData };
   }
 
   private bulkGet = async (

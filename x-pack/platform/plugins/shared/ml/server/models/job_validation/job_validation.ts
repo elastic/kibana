@@ -26,7 +26,6 @@ import type { validateJobSchema } from '../../routes/schemas/job_validation_sche
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -38,7 +37,6 @@ export async function validateJob(
   client: IScopedClusterClient,
   mlClient: MlClient,
   payload: ValidateJobPayload,
-  authHeader: AuthorizationHeader,
   isSecurityDisabled?: boolean
 ) {
   const messages = getMessages();
@@ -109,7 +107,6 @@ export async function validateJob(
       validationMessages.push(
         ...(await validateDatafeedPreviewWithMessages(
           mlClient,
-          authHeader,
           job,
           duration?.start,
           duration?.end

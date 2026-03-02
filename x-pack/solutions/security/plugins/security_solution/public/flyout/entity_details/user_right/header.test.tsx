@@ -10,13 +10,18 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { UserPanelHeader } from './header';
-import { managedUserDetails, mockManagedUserData, mockObservedUser } from './mocks';
+import { managedUserDetails, mockManagedUserData } from './mocks';
+
+const defaultLastSeen = {
+  date: '2023-02-23T20:03:17.489Z',
+  isLoading: false,
+};
 
 const mockProps = {
   userName: 'test',
-  entityIdentifiers: { 'user.name': 'test' } as const,
-  lastSeen: mockObservedUser.lastSeen,
+  scopeId: 'test-scope-id',
   managedUser: mockManagedUserData,
+  lastSeen: defaultLastSeen,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -36,15 +41,7 @@ describe('UserPanelHeader', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
-          {...{
-            ...mockProps,
-            lastSeen: {
-              isLoading: false,
-              date: futureDay,
-            },
-          }}
-        />
+        <UserPanelHeader {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
       </TestProviders>
     );
 
@@ -57,17 +54,16 @@ describe('UserPanelHeader', () => {
     const { getByTestId } = render(
       <TestProviders>
         <UserPanelHeader
-          {...{
-            ...mockProps,
-            managedUser: {
-              ...mockManagedUserData,
-              data: {
-                [ManagedUserDatasetKey.ENTRA]: {
-                  ...entraManagedUser,
-                  fields: {
-                    ...entraManagedUser.fields,
-                    '@timestamp': [futureDay],
-                  },
+          {...mockProps}
+          lastSeen={{ date: '2020-01-01T00:00:00.000Z', isLoading: false }}
+          managedUser={{
+            ...mockManagedUserData,
+            data: {
+              [ManagedUserDatasetKey.ENTRA]: {
+                ...entraManagedUser,
+                fields: {
+                  ...entraManagedUser.fields,
+                  '@timestamp': [futureDay],
                 },
               },
             },
@@ -93,15 +89,7 @@ describe('UserPanelHeader', () => {
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
-          {...{
-            ...mockProps,
-            lastSeen: {
-              isLoading: false,
-              date: undefined,
-            },
-          }}
-        />
+        <UserPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
       </TestProviders>
     );
 
@@ -112,17 +100,27 @@ describe('UserPanelHeader', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <UserPanelHeader
-          {...{
-            ...mockProps,
-            managedUser: {
-              ...mockManagedUserData,
-              data: {},
-            },
+          {...mockProps}
+          managedUser={{
+            ...mockManagedUserData,
+            data: {},
           }}
         />
       </TestProviders>
     );
 
     expect(queryByTestId('user-panel-header-managed-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders skeleton when loading', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <UserPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('user-panel-header-lastSeen-loading')).toBeInTheDocument();
+    expect(getByTestId('user-panel-header-observed-badge-loading')).toBeInTheDocument();
+    expect(queryByTestId('user-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 });

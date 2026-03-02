@@ -72,6 +72,18 @@ export const ProcessorFieldSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorRequiredError',
         { defaultMessage: 'A field value is required.' }
       ),
+      validate: (value: string) => {
+        if (value.includes('{{')) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorMustacheError',
+            {
+              defaultMessage:
+                "Mustache template syntax '{{' '}}' or '{{{' '}}}' is not allowed in field names",
+            }
+          );
+        }
+        return true;
+      },
     },
   });
 
@@ -85,12 +97,7 @@ export const ProcessorFieldSelector = ({
 
   const defaultLabel = i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorSourceLabel',
-    { defaultMessage: 'Source Field' }
-  );
-
-  const defaultHelpText = i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorSourceHelpText',
-    { defaultMessage: 'Select or enter a field name' }
+    { defaultMessage: 'Field' }
   );
 
   const defaultPlaceholder = i18n.translate(
@@ -103,7 +110,7 @@ export const ProcessorFieldSelector = ({
       value={field.value}
       onChange={handleChange}
       label={label ?? defaultLabel}
-      helpText={helpText ?? defaultHelpText}
+      helpText={helpText}
       placeholder={placeholder ?? defaultPlaceholder}
       suggestions={suggestions}
       fullWidth
