@@ -190,7 +190,7 @@ export function QuickSearchVisor({
             <div ref={kqlInputRef}>
               <KQLComponent
                 isDisabled={!isVisible}
-                iconType="search"
+                iconType="magnify"
                 disableLanguageSwitcher={true}
                 indexPatterns={adHocDataView ? [adHocDataView] : []}
                 bubbleSubmitEvent={false}
