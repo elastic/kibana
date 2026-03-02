@@ -10,10 +10,10 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod';
-
-const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
+
+const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
 
 export function registerValidateWorkflowTool(
   agentBuilder: AgentBuilderPluginSetupContract,
