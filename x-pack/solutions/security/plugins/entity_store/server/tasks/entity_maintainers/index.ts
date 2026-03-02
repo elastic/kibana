@@ -18,6 +18,7 @@ import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
+import { CRUDClient } from '../../domain/crud_client';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
@@ -106,6 +107,13 @@ export function registerEntityMaintainerTask({
                 state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
               };
 
+              const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+              const crudClient = new CRUDClient({
+                logger,
+                esClient,
+                namespace: maintainerStatus.metadata.namespace,
+              });
+
               return await runEntityMaintainerTask({
                 currentStatus: maintainerStatus,
                 fakeRequest,
@@ -113,7 +121,8 @@ export function registerEntityMaintainerTask({
                 setup,
                 run,
                 abortController,
-                esClient: start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser,
+                esClient,
+                crudClient
               });
             },
           }),
@@ -133,6 +142,7 @@ async function runEntityMaintainerTask({
   run,
   abortController,
   esClient,
+  crudClient,
 }: {
   currentStatus: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
@@ -141,6 +151,7 @@ async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
 }): Promise<{ state: EntityMaintainerStatus }> {
   try {
     const isFirstRun = currentStatus.metadata.runs === 0;
@@ -152,6 +163,7 @@ async function runEntityMaintainerTask({
         logger,
         fakeRequest,
         esClient,
+        crudClient
       });
     }
     logger.debug(`Executing run`);
@@ -161,6 +173,7 @@ async function runEntityMaintainerTask({
       logger,
       fakeRequest,
       esClient,
+      crudClient
     });
     currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {

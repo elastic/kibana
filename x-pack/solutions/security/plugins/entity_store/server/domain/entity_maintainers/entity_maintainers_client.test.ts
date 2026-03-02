@@ -225,6 +225,50 @@ describe('EntityMaintainersClient', () => {
     });
   });
 
+  describe('stopAll', () => {
+    it('should stop all registered tasks and update each to STOPPED', async () => {
+      const entries: EntityMaintainerTaskEntry[] = [
+        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
+        { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STARTED },
+      ];
+      entityMaintainersRegistry.getAll.mockReturnValue(entries);
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      const client = createClient();
+
+      await client.stopAll();
+
+      expect(entityMaintainersRegistry.getAll).toHaveBeenCalled();
+      expect(stopEntityMaintainer).toHaveBeenCalledTimes(2);
+      expect(stopEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm1', namespace: 'default' })
+      );
+      expect(stopEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'm2', namespace: 'default' })
+      );
+      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m1', {
+        taskStatus: EntityMaintainerTaskStatus.STOPPED,
+      });
+      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m2', {
+        taskStatus: EntityMaintainerTaskStatus.STOPPED,
+      });
+    });
+
+    it('should propagate error when any stop fails', async () => {
+      const entries: EntityMaintainerTaskEntry[] = [
+        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
+        { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STARTED },
+      ];
+      entityMaintainersRegistry.getAll.mockReturnValue(entries);
+      entityMaintainersRegistry.hasId.mockReturnValue(true);
+      (stopEntityMaintainer as jest.Mock)
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('stop failed'));
+      const client = createClient();
+
+      await expect(client.stopAll()).rejects.toThrow('stop failed');
+    });
+  });
+
   describe('getMaintainers', () => {
     it('should return entries from registry with no taskSnapshot when task does not exist (not-found)', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([

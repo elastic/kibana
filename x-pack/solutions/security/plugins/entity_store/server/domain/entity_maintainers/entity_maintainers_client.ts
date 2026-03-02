@@ -113,6 +113,17 @@ export class EntityMaintainersClient {
     }
   }
 
+  public async stopAll(): Promise<void> {
+    this.logger.debug('Stopping all entity maintainer tasks');
+    try {
+      const tasks = entityMaintainersRegistry.getAll();
+      await Promise.all(tasks.map(async ({ id }) => this.stop(id)));
+    } catch (error) {
+      this.logger.error('Failed to stop all entity maintainer tasks', { error });
+      throw error;
+    }
+  }
+
   public async getMaintainers(): Promise<EntityMaintainerListEntry[]> {
     const entries = entityMaintainersRegistry.getAll();
 
