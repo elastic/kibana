@@ -49,28 +49,33 @@ export const Table = () => {
   const [liveAnnouncement, setLiveAnnouncement] = useState<string>('');
 
   useUpdateEffect(() => {
-    setLiveAnnouncement(
-      showFullDatasetNames
-        ? i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesShown', {
-            defaultMessage: 'Table updated. Full dataset names shown.',
-          })
-        : i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesHidden', {
-            defaultMessage: 'Table updated. Full dataset names hidden.',
-          })
-    );
-  }, [showFullDatasetNames]);
+    const fullDatasetNamesState = showFullDatasetNames
+      ? i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesState.shown', {
+          defaultMessage: 'shown',
+        })
+      : i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesState.hidden', {
+          defaultMessage: 'hidden',
+        });
 
-  useUpdateEffect(() => {
+    const inactiveDatasetsState = showInactiveDatasets
+      ? i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsState.shown', {
+          defaultMessage: 'shown',
+        })
+      : i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsState.hidden', {
+          defaultMessage: 'hidden',
+        });
+
     setLiveAnnouncement(
-      showInactiveDatasets
-        ? i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsShown', {
-            defaultMessage: 'Table updated. Inactive datasets shown.',
-          })
-        : i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsHidden', {
-            defaultMessage: 'Table updated. Inactive datasets hidden.',
-          })
+      i18n.translate('xpack.datasetQuality.tableUpdated.combined', {
+        defaultMessage:
+          'Table updated. Full dataset names are {fullDatasetNamesState}. Inactive datasets are {inactiveDatasetsState}.',
+        values: {
+          fullDatasetNamesState,
+          inactiveDatasetsState,
+        },
+      })
     );
-  }, [showInactiveDatasets]);
+  }, [showFullDatasetNames, showInactiveDatasets]);
 
   return (
     <>
