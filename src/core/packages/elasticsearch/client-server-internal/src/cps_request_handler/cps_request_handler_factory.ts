@@ -8,7 +8,7 @@
  */
 
 import { getSpaceNPRE, PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import type { OnRequestHandlerFactory } from './cluster_client';
+import type { OnRequestHandlerFactory } from '../cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
 
 /**
