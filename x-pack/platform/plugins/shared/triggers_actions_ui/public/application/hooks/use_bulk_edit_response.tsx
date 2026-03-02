@@ -88,7 +88,7 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
             <EuiFlexItem grow={false}>
               <div>
                 <EuiButtonEmpty
-                  iconType="search"
+                  iconType="magnify"
                   size="xs"
                   flush="left"
                   onClick={() => onSearchPopulateInternal(response)}
