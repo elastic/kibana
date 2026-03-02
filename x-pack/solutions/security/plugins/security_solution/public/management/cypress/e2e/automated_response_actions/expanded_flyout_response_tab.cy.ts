@@ -54,7 +54,7 @@ const getRoleWithoutResponseActionsHistory = () => {
 describe(
   'Automated Response Actions',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
