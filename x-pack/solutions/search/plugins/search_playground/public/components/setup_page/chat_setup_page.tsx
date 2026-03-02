@@ -57,7 +57,7 @@ export const ChatSetupPage: React.FC = () => {
     <PlaygroundBodySection>
       <EuiEmptyPrompt
         css={EmptyPromptStyle}
-        iconType="discuss"
+        iconType="comment"
         data-test-subj="setupPage"
         title={
           <h2>
