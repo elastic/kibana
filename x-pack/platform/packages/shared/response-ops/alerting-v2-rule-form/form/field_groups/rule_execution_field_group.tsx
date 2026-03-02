@@ -7,24 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FieldGroup } from './field_group';
 import { ScheduleField } from '../fields/schedule_field';
 import { TimeFieldSelect } from '../fields/time_field_select';
 import { LookbackWindowField } from '../fields/lookback_window_field';
 import { GroupFieldSelect } from '../fields/group_field_select';
 
-interface RuleExecutionFieldGroupProps {
-  services: {
-    http: HttpStart;
-    data: DataPublicPluginStart;
-    dataViews: DataViewsPublicPluginStart;
-  };
-}
-
-export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = ({ services }) => {
+export const RuleExecutionFieldGroup: React.FC = () => {
   return (
     <FieldGroup
       title={i18n.translate('xpack.alertingV2.ruleForm.ruleExecution', {
@@ -32,9 +21,9 @@ export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = (
       })}
     >
       <ScheduleField />
-      <TimeFieldSelect services={services} />
+      <TimeFieldSelect />
       <LookbackWindowField />
-      <GroupFieldSelect services={services} />
+      <GroupFieldSelect />
     </FieldGroup>
   );
 };
