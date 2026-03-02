@@ -112,7 +112,6 @@ export class ConcurrencyManager {
       return true;
     }
 
-    const strategy = concurrencySettings.strategy;
     const maxConcurrency = concurrencySettings.max ?? 1;
 
     // Query for non-terminal execution IDs in the same concurrency group
@@ -131,8 +130,8 @@ export class ConcurrencyManager {
     }
 
     // Handle 'queue' strategy: hold the execution in a queue until a slot opens
-    if (strategy === 'queue') {
-      const maxQueueSize = concurrencySettings.maxQueueSize ?? 1;
+    if (concurrencySettings.strategy === 'queue') {
+      const maxQueueSize = concurrencySettings.maxQueueSize;
       const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
         concurrencyGroupKey,
         spaceId
@@ -158,7 +157,7 @@ export class ConcurrencyManager {
     }
 
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
-    if (strategy === 'drop') {
+    if (concurrencySettings.strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.updateWorkflowExecution({
         id: currentExecutionId,
@@ -172,7 +171,7 @@ export class ConcurrencyManager {
     }
 
     // Handle 'cancel-in-progress' strategy: cancel oldest execution(s) to make room
-    if (strategy === 'cancel-in-progress') {
+    if (concurrencySettings.strategy === 'cancel-in-progress') {
       // Calculate how many executions to cancel
       const executionsToCancel = activeCount - maxConcurrency + 1;
 

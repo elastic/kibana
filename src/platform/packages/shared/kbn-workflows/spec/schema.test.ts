@@ -315,12 +315,19 @@ describe('ConcurrencySettingsSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should allow maxQueueSize to be present for non-queue strategies', () => {
+    it('should reject maxQueueSize for non-queue strategies', () => {
       const result = ConcurrencySettingsSchema.safeParse({
         strategy: 'drop',
         maxQueueSize: 10,
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject maxQueueSize when strategy is omitted', () => {
+      const result = ConcurrencySettingsSchema.safeParse({
+        maxQueueSize: 10,
+      });
+      expect(result.success).toBe(false);
     });
   });
 
