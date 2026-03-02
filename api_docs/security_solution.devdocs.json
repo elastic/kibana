@@ -58,7 +58,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +75,7 @@
                   "<object>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 91,
+                "lineNumber": 92,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -116,7 +116,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -143,7 +143,7 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 110,
+                "lineNumber": 111,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 111,
+                "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -191,7 +191,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 273,
+            "lineNumber": 274,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -207,7 +207,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 273,
+                "lineNumber": 274,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +224,7 @@
                   "StartPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 273,
+                "lineNumber": 274,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +244,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 287,
+            "lineNumber": 288,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -259,12 +259,24 @@
             "label": "registerDiscoverSharedFeatures",
             "description": [],
             "signature": [
-              "(plugins: ",
+              "(core: ",
+              "CoreSetup",
+              "<",
+              "StartPluginsDependencies",
+              ", ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
+              ">, plugins: ",
               "SetupPlugins",
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 291,
+            "lineNumber": 306,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -274,14 +286,42 @@
                 "id": "def-public.Plugin.registerDiscoverSharedFeatures.$1",
                 "type": "Object",
                 "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<",
+                  "StartPluginsDependencies",
+                  ", ",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
+                    "text": "PluginStart"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
+                "lineNumber": 307,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$2",
+                "type": "Object",
+                "tags": [],
                 "label": "plugins",
                 "description": [],
                 "signature": [
                   "SetupPlugins"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-                "lineNumber": 291,
-                "columnNumber": 47,
+                "lineNumber": 308,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -302,7 +342,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx",
-            "lineNumber": 320,
+            "lineNumber": 342,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
