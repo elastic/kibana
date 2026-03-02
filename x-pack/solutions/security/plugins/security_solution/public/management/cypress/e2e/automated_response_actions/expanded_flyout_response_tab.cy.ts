@@ -54,7 +54,8 @@ const getRoleWithoutResponseActionsHistory = () => {
 describe(
   'Automated Response Actions',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    // skipped in serverless for now since custom roles are not yet supported, and this test relies on a custom role
+    tags: ['@ess', '@skipInServerless'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
