@@ -47,8 +47,7 @@ interface UserSettings {
 /**
  * Props for the KibanaEuiProvider.
  */
-export interface KibanaEuiProviderProps
-  extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
+export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
   userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
   globalStyles?: boolean;
