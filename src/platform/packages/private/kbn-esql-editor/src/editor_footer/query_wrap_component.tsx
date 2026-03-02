@@ -22,7 +22,7 @@ export function QueryWrapComponent({ onPrettifyQuery }: { onPrettifyQuery: () =>
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          iconType="pipeBreaks"
+          iconType="lineBreak"
           color="text"
           size="xs"
           data-test-subj="ESQLEditor-toggleWordWrap"
