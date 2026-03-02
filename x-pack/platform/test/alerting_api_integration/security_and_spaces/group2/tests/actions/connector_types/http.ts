@@ -154,6 +154,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
         name: 'A generic Http action',
         connector_type_id: '.http',
         is_missing_secrets: false,
+        auth_mode: 'shared',
         config: {
           ...defaultValues,
           url: httpSimulatorURL,
@@ -190,6 +191,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
         name: 'A generic Http action',
         connector_type_id: '.http',
         is_missing_secrets: false,
+        auth_mode: 'shared',
         config: {
           ...defaultValues,
           url: httpSimulatorURL,
@@ -230,6 +232,7 @@ export default function httpTest({ getService }: FtrProviderContext) {
         name: 'A generic Http action',
         connector_type_id: '.http',
         is_missing_secrets: false,
+        auth_mode: 'shared',
         config: {
           ...defaultValues,
           url: httpSimulatorURL,
