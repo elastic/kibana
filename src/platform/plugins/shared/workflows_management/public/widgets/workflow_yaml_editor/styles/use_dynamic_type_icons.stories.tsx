@@ -111,7 +111,7 @@ export const Default = () => {
       {allTypes.map((connector) => (
         <div
           key={connector.actionTypeId}
-          className={`type-inline-highlight type-${connector.actionTypeId}`}
+          className={`type-inline-highlight type-${connector.actionTypeId.replaceAll('.', '-')}`}
         >
           {connector.displayName}
         </div>

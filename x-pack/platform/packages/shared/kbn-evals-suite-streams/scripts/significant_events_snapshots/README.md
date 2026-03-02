@@ -4,7 +4,7 @@ This folder contains a small CLI + helper modules for producing **repeatable Ela
 
 The snapshots are written to **GCS** (bucket: `obs-ai-datasets`) under a run-specific base path, and each scenario snapshot contains:
 - `logs*` — OTel demo log data generated during the run
-- `.kibana_streams_features` — extracted features produced by Streams feature extraction
+- `sigevents-streams-features-<scenario>` — extracted features produced by Streams feature extraction (copied out of system indices so it can be snapshotted)
 
 ## What this does
 
@@ -46,13 +46,13 @@ The per-scenario deploy/teardown + data cleanup is intentional as each snapshot 
 ### Create snapshots for all [available scenarios](./lib/constants.ts)
 
 ```
-node scripts/capture_sigevents_otel_demo_snapshots.ts --connector-id <connectorId>
+node scripts/capture_sigevents_otel_demo_snapshots.js --connector-id <connectorId>
 ```
 
 ### Create snapshots for specific scenarios
 
 ```
-node scripts/capture_sigevents_otel_demo_snapshots.ts \
+node scripts/capture_sigevents_otel_demo_snapshots.js \
   --connector-id <connectorId> \
   --scenario healthy-baseline \
   --scenario payment-unreachable
@@ -69,7 +69,7 @@ node scripts/capture_sigevents_otel_demo_snapshots.ts \
 Note: Use a unique run ID (e.g.: `test-run-...`) to keep multiple runs side-by-side without colliding with previous snapshots.
 
 ```
-node scripts/capture_sigevents_otel_demo_snapshots.ts \
+node scripts/capture_sigevents_otel_demo_snapshots.js \
   --connector-id <connectorId> \
   --run-id test-run-2026-02-23
 ```
@@ -88,6 +88,7 @@ Those snapshot names are what you will replay later in the eval setup.
 This script is designed for **disposable dev data** and assumes it owns the `logs*` space.
 
 - **Run against a dedicated dev ES/Kibana**: The cleanup step deletes data in `logs*` and `.kibana_streams_features`, and it disables Streams. Do not point this at a shared cluster with important logs.
+- **Features are snapshotted from a non-system index**: Elasticsearch snapshots cannot include system indices via the `indices` parameter, so we copy extracted features into `sigevents-streams-features-<scenario>` before snapshotting.
 - **Keep the cluster quiet**: Feature extraction is scheduled over the **last 24 hours** (`from = now - 24h`), so any unrelated `logs*` data in that time range can affect extracted features and snapshots.
 - **Use a unique `--run-id`**: It determines the snapshot repository name (`sigevents-<run-id>`) and the GCS base path. Reusing a run ID can collide with existing snapshots (same scenario snapshot names).
 - **Start small**: When iterating, run a single `--scenario` first; use `--dry-run` to verify what will be created.
