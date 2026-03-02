@@ -6,8 +6,7 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { Deanonymization } from './anonymization';
-import type { Message } from './messages';
+import type { AnonymizationResponseMetadata, DeanonymizedMessageData } from './anonymization';
 import type { ToolOptions } from './tools';
 import type { ToolCallOfToolOptions } from './tools_of';
 
@@ -39,19 +38,15 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
       /**
        * Optional deanonymized input messages metadata
        */
-      deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+      deanonymized_input?: DeanonymizedMessageData[];
       /**
        * Optional deanonymized output metadata
        */
-      deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+      deanonymized_output?: DeanonymizedMessageData;
       /**
        * Optional metadata attached by inference runtime.
        */
-      metadata?: {
-        anonymization?: {
-          replacementsId?: string;
-        };
-      };
+      metadata?: AnonymizationResponseMetadata;
       /**
        * Tool calls from the LLM
        */
@@ -107,19 +102,15 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
     /**
      * Optional deanonymized input messages metadata
      */
-    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+    deanonymized_input?: DeanonymizedMessageData[];
     /**
      * Optional deanonymized output metadata
      */
-    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+    deanonymized_output?: DeanonymizedMessageData;
     /**
      * Optional metadata attached by inference runtime.
      */
-    metadata?: {
-      anonymization?: {
-        replacementsId?: string;
-      };
-    };
+    metadata?: AnonymizationResponseMetadata;
   }
 >;
 

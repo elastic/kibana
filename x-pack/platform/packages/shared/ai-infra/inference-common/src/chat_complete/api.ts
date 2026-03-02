@@ -12,6 +12,7 @@ import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
 import type { ToolCallOfToolOptions } from './tools_of';
+import type { AnonymizationResponseMetadata } from './anonymization';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -220,11 +221,7 @@ export interface ChatCompleteResponse<
   /**
    * Optional metadata attached by inference runtime.
    */
-  metadata?: {
-    anonymization?: {
-      replacementsId?: string;
-    };
-  };
+  metadata?: AnonymizationResponseMetadata;
 }
 
 /**
