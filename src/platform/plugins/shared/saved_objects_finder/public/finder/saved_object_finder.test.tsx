@@ -509,7 +509,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visLine',
+            getIconForSavedObject: () => 'chartLine',
           },
         ]}
       />
@@ -963,7 +963,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visLine',
+            getIconForSavedObject: () => 'chartLine',
           },
         ]}
       >

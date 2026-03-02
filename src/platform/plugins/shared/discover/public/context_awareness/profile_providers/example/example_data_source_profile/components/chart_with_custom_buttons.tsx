@@ -201,7 +201,7 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
               <EuiButton
                 color="text"
                 data-test-subj="exampleChartUpdateEsqlQuery"
-                iconType="editorCodeBlock"
+                iconType="code"
                 onClick={() => updateESQLQuery('FROM my-example-logs | LIMIT 50')}
                 size="s"
               >
@@ -214,7 +214,7 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
               <EuiButton
                 color="text"
                 data-test-subj="exampleChartOpenNewTab"
-                iconType="popout"
+                iconType="external"
                 onClick={() =>
                   openInNewTab({
                     query: { esql: 'FROM my-example-logs | LIMIT 100' },

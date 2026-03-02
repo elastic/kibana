@@ -49,7 +49,7 @@ export const typeToEuiIconMap = {
   histogram: { iconType: 'tokenHistogram' },
   exponential_histogram: { iconType: 'tokenHistogram' },
   tdigest: { iconType: 'tokenHistogram' },
-  _source: { iconType: 'editorCodeBlock', color: 'gray' },
+  _source: { iconType: 'code', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
   sparse_vector: { iconType: 'tokenVectorSparse' },
