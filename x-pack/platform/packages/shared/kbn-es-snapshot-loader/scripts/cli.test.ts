@@ -81,6 +81,22 @@ describe('createEsClientFromUrl auth precedence', () => {
     });
   });
 
+  it('throws when --es-api-key is provided without --es-url', async () => {
+    const restoreHandler = getRestoreHandler();
+
+    await expect(
+      restoreHandler(
+        createRunContext({
+          'es-api-key': 'base64-api-key',
+          'kibana-url': 'http://localhost:5601',
+          'snapshot-url': 'file:///tmp/snapshots',
+        })
+      )
+    ).rejects.toThrow(
+      '--es-api-key requires --es-url. API key auth is not supported when connecting through Kibana (--kibana-url).'
+    );
+  });
+
   it('falls back to basic auth from URL credentials when API key is omitted', async () => {
     const restoreHandler = getRestoreHandler();
 

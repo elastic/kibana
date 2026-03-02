@@ -71,6 +71,13 @@ async function createEsClientFromKibana({
 
 async function getEsClient(flags: CommonFlags, log: ToolingLog): Promise<Client> {
   const { 'es-url': esUrl, 'es-api-key': esApiKey, 'kibana-url': kibanaUrl } = flags;
+
+  if (esApiKey && !esUrl) {
+    throw new Error(
+      '--es-api-key requires --es-url. API key auth is not supported when connecting through Kibana (--kibana-url).'
+    );
+  }
+
   if (esUrl) return createEsClientFromUrl(esUrl, esApiKey);
   return createEsClientFromKibana({ kibanaUrl, log, signal: new AbortController().signal });
 }
