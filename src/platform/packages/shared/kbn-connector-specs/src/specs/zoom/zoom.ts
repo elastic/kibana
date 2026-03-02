@@ -71,8 +71,6 @@ import {
   pickRegistrant,
 } from './types';
 
-const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Remove once Zoom S2S OAuth is natively supported.
-
 const ZOOM_API_BASE = 'https://api.zoom.us/v2';
 
 /**
@@ -101,36 +99,24 @@ export const Zoom: ConnectorSpec = {
 
   auth: {
     types: [
-      ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
-        ? ([
-            {
-              type: 'bearer',
-              defaults: {
-                token: '',
-              },
-              overrides: {
-                meta: {
-                  token: {
-                    sensitive: true,
-                    label: i18n.translate(
-                      'core.kibanaConnectorSpecs.zoom.auth.temporaryManualToken.label',
-                      {
-                        defaultMessage: 'Zoom access token',
-                      }
-                    ),
-                    helpText: i18n.translate(
-                      'core.kibanaConnectorSpecs.zoom.auth.temporaryManualToken.helpText',
-                      {
-                        defaultMessage:
-                          'Paste a Zoom Server-to-Server OAuth access token. Generate one via the Zoom Marketplace or API. Tokens expire after 1 hour.',
-                      }
-                    ),
-                  },
-                },
-              },
+      {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          meta: {
+            token: {
+              sensitive: true,
+              label: i18n.translate('core.kibanaConnectorSpecs.zoom.auth.token.label', {
+                defaultMessage: 'Zoom access token',
+              }),
+              helpText: i18n.translate('core.kibanaConnectorSpecs.zoom.auth.token.helpText', {
+                defaultMessage:
+                  'Paste a Zoom Server-to-Server OAuth access token. Generate one via the Zoom Marketplace or API. Tokens expire after 1 hour.',
+              }),
             },
-          ] as const)
-        : []),
+          },
+        },
+      },
     ],
   },
 
