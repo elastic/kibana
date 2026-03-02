@@ -368,6 +368,29 @@ export class DocumentationManager implements DocumentationManagerAPI {
       throw error;
     }
   }
+  async uninstallOpenAPISpec(options: SecurityLabsUninstallOptions): Promise<void> {
+    const { request, inferenceId } = options;
+    if (!this.packageInstaller) {
+      throw new Error('PackageInstaller not available');
+    }
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message: `User is requesting deletion of OpenAPI Spec content for AI Assistants.`,
+        event: {
+          action: 'openapi_spec_delete',
+          category: ['database'],
+          type: ['deletion'],
+          outcome: 'unknown',
+        },
+      });
+    }
+    try {
+      await this.packageInstaller.uninstallOpenAPISpec({ inferenceId });
+    } catch (error) {
+      this.logger.error(`Failed to uninstall OpenAPI Spec content: ${error.message}`);
+      throw error;
+    }
+  }
 
   async getSecurityLabsStatus({
     inferenceId,

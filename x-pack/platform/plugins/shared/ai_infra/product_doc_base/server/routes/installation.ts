@@ -296,7 +296,19 @@ export const registerInstallationRoutes = ({
           },
         });
       }
+      if (resourceType === ResourceTypes.openapiSpec) {
+        await documentationManager.uninstallOpenAPISpec({
+          request: req,
+          wait: true,
+          inferenceId: req.body?.inferenceId,
+        });
 
+        return res.ok<UninstallResponse>({
+          body: {
+            success: true,
+          },
+        });
+      }
       // Default: product documentation uninstallation
       await documentationManager.uninstall({
         request: req,
