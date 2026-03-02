@@ -16,23 +16,18 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import type { CreateNotificationPolicyData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateNotificationPolicyData,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
+import { DEFAULT_FORM_STATE } from './constants';
 
 const FLYOUT_TITLE_ID = 'notificationPolicyFlyoutTitle';
-
-const DEFAULT_FORM_STATE: NotificationPolicyFormState = {
-  name: '',
-  description: '',
-  matcher: '',
-  groupBy: [],
-  frequency: { type: 'immediate' },
-  workflowId: 'workflow-1',
-};
 
 function toCreatePayload(state: NotificationPolicyFormState): CreateNotificationPolicyData {
   return {
@@ -47,22 +42,21 @@ function toCreatePayload(state: NotificationPolicyFormState): CreateNotification
   };
 }
 
-export interface NotificationPolicyFlyoutProps {
+export interface NotificationPolicyFormFlyoutProps {
   onClose: () => void;
   onSave: (data: CreateNotificationPolicyData) => void;
   isLoading?: boolean;
-  initialValues?: Partial<NotificationPolicyFormState>;
+  initialValues?: NotificationPolicyResponse;
 }
 
-export const NotificationPolicyFlyout = ({
+export const NotificationPolicyFormFlyout = ({
   onClose,
   onSave,
   isLoading = false,
-  initialValues,
-}: NotificationPolicyFlyoutProps) => {
+}: NotificationPolicyFormFlyoutProps) => {
   const methods = useForm<NotificationPolicyFormState>({
     mode: 'onBlur',
-    defaultValues: { ...DEFAULT_FORM_STATE, ...initialValues },
+    defaultValues: DEFAULT_FORM_STATE,
   });
 
   const onSubmitValid = (values: NotificationPolicyFormState) => {

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { NotificationPolicyFormState } from './types';
 
 export const WORKFLOW_OPTIONS = [
   { value: 'workflow-1', text: 'Slack notification workflow' },
@@ -29,3 +30,12 @@ export const FREQUENCY_OPTIONS = [
 ];
 
 export const THROTTLE_INTERVAL_PATTERN = /^[1-9][0-9]*[dhms]$/;
+
+export const DEFAULT_FORM_STATE: NotificationPolicyFormState = {
+  name: '',
+  description: '',
+  matcher: '',
+  groupBy: [],
+  frequency: { type: 'immediate' },
+  workflowId: 'workflow-1',
+};

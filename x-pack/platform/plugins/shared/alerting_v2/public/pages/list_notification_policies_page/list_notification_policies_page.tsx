@@ -17,13 +17,15 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateNotificationPolicyData,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
-import type { CreateNotificationPolicyData } from '@kbn/alerting-v2-schemas';
+import React, { useState } from 'react';
+import { NotificationPolicyFormFlyout } from '../../components/notification_policy/form';
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
-import { NotificationPolicyFlyout } from '../../components/notification_policy/flyout_form';
 import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
 
@@ -34,16 +36,13 @@ export const ListNotificationPoliciesPage = () => {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
-  const createMutation = useCreateNotificationPolicy();
+  const { mutate: createNotificationPolicy, isLoading: isCreating } = useCreateNotificationPolicy();
 
-  const handleSave = useCallback(
-    (data: CreateNotificationPolicyData) => {
-      createMutation.mutate(data, {
-        onSuccess: () => setIsFlyoutOpen(false),
-      });
-    },
-    [createMutation]
-  );
+  const handleSave = (data: CreateNotificationPolicyData) => {
+    createNotificationPolicy(data, {
+      onSuccess: () => setIsFlyoutOpen(false),
+    });
+  };
 
   const { data, isLoading, isError, error } = useFetchNotificationPolicies({
     page: page + 1,
@@ -186,10 +185,10 @@ export const ListNotificationPoliciesPage = () => {
         })}
       />
       {isFlyoutOpen && (
-        <NotificationPolicyFlyout
+        <NotificationPolicyFormFlyout
           onClose={() => setIsFlyoutOpen(false)}
           onSave={handleSave}
-          isLoading={createMutation.isLoading}
+          isLoading={isCreating}
         />
       )}
     </>

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { NotificationPolicyFlyout } from './notification_policy_flyout';
-export type { NotificationPolicyFlyoutProps } from './notification_policy_flyout';
+export { NotificationPolicyFormFlyout } from './notification_policy_form_flyout';
+export type { NotificationPolicyFormFlyoutProps } from './notification_policy_form_flyout';
