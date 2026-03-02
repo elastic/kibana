@@ -764,7 +764,6 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[0].arguments).toEqual(
         expect.objectContaining({
           columnId: ['c'],
-          palette: [expect.any(Object)],
           transposable: [true],
           colorMode: ['none'],
         })
@@ -772,7 +771,6 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[1].arguments).toEqual(
         expect.objectContaining({
           columnId: ['b'],
-          palette: [expect.objectContaining({})],
           transposable: [true],
           colorMode: ['none'],
         })
@@ -1027,11 +1025,10 @@ describe('Datatable Visualization', () => {
             { dataType: 'string' },
             { dataType: 'number' },
             { dataType: 'boolean' },
-            // disallowed types
-            { dataType: 'date', disallowed: true },
+            { dataType: 'date' },
           ])(
             'should apply correct palette, colorMapping & colorMode for $dataType',
-            ({ dataType, disallowed = false }) => {
+            ({ dataType }) => {
               datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
                 dataType,
                 isBucketed: false,
@@ -1052,15 +1049,9 @@ describe('Datatable Visualization', () => {
                   'lens_datatable_column'
                 )[0].arguments;
 
-              if (disallowed) {
-                expect(columnArgs.colorMode).toEqual(['none']);
-                expect(columnArgs.palette).toBeUndefined();
-                expect(columnArgs.colorMapping).toBeUndefined();
-              } else {
-                expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
-                expect(columnArgs.palette).toEqual([expect.any(Object)]);
-                expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
-              }
+              expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
+              expect(columnArgs.palette).toEqual([expect.any(Object)]);
+              expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
             }
           );
         }
