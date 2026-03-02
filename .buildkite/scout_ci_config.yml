@@ -19,6 +19,7 @@ plugins:
     - slo
     - spaces
     - streams_app
+    - synthetics
     - transform
     - uptime
     - ux
