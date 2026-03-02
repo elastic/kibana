@@ -30,6 +30,9 @@ export const FIT_VIEW_PADDING = 0.2;
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
 
+/** Delay before calling fitView after layout update (ms), to allow React Flow to measure nodes */
+export const FIT_VIEW_DEFER_MS = 50;
+
 /** Size of the default marker */
 export const DEFAULT_MARKER_SIZE = 12;
 
@@ -57,6 +60,15 @@ export const CENTER_ANIMATION_DURATION_MS = 200;
 /** Minimum distance threshold for directional keyboard navigation (in pixels) */
 export const DIRECTION_THRESHOLD = 50;
 
+/** Full screen mode: wrapper element when map is in full screen */
+export const SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS = 'serviceMapWrapper--fullScreen';
+
+/** Full screen mode: inner container that gets position fixed */
+export const SERVICE_MAP_FULL_SCREEN_CLASS = 'serviceMap--fullScreen';
+
+/** Body class to restrict scroll and layer when service map is full screen */
+export const SERVICE_MAP_RESTRICT_BODY_CLASS = 'serviceMap--restrictBody';
+
 /**
  * Mock EUI theme colors for testing purposes.
  * These match the light theme values and are used to mock useEuiTheme in tests.
@@ -77,6 +89,30 @@ export const MOCK_EUI_THEME = {
     danger: '#BD271E',
   },
 } as const;
+
+/**
+ * Full mock EUI theme for useEuiTheme() in tests (colors + size + border + levels + shadows + font + animation).
+ * Use in jest.mock('@elastic/eui') with useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME, colorMode: 'LIGHT' }) when colorMode is needed.
+ */
+export const MOCK_EUI_THEME_FOR_USE_THEME = {
+  colors: MOCK_EUI_THEME.colors,
+  size: {
+    xxs: '2px',
+    xs: '4px',
+    s: '8px',
+    m: '12px',
+    l: '24px',
+    xl: '32px',
+  },
+  border: {
+    radius: { small: '4px', medium: '6px' },
+    width: { thin: '1px', thick: '2px' },
+  },
+  levels: { content: 1000, header: 2000, menu: 2000 },
+  shadows: { s: '0 1px 2px rgba(0,0,0,0.1)' },
+  font: { family: '"Inter", sans-serif' },
+  animation: { fast: '150ms' },
+};
 
 /**
  * Mock primary color for testing (matches EUI light theme primary color)
