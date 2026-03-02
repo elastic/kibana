@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers as defaultSecurityConfig } from '../../default/stateful/classic.stateful.config';
+import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
  * Custom Scout stateful server configuration that enables AI Agents and experimental features.
  *
  * Usage:
- *   node scripts/scout.js start-server --stateful --config-dir security_entity_analytics
+ *   node scripts/scout.js start-server --stateful --config-dir evals_entity_analytics
  */
 export const servers: ScoutServerConfig = {
-  ...defaultSecurityConfig,
+  ...evalsTracingConfig,
   kbnTestServer: {
-    ...defaultSecurityConfig.kbnTestServer,
+    ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
-      ...defaultSecurityConfig.kbnTestServer.serverArgs,
+      ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       `--uiSettings.overrides.agentBuilder:experimentalFeatures=true`,
     ],

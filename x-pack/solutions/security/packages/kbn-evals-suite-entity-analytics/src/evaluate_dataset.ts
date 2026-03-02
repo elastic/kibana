@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type {
-  DefaultEvaluators,
-  EvalsExecutorClient,
-  EvaluationDataset,
-  EvaluationResult,
-  Example,
+import {
+  createQuantitativeCorrectnessEvaluators,
+  createQuantitativeGroundednessEvaluator,
+  selectEvaluators,
+  withEvaluatorSpan,
+  type DefaultEvaluators,
+  type EvalsExecutorClient,
+  type EvaluationDataset,
+  type EvaluationResult,
+  type Evaluator,
+  type Example,
 } from '@kbn/evals';
 import type { EvaluationChatClient, ErrorResponse, Step, Messages } from './chat_client';
 
@@ -20,23 +25,11 @@ interface ToolCallAssertion {
 }
 
 interface DatasetExample extends Example {
-  input: {
-    question: string;
-  };
-  output: {
-    criteria?: string[];
-    toolCalls?: ToolCallAssertion[];
-  };
-  metadata?: {
-    query_intent?: string;
-    [key: string]: unknown;
-  };
+  input: { question: string };
+  output: { criteria?: string[]; toolCalls?: ToolCallAssertion[] };
+  metadata?: { query_intent?: string };
 }
 
-/**
- * Task output for SIEM Entity Analytics chat evaluations.
- * Satisfies Phoenix's TaskOutput type (string | boolean | number | object | null).
- */
 interface ChatTaskOutput {
   errors: ErrorResponse[];
   messages: Messages;
@@ -51,6 +44,7 @@ export type EvaluateDataset = ({
     description: string;
     examples: DatasetExample[];
   };
+  concurrency?: number;
 }) => Promise<void>;
 
 /**
@@ -68,28 +62,6 @@ function findToolCallSteps(toolId: string, steps: Step[]): Step[] {
 }
 
 /**
- * Evaluates main criteria from the expected output.
- */
-async function evaluateMainCriteria(
-  criteria: string[],
-  evaluators: DefaultEvaluators,
-  input: DatasetExample['input'],
-  output: ChatTaskOutput,
-  expected: DatasetExample['output'],
-  metadata: DatasetExample['metadata']
-): Promise<EvaluationResult> {
-  if (criteria.length === 0) {
-    return {
-      score: 1,
-      label: 'PASS',
-      explanation: 'No main criteria specified.',
-    };
-  }
-
-  return evaluators.criteria(criteria).evaluate({ input, expected, output, metadata });
-}
-
-/**
  * Evaluates a tool call assertion with its specific criteria.
  * @param toolCallAssertion - The tool call assertion to evaluate
  * @param steps - The conversation steps to search for tool calls
@@ -99,14 +71,14 @@ async function evaluateMainCriteria(
  * @param metadata - The metadata from the example
  * @returns Evaluation result for the tool call
  */
-async function evaluateToolCallAssertion(
+const evaluateToolCallAssertion = async (
   toolCallAssertion: ToolCallAssertion,
   steps: Step[],
   evaluators: DefaultEvaluators,
   input: DatasetExample['input'],
   output: ChatTaskOutput,
   metadata: DatasetExample['metadata']
-): Promise<EvaluationResult> {
+): Promise<EvaluationResult> => {
   const toolCallSteps = findToolCallSteps(toolCallAssertion.id, steps);
   const toolWasCalled = toolCallSteps.length > 0;
 
@@ -140,19 +112,16 @@ async function evaluateToolCallAssertion(
     label: toolCriteriaResult.label ?? 'PASS',
     explanation: combinedExplanation,
   };
-}
+};
 
-/**
- * Evaluates all tool call assertions and returns their results.
- */
-async function evaluateAllToolCalls(
+const evaluateAllToolCalls = async (
   toolCalls: ToolCallAssertion[],
   steps: Step[],
   evaluators: DefaultEvaluators,
   input: DatasetExample['input'],
   output: ChatTaskOutput,
   metadata: DatasetExample['metadata']
-): Promise<EvaluationResult[]> {
+): Promise<EvaluationResult[]> => {
   const results: EvaluationResult[] = [];
 
   for (const toolCallAssertion of toolCalls) {
@@ -168,7 +137,7 @@ async function evaluateAllToolCalls(
   }
 
   return results;
-}
+};
 
 /**
  * Combines multiple evaluation results into a single result.
@@ -191,7 +160,10 @@ function combineEvaluationResults(results: EvaluationResult[]): EvaluationResult
 
 interface EvaluateDatasetOpts {
   dataset: { name: string; description: string; examples: DatasetExample[] };
+  concurrency?: number;
 }
+
+const DEFAULT_CONCURRENCY = 3;
 
 interface CreateEvaluateDatasetOpts {
   evaluators: DefaultEvaluators;
@@ -206,76 +178,95 @@ export function createEvaluateDataset({
 }: CreateEvaluateDatasetOpts): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
+    concurrency = DEFAULT_CONCURRENCY,
   }: EvaluateDatasetOpts) {
-    const dataset = {
-      name,
-      description,
-      examples,
-    } satisfies EvaluationDataset;
+    const dataset = { name, description, examples } satisfies EvaluationDataset;
 
     await executorClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
-          const response = await chatClient.converse({
-            messages: [{ message: input.question }],
-          });
+        concurrency,
+        task: async ({ input, output, metadata }) => {
+          const response = await chatClient.converse({ messages: [{ message: input.question }] });
+
+          const [correctnessResult, groundednessResult] = await Promise.all([
+            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+              evaluators.correctnessAnalysis().evaluate({
+                input,
+                expected: output,
+                output: response,
+                metadata,
+              })
+            ),
+            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+              evaluators.groundednessAnalysis().evaluate({
+                input,
+                expected: output,
+                output: response,
+                metadata,
+              })
+            ),
+          ]);
 
           return {
             errors: response.errors,
             messages: response.messages,
             steps: response.steps,
+            traceId: response.traceId,
+            modelUsage: response.modelUsage,
+            correctnessAnalysis: correctnessResult?.metadata,
+            groundednessAnalysis: groundednessResult?.metadata,
           };
         },
       },
-      [createCriteriaEvaluator({ evaluators }), createToolCallsEvaluator({ evaluators })]
+      [
+        createCriteriaEvaluator({ evaluators }),
+        createToolCallsEvaluator({ evaluators }),
+        ...selectEvaluators([
+          createQuantitativeGroundednessEvaluator(),
+          ...createQuantitativeCorrectnessEvaluators(),
+        ]),
+      ]
     );
   };
 }
 
-/**
- * Evaluator for main criteria (response quality, content, etc.).
- */
-export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
+interface EvaluateOpts {
+  input: DatasetExample['input'];
+  output: ChatTaskOutput;
+  expected: DatasetExample['output'];
+  metadata: DatasetExample['metadata'];
+}
+
+const createCriteriaEvaluator = ({
+  evaluators,
+}: {
+  evaluators: DefaultEvaluators;
+}): Evaluator<DatasetExample, ChatTaskOutput> => {
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
-    evaluate: async ({
-      input,
-      output,
-      expected,
-      metadata,
-    }: {
-      input: DatasetExample['input'];
-      output: ChatTaskOutput;
-      expected: DatasetExample['output'];
-      metadata: DatasetExample['metadata'];
-    }) => {
+    evaluate: async ({ expected, ...rest }: EvaluateOpts) => {
       const criteria = expected.criteria ?? [];
-      return evaluateMainCriteria(criteria, evaluators, input, output, expected, metadata);
+
+      if (criteria.length === 0) {
+        return {
+          score: 1,
+          label: 'PASS',
+          explanation: 'No main criteria specified.',
+        };
+      }
+
+      return evaluators.criteria(criteria).evaluate({ expected, ...rest });
     },
   };
-}
+};
 
-/**
- * Evaluator for tool call assertions.
- * Checks that specified tools were called and evaluates their criteria.
- */
-export function createToolCallsEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
+const createToolCallsEvaluator = ({ evaluators }: { evaluators: DefaultEvaluators }) => {
   return {
     name: 'ToolCalls',
     kind: 'LLM' as const,
-    evaluate: async ({
-      input,
-      output,
-      expected,
-      metadata,
-    }: {
-      input: DatasetExample['input'];
-      output: ChatTaskOutput;
-      expected: DatasetExample['output'];
-      metadata: DatasetExample['metadata'];
-    }) => {
+    evaluate: async ({ input, output, expected, metadata }: EvaluateOpts) => {
       const toolCalls = expected.toolCalls ?? [];
       const steps = output.steps ?? [];
 
@@ -299,4 +290,4 @@ export function createToolCallsEvaluator({ evaluators }: { evaluators: DefaultEv
       return combineEvaluationResults(toolCallResults);
     },
   };
-}
+};

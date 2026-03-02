@@ -33,6 +33,8 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   messages: Messages;
   errors: ErrorResponse[];
   steps?: Step[];
+  traceId?: string;
+  modelUsage?: ModelUsageStats;
 }>;
 
 interface ModelUsageStats {

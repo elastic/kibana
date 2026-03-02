@@ -70,19 +70,19 @@ Run the evaluations:
 
 ```bash
 # Run all SIEM Entity Analytics skills evaluations
-node scripts/playwright test --config x-pack/solutions/security/test/security-solution-evals/playwright.config.ts
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts
 
 # Run specific test file
-node scripts/playwright test --config x-pack/solutions/security/test/security-solution-evals/playwright.config.ts x-pack/solutions/security/test/security-solution-evals/evals/risk_score_engine_on.spec.ts
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/evals/risk_score_engine_on.spec.ts
 
 # Run with specific connector
-node scripts/playwright test --config x-pack/solutions/security/test/security-solution-evals/playwright.config.ts --project="my-connector"
+node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts --project="my-connector"
 
 # Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/test/security-solution-evals/playwright.config.ts
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts
 
 # Export result to Phoenix 
-PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config x-pack/solutions/security-solution-evals/test/security-solution-evals/playwright.config.ts  --project="my-connector"
+PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts  --project="my-connector"
 ```
 
 ## Adding New Tests
