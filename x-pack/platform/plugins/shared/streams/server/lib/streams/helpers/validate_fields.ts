@@ -105,7 +105,7 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
 
 export async function validateSimulation(
   definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
-  currentUser: ElasticsearchClient
+  esClient: ElasticsearchClient
 ) {
   if (definition.ingest.processing.steps.length === 0) {
     return;
@@ -121,7 +121,7 @@ export async function validateSimulation(
       processors: transpileIngestPipeline(definition.ingest.processing).processors,
     },
   };
-  const simulationResult = await executePipelineSimulation(currentUser, simulationBody);
+  const simulationResult = await executePipelineSimulation(esClient, simulationBody);
   if (simulationResult.status === 'failure') {
     throw new MalformedFieldsError(simulationResult.error.message);
   }

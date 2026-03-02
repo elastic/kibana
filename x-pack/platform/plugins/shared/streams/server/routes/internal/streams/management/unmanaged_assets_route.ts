@@ -35,7 +35,7 @@ export const unmanagedAssetsRoute = createServerRoute({
 
     const { read } = await checkAccess({
       name: params.path.name,
-      currentUser: scopedClusterClient.asCurrentUser,
+      esClient: scopedClusterClient.asCurrentUser,
     });
 
     if (!read) {
@@ -54,12 +54,12 @@ export const unmanagedAssetsRoute = createServerRoute({
 
     const assets = await getUnmanagedElasticsearchAssets({
       dataStream,
-      currentUser: scopedClusterClient.asCurrentUser,
+      esClient: scopedClusterClient.asCurrentUser,
     });
 
     return getUnmanagedElasticsearchAssetDetails({
       assets,
-      currentUser: scopedClusterClient.asCurrentUser,
+      esClient: scopedClusterClient.asCurrentUser,
     });
   },
 });

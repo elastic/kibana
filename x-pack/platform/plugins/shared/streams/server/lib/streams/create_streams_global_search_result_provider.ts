@@ -97,7 +97,7 @@ async function findStreams({
 
   const privileges = await checkAccessBulk({
     names: hits.map((hit) => hit._source.name),
-    currentUser: client.asCurrentUser,
+    esClient: client.asCurrentUser,
   });
 
   const hitsWithAccess = searchResponse.hits.hits.filter((hit) => {

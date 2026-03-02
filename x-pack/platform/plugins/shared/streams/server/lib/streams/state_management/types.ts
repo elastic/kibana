@@ -32,7 +32,7 @@ export interface StateDependencies {
   lockManager: LockManagerService;
   streamsClient: StreamsClient;
   storageClient: StreamsStorageClient;
-  currentUser: ElasticsearchClient;
+  esClient: ElasticsearchClient;
   systemClient: SystemClient;
   attachmentClient: AttachmentClient;
   queryClient: QueryClient;

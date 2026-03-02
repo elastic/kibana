@@ -227,7 +227,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     // Check for conflicts
     if (this._changes.lifecycle || this._changes.processing) {
       try {
-        const dataStreamResult = await this.dependencies.currentUser.indices.getDataStream({
+        const dataStreamResult = await this.dependencies.esClient.indices.getDataStream({
           name: this._definition.name,
         });
 
@@ -258,7 +258,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (this._changes.field_overrides) {
-      const response = (await this.dependencies.currentUser.transport.request({
+      const response = (await this.dependencies.esClient.transport.request({
         method: 'PUT',
         path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
         body: {
@@ -321,12 +321,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     await Promise.all([
       validateSettingsWithDryRun({
-        currentUser: this.dependencies.currentUser,
+        esClient: this.dependencies.esClient,
         streamName: this._definition.name,
         settings: this._definition.ingest.settings,
         isServerless: this.dependencies.isServerless,
       }),
-      validateSimulation(this._definition, this.dependencies.currentUser),
+      validateSimulation(this._definition, this.dependencies.esClient),
     ]);
 
     const queryStreamsValidation = validateQueryStreams({
@@ -650,7 +650,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
-      currentUser: this.dependencies.currentUser,
+      esClient: this.dependencies.esClient,
     });
 
     // For deletion operations, only return if there's an actual pipeline configured
@@ -675,7 +675,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
       this._effectiveSettings = getDataStreamSettings(
-        await this.dependencies.currentUser.indices
+        await this.dependencies.esClient.indices
           .getDataStreamSettings({ name: this._definition.name })
           .then((res) => res.data_streams[0])
       );

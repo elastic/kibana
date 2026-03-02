@@ -45,12 +45,12 @@ export function validateSettings({
 }
 
 export async function validateSettingsWithDryRun({
-  currentUser,
+  esClient,
   streamName,
   settings,
   isServerless,
 }: {
-  currentUser: ElasticsearchClient;
+  esClient: ElasticsearchClient;
   streamName: string;
   settings: IngestStreamSettings;
   isServerless: boolean;
@@ -65,7 +65,7 @@ export async function validateSettingsWithDryRun({
     return;
   }
 
-  const response = (await currentUser.indices.putDataStreamSettings({
+  const response = (await esClient.indices.putDataStreamSettings({
     name: streamName,
     settings: settingsToValidate,
     dry_run: true,

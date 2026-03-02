@@ -627,13 +627,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({
-            currentUser: this.dependencies.currentUser,
+            esClient: this.dependencies.esClient,
             streamName: this._definition.name,
             settings: inheritedSettings,
             isServerless: this.dependencies.isServerless,
           })
         : Promise.resolve(),
-      validateSimulation(this._definition, this.dependencies.currentUser),
+      validateSimulation(this._definition, this.dependencies.esClient),
     ]);
 
     return { isValid: true, errors: [] };
@@ -641,7 +641,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   private async getMatchingDataStream() {
     try {
-      const response = await this.dependencies.currentUser.indices.getDataStream({
+      const response = await this.dependencies.esClient.indices.getDataStream({
         name: this._definition.name,
       });
 
@@ -701,7 +701,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     try {
-      await this.dependencies.currentUser.indices.get({
+      await this.dependencies.esClient.indices.get({
         index: name,
       });
 

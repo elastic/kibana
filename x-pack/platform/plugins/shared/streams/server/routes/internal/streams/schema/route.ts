@@ -173,7 +173,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const { read } = await checkAccess({
       name: params.path.name,
-      currentUser: scopedClusterClient.asCurrentUser,
+      esClient: scopedClusterClient.asCurrentUser,
     });
 
     if (!read) {
@@ -337,7 +337,7 @@ export const schemaFieldsConflictsRoute = createServerRoute({
 
     const { read } = await checkAccess({
       name: params.path.name,
-      currentUser: scopedClusterClient.asCurrentUser,
+      esClient: scopedClusterClient.asCurrentUser,
     });
 
     if (!read) {

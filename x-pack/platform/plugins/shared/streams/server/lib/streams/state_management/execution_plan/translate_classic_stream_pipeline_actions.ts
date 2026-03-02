@@ -31,7 +31,7 @@ type ClassicStreamPipelineAction =
  */
 export async function translateClassicStreamPipelineActions(
   actionsByType: ActionsByType,
-  currentUser: ElasticsearchClient
+  esClient: ElasticsearchClient
 ) {
   const maybeActions = [
     ...actionsByType.append_processor_to_ingest_pipeline,
@@ -45,7 +45,7 @@ export async function translateClassicStreamPipelineActions(
   const actionsByPipeline = groupBy(maybeActions, 'pipeline');
 
   for (const [pipelineName, actions] of Object.entries(actionsByPipeline)) {
-    const pipeline = await getPipeline(pipelineName, currentUser);
+    const pipeline = await getPipeline(pipelineName, esClient);
 
     if (pipeline) {
       if (pipeline._meta?.managed_by === MANAGED_BY_STREAMS) {
@@ -60,14 +60,14 @@ export async function translateClassicStreamPipelineActions(
           pipelineName,
           actions,
           actionsByType,
-          currentUser,
+          esClient,
         });
       }
     } else {
       await createStreamsManagedPipeline({
         actions,
         actionsByType,
-        currentUser,
+        esClient,
       });
     }
   }
@@ -79,11 +79,11 @@ export async function translateClassicStreamPipelineActions(
 async function createStreamsManagedPipeline({
   actions,
   actionsByType,
-  currentUser,
+  esClient,
 }: {
   actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
-  currentUser: ElasticsearchClient;
+  esClient: ElasticsearchClient;
 }) {
   assertOnlyAppendActions(actions);
   const targetTemplateNames = uniq(actions.map((action) => action.template));
@@ -91,7 +91,7 @@ async function createStreamsManagedPipeline({
     throw new Error('Append actions targeting the same new pipeline target different templates');
   }
 
-  const indexTemplate = await getIndexTemplate(targetTemplateNames[0], currentUser);
+  const indexTemplate = await getIndexTemplate(targetTemplateNames[0], esClient);
   const pipelineName = `${indexTemplate.name}-pipeline`;
 
   actionsByType.upsert_ingest_pipeline.push({
@@ -196,18 +196,18 @@ async function updateExistingUserManagedPipeline({
   pipelineName,
   actions,
   actionsByType,
-  currentUser,
+  esClient,
 }: {
   pipelineName: string;
   actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
-  currentUser: ElasticsearchClient;
+  esClient: ElasticsearchClient;
 }) {
   const referencePipelineNames = actions.map((action) => action.referencePipeline);
   const { targetPipelineName, targetPipeline } = await findPipelineToModify(
     pipelineName,
     referencePipelineNames,
-    currentUser
+    esClient
   );
 
   let processors = targetPipeline?.processors ?? [];
@@ -243,12 +243,12 @@ async function updateExistingUserManagedPipeline({
 async function findPipelineToModify(
   pipelineName: string,
   referencePipelineNames: string[],
-  currentUser: ElasticsearchClient
+  esClient: ElasticsearchClient
 ): Promise<{
   targetPipelineName: string;
   targetPipeline: IngestPipeline | undefined;
 }> {
-  const pipeline = await getPipeline(pipelineName, currentUser);
+  const pipeline = await getPipeline(pipelineName, esClient);
 
   if (!pipeline) {
     return {
@@ -277,7 +277,7 @@ async function findPipelineToModify(
     return await findPipelineToModify(
       customProcessor.pipeline!.name,
       referencePipelineNames,
-      currentUser
+      esClient
     );
   }
 
@@ -287,9 +287,9 @@ async function findPipelineToModify(
   };
 }
 
-async function getPipeline(id: string, currentUser: ElasticsearchClient) {
+async function getPipeline(id: string, esClient: ElasticsearchClient) {
   return (
-    currentUser.ingest
+    esClient.ingest
       .getPipeline({ id })
       // some keys on the pipeline can't be modified, so we need to clean them up
       // to avoid errors when updating the pipeline
@@ -313,8 +313,8 @@ async function getPipeline(id: string, currentUser: ElasticsearchClient) {
   );
 }
 
-async function getIndexTemplate(name: string, currentUser: ElasticsearchClient) {
-  const indexTemplates = await currentUser.indices.getIndexTemplate({
+async function getIndexTemplate(name: string, esClient: ElasticsearchClient) {
+  const indexTemplates = await esClient.indices.getIndexTemplate({
     name,
   });
   return indexTemplates.index_templates[0];

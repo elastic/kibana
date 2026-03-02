@@ -262,7 +262,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 path: { name: stream.name },
                 body: { processing: pipeline, documents: params.body.documents },
               },
-              currentUser: scopedClusterClient.asCurrentUser,
+              esClient: scopedClusterClient.asCurrentUser,
               streamsClient,
               fieldsMetadataClient,
             }),
@@ -431,7 +431,7 @@ async function processGrokPatterns({
         },
       },
     },
-    currentUser: scopedClusterClient.asCurrentUser,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -551,7 +551,7 @@ async function processDissectPattern({
         },
       },
     },
-    currentUser: scopedClusterClient.asCurrentUser,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });

@@ -27,15 +27,15 @@ export class StreamsService {
     queryClient,
     systemClient,
     featureClient,
-    currentUser,
-    internalUser,
+    esClient,
+    esClientAsInternalUser,
   }: {
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     systemClient: SystemClient;
     featureClient: FeatureClient;
-    currentUser: ElasticsearchClient;
-    internalUser: ElasticsearchClient;
+    esClient: ElasticsearchClient;
+    esClientAsInternalUser: ElasticsearchClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -49,10 +49,10 @@ export class StreamsService {
       logger,
       systemClient,
       featureClient,
-      currentUser,
-      internalUser,
+      esClient,
+      esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
-      storageClient: createStreamsStorageClient(internalUser, logger),
+      storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
       isDev: this.isDev,
     });

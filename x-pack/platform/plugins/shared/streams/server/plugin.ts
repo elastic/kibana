@@ -20,7 +20,7 @@ import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type { StreamsConfig } from '../common/config';
 import { configSchema, exposeToBrowserConfig } from '../common/config';
 import {
@@ -162,8 +162,8 @@ export class StreamsPlugin
         queryClient,
         systemClient,
         featureClient,
-        currentUser: scopedClusterClient.asCurrentUser,
-        internalUser: coreStart.elasticsearch.client.asInternalUser,
+        esClient: scopedClusterClient.asCurrentUser,
+        esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
       });
 
       return {
@@ -266,10 +266,20 @@ export class StreamsPlugin
       void core.getStartServices().then(async ([coreStart]) => {
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         const soClient = coreStart.savedObjects.getUnsafeInternalClient();
-        // Since the RulesClient cannot be unscoped, we provide an empty object that will
-        // throw an error if dashboards, rules, or queries exist in the stream definition.
+        // Since the RulesClient cannot be unscoped, we provide a stub client that
+        // will throw an error if rules or queries exist in the stream definition.
         // This is a limitation of the config-based streams for now.
-        const rulesClient = {} as RulesClient;
+        const rulesClient = {
+          bulkGetRules() {
+            throw new Error('Not implemented');
+          },
+          create() {
+            throw new Error('Not implemented');
+          },
+          update() {
+            throw new Error('Not implemented');
+          },
+        } as unknown as RulesClient;
 
         const [attachmentClient, featureClient, systemClient, queryClient] = await Promise.all([
           attachmentService.getClient({ soClient, rulesClient }),
@@ -283,27 +293,17 @@ export class StreamsPlugin
           queryClient,
           systemClient,
           featureClient,
-          currentUser: esClient,
-          internalUser: esClient,
+          esClient,
+          esClientAsInternalUser: esClient,
         });
 
         await streamsClient.enableStreams();
 
-        for (const { name, parent, where, status } of this.config.preconfigured.forks) {
-          if (!(await streamsClient.existsStream(name))) {
-            await streamsClient.forkStream({
-              parent,
-              name,
-              where,
-              status,
-            });
-          }
-        }
         await streamsClient.bulkUpsert(
-          this.config.preconfigured.streams as {
-            name: string;
-            request: Streams.all.UpsertRequest;
-          }[]
+          this.config.preconfigured.streams.map(({ name, request }) => ({
+            name,
+            request: Streams.all.UpsertRequest.parse(request),
+          }))
         );
       });
     }

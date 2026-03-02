@@ -76,8 +76,8 @@ export class StreamsClient {
   constructor(
     private readonly dependencies: {
       lockManager: LockManagerService;
-      internalUser: ElasticsearchClient;
-      currentUser: ElasticsearchClient;
+      esClientAsInternalUser: ElasticsearchClient;
+      esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       systemClient: SystemClient;
@@ -186,7 +186,7 @@ export class StreamsClient {
     [LOGS_OTEL_STREAM_NAME]: boolean;
     [LOGS_ECS_STREAM_NAME]: boolean;
   }> {
-    const response = (await this.dependencies.internalUser.transport.request({
+    const response = (await this.dependencies.esClientAsInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
     })) as {
@@ -265,7 +265,7 @@ export class StreamsClient {
     if (streamsToEnableInES.length > 0) {
       await Promise.all(
         streamsToEnableInES.map((streamName) =>
-          this.dependencies.currentUser.transport.request({
+          this.dependencies.esClient.transport.request({
             method: 'POST',
             path: `_streams/${streamName}/_enable`,
           })
@@ -328,7 +328,7 @@ export class StreamsClient {
     if (streamsToDisableInES.length > 0) {
       await Promise.all(
         streamsToDisableInES.map((streamName) =>
-          this.dependencies.currentUser.transport.request({
+          this.dependencies.esClient.transport.request({
             method: 'POST',
             path: `_streams/${streamName}/_disable`,
           })
@@ -574,7 +574,7 @@ export class StreamsClient {
       if (Streams.ingest.all.Definition.is(streamDefinition)) {
         const privileges = await checkAccess({
           name,
-          currentUser: this.dependencies.currentUser,
+          esClient: this.dependencies.esClient,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -602,7 +602,7 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, currentUser: this.dependencies.currentUser }).then((privileges) => {
+      checkAccess({ name, esClient: this.dependencies.esClient }).then((privileges) => {
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
@@ -613,7 +613,7 @@ export class StreamsClient {
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
-    return wrapEsCall(this.dependencies.currentUser.indices.getDataStream({ name })).then(
+    return wrapEsCall(this.dependencies.esClient.indices.getDataStream({ name })).then(
       (response) => {
         const notFoundErrorBody = {
           meta: {
@@ -681,7 +681,7 @@ export class StreamsClient {
       REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
     }
 
-    const privileges = await this.dependencies.currentUser.security.hasPrivileges({
+    const privileges = await this.dependencies.esClient.security.hasPrivileges({
       cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
       index: [
         {
@@ -803,7 +803,7 @@ export class StreamsClient {
   private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
     let response: IndicesGetDataStreamResponse;
     try {
-      response = await wrapEsCall(this.dependencies.currentUser.indices.getDataStream());
+      response = await wrapEsCall(this.dependencies.esClient.indices.getDataStream());
     } catch (e) {
       // if permissions are insufficient, we just return an empty list
       if (e instanceof Error && 'statusCode' in e && e.statusCode === 403) {
@@ -834,7 +834,7 @@ export class StreamsClient {
   private async getManagedStreams({ query }: { query?: QueryDslQueryContainer } = {}): Promise<
     Streams.all.Definition[]
   > {
-    const { currentUser, storageClient } = this.dependencies;
+    const { esClient, storageClient } = this.dependencies;
 
     const streamsSearchResponse = await storageClient.search({
       size: 10000,
@@ -853,7 +853,7 @@ export class StreamsClient {
       names: streams
         .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
-      currentUser,
+      esClient,
     });
 
     return streams.filter((stream) => {
@@ -895,7 +895,7 @@ export class StreamsClient {
     // For root streams, also disable in Elasticsearch
     if (isRootStream) {
       try {
-        await this.dependencies.currentUser.transport.request({
+        await this.dependencies.esClient.transport.request({
           method: 'POST',
           path: `_streams/${name}/_disable`,
         });

@@ -35,7 +35,7 @@ describe('ClassicStream', () => {
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       isServerless: false,
       isDev: false,
-      currentUser: {
+      esClient: {
         indices: {
           getDataStreamSettings: jest.fn().mockResolvedValue({
             data_streams: [

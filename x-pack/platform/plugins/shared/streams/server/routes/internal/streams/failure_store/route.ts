@@ -45,8 +45,8 @@ export const getFailureStoreStatsRoute = createServerRoute({
 
     const stats = await getFailureStoreStats({
       name,
-      currentUser: scopedClusterClient.asCurrentUser,
-      secondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
+      esClient: scopedClusterClient.asCurrentUser,
+      esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
       isServerless: server.isServerless,
     });
 
@@ -72,7 +72,7 @@ export const getFailureStoreDefaultRetentionRoute = createServerRoute({
     });
 
     const defaultRetention = await getClusterDefaultFailureStoreRetentionValue({
-      currentUser: scopedClusterClient.asCurrentUser,
+      esClient: scopedClusterClient.asCurrentUser,
       isServerless: !!server.isServerless,
     });
 
