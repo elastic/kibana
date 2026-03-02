@@ -54,7 +54,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     if (currentPolicy.is_managed) {
       return (
         <EuiCallOut>
-          <p>{EDIT_IN_SYNTHETICS_DESC}</p>
+          <p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>
           <EuiButton
             isLoading={!url}
             href={url + `?packagePolicyId=${currentPolicy.id}`}
@@ -71,10 +71,16 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 );
 SyntheticsPolicyEditExtensionWrapper.displayName = 'SyntheticsPolicyEditExtensionWrapper';
 
-const EDIT_IN_SYNTHETICS_LABEL = i18n.translate('xpack.uptime.editPackagePolicy.inSynthetics', {
-  defaultMessage: 'Edit in Synthetics',
-});
+const EDIT_IN_SYNTHETICS_LABEL = i18n.translate(
+  'app_not_found_in_i18nrc.editPackagePolicy.inSynthetics',
+  {
+    defaultMessage: 'Edit in Synthetics',
+  }
+);
 
-const EDIT_IN_SYNTHETICS_DESC = i18n.translate('xpack.uptime.editPackagePolicy.inSyntheticsDesc', {
-  defaultMessage: 'This package policy is managed by the Synthetics app.',
-});
+const EDIT_IN_SYNTHETICS_DESC = i18n.translate(
+  'app_not_found_in_i18nrc.editPackagePolicy.inSyntheticsDesc',
+  {
+    defaultMessage: 'This package policy is managed by the Synthetics app.',
+  }
+);
