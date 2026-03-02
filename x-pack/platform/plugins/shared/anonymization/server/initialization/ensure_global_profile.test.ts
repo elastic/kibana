@@ -92,4 +92,25 @@ describe('ensureGlobalProfileForNamespace', () => {
     expect(ensureGlobalAnonymizationProfile).toHaveBeenCalledTimes(2);
     expect(migrateLegacyUiSettingsIntoGlobalProfile).toHaveBeenCalledTimes(2);
   });
+
+  it('deduplicates concurrent ensures in a single node', async () => {
+    const namespace = `test-concurrent-ensure-${Date.now()}`;
+
+    await Promise.all([
+      ensureGlobalProfileForNamespace({
+        namespace,
+        profilesRepo,
+        logger,
+        getLegacySettingsString: async () => '{"rules":[]}',
+      }),
+      ensureGlobalProfileForNamespace({
+        namespace,
+        profilesRepo,
+        logger,
+        getLegacySettingsString: async () => '{"rules":[]}',
+      }),
+    ]);
+
+    expect(ensureGlobalAnonymizationProfile).toHaveBeenCalledTimes(1);
+  });
 });

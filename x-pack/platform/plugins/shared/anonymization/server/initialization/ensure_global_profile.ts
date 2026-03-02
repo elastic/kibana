@@ -6,35 +6,40 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { LRUCache } from 'lru-cache';
 import type { ProfilesRepository } from '../repository';
 import { ensureGlobalAnonymizationProfile } from './global_profile_initializer';
 import { migrateLegacyUiSettingsIntoGlobalProfile } from './legacy_ui_settings_migration';
 
 const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
 const MAX_CACHED_NAMESPACES = 1000;
-const ensuredStateByNamespace = new Map<
-  string,
-  {
-    lastEnsuredAt: number;
-    migratedLegacySettings: boolean;
-  }
->();
+type EnsuredNamespaceState = {
+  lastEnsuredAt: number;
+  migratedLegacySettings: boolean;
+};
 
-const evictOldestIfNeeded = () => {
-  if (ensuredStateByNamespace.size < MAX_CACHED_NAMESPACES) {
-    return;
+const ensuredStateByNamespace = new LRUCache<string, EnsuredNamespaceState>({
+  max: MAX_CACHED_NAMESPACES,
+});
+
+const inFlightEnsureByNamespace = new Map<string, Promise<void>>();
+
+const runNamespaceEnsureOnce = async (namespace: string, ensure: () => Promise<void>) => {
+  const existing = inFlightEnsureByNamespace.get(namespace);
+  if (existing) {
+    return existing;
   }
-  let oldestKey: string | undefined;
-  let oldestTime = Infinity;
-  for (const [key, state] of ensuredStateByNamespace) {
-    if (state.lastEnsuredAt < oldestTime) {
-      oldestTime = state.lastEnsuredAt;
-      oldestKey = key;
+
+  const inFlight = (async () => {
+    try {
+      await ensure();
+    } finally {
+      inFlightEnsureByNamespace.delete(namespace);
     }
-  }
-  if (oldestKey) {
-    ensuredStateByNamespace.delete(oldestKey);
-  }
+  })();
+
+  inFlightEnsureByNamespace.set(namespace, inFlight);
+  return inFlight;
 };
 
 export const ensureGlobalProfileForNamespace = async ({
@@ -50,44 +55,44 @@ export const ensureGlobalProfileForNamespace = async ({
   getLegacySettingsString?: () => Promise<string | undefined>;
   forceEnsure?: boolean;
 }): Promise<void> => {
-  const now = Date.now();
-  const currentState = ensuredStateByNamespace.get(namespace);
+  return runNamespaceEnsureOnce(namespace, async () => {
+    const now = Date.now();
+    const currentState = ensuredStateByNamespace.get(namespace);
 
-  if (!currentState?.migratedLegacySettings && getLegacySettingsString) {
-    const settingsString = await getLegacySettingsString();
-    await ensureGlobalAnonymizationProfile({ namespace, profilesRepo, logger });
-    const migratedLegacySettings = await migrateLegacyUiSettingsIntoGlobalProfile({
+    if (!currentState?.migratedLegacySettings && getLegacySettingsString) {
+      const settingsString = await getLegacySettingsString();
+      await ensureGlobalAnonymizationProfile({ namespace, profilesRepo, logger });
+      const migratedLegacySettings = await migrateLegacyUiSettingsIntoGlobalProfile({
+        namespace,
+        settingsString,
+        profilesRepo,
+        logger,
+      });
+
+      ensuredStateByNamespace.set(namespace, {
+        lastEnsuredAt: now,
+        migratedLegacySettings,
+      });
+      return;
+    }
+
+    if (
+      !forceEnsure &&
+      currentState &&
+      now - currentState.lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS
+    ) {
+      return;
+    }
+
+    await ensureGlobalAnonymizationProfile({
       namespace,
-      settingsString,
       profilesRepo,
       logger,
     });
 
-    evictOldestIfNeeded();
     ensuredStateByNamespace.set(namespace, {
       lastEnsuredAt: now,
-      migratedLegacySettings,
+      migratedLegacySettings: currentState?.migratedLegacySettings ?? false,
     });
-    return;
-  }
-
-  if (
-    !forceEnsure &&
-    currentState &&
-    now - currentState.lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS
-  ) {
-    return;
-  }
-
-  await ensureGlobalAnonymizationProfile({
-    namespace,
-    profilesRepo,
-    logger,
-  });
-
-  evictOldestIfNeeded();
-  ensuredStateByNamespace.set(namespace, {
-    lastEnsuredAt: now,
-    migratedLegacySettings: currentState?.migratedLegacySettings ?? false,
   });
 };
