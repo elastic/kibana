@@ -10,6 +10,7 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hoo
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ALERT_RULE_TYPE_ID, isSiemRuleType } from '@kbn/rule-data-utils';
 import { ViewRuleDetailsAlertAction } from './view_rule_details_alert_action';
+import { ViewInAppAlertAction } from './view_in_app_alert_action';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
 import { MuteAlertAction } from './mute_alert_action';
@@ -46,6 +47,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
   return (
     <>
       <ViewRuleDetailsAlertAction {...props} />
+      {props.getAlertFormatter && <ViewInAppAlertAction {...props} />}
       <ViewAlertDetailsAlertAction {...props} />
       {showModifyOption && <AcknowledgeAlertAction {...props} />}
       {showModifyOption && <MarkAsUntrackedAlertAction {...props} />}

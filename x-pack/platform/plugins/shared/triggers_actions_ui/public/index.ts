@@ -41,6 +41,12 @@ export type {
 } from './types';
 
 export type {
+  AlertFormatter,
+  AlertFormatterFormatters,
+  FormattedAlertInfo,
+} from '@kbn/alerts-ui-shared/src/common/types';
+
+export type {
   ActionConnectorFieldsProps,
   ActionParamsProps,
   ActionTypeModel,
@@ -79,6 +85,7 @@ export {
 export { AddMessageVariablesOptional } from './application/components/add_message_variables_optional';
 
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
+export { defaultAlertFormatterFormatters } from '@kbn/alerts-ui-shared/src/common/formatters';
 export { templateActionVariable, updateActionConnector, executeAction } from './application/lib';
 
 export function plugin(context: PluginInitializerContext) {
