@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { typeA, typeB } from './saved_objects';
 import { registerSearchExampleRoutes } from './search_example_routes';
+import { registerEsqlExampleRoutes } from './esql_example_routes';
 
 export class SavedObjectsExamplePlugin implements Plugin {
   private readonly logger: Logger;
@@ -29,6 +30,7 @@ export class SavedObjectsExamplePlugin implements Plugin {
     core.savedObjects.registerType(typeB);
     const router = core.http.createRouter();
     registerSearchExampleRoutes(router, this.logger);
+    registerEsqlExampleRoutes(router, this.logger);
   }
 
   public start(core: CoreStart) {}

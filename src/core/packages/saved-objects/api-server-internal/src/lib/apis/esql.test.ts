@@ -134,13 +134,13 @@ describe('esql', () => {
   it('should pass through esql options like query and params', async () => {
     await repository.esql({
       ...options,
-      params: [{ type: 'keyword' as const, value: 'test' }],
+      params: ['test'],
     });
 
     expect(client.esql.query).toHaveBeenCalledTimes(1);
     const [[request]] = client.esql.query.mock.calls;
     expect(request.query).toBe('FROM .kibana | LIMIT 10');
-    expect(request.params).toEqual([{ type: 'keyword', value: 'test' }]);
+    expect(request.params).toEqual(['test']);
   });
 
   describe('with spaces extension', () => {
