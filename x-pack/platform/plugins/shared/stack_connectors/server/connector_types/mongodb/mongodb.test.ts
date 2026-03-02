@@ -262,9 +262,9 @@ describe('MongoConnector', () => {
         services: actionsMock.createServices(),
       });
 
-      await expect(
-        connectorNoDb.listCollections({}, connectorUsageCollector)
-      ).rejects.toThrow('database is required in connector config');
+      await expect(connectorNoDb.listCollections({}, connectorUsageCollector)).rejects.toThrow(
+        'database is required in connector config'
+      );
     });
   });
 
