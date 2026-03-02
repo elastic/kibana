@@ -28,10 +28,51 @@ const getStatusRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2', ...statusRequestQuery },
 };
 
+const getV1StatusRequest: HttpFetchOptionsWithPath = {
+  path: '/api/entity_store/status',
+  query: statusRequestQuery,
+  version: '2023-10-31',
+};
+
+const getV1ListEnginesRequest: HttpFetchOptionsWithPath = {
+  path: '/api/entity_store/engines',
+  version: '2023-10-31',
+};
+
+const postv1StopEngineRequest = (entityType: string): HttpFetchOptionsWithPath => ({
+  path: `/api/entity_store/engines/${entityType}/stop`,
+  version: '2023-10-31',
+});
+
+const deleteV1UninstallEngineRequest = (entityType: string): HttpFetchOptionsWithPath => ({
+  path: `/api/entity_store/engines/${entityType}`,
+  version: '2023-10-31',
+});
+
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.INSTALL,
   body: JSON.stringify({}),
   query: { apiVersion: '2' },
+};
+
+const stopAndUninstallV1Engines = async ({ http, logger }: Pick<Services, 'http' | 'logger'>) => {
+  const v1ListResponse = await http.get<{ engines?: Array<{ type: string }> }>(
+    getV1ListEnginesRequest
+  );
+  const v1Engines = v1ListResponse.engines ?? [];
+
+  for (const { type } of v1Engines) {
+    try {
+      await http.post(postv1StopEngineRequest(type));
+      await http.delete(deleteV1UninstallEngineRequest(type));
+    } catch (e) {
+      logger.error(
+        `Failed to uninstall Entity Store v1 engine in namespace ${
+          this.namespace
+        } for ${type}: ${getErrorMessage(e)}`
+      );
+    }
+  }
 };
 
 /**
@@ -45,15 +86,23 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         const isEntityStoreV2Enabled = services.uiSettings.get(FF_ENABLE_ENTITY_STORE_V2);
         if (!isEntityStoreV2Enabled) return;
 
-        const space = await services.spaces.getActiveSpace();
-        if (space.id !== 'default') return;
-
-        const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
+        const statusResponseV2 = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
-        if (isEntityStoreInstalled(statusResponse.status)) return;
+        if (isEntityStoreInstalled(statusResponseV2.status)) return;
 
-        await services.http.post(installAllEntitiesRequest);
+        const space = await services.spaces.getActiveSpace();
+        const isEntityStoreV1Installed = await (async () => {
+          const statusResponseV1 = await services.http.get<{ status: EntityStoreStatus }>(
+            getV1StatusRequest
+          );
+          return isEntityStoreInstalled(statusResponseV1.status);
+        })();
+
+        if (space.id === 'default' || isEntityStoreV1Installed) {
+          await stopAndUninstallV1Engines({ http: services.http, logger: services.logger });
+          await services.http.post(installAllEntitiesRequest);
+        }
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);

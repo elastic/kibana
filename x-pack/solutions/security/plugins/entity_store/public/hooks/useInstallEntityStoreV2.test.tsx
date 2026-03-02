@@ -10,14 +10,14 @@ import { useInstallEntityStoreV2, type Services } from './useInstallEntityStoreV
 import { ENTITY_STORE_ROUTES, EntityStoreStatus, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 
 interface MockServices {
-  http: { get: jest.Mock; post: jest.Mock };
+  http: { get: jest.Mock; post: jest.Mock; delete: jest.Mock };
   uiSettings: { get: jest.Mock };
   logger: { error: jest.Mock };
   spaces: { getActiveSpace: jest.Mock };
 }
 
 const createMockServices = (): MockServices => ({
-  http: { get: jest.fn(), post: jest.fn() },
+  http: { get: jest.fn(), post: jest.fn(), delete: jest.fn() },
   uiSettings: { get: jest.fn() },
   logger: { error: jest.fn() },
   spaces: { getActiveSpace: jest.fn() },
@@ -44,18 +44,69 @@ describe('useInstallEntityStoreV2', () => {
     expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
-  it('should not install when not in default space', async () => {
+  it('should not install when not in default space and v1 is not installed', async () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
     await waitFor(() => {
-      expect(mockServices.spaces.getActiveSpace).toHaveBeenCalled();
+      expect(mockServices.http.get).toHaveBeenCalledWith({
+        path: '/api/entity_store/status',
+        query: { include_components: false },
+        version: '2023-10-31',
+      });
     });
 
     expect(mockServices.http.post).not.toHaveBeenCalled();
+    expect(mockServices.http.delete).not.toHaveBeenCalled();
+  });
+
+  it('should install in non-default space when v1 is installed and v2 is not installed', async () => {
+    const mockServices = createMockServices();
+    mockServices.uiSettings.get.mockReturnValue(true);
+    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.running });
+    mockServices.http.get.mockResolvedValueOnce({ engines: [{ type: 'host' }] });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+    mockServices.http.post.mockResolvedValueOnce({});
+    mockServices.http.post.mockResolvedValueOnce({});
+    mockServices.http.delete.mockResolvedValueOnce({});
+
+    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
+
+    await waitFor(() => {
+      expect(mockServices.http.post).toHaveBeenCalledTimes(2);
+    });
+
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(1, {
+      path: '/api/entity_store/status',
+      query: { include_components: false },
+      version: '2023-10-31',
+    });
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
+      path: '/api/entity_store/engines',
+      version: '2023-10-31',
+    });
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(3, {
+      path: ENTITY_STORE_ROUTES.STATUS,
+      query: { apiVersion: '2', include_components: false },
+    });
+    expect(mockServices.http.post).toHaveBeenNthCalledWith(1, {
+      path: '/api/entity_store/engines/host/stop',
+      version: '2023-10-31',
+    });
+    expect(mockServices.http.delete).toHaveBeenCalledWith({
+      path: '/api/entity_store/engines/host',
+      version: '2023-10-31',
+    });
+    expect(mockServices.http.post).toHaveBeenNthCalledWith(2, {
+      path: ENTITY_STORE_ROUTES.INSTALL,
+      body: JSON.stringify({}),
+      query: { apiVersion: '2' },
+    });
   });
 
   it("should not install when entity store status is 'running'", async () => {
