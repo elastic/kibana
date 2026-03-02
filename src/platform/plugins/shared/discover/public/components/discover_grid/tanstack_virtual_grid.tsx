@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import {
   EuiBadge,
@@ -40,6 +40,8 @@ export interface TanstackVirtualGridProps {
 const ROW_HEIGHT = 90;
 const OVERSCAN = 10;
 const MAX_SUMMARY_FIELDS = 80;
+
+const scrollPositionCache = new Map<string, number>();
 
 /**
  * Returns a shallow copy of the row with null/undefined values removed from flattened,
@@ -183,6 +185,8 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
     const { fieldFormats } = useDiscoverServices();
     const parentRef = useRef<HTMLDivElement | null>(null);
 
+    const scrollKey = dataView.id ?? dataView.title;
+
     const timeFieldName = dataView.timeFieldName;
 
     const shouldShowFieldHandler = useMemo(() => {
@@ -195,7 +199,27 @@ export const TanstackVirtualGrid: React.FC<TanstackVirtualGridProps> = React.mem
       getScrollElement: () => parentRef.current,
       estimateSize: () => ROW_HEIGHT,
       overscan: OVERSCAN,
+      initialOffset: scrollPositionCache.get(scrollKey) ?? 0,
     });
+
+    useEffect(() => {
+      const scrollEl = parentRef.current;
+      if (!scrollEl) return;
+
+      let rafId: number;
+      const handleScroll = () => {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          scrollPositionCache.set(scrollKey, scrollEl.scrollTop);
+        });
+      };
+
+      scrollEl.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        cancelAnimationFrame(rafId);
+        scrollEl.removeEventListener('scroll', handleScroll);
+      };
+    }, [scrollKey]);
 
     const [localExpandedDoc, setLocalExpandedDoc] = useState<DataTableRecord | undefined>();
     const currentExpandedDoc = expandedDoc ?? localExpandedDoc;
