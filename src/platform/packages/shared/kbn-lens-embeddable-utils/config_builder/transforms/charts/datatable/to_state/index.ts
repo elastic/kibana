@@ -90,7 +90,8 @@ export function getValueColumns(config: DatatableStateESQL) {
       getValueColumn(
         getAccessorName(METRIC_ACCESSOR_PREFIX, index),
         metric.column,
-        inferDatatypeFromColor(metric.color, 'number', true)
+        inferDatatypeFromColor(metric.color, 'number'),
+        true
       )
     ),
   ];
