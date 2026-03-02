@@ -56,7 +56,7 @@ export const createEsqlAttachmentDefinition = ({
       i18n.translate('xpack.agentBuilderPlatform.attachments.esql.label', {
         defaultMessage: 'ES|QL query',
       }),
-    getIcon: () => 'editorCodeBlock',
+    getIcon: () => 'code',
     renderInlineContent: (props) => <EsqlInlineContent {...props} />,
     renderCanvasContent: undefined,
     getActionButtons: ({ attachment }) => [
