@@ -42,12 +42,6 @@ This tool creates structured insights for persisting the results of the troubles
       { problemDescription, remediation, endpointIds, data },
       { modelProvider, logger }
     ) => {
-      if (!data || data.length === 0) {
-        return {
-          results: [],
-        };
-      }
-
       try {
         const model = await modelProvider.getDefaultModel();
         const graph = createGenerateInsightGraph({

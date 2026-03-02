@@ -1109,7 +1109,7 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         > warn
-        > This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        > This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-a2a-agentid
       parameters:
         - description: The unique identifier of the agent to send the A2A task to.
@@ -1165,7 +1165,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-a2a-agentid.json
       parameters:
         - description: The unique identifier of the agent to get A2A metadata for.
@@ -1244,7 +1244,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-agents
       parameters: []
       responses:
@@ -1309,7 +1309,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
       operationId: post-agent-builder-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1498,7 +1498,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
       operationId: delete-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1549,7 +1549,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-agents-id
       parameters:
         - description: The unique identifier of the agent to retrieve.
@@ -1608,7 +1608,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
       operationId: put-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1789,7 +1789,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-conversations
       parameters:
         - description: Optional agent ID to filter conversations by a specific agent.
@@ -1840,7 +1840,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: delete-agent-builder-conversations-conversation-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1891,7 +1891,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-conversations-conversation-id
       parameters:
         - description: The unique identifier of the conversation to retrieve.
@@ -1951,7 +1951,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all attachments for a conversation. Use the optional include_deleted query parameter to include soft-deleted attachments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all attachments for a conversation. Use the optional include_deleted query parameter to include soft-deleted attachments.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-conversations-conversation-id-attachments
       parameters:
         - description: The unique identifier of the conversation.
@@ -2022,7 +2022,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new attachment for a conversation with version tracking.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Create a new attachment for a conversation with version tracking.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-conversations-conversation-id-attachments
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2126,7 +2126,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an attachment. By default performs a soft delete (can be restored). Use permanent=true to permanently remove unreferenced attachments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Delete an attachment. By default performs a soft delete (can be restored). Use permanent=true to permanently remove unreferenced attachments.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: delete-agent-builder-conversations-conversation-id-attachments-attachment-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2185,7 +2185,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Rename an attachment without creating a new version.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Rename an attachment without creating a new version.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: patch-agent-builder-conversations-conversation-id-attachments-attachment-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2261,7 +2261,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an attachment content. Creates a new version if content changed.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Update an attachment content. Creates a new version if content changed.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2349,7 +2349,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restore a soft-deleted attachment.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Restore a soft-deleted attachment.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-conversations-conversation-id-attachments-attachment-id-restore
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2400,6 +2400,88 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/origin:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/origin</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment to update.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateOriginExample:
+                description: Example request for linking an attachment to a saved visualization
+                value:
+                  origin:
+                    saved_object_id: abc123
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                origin: {}
+              required:
+                - origin
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateOriginResponseExample:
+                  description: Example response returning the attachment with updated origin
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: Sales chart
+                      id: att-123
+                      origin:
+                        saved_object_id: abc123
+                      type: visualization
+                      versions:
+                        - content_hash: sha256-xyz
+                          created_at: '2025-01-06T10:00:00.000Z'
+                          data:
+                            chart_type: bar
+                            esql: FROM sales | STATS count=COUNT(*) BY month
+                            query: Show monthly sales
+                            visualization: {}
+                          estimated_tokens: 50
+                          version: 1
+                    success: true
+          description: Indicates a successful response
+      summary: Update attachment origin
+      tags:
+        - agent builder
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/converse:
     post:
       description: |-
@@ -2409,7 +2491,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-converse
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2776,7 +2858,7 @@ paths:
         7. `message_complete`
         8. `round_complete`
 
-        <br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        <br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-converse-async
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2985,7 +3067,7 @@ paths:
 
         > warn
         > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
-        To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-mcp
       parameters:
         - description: Comma-separated list of namespaces to filter tools. Only tools matching the specified namespaces will be returned.
@@ -3046,7 +3128,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available skills (built-in and user-created).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available skills (built-in and user-created).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-skills
       parameters: []
       responses: {}
@@ -3065,7 +3147,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
       operationId: post-agent-builder-skills
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3144,7 +3226,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3176,7 +3258,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific skill by ID.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific skill by ID.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-skills-skillid
       parameters:
         - description: The unique identifier of the skill.
@@ -3201,7 +3283,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
       operationId: put-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3277,7 +3359,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-tools
       parameters: []
       responses:
@@ -3449,7 +3531,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageTools.
       operationId: post-agent-builder-tools
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3654,7 +3736,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-tools-execute
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3884,7 +3966,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageTools.
       operationId: delete-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3942,7 +4024,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-tools-toolid
       parameters:
         - description: The unique identifier of the tool to retrieve.
@@ -4078,7 +4160,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageTools.
       operationId: put-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -34935,71 +35017,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/fleet/agents/{agentId}/effective_config:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/effective_config</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get an agent's effective config by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
-      operationId: get-fleet-agents-agentid-effective-config
-      parameters:
-        - description: The agent ID to get effective config of
-          in: path
-          name: agentId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                successResponse:
-                  value:
-                    effective_config: {}
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  effective_config: {}
-                required:
-                  - effective_config
-          description: 'OK: A successful request.'
-        '400':
-          content:
-            application/json:
-              examples:
-                badRequestResponse:
-                  value:
-                    message: Bad Request
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-          description: A bad request.
-      summary: Get an agent's effective config
-      tags:
-        - Elastic Agents
-      x-metaTags:
-        - content: Kibana
-          name: product_name
   /api/fleet/agents/{agentId}/migrate:
     post:
       description: |-
@@ -56370,26 +56387,20 @@ paths:
               keyword_custom_format:
                 value:
                   description: This parses the first found ipv4 only
-                  deserializer: '{{value}}'
                   id: keyword_custom_format_list
                   name: Simple list with a keyword using a custom format
-                  serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                   type: keyword
             schema:
               type: object
               properties:
                 description:
                   $ref: '#/components/schemas/Security_Lists_API_ListDescription'
-                deserializer:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
                 id:
                   $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
                   $ref: '#/components/schemas/Security_Lists_API_ListName'
-                serializer:
-                  $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
                 type:
                   $ref: '#/components/schemas/Security_Lists_API_ListType'
                 version:
@@ -56459,11 +56470,9 @@ paths:
                     created_at: '2025-01-09T18:25:39.604Z'
                     created_by: elastic
                     description: This parses the first found ipv4 only
-                    deserializer: '{{value}}'
                     id: keyword_custom_format_list
                     immutable: false
                     name: Simple list with a keyword using a custom format
-                    serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
                     tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
                     type: keyword
                     updated_at: '2025-01-09T18:25:39.604Z'
@@ -58030,29 +58039,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListType'
-        - description: |
-            Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-            - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-          in: query
-          name: serializer
-          required: false
-          schema:
-            example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-            type: string
-        - description: |
-            Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-            - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-            - `{{{gte}}},{{{lte}}}` - Date range values.
-          in: query
-          name: deserializer
-          required: false
-          schema:
-            example: '{{value}}'
-            type: string
         - description: Determines when changes made by the request are made visible to search.
           in: query
           name: refresh
@@ -64865,6 +64851,9 @@ paths:
                   description: 'The display name for the space. '
                   minLength: 1
                   type: string
+                projectRouting:
+                  description: Cross-project search default routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.
+                  type: string
                 solution:
                   enum:
                     - security
@@ -64990,6 +64979,9 @@ paths:
                 name:
                   description: 'The display name for the space. '
                   minLength: 1
+                  type: string
+                projectRouting:
+                  description: Cross-project search default routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.
                   type: string
                 solution:
                   enum:
@@ -77725,6 +77717,10 @@ components:
       description: An object that contains the case settings.
       type: object
       properties:
+        extractObservables:
+          description: Auto extracts observables
+          example: false
+          type: boolean
         syncAlerts:
           description: Turns alert syncing on or off.
           example: true
@@ -95093,8 +95089,6 @@ components:
           type: string
         description:
           $ref: '#/components/schemas/Security_Lists_API_ListDescription'
-        deserializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
         id:
           $ref: '#/components/schemas/Security_Lists_API_ListId'
         immutable:
@@ -95103,8 +95097,6 @@ components:
           $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
         name:
           $ref: '#/components/schemas/Security_Lists_API_ListName'
-        serializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
@@ -95139,15 +95131,6 @@ components:
       format: nonempty
       minLength: 1
       type: string
-    Security_Lists_API_ListDeserializer:
-      description: |
-        Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-        - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-        - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-        - `{{{gte}}},{{{lte}}}` - Date range values.
-      example: '{{value}}'
-      type: string
     Security_Lists_API_ListId:
       description: Value list's identifier.
       example: 21b01cfb-058d-44b9-838c-282be16c91cd
@@ -95172,16 +95155,12 @@ components:
           description: Autogenerated value - user that created object.
           example: elastic
           type: string
-        deserializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListDeserializer'
         id:
           $ref: '#/components/schemas/Security_Lists_API_ListItemId'
         list_id:
           $ref: '#/components/schemas/Security_Lists_API_ListId'
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
-        serializer:
-          $ref: '#/components/schemas/Security_Lists_API_ListSerializer'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
@@ -95288,14 +95267,6 @@ components:
         - cluster
         - index
         - application
-    Security_Lists_API_ListSerializer:
-      description: |
-        Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-        - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-        - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-      example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-      type: string
     Security_Lists_API_ListType:
       description: |
         Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:

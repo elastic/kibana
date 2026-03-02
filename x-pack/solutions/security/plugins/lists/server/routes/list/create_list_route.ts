@@ -14,8 +14,9 @@ import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
+import { getUnsupportedParamWarnings } from '../utils/get_unsupported_param_warnings';
 
-export const createListRoute = (router: ListsPluginRouter): void => {
+export const createListRoute = (router: ListsPluginRouter, kibanaVersion: string): void => {
   router.versioned
     .post({
       access: 'public',
@@ -30,7 +31,7 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateListRequestBody),
+            body: buildRouteValidationWithZod(CreateListRequestBody.passthrough()),
           },
         },
         version: '2023-10-31',
@@ -38,8 +39,10 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { name, description, deserializer, id, serializer, type, meta, version } =
-            request.body;
+          const { name, description, id, type, meta, version } = request.body;
+          // Check for unsupported body parameters (serializer and deserializer) and generate warning headers
+          const warningHeaders = getUnsupportedParamWarnings(request, kibanaVersion);
+
           const lists = await getListClient(context);
           const dataStreamExists = await lists.getListDataStreamExists();
           const indexExists = await lists.getListIndexExists();
@@ -68,17 +71,18 @@ export const createListRoute = (router: ListsPluginRouter): void => {
 
           const list = await lists.createList({
             description,
-            deserializer,
             id,
             immutable: false,
             meta,
             name,
-            serializer,
             type,
             version,
           });
 
-          return response.ok({ body: CreateListResponse.parse(list) });
+          return response.ok({
+            body: CreateListResponse.parse(list),
+            ...(warningHeaders && { headers: warningHeaders }),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

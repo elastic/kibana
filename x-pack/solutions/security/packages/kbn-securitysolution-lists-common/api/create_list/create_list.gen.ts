@@ -21,8 +21,6 @@ import {
   ListName,
   ListDescription,
   ListType,
-  ListSerializer,
-  ListDeserializer,
   ListMetadata,
 } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
@@ -33,8 +31,6 @@ export const CreateListRequestBody = z.object({
   name: ListName,
   description: ListDescription,
   type: ListType,
-  serializer: ListSerializer.optional(),
-  deserializer: ListDeserializer.optional(),
   meta: ListMetadata.optional(),
   version: z.number().int().min(1).optional().default(1),
 });
