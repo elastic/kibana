@@ -50,6 +50,17 @@ function isConflictError(error: unknown): boolean {
 }
 
 /**
+ * Check if a 409 error indicates a stream "already exists" (as opposed to
+ * an optimistic-concurrency version conflict). This happens when a previous
+ * content import timed out server-side but actually created the streams.
+ * Retrying the same batch will never succeed — the streams are already there.
+ */
+function isAlreadyExistsConflict(error: unknown): boolean {
+  const err = error as { response?: { status?: number; data?: { message?: string } } };
+  return err?.response?.status === 409 && /already exists/i.test(err.response.data?.message ?? '');
+}
+
+/**
  * Check if an error is a retryable lock contention error (HTTP 422).
  */
 function isLockContentionError(error: unknown): boolean {
@@ -587,7 +598,7 @@ async function createLargeWiredHierarchyViaImport(
   log: ToolingLog,
   count: number
 ) {
-  const IMPORT_BATCH_SIZE = 100;
+  const IMPORT_BATCH_SIZE = 50;
   const totalBatches = Math.ceil(count / IMPORT_BATCH_SIZE);
 
   log.info(
@@ -633,6 +644,16 @@ async function createLargeWiredHierarchyViaImport(
         break;
       } catch (err) {
         lastError = err;
+        if (isAlreadyExistsConflict(err)) {
+          // A previous attempt (that timed out or errored) already created these
+          // streams. Retrying will never succeed, so treat the batch as done.
+          log.warning(
+            `  Batch ${batchIndex + 1}/${totalBatches}: streams already exist ` +
+              `(prior attempt likely succeeded before timeout), continuing`
+          );
+          lastError = undefined;
+          break;
+        }
         if (isConflictError(err) && attempt < MAX_RETRIES) {
           const delay = RETRY_BASE_DELAY_MS * attempt;
           log.warning(
