@@ -333,6 +333,7 @@ export class Plugin
               contentManagement: pluginsStart.contentManagement,
               share: pluginsStart.share,
               cps: pluginsStart.cps,
+              uiActions: pluginsStart.uiActions,
             });
           },
         });

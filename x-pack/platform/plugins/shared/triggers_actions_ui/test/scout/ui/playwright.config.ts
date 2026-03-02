@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { DataSourcesView } from '../components/connectors_view';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const DataSourcesPage: React.FC = () => {
-  useBreadcrumbs([]);
-  return <DataSourcesView />;
-};
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
