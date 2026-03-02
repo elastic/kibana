@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "249776"
+prs:
+- "249776"
 issues:
 - https://github.com/elastic/obs-ai-team/issues/469
 type: bug-fix
@@ -92,4 +93,5 @@ products:
   target: 9.3.0
 areas:
 - Elastic Observability solution
+- Agent Builder
 title: Use the Observability Agent in AI Insights and flyout config

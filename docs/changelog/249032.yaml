@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "249032"
+prs:
+- "249032"
 type: bug-fix
 products:
 - product: kibana
@@ -89,5 +90,5 @@ products:
 - product: security
   target: 9.3.0
 areas:
-- Elastic Security solution
+- Entity analytics
 title: Wrong Number Users Displayed CSV Bug

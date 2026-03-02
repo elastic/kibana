@@ -66,8 +66,8 @@
 #   An optional array of strings that contain the issues that are
 #   relevant to the PR.
 
-# pr:
-#   An optional string that contains the pull request number.
+# prs:
+#   An optional array of strings that contain the pull request numbers.
 
 # subtype:
 #   An optional string that applies only to breaking changes.
@@ -81,7 +81,8 @@
 #   - security
 #   - other
 
-pr: "237796"
+prs:
+- "237796"
 type: bug-fix
 products:
 - product: kibana
@@ -89,6 +90,6 @@ products:
 - product: security
   target: 9.3.0
 areas:
-- Elastic Security solution
+- Endpoint security
 title: TelemetryConfigWatcher auth fix
 description: Fixes the 'missing authentication credentials' issue in `TelemetryConfigWatcher` and `PolicyWatcher`, which should result in less warning log entries in the Security Solution plugin.
