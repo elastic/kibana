@@ -28,7 +28,7 @@ export interface ActiveAction {
   type: ActionType;
 }
 
-export type FilterType = 'sort';
+export type FilterType = 'sort' | 'tags';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -134,6 +134,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
 
 export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
   { type: 'sort', label: 'Filters.Sort' },
+  { type: 'tags', label: 'Filters.Tags' },
 ];
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
