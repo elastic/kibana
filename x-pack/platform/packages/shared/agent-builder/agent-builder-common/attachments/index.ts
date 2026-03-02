@@ -36,6 +36,7 @@ export type {
   AttachmentRefActor,
   AttachmentDiff,
   VersionedAttachmentInput,
+  UpdateOriginResponse,
 } from './versioned_attachment';
 export {
   ATTACHMENT_REF_OPERATION,

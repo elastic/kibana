@@ -450,12 +450,6 @@ const listsMappings = {
     name: {
       type: 'keyword',
     },
-    deserializer: {
-      type: 'keyword',
-    },
-    serializer: {
-      type: 'keyword',
-    },
     description: {
       type: 'keyword',
     },
@@ -497,12 +491,6 @@ const itemsMappings = {
       type: 'keyword',
     },
     list_id: {
-      type: 'keyword',
-    },
-    deserializer: {
-      type: 'keyword',
-    },
-    serializer: {
       type: 'keyword',
     },
     meta: {
