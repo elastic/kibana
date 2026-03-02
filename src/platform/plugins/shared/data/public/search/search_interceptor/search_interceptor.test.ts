@@ -33,7 +33,6 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -2242,17 +2241,13 @@ describe('SearchInterceptor', () => {
   });
 
   describe('project_routing parameter handling', () => {
-    const createMockCPSManager = (
-      projectRouting: string | undefined,
-      access: ProjectRoutingAccess = ProjectRoutingAccess.EDITABLE
-    ): ICPSManager =>
+    const createMockCPSManager = (projectRouting: string | undefined): ICPSManager =>
       ({
         getProjectRouting: jest
           .fn()
           .mockImplementation(
             (passedProjectRouting?: string) => passedProjectRouting ?? projectRouting
           ),
-        getProjectPickerAccess: jest.fn().mockReturnValue(access),
       } as unknown as ICPSManager);
 
     const getSearchInterceptor = (overrides?: Partial<SearchInterceptorDeps>) => {
