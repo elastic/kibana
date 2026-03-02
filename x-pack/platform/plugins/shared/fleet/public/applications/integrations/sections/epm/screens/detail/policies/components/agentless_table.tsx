@@ -30,6 +30,10 @@ import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../commo
 import type { usePagination } from '../../../../../../hooks';
 import { useLink, sendGetAgents, useAuthz, useStartServices } from '../../../../../../hooks';
 import {
+  PendingUpgradeReviewStatus,
+  DeclinedUpgradeStatus,
+} from '../../../installed_integrations/components/pending_upgrade_review_status';
+import {
   Loading,
   PackagePolicyActionsMenu,
   AgentlessEnrollmentFlyout,
@@ -192,25 +196,50 @@ export const AgentlessPackagePoliciesTable = ({
                     </EuiText>
                   </EuiFlexItem>
 
-                  {agentPolicies.length > 0 && packagePolicy.hasUpgrade && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        minWidth="0"
-                        href={`${getHref('upgrade_package_policy', {
-                          policyId: agentPolicies[0].id,
-                          packagePolicyId: packagePolicy.id,
-                        })}?from=${from || 'integrations-policy-list'}`}
-                        data-test-subj="integrationPolicyUpgradeBtn"
-                        isDisabled={!canWriteIntegrationPolicies}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                          defaultMessage="Upgrade"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
+                  {agentPolicies.length > 0 &&
+                    packagePolicy.hasUpgrade &&
+                    (() => {
+                      const review = packagePolicy.pendingUpgradeReview;
+                      if (review && (!review.action || review.action === 'pending')) {
+                        return (
+                          <EuiFlexItem grow={false}>
+                            <PendingUpgradeReviewStatus
+                              pkgName={packagePolicy.package?.name ?? ''}
+                              pendingUpgradeReview={review}
+                            />
+                          </EuiFlexItem>
+                        );
+                      }
+                      if (review && review.action === 'declined') {
+                        return (
+                          <EuiFlexItem grow={false}>
+                            <DeclinedUpgradeStatus
+                              pkgName={packagePolicy.package?.name ?? ''}
+                              pendingUpgradeReview={review}
+                            />
+                          </EuiFlexItem>
+                        );
+                      }
+                      return (
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            minWidth="0"
+                            href={`${getHref('upgrade_package_policy', {
+                              policyId: agentPolicies[0].id,
+                              packagePolicyId: packagePolicy.id,
+                            })}?from=${from || 'integrations-policy-list'}`}
+                            data-test-subj="integrationPolicyUpgradeBtn"
+                            isDisabled={!canWriteIntegrationPolicies}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
+                              defaultMessage="Upgrade"
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      );
+                    })()}
                 </EuiFlexGroup>
               );
             },

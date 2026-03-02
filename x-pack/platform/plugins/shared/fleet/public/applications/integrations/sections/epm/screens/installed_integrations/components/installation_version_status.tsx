@@ -242,9 +242,19 @@ export const InstallationVersionStatus: React.FunctionComponent<{
   } else if (status === 'upgrade_available') {
     return <UpgradeAvailableVersionStatus item={item} />;
   } else if (status === 'pending_upgrade_review') {
-    return <PendingUpgradeReviewStatus item={item} />;
+    return (
+      <PendingUpgradeReviewStatus
+        pkgName={item.name}
+        pendingUpgradeReview={item.installationInfo!.pending_upgrade_review!}
+      />
+    );
   } else if (status === 'declined_review') {
-    return <DeclinedUpgradeStatus item={item} />;
+    return (
+      <DeclinedUpgradeStatus
+        pkgName={item.name}
+        pendingUpgradeReview={item.installationInfo!.pending_upgrade_review!}
+      />
+    );
   } else if (status === 'upgrading') {
     return <UpgradingVersionStatus item={item} />;
   } else if (status === 'uninstalling') {

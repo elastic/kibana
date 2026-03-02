@@ -23,25 +23,29 @@ export const useIsPackagePolicyUpgradable = () => {
     [allPackages?.items]
   );
 
+  const findInstalledPackage = useCallback(
+    (pkgPolicy: PackagePolicy) => {
+      if (!pkgPolicy.package) return undefined;
+      return allInstalledPackages.find(
+        (pkg) => 'installationInfo' in pkg && pkg.installationInfo?.name === pkgPolicy.package!.name
+      );
+    },
+    [allInstalledPackages]
+  );
+
   const isPackagePolicyUpgradable = useCallback(
     (pkgPolicy: PackagePolicy) => {
-      if (!pkgPolicy.package) {
-        return false;
-      }
-      const { name, version } = pkgPolicy.package;
-      const installedPackage = allInstalledPackages.find(
-        (installedPkg) =>
-          'installationInfo' in installedPkg && installedPkg.installationInfo?.name === name
-      );
+      const installedPackage = findInstalledPackage(pkgPolicy);
       if (
+        pkgPolicy.package &&
         installedPackage?.installationInfo?.version &&
-        semverLt(version, installedPackage.installationInfo.version)
+        semverLt(pkgPolicy.package.version, installedPackage.installationInfo.version)
       ) {
         return true;
       }
       return false;
     },
-    [allInstalledPackages]
+    [findInstalledPackage]
   );
 
   return {
