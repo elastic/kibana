@@ -542,14 +542,40 @@ const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
 };
 
 export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namespace?: string) => {
+  const callInit = async () =>
+    supertest
+      .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send();
+
+  const callCleanup = async () =>
+    supertest
+      .delete(routeWithNamespace(RISK_ENGINE_CLEANUP_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send();
+
   return {
     init: async (expectStatusCode: number = 200) => {
-      const response = await supertest
-        .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send();
+      let response = await callInit();
+
+      const hasIndexDataStreamConflict =
+        response.status === 400 &&
+        response.text.includes('index, alias, data stream, and view names need to be unique') &&
+        response.text.includes('conflicts with index');
+
+      // Serverless flaky runs can leave a stale concrete index with the same name as the risk score
+      // data stream alias. Force cleanup and retry init once when that specific conflict appears.
+      if (expectStatusCode === 200 && hasIndexDataStreamConflict) {
+        const cleanupResponse = await callCleanup();
+        if (cleanupResponse.status !== 200 && cleanupResponse.status !== 400) {
+          assertStatusCode(200, cleanupResponse);
+        }
+        response = await callInit();
+      }
+
       assertStatusCode(expectStatusCode, response);
       return response;
     },
