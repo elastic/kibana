@@ -291,6 +291,7 @@ export const NotificationPolicyForm = () => {
                   <EuiFieldText
                     {...field}
                     inputRef={ref}
+                    value={field.value ?? ''}
                     fullWidth
                     isInvalid={!!error}
                     data-test-subj="throttleIntervalInput"
