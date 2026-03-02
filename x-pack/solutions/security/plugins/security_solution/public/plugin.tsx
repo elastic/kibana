@@ -87,6 +87,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _subPlugins?: SubPlugins;
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
+  private _discoverFlyoutServicesPromise?: Promise<StartServices>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -265,7 +266,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     cases?.attachmentFramework?.registerExternalReference(generateIndicatorAttachmentType());
 
-    this.registerDiscoverSharedFeatures(plugins);
+    this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
   }
@@ -288,7 +289,24 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
-  public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
+  private getDiscoverFlyoutServices(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>
+  ): Promise<StartServices> {
+    if (!this._discoverFlyoutServicesPromise) {
+      this._discoverFlyoutServicesPromise = core
+        .getStartServices()
+        .then(([coreStart, startPlugins]) =>
+          this.services.generateServices(coreStart, startPlugins)
+        );
+    }
+
+    return this._discoverFlyoutServicesPromise;
+  }
+
+  public async registerDiscoverSharedFeatures(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ) {
     const { discoverShared } = plugins;
     const discoverFeatureRegistry = discoverShared.features.registry;
 
@@ -308,11 +326,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: (hit) => (
-        <React.Suspense fallback={null}>
-          <LazyAlertFlyoutOverviewTab hit={hit} />
-        </React.Suspense>
-      ),
+      render: (hit) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutOverviewTab hit={hit} servicesPromise={servicesPromise} />
+          </React.Suspense>
+        );
+      },
     };
     discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
   }

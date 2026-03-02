@@ -26,12 +26,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
-import { AGENT_WORKFLOWS_FEATURE_FLAG } from '@kbn/agent-builder-common';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
+import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import type { AgentFormData } from '../agent_form';
 
 interface AgentSettingsTabProps {
@@ -49,13 +48,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
   const {
-    services: { settings, featureFlags },
+    services: { settings },
   } = useKibana();
   const showAgentWorkflowsSection = useMemo(() => {
-    const workflowsUiEnabled = settings.client.get(WORKFLOWS_UI_SETTING_ID, false);
-    const agentWorkflowsEnabled = featureFlags.getBooleanValue(AGENT_WORKFLOWS_FEATURE_FLAG, false);
-    return workflowsUiEnabled && agentWorkflowsEnabled;
-  }, [settings, featureFlags]);
+    return isPreExecutionWorkflowEnabled(settings.client);
+  }, [settings]);
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
   const formFlexColumnStyles = css`
