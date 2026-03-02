@@ -16,6 +16,7 @@ import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
+  atLeastOneDataPhaseEnabled,
   minAgeGreaterThanPreviousPhase,
   rolloverThresholdsValidator,
   downsampleIntervalMultipleOfPreviousOne,
@@ -120,6 +121,13 @@ const shardSizeField = {
   serializer: serializers.stringToNumber,
 };
 
+const dataPhaseEnabledPaths = [
+  '_meta.hot.enabled',
+  '_meta.warm.enabled',
+  '_meta.cold.enabled',
+  '_meta.frozen.enabled',
+];
+
 const allowWriteAfterShrinkField = {
   label: i18nTexts.editPolicy.allowWriteAfterShrinkLabel,
   defaultValue: false,
@@ -209,6 +217,15 @@ const getDownsampleSchema = (phase: PhaseWithDownsample): FormSchema['downsample
 export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
+      enabled: {
+        defaultValue: true,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.hotPhase.activateHotPhaseSwitchLabel',
+          { defaultMessage: 'Activate hot phase' }
+        ),
+        fieldsToValidateOnChange: dataPhaseEnabledPaths,
+        validations: [{ validator: atLeastOneDataPhaseEnabled }],
+      },
       isUsingDefaultRollover: {
         defaultValue: true,
         label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
@@ -256,6 +273,8 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseSwitchLabel',
           { defaultMessage: 'Activate warm phase' }
         ),
+        fieldsToValidateOnChange: dataPhaseEnabledPaths,
+        validations: [{ validator: atLeastOneDataPhaseEnabled }],
       },
       minAgeUnit: {
         defaultValue: 'd',
@@ -299,6 +318,8 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel',
           { defaultMessage: 'Activate cold phase' }
         ),
+        fieldsToValidateOnChange: dataPhaseEnabledPaths,
+        validations: [{ validator: atLeastOneDataPhaseEnabled }],
       },
       readonlyEnabled: {
         defaultValue: false,
@@ -330,6 +351,8 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
           { defaultMessage: 'Activate frozen phase' }
         ),
+        fieldsToValidateOnChange: dataPhaseEnabledPaths,
+        validations: [{ validator: atLeastOneDataPhaseEnabled }],
       },
       minAgeUnit: {
         defaultValue: 'd',

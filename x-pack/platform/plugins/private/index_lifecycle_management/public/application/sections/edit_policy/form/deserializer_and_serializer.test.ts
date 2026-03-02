@@ -7,9 +7,14 @@
 
 import { cloneDeep } from 'lodash';
 import type { SerializedPolicy } from '../../../../../common/types';
+import type {
+  FormData,
+  ValidationFuncArg,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { defaultRolloverAction } from '../../../constants';
 import { createDeserializer } from './deserializer';
 import { createSerializer } from './serializer';
+import { atLeastOneDataPhaseEnabled, DATA_PHASE_REQUIRED_VALIDATION_CODE } from './validations';
 import type { FormInternal } from '../types';
 
 const isObject = (v: unknown): v is { [key: string]: any } =>
@@ -314,6 +319,127 @@ describe('deserializer and serializer', () => {
         cold: { min_age: '2d', actions: {} },
         delete: { min_age: '3d', actions: { delete: {} } },
       },
+    });
+  });
+
+  it('preserves policies without a hot phase', () => {
+    const noHotPolicy: SerializedPolicy = {
+      name: 'noHotPolicy',
+      phases: {
+        warm: { actions: {} },
+        cold: { min_age: '3h', actions: {} },
+      },
+    };
+
+    const formInternalNoHot = deserializer(cloneDeep(noHotPolicy));
+    serializer = createSerializer(cloneDeep(noHotPolicy));
+
+    expect(serializer(formInternalNoHot)).toEqual(noHotPolicy);
+  });
+
+  describe('validations', () => {
+    const createValidationArg = (
+      fields: Record<string, { value: boolean; clearErrors: jest.Mock }>,
+      formData: Record<string, unknown> = {}
+    ): ValidationFuncArg<FormData, unknown> =>
+      ({
+        path: '_meta.hot.enabled',
+        value: undefined,
+        formData,
+        errors: [],
+        customData: {
+          provider: async () => undefined,
+          value: undefined,
+        },
+        form: {
+          getFormData: () => formData,
+          getFields: () => fields,
+        },
+      } as unknown as ValidationFuncArg<FormData, unknown>);
+
+    it('requires at least one data phase enabled', () => {
+      const hotEnabledField = { value: false, clearErrors: jest.fn() };
+      const warmEnabledField = { value: false, clearErrors: jest.fn() };
+      const coldEnabledField = { value: false, clearErrors: jest.fn() };
+      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+
+      const arg = createValidationArg({
+        '_meta.hot.enabled': hotEnabledField,
+        '_meta.warm.enabled': warmEnabledField,
+        '_meta.cold.enabled': coldEnabledField,
+        '_meta.frozen.enabled': frozenEnabledField,
+      });
+
+      expect(atLeastOneDataPhaseEnabled(arg)).toEqual({
+        code: DATA_PHASE_REQUIRED_VALIDATION_CODE,
+        message: 'At least one data phase must be enabled.',
+      });
+
+      expect(hotEnabledField.clearErrors).not.toHaveBeenCalled();
+      expect(warmEnabledField.clearErrors).not.toHaveBeenCalled();
+      expect(coldEnabledField.clearErrors).not.toHaveBeenCalled();
+      expect(frozenEnabledField.clearErrors).not.toHaveBeenCalled();
+    });
+
+    it('clears validation error when any data phase is enabled', () => {
+      const hotEnabledField = { value: true, clearErrors: jest.fn() };
+      const warmEnabledField = { value: false, clearErrors: jest.fn() };
+      const coldEnabledField = { value: false, clearErrors: jest.fn() };
+      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+
+      const arg = createValidationArg({
+        '_meta.hot.enabled': hotEnabledField,
+        '_meta.warm.enabled': warmEnabledField,
+        '_meta.cold.enabled': coldEnabledField,
+        '_meta.frozen.enabled': frozenEnabledField,
+      });
+
+      expect(atLeastOneDataPhaseEnabled(arg)).toBeUndefined();
+
+      expect(hotEnabledField.clearErrors).toHaveBeenCalledWith(DATA_PHASE_REQUIRED_VALIDATION_CODE);
+      expect(warmEnabledField.clearErrors).toHaveBeenCalledWith(
+        DATA_PHASE_REQUIRED_VALIDATION_CODE
+      );
+      expect(coldEnabledField.clearErrors).toHaveBeenCalledWith(
+        DATA_PHASE_REQUIRED_VALIDATION_CODE
+      );
+      expect(frozenEnabledField.clearErrors).toHaveBeenCalledWith(
+        DATA_PHASE_REQUIRED_VALIDATION_CODE
+      );
+    });
+
+    it('does not error when hot is implicitly enabled but not registered', () => {
+      const warmEnabledField = { value: false, clearErrors: jest.fn() };
+      const coldEnabledField = { value: false, clearErrors: jest.fn() };
+      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+
+      const arg = createValidationArg({
+        '_meta.warm.enabled': warmEnabledField,
+        '_meta.cold.enabled': coldEnabledField,
+        '_meta.frozen.enabled': frozenEnabledField,
+      });
+
+      expect(atLeastOneDataPhaseEnabled(arg)).toBeUndefined();
+    });
+
+    it('still errors if hot is missing but explicitly disabled in form data', () => {
+      const warmEnabledField = { value: false, clearErrors: jest.fn() };
+      const coldEnabledField = { value: false, clearErrors: jest.fn() };
+      const frozenEnabledField = { value: false, clearErrors: jest.fn() };
+
+      const arg = createValidationArg(
+        {
+          '_meta.warm.enabled': warmEnabledField,
+          '_meta.cold.enabled': coldEnabledField,
+          '_meta.frozen.enabled': frozenEnabledField,
+        },
+        { _meta: { hot: { enabled: false } } }
+      );
+
+      expect(atLeastOneDataPhaseEnabled(arg)).toEqual({
+        code: DATA_PHASE_REQUIRED_VALIDATION_CODE,
+        message: 'At least one data phase must be enabled.',
+      });
     });
   });
 

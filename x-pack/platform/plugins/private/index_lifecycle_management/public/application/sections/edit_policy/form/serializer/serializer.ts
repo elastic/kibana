@@ -20,17 +20,28 @@ export const createSerializer =
   (data: FormInternal): SerializedPolicy => {
     const { _meta, ...updatedPolicy } = data;
 
-    updatedPolicy.phases = { hot: { actions: {} }, ...updatedPolicy.phases };
+    const hotEnabled = _meta.hot?.enabled ?? true;
+    if (hotEnabled) {
+      updatedPolicy.phases = {
+        ...updatedPolicy.phases,
+        hot: updatedPolicy.phases.hot ?? { actions: {} },
+      };
+    } else if (updatedPolicy.phases.hot) {
+      delete updatedPolicy.phases.hot;
+    }
 
     const draft = cloneDeep<SerializedPolicy>(originalPolicy ?? defaultPolicy);
     // Copy over all updated fields
     merge(draft, updatedPolicy);
+    if (!hotEnabled) {
+      delete draft.phases.hot;
+    }
 
     /**
      * Important shared values for serialization
      */
     const isUsingRollover = Boolean(
-      _meta.hot?.isUsingDefaultRollover || _meta.hot?.customRollover.enabled
+      hotEnabled && (_meta.hot?.isUsingDefaultRollover || _meta.hot?.customRollover.enabled)
     );
 
     // Next copy over all meta fields and delete any fields that have been removed
@@ -40,7 +51,7 @@ export const createSerializer =
     /**
      * HOT PHASE SERIALIZATION
      */
-    if (draft.phases.hot) {
+    if (hotEnabled && draft.phases.hot) {
       draft.phases.hot.min_age = draft.phases.hot.min_age ?? '0ms';
 
       if (draft.phases.hot?.actions) {
@@ -59,29 +70,29 @@ export const createSerializer =
             }
 
             // We are using user-defined, custom rollover settings.
-            if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
+            if (updatedPolicy.phases.hot?.actions.rollover?.max_age) {
               hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot?.customRollover.maxAgeUnit}`;
             } else {
               delete hotPhaseActions.rollover.max_age;
             }
 
-            if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
+            if (typeof updatedPolicy.phases.hot?.actions.rollover?.max_docs !== 'number') {
               delete hotPhaseActions.rollover.max_docs;
             }
 
-            if (updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_size) {
+            if (updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_size) {
               hotPhaseActions.rollover.max_primary_shard_size = `${hotPhaseActions.rollover.max_primary_shard_size}${_meta.hot?.customRollover.maxPrimaryShardSizeUnit}`;
             } else {
               delete hotPhaseActions.rollover.max_primary_shard_size;
             }
 
             if (
-              typeof updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_docs !== 'number'
+              typeof updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_docs !== 'number'
             ) {
               delete hotPhaseActions.rollover.max_primary_shard_docs;
             }
 
-            if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
+            if (updatedPolicy.phases.hot?.actions.rollover?.max_size) {
               hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
             } else {
               delete hotPhaseActions.rollover.max_size;
@@ -91,7 +102,7 @@ export const createSerializer =
           /**
            * HOT PHASE FORCEMERGE
            */
-          if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
+          if (!updatedPolicy.phases.hot?.actions?.forcemerge) {
             delete hotPhaseActions.forcemerge;
           } else if (_meta.hot?.bestCompression) {
             hotPhaseActions.forcemerge!.index_codec = 'best_compression';
@@ -144,14 +155,14 @@ export const createSerializer =
         /**
          * HOT PHASE SET PRIORITY
          */
-        if (!updatedPolicy.phases.hot!.actions?.set_priority) {
+        if (!updatedPolicy.phases.hot?.actions?.set_priority) {
           delete hotPhaseActions.set_priority;
         }
 
         /**
          * HOT PHASE SEARCHABLE SNAPSHOT
          */
-        if (updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+        if (updatedPolicy.phases.hot?.actions?.searchable_snapshot) {
           hotPhaseActions.searchable_snapshot = {
             ...hotPhaseActions.searchable_snapshot,
             snapshot_repository: _meta.searchableSnapshot.repository,

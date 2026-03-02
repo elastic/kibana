@@ -28,6 +28,7 @@ import type { Phase as PhaseType } from '../../../../../../../common/types';
 import { useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 import type { FormInternal } from '../../../types';
+import { useEditPolicyContext } from '../../../edit_policy_context';
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
 
@@ -60,14 +61,19 @@ interface Props {
 export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
   const styles = useStyles();
   const enabledPath = `_meta.${phase}.enabled`;
+  const { isHotPhaseRequired } = useEditPolicyContext();
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
   });
 
   const isHotPhase = phase === 'hot';
   const isDeletePhase = phase === 'delete';
-  // hot phase is always enabled
-  const enabled = get(formData, enabledPath) || isHotPhase;
+  // hot phase is always enabled unless it's editing a policy that doesn't have a hot phase
+  const enabled = isHotPhase
+    ? isHotPhaseRequired
+      ? true
+      : Boolean(get(formData, enabledPath))
+    : Boolean(get(formData, enabledPath));
 
   // delete phase is hidden when disabled
   if (isDeletePhase && !enabled) {

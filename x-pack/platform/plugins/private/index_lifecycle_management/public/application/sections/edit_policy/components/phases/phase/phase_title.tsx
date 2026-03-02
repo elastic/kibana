@@ -25,6 +25,7 @@ import type { Phase } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 import type { FormInternal } from '../../../types';
+import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField, useFormErrorsContext, usePhaseTimings } from '../../../form';
 import { MinAgeField } from '../shared_fields';
 
@@ -43,6 +44,7 @@ interface Props {
 
 export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
+  const { isHotPhaseRequired } = useEditPolicyContext();
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
   });
@@ -50,8 +52,12 @@ export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
   const isHotPhase = phase === 'hot';
   const isDeletePhase = phase === 'delete';
   const { setDeletePhaseEnabled } = usePhaseTimings();
-  // hot phase is always enabled
-  const enabled = get(formData, enabledPath) || isHotPhase;
+  // hot phase is always enabled unless it's editing a policy that doesn't have a hot phase
+  const enabled = isHotPhase
+    ? isHotPhaseRequired
+      ? true
+      : Boolean(get(formData, enabledPath))
+    : Boolean(get(formData, enabledPath));
 
   const { errors } = useFormErrorsContext();
   const hasErrors = Object.keys(errors[phase]).length > 0;
@@ -60,7 +66,7 @@ export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
         <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
-          {!isHotPhase && !isDeletePhase && (
+          {!isDeletePhase && (!isHotPhase || !isHotPhaseRequired) && (
             <EuiFlexItem grow={false}>
               <UseField
                 path={enabledPath}
@@ -79,7 +85,7 @@ export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
               <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          {isHotPhase && (
+          {isHotPhase && isHotPhaseRequired && (
             <EuiFlexItem grow={false}>
               <EuiBadge css={styles.phaseRequiredBadge}>
                 <FormattedMessage

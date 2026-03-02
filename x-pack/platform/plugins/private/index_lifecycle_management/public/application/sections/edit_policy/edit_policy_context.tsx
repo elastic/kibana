@@ -12,6 +12,7 @@ import type { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
 export interface EditPolicyContextValue {
   isNewPolicy: boolean;
+  isHotPhaseRequired: boolean;
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
   license: {
