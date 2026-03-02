@@ -41,6 +41,9 @@ const featuresSchema = {
           properties: {
             type: 'object',
             properties: {},
+            minProperties: 1,
+            description:
+              'Core identifying properties of the feature (e.g. {"name": "order-service"}). Empty properties are invalid — every feature must have at least one stable identifying property.',
           },
           confidence: {
             type: 'number',
@@ -80,8 +83,9 @@ const featuresSchema = {
                   type: 'object',
                   properties: {
                     field: { type: 'string' },
-                    eq: { type: 'string', },
+                    eq: { type: 'string' },
                   },
+                  required: ['field', 'eq'],
                 },
               },
               or: {
@@ -90,20 +94,19 @@ const featuresSchema = {
                   type: 'object',
                   properties: {
                     field: { type: 'string' },
-                    eq: { type: 'string', },
+                    eq: { type: 'string' },
                   },
+                  required: ['field', 'eq'],
                 },
               },
             },
             description:
               'Optional condition used to scope filtering to the corresponding feature. Allowed forms: single equality `{field, eq}` or one-level `{and: [...]}` / `{or: [...]}` of equality conditions.',
-
           },
           meta: {
             type: 'object',
             properties: {},
-            description:
-              'Useful metadata that is not captured in other properties.',
+            description: 'Useful metadata that is not captured in other properties.',
           },
         },
         required: [

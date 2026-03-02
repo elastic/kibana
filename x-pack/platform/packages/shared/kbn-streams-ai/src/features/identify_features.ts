@@ -79,7 +79,6 @@ function tryParseFilter(maybeFilter: unknown): Condition | undefined {
     return undefined;
   }
 
-  console.log("GOT FILTER", JSON.stringify(maybeFilter, null, 2));
   const result = conditionSchema.safeParse(maybeFilter);
   return result.success ? result.data : undefined;
-};
+}
