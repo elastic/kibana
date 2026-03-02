@@ -20,3 +20,4 @@ export {
 export { Global } from './src/modules/plugin';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
 export { cacheInScope } from './src/utils';
+export { rethrowDiError } from './src/di_error';
