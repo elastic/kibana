@@ -1740,6 +1740,10 @@ components:
           description: Turns alert syncing on or off.
           type: boolean
           example: true
+        extractObservables:
+          description: Auto extracts observables
+          type: boolean
+          example: false
     case_severity:
       type: string
       description: The severity of the case.
