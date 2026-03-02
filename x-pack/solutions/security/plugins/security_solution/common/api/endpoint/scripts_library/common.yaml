@@ -112,3 +112,11 @@ components:
           description: Collects host data for investigation
           instructions: Collects host data for investigation
           example: ./collect_host_data.sh --help
+
+    ArchivePathToExecutableSchema:
+      type: string
+      description:
+        Used only for when the uploaded script is an archive (.zip file for example).
+        This property defines the relative path to the file included in the archive that should be executed
+        once its contents are extracted. The path should be relative to the root of the archive.
+      example: ./bin/script.sh
