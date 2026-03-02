@@ -17,6 +17,7 @@ export function convertErrors<T>({
   agentId,
   analyticsService,
   conversationId,
+  executionId,
   logger,
   modelProvider,
   trackingService,
@@ -24,6 +25,7 @@ export function convertErrors<T>({
   agentId: string;
   analyticsService?: AnalyticsService;
   conversationId?: string;
+  executionId?: string;
   logger: Logger;
   modelProvider: ModelProvider;
   trackingService?: TrackingService;
@@ -44,6 +46,7 @@ export function convertErrors<T>({
         analyticsService?.reportRoundError({
           agentId,
           conversationId,
+          executionId,
           error: err,
           modelProvider,
         });
