@@ -139,9 +139,7 @@ export const ZoomGetMeetingParticipantsInputSchema = z.object({
   pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
   nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
 });
-export type ZoomGetMeetingParticipantsInput = z.infer<
-  typeof ZoomGetMeetingParticipantsInputSchema
->;
+export type ZoomGetMeetingParticipantsInput = z.infer<typeof ZoomGetMeetingParticipantsInputSchema>;
 
 export const ZoomGetMeetingRegistrantsInputSchema = z.object({
   meetingId: z.string().describe('Meeting ID'),
