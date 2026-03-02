@@ -11,6 +11,7 @@ import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
+import { servicenowDataSource } from './servicenow';
 import { amazonS3DataSource } from './amazon_s3';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
@@ -20,5 +21,6 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
+  dataCatalog.register(servicenowDataSource);
   dataCatalog.register(amazonS3DataSource);
 }

@@ -91,6 +91,15 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
   [
+    '.servicenow_search',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+        )
+    ),
+  ],
+  [
     '.amazon_s3',
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
