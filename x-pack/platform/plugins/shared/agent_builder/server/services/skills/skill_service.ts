@@ -11,12 +11,15 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { PersistedSkillCreateRequest, PersistedSkillUpdateRequest } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
 import { createBuiltinSkillProvider } from './builtin';
 import { createPersistedSkillProvider } from './persisted';
+import type { AuditLogService } from '../../audit';
+import { asError } from '../../utils/as_error';
 
 export interface SkillServiceSetup {
   registerSkill(skill: SkillDefinition): void;
@@ -31,6 +34,28 @@ export interface SkillServiceStart {
    * registry is created do not affect that registry instance.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
+
+  /**
+   * Create a persisted skill and log the operation for audit.
+   */
+  createSkill(
+    request: KibanaRequest,
+    createRequest: PersistedSkillCreateRequest
+  ): Promise<Awaited<ReturnType<SkillRegistry['create']>>>;
+
+  /**
+   * Update a persisted skill and log the operation for audit.
+   */
+  updateSkill(
+    request: KibanaRequest,
+    skillId: string,
+    update: PersistedSkillUpdateRequest
+  ): Promise<Awaited<ReturnType<SkillRegistry['update']>>>;
+
+  /**
+   * Delete a persisted skill and log the operation for audit.
+   */
+  deleteSkill(request: KibanaRequest, skillId: string): Promise<void>;
 
   /**
    * Register a skill dynamically after plugin start.
@@ -61,6 +86,7 @@ export interface SkillServiceStartDeps {
   spaces?: SpacesPluginStart;
   logger: Logger;
   getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
+  auditLogService: AuditLogService;
 }
 
 export const createSkillService = (): SkillService => {
@@ -101,29 +127,84 @@ class SkillServiceImpl implements SkillService {
     spaces,
     logger,
     getToolRegistry,
+    auditLogService,
   }: SkillServiceStartDeps): SkillServiceStart {
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
     );
 
-    return {
-      getRegistry: async ({ request }) => {
-        await this.mutationQueue;
-        await validated;
-        const space = getCurrentSpaceId({ request, spaces });
-        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
-        const persistedProvider = createPersistedSkillProvider({
-          space,
-          esClient: elasticsearch.client.asInternalUser,
-          logger,
-        });
-        const toolRegistry = await getToolRegistry({ request });
+    const getRegistry = async ({ request }: { request: KibanaRequest }) => {
+      await this.mutationQueue;
+      await validated;
+      const space = getCurrentSpaceId({ request, spaces });
+      const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+      const persistedProvider = createPersistedSkillProvider({
+        space,
+        esClient: elasticsearch.client.asInternalUser,
+        logger,
+      });
+      const toolRegistry = await getToolRegistry({ request });
 
-        return createSkillRegistry({
-          builtinProvider,
-          persistedProvider,
-          toolRegistry,
-        });
+      return createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry,
+      });
+    };
+
+    return {
+      getRegistry,
+      createSkill: async (request, createRequest) => {
+        const registry = await getRegistry({ request });
+        try {
+          const skill = await registry.create(createRequest);
+          auditLogService.logSkillCreated(request, {
+            skillId: skill.id,
+            skillName: skill.name,
+          });
+          return skill;
+        } catch (error) {
+          auditLogService.logSkillCreated(request, {
+            skillId: createRequest.id,
+            skillName: createRequest.name,
+            error: asError(error),
+          });
+          throw error;
+        }
+      },
+      updateSkill: async (request, skillId, update) => {
+        const registry = await getRegistry({ request });
+        try {
+          const skill = await registry.update(skillId, update);
+          auditLogService.logSkillUpdated(request, {
+            skillId: skill.id,
+            skillName: skill.name,
+          });
+          return skill;
+        } catch (error) {
+          auditLogService.logSkillUpdated(request, {
+            skillId,
+            error: asError(error),
+          });
+          throw error;
+        }
+      },
+      deleteSkill: async (request, skillId) => {
+        const registry = await getRegistry({ request });
+        try {
+          const skill = await registry.get(skillId);
+          await registry.delete(skillId);
+          auditLogService.logSkillDeleted(request, {
+            skillId: skill.id,
+            skillName: skill.name,
+          });
+        } catch (error) {
+          auditLogService.logSkillDeleted(request, {
+            skillId,
+            error: asError(error),
+          });
+          throw error;
+        }
       },
       registerSkill: (skill) => {
         const op = this.mutationQueue.then(async () => {

@@ -127,6 +127,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       const registry = await getRegistry({ request: {} as any });
@@ -145,6 +150,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       const skill = createMockSkillDefinition({ id: 'dynamic-1' });
@@ -166,6 +176,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       await expect(
@@ -182,6 +197,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       const skillA = createMockSkillDefinition({ id: 'race-skill', name: 'race-a' as any });
@@ -214,6 +234,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       const result = await start.unregisterSkill('removable');
@@ -232,6 +257,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       const result = await start.unregisterSkill('non-existent');
@@ -247,6 +277,11 @@ describe('createSkillService', () => {
         elasticsearch: { client: { asInternalUser: {} } } as any,
         logger: { warn: jest.fn() } as any,
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+        auditLogService: {
+          logSkillCreated: jest.fn(),
+          logSkillUpdated: jest.fn(),
+          logSkillDeleted: jest.fn(),
+        } as any,
       });
 
       const skill = createMockSkillDefinition({

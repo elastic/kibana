@@ -84,6 +84,11 @@ export class ServiceManager {
 
     const attachments = this.services.attachments.start();
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const tools = this.services.tools.start({
       getRunner,
       spaces,
@@ -98,6 +103,7 @@ export class ServiceManager {
       spaces,
       logger: logger.get('skills'),
       getToolRegistry: tools.getRegistry,
+      auditLogService,
     });
 
     const agents = this.services.agents.start({
@@ -134,11 +140,6 @@ export class ServiceManager {
       security,
       elasticsearch,
       spaces,
-    });
-
-    const auditLogService = new AuditLogService({
-      security,
-      logger: logger.get('audit'),
     });
 
     const taskHandler = createTaskHandler({
