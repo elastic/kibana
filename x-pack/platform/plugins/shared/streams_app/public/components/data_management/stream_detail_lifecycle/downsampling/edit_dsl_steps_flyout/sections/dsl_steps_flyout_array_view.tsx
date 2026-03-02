@@ -25,7 +25,7 @@ import {
   type DslStepsFlyoutFormInternal,
   type PreservedTimeUnit,
 } from '../form';
-import { getDoubledDurationFromPrevious, toMilliseconds } from '../../shared';
+import { downsamplingHelpText, getDoubledDurationFromPrevious, toMilliseconds } from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
 import { useStyles } from '../use_styles';
 import { StepPanel } from './step_panel';
@@ -326,6 +326,11 @@ export const DslStepsFlyoutArrayView = ({
                 })}
               </h2>
             </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {downsamplingHelpText}
+            </EuiText>
           </EuiFlexItem>
 
           {items.length > 0 && (

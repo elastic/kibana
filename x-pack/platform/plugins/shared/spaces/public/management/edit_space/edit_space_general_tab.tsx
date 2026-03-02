@@ -9,8 +9,10 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { EditSpaceTabFooter } from './footer';
@@ -21,6 +23,7 @@ import { getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
+import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
@@ -38,6 +41,11 @@ interface Props {
 
 export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history, ...props }) => {
   const imageAvatarSelected = Boolean(space.imageUrl);
+
+  const {
+    services: { cps },
+  } = useKibana<{ cps?: CPSPluginStart }>();
+
   const [formValues, setFormValues] = useState<CustomizeSpaceFormValues>({
     ...space,
     avatarType: imageAvatarSelected ? 'image' : 'initials',
@@ -54,7 +62,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-  const { http, overlays, logger, notifications, navigateToUrl, spacesManager } =
+  const { http, overlays, logger, notifications, navigateToUrl, spacesManager, capabilities } =
     useEditSpaceServices();
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
@@ -107,6 +115,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     [onChangeFeatures]
   );
 
+  const onProjectRoutingChange = useCallback(
+    (updatedSpace: Partial<Space>) => {
+      onChangeSpaceSettings(updatedSpace);
+    },
+    [onChangeSpaceSettings]
+  );
+
   const backToSpacesList = useCallback(() => {
     history.push('/');
   }, [history]);
@@ -120,6 +135,22 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onClickDeleteSpace = useCallback(() => {
     setShowConfirmDeleteModal(true);
   }, []);
+
+  const canReadProjectRouting = (): boolean => {
+    return capabilities?.project_routing?.read_space_default === true;
+  };
+
+  const updateProjectPicker = useCallback(
+    async (updatedSpace: Partial<Space>) => {
+      if (
+        updatedSpace.projectRouting &&
+        updatedSpace.id === (await spacesManager.getActiveSpace()).id
+      ) {
+        cps?.cpsManager?.updateDefaultProjectRouting(updatedSpace.projectRouting);
+      }
+    },
+    [spacesManager, cps]
+  );
 
   const performSave = useCallback(
     async ({ requiresReload = false }) => {
@@ -167,6 +198,8 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           )
         );
 
+        updateProjectPicker(spaceClone);
+
         setIsDirty(false);
         backToSpacesList();
         if (requiresReload) {
@@ -185,7 +218,15 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         setIsLoading(false);
       }
     },
-    [backToSpacesList, notifications.toasts, formValues, spacesManager, logger, props]
+    [
+      backToSpacesList,
+      notifications.toasts,
+      formValues,
+      spacesManager,
+      logger,
+      props,
+      updateProjectPicker,
+    ]
   );
 
   const validator = useMemo(() => new SpaceValidator(), []);
@@ -307,6 +348,16 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         onChange={onChangeSpaceSettings}
         validator={validator}
       />
+
+      {canReadProjectRouting() && (
+        <>
+          <EuiSpacer />
+          <CustomizeCps
+            space={getSpaceFromFormValues(formValues)}
+            onChange={onProjectRoutingChange}
+          />
+        </>
+      )}
 
       {doShowUserImpactWarning()}
 

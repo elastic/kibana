@@ -24,7 +24,9 @@ import {
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  getRoot,
   isSchema,
+  LOGS_ECS_STREAM_NAME,
   recursiveRecord,
   Streams,
   isNamespacedEcsField,
@@ -170,7 +172,8 @@ export const FieldNameSelector = () => {
             { defaultMessage: 'A field with this name already exists.' }
           );
         }
-        if (isWiredStream) {
+        const isEcsStream = getRoot(stream.name) === LOGS_ECS_STREAM_NAME;
+        if (isWiredStream && !isEcsStream) {
           if (!isNamespacedEcsField(name)) {
             return i18n.translate(
               'xpack.streams.schemaEditor.addFieldFlyout.fieldNameNotNamespacedError',
