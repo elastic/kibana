@@ -370,8 +370,6 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           package: {
             name: 'endpoint',
             version: '8.5.0',
-            release: 'ga',
-            policy_template: 'some-template',
           },
         },
         streams: [
