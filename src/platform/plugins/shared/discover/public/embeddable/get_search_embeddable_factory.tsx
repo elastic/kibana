@@ -240,7 +240,7 @@ export const getSearchEmbeddableFactory = ({
       const cancelInlineTabSelection = async () => {
         if (!isInlineEditing$.getValue() || !inlineEditStateSnapshot) return;
 
-        if (draftSelectedTabId$.getValue() !== selectedTabId$.getValue()) {
+        if (inlineEditDirty$.getValue()) {
           try {
             await searchEmbeddable.reinitializeState(inlineEditStateSnapshot);
           } catch (error) {
@@ -310,32 +310,13 @@ export const getSearchEmbeddableFactory = ({
           timeRangeManager.reinitializeState(lastSaved);
           titleManager.reinitializeState(lastSaved);
           if (lastSaved) {
-            const currentTabId = draftSelectedTabId$.getValue();
-
             const lastSavedRuntimeState = await deserializeState({
               serializedState: lastSaved,
               discoverServices,
             });
 
             selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-
-            const isLastSavedSelectedTabDeleted = isSelectedTabDeleted(
-              lastSavedRuntimeState.selectedTabId,
-              lastSavedRuntimeState.tabs ?? tabs
-            );
-
-            const resolvedTabId = isLastSavedSelectedTabDeleted
-              ? undefined
-              : lastSavedRuntimeState.selectedTabId;
-
-            const resolvedTab = resolvedTabId
-              ? tabs.find((t) => t.id === resolvedTabId)
-              : undefined;
-
-            const newState =
-              currentTabId !== resolvedTabId && resolvedTab ? resolvedTab : lastSavedRuntimeState;
-
-            await searchEmbeddable.reinitializeState(newState);
+            await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
           }
           stopInlineEditing();
         },
