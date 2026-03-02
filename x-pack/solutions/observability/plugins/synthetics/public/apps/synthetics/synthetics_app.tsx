@@ -47,7 +47,7 @@ const Application = (props: SyntheticsAppProps) => {
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
   kibanaService.theme = props.appMountParameters.theme$;
-  
+
   store.dispatch(setBasePath(basePath));
 
   return (
