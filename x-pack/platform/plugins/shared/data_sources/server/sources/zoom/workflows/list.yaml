@@ -33,6 +33,7 @@ inputs:
   - name: page_size
     type: number
     required: false
+    default: 20
     description: "Number of results per page (1-300)."
   - name: next_page_token
     type: string
