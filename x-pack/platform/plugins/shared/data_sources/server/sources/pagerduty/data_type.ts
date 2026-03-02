@@ -17,7 +17,7 @@ export const pagerdutyDataSource: DataSource = {
       'Connect to PagerDuty to access incidents, escalation policies, schedules, and related data.',
   }),
 
-  iconType: '.pagerduty-v2',
+  iconType: '.pagerduty',
 
   stackConnectors: [
     {

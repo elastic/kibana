@@ -39,6 +39,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
   ],
   [
+    '.pagerduty',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
     '.brave-search',
     lazy(
       () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
