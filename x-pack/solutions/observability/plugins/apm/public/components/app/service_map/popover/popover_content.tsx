@@ -5,7 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, EuiIconTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiTable,
+  EuiTableBody,
+  EuiTableCell,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiTableRow,
+  EuiTitle,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
 import type { MouseEvent, ComponentType } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -70,6 +84,19 @@ export function getContentsComponent(
   return DependencyContents;
 }
 
+export interface PopoverAlert {
+  id: string;
+  title: string;
+  severity: string;
+  time: string;
+}
+
+export interface PopoverFailedRequest {
+  time: string;
+  errorMessage: string;
+  requestId: string;
+}
+
 function getPopoverTitle(selection: ServiceMapSelection): string {
   if (isEdge(selection)) {
     const source = selection.data?.sourceLabel ?? selection.source;
@@ -89,6 +116,10 @@ interface PopoverContentProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** Called when user clicks "Open diagnostic tool" – parent should open the flyout and close the popover. */
   onOpenDiagnostic?: () => void;
+  /** Optional alerts to show for the selected service (e.g. demo/story). When set, title shows alert count badge. */
+  alerts?: PopoverAlert[];
+  /** Optional failed requests per edge id (e.g. demo/story). When set, edge popover shows failed requests table. */
+  failedRequestsByEdge?: Record<string, PopoverFailedRequest[]>;
 }
 
 /**
@@ -103,6 +134,8 @@ export function PopoverContent({
   end,
   onFocusClick,
   onOpenDiagnostic,
+  alerts: alertsProp,
+  failedRequestsByEdge,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -110,6 +143,69 @@ export function PopoverContent({
   const selection = selectedEdge ?? selectedNode;
   if (selection == null) {
     return null;
+  }
+
+  const alertCount = selectedNode
+    ? (selectedNode.data as Record<string, unknown>)?.alertCount as number | undefined
+    : undefined;
+  const showAlerts = selectedNode && alertCount != null && alertCount > 0 && alertsProp?.length;
+  const failedRequests =
+    (selectedEdge && failedRequestsByEdge?.[selectedEdge.id]) ?? [];
+  /** When demo failed-requests data is provided for an edge, we skip EdgeContents (it uses API hooks that error in Storybook). */
+  const isEdgeDemoMode =
+    !!selectedEdge && failedRequestsByEdge != null && selectedEdge.id in failedRequestsByEdge;
+
+  // Edge demo mode: render title + failed requests only; never load or render EdgeContents.
+  if (isEdgeDemoMode) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        style={{ minWidth: POPOVER_WIDTH }}
+        data-test-subj="serviceMapPopoverContent"
+      >
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h3
+              style={{ wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 8 }}
+              data-test-subj="serviceMapPopoverTitle"
+            >
+              {getPopoverTitle(selection)}
+            </h3>
+          </EuiTitle>
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+        {failedRequests.length > 0 && (
+          <>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>Failed requests</strong> ({failedRequests.length})
+              </EuiText>
+              <EuiTable size="s">
+                <EuiTableHeader>
+                  <EuiTableRow>
+                    <EuiTableHeaderCell>Time</EuiTableHeaderCell>
+                    <EuiTableHeaderCell>Error</EuiTableHeaderCell>
+                    <EuiTableHeaderCell>Request ID</EuiTableHeaderCell>
+                  </EuiTableRow>
+                </EuiTableHeader>
+                <EuiTableBody>
+                  {failedRequests.map((r) => (
+                    <EuiTableRow key={r.requestId}>
+                      <EuiTableCell>
+                        {r.time.replace('T', ' ').replace('Z', '')}
+                      </EuiTableCell>
+                      <EuiTableCell>{r.errorMessage}</EuiTableCell>
+                      <EuiTableCell>{r.requestId}</EuiTableCell>
+                    </EuiTableRow>
+                  ))}
+                </EuiTableBody>
+              </EuiTable>
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGroup>
+    );
   }
 
   const ContentsComponent = getContentsComponent(selection, isDiagnosticModeEnabled);
@@ -126,8 +222,16 @@ export function PopoverContent({
     >
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
+          <h3
+            style={{ wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 8 }}
+            data-test-subj="serviceMapPopoverTitle"
+          >
             {getPopoverTitle(selection)}
+            {selectedNode && alertCount != null && alertCount > 0 && (
+              <EuiBadge color="danger" data-test-subj="serviceMapPopoverAlertBadge">
+                {alertCount} alerts
+              </EuiBadge>
+            )}
             {kuery && (
               <EuiIconTip
                 position="bottom"
@@ -141,6 +245,56 @@ export function PopoverContent({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
+      {showAlerts && alertsProp && (
+        <>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>Alerts</strong> ({alertCount})
+            </EuiText>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              {alertsProp.slice(0, alertCount).map((a) => (
+                <li key={a.id}>
+                  <EuiText size="s">
+                    {a.title}{' '}
+                    <span style={{ color: 'var(--euiColorMediumShade)' }}>({a.severity})</span>
+                  </EuiText>
+                </li>
+              ))}
+            </ul>
+          </EuiFlexItem>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
+      {selectedEdge && failedRequests.length > 0 && (
+        <>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>Failed requests</strong> ({failedRequests.length})
+            </EuiText>
+            <EuiTable size="s">
+              <EuiTableHeader>
+                <EuiTableRow>
+                  <EuiTableHeaderCell>Time</EuiTableHeaderCell>
+                  <EuiTableHeaderCell>Error</EuiTableHeaderCell>
+                  <EuiTableHeaderCell>Request ID</EuiTableHeaderCell>
+                </EuiTableRow>
+              </EuiTableHeader>
+              <EuiTableBody>
+                {failedRequests.map((r) => (
+                  <EuiTableRow key={r.requestId}>
+                    <EuiTableCell>
+                      {r.time.replace('T', ' ').replace('Z', '')}
+                    </EuiTableCell>
+                    <EuiTableCell>{r.errorMessage}</EuiTableCell>
+                    <EuiTableCell>{r.requestId}</EuiTableCell>
+                  </EuiTableRow>
+                ))}
+              </EuiTableBody>
+            </EuiTable>
+          </EuiFlexItem>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
       <ContentsComponent
         selection={selection}
         onFocusClick={onFocusClick}

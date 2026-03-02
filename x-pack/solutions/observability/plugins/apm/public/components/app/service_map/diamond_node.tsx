@@ -32,6 +32,8 @@ interface DiamondNodeProps {
   badge?: ReactNode;
   ariaLabel?: string;
   groupedCount?: number;
+  /** Optional override for border color (e.g. for problem path in demos). */
+  borderColor?: string;
 }
 
 export const DiamondNode = memo(
@@ -48,10 +50,12 @@ export const DiamondNode = memo(
     badge,
     ariaLabel: customAriaLabel,
     groupedCount,
+    borderColor: borderColorOverride,
   }: DiamondNodeProps) => {
     const { euiTheme } = useEuiTheme();
 
-    const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+    const borderColor =
+      borderColorOverride ?? (selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade);
     const diamondBorderWidth = selected
       ? `${NODE_BORDER_WIDTH_SELECTED}px`
       : `${NODE_BORDER_WIDTH_DEFAULT}px`;

@@ -18,7 +18,12 @@ import {
   CENTER_ANIMATION_DURATION_MS,
 } from './constants';
 import type { Environment } from '../../../../common/environment_rt';
-import { PopoverContent, type ServiceMapSelection } from './popover/popover_content';
+import {
+  PopoverContent,
+  type ServiceMapSelection,
+  type PopoverAlert,
+  type PopoverFailedRequest,
+} from './popover/popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 import { DiagnosticFlyout } from './diagnostic_tool/diagnostic_flyout';
 
@@ -116,6 +121,10 @@ interface MapPopoverProps {
   start: string;
   end: string;
   onClose: () => void;
+  /** Optional alerts for selected service (e.g. demo). When set, popover shows alert count badge and Alerts section. */
+  alerts?: PopoverAlert[];
+  /** Optional failed requests per edge id (e.g. demo). When set, edge popover shows Failed requests table. */
+  failedRequestsByEdge?: Record<string, PopoverFailedRequest[]>;
 }
 
 export function MapPopover({
@@ -127,6 +136,8 @@ export function MapPopover({
   start,
   end,
   onClose,
+  alerts,
+  failedRequestsByEdge,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -234,6 +245,8 @@ export function MapPopover({
           end={end}
           onFocusClick={onFocusClick}
           onOpenDiagnostic={handleOpenDiagnostic}
+          alerts={alerts}
+          failedRequestsByEdge={failedRequestsByEdge}
         />
       </EuiPopover>
       {diagnosticFlyoutSelection && (
