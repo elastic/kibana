@@ -9,18 +9,11 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { UsageRecord, UsageReportingService } from '@kbn/usage-api-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
-import {
-  BUCKET_SIZE_MS,
-  METERING_RETRY_ATTEMPTS,
-  METERING_RETRY_BASE_DELAY_MS,
-  METERING_SOURCE_ID,
-  WORKFLOWS_USAGE_TYPE,
-} from './constants';
-import type { UsageRecord } from './types';
-import type { UsageReportingService } from './usage_reporting_service';
+import { BUCKET_SIZE_MS, METERING_SOURCE_ID, WORKFLOWS_USAGE_TYPE } from './constants';
 
 /**
  * Workflows Metering Service - Stage 1 of the billing pipeline.
@@ -73,7 +66,7 @@ export class WorkflowsMeteringService {
     const usageRecord = this.buildUsageRecord(execution, instanceGroupId);
 
     try {
-      await this.sendWithRetry(usageRecord);
+      await this.usageReportingService.reportUsage([usageRecord]);
     } catch (err) {
       // Log with billing-relevant details per monitoring requirements:
       // project ID, type, and count for impact assessment
@@ -149,52 +142,5 @@ export class WorkflowsMeteringService {
     }
 
     return stepTypes;
-  }
-
-  /**
-   * Sends a usage record with inline retry and exponential backoff.
-   * Per billing team guidance: data loss is preferable to overbilling,
-   * so we retry a few times then give up (logged at error level).
-   */
-  private async sendWithRetry(record: UsageRecord): Promise<void> {
-    let lastError: Error | undefined;
-
-    for (let attempt = 0; attempt < METERING_RETRY_ATTEMPTS; attempt++) {
-      try {
-        const response = await this.usageReportingService.reportUsage([record]);
-
-        if (response.ok) {
-          this.logger.debug(
-            `Successfully reported metering for execution ${record.id} (attempt ${attempt + 1})`
-          );
-          return;
-        }
-
-        lastError = new Error(`Usage API responded with status ${response.status}`);
-        this.logger.warn(
-          `Metering report attempt ${attempt + 1}/${METERING_RETRY_ATTEMPTS} failed: ${
-            lastError.message
-          }`
-        );
-      } catch (err) {
-        lastError = err instanceof Error ? err : new Error(String(err));
-        this.logger.warn(
-          `Metering report attempt ${attempt + 1}/${METERING_RETRY_ATTEMPTS} failed: ${
-            lastError.message
-          }`
-        );
-      }
-
-      // Exponential backoff before next retry (skip delay on last attempt)
-      if (attempt < METERING_RETRY_ATTEMPTS - 1) {
-        await this.delay(METERING_RETRY_BASE_DELAY_MS * Math.pow(2, attempt));
-      }
-    }
-
-    throw lastError || new Error('Metering report failed after all retry attempts');
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
