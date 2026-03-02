@@ -994,6 +994,34 @@ describe('TaskManagerRunner', () => {
       );
       expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'user-error']);
     });
+    test('logs plain object errors with JSON.stringify instead of [object Object]', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                // eslint-disable-next-line no-throw-literal
+                throw { message: 'some error', statusCode: 500 };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      const loggerCall = logger.error.mock.calls[0][0];
+      const loggerMeta = logger.error.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"Task bar \\"foo\\" failed: {\\"message\\":\\"some error\\",\\"statusCode\\":500}"`
+      );
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
+      expect(loggerMeta?.error?.stack_trace).toBeUndefined();
+    });
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
         definitions: {
