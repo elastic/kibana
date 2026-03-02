@@ -39,6 +39,7 @@ export {
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
