@@ -29,6 +29,7 @@ export interface GetDiscoverEsqlQueryOptions {
  *
  * Uses 'TS' source command for TSDB mode streams, 'FROM' otherwise.
  * Optionally includes METADATA _source for wired streams.
+ * Results are sorted by @timestamp descending by default.
  *
  * @param options - Configuration options for query generation
  * @returns The ES|QL query string, or undefined if index patterns cannot be determined
@@ -36,24 +37,24 @@ export interface GetDiscoverEsqlQueryOptions {
  * @example
  * // Basic usage
  * getDiscoverEsqlQuery({ definition, indexMode })
- * // Returns: "FROM logs,logs.*"
+ * // Returns: "FROM logs,logs.* | SORT @timestamp DESC"
  *
  * @example
  * // With TSDB mode
  * getDiscoverEsqlQuery({ definition, indexMode: 'time_series' })
- * // Returns: "TS logs,logs.*"
+ * // Returns: "TS logs,logs.* | SORT @timestamp DESC"
  *
  * @example
  * // With metadata for wired streams
  * getDiscoverEsqlQuery({ definition, indexMode, includeMetadata: true })
- * // Returns: "FROM logs,logs.* METADATA _source"
+ * // Returns: "FROM logs,logs.* METADATA _source | SORT @timestamp DESC"
  */
 export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): string | undefined {
   const { definition, indexMode, includeMetadata = false } = options;
 
   if (Streams.QueryStream.Definition.is(definition)) {
     // Use the ES|QL view name as the query source
-    return `FROM ${definition.query.view}`;
+    return `FROM ${definition.query.view} | SORT @timestamp DESC`;
   }
 
   const indexPatterns = getIndexPatternsForStream(definition);
@@ -64,5 +65,5 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
   const sourceCommand = indexMode === 'time_series' ? 'TS' : 'FROM';
   const metadataSuffix = includeMetadata ? ' METADATA _source' : '';
 
-  return `${sourceCommand} ${indexPatterns.join(', ')}${metadataSuffix}`;
+  return `${sourceCommand} ${indexPatterns.join(', ')}${metadataSuffix} | SORT @timestamp DESC`;
 }

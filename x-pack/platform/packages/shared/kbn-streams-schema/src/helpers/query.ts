@@ -49,7 +49,19 @@ export const buildEsqlQuery = (
     args: [whereCondition],
   });
 
-  const esqlQuery = Builder.expression.query([fromCommand, whereCommand]);
+  const sortCommand = Builder.command({
+    name: 'sort',
+    args: [
+      Builder.expression.order(
+        Builder.expression.column({
+          args: [Builder.identifier({ name: '@timestamp' })],
+        }),
+        { order: 'DESC', nulls: '' }
+      ),
+    ],
+  });
+
+  const esqlQuery = Builder.expression.query([fromCommand, whereCommand, sortCommand]);
 
   return BasicPrettyPrinter.print(esqlQuery);
 };

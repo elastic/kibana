@@ -30,7 +30,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("message: \\"error\\" or message: \\"failed\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* | WHERE KQL("message: \\"error\\" or message: \\"failed\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
 
@@ -47,7 +47,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("level: \\"INFO\\"") AND @timestamp >= "2025-01-01T00:00:00.000Z" AND @timestamp <= "2025-12-31T23:59:59.999Z"'
+        'FROM logs.child,logs.child.* | WHERE KQL("level: \\"INFO\\"") AND @timestamp >= "2025-01-01T00:00:00.000Z" AND @timestamp <= "2025-12-31T23:59:59.999Z" | SORT @timestamp DESC'
       );
     });
   });
@@ -59,7 +59,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query, false);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("status: \\"success\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* | WHERE KQL("status: \\"success\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
 
@@ -69,7 +69,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query, true);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("host.name: \\"server-01\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("host.name: \\"server-01\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
   });
@@ -83,7 +83,9 @@ describe('buildEsqlQuery', () => {
     };
     const esqlQuery = buildEsqlQuery(indices, input);
 
-    expect(esqlQuery).toBe('FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"")');
+    expect(esqlQuery).toBe(
+      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") | SORT @timestamp DESC'
+    );
   });
 
   it('should build query with simple feature filter', () => {
@@ -95,7 +97,7 @@ describe('buildEsqlQuery', () => {
     const esqlQuery = buildEsqlQuery(indices, query);
 
     expect(esqlQuery).toBe(
-      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") AND `some.field` == "some value"'
+      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
     );
   });
 
@@ -110,7 +112,7 @@ describe('buildEsqlQuery', () => {
     const esqlQuery = buildEsqlQuery(indices, query);
 
     expect(esqlQuery).toBe(
-      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") AND (`some.field` == "some value" OR `some.other.field` == "some other value")'
+      'FROM logs.child,logs.child.* | WHERE KQL("event.type: \\"access\\"") AND (`some.field` == "some value" OR `some.other.field` == "some other value") | SORT @timestamp DESC'
     );
   });
 
@@ -121,7 +123,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("message: \\"hello world\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* | WHERE KQL("message: \\"hello world\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
 
@@ -131,7 +133,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("(level: \\"ERROR\\" or level: \\"WARN\\") and service.name: \\"api\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* | WHERE KQL("(level: \\"ERROR\\" or level: \\"WARN\\") and service.name: \\"api\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
 
@@ -141,7 +143,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("message: *error* and host.name: web-*") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* | WHERE KQL("message: *error* and host.name: web-*") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
 
@@ -151,7 +153,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* | WHERE KQL("url.path: \\"/api/v1/users\\" and response.status: 404") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* | WHERE KQL("url.path: \\"/api/v1/users\\" and response.status: 404") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
   });
@@ -163,7 +165,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child | WHERE KQL("message: \\"test \\"quoted\\" sentence\\"") AND `some.field` == "some value"'
+        'FROM logs.child | WHERE KQL("message: \\"test \\"quoted\\" sentence\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
 
@@ -173,7 +175,7 @@ describe('buildEsqlQuery', () => {
       const esqlQuery = buildEsqlQuery(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child | WHERE KQL("file.path: \\"C:\\\\Program Files\\\\App\\"") AND `some.field` == "some value"'
+        'FROM logs.child | WHERE KQL("file.path: \\"C:\\\\Program Files\\\\App\\"") AND `some.field` == "some value" | SORT @timestamp DESC'
       );
     });
   });
