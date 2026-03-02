@@ -102,26 +102,30 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  * into the container and can be flushed before the container is removed.
  *
  * @param container - DOM element that will host the style tags
- * @param keyPrefix - Unique prefix for cache keys (e.g. `flyout-${id}-`)
+ * @param keyPrefix - Unique prefix for cache keys (e.g. `flyout-${id}-`). Invalid characters
+ *   for CSS class names / data-emotion attributes (e.g. whitespace, punctuation) are replaced with hyphens.
  * @returns Object with `cache` (for EuiProvider) and `flush()` to call before removing the container
  */
 export const createEmotionCacheForContainer = (
   container: HTMLElement,
   keyPrefix: string
 ): { cache: KibanaEmotionCacheObject; flush: () => void } => {
+  // Sanitize for use in CSS class names and data-emotion attributes (allow only [a-zA-Z0-9_-])
+  const safePrefix = keyPrefix.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'kbn';
+
   const defaultCache = createCache({
     ...sharedCacheOptions,
-    key: `${keyPrefix}css`,
+    key: `${safePrefix}-css`,
     container,
   });
   const globalCacheForContainer = createCache({
     ...sharedCacheOptions,
-    key: `${keyPrefix}${EUI_STYLES_GLOBAL}`,
+    key: `${safePrefix}-${EUI_STYLES_GLOBAL}`,
     container,
   });
   const utilityCacheForContainer = createCache({
     ...sharedCacheOptions,
-    key: `${keyPrefix}${EUI_STYLES_UTILS}`,
+    key: `${safePrefix}-${EUI_STYLES_UTILS}`,
     container,
   });
   defaultCache.compat = true;
