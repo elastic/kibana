@@ -39,6 +39,14 @@ export class ExitForeachNodeImpl implements NodeImplementation {
     }
 
     this.stepExecutionRuntime.finishStep();
+
+    if (maxReached && hasMoreItems && this.node.onLimit === 'fail') {
+      throw new Error(
+        `Foreach step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
+          `Processed ${nextIndex} of ${foreachState.total} items.`
+      );
+    }
+
     const reason =
       maxReached && hasMoreItems
         ? `reached max-iterations limit of ${this.node.maxIterations}`

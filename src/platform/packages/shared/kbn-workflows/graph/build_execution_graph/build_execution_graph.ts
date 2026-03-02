@@ -17,6 +17,7 @@ import type {
   IfStep,
   KibanaStep,
   LoopStepProps,
+  MaxIterations,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
@@ -433,11 +434,12 @@ function applyIterationGuardrails(
 ): WorkflowGraphType {
   let graph = innerGraph;
 
-  if (loopStep['iteration-timeout']) {
+  const iterationTimeout = loopStep['iteration-timeout'];
+  if (iterationTimeout) {
     graph = handleTimeout(
       `iteration_${stepId}`,
       'step_level_timeout',
-      loopStep['iteration-timeout'],
+      iterationTimeout,
       graph,
       context
     );
@@ -803,6 +805,15 @@ function insertGraphBetweenNodes(
   });
 }
 
+function normalizeMaxIterations(raw: MaxIterations): {
+  maxIterations?: number;
+  onLimit?: 'continue' | 'fail';
+} {
+  if (raw == null) return {};
+  if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
+  return { maxIterations: raw.limit, onLimit: raw['on-limit'] ?? 'continue' };
+}
+
 function createForeachGraph(
   stepId: string,
   foreachStep: ForEachStep,
@@ -823,13 +834,15 @@ function createForeachGraph(
   };
   context.stack.push(enterForeachNode);
   graph.setNode(enterForeachNodeId, enterForeachNode);
+  const { maxIterations, onLimit } = normalizeMaxIterations(foreachStep['max-iterations']);
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
     stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
-    maxIterations: foreachStep['max-iterations'],
+    maxIterations,
+    onLimit,
   };
   graph.setNode(exitNodeId, exitForeachNode);
   let innerGraph = createStepsSequence(foreachStep.steps || [], context);
