@@ -1276,6 +1276,9 @@ paths:
 
             Required when importing a new list that is `list_id` is not
             specified.
+          examples:
+            ip:
+              value: ip
           in: query
           name: type
           required: false
@@ -1456,10 +1459,7 @@ components:
         - updated_at
         - updated_by
     ListDescription:
-      description: Describes the value list.
-      format: nonempty
-      minLength: 1
-      type: string
+      $ref: '#/components/schemas/NonEmptyString'
     ListId:
       $ref: '#/components/schemas/NonEmptyString'
     ListItem:
