@@ -221,9 +221,13 @@ while read -r config_path; do
 
     # Now handle test results - retry logic depends only on test success/failure
     if [[ $EXIT_CODE -eq 2 ]]; then
-      # No tests found - mark as executed so we don't retry it
+      # No tests found - treat as a failure to prevent empty configs from silently passing CI
       buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       configWithoutTests+=("$config_path ($mode)")
+      failedConfigs+=("$config_path ($mode)")
+      FINAL_EXIT_CODE=10
+      echo "Scout config has no runnable tests: $config_path ($mode)"
+      echo "^^^ +++"
     elif [[ $EXIT_CODE -ne 0 ]]; then
       # Test run failed - try to upload events for observability, then mark as failed
       upload_events_if_available "$config_path" "$mode"
@@ -252,12 +256,12 @@ fi
 
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
 {
-  echo "Scout Playwright configs without tests:"
+  echo "Scout Playwright configs without tests (treated as failure):"
   echo ""
   for config in "${configWithoutTests[@]}"; do
     echo "- $config"
   done
-} | buildkite-agent annotate --style "warning" --context "no-tests"
+} | buildkite-agent annotate --style "error" --context "no-tests"
 fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then

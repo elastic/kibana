@@ -154,6 +154,29 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
   });
 };
 
+const validateConfigsHaveTests = (modules: ModuleDiscoveryInfo[], log: ToolingLog): void => {
+  const configsWithoutTests: Array<{ module: string; configPath: string }> = [];
+
+  for (const module of modules) {
+    for (const config of module.configs) {
+      if (!config.hasTests) {
+        configsWithoutTests.push({ module: module.name, configPath: config.path });
+      }
+    }
+  }
+
+  if (configsWithoutTests.length > 0) {
+    log.error('The following Scout Playwright configs have no runnable tests:');
+    for (const { module, configPath } of configsWithoutTests) {
+      log.error(`  - [${module}] ${configPath}`);
+    }
+    throw new Error(
+      `${configsWithoutTests.length} Scout Playwright config(s) have no runnable tests. ` +
+        'Each config must contain at least one non-skipped .spec.ts test file.'
+    );
+  }
+};
+
 const handleFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
@@ -163,6 +186,10 @@ const handleFlattenedOutput = (
   const modulesToFlatten = flagsReader.boolean('save')
     ? filterModulesByScoutCiConfig(log, filteredModules)
     : filteredModules;
+
+  if (flagsReader.boolean('save')) {
+    validateConfigsHaveTests(modulesToFlatten, log);
+  }
 
   const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
 
@@ -222,6 +249,7 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
+    validateConfigsHaveTests(filteredForCiModules, log);
     // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
     const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
     saveModuleDiscoveryInfo(splitModules, log);
@@ -237,6 +265,7 @@ const handleNonFlattenedOutput = (
 
   if (flagsReader.boolean('validate')) {
     filterModulesByScoutCiConfig(log, filteredModules);
+    validateConfigsHaveTests(filteredModules, log);
     return;
   }
 
