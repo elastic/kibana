@@ -16,11 +16,16 @@ export interface ImmediateFrequency {
 
 export type NotificationPolicyFrequency = ThrottleFrequency | ImmediateFrequency;
 
+export interface NotificationPolicyDestination {
+  type: 'workflow';
+  id: string;
+}
+
 export interface NotificationPolicyFormState {
   name: string;
   description: string;
   matcher: string;
   groupBy: string[];
   frequency: NotificationPolicyFrequency;
-  workflowId: string;
+  destinations: NotificationPolicyDestination[];
 }

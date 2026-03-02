@@ -38,7 +38,7 @@ function toCreatePayload(state: NotificationPolicyFormState): CreateNotification
     ...(state.frequency.type === 'throttle'
       ? { throttle: { interval: state.frequency.interval } }
       : {}),
-    destinations: [{ type: 'workflow' as const, id: state.workflowId }],
+    destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };
 }
 

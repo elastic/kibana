@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN, WORKFLOW_OPTIONS } from './constants';
-import type { NotificationPolicyFormState } from './types';
+import type { NotificationPolicyDestination, NotificationPolicyFormState } from './types';
 
 export const NotificationPolicyForm = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
@@ -301,17 +301,32 @@ export const NotificationPolicyForm = () => {
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
           <Controller
-            name="workflowId"
+            name="destinations"
             control={control}
-            render={({ field: { ref, ...field } }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.workflow', {
-                  defaultMessage: 'Workflow',
-                })}
+            render={({ field, fieldState: { error } }) => (
+              <EuiComboBox
                 fullWidth
-              >
-                <EuiSelect {...field} inputRef={ref} fullWidth options={WORKFLOW_OPTIONS} />
-              </EuiFormRow>
+                isInvalid={!!error}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.notificationPolicy.form.destination.ariaLabel',
+                  { defaultMessage: 'Destination' }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.alertingV2.notificationPolicy.form.destination.placeholder',
+                  { defaultMessage: 'Add destination' }
+                )}
+                selectedOptions={field.value.map((d: NotificationPolicyDestination) => {
+                  const workflow = WORKFLOW_OPTIONS.find((w) => w.value === d.id);
+                  return {
+                    label: workflow?.label ?? '',
+                    value: workflow?.value ?? '',
+                  };
+                })}
+                onChange={(options) => {
+                  field.onChange(options.map((o) => ({ type: 'workflow', id: o.value })));
+                }}
+                options={WORKFLOW_OPTIONS}
+              />
             )}
           />
         </EuiSplitPanel.Inner>
