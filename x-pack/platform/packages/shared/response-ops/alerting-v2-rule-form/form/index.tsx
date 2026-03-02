@@ -35,8 +35,8 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = (props) => 
   </Suspense>
 );
 
-// Export types
 export type { FormValues } from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
-export type { RuleFormServices } from './rule_form';
+export type { RuleFormServices } from './contexts';
+export { RuleFormServicesProvider, useRuleFormServices } from './contexts';

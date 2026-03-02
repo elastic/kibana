@@ -8,7 +8,10 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFormWrapper } from '../../test_utils';
 import { GroupFieldSelect } from './group_field_select';
 import { useQueryColumns } from '../hooks/use_query_columns';
@@ -17,9 +20,12 @@ jest.mock('../hooks/use_query_columns');
 
 const mockUseQueryColumns = jest.mocked(useQueryColumns);
 
-const createMockServices = () => ({
+const mockServices = {
+  http: httpServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
-});
+  dataViews: dataViewPluginMocks.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
+};
 
 describe('GroupFieldSelect', () => {
   beforeEach(() => {
@@ -39,14 +45,9 @@ describe('GroupFieldSelect', () => {
   const defaultQuery = 'FROM logs-* | STATS count() BY host.name';
 
   it('renders with label', () => {
-    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
-    const services = createMockServices();
-
-    render(
-      <Wrapper>
-        <GroupFieldSelect services={services} />
-      </Wrapper>
-    );
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+    });
 
     expect(screen.getByText('Group Fields')).toBeInTheDocument();
   });
@@ -66,14 +67,9 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
-    const services = createMockServices();
-
-    render(
-      <Wrapper>
-        <GroupFieldSelect services={services} />
-      </Wrapper>
-    );
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+    });
 
     // Click to open the combo box
     const comboBox = screen.getByRole('combobox');
@@ -101,37 +97,33 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createFormWrapper({
-      evaluation: { query: { base: defaultQuery } },
-      grouping: { fields: ['host.name'] },
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper(
+        {
+          evaluation: { query: { base: defaultQuery } },
+          grouping: { fields: ['host.name'] },
+        },
+        mockServices
+      ),
     });
-    const services = createMockServices();
-
-    render(
-      <Wrapper>
-        <GroupFieldSelect services={services} />
-      </Wrapper>
-    );
 
     // Check that the selected value is shown as a pill/badge
     expect(screen.getByText('host.name')).toBeInTheDocument();
   });
 
   it('calls useQueryColumns with query and onSuccess from form', () => {
-    const Wrapper = createFormWrapper({
-      evaluation: {
-        query: {
-          base: 'FROM metrics-* | STATS avg(value) BY region',
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper(
+        {
+          evaluation: {
+            query: {
+              base: 'FROM metrics-* | STATS avg(value) BY region',
+            },
+          },
         },
-      },
+        mockServices
+      ),
     });
-    const services = createMockServices();
-
-    render(
-      <Wrapper>
-        <GroupFieldSelect services={services} />
-      </Wrapper>
-    );
 
     expect(mockUseQueryColumns).toHaveBeenCalledWith({
       query: 'FROM metrics-* | STATS avg(value) BY region',
@@ -155,14 +147,9 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
-    const services = createMockServices();
-
-    render(
-      <Wrapper>
-        <GroupFieldSelect services={services} />
-      </Wrapper>
-    );
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+    });
 
     // Click to open the combo box
     const comboBox = screen.getByRole('combobox');
@@ -195,14 +182,9 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createFormWrapper({ evaluation: { query: { base: defaultQuery } } });
-    const services = createMockServices();
-
-    render(
-      <Wrapper>
-        <GroupFieldSelect services={services} />
-      </Wrapper>
-    );
+    render(<GroupFieldSelect />, {
+      wrapper: createFormWrapper({ evaluation: { query: { base: defaultQuery } } }, mockServices),
+    });
 
     // Component should still render, just with no options
     expect(screen.getByRole('combobox')).toBeInTheDocument();
