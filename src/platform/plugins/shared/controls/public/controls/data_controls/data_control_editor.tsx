@@ -158,10 +158,7 @@ const CompatibleControlTypesComponent = ({
               onClick={() => setSelectedAction(action.type)}
               label={action.getDisplayName(controlTypeContext)}
             >
-              <EuiIcon
-                type={action.getIconType(controlTypeContext) ?? 'controlsHorizontal'}
-                size="l"
-              />
+              <EuiIcon type={action.getIconType(controlTypeContext) ?? 'controls'} size="l" />
             </EuiKeyPadMenuItem>
           );
 

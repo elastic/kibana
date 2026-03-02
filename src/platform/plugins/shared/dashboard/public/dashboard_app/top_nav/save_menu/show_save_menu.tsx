@@ -75,7 +75,7 @@ export const SaveMenu = ({
         },
         {
           name: topNavStrings.resetChanges.label,
-          icon: 'editorUndo',
+          icon: 'undo',
           'data-test-subj': 'dashboardDiscardChangesMenuItem',
           isLoading: isResetting,
           disabled:

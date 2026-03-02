@@ -88,7 +88,7 @@ export function ClustersTable({ clusters }: Props) {
                       defaultMessage: 'Expand table row to view cluster details',
                     })
               }
-              iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
+              iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
             <EuiText size="xs" color="subdued">
               {name === LOCAL_CLUSTER_KEY
