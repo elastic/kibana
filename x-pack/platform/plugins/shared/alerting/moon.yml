@@ -81,7 +81,8 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
-  - '@kbn/cps'
+  - '@kbn/core-feature-flags-server-mocks'
+  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod
