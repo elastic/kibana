@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -17,7 +16,6 @@ import type {
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ScopedModel } from '@kbn/agent-builder-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import type { EsqlServerPluginStart } from '../types';
@@ -50,22 +48,6 @@ const resolveConnectorId = async ({
   }
 
   return undefined;
-};
-
-const createScopedModel = async ({
-  inference,
-  request,
-  connectorId,
-}: {
-  inference: InferenceServerStart;
-  request: KibanaRequest;
-  connectorId: string;
-}): Promise<ScopedModel> => {
-  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
-  const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-  const connector = await inference.getConnectorById(connectorId, request);
-
-  return { connector, chatModel, inferenceClient };
 };
 
 export const registerNLtoESQLRoute = (
@@ -102,8 +84,6 @@ export const registerNLtoESQLRoute = (
           request,
         });
 
-        // This should never happen, as the connector check is done in the editor visor.
-        // But we'll handle it just in case.
         if (!connectorId) {
           return response.badRequest({
             body: {
@@ -112,7 +92,17 @@ export const registerNLtoESQLRoute = (
           });
         }
 
-        const model = await createScopedModel({ inference, request, connectorId });
+        const chatModel = await inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {},
+        });
+        const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+        const connector = await inference.getConnectorById(connectorId, request);
+        const model = { connector, chatModel, inferenceClient };
+
+        // Dynamic import to avoid circular tsconfig references
+        const { generateEsql } = await import('@kbn/agent-builder-genai-utils');
 
         const result = await generateEsql({
           model,
