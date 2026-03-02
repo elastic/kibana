@@ -121,7 +121,7 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       {scrollState.isScrollable && scrollState.canScrollLeft && (
         <EuiPanel grow={false} paddingSize="none" css={styles.slotsLeftScrollButton}>
           <EuiButtonIcon
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             color="text"
             size="xs"
             aria-label={scrollLeftLabel}
@@ -155,7 +155,7 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       {scrollState.isScrollable && scrollState.canScrollRight && (
         <EuiPanel grow={false} paddingSize="none" css={styles.slotsRightScrollButton}>
           <EuiButtonIcon
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             color="text"
             size="xs"
             aria-label={scrollRightLabel}
