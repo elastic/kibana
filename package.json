@@ -1918,7 +1918,7 @@
     "@types/seedrandom": ">=2.0.0 <4.0.0",
     "@types/selenium-webdriver": "4.35.5",
     "@types/semver": "7.7.1",
-    "@types/sinon": "17.0.3",
+    "@types/sinon": "21.0.0",
     "@types/source-map-support": "0.5.10",
     "@types/stats-lite": "2.2.2",
     "@types/styled-components": "5.1.0",
