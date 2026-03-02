@@ -1,0 +1,115 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { castArray } from 'lodash';
+import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { ApiExecutionContext } from './types';
+import { getNamespacesBoolFilter } from '../search';
+
+export interface PerformEsqlParams {
+  options: SavedObjectsEsqlOptions;
+  /** The raw Elasticsearch client, needed because RepositoryEsClient does not expose esql.query() */
+  rawClient: ElasticsearchClient;
+}
+
+const EMPTY_ESQL_RESPONSE: SavedObjectsEsqlResponse = {
+  columns: [],
+  values: [],
+};
+
+export async function performEsql(
+  { options, rawClient }: PerformEsqlParams,
+  { registry, allowedTypes, extensions = {} }: ApiExecutionContext
+): Promise<SavedObjectsEsqlResponse> {
+  const { securityExtension, spacesExtension } = extensions;
+  const { namespaces: requestedNamespaces, type, ...esqlOptions } = options;
+
+  if (requestedNamespaces.length === 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'options.namespaces cannot be an empty array'
+    );
+  }
+
+  const types = castArray(type).filter((t) => allowedTypes.includes(t));
+  if (types.length === 0) {
+    return EMPTY_ESQL_RESPONSE;
+  }
+
+  let namespaces: string[];
+  try {
+    namespaces =
+      (await spacesExtension?.getSearchableNamespaces(requestedNamespaces)) ?? requestedNamespaces;
+  } catch (error) {
+    if (Boom.isBoom(error) && error.output.payload.statusCode === 403) {
+      return EMPTY_ESQL_RESPONSE;
+    }
+    throw error;
+  }
+  if (namespaces.length === 0) {
+    return EMPTY_ESQL_RESPONSE;
+  }
+
+  const spacesToAuthorize = new Set(namespaces);
+  const typesToAuthorize = new Set(types);
+  const authorizationResult = await securityExtension?.authorizeFind({
+    namespaces: spacesToAuthorize,
+    types: typesToAuthorize,
+  });
+  if (authorizationResult?.status === 'unauthorized') {
+    return EMPTY_ESQL_RESPONSE;
+  }
+
+  let typeToNamespacesMap: Map<string, string[]> | undefined;
+  if (authorizationResult?.status === 'partially_authorized') {
+    typeToNamespacesMap = new Map<string, string[]>();
+    for (const [objType, entry] of authorizationResult.typeMap) {
+      if (!entry.find) continue;
+      const { authorizedSpaces, isGloballyAuthorized } = entry.find;
+      typeToNamespacesMap.set(objType, isGloballyAuthorized ? namespaces : authorizedSpaces);
+    }
+  }
+
+  const namespacesBoolFilter = getNamespacesBoolFilter({
+    namespaces,
+    registry,
+    types,
+    typeToNamespacesMap,
+  });
+
+  const filter = mergeUserFilterWithNamespacesBool(esqlOptions.filter, namespacesBoolFilter);
+
+  const result = await rawClient.esql.query({
+    ...esqlOptions,
+    filter,
+  });
+
+  return result;
+}
+
+function mergeUserFilterWithNamespacesBool(
+  userFilter: estypes.QueryDslQueryContainer | undefined,
+  namespacesBoolFilter: estypes.QueryDslQueryContainer
+): estypes.QueryDslQueryContainer {
+  const must: estypes.QueryDslQueryContainer[] = [namespacesBoolFilter];
+  if (userFilter) {
+    must.push(userFilter);
+  }
+  return {
+    bool: {
+      must,
+    },
+  };
+}
