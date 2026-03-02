@@ -34,7 +34,25 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+      // Mock the licensing API to return an enterprise license (required for System Identification)
+      await page.route('**/api/licensing/info', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            license: {
+              uid: 'enterprise-license-test',
+              type: 'enterprise',
+              mode: 'enterprise',
+              expiryDateInMillis: 4884310543000,
+              status: 'active',
+            },
+            signature: 'enterprise-license-signature',
+          }),
+        })
+      );
+
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoAdvancedTab(STREAM_NAME);
     });
@@ -54,6 +72,9 @@ test.describe(
     });
 
     test('disables saving when syntax editor YAML is invalid', async ({ page, pageObjects }) => {
+      // Verify the System Identification section is visible (requires enterprise license)
+      await expect(page.getByText('System identification')).toBeVisible();
+
       const row = page.locator('tr').filter({ hasText: SYSTEM_NAME });
 
       // In responsive mode, EUI collapses row actions into an "All actions" menu.
