@@ -22,8 +22,6 @@ import type { AstNodeTemplate } from '../../ast/builder';
 import type { Parser } from './parser';
 import type { PromQLAstQueryExpression } from '../../embedded_languages/promql/types';
 
-const mmrDenseVectorFunctionsWithRequiredArgs = new Set(['text_embedding', 'to_dense_vector']);
-
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));
 
@@ -2168,25 +2166,6 @@ export class CstToAstConverter {
       queryVector = this.fromPrimaryExpression(childContext);
     } else if (childContext instanceof cst.ParameterContext) {
       queryVector = this.fromParameter(childContext);
-    }
-
-    if (queryVector?.type === 'function' && childContext instanceof cst.FunctionContext) {
-      const functionExpression = childContext.functionExpression();
-      const closeParen = functionExpression.RP();
-      const closeParenText = closeParen?.getText() ?? '';
-      const hasOpenParen = Boolean(functionExpression.LP());
-      const hasValidCloseParen = Boolean(closeParen) && !/<missing /.test(closeParenText);
-      const hasMissingRequiredParams =
-        mmrDenseVectorFunctionsWithRequiredArgs.has(queryVector.name) &&
-        queryVector.args.length === 0;
-
-      if (hasOpenParen && !hasValidCloseParen && queryVector.args.length === 0) {
-        queryVector.incomplete = true;
-      }
-
-      if (hasValidCloseParen && hasMissingRequiredParams) {
-        queryVector.incomplete = true;
-      }
     }
 
     return queryVector;

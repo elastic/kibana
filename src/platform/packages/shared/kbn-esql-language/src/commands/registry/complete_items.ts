@@ -293,7 +293,7 @@ export const mmrQueryVectorSuggestion: ISuggestionItem = {
   asSnippet: true,
   kind: 'Value',
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.queryVectorSuggestion', {
-    defaultMessage: 'Example query vector',
+    defaultMessage: 'Inline query vector',
   }),
   category: SuggestionCategory.VALUE,
 };
@@ -310,9 +310,9 @@ export const mmrLimitKeywordSuggestion: ISuggestionItem = {
 // wrapping in a function to avoid circular dependency issues with the tests
 export const mmrLimitValueSuggestions: () => ISuggestionItem[] = () =>
   buildConstantsDefinitions(
-    ['5', '10'],
+    ['10', '100', '1000'],
     i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
-      defaultMessage: 'Example limit',
+      defaultMessage: 'Suggested limit',
     }),
     undefined,
     {
@@ -335,7 +335,7 @@ export const mmrLambdaValueSuggestion: ISuggestionItem = {
   text: '0.5',
   kind: 'Value',
   detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.lambdaSuggestion', {
-    defaultMessage: 'Example lambda',
+    defaultMessage: 'Suggested lambda',
   }),
 };
 
