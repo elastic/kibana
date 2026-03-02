@@ -512,7 +512,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             title: 'error query',
             esql: {
               query:
-                'FROM logs.otel.branch_c.nested,logs.otel.branch_c.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
+                'FROM logs.otel.branch_c.nested, logs.otel.branch_c.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
             },
           },
         ]);

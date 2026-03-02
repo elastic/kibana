@@ -179,7 +179,10 @@ export function GeneratedEventPreview({
             setTouched((prev) => ({ ...prev, esql: true }));
             setQuery({ ...query, esql: { query: newQuery.esql } });
           }}
-          onTextLangQuerySubmit={async () => {}}
+          onTextLangQuerySubmit={async (newQuery) => {
+            setTouched((prev) => ({ ...prev, esql: true }));
+            setQuery({ ...query, esql: { query: newQuery?.esql ?? '' } });
+          }}
         />
       </EuiForm>
 

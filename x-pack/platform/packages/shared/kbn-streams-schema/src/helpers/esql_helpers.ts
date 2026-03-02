@@ -6,7 +6,7 @@
  */
 
 import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
-import type { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-language';
+import type { ESQLCommand, ESQLSingleAstItem, ESQLSource } from '@kbn/esql-language';
 
 /**
  * Builds the ES|QL AST node for `METADATA _id, _source`.
@@ -77,4 +77,77 @@ export function ensureMetadata(esql: string): string {
 export function normalizeEsqlQuery(esql: string): string {
   const { root } = Parser.parse(esql);
   return BasicPrettyPrinter.print(root);
+}
+
+/**
+ * Returns the list of index source names from the FROM clause of an
+ * ES|QL query. Returns an empty array when there is no FROM clause.
+ */
+export function getFromSources(esql: string): string[] {
+  const { root } = Parser.parse(esql);
+
+  const fromCmd = root.commands.find(
+    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
+  );
+
+  if (!fromCmd) return [];
+
+  return fromCmd.args
+    .filter(
+      (arg): arg is ESQLSource =>
+        !Array.isArray(arg) &&
+        'type' in arg &&
+        arg.type === 'source' &&
+        (arg as ESQLSource).sourceType === 'index'
+    )
+    .map((source) => source.name);
+}
+
+/**
+ * Rewrites the index sources in the FROM clause of an ES|QL query.
+ * Each index source name is passed through `transform`; if the
+ * returned value differs the source is replaced. Returns the original
+ * string unchanged when there is no FROM clause or no source was
+ * modified.
+ */
+export function rewriteFromSources(
+  esql: string,
+  transform: (index: string) => string
+): string {
+  const { root } = Parser.parse(esql);
+
+  const fromCmd = root.commands.find(
+    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
+  );
+
+  if (!fromCmd) return esql;
+
+  let modified = false;
+  const updatedArgs = fromCmd.args.map((arg) => {
+    if (
+      !Array.isArray(arg) &&
+      'type' in arg &&
+      arg.type === 'source' &&
+      (arg as ESQLSource).sourceType === 'index'
+    ) {
+      const source = arg as ESQLSource;
+      const currentIndex = source.name;
+      const newIndex = transform(currentIndex);
+      if (newIndex !== currentIndex) {
+        modified = true;
+        return Builder.expression.source.index(newIndex);
+      }
+    }
+    return arg;
+  });
+
+  if (!modified) return esql;
+
+  const updatedFrom = { ...fromCmd, args: updatedArgs };
+  const updatedCommands = root.commands.map((cmd) =>
+    cmd === fromCmd ? updatedFrom : cmd
+  );
+  return BasicPrettyPrinter.print(
+    Builder.expression.query(updatedCommands as ESQLCommand[])
+  );
 }
