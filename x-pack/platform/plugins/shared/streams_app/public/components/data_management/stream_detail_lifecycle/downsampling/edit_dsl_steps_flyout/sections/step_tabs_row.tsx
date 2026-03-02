@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -44,26 +44,7 @@ export const StepTabsRow = ({
 }: StepTabsRowProps) => {
   const tabsScrollCss = useEuiOverflowScroll('x');
   const { tabsContainerStyles, tabsErrorSelectedUnderlineStyles } = useStyles();
-  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Array<HTMLSpanElement | null>>([]);
-
-  useEffect(() => {
-    if (selectedStepIndex === undefined) return;
-    const containerEl = tabsContainerRef.current;
-    if (!containerEl) return;
-
-    // Wait for EuiTabs/EuiTab to render before attempting to scroll
-    const id = window.requestAnimationFrame(() => {
-      const selectedTabWrapperEl = tabRefs.current[selectedStepIndex];
-      selectedTabWrapperEl?.scrollIntoView?.({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'nearest',
-      });
-    });
-
-    return () => window.cancelAnimationFrame(id);
-  }, [dataTestSubj, items.length, selectedStepIndex]);
 
   const tabs = useMemo(() => {
     return items.map((item, index) => {
@@ -78,6 +59,13 @@ export const StepTabsRow = ({
           key={item.id}
           ref={(node) => {
             tabRefs.current[index] = node;
+            if (node && selectedStepIndex === index) {
+              node.scrollIntoView?.({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+              });
+            }
           }}
         >
           <EuiTab
@@ -143,7 +131,6 @@ export const StepTabsRow = ({
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem
         grow={false}
-        ref={tabsContainerRef}
         css={[tabsContainerStyles, tabsScrollCss, tabsErrorSelectedUnderlineStyles]}
       >
         <EuiTabs bottomBorder={false}>{tabs}</EuiTabs>
