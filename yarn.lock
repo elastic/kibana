@@ -1108,7 +1108,7 @@
     "@smithy/util-middleware" "^4.2.0"
     tslib "^2.6.2"
 
-"@aws-sdk/s3-request-presigner@^3":
+"@aws-sdk/s3-request-presigner@3.1000.0":
   version "3.1000.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/s3-request-presigner/-/s3-request-presigner-3.1000.0.tgz#c65c898564753c03674b467febe9c1e72ebcdccd"
   integrity sha512-DP6EbwCD0CKzBwBnT1X6STB5i+bY765CxjMbWCATDhCgOB343Q6AHM9c1S/300Uc5waXWtI/Wdeak9Ru56JOvg==
