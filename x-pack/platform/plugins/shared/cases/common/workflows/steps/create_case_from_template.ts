@@ -12,6 +12,7 @@ import {
   UpdateCaseRequest as UpdateCaseRequestSchema,
 } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
 
 export const CreateCaseFromTemplateStepTypeId = 'cases.createCaseFromTemplate';
 
@@ -44,6 +45,32 @@ export const createCaseFromTemplateStepCommonDefinition: CommonStepDefinition<
   CreateCaseFromTemplateStepOutputSchema
 > = {
   id: CreateCaseFromTemplateStepTypeId,
+  category: 'kibana',
+  label: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_LABEL,
+  description: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Create case from template
+\`\`\`yaml
+- name: create_case_from_template
+  type: ${CreateCaseFromTemplateStepTypeId}
+  with:
+    case_template_id: "triage_template"
+\`\`\``,
+      `## Create case from template with overwrites
+\`\`\`yaml
+- name: create_case_from_template_with_overwrites
+  type: ${CreateCaseFromTemplateStepTypeId}
+  with:
+    case_template_id: "triage_template"
+    overwrites:
+      title: "Template based case title"
+      severity: "high"
+      status: "in-progress"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
