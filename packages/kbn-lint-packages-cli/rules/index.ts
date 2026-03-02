@@ -13,10 +13,12 @@ import { matchingPackageNameRule } from './matching_package_name';
 import { constantVersionRule } from './constant_version';
 import { noLicenseRule } from './no_license';
 import { noBasenameCollisionsRule } from './no_basename_collisions';
+import { diGlobalsRule } from './di_globals';
 
 export const RULES: PackageRule[] = [
   matchingPackageNameRule,
   constantVersionRule,
   noLicenseRule,
   noBasenameCollisionsRule,
+  diGlobalsRule,
 ];
