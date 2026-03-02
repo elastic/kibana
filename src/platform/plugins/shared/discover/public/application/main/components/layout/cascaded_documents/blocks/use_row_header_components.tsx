@@ -92,7 +92,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.filterIn', {
       defaultMessage: 'Filter in',
     }),
-    icon: 'plusInCircle',
+    icon: 'plusCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterIn',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
@@ -118,7 +118,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.filterOut', {
       defaultMessage: 'Filter out',
     }),
-    icon: 'minusInCircle',
+    icon: 'minusCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterOut',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(

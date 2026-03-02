@@ -129,7 +129,7 @@ export const EmptyIndexListPrompt = ({
               onClick={() => {
                 navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
               }}
-              icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
+              icon={<EuiIcon size="xl" type="chartHeatmap" color="subdued" />}
               title={
                 <FormattedMessage
                   id="indexPatternManagement.createDataView.emptyState.sampleDataCardTitle"

@@ -29,7 +29,7 @@ export const BothIcons = {
   name: 'Both icons',
   args: {
     secondaryButtonIcon: DEFAULT_SECONDARY_ICON,
-    iconType: 'search',
+    iconType: 'magnify',
   },
   render: (args: { secondaryButtonIcon: string; iconType: string }) => (
     <SplitButton {...args}>Both icons</SplitButton>
@@ -219,7 +219,7 @@ export const WithNotificationIndicator = {
     iconType: React.ComponentProps<typeof SplitButton>['iconType'];
     size: React.ComponentProps<typeof SplitButton>['size'];
   }) => (
-    <SplitButtonWithNotification secondaryButtonIcon="arrowDown" {...args}>
+    <SplitButtonWithNotification secondaryButtonIcon="chevronSingleDown" {...args}>
       Save
     </SplitButtonWithNotification>
   ),

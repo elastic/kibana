@@ -225,7 +225,7 @@ export const useTopNavLinks = ({
         label: i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'ES|QL',
         }),
-        iconType: 'editorCodeBlock',
+        iconType: 'code',
         color: 'success',
         tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
           defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
@@ -253,7 +253,7 @@ export const useTopNavLinks = ({
               defaultMessage: 'Save',
             }),
         testId: 'discoverSaveButton',
-        iconType: isEmbeddedEditor ? 'checkInCircleFilled' : 'save',
+        iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
         run: async () => {
           await onSaveDiscoverSession({
             services,
@@ -264,7 +264,7 @@ export const useTopNavLinks = ({
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonIcon: 'chevronSingleDown',
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
             defaultMessage: 'Save options',
           }),
@@ -279,7 +279,7 @@ export const useTopNavLinks = ({
                     label: i18n.translate('discover.localMenu.cancelTitle', {
                       defaultMessage: 'Cancel',
                     }),
-                    iconType: 'editorUndo',
+                    iconType: 'undo',
                     testId: 'discoverCancelButton',
                   },
                 ],
@@ -326,7 +326,7 @@ export const useTopNavLinks = ({
                     label: i18n.translate('discover.localMenu.resetChangesTitle', {
                       defaultMessage: 'Reset changes',
                     }),
-                    iconType: 'editorUndo',
+                    iconType: 'undo',
                     testId: 'revertUnsavedChangesButton',
                     disableButton: !hasUnsavedChanges,
                   },
