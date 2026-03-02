@@ -6157,6 +6157,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-common@link:src/platform/packages/private/kbn-cps-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps-server-utils@link:src/platform/packages/shared/kbn-cps-server-utils":
   version "0.0.0"
   uid ""
