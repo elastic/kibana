@@ -8,6 +8,17 @@ import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 import { once } from 'lodash';
 import { Elasticsearch, Kibana } from '..';
 
+const stripUrlCredentials = (urlString: string): string => {
+  try {
+    const parsed = new URL(urlString);
+    parsed.username = '';
+    parsed.password = '';
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return urlString;
+  }
+};
+
 export async function callKibana<T>({
   elasticsearch,
   kibana,
@@ -19,13 +30,17 @@ export async function callKibana<T>({
 }): Promise<T> {
   const baseUrl = await getBaseUrl(kibana.hostname);
   const { username, password } = elasticsearch;
+  const basicAuth = Buffer.from(`${username}:${password}`).toString('base64');
 
   const { data } = await axios.request({
     ...options,
-    baseURL: baseUrl,
+    baseURL: stripUrlCredentials(baseUrl),
     allowAbsoluteUrls: false,
-    auth: { username, password },
-    headers: { 'kbn-xsrf': 'true', ...options.headers },
+    headers: {
+      'kbn-xsrf': 'true',
+      ...options.headers,
+      Authorization: `Basic ${basicAuth}`,
+    },
   });
   return data;
 }
