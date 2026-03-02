@@ -32,8 +32,5 @@ yaml-language-server
 @opentelemetry/instrumentation-hapi
 simple-statistics
 monaco-promql
-<<<<<<< markjhoy/add_basic_amazon_s3_connector
-@aws-sdk/client-s3
-=======
 react-element-to-jsx-string
->>>>>>> main
+@aws-sdk/client-s3
