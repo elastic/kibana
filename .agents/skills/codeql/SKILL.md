@@ -1,6 +1,7 @@
 ---
 name: codeql
 description: Work with CodeQL in Kibana — write, test, and debug custom queries locally, fetch scan results from GitHub, and validate inline suppression comments. Use when writing or debugging CodeQL queries, running CodeQL unit tests, analyzing SARIF results, fetching scan results, or checking codeql suppression justifications.
+disable-model-invocation: true
 ---
 
 # CodeQL
@@ -154,3 +155,7 @@ return fs.readFileSync(`/etc/${validatedPath}`, 'utf8');
 | Test produces `.actual` file | Diff `.actual` vs `.expected` — `.actual` files are gitignored |
 | Query finds nothing | Check `codeql-config.yml` `paths-ignore` — test/mock dirs are excluded |
 | `jq` not found for summary | Install jq: `brew install jq` |
+
+## References
+
+- [Writing CodeQL queries](https://codeql.github.com/docs/writing-codeql-queries/) — official guide covering query structure, QL tutorials, and running queries
