@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -80,6 +81,21 @@ export const fromSavedObjectTabToTabState = ({
   };
 };
 
+export const fromSavedObjectTabToSearchSource = async ({
+  tab,
+  services,
+}: {
+  tab: DiscoverSessionTab;
+  services: DiscoverServices;
+}): Promise<ISearchSource> => {
+  return services.data.search.searchSource.create(tab.serializedSearchSource);
+};
+
+/**
+ * @deprecated Prefer using `fromSavedObjectTabToSearchSource` to get only the search source,
+ * or `fromSavedObjectTabToTabState` to get the tab state. This function creates a full
+ * SavedSearch object which is often unnecessary and couples code to the legacy SavedSearch type.
+ */
 export const fromSavedObjectTabToSavedSearch = async ({
   tab,
   discoverSession,
@@ -102,7 +118,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   hideChart: tab.hideChart,
   isTextBasedQuery: tab.isTextBasedQuery,
   usesAdHocDataView: tab.usesAdHocDataView,
-  searchSource: await services.data.search.searchSource.create(tab.serializedSearchSource),
+  searchSource: await fromSavedObjectTabToSearchSource({ tab, services }),
   viewMode: tab.viewMode,
   hideAggregatedPreview: tab.hideAggregatedPreview,
   rowHeight: tab.rowHeight,
@@ -178,6 +194,10 @@ export const fromTabStateToSavedObjectTab = ({
   };
 };
 
+/**
+ * @deprecated Prefer using `fromTabStateToSavedObjectTab` which works directly with TabState.
+ * This function converts from SavedSearch which couples code to the legacy SavedSearch type.
+ */
 export const fromSavedSearchToSavedObjectTab = ({
   tab,
   savedSearch,
