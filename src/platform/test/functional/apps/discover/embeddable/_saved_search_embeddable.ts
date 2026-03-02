@@ -77,13 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
     };
 
-    const editInDiscover = async () => {
-      await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');
-      await header.waitUntilLoadingHasFinished();
-    };
-
     it('can save a search embeddable with a defined rows per page number', async function () {
       const dashboardName = 'Dashboard with a Paginated Saved Search';
       await addSearchEmbeddableToDashboard();
@@ -209,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can edit a session and return to the dashboard', async () => {
       await addSearchEmbeddableToDashboard('logstash hits');
       expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
-      await editInDiscover();
+      await discover.editInDiscover();
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -235,7 +228,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can edit a by-value session and return to the dashboard', async () => {
       await addSearchEmbeddableToDashboard();
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
-      await editInDiscover();
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -264,7 +259,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       // Have to unlink else the cancel flow fails?
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
-      await editInDiscover();
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
       await discover.waitUntilTabIsLoaded();
@@ -278,7 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can edit a by-value session without it affecting the reference session', async () => {
       await addSearchEmbeddableToDashboard();
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
-      await editInDiscover();
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
       await queryBar.setQuery('test');
       await queryBar.submitQuery();
       await discover.waitUntilTabIsLoaded();
@@ -294,7 +291,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('resets back to a normal Discover session if navigated away from an edit session', async () => {
       await addSearchEmbeddableToDashboard();
-      await editInDiscover();
+      await discover.editInDiscover();
+      await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
       await Promise.all([
         globalNav

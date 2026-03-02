@@ -14,6 +14,7 @@ import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plu
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type {
+  EditableSavedSearchAttributes,
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,
   SearchEmbeddableState,
@@ -49,9 +50,6 @@ export const deserializeState = async ({
     const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
 
     const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
-    const rawSavedObjectAttributes = isSelectedTabDeleted
-      ? {}
-      : pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
@@ -69,9 +67,6 @@ export const deserializeState = async ({
 
       // Overwrite SO state with dashboard state for title, description, etc.
       ...panelState,
-
-      // back up the original saved object attributes for comparison
-      rawSavedObjectAttributes,
     };
   } else {
     // by value
@@ -122,23 +117,22 @@ export const serializeState = ({
       ? initialState.tabs?.find((tab) => tab.id === selectedTabId)
       : undefined;
 
-    const editableAttributesBackup = selectedTab
-      ? pick(selectedTab, EDITABLE_SAVED_SEARCH_KEYS)
-      : initialState.rawSavedObjectAttributes ?? {};
+    let overwriteState: EditableSavedSearchAttributes;
 
-    const attributes =
-      savedSearchAttributes.tabs?.[0]?.attributes ??
-      pick(savedSearchAttributes, EDITABLE_SAVED_SEARCH_KEYS);
+    if (isSelectedTabDeleted || !selectedTab) {
+      overwriteState = pick(initialState, EDITABLE_SAVED_SEARCH_KEYS);
+    } else {
+      const editableAttributesBackup = pick(selectedTab, EDITABLE_SAVED_SEARCH_KEYS);
+      const [{ attributes }] = savedSearchAttributes.tabs;
 
-    // only save the current state that is **different** than the saved object state
-    const overwriteState = isSelectedTabDeleted
-      ? pick(initialState, EDITABLE_SAVED_SEARCH_KEYS)
-      : EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-          if (deepEqual(attributes[key], editableAttributesBackup[key])) {
-            return prev;
-          }
-          return { ...prev, [key]: attributes[key] };
-        }, {});
+      // only save the current state that is **different** than the saved object state
+      overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
+        if (deepEqual(attributes[key], editableAttributesBackup[key])) {
+          return prev;
+        }
+        return { ...prev, [key]: attributes[key] };
+      }, {});
+    }
 
     return {
       // Serialize the current dashboard state into the panel state **without** updating the saved object

@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const queryBar = getService('queryBar');
-  const retry = getService('retry');
   const security = getService('security');
   const { common, dashboard, header, discover } = getPageObjects([
     'common',
@@ -43,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.load(
-        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/saved_search_embeddable'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/discover_sessions_for_embeddable'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -98,35 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.saveSearch(savedSearchTitle, false);
       await discover.waitUntilTabIsLoaded();
-    };
-
-    const enterInlineEditing = async () => {
-      const isAlreadyActive = await testSubjects.exists(
-        'discoverEmbeddableInlineEditSelectTabAction'
-      );
-      if (!isAlreadyActive) {
-        await dashboardPanelActions.clickPanelAction('embeddablePanelAction-editPanel');
-        await header.waitUntilLoadingHasFinished();
-      }
-    };
-
-    const selectTabFromPopover = async (tabLabel: string) => {
-      await testSubjects.click('discoverEmbeddableInlineEditSelectTabAction');
-      const popover = await testSubjects.find('discoverEmbeddableInlineEditSelectTabPopover');
-      await find.clickByButtonText(tabLabel, popover);
-      await header.waitUntilLoadingHasFinished();
-      await dashboard.waitForRenderComplete();
-    };
-
-    const selectEmbeddableTab = async (tabLabel: string) => {
-      await retry.try(async () => {
-        await enterInlineEditing();
-        await selectTabFromPopover(tabLabel);
-
-        await testSubjects.click('discoverEmbeddableInlineEditApplyButton');
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
-      });
     };
 
     it('should allow removing the dashboard panel after the underlying saved search has been deleted', async () => {
@@ -232,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialHeaders).to.contain('@timestamp');
       expect(initialHeaders).to.contain('agent');
 
-      await selectEmbeddableTab('Filtered tab');
+      await discover.selectEmbeddableTab('Filtered tab');
 
       const switchedDocumentCount = await discover.getSavedSearchDocumentCount();
       const switchedHeaders = await dataGrid.getHeaderFields();
@@ -261,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dashboardName = 'Dashboard deleted tab editor';
 
       await addSearchEmbeddableToDashboard(savedSearchTitle);
-      await selectEmbeddableTab('Filtered tab');
+      await discover.selectEmbeddableTab('Filtered tab');
 
       await dashboard.saveDashboard(dashboardName, {
         saveAsNew: true,
@@ -274,25 +244,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard(dashboardName);
       await dashboard.waitForRenderComplete();
 
-      // View mode: callout prompts to edit the panel
       const viewModeCalloutText = await getDeletedTabCalloutText();
       expect(viewModeCalloutText).to.contain('Edit the panel');
       await testSubjects.missingOrFail('docTable');
 
-      // Click "Edit the panel" link → switches dashboard to edit mode
       await testSubjects.click('discoverEmbeddableDeletedTabEditPanelLink');
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
-      // Edit mode (before inline editing): callout prompts to use the edit action
       const editModeCalloutText = await getDeletedTabCalloutText();
       expect(editModeCalloutText).to.contain('choose a different tab');
       await testSubjects.missingOrFail('docTable');
 
-      // Enter inline editing via the edit hover action
-      await enterInlineEditing();
+      await discover.enterInlineEditing();
 
-      // Inline editing: callout says to select a different tab, selector shows deleted label
       const inlineEditCalloutText = await getDeletedTabCalloutText();
       expect(inlineEditCalloutText).to.contain('Select a different tab');
       const selectorText = await testSubjects.getVisibleText(
@@ -301,8 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(selectorText).to.contain('(Deleted tab)');
       await testSubjects.missingOrFail('docTable');
 
-      // Select a valid tab and apply
-      await selectTabFromPopover('Untitled');
+      await discover.selectTabFromPopover('Untitled');
 
       await testSubjects.click('discoverEmbeddableInlineEditApplyButton');
       await header.waitUntilLoadingHasFinished();
@@ -315,7 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dashboardName = 'Dashboard deleted tab read only';
 
       await addSearchEmbeddableToDashboard(savedSearchTitle);
-      await selectEmbeddableTab('Filtered tab');
+      await discover.selectEmbeddableTab('Filtered tab');
 
       await dashboard.saveDashboard(dashboardName, {
         saveAsNew: true,

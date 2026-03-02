@@ -8,11 +8,10 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { canvas, discover, header } = getPageObjects(['canvas', 'discover', 'header']);
+  const { canvas, discover } = getPageObjects(['canvas', 'discover']);
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('saved search in canvas', function () {
     before(async () => {
@@ -43,10 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('edits saved search by-reference embeddable', async () => {
-        await dashboardPanelActions.clickPanelAction('embeddablePanelAction-editPanel');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');
-        await header.waitUntilLoadingHasFinished();
+        await discover.editInDiscover();
         await discover.saveSearch('Rendering Test: saved search v2');
         await canvas.goToListingPage();
         await canvas.loadFirstWorkpad('saved search tests');

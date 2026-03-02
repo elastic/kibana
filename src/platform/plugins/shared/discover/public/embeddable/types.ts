@@ -37,7 +37,6 @@ import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
-  EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
   SearchEmbeddableState,
 } from '../../common/embeddable/types';
@@ -76,7 +75,6 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
   SerializedTitles &
   SerializedTimeRange &
   SerializedDrilldowns & {
-    rawSavedObjectAttributes?: EditableSavedSearchAttributes;
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;

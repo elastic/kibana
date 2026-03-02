@@ -14,6 +14,7 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { discoverServiceMock } from '../../__mocks__/services';
+import { getPersistedTabMock } from '../../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import type {
   SearchEmbeddableByValueState,
   SearchEmbeddableState,
@@ -63,19 +64,23 @@ describe('Serialization utils', () => {
     ],
   };
 
-  const mockDiscoverSessionTab = (
-    overrides: Partial<DiscoverSessionTab> & { id: string; label: string }
+  const mockTab = (
+    tabId: string,
+    label: string,
+    appStateOverrides: Record<string, unknown> = {}
   ): DiscoverSessionTab => ({
-    sort: [['order_date', 'desc']],
-    columns: ['_source'],
-    grid: {},
-    hideChart: false,
-    sampleSize: 100,
-    isTextBasedQuery: false,
-    serializedSearchSource: {
-      index: dataViewMock.id,
-    } as SerializedSearchSourceFields,
-    ...overrides,
+    ...getPersistedTabMock({
+      tabId,
+      dataView: dataViewMock,
+      appStateOverrides: {
+        columns: ['_source'],
+        sort: [['order_date', 'desc']],
+        sampleSize: 100,
+        ...appStateOverrides,
+      },
+      services: discoverServiceMock,
+    }),
+    label,
   });
 
   const mockDiscoverSession = (sessionTabs: DiscoverSessionTab[]) =>
@@ -108,10 +113,8 @@ describe('Serialization utils', () => {
 
     test('by reference - default tab (no selectedTabId)', async () => {
       const sessionTabs = [
-        mockDiscoverSessionTab({ id: 'tab-1', label: 'Tab 1' }),
-        mockDiscoverSessionTab({
-          id: 'tab-2',
-          label: 'Tab 2',
+        mockTab('tab-1', 'Tab 1'),
+        mockTab('tab-2', 'Tab 2', {
           columns: ['col-a', 'col-b'],
           sort: [['timestamp', 'asc']],
         }),
@@ -142,10 +145,8 @@ describe('Serialization utils', () => {
 
     test('by reference - valid selectedTabId', async () => {
       const sessionTabs = [
-        mockDiscoverSessionTab({ id: 'tab-1', label: 'Tab 1' }),
-        mockDiscoverSessionTab({
-          id: 'tab-2',
-          label: 'Tab 2',
+        mockTab('tab-1', 'Tab 1'),
+        mockTab('tab-2', 'Tab 2', {
           columns: ['col-a', 'col-b'],
           sort: [['timestamp', 'asc']],
           sampleSize: 200,
@@ -175,9 +176,7 @@ describe('Serialization utils', () => {
 
     test('by reference - deleted selectedTabId discards stale dashboard overrides', async () => {
       const sessionTabs = [
-        mockDiscoverSessionTab({
-          id: 'tab-1',
-          label: 'Tab 1',
+        mockTab('tab-1', 'Tab 1', {
           columns: ['fallback-col'],
           sort: [['fallback_field', 'desc']],
         }),
@@ -207,10 +206,8 @@ describe('Serialization utils', () => {
 
     test('by reference - valid selectedTabId with dashboard overrides', async () => {
       const sessionTabs = [
-        mockDiscoverSessionTab({ id: 'tab-1', label: 'Tab 1' }),
-        mockDiscoverSessionTab({
-          id: 'tab-2',
-          label: 'Tab 2',
+        mockTab('tab-1', 'Tab 1'),
+        mockTab('tab-2', 'Tab 2', {
           columns: ['col-a', 'col-b'],
           sort: [['timestamp', 'asc']],
         }),
@@ -292,7 +289,7 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           uuid,
           initialState: {
-            rawSavedObjectAttributes: savedSearch,
+            tabs: [mockTab('tab-1', 'Tab 1')],
           },
           savedSearch,
           serializeTitles: jest.fn(),
@@ -310,7 +307,7 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           uuid,
           initialState: {
-            rawSavedObjectAttributes: savedSearch,
+            tabs: [mockTab('tab-1', 'Tab 1')],
           },
           savedSearch: { ...savedSearch, sampleSize: 500, sort: [['order_date', 'asc']] },
           serializeTitles: jest.fn(),
@@ -330,7 +327,7 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           uuid,
           initialState: {
-            rawSavedObjectAttributes: savedSearch,
+            tabs: [mockTab('tab-1', 'Tab 1'), mockTab('tab-2', 'Tab 2')],
           },
           savedSearch,
           serializeTitles: jest.fn(),
@@ -350,7 +347,7 @@ describe('Serialization utils', () => {
         const serializedState = serializeState({
           uuid,
           initialState: {
-            rawSavedObjectAttributes: savedSearch,
+            tabs: [mockTab('tab-1', 'Tab 1')],
           },
           savedSearch,
           serializeTitles: jest.fn(),

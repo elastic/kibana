@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, firstValueFrom, merge, skip, map, filter as filterOp } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import {
-  apiCanFocusPanel,
   apiPublishesChildren,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -38,19 +37,15 @@ import { SearchEmbeddableGridComponent } from './components/search_embeddable_gr
 import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
+import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
-import type { SearchEmbeddableApi, SearchEmbeddableSerializedAttributes } from './types';
+import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
-
-// This type forces our snapshot to include all keys so we don't overlook new ones
-type InlineEditSnapshot = {
-  [K in keyof Required<SearchEmbeddableSerializedAttributes>]: SearchEmbeddableSerializedAttributes[K];
-};
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -101,24 +96,11 @@ export const getSearchEmbeddableFactory = ({
         runtimeState?.savedObjectDescription
       );
       const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
-      const draftSelectedTabId$ = new BehaviorSubject<string | undefined>(
-        runtimeState.selectedTabId
-      );
-      const isInlineEditing$ = new BehaviorSubject<boolean>(false);
-      const inlineEditDirty$ = new BehaviorSubject<boolean>(false);
-      const overrideHoverActions$ = isInlineEditing$;
 
       const tabs = runtimeState.tabs ?? [];
-      let inlineEditStateSnapshot: InlineEditSnapshot | undefined;
 
       const isSelectedTabDeleted = (tabId: string | undefined, availableTabs: typeof tabs = tabs) =>
         isTabDeleted(tabId, availableTabs);
-
-      const setFocusedPanelId = (panelId?: string) => {
-        if (apiCanFocusPanel(parentApi)) {
-          parentApi.setFocusedPanelId(panelId);
-        }
-      };
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -148,109 +130,15 @@ export const getSearchEmbeddableFactory = ({
           selectedTabId: selectedTabId$.getValue(),
         });
 
-      const switchTab = async (tabId: string): Promise<boolean> => {
-        const tab = tabs.find((t) => t.id === tabId);
-
-        if (!tab) return false;
-
-        try {
-          await searchEmbeddable.reinitializeState(tab);
-
-          return true;
-        } catch (error) {
-          blockingError$.next(error as Error);
-          dataLoading$.next(false);
-
-          return false;
-        }
-      };
-
-      const stopInlineEditing = () => {
-        isInlineEditing$.next(false);
-        inlineEditDirty$.next(false);
-        draftSelectedTabId$.next(selectedTabId$.getValue());
-
-        inlineEditStateSnapshot = undefined;
-
-        setFocusedPanelId();
-      };
-
-      const startInlineEditing = async () => {
-        if (isInlineEditing$.getValue()) return;
-
-        const currentTabId = selectedTabId$.getValue();
-        const {
-          stateManager,
-          api: { savedSearch$ },
-        } = searchEmbeddable;
-
-        inlineEditStateSnapshot = {
-          serializedSearchSource: savedSearch$.getValue().searchSource.getSerializedFields(),
-          sort: stateManager.sort.getValue(),
-          columns: stateManager.columns.getValue(),
-          grid: stateManager.grid.getValue(),
-          sampleSize: stateManager.sampleSize.getValue(),
-          rowsPerPage: stateManager.rowsPerPage.getValue(),
-          rowHeight: stateManager.rowHeight.getValue(),
-          headerRowHeight: stateManager.headerRowHeight.getValue(),
-          viewMode: stateManager.viewMode.getValue(),
-          density: stateManager.density.getValue(),
-        };
-
-        draftSelectedTabId$.next(currentTabId);
-        isInlineEditing$.next(true);
-
-        setFocusedPanelId(uuid);
-      };
-
-      const previewInlineTabSelection = async (tabId: string) => {
-        if (!isInlineEditing$.getValue()) return;
-        if (draftSelectedTabId$.getValue() === tabId) return;
-
-        const previousDraftTabId = draftSelectedTabId$.getValue();
-
-        draftSelectedTabId$.next(tabId);
-
-        const didSwitch = await switchTab(tabId);
-
-        if (didSwitch) {
-          inlineEditDirty$.next(true);
-        } else {
-          draftSelectedTabId$.next(previousDraftTabId);
-        }
-      };
-
-      const applyInlineTabSelection = async () => {
-        if (!isInlineEditing$.getValue()) return;
-
-        const draftTabId = draftSelectedTabId$.getValue();
-        const committedTabId = selectedTabId$.getValue();
-
-        if (!draftTabId || draftTabId === committedTabId) {
-          stopInlineEditing();
-          return;
-        }
-
-        if (!tabs.some((tab) => tab.id === draftTabId)) return;
-
-        selectedTabId$.next(draftTabId);
-        stopInlineEditing();
-      };
-
-      const cancelInlineTabSelection = async () => {
-        if (!isInlineEditing$.getValue() || !inlineEditStateSnapshot) return;
-
-        if (inlineEditDirty$.getValue()) {
-          try {
-            await searchEmbeddable.reinitializeState(inlineEditStateSnapshot);
-          } catch (error) {
-            blockingError$.next(error as Error);
-            dataLoading$.next(false);
-          }
-        }
-
-        stopInlineEditing();
-      };
+      const inlineEditingApi = initializeInlineEditingApi({
+        uuid,
+        parentApi,
+        tabs,
+        selectedTabId$,
+        searchEmbeddable,
+        blockingError$,
+        dataLoading$,
+      });
 
       const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
         uuid,
@@ -265,15 +153,11 @@ export const getSearchEmbeddableFactory = ({
             skip(1),
             map(() => undefined)
           ),
-          isInlineEditing$.pipe(
-            skip(1),
-            filterOp((isEditing) => !isEditing),
-            map(() => undefined)
-          )
+          inlineEditingApi.anyStateChange$
         ),
         getComparators: () => {
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
-          const shouldSkipTabComparators = isDeleted || isInlineEditing$.getValue();
+          const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
 
           return {
             ...drilldownsManager.comparators,
@@ -318,7 +202,7 @@ export const getSearchEmbeddableFactory = ({
             selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
             await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
           }
-          stopInlineEditing();
+          inlineEditingApi.stopInlineEditing();
         },
       });
 
@@ -338,18 +222,16 @@ export const getSearchEmbeddableFactory = ({
         ...timeRangeManager.api,
         ...drilldownsManager.api,
         ...editApi,
-        // If editing is enabled and it's a by ref embeddable,
-        // override default save-and-return logic with inline editing
         ...(editApi && savedObjectId$.getValue()
           ? {
-              onEdit: startInlineEditing,
-              overrideHoverActions$,
+              onEdit: inlineEditingApi.startInlineEditing,
+              overrideHoverActions$: inlineEditingApi.overrideHoverActions$,
               OverriddenHoverActionsComponent: () => (
                 <SearchEmbeddableInlineEditHoverActions
-                  draftSelectedTabId$={draftSelectedTabId$}
+                  draftSelectedTabId$={inlineEditingApi.draftSelectedTabId$}
                   tabs={tabs}
                   onEditInDiscover={editApi.onEdit}
-                  onSelectTab={previewInlineTabSelection}
+                  onSelectTab={inlineEditingApi.previewInlineTabSelection}
                 />
               ),
             }
@@ -423,6 +305,7 @@ export const getSearchEmbeddableFactory = ({
       let hasPanelBeenRegisteredInParent = false;
       let hasBeenCleanedUp = false;
       let parentChildrenSubscription: Subscription | undefined;
+
       const cleanupEmbeddableResources = () => {
         if (hasBeenCleanedUp) return;
 
@@ -458,10 +341,10 @@ export const getSearchEmbeddableFactory = ({
           ] = useBatchedPublishingSubjects(
             api.savedSearch$,
             api.dataViews$,
-            isInlineEditing$,
-            draftSelectedTabId$,
+            inlineEditingApi.isInlineEditing$,
+            inlineEditingApi.draftSelectedTabId$,
             selectedTabId$,
-            inlineEditDirty$
+            inlineEditingApi.inlineEditDirty$
           );
 
           const selectedTabIdForDisplay = isInlineEditing
@@ -469,16 +352,6 @@ export const getSearchEmbeddableFactory = ({
             : selectedTabId;
           const isSelectedTabDeletedForDisplay = isTabDeleted(selectedTabIdForDisplay, tabs);
           const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;
-
-          useEffect(() => {
-            return () => {
-              // In dashboard, this component can transiently unmount/remount during panel state transitions.
-              // Cleanup is handled when the child API is actually removed from the parent container.
-              if (!apiPublishesChildren(parentApi)) {
-                cleanupEmbeddableResources();
-              }
-            };
-          }, []);
 
           const dataView = useMemo(() => {
             const hasDataView = (dataViews ?? []).length > 0;
@@ -572,8 +445,8 @@ export const getSearchEmbeddableFactory = ({
                           inlineEditing={{
                             isActive: isInlineEditing,
                             hasPendingChanges: hasPendingInlineTabChanges,
-                            onApply: applyInlineTabSelection,
-                            onCancel: cancelInlineTabSelection,
+                            onApply: inlineEditingApi.applyInlineTabSelection,
+                            onCancel: inlineEditingApi.cancelInlineTabSelection,
                           }}
                           stateManager={searchEmbeddable.stateManager}
                         />

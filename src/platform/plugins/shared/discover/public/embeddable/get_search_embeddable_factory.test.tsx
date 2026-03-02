@@ -126,12 +126,7 @@ describe('saved search embeddable', () => {
     }),
     setFocusedPanelId: jest.fn(),
     viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
-  } as unknown as PresentationContainer &
-    PublishesUnifiedSearch & {
-      getAppContext: jest.Mock;
-      setFocusedPanelId: jest.Mock;
-      viewMode$: BehaviorSubject<'view' | 'edit'>;
-    };
+  };
 
   const finalizeEditableApiMock = (
     api: Omit<SearchEmbeddableApi, 'uuid' | 'type' | 'parentApi' | 'phase$'>
