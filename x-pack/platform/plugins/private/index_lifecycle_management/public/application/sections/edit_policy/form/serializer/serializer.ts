@@ -19,8 +19,16 @@ export const createSerializer =
   (originalPolicy?: SerializedPolicy) =>
   (data: FormInternal): SerializedPolicy => {
     const { _meta, ...updatedPolicy } = data;
+    updatedPolicy.phases = updatedPolicy.phases ?? {};
 
-    const hotEnabled = _meta.hot?.enabled ?? true;
+    const hotMeta = _meta?.hot;
+    const warmMeta = _meta?.warm;
+    const coldMeta = _meta?.cold;
+    const frozenMeta = _meta?.frozen;
+    const deleteMeta = _meta?.delete;
+    const searchableSnapshotMeta = _meta?.searchableSnapshot;
+
+    const hotEnabled = hotMeta?.enabled ?? true;
     if (hotEnabled) {
       updatedPolicy.phases = {
         ...updatedPolicy.phases,
@@ -41,7 +49,7 @@ export const createSerializer =
      * Important shared values for serialization
      */
     const isUsingRollover = Boolean(
-      hotEnabled && (_meta.hot?.isUsingDefaultRollover || _meta.hot?.customRollover.enabled)
+      hotEnabled && (hotMeta?.isUsingDefaultRollover || hotMeta?.customRollover?.enabled)
     );
 
     // Next copy over all meta fields and delete any fields that have been removed
@@ -71,7 +79,9 @@ export const createSerializer =
 
             // We are using user-defined, custom rollover settings.
             if (updatedPolicy.phases.hot?.actions.rollover?.max_age) {
-              hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot?.customRollover.maxAgeUnit}`;
+              hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${
+                hotMeta?.customRollover?.maxAgeUnit ?? ''
+              }`;
             } else {
               delete hotPhaseActions.rollover.max_age;
             }
@@ -81,7 +91,9 @@ export const createSerializer =
             }
 
             if (updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_size) {
-              hotPhaseActions.rollover.max_primary_shard_size = `${hotPhaseActions.rollover.max_primary_shard_size}${_meta.hot?.customRollover.maxPrimaryShardSizeUnit}`;
+              hotPhaseActions.rollover.max_primary_shard_size = `${
+                hotPhaseActions.rollover.max_primary_shard_size
+              }${hotMeta?.customRollover?.maxPrimaryShardSizeUnit ?? ''}`;
             } else {
               delete hotPhaseActions.rollover.max_primary_shard_size;
             }
@@ -93,7 +105,9 @@ export const createSerializer =
             }
 
             if (updatedPolicy.phases.hot?.actions.rollover?.max_size) {
-              hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
+              hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${
+                hotMeta?.customRollover?.maxStorageSizeUnit ?? ''
+              }`;
             } else {
               delete hotPhaseActions.rollover.max_size;
             }
@@ -104,20 +118,20 @@ export const createSerializer =
            */
           if (!updatedPolicy.phases.hot?.actions?.forcemerge) {
             delete hotPhaseActions.forcemerge;
-          } else if (_meta.hot?.bestCompression) {
+          } else if (hotMeta?.bestCompression) {
             hotPhaseActions.forcemerge!.index_codec = 'best_compression';
           } else {
             delete hotPhaseActions.forcemerge!.index_codec;
           }
 
-          if (_meta.hot?.bestCompression && hotPhaseActions.forcemerge) {
+          if (hotMeta?.bestCompression && hotPhaseActions.forcemerge) {
             hotPhaseActions.forcemerge.index_codec = 'best_compression';
           }
 
           /**
            * HOT PHASE READ-ONLY
            */
-          if (_meta.hot?.readonlyEnabled) {
+          if (hotMeta?.readonlyEnabled) {
             hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
           } else {
             delete hotPhaseActions.readonly;
@@ -127,9 +141,11 @@ export const createSerializer =
            */
           if (!updatedPolicy.phases.hot?.actions?.shrink) {
             delete hotPhaseActions.shrink;
-          } else if (_meta.hot.shrink.isUsingShardSize) {
+          } else if (hotMeta?.shrink?.isUsingShardSize) {
             delete hotPhaseActions.shrink!.number_of_shards;
-            hotPhaseActions.shrink!.max_primary_shard_size = `${hotPhaseActions.shrink?.max_primary_shard_size}${_meta.hot?.shrink.maxPrimaryShardSizeUnits}`;
+            hotPhaseActions.shrink!.max_primary_shard_size = `${
+              hotPhaseActions.shrink?.max_primary_shard_size
+            }${hotMeta?.shrink?.maxPrimaryShardSizeUnits ?? ''}`;
           } else {
             delete hotPhaseActions.shrink!.max_primary_shard_size;
           }
@@ -165,7 +181,7 @@ export const createSerializer =
         if (updatedPolicy.phases.hot?.actions?.searchable_snapshot) {
           hotPhaseActions.searchable_snapshot = {
             ...hotPhaseActions.searchable_snapshot,
-            snapshot_repository: _meta.searchableSnapshot.repository,
+            snapshot_repository: searchableSnapshotMeta?.repository,
           };
         } else {
           delete hotPhaseActions.searchable_snapshot;
@@ -176,7 +192,8 @@ export const createSerializer =
     /**
      * WARM PHASE SERIALIZATION
      */
-    if (_meta.warm.enabled) {
+    if (warmMeta?.enabled) {
+      draft.phases.warm = draft.phases.warm ?? { actions: {} };
       draft.phases.warm!.actions = draft.phases.warm?.actions ?? {};
       const warmPhase = draft.phases.warm!;
 
@@ -185,14 +202,14 @@ export const createSerializer =
        *
        */
       if (updatedPolicy.phases.warm?.min_age) {
-        warmPhase.min_age = `${updatedPolicy.phases.warm!.min_age}${_meta.warm.minAgeUnit}`;
+        warmPhase.min_age = `${updatedPolicy.phases.warm!.min_age}${warmMeta?.minAgeUnit ?? ''}`;
       }
 
       /**
        * WARM PHASE DATA ALLOCATION
        */
       warmPhase.actions = serializeMigrateAndAllocateActions(
-        _meta.warm,
+        warmMeta,
         warmPhase.actions,
         originalPolicy?.phases.warm?.actions,
         updatedPolicy.phases.warm?.actions?.allocate?.number_of_replicas
@@ -203,7 +220,7 @@ export const createSerializer =
        */
       if (!updatedPolicy.phases.warm?.actions?.forcemerge) {
         delete warmPhase.actions.forcemerge;
-      } else if (_meta.warm.bestCompression) {
+      } else if (warmMeta?.bestCompression) {
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
       } else {
         delete warmPhase.actions.forcemerge!.index_codec;
@@ -212,7 +229,7 @@ export const createSerializer =
       /**
        * WARM PHASE READ ONLY
        */
-      if (_meta.warm.readonlyEnabled) {
+      if (warmMeta?.readonlyEnabled) {
         warmPhase.actions.readonly = warmPhase.actions.readonly ?? {};
       } else {
         delete warmPhase.actions.readonly;
@@ -230,9 +247,11 @@ export const createSerializer =
        */
       if (!updatedPolicy.phases.warm?.actions?.shrink) {
         delete warmPhase.actions.shrink;
-      } else if (_meta.warm.shrink.isUsingShardSize) {
+      } else if (warmMeta?.shrink?.isUsingShardSize) {
         delete warmPhase.actions.shrink!.number_of_shards;
-        warmPhase.actions.shrink!.max_primary_shard_size = `${warmPhase.actions.shrink?.max_primary_shard_size}${_meta.warm?.shrink.maxPrimaryShardSizeUnits}`;
+        warmPhase.actions.shrink!.max_primary_shard_size = `${
+          warmPhase.actions.shrink?.max_primary_shard_size
+        }${warmMeta?.shrink?.maxPrimaryShardSizeUnits ?? ''}`;
       } else {
         delete warmPhase.actions.shrink!.max_primary_shard_size;
       }
@@ -256,7 +275,8 @@ export const createSerializer =
     /**
      * COLD PHASE SERIALIZATION
      */
-    if (_meta.cold.enabled) {
+    if (coldMeta?.enabled) {
+      draft.phases.cold = draft.phases.cold ?? { actions: {} };
       draft.phases.cold!.actions = draft.phases.cold?.actions ?? {};
       const coldPhase = draft.phases.cold!;
 
@@ -264,14 +284,14 @@ export const createSerializer =
        * COLD PHASE MIN AGE
        */
       if (updatedPolicy.phases.cold?.min_age) {
-        coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${_meta.cold.minAgeUnit}`;
+        coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${coldMeta?.minAgeUnit ?? ''}`;
       }
 
       /**
        * COLD PHASE DATA ALLOCATION
        */
       coldPhase.actions = serializeMigrateAndAllocateActions(
-        _meta.cold,
+        coldMeta,
         coldPhase.actions,
         originalPolicy?.phases.cold?.actions,
         updatedPolicy.phases.cold?.actions?.allocate?.number_of_replicas
@@ -289,7 +309,7 @@ export const createSerializer =
       /**
        * COLD PHASE READ ONLY
        */
-      if (_meta.cold.readonlyEnabled) {
+      if (coldMeta?.readonlyEnabled) {
         coldPhase.actions.readonly = coldPhase.actions.readonly ?? {};
       } else {
         delete coldPhase.actions.readonly;
@@ -308,7 +328,7 @@ export const createSerializer =
       if (updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
         coldPhase.actions.searchable_snapshot = {
           ...coldPhase.actions.searchable_snapshot,
-          snapshot_repository: _meta.searchableSnapshot.repository,
+          snapshot_repository: searchableSnapshotMeta?.repository,
         };
       } else {
         delete coldPhase.actions.searchable_snapshot;
@@ -333,7 +353,8 @@ export const createSerializer =
     /**
      * FROZEN PHASE SERIALIZATION
      */
-    if (_meta.frozen?.enabled) {
+    if (frozenMeta?.enabled) {
+      draft.phases.frozen = draft.phases.frozen ?? { actions: {} };
       draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
       const frozenPhase = draft.phases.frozen!;
 
@@ -341,7 +362,9 @@ export const createSerializer =
        * FROZEN PHASE MIN AGE
        */
       if (updatedPolicy.phases.frozen?.min_age) {
-        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${
+          frozenMeta?.minAgeUnit ?? ''
+        }`;
       }
 
       /**
@@ -350,7 +373,7 @@ export const createSerializer =
       if (updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
         frozenPhase.actions.searchable_snapshot = {
           ...frozenPhase.actions.searchable_snapshot,
-          snapshot_repository: _meta.searchableSnapshot.repository,
+          snapshot_repository: searchableSnapshotMeta?.repository,
         };
       } else {
         delete frozenPhase.actions.searchable_snapshot;
@@ -362,7 +385,8 @@ export const createSerializer =
     /**
      * DELETE PHASE SERIALIZATION
      */
-    if (_meta.delete.enabled) {
+    if (deleteMeta?.enabled) {
+      draft.phases.delete = draft.phases.delete ?? { actions: {} };
       const deletePhase = draft.phases.delete!;
 
       /**
@@ -375,7 +399,9 @@ export const createSerializer =
        * DELETE PHASE MIN AGE
        */
       if (updatedPolicy.phases.delete?.min_age) {
-        deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
+        deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${
+          deleteMeta?.minAgeUnit ?? ''
+        }`;
       }
 
       /**
