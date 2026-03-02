@@ -11,13 +11,7 @@ import { schema } from '@kbn/config-schema';
 export const configSchema = schema.object({
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    streams: schema.arrayOf(
-      schema.object({
-        name: schema.string(),
-        request: schema.any(),
-      }),
-      { defaultValue: [] }
-    ),
+    stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
   }),
 });
 

@@ -300,9 +300,9 @@ export class StreamsPlugin
         await streamsClient.enableStreams();
 
         await streamsClient.bulkUpsert(
-          this.config.preconfigured.streams.map(({ name, request }) => ({
+          this.config.preconfigured.stream_definitions.map(({ name, ...definition }) => ({
             name,
-            request: Streams.all.UpsertRequest.parse(request),
+            request: Streams.all.UpsertRequest.parse(definition),
           }))
         );
       });
