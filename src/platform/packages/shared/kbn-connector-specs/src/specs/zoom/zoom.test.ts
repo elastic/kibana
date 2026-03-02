@@ -135,7 +135,20 @@ describe('Zoom', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/meetings/111');
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        uuid: 'uuid-123',
+        id: 111,
+        host_email: 'host@example.com',
+        topic: 'Sprint Planning',
+        type: 2,
+        status: 'waiting',
+        start_time: '2026-03-01T10:00:00Z',
+        duration: 60,
+        timezone: 'America/New_York',
+        agenda: 'Plan the next sprint',
+        join_url: 'https://zoom.us/j/111',
+        password: undefined,
+      });
     });
 
     it('should double-encode a UUID that starts with /', async () => {
@@ -194,7 +207,16 @@ describe('Zoom', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/past_meetings/222');
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        uuid: 'uuid-456',
+        id: 222,
+        topic: 'Retrospective',
+        start_time: '2026-02-25T14:00:00Z',
+        end_time: '2026-02-25T15:00:00Z',
+        duration: 58,
+        total_minutes: 232,
+        participants_count: 4,
+      });
     });
 
     it('should double-encode a UUID containing //', async () => {
@@ -252,7 +274,30 @@ describe('Zoom', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/meetings/111/recordings');
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        topic: 'Team Standup',
+        recording_count: undefined,
+        start_time: undefined,
+        duration: undefined,
+        recording_files: [
+          {
+            id: 'rec-1',
+            recording_type: 'audio_transcript',
+            file_type: 'VTT',
+            file_size: undefined,
+            download_url: 'https://zoom.us/rec/download/transcript.vtt',
+            status: 'completed',
+          },
+          {
+            id: 'rec-2',
+            recording_type: 'chat_file',
+            file_type: 'TXT',
+            file_size: undefined,
+            download_url: 'https://zoom.us/rec/download/chat.txt',
+            status: 'completed',
+          },
+        ],
+      });
     });
 
     it('should strip whitespace from a meeting ID copied from Zoom UI', async () => {
@@ -286,11 +331,11 @@ describe('Zoom', () => {
       const mockResponse = { data: { recording_files: [] } };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Zoom.actions.getMeetingRecordings.handler(mockContext, {
+      const result = (await Zoom.actions.getMeetingRecordings.handler(mockContext, {
         meetingId: '111',
-      });
+      })) as { recording_files: unknown[] };
 
-      expect(result).toEqual(mockResponse.data);
+      expect(result.recording_files).toHaveLength(0);
     });
 
     it('should propagate API errors', async () => {
@@ -363,13 +408,14 @@ describe('Zoom', () => {
 
       const result = (await Zoom.actions.downloadRecordingFile.handler(mockContext, {
         downloadUrl: 'https://zoom.us/rec/download/transcript.vtt',
-      })) as { contentType?: string; text: string };
+      })) as { contentType?: string; text: string; truncated: boolean };
 
       expect(mockClient.get).toHaveBeenCalledWith('https://zoom.us/rec/download/transcript.vtt', {
         responseType: 'arraybuffer',
       });
       expect(result.contentType).toBe('text/vtt');
       expect(result.text).toBe(vttContent);
+      expect(result.truncated).toBe(false);
     });
 
     it('should handle chat log download', async () => {
@@ -382,10 +428,11 @@ describe('Zoom', () => {
 
       const result = (await Zoom.actions.downloadRecordingFile.handler(mockContext, {
         downloadUrl: 'https://zoom.us/rec/download/chat.txt',
-      })) as { contentType?: string; text: string };
+      })) as { contentType?: string; text: string; truncated: boolean };
 
       expect(result.contentType).toBe('text/plain');
       expect(result.text).toContain('Hi team!');
+      expect(result.truncated).toBe(false);
     });
 
     it('should handle missing content-type header', async () => {
@@ -397,10 +444,45 @@ describe('Zoom', () => {
 
       const result = (await Zoom.actions.downloadRecordingFile.handler(mockContext, {
         downloadUrl: 'https://zoom.us/rec/download/file',
-      })) as { contentType?: string; text: string };
+      })) as { contentType?: string; text: string; truncated: boolean };
 
       expect(result.contentType).toBeUndefined();
       expect(result.text).toBe('some content');
+      expect(result.truncated).toBe(false);
+    });
+
+    it('should truncate content exceeding maxChars', async () => {
+      const longContent = 'A'.repeat(200);
+      const mockResponse = {
+        data: Buffer.from(longContent),
+        headers: { 'content-type': 'text/vtt' },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await Zoom.actions.downloadRecordingFile.handler(mockContext, {
+        downloadUrl: 'https://zoom.us/rec/download/long-transcript.vtt',
+        maxChars: 50,
+      })) as { contentType?: string; text: string; truncated: boolean };
+
+      expect(result.text).toHaveLength(50);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('should not truncate content within maxChars', async () => {
+      const shortContent = 'Hello world';
+      const mockResponse = {
+        data: Buffer.from(shortContent),
+        headers: { 'content-type': 'text/plain' },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await Zoom.actions.downloadRecordingFile.handler(mockContext, {
+        downloadUrl: 'https://zoom.us/rec/download/short.txt',
+        maxChars: 1000,
+      })) as { contentType?: string; text: string; truncated: boolean };
+
+      expect(result.text).toBe(shortContent);
+      expect(result.truncated).toBe(false);
     });
 
     it('should propagate download errors', async () => {
@@ -450,6 +532,15 @@ describe('Zoom', () => {
         { params: {} }
       );
       expect(result.participants).toHaveLength(2);
+      const participants = result.participants as Array<Record<string, unknown>>;
+      expect(participants[0]).toEqual({
+        name: 'Alice',
+        user_email: 'alice@example.com',
+        join_time: '2026-02-25T09:00:00Z',
+        leave_time: '2026-02-25T09:30:00Z',
+        duration: 1800,
+      });
+      expect(participants[0]).not.toHaveProperty('id');
     });
 
     it('should double-encode a UUID containing //', async () => {
@@ -528,6 +619,15 @@ describe('Zoom', () => {
         { params: {} }
       );
       expect(result.registrants).toHaveLength(2);
+      const registrants = result.registrants as Array<Record<string, unknown>>;
+      expect(registrants[0]).toEqual({
+        email: 'alice@example.com',
+        first_name: 'Alice',
+        last_name: 'Smith',
+        status: 'approved',
+      });
+      expect(registrants[0]).not.toHaveProperty('id');
+      expect(registrants[0]).not.toHaveProperty('create_time');
     });
 
     it('should filter by registration status', async () => {

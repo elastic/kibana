@@ -39,6 +39,37 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import type {
+  AnyRecord,
+  ZoomListMeetingsInput,
+  ZoomGetMeetingDetailsInput,
+  ZoomGetPastMeetingDetailsInput,
+  ZoomGetMeetingRecordingsInput,
+  ZoomListUserRecordingsInput,
+  ZoomDownloadRecordingFileInput,
+  ZoomGetMeetingParticipantsInput,
+  ZoomGetMeetingRegistrantsInput,
+} from './types';
+import {
+  ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS,
+  ZoomPaginationOutputSchema,
+  ZoomMeetingSummarySchema,
+  ZoomRecordingFileSchema,
+  ZoomParticipantSchema,
+  ZoomRegistrantSchema,
+  ZoomListMeetingsInputSchema,
+  ZoomGetMeetingDetailsInputSchema,
+  ZoomGetPastMeetingDetailsInputSchema,
+  ZoomGetMeetingRecordingsInputSchema,
+  ZoomListUserRecordingsInputSchema,
+  ZoomDownloadRecordingFileInputSchema,
+  ZoomGetMeetingParticipantsInputSchema,
+  ZoomGetMeetingRegistrantsInputSchema,
+  pickMeetingSummary,
+  pickRecordingFile,
+  pickParticipant,
+  pickRegistrant,
+} from './types';
 
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Remove once Zoom S2S OAuth is natively supported.
 
@@ -55,12 +86,6 @@ const encodeZoomId = (id: string): string => {
     ? encodeURIComponent(encodeURIComponent(stripped))
     : encodeURIComponent(stripped);
 };
-
-const ZoomPaginationOutputSchema = z.object({
-  page_size: z.number().optional().describe('Number of records per page'),
-  next_page_token: z.string().optional().describe('Token to fetch the next page of results'),
-  total_records: z.number().optional().describe('Total number of records'),
-});
 
 export const Zoom: ConnectorSpec = {
   metadata: {
@@ -118,28 +143,12 @@ export const Zoom: ConnectorSpec = {
           defaultMessage: 'List meetings for a user. Use type=upcoming for future meetings.',
         }
       ),
-      input: z.object({
-        userId: z
-          .string()
-          .default('me')
-          .describe('User ID or email. Use "me" for the authenticated user.'),
-        type: z
-          .enum(['scheduled', 'live', 'upcoming', 'upcoming_meetings', 'previous_meetings'])
-          .default('upcoming')
-          .describe('Meeting type filter'),
-        pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
-      }),
+      input: ZoomListMeetingsInputSchema,
       output: ZoomPaginationOutputSchema.extend({
-        meetings: z.array(z.any()).describe('Array of meeting objects'),
+        meetings: z.array(ZoomMeetingSummarySchema).describe('Array of meeting summaries'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          userId: string;
-          type: string;
-          pageSize?: number;
-          nextPageToken?: string;
-        };
+        const typedInput: ZoomListMeetingsInput = ZoomListMeetingsInputSchema.parse(input);
         ctx.log.debug(
           `Zoom listing meetings for user ${typedInput.userId}, type=${typedInput.type}`
         );
@@ -154,7 +163,13 @@ export const Zoom: ConnectorSpec = {
             },
           }
         );
-        return response.data;
+        const { data } = response;
+        return {
+          page_size: data.page_size,
+          next_page_token: data.next_page_token,
+          total_records: data.total_records,
+          meetings: (data.meetings ?? []).map(pickMeetingSummary),
+        };
       },
     },
 
@@ -167,13 +182,10 @@ export const Zoom: ConnectorSpec = {
             'Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this to understand what a meeting is about before looking at recordings or participants.',
         }
       ),
-      input: z.object({
-        meetingId: z.string().describe('Meeting ID or UUID'),
-      }),
+      input: ZoomGetMeetingDetailsInputSchema,
       output: z.object({
         uuid: z.string().optional(),
         id: z.number().optional(),
-        host_id: z.string().optional(),
         host_email: z.string().optional(),
         topic: z.string().optional(),
         type: z
@@ -187,17 +199,30 @@ export const Zoom: ConnectorSpec = {
         duration: z.number().optional().describe('Scheduled duration in minutes'),
         timezone: z.string().optional(),
         agenda: z.string().optional().describe('Meeting agenda/description'),
-        created_at: z.string().optional(),
         join_url: z.string().optional(),
-        settings: z.any().optional().describe('Meeting settings object'),
+        password: z.string().optional().describe('Meeting passcode required to join'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { meetingId: string };
+        const typedInput: ZoomGetMeetingDetailsInput =
+          ZoomGetMeetingDetailsInputSchema.parse(input);
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting meeting details for ${typedInput.meetingId}`);
 
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}`);
-        return response.data;
+        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}`);
+        return {
+          uuid: data.uuid,
+          id: data.id,
+          host_email: data.host_email,
+          topic: data.topic,
+          type: data.type,
+          status: data.status,
+          start_time: data.start_time,
+          duration: data.duration,
+          timezone: data.timezone,
+          agenda: data.agenda,
+          join_url: data.join_url,
+          password: data.password,
+        };
       },
     },
 
@@ -207,32 +232,37 @@ export const Zoom: ConnectorSpec = {
         'core.kibanaConnectorSpecs.zoom.actions.getPastMeetingDetails.description',
         {
           defaultMessage:
-            'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times, and source. Only works for past meetings.',
+            'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times. Only works for past meetings.',
         }
       ),
-      input: z.object({
-        meetingId: z.string().describe('Past meeting ID or UUID'),
-      }),
+      input: ZoomGetPastMeetingDetailsInputSchema,
       output: z.object({
         uuid: z.string().optional(),
         id: z.number().optional(),
-        host_id: z.string().optional(),
-        type: z.number().optional(),
         topic: z.string().optional(),
         start_time: z.string().optional(),
         end_time: z.string().optional(),
         duration: z.number().optional().describe('Actual meeting duration in minutes'),
         total_minutes: z.number().optional().describe('Sum of all participant minutes'),
         participants_count: z.number().optional(),
-        source: z.string().optional(),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { meetingId: string };
+        const typedInput: ZoomGetPastMeetingDetailsInput =
+          ZoomGetPastMeetingDetailsInputSchema.parse(input);
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting past meeting details for ${typedInput.meetingId}`);
 
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/past_meetings/${encodedId}`);
-        return response.data;
+        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/past_meetings/${encodedId}`);
+        return {
+          uuid: data.uuid,
+          id: data.id,
+          topic: data.topic,
+          start_time: data.start_time,
+          end_time: data.end_time,
+          duration: data.duration,
+          total_minutes: data.total_minutes,
+          participants_count: data.participants_count,
+        };
       },
     },
 
@@ -245,31 +275,30 @@ export const Zoom: ConnectorSpec = {
             'Get cloud recordings for a meeting. Response includes recording_files with types: shared_screen_with_speaker_view, audio_only, audio_transcript, chat_file, and more.',
         }
       ),
-      input: z.object({
-        meetingId: z.string().describe('Meeting ID or UUID'),
-      }),
+      input: ZoomGetMeetingRecordingsInputSchema,
       output: z.object({
-        uuid: z.string().optional(),
-        id: z.number().optional(),
-        host_id: z.string().optional(),
         topic: z.string().optional(),
         start_time: z.string().optional(),
         duration: z.number().optional(),
-        total_size: z.number().optional(),
         recording_count: z.number().optional(),
-        recording_files: z
-          .array(z.any())
-          .describe(
-            'Array of recording file objects. Each has: id, meeting_id, recording_start, recording_end, file_type, file_extension, file_size, download_url, status, recording_type'
-          ),
+        password: z.string().optional().describe('Passcode to access the recording files'),
+        recording_files: z.array(ZoomRecordingFileSchema),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { meetingId: string };
+        const typedInput: ZoomGetMeetingRecordingsInput =
+          ZoomGetMeetingRecordingsInputSchema.parse(input);
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting recordings for meeting ${typedInput.meetingId}`);
 
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}/recordings`);
-        return response.data;
+        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}/recordings`);
+        return {
+          topic: data.topic,
+          start_time: data.start_time,
+          duration: data.duration,
+          recording_count: data.recording_count,
+          password: data.password,
+          recording_files: (data.recording_files ?? []).map(pickRecordingFile),
+        };
       },
     },
 
@@ -282,34 +311,23 @@ export const Zoom: ConnectorSpec = {
             'List cloud recordings for a user within a date range. Returns meetings with their recording_files (including transcripts and chat files).',
         }
       ),
-      input: z.object({
-        userId: z
-          .string()
-          .default('me')
-          .describe('User ID or email. Use "me" for the authenticated user.'),
-        from: z.string().optional().describe('Start date (YYYY-MM-DD). Defaults to current date.'),
-        to: z.string().optional().describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
-        pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
-      }),
+      input: ZoomListUserRecordingsInputSchema,
       output: ZoomPaginationOutputSchema.extend({
         from: z.string().optional(),
         to: z.string().optional(),
-        meetings: z
-          .array(z.any())
-          .describe('Array of meeting objects, each containing recording_files'),
+        meetings: z.array(
+          ZoomMeetingSummarySchema.extend({
+            recording_count: z.number().optional(),
+            recording_files: z.array(ZoomRecordingFileSchema),
+          })
+        ),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          userId: string;
-          from?: string;
-          to?: string;
-          pageSize?: number;
-          nextPageToken?: string;
-        };
+        const typedInput: ZoomListUserRecordingsInput =
+          ZoomListUserRecordingsInputSchema.parse(input);
         ctx.log.debug(`Zoom listing recordings for user ${typedInput.userId}`);
 
-        const response = await ctx.client.get(
+        const { data } = await ctx.client.get(
           `${ZOOM_API_BASE}/users/${encodeURIComponent(typedInput.userId)}/recordings`,
           {
             params: {
@@ -320,7 +338,18 @@ export const Zoom: ConnectorSpec = {
             },
           }
         );
-        return response.data;
+        return {
+          page_size: data.page_size,
+          next_page_token: data.next_page_token,
+          total_records: data.total_records,
+          from: data.from,
+          to: data.to,
+          meetings: (data.meetings ?? []).map((m: AnyRecord) => ({
+            ...pickMeetingSummary(m),
+            recording_count: m.recording_count,
+            recording_files: ((m.recording_files as AnyRecord[]) ?? []).map(pickRecordingFile),
+          })),
+        };
       },
     },
 
@@ -333,30 +362,28 @@ export const Zoom: ConnectorSpec = {
             'Download a recording file by its download URL. Works for transcripts (VTT format), chat logs, and other recording files. Returns the content as text.',
         }
       ),
-      input: z.object({
-        downloadUrl: z
-          .string()
-          .url()
-          .describe(
-            'The download_url from a recording file object (obtained via getMeetingRecordings or listUserRecordings)'
-          ),
-      }),
+      input: ZoomDownloadRecordingFileInputSchema,
       output: z.object({
         contentType: z.string().optional().describe('Content-Type header from the response'),
-        text: z.string().describe('File content as UTF-8 text'),
+        text: z.string().describe('File content as UTF-8 text (may be truncated)'),
+        truncated: z.boolean().describe('Whether the content was truncated to maxChars'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { downloadUrl: string };
+        const typedInput: ZoomDownloadRecordingFileInput =
+          ZoomDownloadRecordingFileInputSchema.parse(input);
         const sanitizedUrl = typedInput.downloadUrl.split('?')[0];
         ctx.log.debug(`Zoom downloading recording file from ${sanitizedUrl}`);
 
         const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
         });
-        const buffer = Buffer.from(response.data);
+        const fullText = Buffer.from(response.data).toString('utf8');
+        const limit = typedInput.maxChars ?? ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS;
+        const truncated = fullText.length > limit;
         return {
           contentType: response.headers?.['content-type'],
-          text: buffer.toString('utf8'),
+          text: truncated ? fullText.slice(0, limit) : fullText,
+          truncated,
         };
       },
     },
@@ -370,28 +397,17 @@ export const Zoom: ConnectorSpec = {
             'List participants of a past meeting. Returns participant name, email, join/leave times, and duration.',
         }
       ),
-      input: z.object({
-        meetingId: z.string().describe('Past meeting ID or UUID'),
-        pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
-      }),
+      input: ZoomGetMeetingParticipantsInputSchema,
       output: ZoomPaginationOutputSchema.extend({
-        participants: z
-          .array(z.any())
-          .describe(
-            'Array of participant objects with id, name, user_email, join_time, leave_time, duration'
-          ),
+        participants: z.array(ZoomParticipantSchema),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          meetingId: string;
-          pageSize?: number;
-          nextPageToken?: string;
-        };
+        const typedInput: ZoomGetMeetingParticipantsInput =
+          ZoomGetMeetingParticipantsInputSchema.parse(input);
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom listing participants for past meeting ${typedInput.meetingId}`);
 
-        const response = await ctx.client.get(
+        const { data } = await ctx.client.get(
           `${ZOOM_API_BASE}/past_meetings/${encodedId}/participants`,
           {
             params: {
@@ -400,7 +416,12 @@ export const Zoom: ConnectorSpec = {
             },
           }
         );
-        return response.data;
+        return {
+          page_size: data.page_size,
+          next_page_token: data.next_page_token,
+          total_records: data.total_records,
+          participants: (data.participants ?? []).map(pickParticipant),
+        };
       },
     },
 
@@ -413,33 +434,17 @@ export const Zoom: ConnectorSpec = {
             'List registrants of a meeting. Works for future and past meetings that have registration enabled. Returns registrant name, email, and registration status.',
         }
       ),
-      input: z.object({
-        meetingId: z.string().describe('Meeting ID'),
-        status: z
-          .enum(['pending', 'approved', 'denied'])
-          .optional()
-          .describe('Filter by registration status. Defaults to approved.'),
-        pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
-      }),
+      input: ZoomGetMeetingRegistrantsInputSchema,
       output: ZoomPaginationOutputSchema.extend({
-        registrants: z
-          .array(z.any())
-          .describe(
-            'Array of registrant objects with id, email, first_name, last_name, status, create_time, join_url'
-          ),
+        registrants: z.array(ZoomRegistrantSchema),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          meetingId: string;
-          status?: string;
-          pageSize?: number;
-          nextPageToken?: string;
-        };
+        const typedInput: ZoomGetMeetingRegistrantsInput =
+          ZoomGetMeetingRegistrantsInputSchema.parse(input);
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom listing registrants for meeting ${typedInput.meetingId}`);
 
-        const response = await ctx.client.get(
+        const { data } = await ctx.client.get(
           `${ZOOM_API_BASE}/meetings/${encodedId}/registrants`,
           {
             params: {
@@ -449,7 +454,12 @@ export const Zoom: ConnectorSpec = {
             },
           }
         );
-        return response.data;
+        return {
+          page_size: data.page_size,
+          next_page_token: data.next_page_token,
+          total_records: data.total_records,
+          registrants: (data.registrants ?? []).map(pickRegistrant),
+        };
       },
     },
   },

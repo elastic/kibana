@@ -10,9 +10,14 @@ inputs:
     type: string
     required: true
     description: "The download_url from a recording_files entry obtained via get_meeting_recordings or list_user_recordings."
+  - name: max_chars
+    type: number
+    required: false
+    description: "Maximum characters to return. Defaults to 100000. Content exceeding this limit is truncated."
 steps:
   - name: download-file
     type: zoom.downloadRecordingFile
     connector-id: <%= zoom-stack-connector-id %>
     with:
       downloadUrl: "${{inputs.download_url}}"
+      maxChars: ${{inputs.max_chars}}
