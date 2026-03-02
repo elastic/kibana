@@ -10,6 +10,8 @@ import { type FieldRule, suggestEntityClassForField } from '@kbn/anonymization-c
 /**
  * Fields that are allowed by default for the alerts data view profile.
  * Matches the Security Solution's DEFAULT_ALLOW list.
+ * Kept here temporarily while anonymization profile bootstrapping is centralized
+ * in this plugin; follow-up work will move Security-owned defaults to Security.
  */
 const DEFAULT_ALLOW: string[] = [
   '_id',

@@ -20,6 +20,10 @@ export const ALERTS_DATA_VIEW_TARGET_TYPE = 'data_view' as const;
  * If the alerts data view does not yet exist, this is a no-op; the lazy path in
  * `resolveEffectivePolicy` will create the profile once the data view is present.
  *
+ * This lives in the shared anonymization plugin for Phase 1 so every consumer
+ * can rely on consistent backend initialization behavior. We plan to move
+ * Security-specific defaults behind Security-owned wiring in a follow-up.
+ *
  * Called:
  * - Lazily on first anonymization usage for the alerts data view target
  */
