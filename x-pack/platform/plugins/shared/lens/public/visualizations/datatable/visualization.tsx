@@ -230,11 +230,11 @@ export const getDatatableVisualization = ({
     const usesTransposing = state?.columns.some((c) => c.isTransposed);
 
     const title =
-      table.changeType === 'unchanged'
-        ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
+    table.changeType === 'unchanged'
+      ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
           defaultMessage: 'As table',
         })
-        : i18n.translate('xpack.lens.datatable.visualizationOf', {
+      : i18n.translate('xpack.lens.datatable.visualizationOf', {
           defaultMessage: 'Table {operations}',
           values: {
             operations:
@@ -251,13 +251,13 @@ export const getDatatableVisualization = ({
           },
         });
 
-    const changeType = table.changeType;
-    const changeFactor =
-      changeType === 'reduced' || changeType === 'layers'
-        ? 0.3
-        : changeType === 'unchanged'
-          ? 0.5
-          : 1;
+  const changeType = table.changeType;
+  const changeFactor =
+    changeType === 'reduced' || changeType === 'layers'
+      ? 0.3
+      : changeType === 'unchanged'
+      ? 0.5
+      : 1;
 
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
@@ -379,10 +379,10 @@ export const getDatatableVisualization = ({
                 triggerIconType: hidden
                   ? 'invisible'
                   : hasColoring
-                    ? 'colorBy'
-                    : collapseFn
-                      ? 'aggregate'
-                      : undefined,
+                  ? 'colorBy'
+                  : collapseFn
+                  ? 'aggregate'
+                  : undefined,
                 palette: hasColoring ? stops : undefined,
               };
             }),
