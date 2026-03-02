@@ -17,7 +17,7 @@ import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
-const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 10;
+const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
  * Takes care of ES|QL state transformations when a new result is returned
