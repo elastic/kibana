@@ -25,6 +25,7 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { validateGlobalTokens } from './validate_global_tokens';
 
 const Sec = 1000;
 
@@ -36,9 +37,14 @@ export class PluginsSystem<T extends PluginType> {
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
+  private globalTokenValidation: 'warn' | 'error' | 'off' = 'warn';
 
   constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
+  }
+
+  public setGlobalTokenValidation(mode: 'warn' | 'error' | 'off') {
+    this.globalTokenValidation = mode;
   }
 
   public addPlugin(plugin: PluginWrapper) {
@@ -227,6 +233,10 @@ export class PluginsSystem<T extends PluginType> {
 
     this.runtimeResolver.resolveStartRequests(contracts);
 
+    if (this.globalTokenValidation !== 'off') {
+      validateGlobalTokens(this.plugins, this.globalTokenValidation, this.log);
+    }
+
     return contracts;
   }
 
@@ -293,8 +303,6 @@ export class PluginsSystem<T extends PluginType> {
             runtimePluginDependencies:
               plugin.manifest.runtimePluginDependencies.filter(filterUiPlugins),
             requiredBundles: plugin.manifest.requiredBundles,
-            // TODO: use `globals` at runtime to log warnings for
-            // unresolved tokens at startup and to drive browser bundle loading.
             globals: plugin.manifest.globals,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },
