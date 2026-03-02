@@ -19,7 +19,8 @@
     "@kbn/lens-common-2",
     "@kbn/agent-builder-genai-utils",
     "@kbn/dashboard-markdown",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/lens-plugin"
   ],
   "exclude": ["target/**/*"]
 }
