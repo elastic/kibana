@@ -95,7 +95,7 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
       render: (destinations: NotificationPolicyResponse['destinations']) => (
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" wrap>
           {destinations?.map((destination) => (
             <EuiFlexItem key={destination.id} grow={false}>
               <NotificationPolicyDestinationBadge destination={destination} />
