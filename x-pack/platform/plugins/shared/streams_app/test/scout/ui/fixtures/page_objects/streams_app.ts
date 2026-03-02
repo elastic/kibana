@@ -514,7 +514,7 @@ export class StreamsApp {
     ).toBeVisible({ timeout: 30000 });
   }
   async getProcessorPatternText() {
-    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+    return await this.page.getByTestId('streamsAppProcessorDescription').textContent();
   }
 
   async clickSaveProcessor() {
