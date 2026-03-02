@@ -216,7 +216,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
 
   const addMultipleTestItems = () => {
     const icons = [
-      'beaker',
+      'flask',
       'clock',
       'database',
       'package',
