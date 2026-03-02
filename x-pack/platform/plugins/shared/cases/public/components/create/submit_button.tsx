@@ -23,7 +23,7 @@ const SubmitCaseButtonComponent: React.FC<SubmitCaseButtonComponentProps> = ({ i
       tour-step="create-case-submit"
       data-test-subj="create-case-submit"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       isDisabled={isSubmitting}
       isLoading={isSubmitting}
       onClick={submit}

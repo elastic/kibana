@@ -102,7 +102,7 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                         <EuiButtonIcon
                           data-test-subj={`${template.key}-template-delete`}
                           aria-label={`${template.key}-template-delete`}
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           color="danger"
                           onClick={() => setItemToBeDeleted(template)}
                         />

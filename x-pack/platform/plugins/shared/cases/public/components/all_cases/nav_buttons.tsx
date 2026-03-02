@@ -66,7 +66,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
               fill
               onClick={navigateToCreateCaseClick}
               href={getCreateCaseUrl()}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="createNewCaseBtn"
             >
               {i18n.CREATE_CASE_TITLE}
