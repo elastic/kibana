@@ -18,60 +18,25 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
-import { NotificationPoliciesApi } from '../../services/notification_policies_api';
+import React, { useState } from 'react';
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
+import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
 
 const DEFAULT_PER_PAGE = 20;
 
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-};
-
 export const ListNotificationPoliciesPage = () => {
-  const notificationPoliciesApi = useService(NotificationPoliciesApi);
-  const isMounted = useMountedState();
-  const [items, setItems] = useState<NotificationPolicyResponse[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadPolicies = async () => {
-      setIsLoading(true);
-      setError(null);
+  const { data, isLoading, isError, error } = useFetchNotificationPolicies({
+    page: page + 1,
+    perPage,
+  });
 
-      try {
-        const result = await notificationPoliciesApi.listNotificationPolicies({
-          page: page + 1,
-          perPage,
-        });
-        if (isMounted()) {
-          setItems(result.items);
-          setTotal(result.total);
-        }
-      } catch (err) {
-        if (isMounted()) {
-          setError(getErrorMessage(err));
-        }
-      } finally {
-        if (isMounted()) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadPolicies();
-  }, [notificationPoliciesApi, isMounted, page, perPage]);
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   const onTableChange = ({
     page: tablePage,
@@ -155,6 +120,8 @@ export const ListNotificationPoliciesPage = () => {
     },
   ];
 
+  const errorMessage = isError && error ? error.message : null;
+
   return (
     <>
       <EuiPageHeader
@@ -174,7 +141,7 @@ export const ListNotificationPoliciesPage = () => {
         ]}
       />
       <EuiSpacer size="m" />
-      {error ? (
+      {errorMessage ? (
         <>
           <EuiCallOut
             announceOnMount
@@ -187,7 +154,7 @@ export const ListNotificationPoliciesPage = () => {
             color="danger"
             iconType="error"
           >
-            {error}
+            {errorMessage}
           </EuiCallOut>
           <EuiSpacer />
         </>
