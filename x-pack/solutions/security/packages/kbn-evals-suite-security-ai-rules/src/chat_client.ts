@@ -13,7 +13,6 @@ const THREAT_HUNTING_AGENT_ID = 'security.agent';
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
-const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
 
 export type EvalFetch = (path: string, options?: Record<string, unknown>) => Promise<unknown>;
@@ -31,11 +30,6 @@ interface RuleToolStep {
 
 interface ConverseResponse {
   steps?: RuleToolStep[];
-}
-
-interface ParsedSseEvent {
-  event?: string;
-  data?: Record<string, unknown>;
 }
 
 interface SecurityRuleGenerationLog {
@@ -70,105 +64,25 @@ export class SecurityRuleGenerationClient {
       browser_api_tools: [],
     };
 
-    try {
-      const asyncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_ASYNC_API_PATH, {
-        method: 'POST',
-        version: '2023-10-31',
-        asResponse: true,
-        rawResponse: true,
-        body: JSON.stringify(payload),
-      })) as { response?: { text: () => Promise<string> } };
-
-      const ssePayload = await asyncResponse.response?.text();
-      if (ssePayload) {
-        const events = parseSseEvents(ssePayload);
-        const toolResultEvents = events.filter(
-          (event) =>
-            event.event === 'tool_result' &&
-            (event.data?.data as { tool_id?: string } | undefined)?.tool_id ===
-              SECURITY_CREATE_DETECTION_RULE_TOOL_ID
-        );
-        const latestToolResultEvent = toolResultEvents.at(-1)?.data?.data as
-          | { results?: ToolResult[] }
-          | undefined;
-        const extracted = extractRuleDataFromToolResults(latestToolResultEvent?.results);
-
-        if (extracted.ruleData) {
-          return { generatedRule: mapGeneratedRule(extracted.ruleData) };
-        }
-        if (extracted.error) {
-          return { error: extracted.error };
-        }
-
-        this.log.warning(
-          `Agent returned no rule from async converse. Diagnostics: ${JSON.stringify({
-            totalEvents: events.length,
-            toolResultEvents: toolResultEvents.length,
-          })}`
-        );
-      }
-    } catch (error) {
-      this.log.warning(
-        `Async converse failed, falling back to sync endpoint: ${stringifyError(error)}`
-      );
-    }
-
     const syncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_API_PATH, {
       method: 'POST',
       version: '2023-10-31',
       body: JSON.stringify(payload),
     })) as ConverseResponse;
-    const extractedFromSync = extractRuleFromSyncResponse(syncResponse);
+    const extracted = extractRuleFromSyncResponse(syncResponse);
 
-    if (extractedFromSync.ruleData) {
+    if (extracted.ruleData) {
       return {
-        generatedRule: mapGeneratedRule(extractedFromSync.ruleData),
+        generatedRule: mapGeneratedRule(extracted.ruleData),
       };
     }
 
-    this.log.warning(`Agent returned no rule. Sync diagnostics: ${extractedFromSync.diagnostics}`);
+    this.log.warning(`Agent returned no rule. Diagnostics: ${extracted.diagnostics}`);
     return {
-      error: extractedFromSync.error || 'No rule returned from agent',
+      error: extracted.error || 'No rule returned from agent',
     };
   }
 }
-
-const stringifyError = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
-const parseSseEvents = (ssePayload: string): ParsedSseEvent[] => {
-  const blocks = ssePayload.split(/\r?\n\r?\n/);
-  const parsedEvents: ParsedSseEvent[] = [];
-
-  for (const block of blocks) {
-    const lines = block.split(/\r?\n/);
-    let eventName: string | undefined;
-    const dataLines: string[] = [];
-
-    for (const line of lines) {
-      if (line.startsWith('event:')) {
-        eventName = line.substring('event:'.length).trim();
-      } else if (line.startsWith('data:')) {
-        dataLines.push(line.substring('data:'.length).trim());
-      }
-    }
-
-    if (dataLines.length === 0) {
-      continue;
-    }
-
-    try {
-      parsedEvents.push({
-        event: eventName,
-        data: JSON.parse(dataLines.join('\n')) as Record<string, unknown>,
-      });
-    } catch {
-      // Keep parsing resilient when events include malformed chunks.
-    }
-  }
-
-  return parsedEvents;
-};
 
 const extractRuleDataFromToolResults = (
   results?: ToolResult[]
