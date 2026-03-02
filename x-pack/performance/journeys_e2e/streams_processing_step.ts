@@ -21,15 +21,12 @@ export const journey = new Journey({
     });
   })
   .step('Open add processor form', async ({ page }) => {
-    // Click the "Create Processor" button — Grok is the default processor type
     await page.click(subj('streamsAppStreamDetailEnrichmentCreateProcessorButton'));
-    // Wait for the processor field selector to appear (part of the Grok form)
     await page.waitForSelector(subj('streamsAppProcessorFieldSelectorComboFieldText'), {
       timeout: 30000,
     });
   })
   .step('Configure grok processor', async ({ page, inputDelays }) => {
-    // Fill in the field selector (EuiComboBox)
     const comboBox = page.locator(subj('streamsAppProcessorFieldSelectorComboFieldText'));
     const comboInput = comboBox.locator('input[role="combobox"]');
     await comboInput.click();
@@ -42,7 +39,6 @@ export const journey = new Journey({
       await page.keyboard.press('Enter');
     }
 
-    // Fill in the grok pattern using the Expression component's textbox
     const patternExpression = page.locator(subj('streamsAppPatternExpression'));
     await patternExpression.click();
     await page.keyboard.press('Control+A');
@@ -51,7 +47,6 @@ export const journey = new Journey({
   })
   .step('Save processor', async ({ page }) => {
     await page.click(subj('streamsAppProcessorConfigurationSaveProcessorButton'));
-    // Wait for the save to complete — the form should dismiss
     await page.waitForSelector(subj('streamsAppProcessorConfigurationSaveProcessorButton'), {
       state: 'detached',
       timeout: 30000,

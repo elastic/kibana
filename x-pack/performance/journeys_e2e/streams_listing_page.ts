@@ -23,8 +23,6 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsTable'), { timeout: 120000 });
   })
   .step('Search for a classic stream', async ({ page, inputDelays }) => {
-    // Note: EUI's EuiInMemoryTable renders the search bar OUTSIDE the data-test-subj container,
-    // so we cannot scope this locator inside 'streamsTable'. The aria-label is unique on the page.
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
@@ -57,8 +55,6 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsTable'));
   })
   .step('Navigate to a stream detail page', async ({ page }) => {
-    // After collapse-all, logs.otel.child1 is hidden under the collapsed 'logs.otel' parent.
-    // Expand the 'logs.otel' node first so the child link becomes visible.
     const logsExpandButton = page.locator(subj('expandButton-logs.otel'));
     if (await logsExpandButton.isVisible().catch(() => false)) {
       await logsExpandButton.click();

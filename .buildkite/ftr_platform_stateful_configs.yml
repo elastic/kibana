@@ -381,7 +381,6 @@ enabled:
   - x-pack/performance/journeys_e2e/streams_processing_step.ts
   - x-pack/performance/journeys_e2e/streams_retention.ts
   - x-pack/performance/journeys_e2e/streams_field_mapping.ts
-  - x-pack/performance/journeys_e2e/streams_wired_hierarchy.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cases/config.ts

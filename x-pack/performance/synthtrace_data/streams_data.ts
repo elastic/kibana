@@ -68,9 +68,6 @@ function isLockContentionError(error: unknown): boolean {
   return err?.response?.status === 422;
 }
 
-/**
- * Sleep for a given number of milliseconds.
- */
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -125,11 +122,9 @@ async function createSingleClassicStream(kibanaServer: KibanaServer, name: strin
       return;
     } catch (error) {
       if (isConflictError(error)) {
-        // Stream already exists — skip
         return;
       }
       if (isLockContentionError(error) && attempt < MAX_RETRIES) {
-        // Lock contention — wait and retry with exponential backoff
         const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
         await sleep(delay);
         continue;
@@ -163,8 +158,7 @@ export async function createClassicStreams(
       log.info(`  Created ${created}/${count} classic streams`);
     }
 
-    // Delay between batches to reduce lock contention on the streams backend
-    if (i + CLASSIC_STREAM_BATCH_SIZE < names.length) {
+  if (i + CLASSIC_STREAM_BATCH_SIZE < names.length) {
       await sleep(1500);
     }
   }
@@ -191,19 +185,14 @@ export async function createBulkDataStreams(
 ) {
   log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES bulk API...`);
 
-  // 1. Raise max shards per node to accommodate all test data + system indices.
-  //    In ES 9.x each data stream creates 2 shards (write index + failure store backing index),
-  //    so 5000 data streams = ~10000 shards. On top of that, Kibana + ES system indices
-  //    (.kibana*, .security*, .alerts*, .fleet*, .async-search, wired streams, etc.) need
-  //    additional capacity. Previous limits of 6000, 8000, and 10000 were all exhausted in CI.
-  //    Using count * 4 provides generous headroom: 2x for failure stores + 2x for system indices.
+  // ES 9.x creates 2 shards per data stream (write index + failure store); count * 4
+  // provides headroom for failure stores plus Kibana/ES system indices.
   const maxShardsPerNode = count * 4;
   await es.cluster.putSettings({
     persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
   });
   log.info(`  Raised cluster.max_shards_per_node to ${maxShardsPerNode}`);
 
-  // 2. Create an index template matching the naming pattern
   await es.indices.putIndexTemplate({
     name: 'perf-classic-streams-template',
     index_patterns: [`${prefix}-*`],
@@ -214,10 +203,8 @@ export async function createBulkDataStreams(
   });
   log.info('  Index template created');
 
-  // 3. Auto-create data streams via bulk indexing.
-  //    Each bulk request creates up to BULK_BATCH_SIZE data streams by indexing a seed document.
-  //    ES batches the auto-create cluster state changes within a single bulk call, avoiding
-  //    the master node task queue congestion that individual createDataStream() calls cause.
+  // Bulk-indexing into non-existent data streams triggers auto-creation; ES batches the
+  // resulting cluster state changes within a single bulk call, avoiding master node congestion.
   const BULK_BATCH_SIZE = 250;
   const names = Array.from({ length: count }, (_, i) => `${prefix}-${String(i).padStart(5, '0')}`);
   const timestamp = new Date().toISOString();
@@ -267,9 +254,7 @@ async function forkStream(
       },
     });
   } catch (error) {
-    if (isConflictError(error)) {
-      // Child stream already exists — skip
-    } else {
+    if (!isConflictError(error)) {
       throw error;
     }
   }
@@ -294,7 +279,6 @@ export async function createWiredStreamHierarchy(kibanaServer: KibanaServer, log
     { name: `${WIRED_ROOT_STREAM}.child3`, conditionValue: 'service-3' },
   ];
 
-  // Fork children sequentially — each fork modifies the parent's routing
   for (const child of children) {
     log.info(`  Forking ${child.name} from ${WIRED_ROOT_STREAM}...`);
     await forkStream(
@@ -324,10 +308,7 @@ export async function setupListingPageData(
   await enableStreams(kibanaServer, log);
   await createWiredStreamHierarchy(kibanaServer, log);
 
-  // Bulk: 5000 unmanaged data streams via ES API (bypasses Streams backend lock)
   await createBulkDataStreams(es, log, 5000);
-
-  // Small set: 20 managed classic streams via Streams API (for listing page mix)
   await createClassicStreams(kibanaServer, log, 20);
 }
 
@@ -341,13 +322,8 @@ export async function setupWiredStreams(kibanaServer: KibanaServer, log: Tooling
   await createWiredStreamHierarchy(kibanaServer, log);
 }
 
-// ---------------------------------------------------------------------------
-// Phase 5: Large wired stream hierarchy
-// ---------------------------------------------------------------------------
-
 type WiredHierarchyStrategy = 'fork' | 'import';
 
-/** Default child count for the large wired hierarchy */
 const DEFAULT_WIRED_HIERARCHY_COUNT = 100;
 
 /**
@@ -525,9 +501,8 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     });
   }
 
-  // Fetch current ingest settings so we preserve lifecycle/failure_store/processing/fields.
-  // Root streams cannot use `inherit` for lifecycle or failure_store — they must keep
-  // their current concrete values or the server rejects with 400.
+  // Root streams cannot use `inherit` for lifecycle/failure_store — fetch current
+  // concrete values so the PUT does not get rejected with 400.
   const response = await kibanaServer.request<{ ingest: Record<string, unknown> }>({
     path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
     method: 'GET',
@@ -544,7 +519,6 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     wired: { fields: Record<string, unknown>; routing: unknown[] };
   };
 
-  // Strip updated_at from processing — the server sets it on write
   const { updated_at: _updatedAt, ...processingWithoutTimestamp } = processing;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -675,7 +649,6 @@ async function createLargeWiredHierarchyViaImport(
     }
   }
 
-  // After all batches, set the complete routing table on the root stream
   await updateRootRouting(kibanaServer, log, count);
 
   log.info(`Finished creating ${count} wired child streams via batched content import`);
@@ -696,7 +669,6 @@ export async function createLargeWiredHierarchy(
 ) {
   const { count = DEFAULT_WIRED_HIERARCHY_COUNT, strategy = 'import' } = options;
 
-  // Raise max shards per node to accommodate all wired streams + system indices
   const maxShardsPerNode = count * 4;
   await es.cluster.putSettings({
     persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },

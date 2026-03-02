@@ -22,11 +22,9 @@ export const journey = new Journey({
   })
   .step('Open edit retention modal', async ({ page }) => {
     await page.click(subj('streamsAppRetentionMetadataEditDataRetentionButton'));
-    // Wait for the modal to appear
     await page.waitForSelector(subj('editLifecycleModalTitle'));
   })
   .step('Set custom retention', async ({ page }) => {
-    // Toggle the inherit switch OFF to enable custom retention options
     const inheritSwitch = page.locator(subj('inheritDataRetentionSwitch'));
     const isChecked = await inheritSwitch.isChecked();
     if (isChecked) {
@@ -35,7 +33,6 @@ export const journey = new Journey({
 
     await page.click(subj('customRetentionButton'));
 
-    // Wait for the days field and fill in the retention value
     await page.waitForSelector(subj('streamsAppDslModalDaysField'));
     const daysInput = page.locator(subj('streamsAppDslModalDaysField'));
     await daysInput.fill('');
@@ -43,7 +40,6 @@ export const journey = new Journey({
   })
   .step('Save retention settings', async ({ page }) => {
     await page.click(subj('streamsAppModalFooterButton'));
-    // Wait for the modal to close
     await page.waitForSelector(subj('editLifecycleModalTitle'), {
       state: 'detached',
       timeout: 30000,
