@@ -1,7 +1,7 @@
 ---
 name: review-data-source
 description: Review data source changes (connector spec, data source definition, workflows, docs). Use when
-  reviewing a PR, doing post-creation review after generate/build-data-source, or preparing a Data Source PR
+  reviewing a PR involving data sources, doing post-creation review after generate/build-data-source, or preparing a Data Source PR
   checklist.
 ---
 
