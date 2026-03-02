@@ -16,6 +16,12 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import type { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
 
+import {
+  isTabsOnlyHeader,
+  tabsOnlyHeaderCss,
+  TABS_ONLY_HEADER_DEFAULTS,
+} from './tabs_only_header';
+
 const defaultPageTitleCss = css`
   font-size: 1.4rem !important;
   line-height: 1.4rem !important;
@@ -58,13 +64,21 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       />
     );
   } else if (pageHeader) {
-    const mergedPageHeader = {
+    const baseMerged = {
       ...pageHeader,
       pageTitleProps: {
         ...pageHeader.pageTitleProps,
         css: [defaultPageTitleCss, pageHeader.pageTitleProps?.css].filter(Boolean),
       },
     };
+    const mergedPageHeader = isTabsOnlyHeader(pageHeader)
+      ? {
+          ...baseMerged,
+          ...TABS_ONLY_HEADER_DEFAULTS,
+          css: [tabsOnlyHeaderCss, baseMerged.css].filter(Boolean),
+          children: undefined,
+        }
+      : baseMerged;
     header = <EuiPageTemplate.Header {...mergedPageHeader} />;
   }
 

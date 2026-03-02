@@ -10,6 +10,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
 
 import {
   NoDataConfigPage,
@@ -18,6 +19,11 @@ import {
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
+import {
+  isTabsOnlyHeader,
+  tabsOnlyHeaderCss,
+  TABS_ONLY_HEADER_DEFAULTS,
+} from './tabs_only_header';
 
 export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
   className,
@@ -65,11 +71,29 @@ export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
 };
 
 /**
+ * Wrapper around EuiPageTemplate.Header that applies tabs-only header styling
+ * when only tabs are passed (no pageTitle, description, rightSideItems, or children).
+ * Ensures border under tabs, no extra spacer, and horizontal padding.
+ */
+const KibanaPageTemplateHeader: FC<EuiPageHeaderProps> = (props) => {
+  if (isTabsOnlyHeader(props)) {
+    const { children: _children, css: propsCss, ...rest } = props;
+    const merged = {
+      ...rest,
+      ...TABS_ONLY_HEADER_DEFAULTS,
+      css: [tabsOnlyHeaderCss, propsCss].filter(Boolean),
+    };
+    return <EuiPageTemplate.Header {...merged} />;
+  }
+  return <EuiPageTemplate.Header {...props} />;
+};
+
+/**
  * Kibana-specific wrapper of EuiPageTemplate and it's namespaced components
  */
 export const KibanaPageTemplate = Object.assign(_KibanaPageTemplate, {
   Sidebar: EuiPageTemplate.Sidebar,
-  Header: EuiPageTemplate.Header,
+  Header: KibanaPageTemplateHeader,
   Section: EuiPageTemplate.Section,
   BottomBar: EuiPageTemplate.BottomBar,
   EmptyPrompt: EuiPageTemplate.EmptyPrompt,
