@@ -32,7 +32,7 @@ jest.mock('../lib/wrap_async_search_client', () => ({
 
 const projectRouting: SpaceNPRERouting = { projectRouting: 'space' };
 
-function createMockContext(cpsEnabled: boolean): jest.Mocked<TaskRunnerContext> {
+function createMockContext(): jest.Mocked<TaskRunnerContext> {
   const elasticsearch = elasticsearchServiceMock.createInternalStart();
   const dataPlugin = dataPluginMock.createStartContract();
   const asScopedDataSearch = jest.fn().mockReturnValue({ search: jest.fn() });
@@ -45,7 +45,6 @@ function createMockContext(cpsEnabled: boolean): jest.Mocked<TaskRunnerContext> 
   searchMock.searchSource = { asScoped: asScopedSearchSource };
 
   return {
-    cpsEnabled,
     elasticsearch,
     data: dataPlugin,
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
@@ -84,9 +83,9 @@ describe('getExecutorServices', () => {
     jest.clearAllMocks();
   });
 
-  describe('projectRouting when CPS is enabled', () => {
-    it('calls elasticsearch.client.asScoped with fakeRequest and projectRouting when cpsEnabled is true', () => {
-      const context = createMockContext(true);
+  describe('projectRouting', () => {
+    it('calls elasticsearch.client.asScoped with fakeRequest and projectRouting', () => {
+      const context = createMockContext();
       const fakeRequest = createFakeRequest();
 
       getExecutorServices({
@@ -106,8 +105,8 @@ describe('getExecutorServices', () => {
       );
     });
 
-    it('calls data.search.searchSource.asScoped with fakeRequest and projectRouting when cpsEnabled is true', async () => {
-      const context = createMockContext(true);
+    it('calls data.search.searchSource.asScoped with fakeRequest and projectRouting', async () => {
+      const context = createMockContext();
       const fakeRequest = createFakeRequest();
       const searchSourceAsScoped = (
         context.data.search as unknown as { searchSource: { asScoped: jest.Mock } }
@@ -129,8 +128,8 @@ describe('getExecutorServices', () => {
       expect(searchSourceAsScoped).toHaveBeenCalledWith(fakeRequest, projectRouting);
     });
 
-    it('calls data.search.asScoped with fakeRequest and projectRouting when cpsEnabled is true', () => {
-      const context = createMockContext(true);
+    it('calls data.search.asScoped with fakeRequest and projectRouting', () => {
+      const context = createMockContext();
       const fakeRequest = createFakeRequest();
       const dataSearchAsScoped = (context.data.search as unknown as { asScoped: jest.Mock })
         .asScoped;
@@ -149,71 +148,6 @@ describe('getExecutorServices', () => {
 
       expect(dataSearchAsScoped).toHaveBeenCalledTimes(1);
       expect(dataSearchAsScoped).toHaveBeenCalledWith(fakeRequest, projectRouting);
-    });
-  });
-
-  describe('projectRouting when CPS is disabled', () => {
-    it('calls elasticsearch.client.asScoped with only fakeRequest when cpsEnabled is false', () => {
-      const context = createMockContext(false);
-      const fakeRequest = createFakeRequest();
-
-      getExecutorServices({
-        context,
-        fakeRequest,
-        abortController,
-        logger,
-        ruleMonitoringService,
-        ruleResultService,
-        ruleData,
-      });
-
-      expect(context.elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-      expect(context.elasticsearch.client.asScoped).toHaveBeenCalledWith(fakeRequest);
-    });
-
-    it('calls data.search.searchSource.asScoped with only fakeRequest when cpsEnabled is false', async () => {
-      const context = createMockContext(false);
-      const fakeRequest = createFakeRequest();
-      const searchSourceAsScoped = (
-        context.data.search as unknown as { searchSource: { asScoped: jest.Mock } }
-      ).searchSource.asScoped;
-
-      const executorServices = getExecutorServices({
-        context,
-        fakeRequest,
-        abortController,
-        logger,
-        ruleMonitoringService,
-        ruleResultService,
-        ruleData,
-      });
-
-      await executorServices.getWrappedSearchSourceClient();
-
-      expect(searchSourceAsScoped).toHaveBeenCalledTimes(1);
-      expect(searchSourceAsScoped).toHaveBeenCalledWith(fakeRequest);
-    });
-
-    it('calls data.search.asScoped with only fakeRequest when cpsEnabled is false', () => {
-      const context = createMockContext(false);
-      const fakeRequest = createFakeRequest();
-      const dataSearchAsScoped = (context.data.search as unknown as { asScoped: jest.Mock })
-        .asScoped;
-
-      const executorServices = getExecutorServices({
-        context,
-        fakeRequest,
-        abortController,
-        logger,
-        ruleMonitoringService,
-        ruleResultService,
-        ruleData,
-      });
-
-      executorServices.getAsyncSearchClient(ESQL_ASYNC_SEARCH_STRATEGY);
-
-      expect(dataSearchAsScoped).toHaveBeenCalledTimes(1);
-      expect(dataSearchAsScoped).toHaveBeenCalledWith(fakeRequest);
     });
   });
 });

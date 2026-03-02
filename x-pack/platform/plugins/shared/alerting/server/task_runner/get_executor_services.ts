@@ -73,9 +73,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     requestTimeout: getEsRequestTimeout(logger, ruleTaskTimeout),
   };
 
-  const scopedClusterClient = context.cpsEnabled
-    ? context.elasticsearch.client.asScoped(fakeRequest, projectRouting)
-    : context.elasticsearch.client.asScoped(fakeRequest);
+  const scopedClusterClient = context.elasticsearch.client.asScoped(fakeRequest, projectRouting);
 
   const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
     ...wrappedClientOptions,
@@ -105,9 +103,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     },
     getWrappedSearchSourceClient: async () => {
       const searchSourceClient = await withAlertingSpan('alerting:get-search-source-client', () =>
-        context.cpsEnabled
-          ? context.data.search.searchSource.asScoped(fakeRequest, projectRouting)
-          : context.data.search.searchSource.asScoped(fakeRequest)
+        context.data.search.searchSource.asScoped(fakeRequest, projectRouting)
       );
       return wrapSearchSourceClient({
         ...wrappedClientOptions,
@@ -116,9 +112,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     },
 
     getAsyncSearchClient: (strategy) => {
-      const client = context.cpsEnabled
-        ? context.data.search.asScoped(fakeRequest, projectRouting)
-        : context.data.search.asScoped(fakeRequest);
+      const client = context.data.search.asScoped(fakeRequest, projectRouting);
 
       return wrapAsyncSearchClient({
         logger,

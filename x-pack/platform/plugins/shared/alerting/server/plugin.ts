@@ -744,7 +744,6 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
-      cpsEnabled: this.cpsSetup?.getCpsEnabled?.() ?? false,
     });
 
     this.eventLogService!.registerSavedObjectProvider(

@@ -300,16 +300,6 @@ describe('rule_loader', () => {
         authorization: `ApiKey essu_uiam_api_key`,
       });
     });
-
-    test('when cpsEnabled is true, request includes URL with space path', () => {
-      const contextWithCpsDisabled = getTaskRunnerContext({
-        cpsEnabled: true,
-      }) as unknown as TaskRunnerContext;
-      const fakeRequest = getFakeKibanaRequest(contextWithCpsDisabled, spaceId, apiKey);
-      expect(mockBasePathService.set).toHaveBeenCalledWith(fakeRequest, '/s/rule-spaceId');
-      expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
-    });
   });
 });
 
@@ -321,13 +311,11 @@ function mockGetDecrypted(attributes: { apiKey?: string; enabled: boolean; consu
 }
 
 // return enough of TaskRunnerContext that rule_loader needs
-function getTaskRunnerContext(overrides: { cpsEnabled?: boolean } = {}) {
+function getTaskRunnerContext() {
   return {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
     basePathService: mockBasePathService,
     logger: mockLogger,
-    cpsEnabled: false,
-    ...overrides,
   };
 }
