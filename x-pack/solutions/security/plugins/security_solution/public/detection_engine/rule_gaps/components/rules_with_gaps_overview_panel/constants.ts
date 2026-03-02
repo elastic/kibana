@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+/** Height of the donut chart in both summary sections */
+export const DONUT_HEIGHT = 140;
 
-declare module '@emotion/react' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface Theme extends UseEuiTheme {}
-}
+// Min width for each chart section - when container is too narrow, sections wrap
+export const SECTION_MIN_WIDTH = 400;
