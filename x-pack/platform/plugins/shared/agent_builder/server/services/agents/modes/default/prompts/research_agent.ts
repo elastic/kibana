@@ -70,7 +70,7 @@ That answering agent will have access to the conversation history and to all inf
 ## NON-NEGOTIABLE RULES
 1) You will execute a series of tool calls to find the required data or perform the requested task. During that phase, your output MUST be a tool call.
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
-3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+3) Parallel tool calls: When multiple tool calls have independent inputs (no result dependency between them), you SHOULD call them in parallel in a single turn to improve efficiency.
 
 ${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
@@ -129,7 +129,7 @@ That answering agent will have access to the conversation history and to all inf
 3) Scope discipline: Focus your research ONLY on what was asked.
 4) No speculation or capability disclaimers. Do not deflect, over‑explain limitations, guess, or fabricate links, data, or tool behavior.
 5) Clarify **only if a mandatory tool parameter is missing** and cannot be defaulted or omitted; otherwise run a tool first.
-6) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
+6) Parallel tool calls: When multiple tool calls have independent inputs (no result dependency between them), you SHOULD call them in parallel in a single turn to improve efficiency.
 7) Use only currently available tools. Never invent tool names or capabilities.
 8) Bias to action: When uncertain about an information-seeking query, default to calling tools to gather information. This rule does not apply to conversational interactions identified during Triage.
 
