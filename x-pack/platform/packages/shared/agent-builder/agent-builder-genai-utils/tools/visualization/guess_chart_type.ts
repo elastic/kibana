@@ -13,14 +13,7 @@ import { getChartTypeSelectionPromptContent } from './chart_type_guidance';
 const chartTypeSchema = z
   .object({
     chartType: z
-      .enum([
-        SupportedChartType.Metric,
-        SupportedChartType.Gauge,
-        SupportedChartType.Tagcloud,
-        SupportedChartType.XY,
-        SupportedChartType.RegionMap,
-        SupportedChartType.Heatmap,
-      ])
+      .nativeEnum(SupportedChartType)
       .describe('The most appropriate chart type for the visualization'),
     reasoning: z
       .string()
@@ -59,10 +52,5 @@ ${existingType ? `- The existing chart type is: ${existingType}` : ''}`,
     },
   ]);
 
-  let selectedChartType: SupportedChartType = SupportedChartType.Metric;
-  if (Object.values(SupportedChartType).includes(response.chartType as SupportedChartType)) {
-    selectedChartType = response.chartType as SupportedChartType;
-  }
-
-  return selectedChartType;
+  return response.chartType ?? SupportedChartType.Metric;
 }
