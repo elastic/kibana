@@ -35,6 +35,8 @@ export class StepExecutionError extends Error {
   }
 }
 
+const KIBANA_API_PREFIX = 'kbn:';
+
 /**
  * Parses a Console-style API snippet ("GET /index/_search\n{...}") into
  * method, path, and optional JSON body.
@@ -49,11 +51,43 @@ export const parseApiSnippet = (apiSnippet: string): ParsedSnippet => {
   return { method, path, body: body || undefined };
 };
 
+type HttpMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'head';
+
+/**
+ * Executes a Kibana API request directly (paths starting with "kbn:").
+ * Mirrors how Kibana Console handles the kbn: prefix — strips the prefix
+ * and sends the request to Kibana's own API instead of through the ES proxy.
+ */
+const executeKibanaRequest = async (
+  http: HttpSetup,
+  { method, path, body }: ParsedSnippet
+): Promise<EsResponse> => {
+  const kibanaPath = `/${path.replace(KIBANA_API_PREFIX, '').replace(/^\/+/, '')}`;
+  const httpMethod = method.toLowerCase() as HttpMethod;
+  const hasBody = ['post', 'put', 'patch'].includes(httpMethod);
+
+  const response = await http[httpMethod]<Record<string, unknown>>(kibanaPath, {
+    body: hasBody ? body : undefined,
+    asResponse: true,
+  });
+
+  const statusCode = response.response?.status ?? 200;
+
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = typeof response.body === 'string' ? JSON.parse(response.body) : response.body ?? {};
+  } catch {
+    // Non-JSON response
+  }
+
+  return { statusCode, body: parsed };
+};
+
 /**
  * Executes a parsed ES request through the Console proxy endpoint.
  * This is the same mechanism the Dev Tools Console uses internally.
  */
-export const executeEsRequest = async (
+const executeEsProxyRequest = async (
   http: HttpSetup,
   { method, path, body }: ParsedSnippet
 ): Promise<EsResponse> => {
@@ -76,6 +110,19 @@ export const executeEsRequest = async (
   }
 
   return { statusCode, body: parsed };
+};
+
+/**
+ * Routes the request to either Kibana's API (kbn: prefix) or the ES proxy.
+ */
+export const executeEsRequest = async (
+  http: HttpSetup,
+  snippet: ParsedSnippet
+): Promise<EsResponse> => {
+  if (snippet.path.startsWith(KIBANA_API_PREFIX)) {
+    return executeKibanaRequest(http, snippet);
+  }
+  return executeEsProxyRequest(http, snippet);
 };
 
 /**

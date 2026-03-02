@@ -39,13 +39,16 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
   const totalStepCount = steps.length + (hasCleanup ? 1 : 0);
   const showCleanup = hasCleanup && state.currentStep >= steps.length && !state.completed;
 
+  const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
   const { resetWithCleanup, isResetting } = useResetWithCleanup(
     tutorial.cleanup,
     state.savedValues,
-    reset
+    () => {
+      reset();
+      stepRefs.current.get(0)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   );
-
-  const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const setStepRef = useCallback((index: number, el: HTMLDivElement | null) => {
     if (el) {
@@ -65,6 +68,9 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
   }, [state.currentStep]);
 
   const scrollToCurrentStep = useCallback(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     const el = stepRefs.current.get(state.currentStep);
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [state.currentStep]);

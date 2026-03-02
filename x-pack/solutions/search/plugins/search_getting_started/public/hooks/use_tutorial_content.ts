@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { sampleTutorial } from '../components/tutorials/new_tutorial_content/sample_tutorial';
 import { basicsTutorial } from '../components/tutorials/new_tutorial_content/basics_tutorial';
 import { semanticTutorial } from '../components/tutorials/new_tutorial_content/semantic_tutorial';
 import { esqlTutorial } from '../components/tutorials/new_tutorial_content/esql_tutorial';
@@ -70,7 +69,6 @@ export const BULK_INGEST_SNIPPET_PREFIX = 'POST /{{index_name}}/_bulk';
 export type TutorialSlug = (typeof AVAILABLE_TUTORIALS)[number]['slug'];
 
 export const AVAILABLE_TUTORIALS: TutorialDefinition[] = [
-  sampleTutorial,
   basicsTutorial,
   semanticTutorial,
   esqlTutorial,

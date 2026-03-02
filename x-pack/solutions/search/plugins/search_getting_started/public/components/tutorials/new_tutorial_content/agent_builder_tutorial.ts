@@ -16,7 +16,7 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   {
     id: 'create_sample_data',
     type: 'apiCall',
-    header: '## Step 1: Create sample data',
+    header: '## Step 1: Create an index with mappings',
     description:
       'Create an index with book data that agents and tools will work with throughout this tutorial.',
     apiSnippet: `PUT /kibana_sample_data_agents
@@ -70,9 +70,12 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
     valuesToInsert: ['index_name'],
     valuesToSave: {
       default_conversation_id: 'conversation_id',
+      default_input_tokens: 'model_usage.input_tokens',
+      default_output_tokens: 'model_usage.output_tokens',
+      default_llm_calls: 'model_usage.llm_calls',
     },
     explanation:
-      'The default agent responded using its built-in tools. A conversation was created with ID `{{default_conversation_id}}`. Note the token usage in the response — we will compare this later with a custom agent that uses optimized tools.',
+      'The default agent responded using its built-in tools. A conversation was created with ID `{{default_conversation_id}}`. The agent made **{{default_llm_calls}} LLM calls** and consumed **{{default_input_tokens}} input tokens** and **{{default_output_tokens}} output tokens**. Keep these numbers in mind — we will compare them later with a custom agent that uses optimized tools.',
   },
   {
     id: 'list_tools',
@@ -187,9 +190,12 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
     valuesToInsert: ['agent_id'],
     valuesToSave: {
       custom_conversation_id: 'conversation_id',
+      custom_input_tokens: 'model_usage.input_tokens',
+      custom_output_tokens: 'model_usage.output_tokens',
+      custom_llm_calls: 'model_usage.llm_calls',
     },
     explanation:
-      'The custom agent answered using conversation `{{custom_conversation_id}}`. With a purpose-built tool, the agent completes the task in fewer steps and uses fewer tokens than the default agent. Custom tools optimized for specific use cases significantly improve efficiency and accuracy.',
+      'The custom agent answered using conversation `{{custom_conversation_id}}`. It used **{{custom_input_tokens}} input tokens** and **{{custom_output_tokens}} output tokens** across **{{custom_llm_calls}} LLM calls**, compared to **{{default_input_tokens}} input tokens** and **{{default_output_tokens}} output tokens** across **{{default_llm_calls}} LLM calls** for the default agent in Step 3. Custom tools optimized for specific use cases significantly reduce token consumption and improve accuracy.',
   },
 ];
 
