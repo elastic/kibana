@@ -45,12 +45,14 @@ export const useGridLayoutState = ({
   gridSettings,
   expandedPanelId,
   accessMode,
+  getSelectedPanelIds,
 }: {
   layout: GridLayoutData;
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   gridSettings: GridSettings;
   expandedPanelId?: string;
   accessMode: GridAccessMode;
+  getSelectedPanelIds?: () => ReadonlySet<string> | undefined;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
@@ -132,6 +134,7 @@ export const useGridLayoutState = ({
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
       ),
+      getSelectedPanelIds,
 
       layoutUpdated$,
     };

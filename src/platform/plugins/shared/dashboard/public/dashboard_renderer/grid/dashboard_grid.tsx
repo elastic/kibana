@@ -330,6 +330,7 @@ export const DashboardGrid = () => {
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
         accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
+        selectedPanelIds={selectedPanelIds ?? undefined}
       />
     );
   }, [
@@ -341,6 +342,7 @@ export const DashboardGrid = () => {
     expandedPanelId,
     viewMode,
     topOffset,
+    selectedPanelIds,
   ]);
 
   useEffect(() => {

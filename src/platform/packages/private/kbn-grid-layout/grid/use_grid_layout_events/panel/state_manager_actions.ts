@@ -175,6 +175,19 @@ export const moveAction = (
   }
   const hasChangedGridSection = targetSectionId !== lastSectionId;
 
+  const selectedIds = gridLayoutStateManager.getSelectedPanelIds?.();
+  const isMultiDrag =
+    !isResize &&
+    selectedIds &&
+    selectedIds.size > 1 &&
+    selectedIds.has(activePanel.id);
+
+  const idsToMove: string[] = isMultiDrag
+    ? [...selectedIds!].filter(
+        (id) => currentLayout[lastSectionId]?.panels[id] !== undefined
+      )
+    : [activePanel.id];
+
   // resolve the new grid layout
   if (
     hasChangedGridSection ||
@@ -203,18 +216,86 @@ export const moveAction = (
         panels: {},
         order: nextOrder + 1,
       };
-      requestedPanelData.row = 0;
+      if (idsToMove.length === 1) requestedPanelData.row = 0;
     }
 
-    // remove the panel from where it started so that we can apply the drag request
-    delete nextLayout[lastSectionId].panels[activePanel.id];
+    let deltaCol = requestedPanelData.column - currentPanelData.column;
+    let deltaRow = requestedPanelData.row - currentPanelData.row;
 
-    // resolve destination grid
+    if (idsToMove.length > 1) {
+      const panelsToMove = idsToMove
+        .map((id) => currentLayout[lastSectionId]?.panels[id])
+        .filter(Boolean) as GridPanelData[];
+      if (panelsToMove.length === 0) {
+        idsToMove.length = 0;
+        idsToMove.push(activePanel.id);
+      } else {
+        const minCol = Math.min(...panelsToMove.map((p) => p.column));
+        const minRow = Math.min(...panelsToMove.map((p) => p.row));
+        const maxRight = Math.max(...panelsToMove.map((p) => p.column + p.width));
+        deltaCol = Math.max(deltaCol, -minCol);
+        deltaCol = Math.min(deltaCol, columnCount - maxRight);
+        deltaRow = Math.max(deltaRow, -minRow);
+      }
+    }
+
+    if (!nextLayout[lastSectionId]) {
+      if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
+        gridLayout$.next(nextLayout);
+      }
+      activePanelEvent$.next({
+        ...activePanel,
+        id: activePanel.id,
+        position: previewRect,
+        targetSection: targetSectionId!,
+      });
+      return;
+    }
+
+    for (const id of idsToMove) {
+      delete nextLayout[lastSectionId].panels[id];
+    }
+
     const destinationGrid = nextLayout[targetSectionId];
-    const resolvedDestinationGrid = resolveGridSection(destinationGrid.panels, requestedPanelData);
+    if (!destinationGrid) {
+      if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
+        gridLayout$.next(nextLayout);
+      }
+      activePanelEvent$.next({
+        ...activePanel,
+        id: activePanel.id,
+        position: previewRect,
+        targetSection: targetSectionId!,
+      });
+      return;
+    }
+
+    let dragRequest: GridPanelData | GridPanelData[];
+    if (idsToMove.length > 1) {
+      const panelsToMove = idsToMove
+        .map((id) => currentLayout[lastSectionId]?.panels[id])
+        .filter(Boolean) as GridPanelData[];
+      dragRequest = panelsToMove.map((panel) => {
+        const nextPanel = { ...panel };
+        nextPanel.column = panel.column + deltaCol;
+        nextPanel.row = panel.row + deltaRow;
+        if (nextPanel.column < 0) nextPanel.column = 0;
+        if (nextPanel.row < 0) nextPanel.row = 0;
+        if (nextPanel.column + nextPanel.width > columnCount) {
+          nextPanel.column = columnCount - nextPanel.width;
+        }
+        return nextPanel;
+      });
+      if (dragRequest.length === 0) {
+        dragRequest = requestedPanelData;
+      }
+    } else {
+      dragRequest = requestedPanelData;
+    }
+
+    const resolvedDestinationGrid = resolveGridSection(destinationGrid.panels, dragRequest);
     nextLayout[targetSectionId].panels = resolvedDestinationGrid;
 
-    // resolve origin grid
     if (hasChangedGridSection) {
       const originGrid = nextLayout[lastSectionId];
       const resolvedOriginGrid = resolveGridSection(originGrid.panels);
