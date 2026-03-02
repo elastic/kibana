@@ -44,20 +44,20 @@ const isGlobalSetupFile = (filename) => {
   return path.basename(filename) === 'global.setup.ts';
 };
 
-const ALLOWED_PLAYWRIGHT_CONFIG_NAMES = new Set([
-  'playwright.config.ts',
-  'parallel.playwright.config.ts',
-]);
+/**
+ * Valid: playwright.config.ts or <single_alphanumeric_prefix>.playwright.config.ts
+ */
+const VALID_PLAYWRIGHT_CONFIG_PATTERN = /^([a-zA-Z0-9_-]+\.)?playwright\.config\.ts$/;
 
 /**
- * Checks if a file is a Playwright config with a non-standard name
+ * Checks if a file is a Playwright config with an invalid name
  * @param {string} filename
  * @returns {boolean}
  */
-const isNonStandardPlaywrightConfig = (filename) => {
+const isInvalidPlaywrightConfig = (filename) => {
   const basename = path.basename(filename);
   return (
-    basename.includes('playwright.config.ts') && !ALLOWED_PLAYWRIGHT_CONFIG_NAMES.has(basename)
+    basename.includes('playwright.config.ts') && !VALID_PLAYWRIGHT_CONFIG_PATTERN.test(basename)
   );
 };
 
@@ -93,9 +93,8 @@ module.exports = {
         'Scout test files must end with .spec.ts extension. Found: "{{actual}}", expected: "{{expected}}"',
       invalidPath:
         'Scout test files must be located in scout{_*}/{ui,api}/{parallel_,}tests/ directories.',
-      invalidPlaywrightConfigName: `Scout Playwright config files must be named one of the following: ${[
-        ...ALLOWED_PLAYWRIGHT_CONFIG_NAMES,
-      ].join(', ')}. Found: "{{actual}}"`,
+      invalidPlaywrightConfigName:
+        'Scout Playwright config files must match the pattern (<optional_prefix>.)playwright.config.ts, where only a single alphanumeric prefix is allowed. Found: "{{actual}}"',
     },
     fixable: null,
     schema: [],
@@ -133,7 +132,7 @@ module.exports = {
         };
       }
     } else if (filename.includes('/test/scout') && filename.endsWith('.ts')) {
-      if (isNonStandardPlaywrightConfig(filename)) {
+      if (isInvalidPlaywrightConfig(filename)) {
         return {
           Program(node) {
             context.report({
