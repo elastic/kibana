@@ -52,8 +52,8 @@ export const selectWorkflowDefinition = createSelector(
 );
 
 // Only checks if the current workflow yaml can be parsed, does not check the schema, only the yaml syntax
-export const selectIsYamlSyntaxValid = createSelector(selectYamlComputed, (computed): boolean =>
-  Boolean(computed?.workflowDefinition)
+export const selectIsYamlSyntaxValid = createSelector(selectYamlDocument, (yamlDoc): boolean =>
+  Boolean(yamlDoc && yamlDoc.errors.length === 0)
 );
 
 // Checks whether validation errors (from strict schema + custom validations) are present
@@ -74,12 +74,18 @@ export const selectIsTestModalOpen = createSelector(
   (detail) => detail.isTestModalOpen
 );
 
+export const selectReplayExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replayExecutionId
+);
+
 export const selectIsSavingYaml = createSelector(
   selectDetail,
   (detail) => detail.loading.isSavingYaml
 );
 
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
+export const selectWorkflows = createSelector(selectDetail, (detail) => detail.workflows);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
 export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);

@@ -220,9 +220,8 @@ steps:
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      JEST_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_types'
+      FTR_CONFIGS_DEPS: 'build'
     retry:
       automatic:
         - exit_status: '*'
@@ -241,7 +240,7 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_types'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -289,11 +288,6 @@ steps:
     key: storybooks
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -311,11 +305,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     soft_fail: true
     retry:
@@ -335,11 +324,6 @@ steps:
     artifact_paths: 'target/plugin_so_types_snapshot.json'
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 30
     retry:
       automatic:
