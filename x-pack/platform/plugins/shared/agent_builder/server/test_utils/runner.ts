@@ -173,6 +173,7 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getDiff: jest.fn(),
     add: jest.fn(),
     update: jest.fn(),
+    updateOrigin: jest.fn().mockResolvedValue(true),
     delete: jest.fn(),
     restore: jest.fn(),
     permanentDelete: jest.fn(),

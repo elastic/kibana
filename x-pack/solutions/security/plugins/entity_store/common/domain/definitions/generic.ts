@@ -18,9 +18,8 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
   },
   indexPatterns: [],
   fields: [
-    // entity.id doesn't need to be mapped because it's the main entity field
-    // and it's already mapped by default
-
+    // We want this to make sure it's also extracted on CCS logs extraction
+    newestValue({ source: 'entity.id' }),
     newestValue({ source: 'entity.name' }),
     ...getEntityFieldsDescriptions(),
 

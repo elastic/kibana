@@ -10,44 +10,13 @@ import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceMapGraph } from './graph';
 import type { ServiceMapNode } from '../../../../common/service_map';
-import { MOCK_EUI_THEME } from './constants';
+import { MOCK_EUI_THEME, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
-          lightShade: MOCK_EUI_THEME.colors.lightShade,
-          text: MOCK_EUI_THEME.colors.text,
-          primary: MOCK_EUI_THEME.colors.primary,
-        },
-        size: {
-          xs: '4px',
-          s: '8px',
-          m: '12px',
-          l: '24px',
-          xl: '32px',
-        },
-        border: {
-          radius: {
-            medium: '6px',
-          },
-          width: {
-            thin: '1px',
-            thick: '2px',
-          },
-        },
-        levels: {
-          content: 1000,
-        },
-        shadows: {
-          s: '0 1px 2px rgba(0,0,0,0.1)',
-        },
-      },
-    }),
+    useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
 let mockScreenReaderAnnouncementValue = '';
@@ -69,7 +38,23 @@ jest.mock('@xyflow/react', () => {
       <div data-testid="react-flow">{children}</div>
     ),
     Background: () => <div data-testid="react-flow-background" />,
-    Controls: () => <div data-testid="react-flow-controls" />,
+    Controls: ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="react-flow-controls">{children}</div>
+    ),
+    ControlButton: ({
+      children,
+      onClick,
+      'data-test-subj': dataTestSubj,
+      ...rest
+    }: {
+      children?: React.ReactNode;
+      onClick?: () => void;
+      'data-test-subj'?: string;
+    }) => (
+      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
+        {children}
+      </button>
+    ),
     useNodesState: jest.fn((initialNodes) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges) => [initialEdges, jest.fn()]),
     useReactFlow: jest.fn(() => ({
