@@ -6,21 +6,32 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ITelemetryClient, SearchQuerySubmittedParams } from './types';
+import type {
+  ITelemetryClient,
+  SearchQuerySubmittedParams,
+  SloOverviewFlyoutSearchQueriedParams,
+  SloOverviewFlyoutStatusFilteredParams,
+} from './types';
 import { TelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
-  public reportSearchQuerySubmitted = ({
-    kueryFields,
-    timerange,
-    action,
-  }: SearchQuerySubmittedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, {
-      kueryFields,
-      timerange,
-      action,
-    });
+  public reportSearchQuerySubmitted = (params: SearchQuerySubmittedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, params);
+  };
+
+  public reportSloOverviewFlyoutViewed = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED, {});
+  };
+
+  public reportSloOverviewFlyoutSearchQueried = (params: SloOverviewFlyoutSearchQueriedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED, params);
+  };
+
+  public reportSloOverviewFlyoutStatusFiltered = (
+    params: SloOverviewFlyoutStatusFilteredParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED, params);
   };
 }
