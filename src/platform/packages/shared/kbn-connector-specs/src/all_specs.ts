@@ -22,3 +22,4 @@ export * from './specs/virustotal/virustotal';
 export * from './specs/jina/jina_reader';
 export * from './specs/sharepoint_online/sharepoint_online';
 export * from './specs/slack/slack';
+export * from './specs/gmail/gmail';
