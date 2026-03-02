@@ -10,7 +10,9 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/esql-language",
     "@kbn/evals",
+    "@kbn/inference-common",
     "@kbn/scout",
     "@kbn/tooling-log"
   ]

@@ -12,13 +12,9 @@ This package evaluates the quality of AI-generated detection rules against known
 - ES|QL functional equivalence (LLM-as-judge)
 - Rule type and language correctness
 
-## API Flow Parity
+## API Flow
 
-The eval suite intentionally follows the same rule-generation API flow as the Security Solution UI:
-
-- Prompt submission uses `POST /api/agent_builder/converse/async`
-- Rule extraction reads `tool_result` events for `security.create_detection_rule`
-- If async parsing fails, the suite falls back to `POST /api/agent_builder/converse` for resilience
+The eval suite calls the sync Agent Builder API (`POST /api/agent_builder/converse`) and extracts tool results from the `security.create_detection_rule` tool call steps, matching the pattern used by the agent-builder eval suite.
 
 ## Package Structure
 
@@ -30,7 +26,7 @@ kbn-evals-suite-security-ai-rules/
 ├── datasets/
 │   └── sample_rules.ts           # Canonical reference detection rules
 └── src/
-    ├── chat_client.ts            # Agent Builder API client + SSE parsing
+    ├── chat_client.ts            # Agent Builder API client (sync converse)
     ├── evaluate.ts               # Suite-specific eval fixture extensions
     ├── evaluate_dataset.ts       # Experiment runner + all evaluator definitions
     ├── helpers.ts                # Utility functions (MITRE extraction, syntax check, etc.)
@@ -48,10 +44,7 @@ kbn-evals-suite-security-ai-rules/
    - Ensure `kibana.dev.yml` has AI connectors configured
    - Feature flag `aiRuleCreationEnabled: true` is set
 
-3. **AI Connectors** (configured in `config/kibana.dev.yml`):
-   - `gpt-4o` — Azure OpenAI GPT-4o
-   - `sonnet-3_7` — AWS Bedrock Claude Sonnet 3.7
-   - `gemini-2_5-pro` — Google Gemini 2.5 Pro
+3. **AI Connectors**: Configure one or more AI connectors in `config/kibana.dev.yml` or via the Kibana UI. The suite runs against all connectors discovered at runtime (including EIS models when available).
 
 ## Running Evaluations
 
@@ -86,33 +79,18 @@ node scripts/evals summary <run-id>
 ### Method 3: Run suite without summary table
 
 ```bash
-# Set environment variables
-export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200
-export EVALUATION_CONNECTOR_ID=gpt-4o
-
-node scripts/evals run --suite security-ai-rules --evaluation-connector-id gpt-4o
-```
-
-### Method 4: Direct Playwright
-
-```bash
-export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200
-export EVALUATION_CONNECTOR_ID=gpt-4o
-
-node scripts/playwright test \
-  --config x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts
+node scripts/evals run --suite security-ai-rules \
+  --evaluation-connector-id gpt-4o \
+  --evaluations-es-url http://elastic:changeme@localhost:9200
 ```
 
 ### Example: Multi-model comparison
 
-Run the same suite against multiple models to compare quality:
+By default, the suite runs against all connectors configured in `kibana.dev.yml`. Simply configure the models you want to compare and run a single command:
 
 ```bash
-for connector in gpt-4o sonnet-3_7 gemini-2_5-pro; do
-  node scripts/evals summary --suite security-ai-rules \
-    --evaluation-connector-id "$connector" \
-    --repetitions 3
-done
+node scripts/evals summary --suite security-ai-rules \
+  --evaluation-connector-id gpt-4o
 ```
 
 ### Example: Single repetition for fast testing
@@ -127,10 +105,7 @@ node scripts/evals summary --suite security-ai-rules \
 
 ### 1. Query Syntax Validity (CODE — binary: 0 or 1)
 
-Validates that the generated ES|QL query is structurally sound:
-- Query starts with a valid ES|QL source command (`FROM`, `ROW`, `SHOW`, or `METRICS`)
-- Parentheses are balanced
-- Single and double quotes are balanced
+Validates that the generated ES|QL query is structurally sound using the official `@kbn/esql-language` parser. Also checks that the `FROM` clause is not a bare wildcard (`FROM *`).
 
 **Interpretation**:
 - `1.0` = Valid ES|QL syntax
@@ -166,7 +141,7 @@ Metadata includes `precision`, `recall`, `f1`, `generated` (array), and `expecte
 
 ### 5. ESQL Functional Equivalence (LLM-as-judge — binary: 0 or 1)
 
-Uses the `criteria` evaluator from `@kbn/evals` to assess whether the generated ES|QL query would produce the same detection results as the reference query, regardless of query language (reference rules may be in EQL while generated rules are always ES|QL), syntax differences, or field ordering.
+Uses the built-in `createEsqlEquivalenceEvaluator` from `@kbn/evals` to assess whether the generated ES|QL query would produce the same detection results as the reference query, regardless of query language (reference rules may be in EQL while generated rules are always ES|QL), syntax differences, or field ordering.
 
 **Interpretation**:
 - `1.0` = Functionally equivalent — same threat patterns detected
@@ -333,7 +308,7 @@ GET .kibana-evaluations/_search
      - aiRuleCreationEnabled
    ```
 2. Restart Kibana after configuration changes
-3. Confirm Agent Builder routes are reachable (`/api/agent_builder/converse/async` and `/api/agent_builder/converse`)
+3. Confirm Agent Builder route is reachable (`/api/agent_builder/converse`)
 
 ### Low Scores on All Evaluators
 
@@ -413,7 +388,7 @@ node scripts/eslint x-pack/solutions/security/packages/kbn-evals-suite-security-
 
 When adding new evaluators or modifying existing ones:
 
-1. Add evaluator factory functions in `src/evaluate_dataset.ts` following the existing `createQuerySyntaxValidityEvaluator` / `createEsqlFunctionalEquivalenceEvaluator` pattern
+1. Add evaluator factory functions in `src/evaluate_dataset.ts` following the existing `createQuerySyntaxValidityEvaluator` pattern
 2. Add unit tests for any new helper functions in `src/helpers.test.ts`
 3. Test with multiple connectors (GPT-4o, Claude, Gemini)
 4. Update this README with new metrics and interpretations
