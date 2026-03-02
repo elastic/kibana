@@ -79383,6 +79383,89 @@ components:
                 - delimiter
                 - to
             - additionalProperties: false
+              description: Split processor - Split a field value into an array using a separator
+              type: object
+              properties:
+                action:
+                  enum:
+                    - split
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Source field to split into an array
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                preserve_trailing:
+                  description: Preserve empty trailing fields in the split result
+                  type: boolean
+                separator:
+                  description: Regex separator used to split the field value into an array
+                  minLength: 1
+                  type: string
+                to:
+                  description: Target field for the split array (defaults to source)
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - separator
+            - additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - sort
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Array field to sort
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                order:
+                  description: Sort order - "asc" (ascending) or "desc" (descending). Defaults to "asc"
+                  enum:
+                    - asc
+                    - desc
+                  type: string
+                to:
+                  description: Target field for the sorted array (defaults to source)
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - additionalProperties: false
               description: Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)
               type: object
               properties:
