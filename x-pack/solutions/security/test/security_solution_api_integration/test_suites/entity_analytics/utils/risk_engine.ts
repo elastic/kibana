@@ -280,8 +280,19 @@ const waitForRiskScoreIndicesToBeGone = async ({
             const hasMatchingDataStream =
               resolved.data_streams?.some((dataStream) => dataStream.name === name) ?? false;
             return hasMatchingIndex || hasMatchingDataStream;
-          } catch {
-            return false;
+          } catch (e) {
+            // If Elasticsearch cannot resolve due to a conflict (index + datastream with same name),
+            // treat it as still present and keep retrying cleanup.
+            const statusCode = (e as { statusCode?: number })?.statusCode;
+            if (statusCode === 404) {
+              return false;
+            }
+            log.debug(
+              `waitForRiskScoreIndicesToBeGone: resolveIndex failed for ${name} with status ${
+                statusCode ?? 'unknown'
+              }`
+            );
+            return true;
           }
         })
       );
