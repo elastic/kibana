@@ -43,7 +43,10 @@ export const SessionPreviewContainer: FC = () => {
     isPreviewMode,
   });
 
-  const iconType = useMemo(() => (!isPreviewMode ? 'arrowStart' : undefined), [isPreviewMode]);
+  const iconType = useMemo(
+    () => (!isPreviewMode ? 'chevronLimitLeft' : undefined),
+    [isPreviewMode]
+  );
 
   // if the session view is not enabled or in rule preview mode, the navigation is not enabled
   const isNavigationEnabled = useMemo(
