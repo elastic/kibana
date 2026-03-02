@@ -11,7 +11,12 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
 
 export class SyntheticsAppPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly ruleMonitorCountButton: Locator;
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.ruleMonitorCountButton = page.testSubj.locator(
+      'syntheticsStatusRuleVizMonitorQueryIDsButton'
+    );
+  }
 
   async navigateToMonitorManagement() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/monitors'));

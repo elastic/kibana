@@ -9,13 +9,43 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
+test.describe('Creates a custom TLS alert rule', { tag: tags.stateful.classic }, () => {
   const tlsRuleName = 'synthetics-e2e-monitor-tls-rule';
   let configId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
     await syntheticsServices.deleteCustomRules();
+    configId = await syntheticsServices.addMonitor(
+      'Test Monitor',
+      {
+        type: 'http',
+        urls: 'https://www.google.com',
+      },
+      configId,
+      { tls: { enabled: true } }
+    );
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    await syntheticsServices.addSummaryDocument({
+      configId,
+      tlsNotAfter: tomorrowDate.toISOString(),
+      tlsNotBefore: new Date().toISOString(),
+    });
+  });
+
+  test.beforeEach(async ({ pageObjects, browserAuth, page }) => {
+    await test.step('login and navigate to overview', async () => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.syntheticsApp.navigateToOverview(15);
+    });
+
+    await test.step('open create TLS rule flyout', async () => {
+      await pageObjects.syntheticsApp.refreshOverview();
+      await pageObjects.syntheticsApp.openManageTlsRule();
+      await page.testSubj.click('createNewTLSRule');
+      await expect(page.testSubj.locator('ruleDefinition')).toBeVisible();
+    });
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
@@ -23,74 +53,30 @@ test.describe('CustomTLSAlert', { tag: tags.stateful.classic }, () => {
     await syntheticsServices.deleteCustomRules();
   });
 
-  test('creates a custom TLS alert rule and verifies alert fires', async ({
-    pageObjects,
-    page,
-    browserAuth,
-    syntheticsServices,
-  }) => {
-    await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.syntheticsApp.navigateToOverview(15);
-    });
+  test('can filter monitors by KQL', async ({ pageObjects, page }) => {
+    await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toBeVisible({});
+    await page.testSubj.typeWithDelay('queryInput', 'monitor.type: "tcp"', { delay: 100 });
+    await page.testSubj.locator('queryInput').press('Enter');
+    await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toHaveText(
+      '0 existing monitors'
+    );
+  });
 
-    await test.step('create monitor with TLS cert expiring tomorrow', async () => {
-      configId = await syntheticsServices.addMonitor(
-        'Test Monitor',
-        {
-          type: 'http',
-          urls: 'https://www.google.com',
-        },
-        configId,
-        { tls: { enabled: true } }
-      );
-      const tomorrowDate = new Date();
-      tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-      await syntheticsServices.addSummaryDocument({
-        configId,
-        tlsNotAfter: tomorrowDate.toISOString(),
-        tlsNotBefore: new Date().toISOString(),
-      });
-    });
+  test('can filter monitors by type', async ({ pageObjects, page }) => {
+    await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toBeVisible({});
+    await page.getByRole('button', { name: 'Type All' }).click();
+    await page.testSubj.click('monitorTypeField');
+    await page.getByRole('option', { name: 'http' }).click();
+    await page.testSubj
+      .locator('ruleDefinition')
+      .getByRole('button', { name: 'Type http' })
+      .click();
+    await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toHaveText('1 existing monitor');
+  });
 
-    await test.step('open create TLS rule flyout', async () => {
-      await pageObjects.syntheticsApp.refreshOverview();
-      await pageObjects.syntheticsApp.openManageTlsRule();
-      await page.testSubj.click('createNewTLSRule');
-      await expect(page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
-    });
-
-    await test.step('filter monitors by KQL', async () => {
-      await page.testSubj.locator('queryInput').fill('monitor.type: "tcp" ');
-      await page.keyboard.press('Enter');
-      // The button disappears during loading and re-appears with updated count
-      const monitorCountButton = page.testSubj.locator(
-        'syntheticsStatusRuleVizMonitorQueryIDsButton'
-      );
-      await expect(monitorCountButton).toBeHidden({ timeout: 10_000 });
-      await expect(monitorCountButton).toHaveText('0 existing monitors', { timeout: 30_000 });
-
-      await page.testSubj.locator('queryInput').fill('');
-      await page.keyboard.press('Enter');
-    });
-
-    await test.step('filter by monitor type', async () => {
-      const monitorCountButton = page.testSubj.locator(
-        'syntheticsStatusRuleVizMonitorQueryIDsButton'
-      );
-      await expect(monitorCountButton).toBeVisible({ timeout: 30_000 });
-
-      await page.getByRole('button', { name: 'Type All' }).click();
-      await page.testSubj.click('monitorTypeField');
-      await page.getByRole('option', { name: 'http' }).click();
-      await page.testSubj
-        .locator('ruleDefinition')
-        .getByRole('button', { name: 'Type http' })
-        .click();
-      await expect(monitorCountButton).toHaveText('1 existing monitor', { timeout: 30_000 });
-    });
-
+  test('can create rule and fire alert', async ({ pageObjects, page }) => {
     await test.step('create TLS rule', async () => {
+      await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toBeVisible({});
       let requestMade = false;
       page.on('request', (request) => {
         if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
