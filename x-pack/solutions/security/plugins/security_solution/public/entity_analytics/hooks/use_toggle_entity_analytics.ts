@@ -146,7 +146,7 @@ export const useToggleEntityAnalytics = ({
           disablePromises.push(stopEntityEngineMutation.mutateAsync());
         }
         await Promise.all(disablePromises);
-        addSuccess(i18n.RISK_ENGINE_TURNED_OFF, TOAST_OPTIONS);
+        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
       } else {
         if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
           if (!selectedSettingsMatchSavedSettings) {
@@ -169,7 +169,7 @@ export const useToggleEntityAnalytics = ({
           }
         }
 
-        addSuccess(i18n.RISK_ENGINE_TURNED_ON, TOAST_OPTIONS);
+        addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
       }
     } catch {
       // Errors are surfaced via mutation.isError states in the error panel

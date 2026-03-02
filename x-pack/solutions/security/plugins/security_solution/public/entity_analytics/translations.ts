@@ -153,17 +153,17 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_TURNED_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOn',
+export const ENTITY_ANALYTICS_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOn',
   {
-    defaultMessage: 'Entity risk score has been turned on',
+    defaultMessage: 'Entity Analytics has been turned on',
   }
 );
 
-export const RISK_ENGINE_TURNED_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOff',
+export const ENTITY_ANALYTICS_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.moduleTurnedOff',
   {
-    defaultMessage: 'Entity risk score has been turned off',
+    defaultMessage: 'Entity Analytics has been turned off',
   }
 );
 
