@@ -1,11 +1,11 @@
 ---
-navigation_title: "PagerDuty (data source)"
+navigation_title: "PagerDuty"
 applies_to:
-  stack: preview
+  stack: preview 9.4
   serverless: preview
 ---
 
-# PagerDuty data source [pagerduty-data-source]
+# PagerDuty data source MCP connector [pagerduty-data-source]
 
 The PagerDuty data source connects to PagerDuty via the PagerDuty MCP server to access incidents, escalation policies, schedules, on-calls, users, and teams. Use it in data and context sources and agentic workflows to search and retrieve PagerDuty data.
 
