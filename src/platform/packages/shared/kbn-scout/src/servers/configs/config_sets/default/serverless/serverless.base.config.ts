@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve, join } from 'path';
+import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import {
-  fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
+  packageRegistryDocker,
+  dockerRegistryPort,
   getDockerFileMountPath,
 } from '@kbn/test';
 import {
@@ -25,17 +26,6 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
-
-const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
-/**
- * This is used by CI to set the docker registry port
- * you can also define this environment variable locally when running tests which
- * will spin up a local docker package registry locally for you
- * if this is defined it takes precedence over the `packageRegistryOverride` variable
- */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
 const servers = {
   elasticsearch: {
@@ -60,14 +50,8 @@ export const defaultConfig: ScoutServerConfig = {
   servers,
   dockerServers: defineDockerServersConfig({
     registry: {
-      enabled: !!dockerRegistryPort,
-      image: fleetPackageRegistryDockerImage,
-      portInContainer: 8080,
-      port: dockerRegistryPort,
-      args: dockerArgs,
-      waitForLogLine: 'package manifests loaded',
+      ...packageRegistryDocker,
       waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
-      preferCached: true,
     },
   }),
   esTestCluster: {
@@ -192,6 +176,9 @@ export const defaultConfig: ScoutServerConfig = {
           hosts: ['https://localhost:9200'],
         },
       ])}`,
+      ...(dockerRegistryPort
+        ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+        : []),
     ],
   },
 };
