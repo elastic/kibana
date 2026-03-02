@@ -94,13 +94,12 @@ describe('DataLifecycleTimeline', () => {
         />
       );
 
-      expect(screen.getByTestId('dataLifecycleTimeline-value-28h')).not.toHaveAttribute(
-        'data-is-invalid'
-      );
-      expect(screen.getByTestId('dataLifecycleTimeline-value-15h')).toHaveAttribute(
-        'data-is-invalid',
-        'true'
-      );
+      expect(screen.getByTestId('dataLifecycleTimeline-value-28h')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('dataLifecycleTimeline-value-28h-invalid')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataLifecycleTimeline-value-15h-invalid')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleTimeline-value-15h')).not.toBeInTheDocument();
     });
 
     it('should mark invalid step indices using DSL segment stepIndex mapping', () => {
@@ -138,13 +137,12 @@ describe('DataLifecycleTimeline', () => {
         />
       );
 
-      expect(screen.getByTestId('dataLifecycleTimeline-value-10d')).not.toHaveAttribute(
-        'data-is-invalid'
-      );
-      expect(screen.getByTestId('dataLifecycleTimeline-value-20d')).toHaveAttribute(
-        'data-is-invalid',
-        'true'
-      );
+      expect(screen.getByTestId('dataLifecycleTimeline-value-10d')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('dataLifecycleTimeline-value-10d-invalid')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataLifecycleTimeline-value-20d-invalid')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleTimeline-value-20d')).not.toBeInTheDocument();
     });
   });
 

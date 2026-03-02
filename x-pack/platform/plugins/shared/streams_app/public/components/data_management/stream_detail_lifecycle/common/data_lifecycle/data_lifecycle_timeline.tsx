@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -17,6 +17,50 @@ import {
 import type { PhaseName } from '@kbn/streams-schema';
 import type { LifecyclePhase } from './lifecycle_types';
 import type { TimelineSegment } from './data_lifecycle_segments';
+
+const buildInvalidLeftValuesSet = ({
+  invalidPhases,
+  invalidStepIndices,
+  segments,
+  phases,
+}: {
+  invalidPhases?: PhaseName[];
+  invalidStepIndices?: number[];
+  segments: TimelineSegment[];
+  phases: LifecyclePhase[];
+}): Set<string> => {
+  if (
+    (!invalidPhases || invalidPhases.length === 0) &&
+    (!invalidStepIndices || invalidStepIndices.length === 0)
+  ) {
+    return new Set<string>();
+  }
+
+  const invalidPhasesSet = new Set<string>(invalidPhases ?? []);
+  const invalidStepIndicesSet = new Set(invalidStepIndices ?? []);
+  const leftValuesSet = new Set<string>();
+
+  for (let i = 0; i < phases.length; i++) {
+    const phase = phases[i];
+    const phaseName = phase.name;
+    if (!invalidPhasesSet.has(phaseName)) continue;
+
+    // "hot" can render a custom left label (e.g. "0d"), so prefer the segment's leftValue.
+    const leftValue =
+      phaseName === 'hot' ? segments[i]?.leftValue ?? segments[0]?.leftValue : phase.min_age;
+    if (leftValue) leftValuesSet.add(leftValue);
+  }
+
+  if (invalidStepIndicesSet.size > 0) {
+    for (const segment of segments) {
+      if (segment.stepIndex === undefined) continue;
+      if (!invalidStepIndicesSet.has(segment.stepIndex)) continue;
+      if (segment.leftValue) leftValuesSet.add(segment.leftValue);
+    }
+  }
+
+  return leftValuesSet;
+};
 
 export const DataLifecycleTimeline = ({
   phases,
@@ -34,48 +78,21 @@ export const DataLifecycleTimeline = ({
   invalidStepIndices?: number[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const segments: TimelineSegment[] =
-    timelineSegments ??
-    phases.map((phase) => ({
-      grow: phase.grow,
-      leftValue: phase.min_age,
-      isDelete: phase.isDelete,
-    }));
+  const segments = useMemo<TimelineSegment[]>(
+    () =>
+      timelineSegments ??
+      phases.map((phase) => ({
+        grow: phase.grow,
+        leftValue: phase.min_age,
+        isDelete: phase.isDelete,
+      })),
+    [phases, timelineSegments]
+  );
 
-  const invalidLeftValuesSet = (() => {
-    if (
-      (!invalidPhases || invalidPhases.length === 0) &&
-      (!invalidStepIndices || invalidStepIndices.length === 0)
-    ) {
-      return new Set<string>();
-    }
-
-    const invalidPhasesSet = new Set<string>(invalidPhases ?? []);
-    const invalidStepIndicesSet = new Set(invalidStepIndices ?? []);
-    const leftValuesSet = new Set<string>();
-
-    if (invalidPhasesSet.has('hot')) {
-      const first = segments[0]?.leftValue;
-      if (first) leftValuesSet.add(first);
-    }
-
-    for (const phase of phases) {
-      const phaseName = phase.name;
-      if (phaseName === 'hot') continue;
-      if (!invalidPhasesSet.has(phaseName)) continue;
-      if (phase.min_age) leftValuesSet.add(phase.min_age);
-    }
-
-    if (invalidStepIndicesSet.size > 0) {
-      for (const segment of segments) {
-        if (segment.stepIndex === undefined) continue;
-        if (!invalidStepIndicesSet.has(segment.stepIndex)) continue;
-        if (segment.leftValue) leftValuesSet.add(segment.leftValue);
-      }
-    }
-
-    return leftValuesSet;
-  })();
+  const invalidLeftValuesSet = useMemo(
+    () => buildInvalidLeftValuesSet({ invalidPhases, invalidStepIndices, segments, phases }),
+    [invalidPhases, invalidStepIndices, phases, segments]
+  );
 
   return (
     <EuiPanel
@@ -167,8 +184,9 @@ const DataLifecyclePhaseTimeline = ({
             hasBorder={false}
             hasShadow={false}
             css={{ transform: 'translateX(-50%)' }}
-            data-test-subj={`dataLifecycleTimeline-value-${leftValue}`}
-            data-is-invalid={isInvalidPoint ? 'true' : undefined}
+            data-test-subj={`dataLifecycleTimeline-value-${leftValue}${
+              isInvalidPoint ? '-invalid' : ''
+            }`}
           >
             <EuiText textAlign="center" size="xs" color={isInvalidPoint ? 'danger' : 'subdued'}>
               {leftValue}
