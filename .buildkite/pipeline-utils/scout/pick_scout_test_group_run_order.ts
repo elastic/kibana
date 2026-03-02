@@ -47,27 +47,9 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
 
-  const allModules = JSON.parse(
+  const modulesWithTests = JSON.parse(
     Fs.readFileSync(scoutConfigsPath, 'utf-8')
   ) as ModuleDiscoveryInfo[];
-
-  const modulesWithTests = allModules
-    .map((module) => {
-      const skippedConfigs = module.configs.filter((config) => !config.hasTests);
-      if (skippedConfigs.length > 0) {
-        for (const config of skippedConfigs) {
-          console.warn(
-            `[scout] Skipping config with no runnable tests: [${module.name}] ${config.path}`
-          );
-        }
-      }
-
-      return {
-        ...module,
-        configs: module.configs.filter((config) => config.hasTests),
-      };
-    })
-    .filter((module) => module.configs.length > 0);
 
   if (modulesWithTests.length === 0) {
     // no scout configs found, nothing to need to upload steps
