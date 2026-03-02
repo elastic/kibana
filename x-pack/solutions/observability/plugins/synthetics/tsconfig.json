@@ -9,6 +9,7 @@
     "scripts/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
