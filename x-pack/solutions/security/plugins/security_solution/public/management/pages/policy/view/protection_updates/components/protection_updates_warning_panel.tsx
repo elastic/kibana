@@ -15,7 +15,7 @@ export const ProtectionUpdatesWarningPanel = () => (
     title={i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.warningPanel.title', {
       defaultMessage: 'Attention',
     })}
-    iconType="alert"
+    iconType="warning"
     data-test-subj="protection-updates-warning-callout"
   >
     <FormattedMessage

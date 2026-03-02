@@ -36,7 +36,7 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
       <EuiButton
         onClick={toggleActionLog}
         disabled={showActionLogFlyout}
-        iconType="list"
+        iconType="listBullet"
         data-test-subj="responderShowActionLogButton"
       >
         <FormattedMessage
