@@ -60,6 +60,7 @@ export type IBody =
   | {
       index_filter?: estypes.QueryDslQueryContainer;
       runtime_mappings?: estypes.MappingRuntimeFields;
+      project_routing?: string;
     }
   | undefined;
 
@@ -67,6 +68,7 @@ export const bodySchema = schema.maybe(
   schema.object({
     index_filter: schema.maybe(schema.any()),
     runtime_mappings: schema.maybe(schema.any()),
+    project_routing: schema.maybe(schema.string()),
   })
 );
 export interface IQuery {
@@ -176,6 +178,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     // not available to get request
     const indexFilter = request.body?.index_filter;
     const runtimeMappings = request.body?.runtime_mappings;
+    const projectRouting = request.body?.project_routing;
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
@@ -203,6 +206,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         allowHidden,
         includeEmptyFields,
         runtimeMappings,
+        projectRouting,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
         abortSignal,
       });
