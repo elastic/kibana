@@ -12,7 +12,6 @@ const TIMELINE_TEMPLATES_URL = 'security/timelines/template';
 
 export class TimelinePage {
   readonly panel: Locator;
-  readonly flyoutWrapper: Locator;
   readonly queryInput: Locator;
   readonly saveStatus: Locator;
   readonly saveButton: Locator;
@@ -37,7 +36,6 @@ export class TimelinePage {
 
   constructor(private readonly page: ScoutPage) {
     this.panel = this.page.testSubj.locator('timeline-modal-header-panel');
-    this.flyoutWrapper = this.page.testSubj.locator('timeline-portal-ref');
     this.queryInput = this.page.testSubj.locator('timelineQueryInput');
     this.saveStatus = this.panel.locator('[data-test-subj="timeline-save-status"]');
     this.saveButton = this.page.testSubj.locator('timeline-modal-save-timeline');
@@ -153,9 +151,5 @@ export class TimelinePage {
     // EUI wraps disabled buttons in a tooltip anchor <span> that intercepts
     // pointer events, so we hover the wrapper instead of the button itself.
     await this.saveButtonTooltipAnchor.hover();
-  }
-
-  getTimelineRows() {
-    return this.timelineRows;
   }
 }

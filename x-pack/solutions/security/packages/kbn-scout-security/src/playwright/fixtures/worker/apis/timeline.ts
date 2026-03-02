@@ -19,6 +19,11 @@ const DEFAULT_COLUMNS = [
   { id: 'host.name' },
 ];
 
+const DEFAULT_DATE_RANGE = {
+  start: '2018-01-01T12:22:56.000Z',
+  end: '2023-04-01T12:22:56.000Z',
+};
+
 export interface TimelineInput {
   title: string;
   description?: string;
@@ -44,6 +49,27 @@ const DEFAULT_TIMELINE: TimelineInput = {
   description: 'This is the best timeline',
   query: 'host.name: *',
 };
+
+const buildTimelineBody = (
+  timeline: TimelineInput,
+  options: { columns: Array<{ id: string }>; timelineType?: string; templateVersion?: number }
+) => ({
+  timeline: {
+    columns: options.columns,
+    kqlMode: 'filter',
+    kqlQuery: {
+      filterQuery: {
+        kuery: { expression: timeline.query ?? '', kind: 'kuery' },
+      },
+    },
+    dateRange: DEFAULT_DATE_RANGE,
+    description: timeline.description ?? '',
+    title: timeline.title,
+    savedQueryId: null,
+    ...(options.timelineType && { timelineType: options.timelineType }),
+    ...(options.templateVersion && { templateTimelineVersion: options.templateVersion }),
+  },
+});
 
 export const getTimelineApiService = ({
   kbnClient,
@@ -73,21 +99,9 @@ export const getTimelineApiService = ({
         const response = await kbnClient.request<CreateTimelineApiResponse>({
           method: 'POST',
           path: `${basePath}${TIMELINE_URL}`,
-          body: {
-            timeline: {
-              columns: [...DEFAULT_COLUMNS, { id: 'message' }],
-              kqlMode: 'filter',
-              kqlQuery: {
-                filterQuery: {
-                  kuery: { expression: timeline.query ?? '', kind: 'kuery' },
-                },
-              },
-              dateRange: { end: '2023-04-01T12:22:56.000Z', start: '2018-01-01T12:22:56.000Z' },
-              description: timeline.description ?? '',
-              title: timeline.title,
-              savedQueryId: null,
-            },
-          },
+          body: buildTimelineBody(timeline, {
+            columns: [...DEFAULT_COLUMNS, { id: 'message' }],
+          }),
         });
 
         return response.data.savedObjectId;
@@ -101,23 +115,11 @@ export const getTimelineApiService = ({
         const response = await kbnClient.request<CreateTimelineApiResponse>({
           method: 'POST',
           path: `${basePath}${TIMELINE_URL}`,
-          body: {
-            timeline: {
-              columns: DEFAULT_COLUMNS,
-              kqlMode: 'filter',
-              kqlQuery: {
-                filterQuery: {
-                  kuery: { expression: timeline.query ?? '', kind: 'kuery' },
-                },
-              },
-              dateRange: { end: '1577881376000', start: '1514809376000' },
-              description: timeline.description ?? '',
-              title: timeline.title,
-              templateTimelineVersion: 1,
-              timelineType: 'template',
-              savedQueryId: null,
-            },
-          },
+          body: buildTimelineBody(timeline, {
+            columns: DEFAULT_COLUMNS,
+            timelineType: 'template',
+            templateVersion: 1,
+          }),
         });
 
         return response.data.savedObjectId;

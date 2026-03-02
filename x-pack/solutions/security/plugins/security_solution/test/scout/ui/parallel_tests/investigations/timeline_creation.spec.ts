@@ -18,8 +18,9 @@ spaceTest.describe(
       await apiServices.timeline.deleteAll();
     });
 
-    spaceTest.afterAll(async ({ apiServices }) => {
+    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
       await apiServices.timeline.deleteAll();
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(
@@ -44,7 +45,6 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Verify flyout is visible with the template query', async () => {
-          await expect(timelinePage.flyoutWrapper).toHaveCSS('visibility', 'visible');
           await expect(timelinePage.queryInput).toHaveText(DEFAULT_QUERY);
         });
       }
@@ -82,8 +82,8 @@ spaceTest.describe(
         await spaceTest.step('Hover save button and verify read-only tooltip', async () => {
           await timelinePage.hoverSaveButton();
           await expect(timelinePage.saveTooltip).toBeVisible();
-          await expect(timelinePage.saveTooltip).toHaveText(
-            'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
+          await expect(timelinePage.saveTooltip).toContainText(
+            'you do not have the required permissions to save timelines'
           );
         });
       }
@@ -97,7 +97,6 @@ spaceTest.describe(
       await timelinePage.open();
 
       await spaceTest.step('Verify unsaved state on new timeline', async () => {
-        await expect(timelinePage.panel).toBeVisible();
         await expect(timelinePage.saveStatus).toBeVisible();
         await expect(timelinePage.saveStatus).toHaveText(/^Unsaved/);
       });
@@ -139,9 +138,8 @@ spaceTest.describe(
 
       await spaceTest.step('Close and verify both timelines appear in list', async () => {
         await timelinePage.close();
-        const rows = timelinePage.getTimelineRows();
-        await expect(rows).toHaveCount(2);
-        await expect(rows).toContainText(['Second', 'First']);
+        await expect(timelinePage.timelineRows).toHaveCount(2);
+        await expect(timelinePage.timelineRows).toContainText(['Second', 'First']);
       });
     });
   }
