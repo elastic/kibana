@@ -3324,6 +3324,7 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /.agents/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
+/.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
