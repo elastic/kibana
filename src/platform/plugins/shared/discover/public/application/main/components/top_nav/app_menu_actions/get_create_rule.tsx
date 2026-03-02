@@ -8,6 +8,7 @@
  */
 
 import React, { Suspense, useEffect, useRef, useState, useMemo } from 'react';
+import { from } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -15,6 +16,7 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/d
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import { createTabAppStateObservable } from '../../../state_management/utils/create_tab_app_state_observable';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
@@ -48,7 +50,17 @@ export function CreateESQLRuleFlyout({
   const initialPathnameRef = useRef(history.location.pathname);
 
   // Create the app state observable once and memoize it
-  const appState$ = useMemo(() => stateContainer.createAppStateObservable(), [stateContainer]);
+  // Note: We create this manually instead of using ExtendedDiscoverStateContainer
+  // because we receive a DiscoverStateContainer from the top nav
+  const appState$ = useMemo(
+    () =>
+      createTabAppStateObservable({
+        tabId: stateContainer.getCurrentTab().id,
+        internalState$: from(stateContainer.internalState),
+        getState: stateContainer.internalState.getState,
+      }),
+    [stateContainer]
+  );
 
   useEffect(() => {
     const querySubscription = appState$.subscribe((appState) => {
