@@ -237,43 +237,45 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
 
     return (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-        {defaultContentLinks.map(({ href, title, onClick: _onClick, dataTestSubj, iconType }, i) => {
-          const isLast = i === defaultContentLinks.length - 1;
+        {defaultContentLinks.map(
+          ({ href, title, onClick: _onClick, dataTestSubj, iconType }, i) => {
+            const isLast = i === defaultContentLinks.length - 1;
 
-          if (href && _onClick) {
-            throw new Error(
-              'Only one of `href` and `onClick` should be provided for the help menu link.'
+            if (href && _onClick) {
+              throw new Error(
+                'Only one of `href` and `onClick` should be provided for the help menu link.'
+              );
+            }
+
+            const hrefProps = href ? { href, target: '_blank' } : {};
+            const onClick = () => {
+              if (!_onClick) return;
+              _onClick();
+              this.closeMenu();
+            };
+
+            return (
+              <EuiFlexItem key={i}>
+                <EuiButtonEmpty
+                  {...hrefProps}
+                  onClick={onClick}
+                  size="s"
+                  flush="left"
+                  color="text"
+                  data-test-subj={dataTestSubj}
+                  {...(iconType && { iconType })}
+                  css={css`
+                    display: block;
+                    text-align: left;
+                    font-weight: normal;
+                  `}
+                >
+                  {title}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             );
           }
-
-          const hrefProps = href ? { href, target: '_blank' } : {};
-          const onClick = () => {
-            if (!_onClick) return;
-            _onClick();
-            this.closeMenu();
-          };
-
-          return (
-            <EuiFlexItem key={i}>
-              <EuiButtonEmpty
-                {...hrefProps}
-                onClick={onClick}
-                size="s"
-                flush="left"
-                color="text"
-                data-test-subj={dataTestSubj}
-                {...(iconType && { iconType })}
-                css={css`
-                  display: block;
-                  text-align: left;
-                  font-weight: normal;
-                `}
-              >
-                {title}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          );
-        })}
+        )}
       </EuiFlexGroup>
     );
   }

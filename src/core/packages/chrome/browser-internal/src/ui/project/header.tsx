@@ -68,7 +68,7 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation
 
-    [data-test-subj="breadcrumbs"] [aria-current="page"] {
+    [data-test-subj='breadcrumbs'] [aria-current='page'] {
       font-weight: 600;
     }
   `,
@@ -159,8 +159,7 @@ const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppAction
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const hasOverflow = config.overflowPanels && config.overflowPanels.length > 0;
   const secondaryToolbarCss = getSecondaryToolbarCss({ euiTheme });
-  const hasSecondaryActions =
-    config.secondaryActions && config.secondaryActions.length > 0;
+  const hasSecondaryActions = config.secondaryActions && config.secondaryActions.length > 0;
   const showToolbar = hasSecondaryActions || hasOverflow;
 
   const overflowButton = (
@@ -407,7 +406,22 @@ export const ProjectHeader = ({
             )}
 
             <EuiHeaderSection side="right">
-            <EuiHeaderSectionItem>
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem
+                css={css`
+                  gap: ${euiTheme.size.s};
+                `}
+              >
+                <HeaderNavControls navControls$={observables.navControlsRight$} />
+              </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem
+                css={css`
+                  margin-left: ${euiTheme.size.xs};
+                `}
+              >
                 <HeaderHelpMenu
                   isServerless={isServerless}
                   globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
@@ -419,20 +433,7 @@ export const ProjectHeader = ({
                   kibanaVersion={kibanaVersion}
                   navigateToUrl={application.navigateToUrl}
                 />
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsCenter$} />
-              </EuiHeaderSectionItem>
-
-
-              <EuiHeaderSectionItem
-                css={css`
-                  gap: ${euiTheme.size.s};
-                `}
-              >
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
-              </EuiHeaderSectionItem>
+              </EuiHeaderSectionItem>              
             </EuiHeaderSection>
           </EuiHeader>
         </div>
