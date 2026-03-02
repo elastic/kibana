@@ -280,7 +280,7 @@ export const ConversationSidePanel = React.memo<Props>(
               <EuiButton
                 color="primary"
                 fill
-                iconType="discuss"
+                iconType="comment"
                 onClick={onConversationCreate}
                 fullWidth
                 size="s"

@@ -81,7 +81,7 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display, 
           data-test-subj="setup-knowledge-base-button"
           disabled={!kbStatus?.is_setup_available}
           isLoading={isSetupInProgress}
-          iconType="importAction"
+          iconType="download"
           onClick={onInstallKnowledgeBase}
           size={'xs'}
         >
@@ -96,7 +96,7 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display, 
           fill={fill ?? true}
           disabled={!kbStatus?.is_setup_available}
           isLoading={isSetupInProgress}
-          iconType="importAction"
+          iconType="download"
           onClick={onInstallKnowledgeBase}
         >
           {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {

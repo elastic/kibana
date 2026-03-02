@@ -25,7 +25,7 @@ const UpgradeActionsComponent = () => {
         <EuiButton
           data-test-subj="upgradeDocs"
           href="https://www.elastic.co/subscriptions"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           target="_blank"
         >
