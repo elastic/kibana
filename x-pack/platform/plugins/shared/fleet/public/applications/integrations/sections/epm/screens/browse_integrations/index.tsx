@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
@@ -18,6 +18,7 @@ import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar, StickyFlexItem } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
+import { useSetUrlCategory } from './hooks/url_categories';
 import { NoDataPrompt } from './components/no_data_prompt';
 import {
   ManageIntegrationsTable,
@@ -68,30 +69,25 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     [history, manageIntegrationsHref]
   );
 
+  const setUrlCategory = useSetUrlCategory();
   const {
     allCategories,
     initialSelectedCategory,
     selectedCategory,
     mainCategories,
-    onlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
+    availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
-    setUrlandReplaceHistory({
-      searchString: '',
-      categoryId: '',
-      subCategoryId: '',
-      onlyAgentless: onlyAgentlessFilter,
-    });
+    setUrlCategory({ category: '' }, { replace: true });
     return null;
   }
 
@@ -148,7 +144,10 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
               <EuiSpacer size="m" />
             </StickyFlexItem>
           ) : (
-            <SearchAndFiltersBar />
+            <SearchAndFiltersBar
+              categories={mainCategories}
+              availableSubCategories={availableSubCategories}
+            />
           )}
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
