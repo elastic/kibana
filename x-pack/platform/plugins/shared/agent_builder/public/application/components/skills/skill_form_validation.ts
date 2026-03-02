@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
-import { skillIdMaxLength, skillIdRegexp } from '@kbn/agent-builder-common';
+import {
+  skillIdMaxLength,
+  skillNameMaxLength,
+  skillIdRegexp,
+  maxToolsPerSkill,
+} from '@kbn/agent-builder-common';
 
 const validationMessages = {
   id: {
@@ -27,6 +32,10 @@ const validationMessages = {
     required: i18n.translate('xpack.agentBuilder.skills.validation.name.required', {
       defaultMessage: 'Name is required.',
     }),
+    tooLong: i18n.translate('xpack.agentBuilder.skills.validation.name.tooLong', {
+      defaultMessage: 'Name must be at most {maxLength} characters.',
+      values: { maxLength: skillNameMaxLength },
+    }),
   },
   description: {
     required: i18n.translate('xpack.agentBuilder.skills.validation.description.required', {
@@ -38,6 +47,12 @@ const validationMessages = {
       defaultMessage: 'Instructions content is required.',
     }),
   },
+  toolIds: {
+    max: i18n.translate('xpack.agentBuilder.skills.validation.toolIds.max', {
+      defaultMessage: 'A maximum of {max} tools can be associated with a skill.',
+      values: { max: maxToolsPerSkill },
+    }),
+  },
 };
 
 export const skillFormValidationSchema = z.object({
@@ -46,10 +61,13 @@ export const skillFormValidationSchema = z.object({
     .min(1, { message: validationMessages.id.required })
     .max(skillIdMaxLength, { message: validationMessages.id.tooLong })
     .regex(skillIdRegexp, { message: validationMessages.id.format }),
-  name: z.string().min(1, { message: validationMessages.name.required }),
+  name: z
+    .string()
+    .min(1, { message: validationMessages.name.required })
+    .max(skillNameMaxLength, { message: validationMessages.name.tooLong }),
   description: z.string().min(1, { message: validationMessages.description.required }),
   content: z.string().min(1, { message: validationMessages.content.required }),
-  tool_ids: z.array(z.string()),
+  tool_ids: z.array(z.string()).max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),
 });
 
 export type SkillFormData = z.infer<typeof skillFormValidationSchema>;

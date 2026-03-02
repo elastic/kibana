@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 import { useEditSkill } from '../../hooks/skills/use_edit_skill';
-import { useSkill } from '../../hooks/skills/use_skills';
+import { appPaths } from '../../utils/app_paths';
 import { SkillForm, SkillFormMode } from './skill_form';
 
 export const EditSkill: React.FC = () => {
   const { skillId } = useParams<{ skillId: string }>();
-  const { skill } = useSkill({ skillId });
+  const { skill, isSubmitting, isLoading, editSkill } = useEditSkill({ skillId });
 
-  const { skill: editingSkill, isSubmitting, isLoading, editSkill } = useEditSkill({ skillId });
+  if (!skillId) {
+    return <Redirect to={appPaths.skills.list} />;
+  }
 
-  // If the skill is readonly (built-in), show view mode
   if (skill?.readonly) {
     return <SkillForm mode={SkillFormMode.View} skill={skill} isLoading={isLoading} />;
   }
@@ -27,7 +28,7 @@ export const EditSkill: React.FC = () => {
       mode={SkillFormMode.Edit}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
-      skill={editingSkill}
+      skill={skill}
       onSave={editSkill}
     />
   );

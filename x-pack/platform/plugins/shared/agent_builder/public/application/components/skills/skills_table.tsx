@@ -7,13 +7,9 @@
 
 import type { CriteriaWithPagination, EuiBasicTableColumn, SearchFilterConfig } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIconTip,
   EuiInMemoryTable,
-  EuiLink,
   EuiSkeletonText,
   EuiText,
   useEuiTheme,
@@ -27,6 +23,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import { createSkillIdColumn, createSkillTypeColumn } from './skills_columns';
 import { SkillContextMenu } from './skills_table_context_menu';
 
 export const AgentBuilderSkillsTable = memo(() => {
@@ -155,7 +152,7 @@ const useSkillsTableColumns = ({
   );
 
   return useMemo(
-    () => [
+    (): Array<EuiBasicTableColumn<PublicSkillDefinition>> => [
       {
         width: '30px',
         render: (skill: PublicSkillDefinition) => {
@@ -165,33 +162,7 @@ const useSkillsTableColumns = ({
           return null;
         },
       },
-      {
-        field: 'id',
-        name: labels.skills.skillIdLabel,
-        sortable: true,
-        width: '30%',
-        render: (id: string, skill: PublicSkillDefinition) => (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiLink
-                onClick={() => handleSkillClick(skill.id)}
-                data-test-subj={`agentBuilderSkillLink-${skill.id}`}
-              >
-                <EuiText size="s">
-                  <strong>{skill.id}</strong>
-                </EuiText>
-              </EuiLink>
-            </EuiFlexItem>
-            {skill.name !== skill.id && (
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {skill.name}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ),
-      },
+      createSkillIdColumn({ onClick: handleSkillClick }),
       {
         field: 'description',
         name: labels.skills.descriptionLabel,
@@ -203,16 +174,7 @@ const useSkillsTableColumns = ({
           </EuiText>
         ),
       },
-      {
-        field: 'readonly',
-        name: labels.skills.typeLabel,
-        width: '100px',
-        render: (readonly: boolean) => (
-          <EuiBadge color={readonly ? 'hollow' : 'primary'}>
-            {readonly ? labels.skills.builtinLabel : labels.skills.customLabel}
-          </EuiBadge>
-        ),
-      },
+      createSkillTypeColumn(),
       {
         field: 'tool_ids',
         name: labels.skills.toolsLabel,
@@ -225,7 +187,7 @@ const useSkillsTableColumns = ({
       },
       {
         width: '60px',
-        align: 'right',
+        align: 'right' as const,
         render: (skill: PublicSkillDefinition) => (
           <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageTools} />
         ),

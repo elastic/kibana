@@ -92,6 +92,17 @@ describe('SkillSelection utilities', () => {
       const selection = [{ skill_ids: ['skill-a', 'skill-b'] }, { skill_ids: ['skill-c'] }];
       expect(getExplicitSkillIds(selection)).toEqual(['skill-a', 'skill-b', 'skill-c']);
     });
+
+    it('should preserve duplicate IDs', () => {
+      const selection = [{ skill_ids: ['skill-a', 'skill-a'] }];
+      expect(getExplicitSkillIds(selection)).toEqual(['skill-a', 'skill-a']);
+    });
+  });
+
+  describe('allSkillsSelectionWildcard', () => {
+    it('should be the wildcard character', () => {
+      expect(allSkillsSelectionWildcard).toBe('*');
+    });
   });
 
   describe('allBuiltInSkillsSelection', () => {

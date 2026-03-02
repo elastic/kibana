@@ -7,13 +7,15 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type {
-  PersistedSkillCreateRequest,
-  PersistedSkillUpdateRequest,
+import {
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+  createBadRequestError,
+  createAgentBuilderError,
+  AgentBuilderErrorCode,
+  maxToolsPerSkill,
 } from '@kbn/agent-builder-common';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
-
-const MAX_TOOLS_PER_SKILL = 5;
 
 export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
@@ -37,9 +39,9 @@ export const createSkillRegistry = ({
     if (!toolIds || toolIds.length === 0) {
       return;
     }
-    if (toolIds.length > MAX_TOOLS_PER_SKILL) {
-      throw new Error(
-        `A skill can reference at most ${MAX_TOOLS_PER_SKILL} tools, but ${toolIds.length} were provided.`
+    if (toolIds.length > maxToolsPerSkill) {
+      throw createBadRequestError(
+        `A skill can reference at most ${maxToolsPerSkill} tools, but ${toolIds.length} were provided.`
       );
     }
     const invalidIds: string[] = [];
@@ -50,7 +52,7 @@ export const createSkillRegistry = ({
       }
     }
     if (invalidIds.length > 0) {
-      throw new Error(`Invalid tool IDs: ${invalidIds.join(', ')}`);
+      throw createBadRequestError(`Invalid tool IDs: ${invalidIds.join(', ')}`);
     }
   };
 
@@ -78,11 +80,19 @@ export const createSkillRegistry = ({
     async create(params) {
       const existsInBuiltin = await builtinProvider.has(params.id);
       if (existsInBuiltin) {
-        throw new Error(`Skill with id '${params.id}' already exists as a built-in skill.`);
+        throw createAgentBuilderError(
+          AgentBuilderErrorCode.badRequest,
+          `Skill with id '${params.id}' already exists as a built-in skill.`,
+          { statusCode: 409 }
+        );
       }
       const existsInPersisted = await persistedProvider.has(params.id);
       if (existsInPersisted) {
-        throw new Error(`Skill with id '${params.id}' already exists.`);
+        throw createAgentBuilderError(
+          AgentBuilderErrorCode.badRequest,
+          `Skill with id '${params.id}' already exists.`,
+          { statusCode: 409 }
+        );
       }
       await validateToolIds(params.tool_ids);
       return persistedProvider.create(params);
@@ -91,7 +101,7 @@ export const createSkillRegistry = ({
     async update(skillId, updateRequest) {
       const existsInBuiltin = await builtinProvider.has(skillId);
       if (existsInBuiltin) {
-        throw new Error(`Skill '${skillId}' is read-only`);
+        throw createBadRequestError(`Skill '${skillId}' is read-only`);
       }
       await validateToolIds(updateRequest.tool_ids);
       return persistedProvider.update(skillId, updateRequest);
@@ -100,7 +110,7 @@ export const createSkillRegistry = ({
     async delete(skillId) {
       const existsInBuiltin = await builtinProvider.has(skillId);
       if (existsInBuiltin) {
-        throw new Error(`Skill '${skillId}' is read-only`);
+        throw createBadRequestError(`Skill '${skillId}' is read-only`);
       }
       await persistedProvider.delete(skillId);
       return true;

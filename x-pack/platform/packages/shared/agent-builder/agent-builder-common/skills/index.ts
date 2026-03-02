@@ -24,5 +24,7 @@ export {
   skillUpdateRequestSchema,
   validateSkillId,
   skillIdMaxLength,
+  skillNameMaxLength,
   skillIdRegexp,
+  maxToolsPerSkill,
 } from './validation';

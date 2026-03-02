@@ -18,6 +18,9 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
   ToolCreated: `${TELEMETRY_PREFIX}_tool_created`,
+  SkillCreated: `${TELEMETRY_PREFIX}_skill_created`,
+  SkillUpdated: `${TELEMETRY_PREFIX}_skill_updated`,
+  SkillDeleted: `${TELEMETRY_PREFIX}_skill_deleted`,
   RoundComplete: `${TELEMETRY_PREFIX}_round_complete`,
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
   ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
@@ -94,6 +97,18 @@ export interface ReportToolCreatedParams {
   tool_type: string;
 }
 
+export interface ReportSkillCreatedParams {
+  skill_id: string;
+}
+
+export interface ReportSkillUpdatedParams {
+  skill_id: string;
+}
+
+export interface ReportSkillDeletedParams {
+  skill_id: string;
+}
+
 export interface ReportToolCallSuccessParams {
   tool_id: string;
   tool_call_id: string;
@@ -126,6 +141,9 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
+  [AGENT_BUILDER_EVENT_TYPES.SkillCreated]: ReportSkillCreatedParams;
+  [AGENT_BUILDER_EVENT_TYPES.SkillUpdated]: ReportSkillUpdatedParams;
+  [AGENT_BUILDER_EVENT_TYPES.SkillDeleted]: ReportSkillDeletedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]: ReportToolCallSuccessParams;
@@ -139,6 +157,9 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
+  | EventTypeOpts<ReportSkillCreatedParams>
+  | EventTypeOpts<ReportSkillUpdatedParams>
+  | EventTypeOpts<ReportSkillDeletedParams>
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportRoundErrorParams>
   | EventTypeOpts<ReportToolCallSuccessParams>
@@ -151,6 +172,9 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillCreated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillUpdated
+  | typeof AGENT_BUILDER_EVENT_TYPES.SkillDeleted
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundError
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess
@@ -291,6 +315,48 @@ const TOOL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Type of tool created (esql|index_search|workflow|mcp|...)',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_CREATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillCreated,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the created skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_UPDATED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillUpdated,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the updated skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
+        optional: false,
+      },
+    },
+  },
+};
+
+const SKILL_DELETED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SkillDeleted,
+  schema: {
+    skill_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'ID of the deleted skill (normalized: built-in skills keep ID, custom skills become "custom-<sha256_prefix>")',
         optional: false,
       },
     },
@@ -680,6 +746,9 @@ export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unk
   AGENT_CREATED_EVENT,
   AGENT_UPDATED_EVENT,
   TOOL_CREATED_EVENT,
+  SKILL_CREATED_EVENT,
+  SKILL_UPDATED_EVENT,
+  SKILL_DELETED_EVENT,
   ROUND_COMPLETE_EVENT,
   ROUND_ERROR_EVENT,
   TOOL_CALL_SUCCESS_EVENT,

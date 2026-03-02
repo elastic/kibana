@@ -186,7 +186,9 @@ export {
   skillUpdateRequestSchema,
   validateSkillId,
   skillIdMaxLength,
+  skillNameMaxLength,
   skillIdRegexp,
+  maxToolsPerSkill,
 } from './skills';
 export * from './telemetry';
 export {

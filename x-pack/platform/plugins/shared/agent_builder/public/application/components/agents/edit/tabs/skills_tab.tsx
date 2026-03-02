@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
 } from '@elastic/eui';
 import type { PublicSkillDefinition, SkillSelection } from '@kbn/agent-builder-common';
 import {
@@ -29,6 +28,11 @@ import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { AgentFormData } from '../agent_form';
 import { labels } from '../../../../utils/i18n';
+import {
+  createSkillIdColumn,
+  createSkillDescriptionColumn,
+  createSkillTypeColumn,
+} from '../../../skills/skills_columns';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
@@ -110,6 +114,16 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
     return result;
   }, [skills, showActiveOnly, searchQuery, isSkillActive]);
 
+  const sortedAndPaginatedSkills = useMemo(() => {
+    const sorted = [...displaySkills].sort((a, b) => {
+      const aVal = String(a[sortField] ?? '');
+      const bVal = String(b[sortField] ?? '');
+      const cmp = aVal.localeCompare(bVal);
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+    return sorted.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+  }, [displaySkills, sortField, sortDirection, pageIndex, pageSize]);
+
   const activeSkillsCount = useMemo(() => {
     if (isAllSelected) return skills.length;
     const explicitIds = new Set(getExplicitSkillIds(selectedSkills));
@@ -141,44 +155,9 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }
 
   const columns = [
-    {
-      field: 'id',
-      name: labels.skills.skillIdLabel,
-      sortable: true,
-      width: '30%',
-      render: (id: string, skill: PublicSkillDefinition) => (
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{id}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          {skill.name !== id && (
-            <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                {skill.name}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      field: 'description',
-      name: labels.skills.descriptionLabel,
-      truncateText: true,
-      width: '40%',
-    },
-    {
-      field: 'readonly',
-      name: labels.skills.typeLabel,
-      width: '100px',
-      render: (readonly: boolean) => (
-        <EuiBadge color={readonly ? 'hollow' : 'primary'}>
-          {readonly ? labels.skills.builtinLabel : labels.skills.customLabel}
-        </EuiBadge>
-      ),
-    },
+    createSkillIdColumn(),
+    createSkillDescriptionColumn(),
+    createSkillTypeColumn(),
     {
       width: '80px',
       name: i18n.translate('xpack.agentBuilder.agents.form.skills.activeColumn', {
@@ -234,7 +213,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       <EuiSpacer size="m" />
 
       <EuiBasicTable
-        items={displaySkills.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)}
+        items={sortedAndPaginatedSkills}
         columns={columns}
         itemId="id"
         pagination={{

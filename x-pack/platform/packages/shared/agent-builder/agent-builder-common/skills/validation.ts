@@ -8,16 +8,14 @@
 import { z } from '@kbn/zod';
 
 export const skillIdMaxLength = 64;
+export const skillNameMaxLength = 64;
 export const skillIdRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+export const maxToolsPerSkill = 5;
 
 const skillNameSchema = z
   .string()
   .min(1, 'Name must be non-empty')
-  .max(skillIdMaxLength, `Name must be at most ${skillIdMaxLength} characters`)
-  .regex(
-    skillIdRegexp,
-    'Name must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores'
-  );
+  .max(skillNameMaxLength, `Name must be at most ${skillNameMaxLength} characters`);
 
 const skillDescriptionSchema = z
   .string()
@@ -45,7 +43,9 @@ const referencedContentItemSchema = z.object({
   content: z.string().min(1, 'Content must be non-empty'),
 });
 
-const toolIdsSchema = z.array(z.string().min(1, 'Tool ID must be non-empty'));
+const toolIdsSchema = z
+  .array(z.string().min(1, 'Tool ID must be non-empty'))
+  .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`);
 
 /**
  * Zod schema for validating skill create request bodies.
