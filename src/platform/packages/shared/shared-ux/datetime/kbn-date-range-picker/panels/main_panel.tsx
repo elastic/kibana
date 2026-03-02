@@ -18,14 +18,14 @@ import {
   PanelBodySection,
   PanelFooter,
   PanelListItem,
-  PanelNavItem,
+  // PanelNavItem,
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
-import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
+// import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
 import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '../utils';
 import { mainPanelTexts } from '../translations';
-import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
+// import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
 
 interface OptionsListProps {
   /** Options to render as list items. */
@@ -109,31 +109,31 @@ const PresetsRecentTabs = () => {
   );
 };
 
-const SubPanelMenu = () => {
-  const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
-  const euiThemeContext = useEuiTheme();
-  const styles = mainPanelStyles(euiThemeContext);
+// const SubPanelMenu = () => {
+//   const { navigateTo, panelDescriptors } = useDateRangePickerPanelNavigation();
+//   const euiThemeContext = useEuiTheme();
+//   const styles = mainPanelStyles(euiThemeContext);
 
-  return (
-    <ul css={styles.list}>
-      <PanelNavItem onClick={() => navigateTo('calendar-panel')} icon="calendar">
-        {mainPanelTexts.calendarPanelTitle}
-      </PanelNavItem>
-      <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
-        {mainPanelTexts.customTimeRangePanelTitle}
-      </PanelNavItem>
-      {panelDescriptors.map(({ id, title, icon }) => (
-        <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
-          {title}
-        </PanelNavItem>
-      ))}
-    </ul>
-  );
-};
+//   return (
+//     <ul css={styles.list}>
+//       <PanelNavItem onClick={() => navigateTo('calendar-panel')} icon="calendar">
+//         {mainPanelTexts.calendarPanelTitle}
+//       </PanelNavItem>
+//       <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
+//         {mainPanelTexts.customTimeRangePanelTitle}
+//       </PanelNavItem>
+//       {panelDescriptors.map(({ id, title, icon }) => (
+//         <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
+//           {title}
+//         </PanelNavItem>
+//       ))}
+//     </ul>
+//   );
+// };
 
 export function MainPanel() {
   const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
-  const euiThemeContext = useEuiTheme();
+  // const euiThemeContext = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
     if (timeRange.isInvalid || !onPresetSave) return;
@@ -144,8 +144,8 @@ export function MainPanel() {
     applyRange();
   }, [onPresetSave, applyRange, timeRange]);
 
-  const styles = mainPanelStyles(euiThemeContext);
-  const dividerStyles = panelDividerStyles(euiThemeContext);
+  // const styles = mainPanelStyles(euiThemeContext);
+  // const dividerStyles = panelDividerStyles(euiThemeContext);
 
   // temporary dev-only flag to show the footer conditionally
   // TODO remove as we make progress and add content to it
@@ -157,10 +157,10 @@ export function MainPanel() {
         <PanelBodySection spacingSide="none">
           <PresetsRecentTabs />
         </PanelBodySection>
-        <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
+        {/* <PanelBodySection spacingSide="none" css={styles.stickyBottom}>
           <hr css={dividerStyles.root} />
           <SubPanelMenu />
-        </PanelBodySection>
+        </PanelBodySection> */}
       </PanelBody>
       {_showFooter && (
         <PanelFooter
