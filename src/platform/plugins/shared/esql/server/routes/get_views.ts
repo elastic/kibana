@@ -34,7 +34,9 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
         });
       } catch (error) {
         logger.get().debug(error);
-        throw error;
+        return response.ok({
+          body: { views: [] },
+        });
       }
     }
   );
