@@ -10,8 +10,8 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   replacements: schema.object({
-    // Must be explicitly configured to avoid a shared default across deployments.
-    encryptionKey: schema.string({ minLength: 1 }),
+    // Required only when xpack.anonymization.active=true.
+    encryptionKey: schema.maybe(schema.string({ minLength: 1 })),
   }),
   workers: schema.object({
     anonymization: schema.object({

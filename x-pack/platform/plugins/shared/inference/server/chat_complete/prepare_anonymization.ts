@@ -13,6 +13,7 @@ import type {
   ChatCompleteAnonymizationTarget,
   ChatCompleteOptions,
 } from '@kbn/inference-common';
+import { createInferenceRequestError } from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
@@ -28,6 +29,7 @@ interface PrepareAnonymizationOptions {
   replacementsEsClient?: ElasticsearchClient;
   replacementsEncryptionKey?: string;
   usePersistentReplacements?: boolean;
+  requireReplacementsEncryptionKey?: boolean;
   saltPromise?: Promise<string | undefined>;
   resolveEffectivePolicy?: (
     target?: ChatCompleteAnonymizationTarget
@@ -46,6 +48,7 @@ export const prepareAnonymization = async ({
   replacementsEsClient,
   replacementsEncryptionKey,
   usePersistentReplacements = true,
+  requireReplacementsEncryptionKey = false,
   saltPromise,
   resolveEffectivePolicy,
   metadata,
@@ -65,6 +68,13 @@ export const prepareAnonymization = async ({
       effectivePolicy,
     });
     return { anonymization, replacementsId: undefined, effectivePolicy };
+  }
+
+  if (requireReplacementsEncryptionKey && !replacementsEncryptionKey) {
+    throw createInferenceRequestError(
+      'xpack.inference.replacements.encryptionKey must be configured when anonymization replacements are active',
+      400
+    );
   }
 
   const carriedReplacementsId = metadata?.anonymization?.replacementsId;

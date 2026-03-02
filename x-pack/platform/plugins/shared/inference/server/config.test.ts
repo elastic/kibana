@@ -8,10 +8,11 @@
 import { configSchema } from './config';
 
 describe('inference config schema', () => {
-  it('requires replacements encryption key', () => {
-    expect(() => configSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[replacements.encryptionKey]: expected value of type [string] but got [undefined]"`
-    );
+  it('does not require replacements encryption key in schema', () => {
+    expect(configSchema.validate({})).toMatchObject({
+      enabled: true,
+      replacements: {},
+    });
   });
 
   it('accepts explicit replacements encryption key', () => {

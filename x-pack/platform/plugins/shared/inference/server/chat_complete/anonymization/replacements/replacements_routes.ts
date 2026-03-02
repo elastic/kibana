@@ -26,13 +26,24 @@ const toStatusCode = (err: unknown): number => {
   return directStatus ?? metaStatus ?? 500;
 };
 
+const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void => {
+  if (!encryptionKey) {
+    const error = new Error(
+      'xpack.inference.replacements.encryptionKey must be configured to use replacements APIs'
+    ) as Error & { statusCode?: number };
+    error.statusCode = 400;
+    throw error;
+  }
+};
+
 const INDEX_ENSURE_CACHE_MS = 60_000;
 let replacementsIndexEnsuredAt = 0;
 
 const resolveReplacementsContext = async (
   context: RequestHandlerContext,
-  options: { encryptionKey: string; logger: Logger }
+  options: { encryptionKey?: string; logger: Logger }
 ) => {
+  assertReplacementsEncryptionKeyConfigured(options.encryptionKey);
   const coreContext = await context.core;
   const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -50,7 +61,7 @@ export const registerReplacementsRoutes = (
   router: IRouter,
   logger: Logger,
   options: {
-    encryptionKey: string;
+    encryptionKey?: string;
   }
 ): void => {
   // GET /internal/inference/anonymization/replacements/{id} — Resolve by ID

@@ -57,6 +57,16 @@ const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   return enabledRules;
 };
 
+export const getValidatedReplacementsEncryptionKey = ({
+  anonymizationEnabled,
+  encryptionKey,
+}: {
+  anonymizationEnabled: boolean;
+  encryptionKey?: string;
+}): string | undefined => {
+  return anonymizationEnabled ? encryptionKey : undefined;
+};
+
 export class InferencePlugin
   implements
     Plugin<
@@ -95,9 +105,17 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
-    this.logger.info(
-      'Persistent anonymization replacements require explicit xpack.inference.replacements.encryptionKey'
-    );
+    const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+    const replacementsEncryptionKey = getValidatedReplacementsEncryptionKey({
+      anonymizationEnabled,
+      encryptionKey: this.config.replacements.encryptionKey,
+    });
+
+    if (anonymizationEnabled) {
+      this.logger.info(
+        'Persistent anonymization replacements require explicit xpack.inference.replacements.encryptionKey; requests using replacements APIs will return 400 when it is not configured'
+      );
+    }
 
     this.regexWorker = new RegexWorkerService(
       this.config.workers.anonymization,
@@ -148,7 +166,6 @@ export class InferencePlugin
       const namespace =
         core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
       const policyService = pluginsStart.anonymization?.getPolicyService();
-      const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
       return {
         namespace,
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
@@ -167,10 +184,9 @@ export class InferencePlugin
           },
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
-            encryptionKey: anonymizationEnabled
-              ? this.config.replacements.encryptionKey
-              : undefined,
+            encryptionKey: replacementsEncryptionKey,
             usePersistentReplacements: anonymizationEnabled,
+            requireEncryptionKey: anonymizationEnabled,
           },
         },
       };
