@@ -20,6 +20,9 @@ export type NerEntityClass = (typeof NER_ENTITY_CLASSES)[number];
 /**
  * Full canonical set of anonymization entity class labels.
  * Includes NER classes plus domain-specific field labels.
+ * This list intentionally stays compact/canonical and does not include a
+ * dedicated `PHONE` class; phone-like regex matches should use the closest
+ * canonical class (`MISC`) until/unless a formal class is added.
  * Use these as token prefixes in masks (e.g. `HOST_NAME_abc123`).
  */
 export const ANONYMIZATION_ENTITY_CLASSES = [

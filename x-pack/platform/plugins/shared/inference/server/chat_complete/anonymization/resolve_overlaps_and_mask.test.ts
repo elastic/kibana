@@ -18,7 +18,8 @@ describe('processMatches', () => {
     pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
   };
 
-  const phoneRule: RegexAnonymizationRule = {
+  // PHONE is intentionally represented as MISC until a canonical PHONE class is introduced.
+  const phoneLikeRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
     entityClass: 'MISC',
@@ -114,7 +115,7 @@ describe('processMatches', () => {
     const result = resolveOverlapsAndMask({
       detectedMatches,
       state,
-      rules: [emailRule, phoneRule],
+      rules: [emailRule, phoneLikeRule],
     });
 
     const emailMask = getEntityMask({
@@ -153,7 +154,7 @@ describe('processMatches', () => {
     const result = resolveOverlapsAndMask({
       detectedMatches,
       state,
-      rules: [emailRule, phoneRule],
+      rules: [emailRule, phoneLikeRule],
     });
 
     const emailMask = getEntityMask({
