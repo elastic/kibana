@@ -118,7 +118,10 @@ export const AmazonS3: ConnectorSpec = {
   actions: {
     listBuckets: {
       isTool: true,
-      input: z.object({}),
+      input: z.object({
+        region: z.string().optional().describe('The AWS region to list buckets from'),
+        prefix: z.string().optional().describe('The prefix to filter buckets by'),
+      }),
       handler: async (ctx, input) => {
         const config = ctx.config as {
           accessKeyId: string;
@@ -237,6 +240,12 @@ export const AmazonS3: ConnectorSpec = {
       input: z.object({
         bucket: z.string().min(1).describe('The name of the S3 bucket'),
         key: z.string().min(1).describe('The key (path) of the file to download'),
+        maximumDownloadSizeBytes: z.number()
+          .positive()
+          .optional()
+          .describe(
+            'Maximum file size in bytes that can be downloaded for the file content. If the file exceeds this size, a URL will be returned instead of the content.'
+          ),
       }),
       handler: async (ctx, input) => {
         const config = ctx.config as {
@@ -253,14 +262,12 @@ export const AmazonS3: ConnectorSpec = {
         try {
           const s3Client = createS3Client(config);
 
-          // First, get file metadata
           const headCommand = new HeadObjectCommand({
             Bucket: typedInput.bucket,
             Key: typedInput.key,
           });
           const metadata = await s3Client.send(headCommand);
 
-          // Check if file size exceeds the maximum allowed download size
           const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
           if (metadata.ContentLength && metadata.ContentLength > maxSize) {
             const region = config.region || 'us-east-1';

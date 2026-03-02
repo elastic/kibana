@@ -92,6 +92,6 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.amazon_s3',
-    lazy(() => import(/* webpackChunkName: "connectorIconamazons3" */ './specs/amazon_s3/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
 ]);
