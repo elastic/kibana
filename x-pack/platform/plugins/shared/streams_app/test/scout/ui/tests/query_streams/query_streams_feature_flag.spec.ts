@@ -33,7 +33,7 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
     await page.reload();
     await expect(pageObjects.streams.createQueryStreamButton).toBeHidden();
 
-    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.streams.gotoPartitioningTab('logs.ecs');
     await expect(pageObjects.streams.childStreamTypeSelector).toBeHidden();
   });
 
@@ -48,7 +48,7 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
     await page.reload();
     await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
 
-    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.streams.gotoPartitioningTab('logs.ecs');
     await expect(pageObjects.streams.childStreamTypeSelector).toBeVisible();
   });
 });

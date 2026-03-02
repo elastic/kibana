@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { deleteQueryStream } from '../../fixtures/query_stream_helpers';
 
-const STREAM_NAMES_CREATED_BY_SPEC = ['logs.host-1', 'test-query-stream'];
+const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
 test.describe('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects }) => {
@@ -42,7 +42,7 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
 
   test('should properly create a root query stream', async ({ pageObjects, esClient }) => {
     const rootQueryStreamName = 'test-query-stream';
-    const rootQueryStreamEsqlQuery = 'FROM logs | WHERE host.name == "host-1"';
+    const rootQueryStreamEsqlQuery = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
     // create root query stream
     await pageObjects.streams.clickCreateQueryStreamButton();
@@ -73,9 +73,9 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     pageObjects,
     esClient,
   }) => {
-    const parentStreamName = 'logs';
+    const parentStreamName = 'logs.ecs';
     const childStreamName = 'host-1';
-    const esqlQuery = 'FROM logs | WHERE host.name == "host-1"';
+    const esqlQuery = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
     // create child query stream as a child of the parent ingest stream via streams UI
     await pageObjects.streams.clickStreamNameLink(parentStreamName);

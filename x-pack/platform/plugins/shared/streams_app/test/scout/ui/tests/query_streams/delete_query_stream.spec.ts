@@ -11,9 +11,9 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { createQueryStream, deleteQueryStream } from '../../fixtures/query_stream_helpers';
 
-const QUERY_STREAM_NAME = 'logs.test';
+const QUERY_STREAM_NAME = 'logs.ecs.test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
-const INITIAL_ESQL_QUERY = 'FROM logs | WHERE host.name == "host-1"';
+const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
 test.describe('Query streams - Delete query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
