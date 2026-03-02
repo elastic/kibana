@@ -249,7 +249,6 @@ for (const testSuite of testSuites) {
         },
       });
       break;
-    case 'elastic_synthetics':
       const synthGroup = groups.find((g) => g.key === testSuite.key);
       if (!synthGroup) {
         throw new Error(

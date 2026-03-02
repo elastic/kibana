@@ -37,12 +37,6 @@
       "reason": "Displays informational message"
     },
     {
-      "path": "esbuild",
-      "lifecycle": "postinstall",
-      "required": true,
-      "reason": "Configures esbuild. Used by @elastic/synthetics"
-    },
-    {
       "path": "geckodriver",
       "lifecycle": "postinstall",
       "required": true,
