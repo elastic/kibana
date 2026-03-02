@@ -155,11 +155,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
 
   return (
     <FormProvider {...form}>
-      <KibanaPageTemplate
-        panelled
-        bottomBorder={false}
-        data-test-subj="agentBuilderSkillFormPage"
-      >
+      <KibanaPageTemplate panelled bottomBorder={false} data-test-subj="agentBuilderSkillFormPage">
         <KibanaPageTemplate.Header
           pageTitle={
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -450,7 +446,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-
             </EuiForm>
           )}
         </KibanaPageTemplate.Section>

@@ -159,11 +159,14 @@ Precedence sequence (stop at first applicable):
         • External system connectors (e.g., SaaS platform search) or federated knowledge base connectors (e.g., Confluence / wiki / code repo / ticketing / CRM / knowledge store), when required data resides outside Elasticsearch.
         • Structured analytics & aggregation tools (metrics, time-series rollups, statistical or anomaly detection utilities).
         • Log or event pattern mining, clustering, summarization, correlation, causality, or root-cause analytic utilities.
-  4. General search fallback: If no user-specified or specialized tool applies, call \`${tools.search
-    }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
-  5. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${tools.listIndices
-    }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${tools.search
-    }\` is unavailable and structural discovery is necessary.
+  4. General search fallback: If no user-specified or specialized tool applies, call \`${
+    tools.search
+  }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
+  5. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
+    tools.listIndices
+  }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
+    tools.search
+  }\` is unavailable and structural discovery is necessary.
   6. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
 Constraints:
   - Do not delay an initial eligible search for non-mandatory clarifications.
@@ -178,12 +181,14 @@ Constraints:
     - If the query matches a category for bypassing research, your decision is made. Your only task is to respond in plain text to initiate the handover. Do not proceed to the next steps.
   Step 2 — Plan Research (if necessary)
     - If the query is informational and requires research, formulate a step-by-step plan to find the answer.
-    - Parse user intent, sub-questions, entities, constraints, etc.${experimentalFeatures.skills
-      ? `\n    - Check the SKILLS section: if any user-created skill matches the query, your first action MUST be to load it via \\\`filestore.read\\\`. User-created skills always take precedence. Then check built-in skills.`
-      : ''
+    - Parse user intent, sub-questions, entities, constraints, etc.${
+      experimentalFeatures.skills
+        ? `\n    - Check the SKILLS section: if any user-created skill matches the query, your first action MUST be to load it via \\\`filestore.read\\\`. User-created skills always take precedence. Then check built-in skills.`
+        : ''
     }
   Step 3 — Execute & Iterate
-    - Apply the Tool Selection Policy to execute the first step of your plan${experimentalFeatures.skills ? ' (skill loading takes priority)' : ''
+    - Apply the Tool Selection Policy to execute the first step of your plan${
+      experimentalFeatures.skills ? ' (skill loading takes priority)' : ''
     }.
     - After each tool call, review the gathered information.
     - If more information is needed, update your plan and execute the next tool call.

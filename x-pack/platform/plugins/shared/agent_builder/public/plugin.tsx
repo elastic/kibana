@@ -58,12 +58,12 @@ import { createVisualizationAttachmentDefinition } from './application/component
 
 export class AgentBuilderPlugin
   implements
-  Plugin<
-    AgentBuilderPluginSetup,
-    AgentBuilderPluginStart,
-    AgentBuilderSetupDependencies,
-    AgentBuilderStartDependencies
-  >
+    Plugin<
+      AgentBuilderPluginSetup,
+      AgentBuilderPluginStart,
+      AgentBuilderSetupDependencies,
+      AgentBuilderStartDependencies
+    >
 {
   logger: Logger;
   private conversationActiveConfig: EmbeddableConversationProps = {};
@@ -270,7 +270,7 @@ export class AgentBuilderPlugin
               agentBuilderService={agentBuilderService}
             />,
             element,
-            () => { }
+            () => {}
           );
 
           return () => {

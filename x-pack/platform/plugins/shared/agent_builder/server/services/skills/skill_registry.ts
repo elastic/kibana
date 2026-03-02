@@ -20,10 +20,7 @@ export interface SkillRegistry {
   get(skillId: string): Promise<InternalSkillDefinition | undefined>;
   list(): Promise<InternalSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
-  update(
-    skillId: string,
-    update: PersistedSkillUpdateRequest
-  ): Promise<InternalSkillDefinition>;
+  update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
   delete(skillId: string): Promise<boolean>;
 }
 

@@ -118,7 +118,7 @@ describe('SkillClient', () => {
     it('filters by space and skill id in query', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
-      await client.get('test-skill').catch(() => { });
+      await client.get('test-skill').catch(() => {});
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
