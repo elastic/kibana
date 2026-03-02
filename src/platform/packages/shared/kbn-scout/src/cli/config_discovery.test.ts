@@ -920,7 +920,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
   });
 
   describe('validates configs have runnable tests', () => {
-    const moduleWithNoRunnableTests: ScoutTestableModuleWithConfigs = {
+    const moduleWithNoTests: ScoutTestableModuleWithConfigs = {
       name: 'pluginEmpty',
       group: 'groupEmpty',
       type: 'plugin' as const,
@@ -937,10 +937,10 @@ describe('runDiscoverPlaywrightConfigs', () => {
             sha1: 'empty123',
             tests: [
               {
-                id: 'skippedTest',
-                title: 'Skipped Test',
-                expectedStatus: 'skipped',
-                location: { file: 'test.spec.ts', line: 1, column: 1 },
+                id: 'setupOnly',
+                title: 'Setup',
+                expectedStatus: 'passed',
+                location: { file: 'global.setup.ts', line: 1, column: 1 },
                 tags: ['@local-stateful-classic'],
               },
             ],
@@ -949,8 +949,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
       ],
     };
 
-    it('filters out modules with only skipped tests before "--validate" runs', () => {
-      // Configs with no passed .spec.ts tests produce empty tags via collectUniqueTags,
+    it('filters out modules with no .spec.ts tests before "--validate" runs', () => {
+      // Configs with no .spec.ts tests produce empty tags via collectUniqueTags,
       // so they are removed by filterModulesByTargetTags before validation runs.
       // This test verifies that such modules don't cause errors.
       flagsReader.enum.mockReturnValue('all');
@@ -959,14 +959,14 @@ describe('runDiscoverPlaywrightConfigs', () => {
         return false;
       });
 
-      mockTestableModules.modules = [moduleWithNoRunnableTests];
+      mockTestableModules.modules = [moduleWithNoTests];
 
       (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
 
       expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
     });
 
-    it('throws when "--save" finds configs with no runnable tests', () => {
+    it('throws when "--save" finds configs with no tests', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'save') return true;
@@ -993,11 +993,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(modulesReturnedByCiFilter);
 
       expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-        /1 Scout Playwright config\(s\) have no runnable tests/
+        /1 Scout Playwright config\(s\) have no tests/
       );
     });
 
-    it('does not throw when all configs have runnable tests', () => {
+    it('does not throw when all configs have tests', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'validate') return true;
@@ -1050,7 +1050,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(modulesReturnedByCiFilter);
 
       expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-        /2 Scout Playwright config\(s\) have no runnable tests/
+        /2 Scout Playwright config\(s\) have no tests/
       );
       expect(log.error).toHaveBeenCalledWith(
         expect.stringContaining('[pluginA] pluginA/config1.playwright.config.ts')
@@ -1060,7 +1060,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
     });
 
-    it('throws when "--save --flatten" finds configs with no runnable tests', () => {
+    it('throws when "--save --flatten" finds configs with no tests', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'save') return true;
@@ -1088,7 +1088,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(modulesReturnedByCiFilter);
 
       expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-        /1 Scout Playwright config\(s\) have no runnable tests/
+        /1 Scout Playwright config\(s\) have no tests/
       );
     });
   });

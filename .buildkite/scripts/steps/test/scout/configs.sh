@@ -226,7 +226,7 @@ while read -r config_path; do
       configWithoutTests+=("$config_path ($mode)")
       failedConfigs+=("$config_path ($mode)")
       FINAL_EXIT_CODE=10
-      echo "Scout config has no runnable tests: $config_path ($mode)"
+      echo "Scout config has no tests: $config_path ($mode)"
       echo "^^^ +++"
     elif [[ $EXIT_CODE -ne 0 ]]; then
       # Test run failed - try to upload events for observability, then mark as failed

@@ -43,8 +43,9 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
     group: module.group,
     type: module.type,
     configs: module.configs.map((config) => {
-      const runnableTest = config.manifest.tests.find(
-        (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
+      // Skipped tests are still counted: a config is only "empty" when it has no .spec.ts files at all
+      const hasSpecFile = config.manifest.tests.some((test) =>
+        test.location.file.endsWith('.spec.ts')
       );
 
       const usesParallelWorkers = config.type === 'parallel';
@@ -52,7 +53,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
 
       return {
         path: config.path,
-        hasTests: !!runnableTest,
+        hasTests: hasSpecFile,
         tags: allTags,
         serverRunFlags: [], // Will be computed from tags after cross-tag filtering
         usesParallelWorkers,
@@ -171,8 +172,8 @@ const validateConfigsHaveTests = (modules: ModuleDiscoveryInfo[], log: ToolingLo
       log.error(`  - [${module}] ${configPath}`);
     }
     throw new Error(
-      `${configsWithoutTests.length} Scout Playwright config(s) have no runnable tests. ` +
-        'Each config must contain at least one non-skipped .spec.ts test file.'
+      `${configsWithoutTests.length} Scout Playwright config(s) have no tests. ` +
+        'Each config must contain at least one .spec.ts test file.'
     );
   }
 };
