@@ -21,5 +21,7 @@ export const NotificationPolicyDestinationBadge = ({
           {destination.id}
         </EuiBadge>
       );
+    default:
+      return null;
   }
 };

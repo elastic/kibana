@@ -29,4 +29,13 @@ describe('NotificationPolicyDestinationBadge', () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('test-id');
   });
+
+  it('renders nothing for an unknown destination type', () => {
+    render(
+      <NotificationPolicyDestinationBadge
+        destination={{ type: 'unknown' as never, id: 'test-id' }}
+      />
+    );
+    expect(screen.queryByText('test-id')).not.toBeInTheDocument();
+  });
 });

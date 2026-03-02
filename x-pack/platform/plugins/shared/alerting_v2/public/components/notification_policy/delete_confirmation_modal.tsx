@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 interface DeleteNotificationPolicyConfirmModalProps {
   policyName: string;
@@ -23,10 +23,12 @@ export const DeleteNotificationPolicyConfirmModal = ({
   onConfirm,
   isLoading = false,
 }: DeleteNotificationPolicyConfirmModalProps) => {
+  const titleId = useGeneratedHtmlId();
   return (
     <EuiConfirmModal
       id="deleteNotificationPolicyConfirmModal"
-      aria-label="Delete notification policy"
+      aria-labelledby={titleId}
+      titleProps={{ id: titleId }}
       title={i18n.translate('xpack.alertingV2.notificationPolicy.deleteModal.title', {
         defaultMessage: 'Delete notification policy',
       })}

@@ -23,8 +23,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERTING_V2_APP_ID, ALERTING_V2_APP_ROUTE } from './constants';
 import { App } from './components/app';
 
-const queryClient = new QueryClient();
-
 @injectable()
 export class AlertingV2App {
   public static id = ALERTING_V2_APP_ID;
@@ -53,6 +51,8 @@ export const mountAlertingV2App = ({
   container: Container;
 }): AppUnmount => {
   const { element, history } = params;
+
+  const queryClient = new QueryClient();
 
   ReactDOM.render(
     <Context.Provider value={container}>
