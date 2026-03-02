@@ -20,10 +20,12 @@ import {
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import { useMetricsInfo } from './use_metrics_info';
 
 /**
  * Wrapper component that reads breakdownField from Discover's app state
- * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector
+ * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
+ * Triggers METRICS_INFO fetch when in Metrics Experience.
  */
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
@@ -32,6 +34,8 @@ const MetricsExperienceGridWrapper = (
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const { onFilter } = props;
+
+  useMetricsInfo(props.fetchParams, props.services, props.isComponentVisible ?? true);
 
   // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
   const handleFilter = useCallback(
