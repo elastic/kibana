@@ -8,7 +8,10 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { UnifiedHistogramFetchParams, UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import type {
+  UnifiedHistogramFetchParams,
+  UnifiedHistogramServices,
+} from '@kbn/unified-histogram/types';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { useMetricsInfo } from './use_metrics_info';
 import { fetchMetricsInfo } from '../utils/fetch_metrics_info';
@@ -23,7 +26,7 @@ const createServices = (): UnifiedHistogramServices =>
   ({
     data: { search: { search: jest.fn() } },
     uiSettings: {},
-  }) as unknown as UnifiedHistogramServices;
+  } as unknown as UnifiedHistogramServices);
 
 const createFetchParams = (
   overrides: Partial<UnifiedHistogramFetchParams> = {}
@@ -36,7 +39,7 @@ const createFetchParams = (
     filters: [],
     abortController: new AbortController(),
     ...overrides,
-  }) as unknown as UnifiedHistogramFetchParams;
+  } as unknown as UnifiedHistogramFetchParams);
 
 describe('useMetricsInfo', () => {
   beforeEach(() => {
