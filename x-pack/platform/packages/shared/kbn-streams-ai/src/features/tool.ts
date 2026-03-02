@@ -107,6 +107,7 @@ export function toFeatureForLlmContext(feature: Feature): LlmFeature {
     'properties',
     'evidence',
     'tags',
+    'filter',
     'meta',
   ]);
 }

@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { isEqual } from 'lodash';
-import { conditionSchema, } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
@@ -37,7 +37,7 @@ export const baseFeatureSchema = z.object({
   evidence: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   filter: conditionSchema.optional(),
-  meta: z.record(z.string(), z.unknown()).optional()
+  meta: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type BaseFeature = z.infer<typeof baseFeatureSchema>;
