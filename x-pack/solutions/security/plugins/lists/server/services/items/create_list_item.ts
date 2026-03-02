@@ -6,14 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-<<<<<<< HEAD
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  DeserializerOrUndefined,
-=======
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
   IdOrUndefined,
   ListItemSchema,
   MetaOrUndefined,

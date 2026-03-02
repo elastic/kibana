@@ -205,8 +205,6 @@ paths:
       requestBody:
         content:
           application/json:
-<<<<<<< HEAD
-=======
             examples:
               ip:
                 value:
@@ -232,28 +230,17 @@ paths:
                   id: keyword_custom_format_list
                   name: Simple list with a keyword using a custom format
                   type: keyword
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
             schema:
               type: object
               properties:
                 description:
                   $ref: '#/components/schemas/ListDescription'
-<<<<<<< HEAD
-                deserializer:
-                  type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
                 id:
                   $ref: '#/components/schemas/ListId'
                 meta:
                   $ref: '#/components/schemas/ListMetadata'
                 name:
                   $ref: '#/components/schemas/ListName'
-<<<<<<< HEAD
-                serializer:
-                  type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
                 type:
                   $ref: '#/components/schemas/ListType'
                 version:
@@ -270,8 +257,6 @@ paths:
         '200':
           content:
             application/json:
-<<<<<<< HEAD
-=======
               examples:
                 ip:
                   value:
@@ -333,7 +318,6 @@ paths:
                     updated_at: 2025-01-09T18:25:39.604Z
                     updated_by: elastic
                     version: 1
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
               schema:
                 $ref: '#/components/schemas/List'
           description: Successful response
@@ -1297,19 +1281,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-<<<<<<< HEAD
-        - in: query
-          name: serializer
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: deserializer
-          required: false
-          schema:
-            type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
         - description: >-
             Determines when changes made by the request are made visible to
             search
@@ -1452,11 +1423,6 @@ components:
           type: string
         description:
           $ref: '#/components/schemas/ListDescription'
-<<<<<<< HEAD
-        deserializer:
-          type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
         id:
           $ref: '#/components/schemas/ListId'
         immutable:
@@ -1465,11 +1431,6 @@ components:
           $ref: '#/components/schemas/ListMetadata'
         name:
           $ref: '#/components/schemas/ListName'
-<<<<<<< HEAD
-        serializer:
-          type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
         tie_breaker_id:
           type: string
         type:
@@ -1495,14 +1456,10 @@ components:
         - updated_at
         - updated_by
     ListDescription:
-<<<<<<< HEAD
-      $ref: '#/components/schemas/NonEmptyString'
-=======
       description: Describes the value list.
       format: nonempty
       minLength: 1
       type: string
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
     ListId:
       $ref: '#/components/schemas/NonEmptyString'
     ListItem:
@@ -1518,22 +1475,12 @@ components:
           type: string
         created_by:
           type: string
-<<<<<<< HEAD
-        deserializer:
-          type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
         id:
           $ref: '#/components/schemas/ListItemId'
         list_id:
           $ref: '#/components/schemas/ListId'
         meta:
           $ref: '#/components/schemas/ListItemMetadata'
-<<<<<<< HEAD
-        serializer:
-          type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
         tie_breaker_id:
           type: string
         type:

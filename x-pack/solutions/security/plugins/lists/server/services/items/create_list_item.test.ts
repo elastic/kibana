@@ -11,11 +11,7 @@ import { getListItemResponseMock } from '../../../common/schemas/response/list_i
 import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getIndexESListItemMock } from '../../schemas/elastic_query/index_es_list_item_schema.mock';
 
-<<<<<<< HEAD
-import { CreateListItemOptions, createListItem } from './create_list_item';
-=======
 import { createListItem } from './create_list_item';
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
 import { getCreateListItemOptionsMock } from './create_list_item.mock';
 
 describe('create_list_item', () => {

@@ -26,13 +26,6 @@ paths:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListDescription'
                 type:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
-<<<<<<< HEAD
-                serializer:
-                  type: string
-                deserializer:
-                  type: string
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
                 meta:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListMetadata'
                 version:
@@ -43,8 +36,6 @@ paths:
                 - name
                 - description
                 - type
-<<<<<<< HEAD
-=======
             examples:
               ip:
                 value:
@@ -71,7 +62,6 @@ paths:
                   description: This parses the first found ipv4 only
                   type: keyword
 
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
       responses:
         200:
           description: Successful response
@@ -79,8 +69,6 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
-<<<<<<< HEAD
-=======
               examples:
                 ip:
                   value:
@@ -142,7 +130,6 @@ paths:
                     created_by: elastic
                     updated_at: 2025-01-09T18:25:39.604Z
                     updated_by: elastic
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
         400:
           description: Invalid input data response
           content:

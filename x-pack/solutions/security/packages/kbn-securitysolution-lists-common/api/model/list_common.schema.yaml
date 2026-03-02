@@ -44,22 +44,6 @@ components:
     ListMetadata:
       type: object
       additionalProperties: true
-<<<<<<< HEAD
-=======
-      description: Placeholder for metadata about the value list.
-
-    ListVersion:
-      type: integer
-      minimum: 1
-      description: The document version number.
-      example: 1
-
-    ListVersionId:
-      type: string
-      description: |
-        The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
-      example: WzIsMV0=
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
 
     ListItemId:
       $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'

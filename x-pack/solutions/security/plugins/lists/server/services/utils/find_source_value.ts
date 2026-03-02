@@ -6,11 +6,7 @@
  */
 
 import Mustache from 'mustache';
-<<<<<<< HEAD
-import { DeserializerOrUndefined, type } from '@kbn/securitysolution-io-ts-list-types';
-=======
 import { type } from '@kbn/securitysolution-io-ts-list-types';
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
 
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { esDataTypeGeoPointRange, esDataTypeRange } from '../../schemas/common/schemas';

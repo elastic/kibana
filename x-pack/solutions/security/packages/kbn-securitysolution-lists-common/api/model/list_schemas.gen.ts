@@ -33,11 +33,6 @@ export const List = z.object({
   type: ListType,
   name: ListName,
   description: ListDescription,
-<<<<<<< HEAD
-  serializer: z.string().optional(),
-  deserializer: z.string().optional(),
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
   immutable: z.boolean(),
   meta: ListMetadata.optional(),
   '@timestamp': z.string().datetime().optional(),
@@ -56,11 +51,6 @@ export const ListItem = z.object({
   type: ListType,
   list_id: ListId,
   value: ListItemValue,
-<<<<<<< HEAD
-  serializer: z.string().optional(),
-  deserializer: z.string().optional(),
-=======
->>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
   meta: ListItemMetadata.optional(),
   '@timestamp': z.string().datetime().optional(),
   _version: z.string().optional(),
