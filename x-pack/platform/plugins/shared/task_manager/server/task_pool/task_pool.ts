@@ -206,9 +206,12 @@ export class TaskPool {
         // If a task Saved Object can't be found by an in flight task runner
         // we asssume the underlying task has been deleted while it was running
         // so we will log this as a debug, rather than a warn
-        const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${
-          err.message || err.error.message
-        }`;
+        const errorMessage =
+          extractTaskRunErrorMessage(err) ??
+          (err && typeof err === 'object' && 'error' in err && err.error
+            ? String(err.error)
+            : String(err));
+        const errorLogLine = `Task ${taskRunner.toString()} failed in attempt to run: ${errorMessage}`;
         if (isTaskSavedObjectNotFoundError(err, taskRunner.id)) {
           this.logger.debug(errorLogLine);
         } else {
@@ -258,6 +261,32 @@ export class TaskPool {
         this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
       }
     })().catch(() => {});
+  }
+}
+
+function extractTaskRunErrorMessage(err: unknown): string | undefined {
+  if (!err || typeof err !== 'object') {
+    return;
+  }
+
+  if ('message' in err && typeof err.message === 'string') {
+    return err.message;
+  }
+
+  if ('reason' in err && typeof err.reason === 'string') {
+    return err.reason;
+  }
+
+  if ('error' in err && err.error && typeof err.error === 'object') {
+    if ('message' in err.error && typeof err.error.message === 'string') {
+      return err.error.message;
+    }
+    if ('reason' in err.error && typeof err.error.reason === 'string') {
+      return err.error.reason;
+    }
+    if ('type' in err.error && typeof err.error.type === 'string') {
+      return err.error.type;
+    }
   }
 }
 
