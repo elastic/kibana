@@ -78,7 +78,9 @@ export class SecurityRuleGenerationClient {
     }
 
     this.log.warning(
-      `Agent returned no rule. Error: ${extracted.error ?? 'unknown'}. Diagnostics: ${extracted.diagnostics}`
+      `Agent returned no rule. Error: ${extracted.error ?? 'unknown'}. Diagnostics: ${
+        extracted.diagnostics
+      }`
     );
     return {
       error: extracted.error || 'No rule returned from agent',
