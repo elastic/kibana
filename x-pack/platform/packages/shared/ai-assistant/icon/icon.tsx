@@ -20,5 +20,5 @@ export type AssistantIconProps = Omit<EuiIconProps, 'type'>;
  * Default Elastic AI Assistant icon.
  */
 export const AssistantIcon = ({ size = 'm', ...rest }: AssistantIconProps) => {
-  return <EuiIcon {...{ type: assistantIcon, size, ...rest }} />;
+  return <EuiIcon {...{ type: robotIcon, size, ...rest }} />;
 };

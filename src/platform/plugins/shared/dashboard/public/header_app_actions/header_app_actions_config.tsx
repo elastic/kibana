@@ -72,13 +72,12 @@ const DashboardSaveSplitButton: React.FC = () => {
   const primaryActionButtonCss = css`
     background-color: transparent !important;
     height: 28px !important;
-    margin-left: 4px;
+    margin-left: 0;
   `;
   const secondaryActionButtonCss = css`
     background-color: transparent !important;
     height: 28px !important;
     margin-left: 0;
-    margin-right: 8px;
   `;
   const panels = [
     {
@@ -180,16 +179,17 @@ const DashboardPrimaryActions: React.FC = () => {
   const primaryActionButtonCss = css`
     background-color: transparent !important;
     height: 28px !important;
-    margin-left: 4px;
+    margin-left: 0;
   `;
 
   if (isEditMode) {
     return (
       <>
+        <DashboardSaveSplitButton />
         <EuiButton
           css={primaryButtonCss}
           size="s"
-          color="success"
+          color="primary"
           minWidth={false}
           iconType="plusInCircle"
           onClick={noop}
@@ -202,7 +202,6 @@ const DashboardPrimaryActions: React.FC = () => {
             defaultMessage: 'Add',
           })}
         </EuiButton>
-        <DashboardSaveSplitButton />
       </>
     );
   }
@@ -266,30 +265,26 @@ export function getDashboardListingHeaderAppActionsConfig(
   onCreateDashboard: () => void
 ): ChromeHeaderAppActionsConfig {
   const primaryActionButtonCss = css`
-  background-color: transparent !important;
-  height: 28px !important;
-  margin-left: 4px;
+    background-color: transparent !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    margin-left: 0;
 `;
   return {
     primaryActions: [
-      <EuiButton
+      <EuiButtonIcon
         key="listing-new-dashboard"
         css={primaryActionButtonCss}
-        size="s"
-        minWidth={false}
+        size="xs"
         color="text"
-        iconType="plus"
-        iconSize="s"
+        iconType="plusInCircle"
+        iconSize="m"
         onClick={onCreateDashboard}
         data-test-subj="headerGlobalNav-appActionsNewDashboardButton"
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
           defaultMessage: 'New',
         })}
-      >
-        {i18n.translate('core.ui.chrome.headerGlobalNav.newButton', {
-          defaultMessage: 'New',
-        })}
-      </EuiButton>
+      />
     ],
   };
 }
