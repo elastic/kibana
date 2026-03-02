@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import type {
+  PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';

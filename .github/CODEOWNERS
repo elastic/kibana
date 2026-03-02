@@ -1835,6 +1835,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts @elastic/obs-exploration-team
 
 # obs-onboarding-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/obs-onboarding-team
