@@ -88,9 +88,9 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
   virtualRow: css({
     display: 'flex',
     alignItems: 'stretch',
+    height: '100%',
     borderBottom: euiTheme.border.thin,
-    contentVisibility: 'auto',
-    containIntrinsicSize: '0 68px',
+    boxSizing: 'border-box',
     '&:hover': {
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
     },
@@ -123,11 +123,6 @@ export const getTanstackVirtualGridStyles = (euiTheme: UseEuiTheme['euiTheme']) 
     padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
     overflow: 'hidden',
     minWidth: 0,
-
-    // 3-line clamp matching UnifiedDataTable row height behaviour
-    display: '-webkit-box',
-    WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical',
     lineHeight: 1.5,
   }),
 });
