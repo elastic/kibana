@@ -17,6 +17,7 @@ import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
+import { startDockerServers } from './run_docker_servers';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 
@@ -45,6 +46,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     });
 
     await ensureDefaultSpaceNPRE(config, log);
+
+    const shutdownDockerServers = await startDockerServers(config, log);
 
     await runKibanaServer({
       procs,
@@ -75,6 +78,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     );
 
     await procs.waitForAllToStop();
+    await shutdownDockerServers();
     await shutdownEs();
   });
 }
