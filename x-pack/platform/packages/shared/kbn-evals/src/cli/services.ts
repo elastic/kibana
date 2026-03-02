@@ -216,82 +216,25 @@ export const tailLog = (
     return () => {};
   }
 
-  const startPos = opts?.fromStart ? 0 : Fs.statSync(logPath).size;
-  let offset = startPos;
+  const tailArgs = ['-f'];
+  if (!opts?.fromStart) {
+    tailArgs.push('-n', '0');
+  }
+  tailArgs.push(logPath);
+
+  const child = spawn('tail', tailArgs, { stdio: ['ignore', 'pipe', 'ignore'] });
+
   let buffer = '';
-
-  const interval = setInterval(() => {
-    try {
-      const stat = Fs.statSync(logPath);
-      if (stat.size > offset) {
-        const chunk = Buffer.alloc(stat.size - offset);
-        const fd = Fs.openSync(logPath, 'r');
-        Fs.readSync(fd, chunk, 0, chunk.length, offset);
-        Fs.closeSync(fd);
-        offset = stat.size;
-
-        buffer += chunk.toString('utf-8');
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-        for (const line of lines) {
-          log.info(`[${name}] ${line}`);
-        }
-      }
-    } catch {
-      // file may be temporarily unavailable
+  child.stdout.on('data', (chunk: Buffer) => {
+    buffer += chunk.toString('utf-8');
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      log.info(`[${name}] ${line}`);
     }
-  }, 300);
-
-  return () => clearInterval(interval);
-};
-
-/**
- * Wait for a service to produce a line matching a pattern, or timeout.
- */
-export const waitForLogLine = (
-  repoRoot: string,
-  name: ServiceName,
-  pattern: RegExp | string,
-  timeoutMs: number
-): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const state = readState(repoRoot);
-    const entry = state[name];
-    if (!entry) {
-      resolve(false);
-      return;
-    }
-
-    const logPath = Path.resolve(repoRoot, entry.logFile);
-    const regex = typeof pattern === 'string' ? new RegExp(pattern) : pattern;
-    let offset = 0;
-    const deadline = Date.now() + timeoutMs;
-
-    const interval = setInterval(() => {
-      if (Date.now() > deadline) {
-        clearInterval(interval);
-        resolve(false);
-        return;
-      }
-
-      try {
-        if (!Fs.existsSync(logPath)) return;
-        const stat = Fs.statSync(logPath);
-        if (stat.size <= offset) return;
-
-        const chunk = Buffer.alloc(stat.size - offset);
-        const fd = Fs.openSync(logPath, 'r');
-        Fs.readSync(fd, chunk, 0, chunk.length, offset);
-        Fs.closeSync(fd);
-        offset = stat.size;
-
-        if (regex.test(chunk.toString('utf-8'))) {
-          clearInterval(interval);
-          resolve(true);
-        }
-      } catch {
-        // file may be temporarily unavailable
-      }
-    }, 500);
   });
+
+  return () => {
+    child.kill();
+  };
 };

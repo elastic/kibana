@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import { execFileSync, spawnSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
+import { safeExec, VAULT_SECRET_PATH } from '../utils';
 
-const VAULT_SECRET_PATH = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
 const EIS_MODELS_PATH = 'target/eis_models.json';
-
-const safeExec = (command: string, args: string[]): string | null => {
-  try {
-    return execFileSync(command, args, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return null;
-  }
-};
 
 const checkVaultAuth = (): boolean => {
   return safeExec('vault', ['token', 'lookup', '-format=json']) !== null;

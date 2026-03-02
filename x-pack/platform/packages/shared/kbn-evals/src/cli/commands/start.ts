@@ -7,7 +7,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { spawn, execFileSync } from 'child_process';
+import { spawn } from 'child_process';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -30,22 +30,11 @@ import {
   connectorsHash,
   tailLog,
 } from '../services';
+import { safeExec, VAULT_SECRET_PATH } from '../utils';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
-const VAULT_SECRET_PATH = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
-
-const safeExec = (command: string, args: string[]): string | null => {
-  try {
-    return execFileSync(command, args, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return null;
-  }
-};
 
 const fetchCcmApiKey = (log: ToolingLog): string => {
   const envKey = process.env.KIBANA_EIS_CCM_API_KEY;
@@ -88,6 +77,8 @@ const isEdotRunningViaDocker = (): boolean => {
   return result !== null && result.length > 0;
 };
 
+// Any HTTP response (including 401/503) means the service is listening.
+// We only care that the port is up, not that auth is configured yet.
 const probeHttp = async (url: string): Promise<boolean> => {
   try {
     await fetch(url, { signal: AbortSignal.timeout(2000) });

@@ -7,11 +7,12 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { execFileSync, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
 import { isServiceRunning, readState } from '../services';
+import { safeExec } from '../utils';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
@@ -23,17 +24,6 @@ interface CheckResult {
   detail?: string;
   fix?: () => Promise<void>;
 }
-
-const safeExec = (command: string, args: string[]): string | null => {
-  try {
-    return execFileSync(command, args, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return null;
-  }
-};
 
 export const doctorCmd: Command<void> = {
   name: 'doctor',
