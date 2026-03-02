@@ -10,9 +10,9 @@
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { combineLatest, skip } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { useGridPanelState } from './use_panel_grid_data';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { i18n } from '@kbn/i18n';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [width, setWidth] = useState(0);
