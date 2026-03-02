@@ -55,14 +55,14 @@ export class SearchInferenceEndpointsPlugin
       name: PLUGIN_NAME,
       order: 2,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      app: ['kibana'],
+      app: [],
       catalogue: [],
       management: {
         ml: [INFERENCE_ENDPOINTS_APP_ID],
       },
       privileges: {
         all: {
-          app: ['kibana'],
+          app: [],
           api: [],
           catalogue: [],
           management: {
