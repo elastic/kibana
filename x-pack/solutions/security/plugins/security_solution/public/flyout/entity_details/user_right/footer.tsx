@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TakeAction } from '../shared/components/take_action';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
-export const UserPanelFooter = ({ userName }: { userName: string }) => {
+export const UserPanelFooter = ({
+  entityIdentifiers,
+}: {
+  entityIdentifiers: EntityIdentifiers;
+}) => {
+  const userName = useMemo(
+    () =>
+      entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '',
+    [entityIdentifiers]
+  );
+
   return (
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">

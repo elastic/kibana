@@ -9,8 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { euid } from '../../../../../../plugins/entity_store/common';
 import type { ESQuery } from '../../../../common/typed_json';
+import {
+  buildUserFilterFromEntityIdentifiers,
+  buildUserNamesFilter,
+} from '../../../../common/search_strategy';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -36,13 +39,15 @@ import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface UserPanelProps extends Record<string, unknown> {
-  contextID: string;
+  contextID?: string;
   scopeId: string;
-  isPreviewMode: boolean;
+  isPreviewMode?: boolean;
   /**
    * Entity identifiers for the user (following entity store EUID logic)
    */
-  entityIdentifiers: EntityIdentifiers;
+  entityIdentifiers?: EntityIdentifiers;
+  /** @deprecated Use entityIdentifiers with 'user.name' key instead */
+  userName?: string;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -62,19 +67,41 @@ export const UserPanel = ({
   scopeId,
   isPreviewMode = false,
   entityIdentifiers,
+  userName: legacyUserName,
 }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
+  // Guard: entityIdentifiers and contextID with fallbacks to prevent "Unable to load page" errors
+  // Support legacy userName param: when only userName is passed, derive entityIdentifiers
+  const safeEntityIdentifiers = useMemo(
+    () =>
+      entityIdentifiers && Object.keys(entityIdentifiers).length > 0
+        ? entityIdentifiers
+        : legacyUserName
+        ? { 'user.name': legacyUserName }
+        : {},
+    [entityIdentifiers, legacyUserName]
+  );
+  const safeContextID = contextID ?? scopeId ?? 'user-panel';
+  const hasValidIdentifiers =
+    safeEntityIdentifiers && Object.keys(safeEntityIdentifiers).length > 0;
+
   // Extract userName from entityIdentifiers
   // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
   const effectiveUserName = useMemo<string>(() => {
+    if (!hasValidIdentifiers) return '';
     const userNameFromIdentifiers =
-      entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0];
-    return userNameFromIdentifiers as string;
-  }, [entityIdentifiers]);
+      safeEntityIdentifiers['user.name'] || Object.values(safeEntityIdentifiers)[0];
+    return (userNameFromIdentifiers as string) ?? '';
+  }, [safeEntityIdentifiers, hasValidIdentifiers]);
 
-  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+  const entityFilters = useMemo(
+    () =>
+      buildUserFilterFromEntityIdentifiers(safeEntityIdentifiers) ??
+      (effectiveUserName ? buildUserNamesFilter([effectiveUserName]) : undefined),
+    [safeEntityIdentifiers, effectiveUserName]
+  );
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
@@ -86,7 +113,7 @@ export const UserPanel = ({
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
-  const observedUser = useObservedUser(entityIdentifiers, scopeId);
+  const observedUser = useObservedUser(safeEntityIdentifiers, scopeId);
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
@@ -105,10 +132,10 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(safeEntityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    entityIdentifiers: safeEntityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
@@ -124,9 +151,9 @@ export const UserPanel = ({
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    entityIdentifiers,
+    entityIdentifiers: safeEntityIdentifiers,
     scopeId,
-    contextID,
+    contextID: safeContextID,
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
@@ -157,7 +184,7 @@ export const UserPanel = ({
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <UserPanelHeader
-        entityIdentifiers={entityIdentifiers}
+        entityIdentifiers={safeEntityIdentifiers}
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
         userName={effectiveUserName}
@@ -167,19 +194,19 @@ export const UserPanel = ({
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
-        contextID={contextID}
+        contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
         isPreviewMode={isPreviewMode}
-        entityIdentifiers={entityIdentifiers}
+        entityIdentifiers={safeEntityIdentifiers}
       />
       {!isPreviewMode && assetInventoryEnabled && (
-        <UserPanelFooter entityIdentifiers={entityIdentifiers} />
+        <UserPanelFooter entityIdentifiers={safeEntityIdentifiers} />
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter
-          entityIdentifiers={entityIdentifiers}
-          contextID={contextID}
+          entityIdentifiers={safeEntityIdentifiers}
+          contextID={safeContextID}
           scopeId={scopeId}
         />
       )}

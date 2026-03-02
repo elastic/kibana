@@ -11,7 +11,6 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { InsightsTabCsp } from './insights_tab_csp';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
 import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 
 // Mock the child components
@@ -42,8 +41,7 @@ const mockUseExpandableFlyoutState = useExpandableFlyoutState as jest.MockedFunc
 
 describe('InsightsTabCsp', () => {
   const defaultProps = {
-    value: 'test-value',
-    field: 'hostName' as CloudPostureEntityIdentifier,
+    entityIdentifiers: { 'host.name': 'test-value' },
     scopeId: 'test-scope',
   };
 

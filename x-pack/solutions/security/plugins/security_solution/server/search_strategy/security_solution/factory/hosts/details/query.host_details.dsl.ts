@@ -13,6 +13,7 @@ import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
 export const buildHostDetailsQuery = ({
   hostName,
+  hostFilter,
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
@@ -21,8 +22,13 @@ export const buildHostDetailsQuery = ({
     ...cloudFieldsMap,
   });
 
+  const hostFilterClause = hostFilter ?? (hostName ? { term: { 'host.name': hostName } } : undefined);
+  if (!hostFilterClause) {
+    throw new Error('Either hostName or hostFilter must be provided to buildHostDetailsQuery');
+  }
+
   const filter = [
-    { term: { 'host.name': hostName } },
+    hostFilterClause,
     {
       range: {
         '@timestamp': {

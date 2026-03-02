@@ -10,6 +10,7 @@ import { useEffect, useMemo } from 'react';
 import type { inputsModel } from '../../../../../common/store';
 import type { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { HostsQueries } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { buildHostFilterFromEntityIdentifiers } from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
@@ -26,23 +27,64 @@ export interface HostDetailsArgs {
   endDate: string;
 }
 
-interface UseHostDetails {
+interface UseHostDetailsBase {
   endDate: string;
-  hostName: string;
   id?: string;
   indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
 
-export const useHostDetails = ({
-  endDate,
-  hostName,
-  indexNames,
-  id = ID,
-  skip = false,
-  startDate,
-}: UseHostDetails): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
+interface UseHostDetailsWithHostName extends UseHostDetailsBase {
+  hostName: string;
+  entityIdentifiers?: never;
+}
+
+interface UseHostDetailsWithEntityIdentifiers extends UseHostDetailsBase {
+  entityIdentifiers: Record<string, string>;
+  hostName?: never;
+}
+
+type UseHostDetails = UseHostDetailsWithHostName | UseHostDetailsWithEntityIdentifiers;
+
+const getStableEntityIdentifiersKey = (identifiers: Record<string, string>): string =>
+  JSON.stringify(
+    Object.fromEntries(Object.entries(identifiers).sort(([a], [b]) => a.localeCompare(b)))
+  );
+
+export const useHostDetails = (
+  props: UseHostDetails
+): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
+  const { endDate, indexNames, id = ID, skip = false, startDate } = props;
+
+  const entityIdentifiersKey =
+    'entityIdentifiers' in props &&
+    props.entityIdentifiers &&
+    Object.keys(props.entityIdentifiers).length > 0
+      ? getStableEntityIdentifiersKey(props.entityIdentifiers)
+      : null;
+  const hostNameFromProps = 'hostName' in props ? props.hostName : '';
+
+  const { hostFilter, hostName } = useMemo(() => {
+    if (entityIdentifiersKey !== null) {
+      const entityIdentifiers = JSON.parse(entityIdentifiersKey) as Record<string, string>;
+      const filter = buildHostFilterFromEntityIdentifiers(entityIdentifiers);
+      const fallbackName =
+        entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0] || '';
+      return {
+        hostFilter: filter ?? (fallbackName ? { term: { 'host.name': fallbackName } } : undefined),
+        hostName: '',
+      };
+    }
+    return {
+      hostFilter: undefined,
+      hostName: hostNameFromProps,
+    };
+  }, [entityIdentifiersKey, hostNameFromProps]);
+
+  const hasValidParams = Boolean(hostFilter || (hostName && hostName.trim()));
+  const effectiveSkip = skip || !hasValidParams;
+
   const {
     loading,
     result: response,
@@ -55,7 +97,7 @@ export const useHostDetails = ({
       hostDetails: {},
     },
     errorMessage: i18n.FAIL_HOST_OVERVIEW,
-    abort: skip,
+    abort: effectiveSkip,
   });
 
   const hostDetailsResponse = useMemo(
@@ -72,24 +114,27 @@ export const useHostDetails = ({
   );
 
   const hostDetailsRequest = useMemo(
-    () => ({
-      defaultIndex: indexNames,
-      factoryQueryType: HostsQueries.details,
-      hostName,
-      timerange: {
-        interval: '12h',
-        from: startDate,
-        to: endDate,
-      },
-    }),
-    [endDate, hostName, indexNames, startDate]
+    () =>
+      hasValidParams
+        ? {
+            defaultIndex: indexNames,
+            factoryQueryType: HostsQueries.details,
+            ...(hostFilter ? { hostFilter } : { hostName: (hostName ?? '').trim() }),
+            timerange: {
+              interval: '12h',
+              from: startDate,
+              to: endDate,
+            },
+          }
+        : null,
+    [endDate, hostFilter, hostName, hasValidParams, indexNames, startDate]
   );
 
   useEffect(() => {
-    if (!skip) {
+    if (!effectiveSkip && hostDetailsRequest) {
       search(hostDetailsRequest);
     }
-  }, [hostDetailsRequest, search, skip]);
+  }, [effectiveSkip, hostDetailsRequest, search]);
 
   return [loading, hostDetailsResponse, refetch];
 };

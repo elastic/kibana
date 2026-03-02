@@ -28,7 +28,6 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -64,13 +63,11 @@ const VulnerabilitiesCount = ({
 };
 
 export const VulnerabilitiesPreview = ({
-  value,
-  field,
+  entityIdentifiers,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  entityIdentifiers: Record<string, string>;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
@@ -79,7 +76,7 @@ export const VulnerabilitiesPreview = ({
   }, []);
 
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
+    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
     sort: [],
     enabled: true,
     pageSize: 1,

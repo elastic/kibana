@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
-import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../../entity_store/common';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   type CloudSecurityUiCounters,

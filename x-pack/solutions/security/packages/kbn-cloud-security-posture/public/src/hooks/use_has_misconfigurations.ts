@@ -8,9 +8,17 @@
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationPreview } from './use_misconfiguration_preview';
 
-export const useHasMisconfigurations = (field: string, value: string) => {
+export const useHasMisconfigurations = (
+  fieldOrEntityIdentifiers: string | Record<string, string>,
+  value?: string
+) => {
+  const query =
+    typeof fieldOrEntityIdentifiers === 'object'
+      ? buildGenericEntityFlyoutPreviewQuery(fieldOrEntityIdentifiers)
+      : buildGenericEntityFlyoutPreviewQuery(fieldOrEntityIdentifiers, value);
+
   const { data } = useMisconfigurationPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
+    query,
     sort: [],
     enabled: true,
     pageSize: 1,

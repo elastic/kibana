@@ -58,34 +58,44 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildGenericEntityFlyoutPreviewQuery = (
+/**
+ * Builds a query to filter CSP findings by entity identifiers (EUID-compatible).
+ * Supports both single field/value and multiple entity identifiers (Record).
+ */
+export function buildGenericEntityFlyoutPreviewQuery(entityIdentifiers: Record<string, string>): {
+  bool: { filter: object[] };
+};
+export function buildGenericEntityFlyoutPreviewQuery(
   field: string,
   queryValue?: string,
   status?: string,
   queryField?: string
-) => {
-  return {
-    bool: {
-      filter: [
-        {
-          bool: {
-            should: [
-              {
-                term: {
-                  [field]: `${queryValue || ''}`,
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        status && queryField
-          ? {
+): { bool: { filter: object[] } };
+export function buildGenericEntityFlyoutPreviewQuery(
+  fieldOrEntityIdentifiers: string | Record<string, string>,
+  queryValueOrStatus?: string,
+  statusOrQueryField?: string,
+  queryField?: string
+): { bool: { filter: object[] } } {
+  const isEntityIdentifiers = typeof fieldOrEntityIdentifiers === 'object';
+
+  if (isEntityIdentifiers) {
+    const entityIdentifiers = fieldOrEntityIdentifiers as Record<string, string>;
+    const status = queryValueOrStatus;
+    const queryFieldParam = statusOrQueryField;
+    const entityFilter = Object.entries(entityIdentifiers).map(([field, value]) => ({
+      term: { [field]: value },
+    }));
+    const filter: object[] = [
+      ...(entityFilter.length > 0 ? [{ bool: { must: entityFilter } }] : []),
+      ...(status && queryFieldParam
+        ? [
+            {
               bool: {
                 should: [
                   {
                     term: {
-                      [queryField]: {
+                      [queryFieldParam]: {
                         value: status,
                         case_insensitive: true,
                       },
@@ -94,12 +104,53 @@ export const buildGenericEntityFlyoutPreviewQuery = (
                 ],
                 minimum_should_match: 1,
               },
-            }
-          : undefined,
-      ].filter(Boolean),
+            },
+          ]
+        : []),
+    ];
+    return { bool: { filter } };
+  }
+
+  const field = fieldOrEntityIdentifiers as string;
+  const queryValue = queryValueOrStatus;
+  const status = statusOrQueryField;
+  const queryFieldParam = queryField;
+
+  const filter: object[] = [
+    {
+      bool: {
+        should: [
+          {
+            term: {
+              [field]: `${queryValue || ''}`,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
     },
-  };
-};
+    ...(status && queryFieldParam
+      ? [
+          {
+            bool: {
+              should: [
+                {
+                  term: {
+                    [queryFieldParam]: {
+                      value: status,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : []),
+  ];
+  return { bool: { filter } };
+}
 
 // Higher-order function for Misconfiguration
 export const buildMisconfigurationEntityFlyoutPreviewQuery = (

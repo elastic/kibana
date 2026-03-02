@@ -37,13 +37,15 @@ import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface HostPanelProps extends Record<string, unknown> {
-  contextID: string;
+  contextID?: string;
   scopeId: string;
-  isPreviewMode: boolean;
+  isPreviewMode?: boolean;
   /**
    * Entity identifiers for the host (following entity store EUID logic)
    */
-  entityIdentifiers: EntityIdentifiers;
+  entityIdentifiers?: EntityIdentifiers;
+  /** @deprecated Use entityIdentifiers with 'host.name' key instead */
+  hostName?: string;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -65,12 +67,22 @@ export const HostPanel = ({
   scopeId,
   isPreviewMode = false,
   entityIdentifiers,
+  hostName: legacyHostName,
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
   // Guard: entityIdentifiers and contextID with fallbacks to prevent "Unable to load page" errors
-  const safeEntityIdentifiers = useMemo(() => entityIdentifiers ?? {}, [entityIdentifiers]);
+  // Support legacy hostName param: when only hostName is passed, derive entityIdentifiers
+  const safeEntityIdentifiers = useMemo(
+    () =>
+      entityIdentifiers && Object.keys(entityIdentifiers).length > 0
+        ? entityIdentifiers
+        : legacyHostName
+        ? { 'host.name': legacyHostName }
+        : {},
+    [entityIdentifiers, legacyHostName]
+  );
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const hasValidIdentifiers =
     safeEntityIdentifiers && Object.keys(safeEntityIdentifiers).length > 0;

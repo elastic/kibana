@@ -25,7 +25,14 @@ import {
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
-  ({ detailName, filterQuery, indexNames, hostDetailsPagePath, hostDetailsFilter }) => {
+  ({
+    detailName,
+    entityIdentifiers,
+    filterQuery,
+    indexNames,
+    hostDetailsPagePath,
+    hostDetailsFilter,
+  }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
     const tabProps = {
@@ -38,6 +45,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       type: HostsType.details,
       indexNames,
       hostName: detailName,
+      entityIdentifiers,
     };
 
     return (

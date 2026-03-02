@@ -10,27 +10,34 @@ import { FILTER_CLOSED } from '@kbn/securitysolution-data-table/common/types';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
-import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
 
 export const useNonClosedAlerts = ({
+  entityIdentifiers,
   field,
   value,
   to,
   from,
   queryId,
 }: {
-  field: CloudPostureEntityIdentifier;
-  value: string;
+  entityIdentifiers?: Record<string, string>;
+  field?: string;
+  value?: string;
   to: string;
   from: string;
   queryId: string;
 }) => {
   const { signalIndexName } = useSignalIndex();
 
-  const entityFilter = useMemo(() => ({ field, value }), [field, value]);
+  const entityFilter = useMemo(() => {
+    if (entityIdentifiers && Object.keys(entityIdentifiers).length > 0) {
+      return undefined;
+    }
+    return field && value ? { field, value } : undefined;
+  }, [entityIdentifiers, field, value]);
 
   const { items: alertsData } = useAlertsByStatus({
     entityFilter,
+    entityIdentifiers,
     signalIndexName,
     queryId,
     to,

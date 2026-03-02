@@ -10,10 +10,11 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { HostPanelHeader } from './header';
 import { mockObservedHostData } from '../mocks';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 
 const mockProps = {
-  hostName: 'test',
-  observedHost: mockObservedHostData,
+  entityIdentifiers: { [EntityIdentifierFields.hostName]: 'test' } as Record<string, string>,
+  lastSeen: mockObservedHostData.lastSeen,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -36,12 +37,9 @@ describe('HostPanelHeader', () => {
         <HostPanelHeader
           {...{
             ...mockProps,
-            observedHost: {
-              ...mockObservedHostData,
-              lastSeen: {
-                isLoading: false,
-                date: futureDay,
-              },
+            lastSeen: {
+              isLoading: false,
+              date: futureDay,
             },
           }}
         />
@@ -67,12 +65,9 @@ describe('HostPanelHeader', () => {
         <HostPanelHeader
           {...{
             ...mockProps,
-            observedHost: {
-              ...mockObservedHostData,
-              lastSeen: {
-                isLoading: false,
-                date: undefined,
-              },
+            lastSeen: {
+              isLoading: false,
+              date: undefined,
             },
           }}
         />

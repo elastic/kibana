@@ -9,27 +9,36 @@ import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import type { HostItem } from '../../../../common/search_strategy';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface HostPanelHeaderProps {
-  hostName: string;
-  observedHost: ObservedEntityData<HostItem>;
+  entityIdentifiers: EntityIdentifiers;
+  lastSeen: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ entityIdentifiers, lastSeen }: HostPanelHeaderProps) => {
+  const hostName = useMemo(
+    () =>
+      entityIdentifiers[EntityIdentifierFields.hostName] ||
+      Object.values(entityIdentifiers)[0] ||
+      '',
+    [entityIdentifiers]
+  );
+
   const lastSeenDate = useMemo(
-    () => observedHost.lastSeen.date && new Date(observedHost.lastSeen.date),
-    [observedHost.lastSeen.date]
+    () => lastSeen?.date && new Date(lastSeen.date),
+    [lastSeen?.date]
   );
 
   return (
@@ -56,7 +65,7 @@ export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {observedHost.lastSeen.date && (
+              {lastSeen?.date && (
                 <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"

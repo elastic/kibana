@@ -42,4 +42,17 @@ export const buildHostFilterFromEntityIdentifiers = (
   return filter as ESQuery | undefined;
 };
 
+/**
+ * Builds an Elasticsearch filter for user queries based on entityIdentifiers.
+ * Uses EUID priority from entity_store common (see getEuidDslFilterBasedOnDocument).
+ * @param entityIdentifiers - Key-value pairs of field names and their values (used as document for EUID)
+ * @returns ESQuery filter object, or undefined if no valid identifiers found
+ */
+export const buildUserFilterFromEntityIdentifiers = (
+  entityIdentifiers: Record<string, string>
+): ESQuery | undefined => {
+  const filter = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+  return filter as ESQuery | undefined;
+};
+
 export { EntityType };

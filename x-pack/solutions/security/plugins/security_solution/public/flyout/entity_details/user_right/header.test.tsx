@@ -14,8 +14,9 @@ import { managedUserDetails, mockManagedUserData, mockObservedUser } from './moc
 
 const mockProps = {
   userName: 'test',
+  entityIdentifiers: { 'user.name': 'test' } as const,
+  lastSeen: mockObservedUser.lastSeen,
   managedUser: mockManagedUserData,
-  observedUser: mockObservedUser,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -38,12 +39,9 @@ describe('UserPanelHeader', () => {
         <UserPanelHeader
           {...{
             ...mockProps,
-            observedUser: {
-              ...mockObservedUser,
-              lastSeen: {
-                isLoading: false,
-                date: futureDay,
-              },
+            lastSeen: {
+              isLoading: false,
+              date: futureDay,
             },
           }}
         />
@@ -98,12 +96,9 @@ describe('UserPanelHeader', () => {
         <UserPanelHeader
           {...{
             ...mockProps,
-            observedUser: {
-              ...mockObservedUser,
-              lastSeen: {
-                isLoading: false,
-                date: undefined,
-              },
+            lastSeen: {
+              isLoading: false,
+              date: undefined,
             },
           }}
         />

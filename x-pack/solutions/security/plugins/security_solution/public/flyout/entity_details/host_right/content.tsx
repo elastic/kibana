@@ -84,7 +84,6 @@ export const HostPanelContent = ({
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
-        hostName={hostName}
         observedHost={observedHost}
         contextID={contextID}
         scopeId={scopeId}

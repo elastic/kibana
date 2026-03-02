@@ -16,7 +16,6 @@ import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 /**
  * Insights view displayed in the document details expandable flyout left section
@@ -44,14 +43,15 @@ function isCspFlyoutPanelProps(
 
 export const InsightsTabCsp = memo(
   ({
-    value,
-    field,
+    entityIdentifiers,
     scopeId,
   }: {
-    value: string;
-    field: CloudPostureEntityIdentifier;
+    entityIdentifiers: Record<string, string>;
     scopeId: string;
   }) => {
+    const firstEntry = Object.entries(entityIdentifiers)[0];
+    const field = firstEntry?.[0] ?? '';
+    const value = firstEntry?.[1] ?? '';
     const panels = useExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;

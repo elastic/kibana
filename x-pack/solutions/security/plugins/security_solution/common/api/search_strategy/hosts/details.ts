@@ -14,7 +14,8 @@ import { timerange } from '../model/timerange';
 import { sort } from './model/sort';
 
 export const hostDetailsSchema = requestBasicOptionsSchema.extend({
-  hostName: z.string(),
+  hostName: z.string().optional(),
+  hostFilter: z.any().optional(),
   skip: z.boolean().optional(),
   inspect,
   pagination: pagination.optional(),

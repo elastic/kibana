@@ -95,7 +95,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,
-        params: { userName: 'testUser', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityIdentifiers: { 'user.name': 'testUser' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+          isPreviewMode: false,
+        },
       },
     });
   });
@@ -117,7 +122,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: HostPanelKey,
-        params: { hostName: 'testHost', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityIdentifiers: { 'host.name': 'testHost' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+          isPreviewMode: false,
+        },
       },
     });
   });

@@ -6,7 +6,7 @@
  */
 
 import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
@@ -30,33 +30,31 @@ export type CloudPostureEntityIdentifier =
   | 'related.entity'; // related.entity is not an entity identifier field, but it includes entity ids which we use to filter for related entities
 
 export const EntityInsight = <T,>({
-  value,
-  field,
+  entityIdentifiers,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  entityIdentifiers: Record<string, string>;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const insightContent: React.ReactElement[] = [];
 
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    field,
-    value
+  const { hasMisconfigurationFindings: showMisconfigurationsPreview } =
+    useHasMisconfigurations(entityIdentifiers);
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
+
+  const showVulnerabilitiesPreview = useMemo(
+    () => hasVulnerabilitiesFindings && 'host.name' in entityIdentifiers,
+    [hasVulnerabilitiesFindings, entityIdentifiers]
   );
-
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
-
-  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
 
   const { to, from } = useGlobalTime();
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
-    field,
-    value,
+    entityIdentifiers,
     to,
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
@@ -79,8 +77,7 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <MisconfigurationsPreview
-          value={value}
-          field={field}
+          entityIdentifiers={entityIdentifiers}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />
@@ -91,8 +88,7 @@ export const EntityInsight = <T,>({
     insightContent.push(
       <>
         <VulnerabilitiesPreview
-          value={value}
-          field={field}
+          entityIdentifiers={entityIdentifiers}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
         />
