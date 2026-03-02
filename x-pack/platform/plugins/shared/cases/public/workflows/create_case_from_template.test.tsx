@@ -74,7 +74,7 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
     const { definition } = setup();
 
     expect(definition.id).toBe('cases.createCaseFromTemplate');
-    expect(definition.actionsMenuGroup).toBe('kibana');
+    expect(definition.category).toBe('kibana');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 
