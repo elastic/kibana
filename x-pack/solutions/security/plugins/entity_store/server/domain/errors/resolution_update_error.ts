@@ -6,12 +6,11 @@
  */
 
 export class ResolutionUpdateError extends Error {
+  public readonly failures: object[];
+
   constructor(operation: string, failures: object[]) {
-    super(
-      `Failed to ${operation}: ${failures.length} update(s) failed. Details: ${JSON.stringify(
-        failures
-      )}`
-    );
+    super(`Failed to ${operation}: ${failures.length} update(s) failed`);
     this.name = 'ResolutionUpdateError';
+    this.failures = failures;
   }
 }

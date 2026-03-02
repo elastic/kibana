@@ -138,6 +138,11 @@ export class ResolutionClient {
     });
 
     if (linkResult.failures?.length) {
+      this.logger.error(
+        `updateByQuery failures while linking entities to '${targetId}': ${JSON.stringify(
+          linkResult.failures
+        )}`
+      );
       throw new ResolutionUpdateError('link entities', linkResult.failures);
     }
 
@@ -195,6 +200,9 @@ export class ResolutionClient {
     });
 
     if (unlinkResult.failures?.length) {
+      this.logger.error(
+        `updateByQuery failures while unlinking entities: ${JSON.stringify(unlinkResult.failures)}`
+      );
       throw new ResolutionUpdateError('unlink entities', unlinkResult.failures);
     }
 
