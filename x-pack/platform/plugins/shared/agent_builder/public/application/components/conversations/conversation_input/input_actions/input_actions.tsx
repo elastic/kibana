@@ -8,9 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import { TourStep, useAgentBuilderTour } from '../../../../context/agent_builder_tour_context';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
+import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { AgentSelector } from './agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { ModifyButton } from './modify_button/modify_button';
 
 interface InputActionsProps {
   onSubmit: () => void;
@@ -26,6 +29,10 @@ export const InputActions: React.FC<InputActionsProps> = ({
   agentId,
 }) => {
   const { getStepProps } = useAgentBuilderTour();
+  const { isEmbeddedContext } = useConversationContext();
+  const { agent } = useAgentBuilderAgentById(agentId);
+
+  const showModifyButton = !isEmbeddedContext && !agent?.readonly;
 
   return (
     <EuiFlexItem grow={false}>
@@ -36,9 +43,14 @@ export const InputActions: React.FC<InputActionsProps> = ({
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
-            <ConnectorSelector />
-          </EuiTourStep>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
+                <ConnectorSelector />
+              </EuiTourStep>
+            </EuiFlexItem>
+            {showModifyButton && <ModifyButton />}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">

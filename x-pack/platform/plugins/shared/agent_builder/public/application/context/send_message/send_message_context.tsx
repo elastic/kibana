@@ -6,13 +6,19 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  ConversationRoundStep,
+  RuntimeAgentConfigurationOverrides,
+} from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
-  sendMessage: ({ message }: { message: string }) => void;
+  sendMessage: (params: {
+    message: string;
+    configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  }) => void;
   isResponseLoading: boolean;
   pendingMessage: string | undefined;
   error: unknown;

@@ -35,10 +35,28 @@ import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
+import {
+  AgentOverridesProvider,
+  useAgentOverrides,
+} from '../../context/agent_overrides/agent_overrides_context';
+import { AgentOverridesPanel } from './agent_overrides_panel/agent_overrides_panel';
 
-export const Conversation: React.FC<{}> = () => {
+/**
+ * Shared conversation component used by both full-screen and embedded views.
+ * Wraps content with AgentOverridesProvider so all children have access to override state.
+ */
+export const Conversation: React.FC = () => {
+  return (
+    <AgentOverridesProvider>
+      <ConversationContent />
+    </AgentOverridesProvider>
+  );
+};
+
+const ConversationContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
+  const { isOverridesPanelOpen, closeOverridesPanel } = useAgentOverrides();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
@@ -106,6 +124,10 @@ export const Conversation: React.FC<{}> = () => {
     padding-bottom: ${euiTheme.size.base};
   `;
 
+  const inputWrapperStyles = css`
+    position: relative;
+  `;
+
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;
   }
@@ -136,9 +158,15 @@ export const Conversation: React.FC<{}> = () => {
         {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
       <EuiFlexItem
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
+        css={[
+          conversationElementWidthStyles,
+          conversationElementPaddingStyles,
+          inputPaddingStyles,
+          inputWrapperStyles,
+        ]}
         grow={false}
       >
+        {isOverridesPanelOpen && <AgentOverridesPanel onClose={closeOverridesPanel} />}
         <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
       </EuiFlexItem>
     </EuiFlexGroup>

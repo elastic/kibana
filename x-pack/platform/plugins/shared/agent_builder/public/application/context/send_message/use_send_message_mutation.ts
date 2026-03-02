@@ -14,6 +14,7 @@ import type {
   ConversationAction,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type { RuntimeAgentConfigurationOverrides } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ScreenContextAttachmentData,
@@ -38,6 +39,7 @@ interface UseSendMessageMutationProps {
 interface SendMessageParams {
   message?: string;
   action?: ConversationAction;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -156,7 +158,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message, action }: SendMessageParams) => {
+  const sendMessage = async ({ message, action, configurationOverrides }: SendMessageParams) => {
     const signal = messageControllerRef.current?.signal;
     const isRegenerate = action === 'regenerate';
     if (!signal) {
@@ -197,6 +199,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       connectorId,
       attachments: [...(attachments || []), ...contextAttachments],
       browserApiTools: browserApiToolsMetadata,
+      configurationOverrides,
     });
 
     return subscribeToChatEvents(events$);
