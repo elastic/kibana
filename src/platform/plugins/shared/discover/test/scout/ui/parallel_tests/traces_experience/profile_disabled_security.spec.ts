@@ -17,13 +17,13 @@ import {
 } from '../../fixtures/traces_experience';
 
 spaceTest.describe(
-  'Traces in Discover - Custom columns',
+  'Traces in Discover - Profile disabled (Security solution)',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: [...tags.stateful.all, ...tags.serverless.security.all],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-      await setupTracesExperience(scoutSpace, config);
+      await setupTracesExperience(scoutSpace, config, { solutionView: 'security' });
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -36,33 +36,39 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'should display trace-specific columns in data view mode',
+      'should not display trace-specific columns in data view mode',
       async ({ pageObjects }) => {
         await spaceTest.step('wait for results to load', async () => {
           await pageObjects.discover.waitForDocTableRendered();
         });
 
-        await spaceTest.step('verify trace-specific column headers', async () => {
+        await spaceTest.step('verify trace-specific columns are not present', async () => {
           const { tracesExperience } = pageObjects;
 
-          for (const column of tracesExperience.expectedColumns) {
-            await expect(tracesExperience.getColumnHeader(column)).toBeVisible();
+          for (const column of tracesExperience.profileSpecificColumns) {
+            await expect(tracesExperience.getColumnHeader(column)).toBeHidden();
           }
         });
       }
     );
 
-    spaceTest('should display trace-specific columns in ESQL mode', async ({ pageObjects }) => {
-      await spaceTest.step('switch to ESQL mode with a different index pattern', async () => {
+    spaceTest('should not render RED metrics charts in ESQL mode', async ({ pageObjects }) => {
+      await spaceTest.step('run ESQL query for traces', async () => {
         await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
       });
 
-      await spaceTest.step('verify trace-specific column headers', async () => {
-        const { tracesExperience } = pageObjects;
+      await spaceTest.step('verify RED metrics grid is not visible', async () => {
+        await expect(pageObjects.tracesExperience.redMetricsGrid).toBeHidden();
+      });
+    });
 
-        for (const column of tracesExperience.expectedColumns) {
-          await expect(tracesExperience.getColumnHeader(column)).toBeVisible();
-        }
+    spaceTest('should not show Overview tab in document flyout', async ({ pageObjects }) => {
+      await spaceTest.step('open first document in flyout', async () => {
+        await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
+      });
+
+      await spaceTest.step('verify Overview tab is not present', async () => {
+        await expect(pageObjects.tracesExperience.overviewTab).toBeHidden();
       });
     });
   }

@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { TRACES } from '../../fixtures/traces_experience';
-
-const RED_METRICS_CHART_TITLES = ['Latency', 'Error Rate', 'Throughput'];
+import {
+  spaceTest,
+  TRACES,
+  setupTracesExperience,
+  teardownTracesExperience,
+} from '../../fixtures/traces_experience';
 
 spaceTest.describe(
   'Traces in Discover - RED metrics charts',
@@ -20,15 +23,7 @@ spaceTest.describe(
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-      if (!config.serverless) {
-        await scoutSpace.setSolutionView('oblt');
-      }
-      await scoutSpace.savedObjects.load(TRACES.KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(TRACES.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime({
-        from: TRACES.DEFAULT_START_TIME,
-        to: TRACES.DEFAULT_END_TIME,
-      });
+      await setupTracesExperience(scoutSpace, config);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -37,54 +32,52 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+      await teardownTracesExperience(scoutSpace);
     });
 
-    spaceTest('should render RED metrics charts in ESQL mode', async ({ page, pageObjects }) => {
+    spaceTest('should render RED metrics charts in ESQL mode', async ({ pageObjects }) => {
       await spaceTest.step('run ESQL query for traces', async () => {
         await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
       });
 
       await spaceTest.step('verify RED metrics charts are visible', async () => {
-        const grid = page.testSubj.locator('metricsExperienceGrid');
-        await expect(grid).toBeVisible();
+        const { tracesExperience } = pageObjects;
 
-        for (const title of RED_METRICS_CHART_TITLES) {
-          await expect(grid.getByText(title)).toBeVisible();
+        await expect(tracesExperience.redMetricsGrid).toBeVisible();
+
+        for (const title of tracesExperience.expectedRedMetricsChartTitles) {
+          await expect(tracesExperience.getRedMetricsChartTitle(title)).toBeVisible();
+        }
+      });
+    });
+
+    spaceTest('should render RED metrics charts with WHERE filter', async ({ pageObjects }) => {
+      await spaceTest.step('run ESQL query with WHERE filter', async () => {
+        await pageObjects.discover.writeEsqlQuery(
+          `${TRACES.ESQL_QUERY} | WHERE service.name == "synth-traces-service"`
+        );
+      });
+
+      await spaceTest.step('verify RED metrics charts are visible', async () => {
+        const { tracesExperience } = pageObjects;
+
+        await expect(tracesExperience.redMetricsGrid).toBeVisible();
+
+        for (const title of tracesExperience.expectedRedMetricsChartTitles) {
+          await expect(tracesExperience.getRedMetricsChartTitle(title)).toBeVisible();
         }
       });
     });
 
     spaceTest(
-      'should render RED metrics charts with WHERE filter',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('run ESQL query with WHERE filter', async () => {
-          await pageObjects.discover.writeEsqlQuery(
-            `${TRACES.ESQL_QUERY} | WHERE service.name == "synth-traces-service"`
-          );
-        });
-
-        await spaceTest.step('verify RED metrics charts are visible', async () => {
-          const grid = page.testSubj.locator('metricsExperienceGrid');
-          await expect(grid).toBeVisible();
-
-          for (const title of RED_METRICS_CHART_TITLES) {
-            await expect(grid.getByText(title)).toBeVisible();
-          }
-        });
-      }
-    );
-
-    spaceTest(
       'should not render RED metrics charts with transformative ESQL query',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         await spaceTest.step('run transformative ESQL query', async () => {
           await pageObjects.discover.writeEsqlQuery(`${TRACES.ESQL_QUERY} | STATS count()`);
         });
 
         await spaceTest.step('verify RED metrics grid is not visible', async () => {
-          await expect(page.testSubj.locator('metricsExperienceGrid')).toBeHidden();
+          await expect(pageObjects.tracesExperience.redMetricsGrid).toBeHidden();
         });
       }
     );
@@ -98,7 +91,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify RED metrics grid is not visible', async () => {
-          await expect(page.testSubj.locator('metricsExperienceGrid')).toBeHidden();
+          await expect(pageObjects.tracesExperience.redMetricsGrid).toBeHidden();
         });
       }
     );

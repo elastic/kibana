@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { TRACES } from '../../fixtures/traces_experience';
+import {
+  spaceTest,
+  setupTracesExperience,
+  teardownTracesExperience,
+} from '../../fixtures/traces_experience';
 
 spaceTest.describe(
   'Traces in Discover - Overview tab',
@@ -18,15 +22,7 @@ spaceTest.describe(
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-      if (!config.serverless) {
-        await scoutSpace.setSolutionView('oblt');
-      }
-      await scoutSpace.savedObjects.load(TRACES.KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(TRACES.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime({
-        from: TRACES.DEFAULT_START_TIME,
-        to: TRACES.DEFAULT_END_TIME,
-      });
+      await setupTracesExperience(scoutSpace, config);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -35,73 +31,50 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+      await teardownTracesExperience(scoutSpace);
     });
 
-    spaceTest('should show Overview tab in the document flyout', async ({ page, pageObjects }) => {
-      await spaceTest.step('wait for results and open first document', async () => {
-        await pageObjects.discover.waitForDocTableRendered();
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.discover.waitForDocViewerFlyoutOpen();
+    spaceTest('should show Overview tab in the document flyout', async ({ pageObjects }) => {
+      await spaceTest.step('open first document in flyout', async () => {
+        await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
       });
 
       await spaceTest.step('verify Overview tab is present', async () => {
-        await expect(
-          page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview')
-        ).toBeVisible();
+        await expect(pageObjects.tracesExperience.overviewTab).toBeVisible();
       });
     });
 
-    spaceTest('should render the Similar Spans section', async ({ page, pageObjects }) => {
-      await spaceTest.step('open first document in flyout', async () => {
-        await pageObjects.discover.waitForDocTableRendered();
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.discover.waitForDocViewerFlyoutOpen();
-      });
-
-      await spaceTest.step('select Overview tab', async () => {
-        await page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview').click();
+    spaceTest('should render the Similar Spans section', async ({ pageObjects }) => {
+      await spaceTest.step('open Overview tab', async () => {
+        await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
       });
 
       await spaceTest.step('verify Similar Spans section is visible', async () => {
-        await expect(page.testSubj.locator('docViewerSimilarSpansSection')).toBeVisible({
+        await expect(pageObjects.tracesExperience.similarSpansSection).toBeVisible({
           timeout: 30_000,
         });
       });
     });
 
-    spaceTest('should render the Trace Summary section', async ({ page, pageObjects }) => {
-      await spaceTest.step('open first document in flyout', async () => {
-        await pageObjects.discover.waitForDocTableRendered();
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.discover.waitForDocViewerFlyoutOpen();
-      });
-
-      await spaceTest.step('select Overview tab', async () => {
-        await page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview').click();
+    spaceTest('should render the Trace Summary section', async ({ pageObjects }) => {
+      await spaceTest.step('open Overview tab', async () => {
+        await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
       });
 
       await spaceTest.step('verify Trace Summary section is visible', async () => {
-        await expect(page.testSubj.locator('unifiedDocViewerTraceSummarySection')).toBeVisible({
+        await expect(pageObjects.tracesExperience.traceSummarySection).toBeVisible({
           timeout: 30_000,
         });
       });
     });
 
-    spaceTest('should render the Logs section', async ({ page, pageObjects }) => {
-      await spaceTest.step('open first document in flyout', async () => {
-        await pageObjects.discover.waitForDocTableRendered();
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.discover.waitForDocViewerFlyoutOpen();
-      });
-
-      await spaceTest.step('select Overview tab', async () => {
-        await page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview').click();
+    spaceTest('should render the Logs section', async ({ pageObjects }) => {
+      await spaceTest.step('open Overview tab', async () => {
+        await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
       });
 
       await spaceTest.step('verify Logs section is visible', async () => {
-        await expect(page.testSubj.locator('unifiedDocViewerLogsSection')).toBeVisible({
+        await expect(pageObjects.tracesExperience.logsSection).toBeVisible({
           timeout: 30_000,
         });
       });

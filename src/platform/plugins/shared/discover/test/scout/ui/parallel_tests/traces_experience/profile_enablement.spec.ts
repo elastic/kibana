@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { TRACES } from '../../fixtures/traces_experience';
+import {
+  spaceTest,
+  TRACES,
+  setupTracesExperience,
+  teardownTracesExperience,
+} from '../../fixtures/traces_experience';
 
 spaceTest.describe(
   'Traces in Discover - Profile enablement',
@@ -18,15 +23,7 @@ spaceTest.describe(
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-      if (!config.serverless) {
-        await scoutSpace.setSolutionView('oblt');
-      }
-      await scoutSpace.savedObjects.load(TRACES.KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(TRACES.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime({
-        from: TRACES.DEFAULT_START_TIME,
-        to: TRACES.DEFAULT_END_TIME,
-      });
+      await setupTracesExperience(scoutSpace, config);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -35,12 +32,11 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+      await teardownTracesExperience(scoutSpace);
     });
 
     spaceTest(
-      'should load Discover with trace data in Classic mode',
+      'should load Discover with trace data in classic mode',
       async ({ page, pageObjects }) => {
         await spaceTest.step('verify Discover loaded with results', async () => {
           await pageObjects.discover.waitForDocTableRendered();
@@ -50,9 +46,9 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'should load Discover with trace data in ES|QL mode',
+      'should load Discover with trace data in ESQL mode',
       async ({ page, pageObjects }) => {
-        await spaceTest.step('run ES|QL query for traces', async () => {
+        await spaceTest.step('run ESQL query for traces', async () => {
           await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
         });
 
