@@ -29,6 +29,9 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 
 The Zoom connector has the following actions:
 
+Who am I
+:   Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL. Takes no inputs.
+
 List meetings
 :   List meetings for a user. Supports filtering by type (scheduled, live, upcoming, etc.).
     - **userId** (optional): User ID or email. Defaults to `me`.
@@ -37,7 +40,7 @@ List meetings
     - **nextPageToken** (optional): Pagination token from a previous response.
 
 Get meeting details
-:   Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this to understand what a meeting is about before looking at recordings or participants.
+:   Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, passcode, and settings. Use this to understand what a meeting is about before looking at recordings or participants.
     - **meetingId** (required): Meeting ID or UUID.
 
 Get past meeting details
@@ -45,7 +48,7 @@ Get past meeting details
     - **meetingId** (required): Past meeting ID or UUID.
 
 Get meeting recordings
-:   Get cloud recordings for a specific meeting. The response includes `recording_files` with types such as `audio_transcript` (VTT), `chat_file` (TXT), `shared_screen_with_speaker_view`, `audio_only`, and more.
+:   Get cloud recordings for a specific meeting. The response includes the recording passcode and `recording_files` with types such as `audio_transcript` (VTT), `chat_file` (TXT), `shared_screen_with_speaker_view`, `audio_only`, and more.
     - **meetingId** (required): Meeting ID or UUID.
 
 List user recordings
@@ -57,8 +60,9 @@ List user recordings
     - **nextPageToken** (optional): Pagination token from a previous response.
 
 Download recording file
-:   Download a recording file by its download URL. Works for transcripts (VTT format), chat logs (TXT format), and other recording files.
+:   Download a recording file by its download URL. Works for transcripts (VTT format), chat logs (TXT format), and other recording files. Content exceeding the character limit is truncated.
     - **downloadUrl** (required): The `download_url` from a recording file object obtained via *Get meeting recordings* or *List user recordings*.
+    - **maxChars** (optional): Maximum characters to return. Defaults to 100,000. Content exceeding this limit is truncated, and the response includes a `truncated` flag.
 
 Get meeting participants
 :   List people who actually attended a past meeting. Returns participant name, email, join/leave times, and duration. Only works for meetings that have already ended.
@@ -74,7 +78,7 @@ Get meeting registrants
     - **nextPageToken** (optional): Pagination token from a previous response.
 
 Recommended flow
-:   Use *List user recordings* or *Get meeting recordings* to find available recording files, then call *Download recording file* with the `download_url` of the desired file. Look for `recording_type` values of `audio_transcript` for transcripts and `chat_file` for post-meeting chat logs.
+:   Use *Who am I* to verify the connected user identity. Use *List user recordings* or *Get meeting recordings* to find available recording files, then call *Download recording file* with the `download_url` of the desired file. Look for `recording_type` values of `audio_transcript` for transcripts and `chat_file` for post-meeting chat logs.
 
 
 ## Get API credentials [zoom-api-credentials]
