@@ -31,7 +31,7 @@ export const executeCleanupItem = async (
     const errorReason =
       typeof response.body.error === 'string'
         ? (response.body.error as string)
-        : ((errorObj?.reason as string) ?? 'Delete failed');
+        : (errorObj?.reason as string) ?? 'Delete failed';
     throw new Error(errorReason);
   }
 };
