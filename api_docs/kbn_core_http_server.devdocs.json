@@ -4013,6 +4013,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/nodes/register_list_route.ts"
               },
@@ -4447,10 +4451,6 @@
               {
                 "plugin": "customBranding",
                 "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7137,6 +7137,10 @@
                 "path": "x-pack/platform/plugins/private/graph/server/routes/explore.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/index/register_retry_route.ts"
               },
@@ -7463,10 +7467,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -9473,6 +9473,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "logstash",
                 "path": "x-pack/platform/plugins/private/logstash/server/routes/pipeline/save.ts"
               },
@@ -9595,10 +9599,6 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_license_route.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -10357,6 +10357,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_delete_route.ts"
               },
@@ -10423,10 +10427,6 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/database/delete.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
