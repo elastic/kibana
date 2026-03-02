@@ -26,6 +26,7 @@ const THANK_YOU_MESSAGE = i18n.translate(
 
 export function FeedbackButtons({ flow }: { flow: string }) {
   const { notifications, analytics } = useKibana().services;
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
   const handleClick = (feedback: Feedback) => {
     analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT.eventType, {
@@ -34,6 +35,8 @@ export function FeedbackButtons({ flow }: { flow: string }) {
     });
     notifications?.toasts.addSuccess(THANK_YOU_MESSAGE);
   };
+
+  if (!isFeedbackEnabled) return null;
 
   return (
     <>

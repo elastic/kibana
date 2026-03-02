@@ -5,40 +5,45 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data mapping - schema editor - Wired Streams',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a parent wired stream
-      await apiServices.streams.forkStream('logs', 'logs.parent', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.parent', {
         field: 'severity_text',
         eq: 'info',
       });
       // Create a child wired stream
-      await apiServices.streams.forkStream('logs.parent', 'logs.parent.child', {
+      await apiServices.streams.forkStream('logs.otel.parent', 'logs.otel.parent.child', {
         field: 'service.name',
         eq: 'test-service',
       });
 
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing mappings before each test
-      await apiServices.streams.clearStreamMappings('logs.parent');
-      await apiServices.streams.clearStreamMappings('logs.parent.child');
+      await apiServices.streams.clearStreamMappings('logs.otel.parent');
+      await apiServices.streams.clearStreamMappings('logs.otel.parent.child');
 
-      await pageObjects.streams.gotoSchemaEditorTab('logs.parent.child');
-      // Verify this is a wired stream (not classic)
-      await pageObjects.streams.verifyWiredBadge();
+      await pageObjects.streams.gotoSchemaEditorTab('logs.otel.parent.child');
+
+      // Wait for the page to be fully loaded before checking for wired badge
+      await page.locator('[data-test-subj="wiredStreamBadge"]').waitFor({
+        state: 'visible',
+        timeout: 30_000,
+      });
     });
 
     test.afterAll(async ({ logsSynthtraceEsClient }) => {
@@ -47,7 +52,7 @@ test.describe(
 
     test('inherited fields display with parent links', async ({ page, pageObjects }) => {
       // First, map a field in the parent stream
-      await pageObjects.streams.gotoSchemaEditorTab('logs.parent');
+      await pageObjects.streams.gotoSchemaEditorTab('logs.otel.parent');
       await pageObjects.streams.expectSchemaEditorTableVisible();
 
       await page.getByTestId('streamsAppContentAddFieldButton').click();
@@ -56,9 +61,7 @@ test.describe(
       ).toBeVisible();
 
       const parentFieldName = 'attributes.parent_field';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(parentFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(parentFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await pageObjects.streams.reviewStagedFieldMappingChanges();
@@ -66,7 +69,7 @@ test.describe(
       await pageObjects.toasts.closeAll();
 
       // Now check the child stream for inherited fields
-      await pageObjects.streams.gotoSchemaEditorTab('logs.parent.child');
+      await pageObjects.streams.gotoSchemaEditorTab('logs.otel.parent.child');
       await pageObjects.streams.expectSchemaEditorTableVisible();
 
       // Search for the inherited field
@@ -87,7 +90,7 @@ test.describe(
       // Verify parent link is displayed
       await expect(page.getByTestId('streamsAppFieldParentLink')).toBeVisible();
       // The link text includes screen reader text, so use toContainText
-      await expect(page.getByTestId('streamsAppFieldParentLink')).toContainText('logs.parent');
+      await expect(page.getByTestId('streamsAppFieldParentLink')).toContainText('logs.otel.parent');
     });
 
     test('ECS/Otel type pre-selection for known fields', async ({ page, pageObjects }) => {
@@ -95,20 +98,19 @@ test.describe(
 
       // Click the "Add field" button
       await page.getByTestId('streamsAppContentAddFieldButton').click();
-
-      // Wait `/fields_metadata` so that we are sure the ECS/Otel mapping recommendations are available
-      await page.waitForResponse(
-        (response) => response.url().includes('/fields_metadata') && response.ok()
-      );
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
 
       // Add an Otel field that should have type recommendation (IP type)
       const ecsFieldName = 'resource.attributes.host.ip';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(ecsFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(ecsFieldName);
 
-      // Wait for ECS/Otel recommendation to load and field type to be pre-selected
-      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip');
+      // Wait for ECS/Otel recommendation to load - the /fields_metadata call provides type hints
+      // Give extra time for the API response to be processed and the UI to update
+      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip', {
+        timeout: 30_000,
+      });
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(
@@ -146,9 +148,7 @@ test.describe(
 
       const ecsFieldName = 'attributes.process_id';
       const aliasFieldName = 'process_id';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(ecsFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(ecsFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
 
       // Check if the add button is enabled (form should be valid)
@@ -189,6 +189,56 @@ test.describe(
         rowIndex: 1,
         value: `Alias for ${ecsFieldName}`,
       });
+    });
+
+    test('validates field names for wired streams', async ({ page, pageObjects }) => {
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      // Open the "Add field" flyout
+      await page.getByTestId('streamsAppContentAddFieldButton').click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
+
+      // Try to add a non-namespaced field - should show error
+      const invalidFieldName = 'invalid_field';
+      await pageObjects.streams.typeFieldName(invalidFieldName);
+
+      // Check that an error is displayed
+      const formRow = page
+        .getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName')
+        .locator('..');
+      await expect(formRow.locator('.euiFormErrorText')).toContainText(
+        "doesn't match the namespaced ECS or OTel schema"
+      );
+
+      // Check that the Add button is disabled when there's a validation error
+      const addButton = page.getByTestId('streamsAppSchemaEditorAddFieldButton');
+      await expect(addButton).toBeDisabled();
+
+      // Clear and try with a valid namespaced field
+      const clearButton = page.getByTestId('comboBoxClearButton');
+      await clearButton.click();
+
+      const validFieldName = 'attributes.valid_field';
+      await pageObjects.streams.typeFieldName(validFieldName);
+
+      // Error should be gone
+      await expect(formRow.locator('.euiFormErrorText')).toBeHidden();
+
+      // Set field type and verify Add button works
+      await pageObjects.streams.setFieldMappingType('keyword');
+      await addButton.click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeHidden();
+
+      // Verify the field was staged (visible in review)
+      await pageObjects.streams.reviewStagedFieldMappingChanges();
+      await expect(page.getByText(validFieldName)).toBeVisible();
+
+      // Close the modal to clean up
+      await pageObjects.streams.closeSchemaReviewModal();
     });
   }
 );

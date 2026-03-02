@@ -410,6 +410,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           style: getRowStyle(group),
         };
       }}
+      tableCaption={i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.tableCaption', {
+        defaultMessage: 'Log rate analysis results groups',
+      })}
     />
   );
 };

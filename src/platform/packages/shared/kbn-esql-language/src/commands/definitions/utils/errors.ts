@@ -265,6 +265,61 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'promqlInvalidParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidParam', {
+          defaultMessage: '[PROMQL] {reason}',
+          values: { reason: out.reason },
+        }),
+        type: 'error',
+      };
+    case 'promqlMutuallyExclusiveParams':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
+          defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
+          values: { param1: out.param1, param2: out.param2 },
+        }),
+        type: 'error',
+      };
+    case 'promqlMissingQuery':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
+          defaultMessage: '[PROMQL] Missing query',
+        }),
+        type: 'error',
+      };
+    case 'promqlUnknownFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlUnknownFunction', {
+          defaultMessage: '[PROMQL] Unknown function "{fn}"',
+          values: { fn: out.fn },
+        }),
+        type: 'error',
+      };
+    case 'promqlWrongNumberArgs':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlWrongNumberArgs', {
+          defaultMessage:
+            '[PROMQL] Wrong number of arguments for "{fn}". Expected {expected}, got {actual}',
+          values: { fn: out.fn, expected: out.expected, actual: out.actual },
+        }),
+        type: 'error',
+      };
+    case 'promqlGroupingNotAllowed':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlGroupingNotAllowed', {
+          defaultMessage: '[PROMQL] Grouping is only allowed on aggregation',
+        }),
+        type: 'error',
+      };
+    case 'promqlNoMatchingSignature':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlNoMatchingSignature', {
+          defaultMessage: '[PROMQL] Argument types require ({required}) for function "{fn}"',
+          values: { fn: out.fn, required: out.required },
+        }),
+        type: 'error',
+      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(
@@ -390,6 +445,38 @@ Expected one of:
               '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
           }
         ),
+        type: 'error',
+      };
+    case 'invalidSettingValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
+          defaultMessage: 'Invalid value "{value}" for setting "{setting}".',
+          values: {
+            value: out.value,
+            setting: out.setting,
+          },
+        }),
+        type: 'error',
+      };
+    case 'unknownMapParameterName':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
+          defaultMessage: 'Unknown parameter "{paramName}".',
+          values: { paramName: out.paramName },
+        }),
+        type: 'error',
+      };
+    case 'invalidMapParameterValueType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
+          defaultMessage:
+            'Invalid type for parameter "{paramName}". Expected type: {expectedType}. Received: {actualType}.',
+          values: {
+            paramName: out.paramName,
+            expectedType: out.expectedType,
+            actualType: out.actualType,
+          },
+        }),
         type: 'error',
       };
   }

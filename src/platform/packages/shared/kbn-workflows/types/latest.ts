@@ -9,6 +9,7 @@
 
 export type {
   // commands
+  BulkCreateWorkflowsCommand,
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
@@ -52,24 +53,27 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
+  StepStabilityLevel,
   HttpMethod,
   StepPropertyHandler,
-  PropertyCompletionFn,
-  PropertyValidationFn,
-  PropertyValidationResult,
-  PropertyCompletionOption,
-  PropertyValidationContext,
+  PropertySelectionHandler,
+  SelectionOption,
+  SelectionDetails,
+  SelectionContext,
+  RequestOptions,
 } from './v1';
 
 // exported full to use enum as values
 export {
   // command schemas
+  BulkCreateWorkflowsCommandSchema,
   CreateWorkflowCommandSchema,
   ExecutionStatus,
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
   TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

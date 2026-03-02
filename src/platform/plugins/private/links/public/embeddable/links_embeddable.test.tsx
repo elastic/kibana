@@ -120,6 +120,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const parentApi = getMockLinksParentApi(state);
   const uuid = '1234';
   return await factory.buildEmbeddable({
+    initializeDrilldownsManager: jest.fn(),
     initialState: state,
     finalizeApi: (api) => {
       return {
@@ -139,7 +140,7 @@ describe('getLinksEmbeddableFactory', () => {
     const byRefState: LinksEmbeddableState = {
       title: 'my links',
       description: 'just a few links',
-      hidePanelTitles: false,
+      hide_title: false,
       savedObjectId: '123',
     };
 
@@ -158,7 +159,8 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.serializeState()).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: false,
+        hide_title: false,
+        hide_border: false,
         savedObjectId: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
@@ -171,7 +173,8 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.getSerializedStateByValue()).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: false,
+        hide_title: false,
+        hide_border: false,
         links: getLinks(),
         layout: 'vertical',
       });
@@ -182,7 +185,7 @@ describe('getLinksEmbeddableFactory', () => {
     const byValueState: LinksEmbeddableState = {
       description: 'just a few links',
       title: 'my links',
-      hidePanelTitles: true,
+      hide_title: true,
       links: getLinks(),
       layout: 'horizontal',
     };
@@ -203,7 +206,8 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.serializeState()).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: true,
+        hide_title: true,
+        hide_border: true,
         links: getLinks(),
         layout: 'horizontal',
       });
@@ -225,7 +229,8 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.getSerializedStateByReference(newId)).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: true,
+        hide_title: true,
+        hide_border: true,
         savedObjectId: '333',
       });
     });

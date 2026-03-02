@@ -102,42 +102,46 @@ export function getCompletionItemProvider(
         };
       }
 
+      // Incremental deduplication accumulator
+      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
+
+      let isIncomplete = false;
+
+      {
+        // Get suggestions from all stored YAML providers (excluding workflow provider)
+        const allYamlProviders = getAllYamlProviders();
+
+        // Call all stored providers and add their suggestions incrementally
+        for (const yamlProvider of allYamlProviders) {
+          if (yamlProvider.provideCompletionItems) {
+            try {
+              const result = await yamlProvider.provideCompletionItems(
+                model,
+                position,
+                completionContext,
+                {} as monaco.CancellationToken
+              );
+              if (result) {
+                mapSuggestions(deduplicatedMap, result.suggestions || []);
+                if (result.incomplete) {
+                  isIncomplete = true;
+                }
+              }
+            } catch (error) {
+              // Continue with other providers if one fails
+            }
+          }
+        }
+      }
+
+      // Then, get workflow-specific suggestions (variables, connectors, etc.)
       // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
       const workflowSuggestions = await getSuggestions({
         ...autocompleteContext,
         model,
         position,
       });
-
-      // Incremental deduplication accumulator
-      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
       mapSuggestions(deduplicatedMap, workflowSuggestions);
-
-      // Get suggestions from all stored YAML providers (excluding workflow provider)
-      const allYamlProviders = getAllYamlProviders();
-      let isIncomplete = false;
-
-      // Call all stored providers and add their suggestions incrementally
-      for (const yamlProvider of allYamlProviders) {
-        if (yamlProvider.provideCompletionItems) {
-          try {
-            const result = await yamlProvider.provideCompletionItems(
-              model,
-              position,
-              completionContext,
-              {} as monaco.CancellationToken
-            );
-            if (result) {
-              mapSuggestions(deduplicatedMap, result.suggestions || []);
-              if (result.incomplete) {
-                isIncomplete = true;
-              }
-            }
-          } catch (error) {
-            // Continue with other providers if one fails
-          }
-        }
-      }
 
       return {
         suggestions: Array.from(deduplicatedMap.values()),

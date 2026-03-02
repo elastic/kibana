@@ -39,12 +39,14 @@ import type {
   SLOPublicStart,
 } from './types';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { SloTelemetryService } from './services/telemetry';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly telemetryService = new SloTelemetryService();
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: { enabled: false },
   };
@@ -59,6 +61,8 @@ export class SLOPlugin
     plugins: SLOPublicPluginsSetup
   ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    this.telemetryService.setup(core.analytics);
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
@@ -86,6 +90,7 @@ export class SLOPlugin
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
         sloClient,
+        telemetry: this.telemetryService.start(coreStart.analytics),
       });
     };
     const appUpdater$ = this.appUpdater$;
@@ -213,10 +218,16 @@ export class SLOPlugin
       isServerless: !!plugins.serverless,
       experimentalFeatures: this.experimentalFeatures,
       sloClient,
+      telemetry: this.telemetryService.start(core.analytics),
     });
 
     const getCreateSLOFormFlyout = lazyWithContextProviders(
       lazy(() => import('./pages/slo_edit/shared_flyout/create_slo_form_flyout')),
+      { spinnerSize: 'm' }
+    );
+
+    const getSLODetailsFlyout = lazyWithContextProviders(
+      lazy(() => import('./pages/slo_details/shared_flyout/slo_details_flyout')),
       { spinnerSize: 'm' }
     );
 
@@ -227,6 +238,7 @@ export class SLOPlugin
 
     return {
       getCreateSLOFormFlyout,
+      getSLODetailsFlyout,
     };
   }
 

@@ -8,3 +8,4 @@
 export * from './microsoft_script_input_params';
 export * from './sentinelone_script_input_params';
 export * from './crowdstrike_script_input_params';
+export * from './endpoint_script_input_params';

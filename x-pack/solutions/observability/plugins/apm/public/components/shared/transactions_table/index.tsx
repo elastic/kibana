@@ -30,6 +30,7 @@ import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
+import { useTransactionActions } from './get_transaction_actions';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -97,7 +98,7 @@ export function TransactionsTable({
 
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, indexSettings } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
@@ -151,7 +152,7 @@ export function TransactionsTable({
 
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const tableSearchBar: TableSearchBar<ApiResponse['transactionGroups'][0]> = useMemo(() => {
     return {
@@ -164,6 +165,15 @@ export function TransactionsTable({
       }),
     };
   }, [isTableSearchBarEnabled, mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
+
+  const transactionRowActions = useTransactionActions({
+    kuery,
+    serviceName,
+    environment,
+    rangeFrom: query.rangeFrom,
+    rangeTo: query.rangeTo,
+    indexSettings,
+  });
 
   useEffect(() => {
     return setScreenContext?.({
@@ -263,6 +273,7 @@ export function TransactionsTable({
             saveTableOptionsToUrl={saveTableOptionsToUrl}
             onChangeRenderedItems={setRenderedItems}
             tableCaption={title}
+            actions={transactionRowActions}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

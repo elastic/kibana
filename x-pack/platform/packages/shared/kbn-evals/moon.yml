@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals'
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/obs-ai-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/evals'
   description: Moon project for @kbn/evals
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/obs-ai-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-evals
 dependsOn:
@@ -28,12 +28,13 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/some-dev-log'
   - '@kbn/inference-tracing'
-  - '@kbn/apm-config-loader'
   - '@kbn/repo-info'
-  - '@kbn/std'
   - '@kbn/test'
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/config-schema'
+  - '@kbn/evals-common'
 tags:
   - test-helper
   - package

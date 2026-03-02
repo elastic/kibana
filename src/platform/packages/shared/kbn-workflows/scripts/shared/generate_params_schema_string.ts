@@ -11,18 +11,20 @@ import { getSchemaNamePrefix } from './get_schema_name_prefix';
 
 // Utils used in the generated code, should be imported relative to @kbn/workflows/spec/elasticsearch/generated/ or @kbn/workflows/spec/kibana/generated/
 export const StaticImports = `
-import { getShapeAt, getZodLooseObjectFromProperty, getZodObjectFromProperty } from '../../../common/utils/zod';
+import { getShapeAt } from '../../../common/utils/zod';
 `;
 
 // TODO: unwrap and combine the shapes at the build time instead of at the runtime
 // Union is important because if we use object we override parameters from "body", "path", "query" with the same name with the latest one
 export function generateParamsSchemaString(
   operationIds: string[],
-  extendParams: Record<string, string>
+  extendParams: Record<string, string>,
+  spreadParams: string[] = []
 ): string {
-  const extendParamsString = Object.entries(extendParams)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(', ');
+  const extendParamsString = [
+    ...Object.entries(extendParams).map(([key, value]) => `${key}: ${value}`),
+    ...spreadParams.map((s) => `...${s}`),
+  ].join(', ');
   if (operationIds.length === 0) {
     return `z.optional(z.object({ ${extendParamsString} }))`;
   }

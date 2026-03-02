@@ -12,14 +12,12 @@ Object {
         },
       },
       "terms": Object {
+        "field": "host.ip",
         "order": Object {
           "timestamp": "desc",
         },
-        "script": Object {
-          "lang": "painless",
-          "source": "doc['host.ip']",
-        },
         "size": 10,
+        "value_type": "ip",
       },
     },
     "host_os_family": Object {

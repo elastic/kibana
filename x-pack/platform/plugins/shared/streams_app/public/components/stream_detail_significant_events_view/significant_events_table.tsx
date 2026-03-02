@@ -7,23 +7,21 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiConfirmModal } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { System, StreamQuery, Streams } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { StreamFeatureDetailsFlyout } from '../stream_detail_features/stream_features/stream_feature_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
-import { buildDiscoverParams } from './utils/discover_helpers';
+import { buildDiscoverParams } from '../significant_events_discovery/utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
-import { SeverityBadge } from '../significant_events_discovery/components/severity_badge';
+import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
+import { ConditionDisplay } from '../data_management/shared/condition_display';
 
 export function SignificantEventsTable({
   definition,
@@ -46,8 +44,6 @@ export function SignificantEventsTable({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState<System>();
-  const { featuresByName, refreshFeatures } = useStreamFeatures(definition.name);
 
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const maxYValue = useMemo(
@@ -80,44 +76,6 @@ export function SignificantEventsTable({
     },
     {
       field: 'query',
-      name: i18n.translate('xpack.streams.significantEventsTable.feature', {
-        defaultMessage: 'Feature',
-      }),
-      render: (query: StreamQuery) => {
-        return (
-          <EuiBadge
-            color="hollow"
-            onClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
-              {
-                defaultMessage: 'Open feature details',
-              }
-            )}
-            onClick={() => {
-              if (query.feature?.name) {
-                setSelectedFeature(featuresByName[query.feature.name]);
-              }
-            }}
-            iconOnClick={() => {
-              if (query.feature?.name) {
-                setSelectedFeature(featuresByName[query.feature.name]);
-              }
-            }}
-            iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
-              {
-                defaultMessage: 'Open feature details',
-              }
-            )}
-            data-test-subj="significant_events_table_feature_badge"
-          >
-            {query.feature?.name ?? '--'}
-          </EuiBadge>
-        );
-      },
-    },
-    {
-      field: 'query',
       name: i18n.translate('xpack.streams.significantEventsTable.queryText', {
         defaultMessage: 'Query',
       }),
@@ -127,6 +85,19 @@ export function SignificantEventsTable({
         }
 
         return <EuiCodeBlock paddingSize="none">{JSON.stringify(query.kql.query)}</EuiCodeBlock>;
+      },
+    },
+    {
+      field: 'query',
+      name: i18n.translate('xpack.streams.significantEventsTable.additionalFilterColumnTitle', {
+        defaultMessage: 'Additional filter',
+      }),
+      render: (query: StreamQuery) => {
+        if (!query.feature?.filter) {
+          return '--';
+        }
+
+        return <ConditionDisplay condition={query.feature.filter} />;
       },
     },
     {
@@ -235,16 +206,6 @@ export function SignificantEventsTable({
         tableLayout="auto"
         itemId="id"
       />
-      {selectedFeature && (
-        <StreamFeatureDetailsFlyout
-          definition={definition}
-          feature={selectedFeature}
-          closeFlyout={() => {
-            setSelectedFeature(undefined);
-          }}
-          refreshFeatures={refreshFeatures}
-        />
-      )}
       {isDeleteModalVisible && selectedDeleteItem && (
         <EuiConfirmModal
           data-test-subj="significant_events_table_delete_confirm_modal"

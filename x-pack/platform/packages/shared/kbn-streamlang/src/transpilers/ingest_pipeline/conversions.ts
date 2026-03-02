@@ -22,6 +22,7 @@ import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_pr
 
 import type { IngestPipelineTranspilationOptions } from '.';
 import { processJoinProcessor } from './processors/join_processor';
+import { processConcatProcessor } from './processors/concat_processor';
 
 export function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
@@ -48,6 +49,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       }
     }
 
+    // manual_ingest_pipeline handles its own condition compilation because it needs to
+    // combine the parent 'where' condition with nested processor 'if' conditions
+    if (action === 'manual_ingest_pipeline') {
+      return processManualIngestPipelineProcessors(
+        processorWithRenames as Parameters<typeof processManualIngestPipelineProcessors>[0],
+        transpilationOptions
+      );
+    }
+
     const processorWithCompiledConditions =
       'if' in processorWithRenames && processorWithRenames.if
         ? {
@@ -55,15 +65,6 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
             if: conditionToPainless(processorWithRenames.if),
           }
         : processorWithRenames;
-
-    if (action === 'manual_ingest_pipeline') {
-      return processManualIngestPipelineProcessors(
-        processorWithCompiledConditions as Parameters<
-          typeof processManualIngestPipelineProcessors
-        >[0],
-        transpilationOptions
-      );
-    }
 
     if (action === 'remove_by_prefix') {
       return processRemoveByPrefixProcessor(
@@ -83,6 +84,12 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
     if (action === 'join') {
       return processJoinProcessor(
         processorWithCompiledConditions as Parameters<typeof processJoinProcessor>[0]
+      );
+    }
+
+    if (action === 'concat') {
+      return processConcatProcessor(
+        processorWithCompiledConditions as Parameters<typeof processConcatProcessor>[0]
       );
     }
 

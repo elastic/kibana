@@ -27,7 +27,7 @@ describe('AddLayerButton', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'area',
-          splitAccessor: 'd',
+          splitAccessors: ['d'],
           xAccessor: 'a',
           accessors: ['b', 'c'],
         },

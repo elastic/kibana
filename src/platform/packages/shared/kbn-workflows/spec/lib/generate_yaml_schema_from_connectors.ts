@@ -8,22 +8,27 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
   getForEachStepSchema,
-  getHttpStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getTriggerSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
-  WorkflowSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowSchemaBase,
+  WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
+import type { JsonModelSchema } from '../schema/common/json_model_schema';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -33,24 +38,57 @@ export function getStepId(stepName: string): string {
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
+  /** Registered custom trigger type ids for YAML schema validation (e.g. example.custom_trigger) */
+  triggers: string[] = [],
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
   loose: boolean = false
-) {
+): z.ZodType {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
-    return WorkflowSchema.partial().extend({
+    // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
+    // We use the base schema (without transform) so we can extend it
+    return WorkflowSchemaForAutocompleteBase.extend({
       settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
-    });
+    }).transform((data) => ({
+      ...data,
+      version: '1' as const,
+    }));
   }
 
-  return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-    steps: z.array(recursiveStepSchema),
+  const triggerSchema = getTriggerSchema(triggers);
+  const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
+    triggers: z.array(triggerSchema).min(1),
   });
+
+  return workflowBaseWithTriggers
+    .extend({
+      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+      steps: z.array(recursiveStepSchema),
+    })
+    .transform((data) => {
+      let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+      if (data.inputs) {
+        if (
+          'properties' in data.inputs &&
+          typeof data.inputs === 'object' &&
+          !Array.isArray(data.inputs)
+        ) {
+          normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+        } else if (Array.isArray(data.inputs)) {
+          normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+        }
+      }
+      const { inputs: _, ...rest } = data;
+      return {
+        ...rest,
+        version: '1' as const,
+        ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+      };
+    });
 }
 
 function createRecursiveStepSchema(
@@ -66,7 +104,6 @@ function createRecursiveStepSchema(
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
-    const httpSchema = getHttpStepSchema(stepSchema, loose);
 
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
@@ -85,7 +122,8 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       DataSetStepSchema,
-      httpSchema,
+      WorkflowExecuteStepSchema,
+      WorkflowExecuteAsyncStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
@@ -99,12 +137,19 @@ function generateStepSchemaForConnector(
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
+  const connectorIdSchema: Record<string, z.ZodType> = {};
+  // Add connector-id schema if hasConnectorId has a value
+  if (connector.hasConnectorId) {
+    connectorIdSchema['connector-id'] =
+      connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
+  }
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
+    ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),
   });
@@ -127,13 +172,11 @@ function generateAliasSchemas(
     const connector = connectors.find((c) => c.type === newType);
     if (connector) {
       // Create a schema with the old type name but same params/output
+      const newSchema = generateStepSchemaForConnector(connector, stepSchema, loose);
       aliasSchemas.push(
-        BaseConnectorStepSchema.extend({
+        newSchema.extend({
           // Mark as deprecated in description so it's clear this is a legacy alias
           type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
-          'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-          with: connector.paramsSchema,
-          'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
         })
       );
     }

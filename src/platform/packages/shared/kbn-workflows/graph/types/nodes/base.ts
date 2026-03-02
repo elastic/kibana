@@ -11,9 +11,10 @@ import { z } from '@kbn/zod/v4';
 import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
-  HttpStepSchema,
   KibanaStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -44,13 +45,6 @@ export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
 });
 export type DataSetGraphNode = z.infer<typeof DataSetGraphNodeSchema>;
 
-export const HttpGraphNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('http'),
-  configuration: HttpStepSchema,
-});
-export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
-
 export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
@@ -68,3 +62,17 @@ export const KibanaGraphNodeSchema = GraphNodeSchema.extend({
   configuration: KibanaStepSchema,
 });
 export type KibanaGraphNode = z.infer<typeof KibanaGraphNodeSchema>;
+
+export const WorkflowExecuteGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.execute'),
+  configuration: WorkflowExecuteStepSchema,
+});
+export type WorkflowExecuteGraphNode = z.infer<typeof WorkflowExecuteGraphNodeSchema>;
+
+export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.executeAsync'),
+  configuration: WorkflowExecuteAsyncStepSchema,
+});
+export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;

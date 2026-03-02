@@ -21,6 +21,8 @@ import {
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { i18n } from '@kbn/i18n';
+
 import type {
   PackageInfo,
   RegistryVarsEntry,
@@ -292,7 +294,13 @@ const VarsTable: React.FunctionComponent<{ vars: RegistryVarsEntry[] }> = ({ var
           />
         </h6>
       </EuiTitle>
-      <EuiBasicTable columns={columns} items={vars} />
+      <EuiBasicTable
+        tableCaption={i18n.translate('xpack.fleet.epm.packageDetails.apiReference.tableCaption', {
+          defaultMessage: 'Variables',
+        })}
+        columns={columns}
+        items={vars}
+      />
     </>
   );
 };

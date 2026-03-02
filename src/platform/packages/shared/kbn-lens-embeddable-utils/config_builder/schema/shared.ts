@@ -17,6 +17,19 @@ import {
 } from './constants';
 import { filterSchema, unifiedSearchFilterSchema } from './filter';
 
+export const labelSharedProp = {
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+};
+
 export const sharedPanelInfoSchema = {
   /**
    * The title of the chart displayed in the panel.
@@ -116,8 +129,15 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description' } }
+  {
+    meta: {
+      id: 'collapseBy',
+      description: 'Collapse by function description',
+    },
+  }
 );
+
+export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
 
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
@@ -129,3 +149,15 @@ export const axisTitleSchemaProps = {
   ),
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
 };
+
+export const legendTruncateAfterLinesSchema = schema.maybe(
+  schema.number({
+    defaultValue: 1,
+    min: 1,
+    max: 10,
+    meta: {
+      description: 'Maximum lines before truncating legend items (1-10)',
+      id: 'legendTruncateAfterLines',
+    },
+  })
+);

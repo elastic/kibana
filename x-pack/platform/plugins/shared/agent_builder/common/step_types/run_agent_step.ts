@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -21,11 +22,37 @@ export const InputSchema = z.object({
    * output schema for the run agent step, if provided agent will return structured output
    */
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  schema: z.any().optional().describe('The schema for the output of the agent.'),
+  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */
   message: z.string().describe('The user input message to send to the agent.'),
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments: z
+    .array(
+      z.object({
+        /**
+         * Optional unique identifier for the attachment.
+         */
+        id: z.string().optional(),
+        /**
+         * Type of the attachment (e.g., "security.alert").
+         */
+        type: z.string(),
+        /**
+         * Data payload of the attachment, specific to the attachment type.
+         */
+        data: z.record(z.string(), z.any()),
+        /**
+         * When true, the attachment will not be displayed in the UI.
+         */
+        hidden: z.boolean().optional(),
+      })
+    )
+    .optional()
+    .describe('Optional attachments to provide to the agent.'),
   /**
    * Optional existing conversation id to continue a previous conversation.
    */
@@ -47,7 +74,7 @@ export const OutputSchema = z.object({
   structured_output: z
     .any()
     .optional()
-    .describe('The structured output from the agent. Only here when schem was provided'),
+    .describe('The structured output from the agent. Only here when schema was provided'),
   conversation_id: z
     .string()
     .optional()

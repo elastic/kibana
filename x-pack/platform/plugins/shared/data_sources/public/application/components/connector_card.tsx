@@ -22,7 +22,10 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
   onClick,
   isDisabled = false,
 }) => {
-  const iconComponent = useMemo(() => getConnectorIcon(connector, 'l'), [connector]);
+  const iconComponent = useMemo(
+    () => getConnectorIcon(connector.iconType, 'l'),
+    [connector.iconType]
+  );
 
   return (
     <EuiPanel

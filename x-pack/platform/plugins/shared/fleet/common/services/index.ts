@@ -106,3 +106,17 @@ export {
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
+
+// Generic var_group helpers
+export type { VarGroupSelection } from './var_group_helpers';
+export {
+  getSelectedOption,
+  getVisibleVarsForOption,
+  getVarsControlledByVarGroups,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isVarInSelectedVarGroupOption,
+} from './var_group_helpers';
+
+// Cloud Connector accessor module
+export * from './cloud_connectors';

@@ -115,7 +115,7 @@ export default class promql_parser extends parser_config {
                                                             "'on'", "'ignoring'", 
                                                             "'group_left'", 
                                                             "'group_right'", 
-                                                            "'bool'", null, 
+                                                            "'bool'", "'offset'", 
                                                             "'@'", "'start()'", 
                                                             "'end()'", "'{'", 
                                                             "'}'", "'['", 

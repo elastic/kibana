@@ -15,14 +15,16 @@ describe('titles api', () => {
   const initialTitles: SerializedTitles = {
     title: 'very cool title',
     description: 'less cool description',
-    hidePanelTitles: false,
+    hide_title: false,
+    hide_border: false,
   };
 
   it('should initialize publishing subjects from initialState', () => {
     const { api } = initializeTitleManager(initialTitles);
     expect(api.title$.value).toBe(initialTitles.title);
     expect(api.description$.value).toBe(initialTitles.description);
-    expect(api.hidePanelTitles$.value).toBe(initialTitles.hidePanelTitles);
+    expect(api.hideTitle$.value).toBe(initialTitles.hide_title);
+    expect(api.hideBorder$.value).toBe(initialTitles.hide_border);
   });
 
   it('should update publishing subject values when set functions are called', () => {
@@ -30,11 +32,13 @@ describe('titles api', () => {
 
     api.setTitle('even cooler title');
     api.setDescription('super uncool description');
-    api.setHidePanelTitles(true);
+    api.setHideTitle(true);
+    api.setHideBorder(true);
 
     expect(api.title$.value).toEqual('even cooler title');
     expect(api.description$.value).toEqual('super uncool description');
-    expect(api.hidePanelTitles$.value).toBe(true);
+    expect(api.hideTitle$.value).toBe(true);
+    expect(api.hideBorder$.value).toBe(true);
   });
 
   it('should correctly serialize current state', () => {
@@ -45,19 +49,30 @@ describe('titles api', () => {
     expect(serializedTitles).toMatchInlineSnapshot(`
         Object {
           "description": "less cool description",
-          "hidePanelTitles": false,
+          "hide_border": false,
+          "hide_title": false,
           "title": "UH OH, A TITLE",
         }
       `);
   });
 
-  it('should correctly compare hidePanelTitles with custom comparator', () => {
-    const comparator = titleComparators.hidePanelTitles as ComparatorFunction<
+  it('should correctly compare hide_title with custom comparator', () => {
+    const comparator = titleComparators.hide_title as ComparatorFunction<
       SerializedTitles,
-      'hidePanelTitles'
+      'hide_title'
     >;
     expect(comparator(true, false)).toBe(false);
     expect(comparator(undefined, false)).toBe(true);
     expect(comparator(true, undefined)).toBe(false);
+  });
+
+  it('should initialize hide_border with true if borderlessByDefault is true', () => {
+    const { api } = initializeTitleManager({}, { borderlessByDefault: true });
+    expect(api.hideBorder$.value).toBe(true);
+  });
+
+  it('should not override explicit hide_border with borderlessByDefault', () => {
+    const { api } = initializeTitleManager({ hide_border: false }, { borderlessByDefault: true });
+    expect(api.hideBorder$.value).toBe(false);
   });
 });

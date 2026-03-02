@@ -6,36 +6,72 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../definitions/entity_schema';
+import type {
+  EntityDefinition,
+  EntityType,
+} from '../../../common/domain/definitions/entity_schema';
+import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
-
 const BASE_ENTITY_INDEX_MAPPING = {
   '@timestamp': { type: 'date' },
   'event.ingested': { type: 'date' },
   labels: { type: 'object' },
   tags: { type: 'keyword', ignore_above: 1024 },
-
-  // 'asset.criticality': { type: 'keyword' },
-  // 'entity.name': { type: 'keyword' },
-  // 'entity.source': { type: 'keyword' },
+  'entity.id': { type: 'keyword' },
+  'entity.EngineMetadata.Type': { type: 'keyword' },
+  'entity.EngineMetadata.UntypedId': { type: 'keyword' },
+  'entity.source': { type: 'keyword' },
+  'entity.risk.calculated_level': { type: 'keyword' },
+  'entity.risk.calculated_score': { type: 'float' },
+  'entity.risk.calculated_score_norm': { type: 'float' },
 } as const satisfies MappingProperties;
 
-export const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;
+export const getComponentTemplateName = (type: EntityType, namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-latest@platform`;
 
-export const getEntityDefinitionComponentTemplate = (definition: EntityDefinition) => ({
-  name: getComponentTemplateName(definition.id),
-  template: { settings: { hidden: true }, mappings: getIndexMappings(definition) },
-});
+export const getEntityDefinitionComponentTemplate = (
+  definition: EntityDefinition,
+  namespace: string
+) => {
+  return {
+    name: getComponentTemplateName(definition.type, namespace),
+    template: { settings: { hidden: true }, mappings: getIndexMappings(definition) },
+  };
+};
 
 const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
-    ...Object.fromEntries(definition.identityFields.map((c) => [c.field, c.mapping])),
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)
         .map(({ source, destination, mapping }) => [destination || source, mapping])
+    ),
+  },
+});
+
+export const getUpdatesComponentTemplateName = (type: EntityType, namespace: string) =>
+  `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-updates@platform`;
+
+export const getUpdatesEntityDefinitionComponentTemplate = (
+  definition: EntityDefinition,
+  namespace: string
+) => {
+  return {
+    name: getUpdatesComponentTemplateName(definition.type, namespace),
+    template: { settings: { hidden: true }, mappings: getUpdatesIndexMappings(definition) },
+  };
+};
+
+const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
+  properties: {
+    ...BASE_ENTITY_INDEX_MAPPING,
+    ...Object.fromEntries(
+      definition.fields
+        .filter(({ mapping }) => mapping)
+        .filter(({ source }) => source[0] !== '_')
+        .map(({ source, mapping }) => [source, mapping])
     ),
   },
 });

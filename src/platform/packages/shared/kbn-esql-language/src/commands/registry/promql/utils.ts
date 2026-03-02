@@ -9,149 +9,9 @@
 
 import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
-import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
-
-type PromqlPositionType =
-  | 'after_command'
-  | 'after_param_keyword'
-  | 'after_param_equals'
-  | 'inside_query'
-  | 'after_query';
-
-interface PromqlPosition {
-  type: PromqlPositionType;
-  currentParam?: string;
-}
-
-const TRAILING_PARAM_NAME_REGEX = /([A-Za-z_][A-Za-z0-9_]*)\s*$/;
-
-export function getPosition(innerText: string, command: ESQLAstAllCommands): PromqlPosition {
-  const promqlCommand = command as ESQLAstPromqlCommand;
-
-  const queryZonePosition = getQueryZonePosition(innerText, promqlCommand);
-
-  if (queryZonePosition) {
-    return queryZonePosition;
-  }
-
-  // Fallback to param zone detection (text-based, for transitional states)
-  const commandText = innerText.substring(promqlCommand.location.min);
-
-  return getParamZonePosition(commandText);
-}
-
-// ============================================================================
-// Query zone detection (AST-based)
-// ============================================================================
-
-/*
- * Uses AST query location to decide whether the cursor is in/after the query.
- * We keep this separate to avoid misclassifying param edits as query edits.
- */
-function getQueryZonePosition(
-  innerText: string,
-  promqlCommand: ESQLAstPromqlCommand
-): PromqlPosition | undefined {
-  const queryNode = promqlCommand.query;
-  const queryLocation = queryNode?.location;
-
-  if (!isQueryLocationUsable(innerText, queryLocation)) {
-    return undefined;
-  }
-
-  if (queryLocation && innerText.length > queryLocation.max) {
-    return { type: 'after_query' };
-  }
-
-  if (queryNode && within(innerText.length, queryNode)) {
-    return { type: 'inside_query' };
-  }
-
-  return undefined;
-}
-
-/*
- * Guards against the parser misclassifying the last param as the query.
- * If the "query" looks like a param assignment, stay in param mode.
- */
-function isQueryLocationUsable(
-  innerText: string,
-  queryLocation: { min: number; max: number } | undefined
-): boolean {
-  if (queryLocation === undefined || queryLocation.max <= queryLocation.min) {
-    return false;
-  }
-
-  const queryText = innerText.substring(queryLocation.min, queryLocation.max + 1);
-
-  return isPromqlQueryText(queryText);
-}
-
-function isPromqlQueryText(text: string): boolean {
-  const trimmed = text.trim();
-  return trimmed !== '' && !looksLikePromqlParamAssignment(trimmed);
-}
-
-// ============================================================================
-// Param zone detection (text-based)
-// ============================================================================
-
-/*
- * Fallback for editing states where the AST is unreliable (typing params).
- * We only look at the local text to avoid fighting incomplete AST nodes.
- */
-function getParamZonePosition(commandText: string): PromqlPosition {
-  const incompleteParam = getIncompleteParamFromText(commandText);
-
-  if (incompleteParam) {
-    return { type: 'after_param_equals', currentParam: incompleteParam };
-  }
-
-  if (isAfterParamKeyword(commandText)) {
-    return { type: 'after_param_keyword' };
-  }
-
-  return { type: 'after_command' };
-}
-
-/* Identifies a param assignment in progress so we can switch to value suggestions.*/
-function getIncompleteParamFromText(text: string): string | undefined {
-  const trimmed = text.trimEnd();
-
-  if (!trimmed.endsWith('=')) {
-    return undefined;
-  }
-
-  const beforeEquals = trimmed.slice(0, -1).trimEnd();
-  const paramName = getTrailingIdentifier(beforeEquals)?.toLowerCase();
-
-  return paramName && isPromqlParamName(paramName) ? paramName : undefined;
-}
-
-/* Detects the "param name + space" pattern to suggest the "=" token. */
-function isAfterParamKeyword(text: string): boolean {
-  if (!text.endsWith(' ')) {
-    return false;
-  }
-
-  const trimmed = text.trimEnd();
-  const lastWord = getTrailingIdentifier(trimmed)?.toLowerCase();
-
-  return lastWord ? isPromqlParamName(lastWord) : false;
-}
-
-/*
- * Extracts the trailing param name when it is immediately after a quoted value.
- * This lets us detect `start` in cases like `end="..."start =`.
- */
-function getTrailingIdentifier(text: string): string | undefined {
-  const match = text.match(TRAILING_PARAM_NAME_REGEX);
-  return match ? match[1] : undefined;
-}
-
-// ============================================================================
-// Param definitions
-// ============================================================================
+import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
+import { getPreGroupedAggregationName } from '../../definitions/utils/promql';
+import { getTrailingIdentifier } from '../../definitions/utils/shared';
 
 export enum PromqlParamValueType {
   TimeseriesSources = 'timeseries_sources',
@@ -159,93 +19,363 @@ export enum PromqlParamValueType {
   Static = 'static',
 }
 
-type PromqlParamName = (typeof PROMQL_PARAMS)[number]['name'];
+export enum PromqlParamName {
+  Index = 'index',
+  Step = 'step',
+  Start = 'start',
+  End = 'end',
+  Buckets = 'buckets',
+  ScrapeInterval = 'scrape_interval',
+}
 
 export interface PromqlParamDefinition {
   name: string;
   description: string;
   valueType: PromqlParamValueType;
+  required?: boolean;
   suggestedValues?: string[];
 }
 
-const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step', 'start', 'end'];
+// ============================================================================
+// Types
+// ============================================================================
 
-const PROMQL_PARAMS: PromqlParamDefinition[] = [
+type ParamPositionKind = 'after_command' | 'after_param_keyword' | 'after_param_equals';
+
+export type PromqlMacroPosition =
+  | {
+      type: 'params';
+      kind: ParamPositionKind;
+      currentParam?: string;
+      shouldWrap: boolean;
+      preGroupedAgg?: string;
+    }
+  | {
+      type: 'query';
+      queryText: string;
+      cursorRelative: number;
+      shouldWrap: boolean;
+    };
+
+interface QuerySlice {
+  text: string;
+  start: number;
+  originalLength: number;
+}
+
+interface PromqlQueryBounds {
+  queryStart: number;
+  queryEnd: number;
+  wrappedEnd?: number;
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+// Shared identifier pattern for param names, column names, etc.
+export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
+
+const TOKEN_SPLIT_WHITESPACE_REGEX = /\s/;
+
+export const PROMQL_PARAMS: PromqlParamDefinition[] = [
   {
-    name: 'index',
+    name: PromqlParamName.Index,
     description: 'Index pattern to query',
     valueType: PromqlParamValueType.TimeseriesSources,
   },
   {
-    name: 'step',
+    name: PromqlParamName.Step,
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
   },
   {
-    name: 'start',
-    description: 'Range query start time',
+    name: PromqlParamName.Start,
+    description: 'Range query start time (requires end)',
     valueType: PromqlParamValueType.DateLiterals,
   },
   {
-    name: 'end',
-    description: 'Range query end time',
+    name: PromqlParamName.End,
+    description: 'Range query end time (requires start)',
     valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
+    name: PromqlParamName.Buckets,
+    description: 'Number of time buckets (alternative to step)',
+    valueType: PromqlParamValueType.Static,
+  },
+  {
+    name: PromqlParamName.ScrapeInterval,
+    description: 'Scrape interval for implicit range selector window (e.g. 1m)',
+    valueType: PromqlParamValueType.Static,
   },
 ];
 
-export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map((param) => param.name);
+export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map(({ name }) => name);
 
-export function getPromqlParamDefinitions(): PromqlParamDefinition[] {
-  return PROMQL_PARAMS;
+const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
+  param,
+  pattern: new RegExp(`${param}\\s*=`, 'i'),
+}));
+
+// ============================================================================
+// Query Slice Helpers
+// ============================================================================
+
+/*
+ * Extracts the PromQL query text and start position from the command.
+ * Uses full commandText (up to pipe) so the PromQL parser gets balanced parentheses.
+ * Returns the start position to convert absolute cursor to relative for query analysis.
+ */
+function getPromqlQuerySlice(
+  command: ESQLAstPromqlCommand,
+  commandText: string,
+  queryBounds: PromqlQueryBounds
+): QuerySlice | undefined {
+  if (queryBounds.queryStart < 0) {
+    return undefined;
+  }
+
+  // commandText starts at command.location.min, so convert to relative position
+  const commandStart = command.location.min;
+  const relativeMin = queryBounds.queryStart - commandStart;
+  const rawText = commandText.slice(relativeMin).trimEnd();
+
+  if (rawText.length === 0) {
+    return undefined;
+  }
+
+  const text = correctPromqlQuerySyntax(rawText);
+
+  // Keep original length to clamp cursor (cursor shouldn't appear on added brackets)
+  return { text, start: queryBounds.queryStart, originalLength: rawText.length };
 }
 
-export function getPromqlParam(name: string): PromqlParamDefinition | undefined {
-  return PROMQL_PARAMS.find((param) => param.name === name);
+function getPromqlQueryBounds(
+  queryNode: ESQLAstPromqlCommand['query']
+): PromqlQueryBounds | undefined {
+  if (!queryNode) {
+    return undefined;
+  }
+
+  const wrapped = extractWrappedLocations(queryNode);
+  const queryLocation = wrapped?.inner ?? queryNode.location;
+
+  return {
+    queryStart: queryLocation.min,
+    queryEnd: queryLocation.max,
+    wrappedEnd: wrapped?.outer.max,
+  };
 }
 
-export function areRequiredPromqlParamsPresent(usedParams: Set<string>): boolean {
-  return PROMQL_REQUIRED_PARAMS.every((param) => usedParams.has(param));
+/**
+ * Extracts inner (child expression) and outer (parens wrapper) locations.
+ * Handles both bare parens `(query)` and assignment `col0=(query)`.
+ */
+function extractWrappedLocations(
+  node: NonNullable<ESQLAstPromqlCommand['query']>
+): { inner: { min: number; max: number }; outer: { min: number; max: number } } | undefined {
+  // Bare parens: (query) - node itself is a parens with a child
+  if (node.type === 'parens' && 'child' in node) {
+    const inner = (node.child as { location?: { min: number; max: number } })?.location;
+
+    return inner ? { inner, outer: node.location } : undefined;
+  }
+
+  // Assignment: col0=(query) - binary-expression with parens RHS
+  if (!('subtype' in node) || node.subtype !== 'binary-expression') {
+    return undefined;
+  }
+
+  const args = 'args' in node ? (node.args as unknown[]) : [];
+  const rhsNode = !Array.isArray(args[1]) ? (args[1] as Record<string, unknown>) : undefined;
+
+  if (!rhsNode || rhsNode.type !== 'parens' || !('child' in rhsNode)) {
+    return undefined;
+  }
+
+  const inner = (rhsNode.child as { location?: { min: number; max: number } })?.location;
+  const outer = (rhsNode as { location?: { min: number; max: number } }).location;
+
+  return inner && outer ? { inner, outer } : undefined;
 }
 
-export const isPromqlParamName = (name: string): name is PromqlParamName =>
-  PROMQL_PARAM_NAMES.includes(name);
+// ============================================================================
+// Main Entry Point
+// ============================================================================
 
+export function getPosition(
+  innerText: string,
+  command: ESQLAstAllCommands,
+  commandText: string | undefined
+): PromqlMacroPosition {
+  const cursorPosition = innerText.length;
+  const promqlCommand = command as ESQLAstPromqlCommand;
+  const innerCommandText = innerText.substring(promqlCommand.location.min);
+
+  const preGroupedAgg = getPreGroupedAggregationName(innerCommandText);
+  const shouldWrap = isAfterCustomColumnAssignment(innerCommandText) || !!preGroupedAgg;
+
+  const queryBounds = getPromqlQueryBounds(promqlCommand.query);
+  const querySlice =
+    commandText && queryBounds
+      ? getPromqlQuerySlice(promqlCommand, commandText, queryBounds)
+      : undefined;
+
+  const queryZone = getQueryZoneMacroPosition(
+    innerText,
+    cursorPosition,
+    promqlCommand.query,
+    queryBounds,
+    querySlice,
+    shouldWrap
+  );
+
+  if (queryZone) {
+    return queryZone;
+  }
+
+  if (isInsideQueryParen(innerCommandText)) {
+    return { type: 'query', queryText: '', cursorRelative: 0, shouldWrap };
+  }
+
+  return getParamZoneMacroPosition(innerCommandText, shouldWrap, preGroupedAgg);
+}
+
+// ============================================================================
+// Query zone detection (AST-based)
+// ============================================================================
+
+function getQueryZoneMacroPosition(
+  innerText: string,
+  cursorPosition: number,
+  queryNode: ESQLAstPromqlCommand['query'],
+  queryBounds: PromqlQueryBounds | undefined,
+  querySlice: QuerySlice | undefined,
+  shouldWrap: boolean
+): PromqlMacroPosition | undefined {
+  if (!queryBounds || !isQueryLocationUsable(innerText, queryBounds) || !querySlice) {
+    return undefined;
+  }
+
+  const { queryEnd, wrappedEnd } = queryBounds;
+  const { text, start, originalLength } = querySlice;
+
+  const isPastEnd = cursorPosition > (wrappedEnd ?? queryEnd);
+  const isInsideWrapper = wrappedEnd !== undefined && cursorPosition > queryEnd;
+  const isInsideNode = queryNode !== undefined && within(cursorPosition, queryNode);
+
+  if (!isPastEnd && !isInsideWrapper && !isInsideNode) {
+    return undefined;
+  }
+
+  const cursorRelative = Math.min(cursorPosition - start, originalLength);
+
+  return { type: 'query', queryText: text, cursorRelative, shouldWrap };
+}
+
+// ============================================================================
+// Param zone detection (text-based)
+// ============================================================================
+
+function getParamZoneMacroPosition(
+  commandText: string,
+  shouldWrap: boolean,
+  preGroupedAgg: string | undefined
+): PromqlMacroPosition {
+  const incompleteParam = getIncompleteParamFromText(commandText);
+
+  if (incompleteParam) {
+    return {
+      type: 'params',
+      kind: 'after_param_equals',
+      currentParam: incompleteParam,
+      shouldWrap,
+      preGroupedAgg,
+    };
+  }
+
+  if (isAfterParamKeyword(commandText)) {
+    return { type: 'params', kind: 'after_param_keyword', shouldWrap, preGroupedAgg };
+  }
+
+  return { type: 'params', kind: 'after_command', shouldWrap, preGroupedAgg };
+}
+
+// ============================================================================
+// Zone detection helpers
+// ============================================================================
+
+/**
+ * Guards against the parser misclassifying params as the query.
+ * Rejects invalid query locations (e.g., `PROMQL step` where "step" ends up in query.text).
+ */
+function isQueryLocationUsable(
+  innerText: string,
+  queryBounds: ReturnType<typeof getPromqlQueryBounds>
+): boolean {
+  if (!queryBounds || queryBounds.queryEnd === queryBounds.queryStart) {
+    return false;
+  }
+
+  const queryText = innerText.substring(queryBounds.queryStart, queryBounds.queryEnd + 1).trim();
+
+  // Reject if empty or looks like a param assignment
+  return queryText !== '' && !looksLikePromqlParamAssignment(queryText);
+}
+
+/**
+ * Detects if cursor is inside an open paren that starts a query context.
+ * Handles cases like "PROMQL (" or "PROMQL col0 = (" where the AST doesn't
+ * have a query node yet because the content is empty.
+ */
+function isInsideQueryParen(commandText: string): boolean {
+  const trimmed = commandText.trimEnd();
+  if (!trimmed.endsWith('(')) {
+    return false;
+  }
+
+  return getBracketsToClose(trimmed).includes(')');
+}
+
+// ============================================================================
+// Param text helpers
+// ============================================================================
+
+export const isPromqlParamName = (name: string): boolean => PROMQL_PARAM_NAMES.includes(name);
+
+/**
+ * Detects if text looks like a param assignment.
+ * Matches: "index", "index=", "index=value", or ",..." (comma continuation).
+ */
 export function looksLikePromqlParamAssignment(text: string): boolean {
   const trimmed = text.trim().toLowerCase();
-
   if (trimmed.startsWith(',')) {
     return true;
   }
 
-  return PROMQL_PARAM_NAMES.some((param) => {
-    if (trimmed === param) {
-      return true;
-    }
-
-    if (trimmed.startsWith(param)) {
-      const afterParam = trimmed.substring(param.length).trimStart();
-      return afterParam.startsWith('=');
-    }
-
-    return false;
-  });
+  return PROMQL_PARAM_NAMES.some(
+    (param) =>
+      trimmed === param ||
+      (trimmed.startsWith(param) && trimmed.substring(param.length).trimStart().startsWith('='))
+  );
 }
 
-/*
- * Scans the PROMQL command text to avoid suggesting params already typed.
- * We don't rely on AST params because the parser can put the last param in the query field.
- */
+/** Scans command text to find used params (includes params after cursor for filtering). */
 export function getUsedPromqlParamNames(commandText: string): Set<string> {
   const used = new Set<string>();
-  const tokens = commandText.toLowerCase().split(/\s+/);
 
-  for (const param of PROMQL_PARAM_NAMES) {
-    if (tokens.some((token) => token === param || token.startsWith(`${param}=`))) {
+  for (const { param, pattern } of PARAM_ASSIGNMENT_PATTERNS) {
+    if (pattern.test(commandText)) {
       used.add(param);
     }
   }
 
   return used;
+}
+
+export function getPromqlParam(name: string): PromqlParamDefinition | undefined {
+  return PROMQL_PARAMS.find((param) => param.name === name);
 }
 
 /*
@@ -257,25 +387,16 @@ export function isParamValueComplete(
   cursorPosition: number,
   currentParam?: string
 ): boolean {
-  const afterCursor = fullQuery.substring(cursorPosition).trimStart();
-
-  if (!afterCursor) {
+  const firstToken = fullQuery
+    .substring(cursorPosition)
+    .trimStart()
+    .split(TOKEN_SPLIT_WHITESPACE_REGEX, 1)[0]
+    ?.toLowerCase();
+  if (!firstToken || isPromqlParamName(firstToken)) {
     return false;
   }
 
-  const firstToken = afterCursor.split(/\s/)[0].toLowerCase();
-
-  if (!firstToken) {
-    return false;
-  }
-
-  // Cache the type guard result to avoid narrowing firstToken to never.
-  const isParamToken = isPromqlParamName(firstToken);
-  if (isParamToken) {
-    return false;
-  }
-
-  const assignmentKey = `${firstToken}`.split('=')[0].toLowerCase();
+  const assignmentKey = firstToken.split('=')[0];
   if (assignmentKey && isPromqlParamName(assignmentKey)) {
     return false;
   }
@@ -294,14 +415,14 @@ export function isParamValueComplete(
   }
 
   if (definition.valueType === PromqlParamValueType.DateLiterals) {
-    return isDateLiteralToken(firstToken);
+    return firstToken.startsWith('?_t') || firstToken.startsWith('"') || firstToken.startsWith("'");
+  }
+
+  if (definition.valueType === PromqlParamValueType.TimeseriesSources) {
+    return !firstToken.includes('=') && !firstToken.includes('(');
   }
 
   return true;
-}
-
-function isDateLiteralToken(token: string): boolean {
-  return token.startsWith('?_t') || token.startsWith('"') || token.startsWith("'");
 }
 
 /* Avoids suggesting a column assignment when the cursor is directly before a param token. */
@@ -309,42 +430,73 @@ export function isAtValidColumnSuggestionPosition(
   fullCommandText: string,
   cursorPosition: number
 ): boolean {
-  const afterCursor = fullCommandText.substring(cursorPosition).trimStart();
-
-  if (!afterCursor) {
-    return true;
-  }
-
-  const firstToken = afterCursor.split(/\s/)[0];
-
-  if (!firstToken) {
-    return true;
-  }
-
-  const keyPart = firstToken.split('=')[0].toLowerCase();
-
-  return !isPromqlParamName(keyPart);
+  const keyPart = fullCommandText
+    .substring(cursorPosition)
+    .trimStart()
+    .split(TOKEN_SPLIT_WHITESPACE_REGEX, 1)[0]
+    ?.split('=')[0]
+    ?.toLowerCase();
+  return !keyPart || !isPromqlParamName(keyPart);
 }
+
+/** Extracts trailing identifier if it's a known PROMQL param name. */
+function getTrailingPromqlParamName(text: string): string | undefined {
+  const identifier = getTrailingIdentifier(text.trimEnd())?.toLowerCase();
+  return identifier && isPromqlParamName(identifier) ? identifier : undefined;
+}
+
+/** Identifies a param assignment in progress (e.g., "step=") to suggest values. */
+function getIncompleteParamFromText(text: string): string | undefined {
+  const trimmed = text.trimEnd();
+  if (!trimmed.endsWith('=')) {
+    return undefined;
+  }
+  return getTrailingPromqlParamName(trimmed.slice(0, -1));
+}
+
+/** Detects "param name + space" pattern (e.g., "step ") to suggest "=". */
+function isAfterParamKeyword(text: string): boolean {
+  return text.endsWith(' ') && getTrailingPromqlParamName(text) !== undefined;
+}
+
+// ============================================================================
+// Column Assignment Helpers
+// ============================================================================
+
+/** Detects when the cursor is after a custom query assignment like "col0 =". */
+function isAfterCustomColumnAssignment(commandText: string): boolean {
+  const trimmed = commandText.trimEnd();
+  if (!trimmed.endsWith('=')) {
+    return false;
+  }
+
+  const beforeEquals = trimmed.slice(0, -1).trimEnd();
+  const name = getTrailingIdentifier(beforeEquals)?.toLowerCase();
+
+  return name ? !isPromqlParamName(name) : false;
+}
+
+// ============================================================================
+// Index Assignment Context
+// ============================================================================
 
 interface IndexAssignmentContext {
   valueText: string;
   valueStart: number;
 }
 
-/* Extracts the raw index value text so we can reuse source-suggestion logic. */
-export function getIndexAssignmentContext(
-  commandText: string,
-  assignmentKey: string = 'index'
-): IndexAssignmentContext | undefined {
+/** Extracts the raw index value text so we can reuse source-suggestion logic. */
+export function getIndexAssignmentContext(commandText: string): IndexAssignmentContext | undefined {
   const equalsIndex = commandText.lastIndexOf('=');
+
   if (equalsIndex < 0) {
     return undefined;
   }
 
   const beforeEquals = commandText.slice(0, equalsIndex).trimEnd();
-  const key = findFinalWord(beforeEquals);
+  const key = getTrailingIdentifier(beforeEquals);
 
-  if (key.toLowerCase() !== assignmentKey.toLowerCase()) {
+  if (key?.toLowerCase() !== PromqlParamName.Index) {
     return undefined;
   }
 

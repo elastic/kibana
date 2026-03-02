@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
+import { isCancellableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 /**
@@ -50,6 +52,16 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     return;
   }
 
+  // Create a span for the entire node execution lifecycle
+  const nodeSpan = apm.startSpan(`node: ${node.stepId || node.id}`, 'workflow', 'node');
+  if (nodeSpan) {
+    nodeSpan.setLabel('node_id', node.id);
+    nodeSpan.setLabel('node_type', node.stepType);
+    if (node.stepId) {
+      nodeSpan.setLabel('step_id', node.stepId);
+    }
+  }
+
   try {
     params.workflowRuntime.exitScope();
     stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
@@ -64,6 +76,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
+      nodeSpan?.setOutcome('unknown');
+      nodeSpan?.end();
       return;
     }
 
@@ -88,16 +102,39 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
+
+    if (
+      stepExecutionRuntime.abortController.signal.aborted &&
+      isCancellableNode(nodeImplementation)
+    ) {
+      try {
+        await nodeImplementation.onCancel();
+      } catch (onCancelError) {
+        params.workflowLogger.logError(
+          'Failed to execute onCancel hook - continuing execution',
+          onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
+        );
+      }
+    }
+
     params.workflowRuntime.enterScope();
+    nodeSpan?.setOutcome('success');
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
+    nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
 
     if (stepExecutionRuntime) {
+      const catchErrorSpan = apm.startSpan('catch error handling', 'workflow', 'error_handling');
       await catchError(params, stepExecutionRuntime);
+      catchErrorSpan?.end();
     }
 
+    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
+    saveStateSpan?.end();
+
+    nodeSpan?.end();
   }
 }

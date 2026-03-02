@@ -40,6 +40,7 @@ interface DataSourceCardProps {
   readonly subtitle?: string;
   readonly isPreviewVisible?: boolean;
   readonly isForCompleteSimulation?: boolean;
+  readonly 'data-test-subj'?: string;
 }
 
 export const DataSourceCard = ({
@@ -49,6 +50,7 @@ export const DataSourceCard = ({
   subtitle,
   isPreviewVisible,
   isForCompleteSimulation = false,
+  'data-test-subj': dataTestSubj,
 }: PropsWithChildren<DataSourceCardProps>) => {
   const { selectDataSource } = useStreamEnrichmentEvents();
   const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
@@ -58,7 +60,8 @@ export const DataSourceCard = ({
   const canDeleteDataSource = dataSourceState.can({ type: 'dataSource.delete' });
   const isEnabled = dataSourceState.matches('enabled');
   const isLoading = dataSourceState.matches({ enabled: 'loadingData' });
-  const isDeletableDataSource = dataSource.type !== 'latest-samples'; // We don't allow deleting the latest-samples source to always have a data source available
+  const isDeletableDataSource =
+    dataSource.type !== 'latest-samples' && dataSource.type !== 'failure-store'; // We don't allow deleting the latest-samples or failure store data sources to always have a data source available
 
   const handleSelection = () => selectDataSource(dataSourceRef.id);
 
@@ -73,69 +76,71 @@ export const DataSourceCard = ({
   );
 
   return (
-    <EuiCheckableCard
-      id={`dataSourceCard-${dataSource.type}-${dataSourceRef.id}`}
-      css={css`
-        [class*='euiSplitPanel__inner']:has(> label.euiCheckableCard__label) {
-          overflow-block: auto;
-        }
-      `}
-      label={
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" wrap>
-            <EuiTitle size="xs">
-              <h3>{title ?? dataSource.type}</h3>
-            </EuiTitle>
-            {isForCompleteSimulation ? <CompleteSimulationBadge /> : <PartialSimulationBadge />}
-            <EuiFlexItem grow />
-            {isDeletableDataSource && (
-              <EuiToolTip
-                content={
-                  !canDeleteDataSource
-                    ? DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceDisabledLabel
-                    : undefined
-                }
-                disableScreenReaderOutput
-              >
-                <EuiButtonIcon
-                  iconType="trash"
-                  disabled={!canDeleteDataSource}
-                  onClick={deleteDataSource}
-                  aria-label={DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceLabel}
-                />
-              </EuiToolTip>
-            )}
+    <div data-test-subj={dataTestSubj}>
+      <EuiCheckableCard
+        id={`dataSourceCard-${dataSource.type}-${dataSourceRef.id}`}
+        css={css`
+          [class*='euiSplitPanel__inner']:has(> label.euiCheckableCard__label) {
+            overflow-block: auto;
+          }
+        `}
+        label={
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" wrap>
+              <EuiTitle size="xs">
+                <h3>{title ?? dataSource.type}</h3>
+              </EuiTitle>
+              {isForCompleteSimulation ? <CompleteSimulationBadge /> : <PartialSimulationBadge />}
+              <EuiFlexItem grow />
+              {isDeletableDataSource && (
+                <EuiToolTip
+                  content={
+                    !canDeleteDataSource
+                      ? DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceDisabledLabel
+                      : undefined
+                  }
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="trash"
+                    disabled={!canDeleteDataSource}
+                    onClick={deleteDataSource}
+                    aria-label={DATA_SOURCES_I18N.dataSourceCard.deleteDataSourceLabel}
+                  />
+                </EuiToolTip>
+              )}
+            </EuiFlexGroup>
+            <EuiText component="p" color="subdued" size="xs">
+              {subtitle}
+            </EuiText>
           </EuiFlexGroup>
-          <EuiText component="p" color="subdued" size="xs">
-            {subtitle}
-          </EuiText>
-        </EuiFlexGroup>
-      }
-      onChange={handleSelection}
-      checked={isEnabled}
-    >
-      {children}
-      <EuiAccordion
-        id={dataSourceRef.id}
-        buttonContent={DATA_SOURCES_I18N.dataSourceCard.dataPreviewAccordionLabel}
-        initialIsOpen={isPreviewVisible}
+        }
+        onChange={handleSelection}
+        checked={isEnabled}
       >
-        <EuiSpacer size="s" />
-        {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-        {isEmpty(previewDocs) ? (
-          <EuiEmptyPrompt
-            icon={<AssetImage type="noResults" size="s" />}
-            titleSize="xs"
-            title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
-          />
-        ) : (
-          <PreviewTable
-            documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
-            height={150}
-          />
-        )}
-      </EuiAccordion>
-    </EuiCheckableCard>
+        {children}
+        <EuiAccordion
+          id={dataSourceRef.id}
+          buttonContent={DATA_SOURCES_I18N.dataSourceCard.dataPreviewAccordionLabel}
+          initialIsOpen={isPreviewVisible}
+        >
+          <EuiSpacer size="s" />
+          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+          {isEmpty(previewDocs) ? (
+            <EuiEmptyPrompt
+              icon={<AssetImage type="noResults" size="s" />}
+              titleSize="xs"
+              title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
+            />
+          ) : (
+            <PreviewTable
+              documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
+              height={350}
+            />
+          )}
+        </EuiAccordion>
+      </EuiCheckableCard>
+    </div>
   );
 };
 
@@ -158,9 +163,7 @@ export const PartialSimulationBadge = ({ short = false }: { short?: boolean }) =
           : undefined
       }
     >
-      <EuiBadge tabIndex={0} color="warning">
-        {label}
-      </EuiBadge>
+      <EuiBadge tabIndex={0}>{label}</EuiBadge>
     </EuiToolTip>
   );
 };
