@@ -17,7 +17,7 @@ export function useDateRangeRedirect() {
 
   const { core, plugins } = useApmPluginContext();
 
-  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+  const timePickerTimeDefaults = core?.uiSettings?.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
