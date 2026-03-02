@@ -41,6 +41,7 @@ export interface WatchlistsFlyoutParams extends Record<string, unknown> {
   mode?: WatchlistsFlyoutMode;
   watchlistId?: string;
   watchlistName?: string;
+  spaceId?: string;
 }
 
 export interface WatchlistsFlyoutExpandableFlyoutProps extends FlyoutPanelProps {
@@ -52,6 +53,7 @@ export const WatchlistsFlyoutPanel = ({
   mode = 'create',
   watchlistId,
   watchlistName,
+  spaceId,
 }: WatchlistsFlyoutParams) => {
   const isEditMode = mode === 'edit';
   const title = isEditMode
@@ -90,7 +92,13 @@ export const WatchlistsFlyoutPanel = ({
           defaultMessage: 'Watchlist created successfully',
         })
       );
-      await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
+      if (spaceId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['watchlists-management-table', spaceId],
+        });
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
+      }
       closeFlyout();
     },
     onError: (error: Error) => {

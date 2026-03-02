@@ -16,6 +16,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { WatchlistsFlyoutKey } from '../../flyout/entity_details/shared/constants';
 import { Watchlists } from '../components/watchlists';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlistsManagement.pageTitle',
@@ -26,6 +27,7 @@ const PAGE_TITLE = i18n.translate(
 
 export const EntityAnalyticsWatchlistsManagementPage = () => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const spaceId = useSpaceId();
 
   const handleCreateClick = () => {
     openFlyout({
@@ -33,6 +35,7 @@ export const EntityAnalyticsWatchlistsManagementPage = () => {
         id: WatchlistsFlyoutKey,
         params: {
           mode: 'create',
+          spaceId,
         },
       },
     });

@@ -21,14 +21,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useMutation, useQueryClient } from '@kbn/react-query';
 import { WatchlistsFlyoutKey } from '../../../../../flyout/entity_details/shared/constants';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
-import { useEntityAnalyticsRoutes } from '../../../../api/api';
+import { useDeleteWatchlist } from './hooks/use_delete_watchlist';
 import { useWatchlistsTableData } from './hooks/use_watchlists_table_data';
 import { buildWatchlistsManagementTableColumns } from './columns';
 import type { WatchlistTableItemType } from './types';
@@ -40,9 +39,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
   const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
   const { openFlyout } = useExpandableFlyoutApi();
-  const queryClient = useQueryClient();
-  const { addSuccess, addError } = useAppToasts();
-  const { deleteWatchlist } = useEntityAnalyticsRoutes();
+  const { addError } = useAppToasts();
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
     useBoolState();
   const [pendingDelete, setPendingDelete] = useState<WatchlistTableItemType | null>(null);
@@ -56,38 +53,14 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
             mode: 'edit',
             watchlistId: record.id,
             watchlistName: record.name,
+            spaceId,
           },
         },
       });
     },
-    [openFlyout]
+    [openFlyout, spaceId]
   );
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteWatchlist({ id }),
-    onSuccess: async () => {
-      addSuccess(
-        i18n.translate(
-          'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteSuccess',
-          {
-            defaultMessage: 'Watchlist deleted successfully',
-          }
-        )
-      );
-      await queryClient.invalidateQueries({
-        queryKey: ['watchlists-management-table', spaceId],
-      });
-    },
-    onError: (error: Error) => {
-      addError(error, {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteError',
-          {
-            defaultMessage: 'Failed to delete watchlist',
-          }
-        ),
-      });
-    },
-  });
+  const deleteMutation = useDeleteWatchlist(spaceId);
 
   const onDelete = useCallback(
     (record: WatchlistTableItemType) => {
