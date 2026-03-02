@@ -37,7 +37,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
                 size="xs"
                 color="text"
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={() => setOpen((x) => !x)}
                 data-test-subj="show-filters-button"
               >

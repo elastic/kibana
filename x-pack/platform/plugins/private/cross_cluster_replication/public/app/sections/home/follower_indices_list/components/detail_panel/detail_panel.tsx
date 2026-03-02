@@ -569,7 +569,7 @@ export const DetailPanel = ({
                 <EuiFlexItem grow={false}>
                   <ContextMenu
                     iconSide="left"
-                    iconType="arrowUp"
+                    iconType="chevronSingleUp"
                     anchorPosition="upRight"
                     label={
                       <FormattedMessage

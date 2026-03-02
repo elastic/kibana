@@ -105,7 +105,7 @@ exports[`policy table shows empty state when there are no policies 1`] = `
               >
                 <span
                   color="inherit"
-                  data-euiicon-type="plusInCircle"
+                  data-euiicon-type="plusCircle"
                 />
                 Create policy
               </span>

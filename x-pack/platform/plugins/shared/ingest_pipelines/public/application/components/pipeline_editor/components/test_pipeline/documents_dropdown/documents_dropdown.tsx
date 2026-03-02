@@ -63,7 +63,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
     <EuiButtonEmpty
       data-test-subj="documentsButton"
       onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
     >
       {i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.selectedDocumentLabel', {

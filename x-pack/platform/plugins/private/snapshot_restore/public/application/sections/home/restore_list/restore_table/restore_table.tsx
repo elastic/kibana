@@ -177,7 +177,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
         <EuiButtonIcon
           onClick={() => toggleIndexRestoreDetails(item)}
           aria-label={itemIdToExpandedRowMap[item.index] ? 'Collapse' : 'Expand'}
-          iconType={itemIdToExpandedRowMap[item.index] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.index] ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       ),
     },

@@ -269,7 +269,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                 <>
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                     <EuiButtonEmpty
-                      iconType="exportAction"
+                      iconType="upload"
                       disabled={inputEditorValue === ''}
                       onClick={() =>
                         downloadFileAs(EXPORT_FILE_NAME, {
@@ -287,7 +287,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                   <>
                     <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
                       <EuiButtonEmpty
-                        iconType="importAction"
+                        iconType="download"
                         onClick={() => document.getElementById('importConsoleFile')?.click()}
                         size="xs"
                         data-test-subj="consoleImportButton"
@@ -375,7 +375,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         >
           <EuiButtonEmpty
             onClick={() => updateTab(CONFIG_TAB_ID)}
-            iconType="editorCodeBlock"
+            iconType="code"
             size="xs"
             color="text"
             aria-label={MAIN_PANEL_LABELS.variablesButton}

@@ -302,7 +302,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           <EuiButton
             {...reactRouterNavigate(history, '/create_template')}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
           >
             <FormattedMessage
               id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.createTemplatesButtonLabel"
