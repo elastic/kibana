@@ -19,7 +19,7 @@ import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
