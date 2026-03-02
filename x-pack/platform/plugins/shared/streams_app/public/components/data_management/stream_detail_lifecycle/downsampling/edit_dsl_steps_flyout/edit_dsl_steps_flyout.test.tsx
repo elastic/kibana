@@ -96,7 +96,7 @@ const Wrapper = ({
   initialSteps: IngestStreamLifecycleDSL;
   initialSelectedStepIndex?: number;
   onClose: () => void;
-  onChange: FlyoutOnChange;
+  onChange: React.ComponentProps<typeof EditDslStepsFlyout>['onChange'];
   onSave: (next: IngestStreamLifecycleDSL) => void;
   setSelectedStepIndexRef: { current: ((index: number | undefined) => void) | null };
   onSelectedStepIndexChange: jest.Mock;
