@@ -415,8 +415,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
         return newNotesMap;
       });
-      refetch();
-    }, [noteIds, timelineSavedObjectId, refetch]);
+    }, [noteIds]);
 
     return !isModal ? (
       <OpenTimeline
