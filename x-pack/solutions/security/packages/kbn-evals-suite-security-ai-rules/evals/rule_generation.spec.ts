@@ -17,11 +17,12 @@ import { negativePairs } from '../datasets/negative_pairs';
 evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete }, () => {
   evaluate(
     'generates accurate detection rules',
-    async ({ executorClient, evaluators, chatClient, log }) => {
+    async ({ executorClient, evaluators, chatClient, evaluationInferenceClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         evaluators,
         executorClient,
         chatClient,
+        inferenceClient: evaluationInferenceClient,
         log,
       });
 
@@ -46,11 +47,12 @@ evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete
 
   evaluate(
     'handles edge cases and errors gracefully',
-    async ({ executorClient, evaluators, chatClient, log }) => {
+    async ({ executorClient, evaluators, chatClient, evaluationInferenceClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         evaluators,
         executorClient,
         chatClient,
+        inferenceClient: evaluationInferenceClient,
         log,
       });
 
@@ -75,11 +77,12 @@ evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete
 
   evaluate(
     'rejects impossible detection requests',
-    async ({ executorClient, evaluators, chatClient, log }) => {
+    async ({ executorClient, evaluators, chatClient, evaluationInferenceClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         evaluators,
         executorClient,
         chatClient,
+        inferenceClient: evaluationInferenceClient,
         log,
       });
 
