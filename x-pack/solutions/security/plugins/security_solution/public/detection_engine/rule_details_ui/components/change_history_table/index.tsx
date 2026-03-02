@@ -8,9 +8,6 @@
 import {
   EuiAvatar,
   EuiBadge,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -23,12 +20,14 @@ import {
 import { css } from '@emotion/react';
 import moment from 'moment';
 import React, { useState } from 'react';
-
-// import type { Filter, Query } from '@kbn/es-query';
-// import { FILTERS } from '@kbn/es-query';
-
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import { HeaderSection } from '../../../../common/components/header_section';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  UtilityBar,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../../common/components/utility_bar';
 import type { Rule } from '../../../rule_management/logic';
 import type { ChangeHistoryResult } from '../../../rule_management/api/hooks/use_change_history';
 import { useChangeHistory } from '../../../rule_management/api/hooks/use_change_history';
@@ -37,7 +36,6 @@ import { useRuleDetailsContext } from '../../pages/rule_details/rule_details_con
 import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { CHANGE_HISTORY_ACTION_TEMPLATE } from './templates';
 import { ChangeHistoryFlyout } from './flyout';
-import * as i18n from './translations';
 
 interface ChangeHistoryTableProps {
   ruleId: string;
@@ -78,7 +76,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
     perPage: pageSize,
   });
   // const items = data?.items || [];
-  const maxItems = data?.total ?? 0;
+  const maxItems = (data?.total ?? 1) + 1;
 
   const items = data?.items?.map((item) => {
     const visibleChanges = item.changes.filter((c) => !IGNORED_FIELDS.includes(c));
@@ -112,7 +110,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
             }}
           >
             {`View `}
-            <EuiIcon type="expand" />
+            <EuiIcon type="expand" aria-hidden={true} />
           </EuiLink>
         </EuiText>
       </EuiTimelineItem>
@@ -163,22 +161,40 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
 
   return (
     <EuiPanel data-test-subj="executionLogContainer" hasBorder>
-      {/* Filter bar */}
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={true}>
-          <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFieldSearch
-            data-test-subj="historySearch"
-            aria-label={i18n.SEARCH_PLACEHOLDER}
-            placeholder={i18n.SEARCH_PLACEHOLDER}
-            onSearch={() => {}}
-            isClearable={true}
-            fullWidth={true}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {/* Utility bar */}
+      <UtilityBar>
+        <UtilityBarSection>
+          <UtilityBarGroup>
+            <UtilityBarText
+              css={css`
+                padding: 0.3em 0 0.5em;
+              `}
+              dataTestSubj="historyPagination"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.paginationDetails"
+                defaultMessage="Showing {partOne} of {partTwo} events"
+                values={{
+                  partOne: (
+                    <span
+                      css={css`
+                        font-weight: bold;
+                      `}
+                    >{`${1}-${maxItems}`}</span>
+                  ),
+                  partTwo: (
+                    <span
+                      css={css`
+                        font-weight: bold;
+                      `}
+                    >{`${maxItems}`}</span>
+                  ),
+                }}
+              />
+            </UtilityBarText>
+          </UtilityBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
       <EuiSpacer size="s" />
       <EuiTimeline aria-label="Change History timeline">{items}</EuiTimeline>
       <ChangeHistoryFlyout
