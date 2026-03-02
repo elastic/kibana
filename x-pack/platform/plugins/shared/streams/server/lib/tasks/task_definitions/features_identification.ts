@@ -10,7 +10,6 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import {
   type IdentifyFeaturesResult,
   type BaseFeature,
-  type Feature,
   isComputedFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
@@ -19,8 +18,6 @@ import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { conditionToQueryDsl } from '@kbn/streamlang';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -96,8 +93,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
-                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
-                const sampleDocumentsFilter = createEntityExclusionFilter(existingFeatures);
 
                 const { hits: sampleDocuments } = await getSampleDocuments({
                   esClient,
@@ -105,7 +100,6 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   start,
                   end,
                   size: 20,
-                  filter: sampleDocumentsFilter,
                 });
 
                 const identifyFeaturesStart = Date.now();
@@ -156,8 +150,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     newFeaturesCount--;
                     taskContext.logger.debug(
                       () =>
-                        `Overwriting feature with id [${
-                          feature.id
+                        `Overwriting feature with id [${feature.id
                         }] since it already exists.\nExisting feature: ${JSON.stringify(
                           existing
                         )}\nNew feature: ${JSON.stringify(feature)}`
@@ -250,20 +243,4 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
       },
     },
   } satisfies TaskDefinitionRegistry;
-}
-
-function createEntityExclusionFilter(
-  features: Feature[]
-): QueryDslQueryContainer | undefined {
-  const filters = features.flatMap((feature) => (feature.filter ? [feature.filter] : []));
-
-  if (filters.length === 0) {
-    return undefined;
-  }
-
-  return {
-    bool: {
-      must_not: filters.map((filter) => conditionToQueryDsl(filter)),
-    },
-  };
 }
