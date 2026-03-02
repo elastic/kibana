@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, EuiText, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { combineLatest, filter, map, pairwise, skip, startWith } from 'rxjs';
+import { combineLatest, skip } from 'rxjs';
 import { useGridPanelState } from './use_panel_grid_data';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
@@ -27,13 +27,7 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   useEffect(() => {
     /** Update the styles of the panel as it is dragged via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
-      gridLayoutStateManager.activePanelEvent$.pipe(
-        // filter out the first active panel event to allow "onClick" events through
-        pairwise(),
-        filter(([before]) => before !== undefined),
-        map(([, after]) => after),
-        startWith(undefined)
-      ),
+      gridLayoutStateManager.activePanelEvent$,
       panel$,
     ])
       .pipe(skip(1))
