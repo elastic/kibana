@@ -78,7 +78,6 @@ const renderFlyout = (
   };
 };
 
-type FlyoutOnChange = React.ComponentProps<typeof EditDslStepsFlyout>['onChange'];
 
 const Wrapper = ({
   initialSteps,
