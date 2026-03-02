@@ -166,6 +166,14 @@ export class GettingStarted {
     await this.page.testSubj.locator(`tutorialCard-${slug}`).click();
   }
 
+  async getTutorialSelectorCards() {
+    return this.page.locator('[data-test-subj^="tutorialCard-"]').all();
+  }
+
+  async getTutorialSelectorCard(slug: string) {
+    return this.page.testSubj.locator(`tutorialCard-${slug}`);
+  }
+
   async getStepPanel(stepIndex: number) {
     return this.page.testSubj.locator(`tutorialStep-${stepIndex}`);
   }
@@ -173,6 +181,10 @@ export class GettingStarted {
   async clickStepExecute(stepIndex: number) {
     const stepPanel = this.page.testSubj.locator(`tutorialStep-${stepIndex}`);
     await stepPanel.locator('[data-test-subj="stepExecuteButton"]').click();
+  }
+
+  async clickStepIngest(stepIndex: number) {
+    await this.page.testSubj.locator(`tutorialStep-${stepIndex}-ingest`).click();
   }
 
   async clickStepNext(stepIndex: number) {
@@ -188,6 +200,10 @@ export class GettingStarted {
     return stepPanel.locator('[data-test-subj="stepExplanation"]');
   }
 
+  async getStepProgressText() {
+    return this.page.testSubj.locator('tutorialStepProgress').innerText();
+  }
+
   async getTutorialSummary() {
     return this.page.testSubj.locator('tutorialSummary');
   }
@@ -198,5 +214,21 @@ export class GettingStarted {
 
   async clickTutorialBackToAll() {
     await this.page.testSubj.locator('tutorialBack').click();
+  }
+
+  async getCleanupStepPanel() {
+    return this.page.testSubj.locator('tutorialCleanupStep');
+  }
+
+  async clickCleanupItemDelete(index: number) {
+    await this.page.testSubj.locator(`cleanupItem-${index}-delete`).click();
+  }
+
+  async getCleanupItemDeleted(index: number) {
+    return this.page.testSubj.locator(`cleanupItem-${index}-deleted`);
+  }
+
+  async clickCleanupComplete() {
+    await this.page.testSubj.locator('tutorialCleanupComplete').click();
   }
 }

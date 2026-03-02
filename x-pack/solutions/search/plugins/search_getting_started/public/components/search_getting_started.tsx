@@ -15,7 +15,7 @@ import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { SearchGettingStartedConnectCode } from './connect_code';
 import { GettingStartedFooter } from './footer';
 import { SearchGettingStartedHeader } from './header';
-import { UpdatedTutorials } from './tutorials/updated_tutorials';
+import { UpdatedTutorials } from './tutorials/new_tutorial_components/updated_tutorials';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();

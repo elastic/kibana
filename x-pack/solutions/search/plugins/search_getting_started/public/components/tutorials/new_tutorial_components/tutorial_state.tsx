@@ -10,14 +10,17 @@ import type {
   TutorialStep,
   SnippetVariableKey,
   TutorialSlug,
-} from '../../hooks/use_tutorial_content';
-import { useTutorialContent, BULK_INGEST_SNIPPET_PREFIX } from '../../hooks/use_tutorial_content';
+} from '../../../hooks/use_tutorial_content';
+import {
+  useTutorialContent,
+  BULK_INGEST_SNIPPET_PREFIX,
+} from '../../../hooks/use_tutorial_content';
 import {
   useExecuteTutorialStep,
   insertValues,
   StepExecutionError,
   type EsResponse,
-} from '../../hooks/use_execute_tutorial_step';
+} from '../../../hooks/use_execute_tutorial_step';
 
 export type StepStatus = 'pending' | 'running' | 'completed' | 'failed';
 

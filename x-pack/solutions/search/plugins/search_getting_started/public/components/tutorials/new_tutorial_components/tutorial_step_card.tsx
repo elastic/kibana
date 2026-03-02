@@ -24,7 +24,7 @@ import { StepExplanation } from './step_explanation';
 import {
   getResponseHighlightLines,
   getSnippetHighlightLines,
-} from './new_tutorial_content/utils/highlight_utils';
+} from '../new_tutorial_content/utils/highlight_utils';
 
 export interface TutorialStepCardProps {
   step: ResolvedStep;

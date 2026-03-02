@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { TutorialDefinition, TutorialSlug } from '../../hooks/use_tutorial_content';
+import type { TutorialDefinition, TutorialSlug } from '../../../hooks/use_tutorial_content';
 
 export interface TutorialSelectorProps {
   tutorials: TutorialDefinition[];
@@ -21,7 +21,7 @@ export const TutorialSelector: React.FC<TutorialSelectorProps> = ({ tutorials, o
         <EuiFlexItem key={tutorial.slug}>
           <EuiCard
             hasBorder
-            icon={<EuiIcon type="documentation" size="xl" />}
+            icon={<EuiIcon type="documentation" size="xl" aria-hidden={true} />}
             title={tutorial.title}
             titleSize="xs"
             description={tutorial.description}

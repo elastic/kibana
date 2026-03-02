@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { TutorialDefinition } from '../../hooks/use_tutorial_content';
-import { useResetWithCleanup } from '../../hooks/use_reset_with_cleanup';
+import type { TutorialDefinition } from '../../../hooks/use_tutorial_content';
+import { useResetWithCleanup } from '../../../hooks/use_reset_with_cleanup';
 import { useTutorialState } from './tutorial_state';
 import { TutorialStepCard } from './tutorial_step_card';
 import { TutorialSummary } from './tutorial_summary';
@@ -129,10 +129,9 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.searchGettingStarted.tutorial.runner.jumpToStep',
-                  { defaultMessage: 'Jump to current step' }
-                )}
+                content={i18n.translate('xpack.searchGettingStarted.tutorial.runner.jumpToStep', {
+                  defaultMessage: 'Jump to current step',
+                })}
               >
                 <EuiButtonEmpty
                   size="s"

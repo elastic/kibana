@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { AVAILABLE_TUTORIALS, type TutorialSlug } from '../../hooks/use_tutorial_content';
+import { AVAILABLE_TUTORIALS, type TutorialSlug } from '../../../hooks/use_tutorial_content';
 import { TutorialSelector } from './tutorial_selector';
 import { TutorialRunner } from './tutorial_runner';
 

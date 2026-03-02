@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { StepStatus } from './tutorial_state';
-import type { EsResponse } from '../../hooks/use_execute_tutorial_step';
+import type { EsResponse } from '../../../hooks/use_execute_tutorial_step';
 
 export interface StepCodeSectionProps {
   apiSnippet: string;
@@ -58,12 +58,7 @@ const formatResponseBody = (response: EsResponse): string => {
 
 const ResponsePane: React.FC<
   Pick<StepCodeSectionProps, 'status' | 'response' | 'error' | 'responseHighlightLines'>
-> = ({
-  status,
-  response,
-  error,
-  responseHighlightLines,
-}) => {
+> = ({ status, response, error, responseHighlightLines }) => {
   if (status === 'running') {
     return (
       <EuiFlexGroup
@@ -103,9 +98,7 @@ const ResponsePane: React.FC<
         isCopyable
         css={codeBlockFillHeight}
         lineNumbers={
-          responseHighlightLines
-            ? { start: 1, highlight: responseHighlightLines }
-            : false
+          responseHighlightLines ? { start: 1, highlight: responseHighlightLines } : false
         }
       >
         {formatResponseBody(response)}

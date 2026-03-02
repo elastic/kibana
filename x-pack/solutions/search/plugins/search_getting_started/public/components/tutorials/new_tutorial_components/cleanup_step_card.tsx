@@ -17,9 +17,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CleanupItem, SnippetVariableKey } from '../../hooks/use_tutorial_content';
-import { useCleanupState } from '../../hooks/use_cleanup_state';
-import { insertValues } from '../../hooks/use_execute_tutorial_step';
+import type { CleanupItem, SnippetVariableKey } from '../../../hooks/use_tutorial_content';
+import { useCleanupState } from '../../../hooks/use_cleanup_state';
+import { insertValues } from '../../../hooks/use_execute_tutorial_step';
 
 export interface CleanupStepCardProps {
   cleanup: CleanupItem[];
@@ -76,10 +76,9 @@ export const CleanupStepCard: React.FC<CleanupStepCardProps> = ({
                           isDisabled
                           data-test-subj={`cleanupItem-${i}-deleted`}
                         >
-                          {i18n.translate(
-                            'xpack.searchGettingStarted.tutorial.cleanup.deleted',
-                            { defaultMessage: 'Deleted' }
-                          )}
+                          {i18n.translate('xpack.searchGettingStarted.tutorial.cleanup.deleted', {
+                            defaultMessage: 'Deleted',
+                          })}
                         </EuiButton>
                       ) : (
                         <EuiButton
@@ -90,20 +89,15 @@ export const CleanupStepCard: React.FC<CleanupStepCardProps> = ({
                           onClick={() => executeDelete(i)}
                           data-test-subj={`cleanupItem-${i}-delete`}
                         >
-                          {i18n.translate(
-                            'xpack.searchGettingStarted.tutorial.cleanup.delete',
-                            { defaultMessage: 'Delete' }
-                          )}
+                          {i18n.translate('xpack.searchGettingStarted.tutorial.cleanup.delete', {
+                            defaultMessage: 'Delete',
+                          })}
                         </EuiButton>
                       )}
                     </EuiFlexItem>
                     {itemState.status === 'error' && itemState.error && (
                       <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="warning"
-                          color="warning"
-                          content={itemState.error}
-                        />
+                        <EuiIconTip type="warning" color="warning" content={itemState.error} />
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>

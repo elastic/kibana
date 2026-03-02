@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TutorialDefinition } from '../../hooks/use_tutorial_content';
+import type { TutorialDefinition } from '../../../hooks/use_tutorial_content';
 
 export interface TutorialSummaryProps {
   summary: TutorialDefinition['summary'];
@@ -28,7 +28,7 @@ export const TutorialSummary: React.FC<TutorialSummaryProps> = ({ summary }) => 
     <EuiPanel color="success" paddingSize="l" hasBorder data-test-subj="tutorialSummary">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" color="success" size="l" />
+          <EuiIcon type="checkInCircleFilled" color="success" size="l" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -58,7 +58,12 @@ export const TutorialSummary: React.FC<TutorialSummaryProps> = ({ summary }) => 
           <EuiFlexGroup direction="column" gutterSize="xs">
             {summary.links.map((link) => (
               <EuiFlexItem key={link.href} grow={false}>
-                <EuiLink href={link.href} target="_blank" external>
+                <EuiLink
+                  data-test-subj="searchGettingStartedTutorialSummaryLink"
+                  href={link.href}
+                  target="_blank"
+                  external
+                >
                   {link.label}
                 </EuiLink>
               </EuiFlexItem>
