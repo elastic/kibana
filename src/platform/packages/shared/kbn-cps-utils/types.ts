@@ -43,12 +43,14 @@ export interface ProjectsData {
 }
 
 export interface ICPSManager {
-  fetchProjects(): Promise<ProjectsData | null>;
-  refresh(): Promise<ProjectsData | null>;
+  whenReady(): Promise<void>;
+  fetchProjects(projectRouting?: ProjectRouting): Promise<ProjectsData | null>;
+  getTotalProjectCount(): number;
   getProjectRouting$(): Observable<ProjectRouting | undefined>;
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
   getProjectRouting(overrideValue?: ProjectRouting): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
+  updateDefaultProjectRouting(projectRouting?: ProjectRouting): void;
   getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;
   getProjectPickerAccess(): ProjectRoutingAccess;
 }
