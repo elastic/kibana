@@ -35,6 +35,8 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     configuration: {
       tools: [],
     },
+    visibility: 'public',
+    created_by: { username: 'test-user' },
     readonly: false,
     ...parts,
   };
@@ -51,6 +53,8 @@ export const createMockedInternalAgent = (
     configuration: {
       tools: [],
     },
+    visibility: 'public',
+    created_by: { username: 'test-user' },
     readonly: false,
     isAvailable: jest.fn() as any,
     ...parts,

@@ -18,7 +18,7 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { getUserFromRequest } from '../../../utils';
+import { getIsSuperuserFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
   AgentDeleteRequest,
@@ -66,10 +66,23 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
+  const isSuperuser = await getIsSuperuserFromRequest({
+    request,
+    security,
+    esClient: scopedClient.asCurrentUser,
+  });
   const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 
-  return new AgentClientImpl({ storage, user, request, space, toolsService, logger });
+  return new AgentClientImpl({
+    storage,
+    user,
+    isSuperuser,
+    request,
+    space,
+    toolsService,
+    logger,
+  });
 };
 
 class AgentClientImpl implements AgentClient {
@@ -78,12 +91,14 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
+  private readonly isSuperuser: boolean;
   private readonly logger: Logger;
 
   constructor({
     storage,
     toolsService,
     user,
+    isSuperuser,
     request,
     space,
     logger,
@@ -91,6 +106,7 @@ class AgentClientImpl implements AgentClient {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
+    isSuperuser: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -99,6 +115,7 @@ class AgentClientImpl implements AgentClient {
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
+    this.isSuperuser = isSuperuser;
     this.space = space;
     this.logger = logger;
   }
@@ -123,30 +140,32 @@ class AgentClientImpl implements AgentClient {
   }
 
   async get(agentId: string): Promise<PersistedAgentDefinition> {
-    const document = await this._get(agentId);
-    if (!document) {
-      throw createAgentNotFoundError({ agentId });
-    }
-
-    if (!hasAccess({ document, user: this.user })) {
-      throw createAgentNotFoundError({ agentId });
-    }
+    const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
     return fromEs(document);
   }
 
   async has(agentId: string): Promise<boolean> {
-    const document = await this._get(agentId);
-    return document !== undefined;
+    try {
+      await this.getDocumentWithAccess({ agentId, access: 'read' });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
+    const filters = [createSpaceDslFilter(this.space)];
+    if (!this.isSuperuser) {
+      filters.push(buildVisibilityReadFilter({ user: this.user }));
+    }
+
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(this.space)],
+          filter: filters,
         },
       },
     });
@@ -170,6 +189,7 @@ class AgentClientImpl implements AgentClient {
 
     const attributes = createRequestToEs({
       profile,
+      user: this.user,
       space: this.space,
       creationDate: now,
     });
@@ -185,14 +205,9 @@ class AgentClientImpl implements AgentClient {
     agentId: string,
     profileUpdate: AgentUpdateRequest
   ): Promise<PersistedAgentDefinition> {
-    const document = await this._get(agentId);
-    if (!document) {
-      throw createAgentNotFoundError({
-        agentId,
-      });
-    }
+    const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
 
-    if (!hasAccess({ document, user: this.user })) {
+    if (this.isVisibilityChange(document, profileUpdate) && !this.canChangeVisibility(document)) {
       throw createAgentNotFoundError({ agentId });
     }
 
@@ -218,14 +233,7 @@ class AgentClientImpl implements AgentClient {
   async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
 
-    const document = await this._get(id);
-    if (!document) {
-      throw createAgentNotFoundError({ agentId: id });
-    }
-
-    if (!hasAccess({ document, user: this.user })) {
-      throw createAgentNotFoundError({ agentId: id });
-    }
+    const document = await this.getDocumentWithAccess({ agentId: id, access: 'write' });
 
     const deleteResponse = await this.storage.getClient().delete({ id: document._id });
     return deleteResponse.result === 'deleted';
@@ -248,6 +256,50 @@ class AgentClientImpl implements AgentClient {
   private async exists(agentId: string): Promise<boolean> {
     const document = await this._get(agentId);
     return !!document;
+  }
+
+  private canChangeVisibility(document: Document): boolean {
+    return this.isSuperuser || isOwner({ document, user: this.user });
+  }
+
+  private isVisibilityChange(document: Document, update: AgentUpdateRequest): boolean {
+    if (update.visibility === undefined) {
+      return false;
+    }
+
+    return update.visibility !== (document._source?.visibility ?? 'public');
+  }
+
+  private async getDocumentWithAccess({
+    agentId,
+    access,
+  }: {
+    agentId: string;
+    access: 'read' | 'write';
+  }): Promise<Document> {
+    const document = await this._get(agentId);
+    if (!document) {
+      throw createAgentNotFoundError({ agentId });
+    }
+
+    const hasRequestedAccess =
+      access === 'read'
+        ? hasReadAccess({
+            document,
+            user: this.user,
+            isSuperuser: this.isSuperuser,
+          })
+        : hasWriteAccess({
+            document,
+            user: this.user,
+            isSuperuser: this.isSuperuser,
+          });
+
+    if (!hasRequestedAccess) {
+      throw createAgentNotFoundError({ agentId });
+    }
+
+    return document;
   }
 
   private async _get(agentId: string): Promise<Document | undefined> {
@@ -278,13 +330,87 @@ class AgentClientImpl implements AgentClient {
   }
 }
 
-const hasAccess = ({
+const hasReadAccess = ({
+  document,
+  user,
+  isSuperuser,
+}: {
+  document: Pick<Document, '_source'>;
+  user: UserIdAndName;
+  isSuperuser: boolean;
+}) => {
+  if (isSuperuser) {
+    return true;
+  }
+
+  const visibility = document._source?.visibility ?? 'public';
+  if (visibility !== 'private') {
+    return true;
+  }
+
+  return isOwner({ document, user });
+};
+
+const hasWriteAccess = ({
+  document,
+  user,
+  isSuperuser,
+}: {
+  document: Pick<Document, '_source'>;
+  user: UserIdAndName;
+  isSuperuser: boolean;
+}) => {
+  if (isSuperuser) {
+    return true;
+  }
+
+  const visibility = document._source?.visibility ?? 'public';
+  if (visibility === 'public') {
+    return true;
+  }
+
+  return isOwner({ document, user });
+};
+
+const isOwner = ({
   document,
   user,
 }: {
   document: Pick<Document, '_source'>;
   user: UserIdAndName;
 }) => {
-  // no access control for now
-  return true;
+  const source = document._source;
+  if (!source) {
+    return false;
+  }
+
+  if (user.id !== undefined && source.created_by_id === user.id) {
+    return true;
+  }
+
+  return source.created_by_name === user.username;
+};
+
+const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => {
+  const shouldClauses: Array<Record<string, unknown>> = [
+    {
+      bool: {
+        must_not: {
+          term: { visibility: 'private' },
+        },
+      },
+    },
+    { term: { created_by_name: user.username } },
+  ];
+
+  if (user.id !== undefined) {
+    shouldClauses.push({ term: { created_by_id: user.id } });
+  }
+
+  return {
+    bool: {
+      should: shouldClauses,
+      minimum_should_match: 1,
+    },
+  };
 };

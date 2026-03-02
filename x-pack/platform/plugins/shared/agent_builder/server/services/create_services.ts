@@ -58,6 +58,7 @@ export class ServiceManager {
   startServices({
     logger,
     security,
+    userProfile,
     spaces,
     elasticsearch,
     inference,

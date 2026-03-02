@@ -10,7 +10,7 @@ import {
   securityServiceMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import { getUserFromRequest } from './utils';
+import { getIsSuperuserFromRequest, getUserFromRequest } from './utils';
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -76,5 +76,62 @@ describe('getUserFromRequest', () => {
 
     expect(result).not.toHaveProperty('id');
     expect(result.username).toBe('some-user');
+  });
+});
+
+describe('getIsSuperuserFromRequest', () => {
+  let security: ReturnType<typeof securityServiceMock.createStart>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  beforeEach(() => {
+    security = securityServiceMock.createStart();
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('returns true for real requests when getCurrentUser has superuser role', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'testuser',
+      profile_uid: 'profile-123',
+      roles: ['superuser'],
+    } as any);
+
+    const result = await getIsSuperuserFromRequest({ request, security, esClient });
+
+    expect(result).toBe(true);
+    expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+    expect(esClient.security.authenticate).not.toHaveBeenCalled();
+  });
+
+  it('returns false for real requests when getCurrentUser has no superuser role', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    security.authc.getCurrentUser.mockReturnValue({
+      username: 'testuser',
+      profile_uid: 'profile-123',
+      roles: ['kibana_admin'],
+    } as any);
+
+    const result = await getIsSuperuserFromRequest({ request, security, esClient });
+
+    expect(result).toBe(false);
+    expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+    expect(esClient.security.authenticate).not.toHaveBeenCalled();
+  });
+
+  it('falls back to ES authenticate roles for fake requests', async () => {
+    const request = httpServerMock.createFakeKibanaRequest({});
+
+    esClient.security.authenticate.mockResolvedValue({
+      username: 'task-manager-user',
+      roles: ['superuser'],
+    } as any);
+
+    const result = await getIsSuperuserFromRequest({ request, security, esClient });
+
+    expect(result).toBe(true);
+    expect(security.authc.getCurrentUser).not.toHaveBeenCalled();
+    expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 });

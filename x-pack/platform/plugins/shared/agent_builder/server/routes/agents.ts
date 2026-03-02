@@ -172,6 +172,13 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf([
+                  schema.literal('public'),
+                  schema.literal('shared'),
+                  schema.literal('private'),
+                ])
+              ),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -287,6 +294,13 @@ export function registerAgentRoutes({
                     meta: { description: 'Updated labels for categorizing and organizing agents.' },
                   }
                 )
+              ),
+              visibility: schema.maybe(
+                schema.oneOf([
+                  schema.literal('public'),
+                  schema.literal('shared'),
+                  schema.literal('private'),
+                ])
               ),
               configuration: schema.maybe(
                 schema.object(

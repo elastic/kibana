@@ -7,6 +7,7 @@
 
 export {
   AgentType,
+  type AgentVisibility,
   agentBuilderDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,

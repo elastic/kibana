@@ -79,6 +79,8 @@ export const toInternalDefinition = async ({
     ...definition,
     configuration,
     type: AgentType.chat,
+    visibility: 'public',
+    created_by: { username: 'unknown' },
     readonly: true,
     isAvailable: async (ctx) => {
       if (definition.availability) {

@@ -40,3 +40,26 @@ export const getUserFromRequest = async ({
   const authResponse = await esClient.security.authenticate();
   return { username: authResponse.username };
 };
+
+/**
+ * Resolves whether the request is executing as a superuser.
+ */
+export const getIsSuperuserFromRequest = async ({
+  request,
+  security,
+  esClient,
+}: {
+  request: KibanaRequest;
+  security: SecurityServiceStart;
+  esClient: ElasticsearchClient;
+}): Promise<boolean> => {
+  if (!request.isFakeRequest) {
+    const authUser = security.authc.getCurrentUser(request);
+    if (authUser) {
+      return authUser.roles?.includes('superuser') ?? false;
+    }
+  }
+
+  const authResponse = await esClient.security.authenticate();
+  return authResponse.roles.includes('superuser');
+};

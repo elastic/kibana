@@ -6,6 +6,7 @@
  */
 
 import type { ToolSelection } from '../tools';
+import type { UserIdAndName } from '../base/users';
 
 /**
  * The type of an agent.
@@ -14,6 +15,8 @@ import type { ToolSelection } from '../tools';
 export enum AgentType {
   chat = 'chat',
 }
+
+export type AgentVisibility = 'private' | 'public' | 'shared';
 
 /**
  * ID of the agentBuilder default conversational agent
@@ -45,6 +48,14 @@ export interface AgentDefinition {
    * Built-in agents are readonly, user-created agent are not.
    */
   readonly: boolean;
+  /**
+   * Visibility controls who can read and write this agent.
+   */
+  visibility?: AgentVisibility;
+  /**
+   * Agent owner metadata.
+   */
+  created_by?: UserIdAndName;
   /**
    * Optional labels used to organize or filter agents
    */

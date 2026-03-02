@@ -154,12 +154,21 @@ export class AgentBuilderPlugin
   }
 
   start(
-    { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags }: CoreStart,
+    {
+      elasticsearch,
+      security,
+      userProfile,
+      uiSettings,
+      savedObjects,
+      dataStreams,
+      featureFlags,
+    }: CoreStart,
     { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      userProfile,
       elasticsearch,
       inference,
       spaces,
