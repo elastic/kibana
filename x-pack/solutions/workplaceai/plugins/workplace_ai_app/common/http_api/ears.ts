@@ -29,6 +29,7 @@ export const ALL_EARS_OAUTH_PROVIDERS = [
 
 // Exchange token
 export interface ExchangeCodeRequest {
+  pkce_verifier: string;
   code: string;
 }
 
