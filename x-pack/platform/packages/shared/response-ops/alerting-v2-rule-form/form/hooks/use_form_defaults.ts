@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import type { FormValues } from '../types';
 import { useDefaultGroupBy } from './use_default_group_by';
+import { useQueryBaseAndCondition } from './use_query_base_and_condition';
 
 interface UseFormDefaultsProps {
   /** The ES|QL query to derive defaults from */
@@ -25,6 +26,7 @@ interface UseFormDefaultsProps {
  */
 export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => {
   const { defaultGroupBy } = useDefaultGroupBy({ query });
+  const { baseQuery, condition } = useQueryBaseAndCondition({ query });
 
   return useMemo(
     () => ({
@@ -41,7 +43,8 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
       },
       evaluation: {
         query: {
-          base: query,
+          base: baseQuery,
+          condition,
         },
       },
       grouping: defaultGroupBy.length
@@ -50,6 +53,6 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
           }
         : undefined,
     }),
-    [query, defaultGroupBy]
+    [baseQuery, condition, defaultGroupBy]
   );
 };

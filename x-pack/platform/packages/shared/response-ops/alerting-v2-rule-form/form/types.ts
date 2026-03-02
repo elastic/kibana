@@ -26,10 +26,12 @@ export interface RuleSchedule {
 
 export interface EvaluationQuery {
   base: string;
+  condition: string;
 }
 
 export interface RuleEvaluation {
   query: EvaluationQuery;
+  condition?: string;
 }
 
 export interface RuleGrouping {

@@ -18,18 +18,18 @@ import {
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
-import { useEsqlCallbacks } from './hooks/use_esql_callbacks';
 import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
-import { QueryFieldGroup } from './field_groups/query_field_group';
+import { ConditionFieldGroup } from './field_groups/condition_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
 import { useCreateRule } from './hooks/use_create_rule';
@@ -41,7 +41,6 @@ export interface RuleFormServices {
   http: HttpStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  application: ApplicationStart;
   /** Required when includeSubmission is true */
   notifications?: NotificationsStart;
 }
@@ -55,9 +54,10 @@ export interface RuleFormProps {
   onSubmit?: (values: FormValues) => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
-  /** Whether to include YAML editor toggle (default: false). Requires services.application. */
+  /** Whether to include YAML editor toggle (default: false) */
   includeYaml?: boolean;
-  /** Whether the form is in a loading/disabled state */
+  /** ES|QL callbacks for YAML editor autocomplete (required if includeYaml is true) */
+  esqlCallbacks?: ESQLCallbacks;
   isDisabled?: boolean;
   /**
    * Whether to include submit/cancel buttons (default: false).
@@ -67,11 +67,8 @@ export interface RuleFormProps {
   includeSubmission?: boolean;
   /** Called after successful rule creation (only used when includeSubmission is true) */
   onSuccess?: () => void;
-  /** Callback when cancel button is clicked */
   onCancel?: () => void;
-  /** Custom label for the submit button */
   submitLabel?: React.ReactNode;
-  /** Custom label for the cancel button */
   cancelLabel?: React.ReactNode;
 }
 
@@ -93,6 +90,7 @@ const formValuesToYamlObject = (values: FormValues): Record<string, unknown> => 
   evaluation: {
     query: {
       base: values.evaluation.query.base,
+      ...(values.evaluation.query.condition && { condition: values.evaluation.query.condition }),
     },
   },
   ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
@@ -131,6 +129,7 @@ const yamlToFormValues = (yamlString: string): FormValues | null => {
       evaluation: {
         query: {
           base: (evalQuery?.base as string) ?? '',
+          condition: (evalQuery?.condition as string) ?? '',
         },
       },
       grouping: grouping?.fields ? { fields: grouping.fields as string[] } : undefined,
@@ -157,6 +156,7 @@ const RuleFormContent: React.FC<RuleFormContentProps> = ({
   onFormSubmit,
   includeQueryEditor = true,
   includeYaml = false,
+  esqlCallbacks,
   isDisabled = false,
   isSubmitting = false,
   showSubmissionButtons = false,
@@ -164,11 +164,6 @@ const RuleFormContent: React.FC<RuleFormContentProps> = ({
   submitLabel,
   cancelLabel,
 }) => {
-  const esqlCallbacks = useEsqlCallbacks({
-    application: services.application,
-    http: services.http,
-    search: services.data.search.search,
-  });
   const { handleSubmit, getValues, reset } = useFormContext<FormValues>();
   const [editMode, setEditMode] = useState<EditMode>('form');
   const [yaml, setYaml] = useState<string>('');
@@ -325,12 +320,11 @@ const RuleFormContent: React.FC<RuleFormContentProps> = ({
         <>
           <EuiForm id={RULE_FORM_ID} component="form" onSubmit={handleSubmit(onFormSubmit)}>
             <ErrorCallOut />
-            {includeQueryEditor && (
-              <>
-                <QueryFieldGroup />
-                <EuiSpacer size="m" />
-              </>
-            )}
+            <ConditionFieldGroup
+              includeBase={includeQueryEditor}
+              search={services.data.search.search}
+            />
+            <EuiSpacer size="m" />
             <RuleDetailsFieldGroup />
             <EuiSpacer size="m" />
             <RuleExecutionFieldGroup services={services} />

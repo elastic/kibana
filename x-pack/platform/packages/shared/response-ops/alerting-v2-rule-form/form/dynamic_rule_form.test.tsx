@@ -20,6 +20,18 @@ jest.mock('@kbn/yaml-rule-editor', () => ({
   YamlRuleEditor: () => <div data-test-subj="yamlRuleEditorMock">YAML Editor Mock</div>,
 }));
 
+// Mock the code-editor to avoid monaco editor setup
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea
+      data-test-subj="codeEditorMock"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+  ESQL_LANG_ID: 'esql',
+}));
+
 // Mock the ES|QL utils to avoid complex setup
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn().mockResolvedValue({

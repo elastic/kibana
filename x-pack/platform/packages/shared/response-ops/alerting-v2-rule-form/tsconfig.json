@@ -27,11 +27,14 @@
     "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/esql-types",
+    "@kbn/esql-language",
     "@kbn/es-query",
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
-    "@kbn/yaml-rule-editor"
+    "@kbn/yaml-rule-editor",
+    "@kbn/code-editor",
+    "@kbn/monaco"
   ]
 }
 
