@@ -18,7 +18,9 @@ project:
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
 dependsOn:
+  - '@kbn/esql-language'
   - '@kbn/evals'
+  - '@kbn/inference-common'
   - '@kbn/scout'
   - '@kbn/tooling-log'
 tags:
