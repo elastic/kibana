@@ -223,9 +223,9 @@ export const config: PluginConfigDescriptor = {
           ),
           backgroundSync: schema.maybe(
             schema.object({
-              enabled: schema.boolean({ defaultValue: false }),
+              enabled: schema.boolean({ defaultValue: true }),
               dryRun: schema.boolean({ defaultValue: false }),
-              interval: schema.maybe(schema.string({ defaultValue: '1h' })),
+              interval: schema.maybe(schema.string({ defaultValue: '10m' })),
             })
           ),
         })
