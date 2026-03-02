@@ -104,7 +104,7 @@ const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =>
     css({
       position: 'relative',
       overflow: 'hidden',
-      borderRadius: euiTheme.border.radius.small,
+      // borderRadius: euiTheme.border.radius.small,
       display: 'inline-flex',
       alignItems: 'stretch',
       flexDirection: 'row',
@@ -113,25 +113,25 @@ const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =>
         content: '""',
         position: 'absolute',
         inset: 0,
-        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-        borderRadius: 'inherit',
+        // border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        // borderRadius: 'inherit',
         pointerEvents: 'none',
       },
 
       '& .headerAppActionsSecondaryToolbarControlIconButton .euiButtonIcon': {
-        borderRadius: 0,
+        // borderRadius: 0,
         border: 'none',
       },
 
-      '& .headerAppActionsSecondaryToolbarControlIconButton + .headerAppActionsSecondaryToolbarControlIconButton':
-        {
-          borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-        },
+      // '& .headerAppActionsSecondaryToolbarControlIconButton + .headerAppActionsSecondaryToolbarControlIconButton':
+      //   {
+      //     borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      //   },
 
-      /* Divider between multiple buttons inside one wrapper (e.g. Dashboard Share + Exit) */
-      '& .euiButtonIcon + .euiButtonIcon': {
-        borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-      },
+      // /* Divider between multiple buttons inside one wrapper (e.g. Dashboard Share + Exit) */
+      // '& .euiButtonIcon + .euiButtonIcon': {
+      //   borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      // },
     }),
   controlGroupIconButton:
     euiTheme &&
@@ -141,7 +141,7 @@ const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =>
         blockSize: '28px',
         minWidth: '28px',
         minHeight: '28px',
-        borderRadius: 'inherit',
+        // borderRadius: 'inherit',
 
         '&:hover, &:active, &:focus': {
           background: 'transparent',

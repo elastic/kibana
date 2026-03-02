@@ -145,7 +145,7 @@ const DiscoverEsqlButton: React.FC<DiscoverEsqlButtonProps> = ({ onClick }) => {
       size="s"
       iconType="editorCodeBlock"
       minWidth={false}
-      color="success"
+      color="primary"
       css={esqlButtonCss}
       onClick={onClick ?? noop}
       data-test-subj="headerGlobalNav-appActionsEsqlButton"
