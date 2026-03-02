@@ -22,16 +22,18 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import { EngineDescriptorType } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import { CRUDClient } from './domain/crud_client';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 
 export class EntityStorePlugin
   implements
-  Plugin<
-    EntityStoreSetupContract,
-    EntityStoreStartContract,
-    EntityStoreSetupPlugins,
-    EntityStoreStartPlugins
-  > {
+    Plugin<
+      EntityStoreSetupContract,
+      EntityStoreStartContract,
+      EntityStoreSetupPlugins,
+      EntityStoreStartPlugins
+    >
+{
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 
@@ -96,6 +98,11 @@ export class EntityStorePlugin
     plugins.taskManager.registerApiKeyInvalidateFn(
       plugins.security?.authc.apiKeys.invalidateAsInternalUser
     );
+
+    const logger = this.logger;
+    return {
+      createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
+    };
   }
 
   public stop() {
