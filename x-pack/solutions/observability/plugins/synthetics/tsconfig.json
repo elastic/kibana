@@ -121,7 +121,8 @@
     "@kbn/content-management-plugin",
     "@kbn/licensing-types",
     "@kbn/observability-synthetics-test-data",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/scout-oblt"
   ],
   "exclude": ["target/**/*"]
 }
