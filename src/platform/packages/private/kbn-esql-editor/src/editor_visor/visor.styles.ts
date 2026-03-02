@@ -37,7 +37,7 @@ export const visorStyles = (
   const visorBoxShadow = isDarkMode
     ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
     : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
-
+  const visorInnerPadding = '2px';
   const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorGradientPadding})`;
 
   const gradientBoxStyles = {
@@ -66,7 +66,7 @@ export const visorStyles = (
     comboBoxWrapper: {
       background: euiTheme.colors.backgroundBasePlain,
       justifyContent: 'center',
-      paddingLeft: '2px',
+      paddingLeft: visorInnerPadding,
       flexGrow: 1,
       maxWidth: `${
         isSpaceReduced ? `calc(${visorWidthPercentage * 100}% )` : `${comboBoxWidth}px`
@@ -108,7 +108,7 @@ export const visorStyles = (
       justify-content: center;
       border-bottom-right-radius: ${euiTheme.size.s};
       border-top-right-radius: ${euiTheme.size.s};
-      padding-right: 2px;
+      padding-right: ${visorInnerPadding};
 
       .euiFormControlLayout--group {
         border-radius: ${euiTheme.size.s};
@@ -141,7 +141,7 @@ export const visorStyles = (
       background: ${euiTheme.colors.backgroundBasePlain};
       border-bottom-left-radius: ${euiTheme.size.s};
       border-top-left-radius: ${euiTheme.size.s};
-      padding-left: 2px;
+      padding-left: ${visorInnerPadding};
       flex-shrink: 0;
       flex-grow: 0;
       width: ${modeSelectWidth}px;
@@ -170,7 +170,7 @@ export const visorStyles = (
       height: ${euiTheme.size.xl};
       border-bottom-right-radius: ${euiTheme.size.s};
       border-top-right-radius: ${euiTheme.size.s};
-      padding-right: 2px;
+      padding-right: ${visorInnerPadding};
       overflow: visible;
       position: relative;
     `,
@@ -179,7 +179,7 @@ export const visorStyles = (
       border: none !important;
       background-color: ${euiTheme.colors.backgroundBasePlain};
       font-size: ${fontSize} !important;
-      padding: calc(${euiTheme.size.xs} + 2px) ${euiTheme.size.s} !important;
+      padding: calc(${euiTheme.size.xs} + ${visorInnerPadding}) ${euiTheme.size.s} !important;
       margin: 0;
       resize: none;
       overflow: hidden;
