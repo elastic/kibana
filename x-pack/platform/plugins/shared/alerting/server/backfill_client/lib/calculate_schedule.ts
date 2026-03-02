@@ -9,10 +9,15 @@ import { adHocRunStatus } from '../../../common/constants';
 import { parseDuration } from '../../../common';
 import type { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
 
+export const MAX_SCHEDULE_ENTRIES = 10_000;
+
+export const SCHEDULE_TRUNCATED_WARNING = `Backfill schedule was truncated to the maximum allowed entries of ${MAX_SCHEDULE_ENTRIES}.`;
+
 const getScheduleFromInterval = (
   start: string,
   interval: string,
-  end?: string
+  end?: string,
+  maxEntries?: number
 ): AdHocRunSchedule[] => {
   const schedule: AdHocRunSchedule[] = [];
   const intervalInMs = parseDuration(interval);
@@ -23,17 +28,36 @@ const getScheduleFromInterval = (
     currentEnd = new Date(currentStart.valueOf() + intervalInMs);
     schedule.push({ status: adHocRunStatus.PENDING, runAt: currentEnd.toISOString(), interval });
 
+    if (maxEntries && schedule.length >= maxEntries) break;
+
     currentStart = currentEnd;
   } while (end && currentEnd && currentEnd.valueOf() < new Date(end).valueOf());
 
   return schedule;
 };
 
+export interface CalculateScheduleResult {
+  schedule: AdHocRunSchedule[];
+  truncated: boolean;
+}
+
 export function calculateSchedule(
   interval: string,
   ranges: Array<{ start: string; end: string }>
-): AdHocRunSchedule[] {
-  return ranges.flatMap((range) => {
-    return getScheduleFromInterval(range.start, interval, range.end);
-  });
+): CalculateScheduleResult {
+  const schedule: AdHocRunSchedule[] = [];
+  let truncated = false;
+  for (const range of ranges) {
+    const remaining = MAX_SCHEDULE_ENTRIES - schedule.length;
+    if (remaining <= 0) {
+      truncated = true;
+      break;
+    }
+    const entries = getScheduleFromInterval(range.start, interval, range.end, remaining);
+    schedule.push(...entries);
+  }
+  if (schedule.length >= MAX_SCHEDULE_ENTRIES) {
+    truncated = true;
+  }
+  return { schedule, truncated };
 }
