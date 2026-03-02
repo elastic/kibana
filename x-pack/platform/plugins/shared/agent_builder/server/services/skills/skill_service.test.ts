@@ -6,7 +6,6 @@
  */
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createSkillService } from './skill_service';
 
@@ -51,44 +50,43 @@ describe('createSkillService', () => {
   });
 
   describe('setup().registerSkill', () => {
-    it('registers a skill successfully', async () => {
+    it('registers a skill successfully', () => {
       const service = createSkillService();
       const { registerSkill } = service.setup();
 
       const skill = createMockSkillDefinition();
-      await expect(registerSkill(skill)).resolves.not.toThrow();
-      expect(validateSkillDefinition).toHaveBeenCalledWith(skill);
+      expect(() => registerSkill(skill)).not.toThrow();
     });
 
-    it('throws when registering duplicate skill id', async () => {
+    it('throws when registering duplicate skill id', () => {
       const service = createSkillService();
       const { registerSkill } = service.setup();
 
-      await registerSkill(createMockSkillDefinition({ id: 'dup' }));
-      await expect(
+      registerSkill(createMockSkillDefinition({ id: 'dup' }));
+      expect(() =>
         registerSkill(createMockSkillDefinition({ id: 'dup', name: 'other' as any }))
-      ).rejects.toThrow('Skill type with id dup already registered');
+      ).toThrow('Skill type with id dup already registered');
     });
 
-    it('throws when registering skill with duplicate path and name', async () => {
+    it('throws when registering skill with duplicate path and name', () => {
       const service = createSkillService();
       const { registerSkill } = service.setup();
 
-      await registerSkill(
+      registerSkill(
         createMockSkillDefinition({ id: 'a', name: 'same' as any, basePath: 'skills/p' as any })
       );
-      await expect(
+      expect(() =>
         registerSkill(
           createMockSkillDefinition({ id: 'b', name: 'same' as any, basePath: 'skills/p' as any })
         )
-      ).rejects.toThrow('Skill with path skills/p and name same already registered');
+      ).toThrow('Skill with path skills/p and name same already registered');
     });
 
-    it('allows different skills with same name but different base paths', async () => {
+    it('allows different skills with same name but different base paths', () => {
       const service = createSkillService();
       const { registerSkill } = service.setup();
 
-      await expect(
+      expect(() =>
         registerSkill(
           createMockSkillDefinition({
             id: 'a',
@@ -96,8 +94,8 @@ describe('createSkillService', () => {
             basePath: 'skills/platform' as any,
           })
         )
-      ).resolves.not.toThrow();
-      await expect(
+      ).not.toThrow();
+      expect(() =>
         registerSkill(
           createMockSkillDefinition({
             id: 'b',
@@ -105,7 +103,7 @@ describe('createSkillService', () => {
             basePath: 'skills/security' as any,
           })
         )
-      ).resolves.not.toThrow();
+      ).not.toThrow();
     });
   });
 
@@ -126,7 +124,7 @@ describe('createSkillService', () => {
       const { registerSkill } = service.setup();
 
       const skill = createMockSkillDefinition({ id: 'builtin-1' });
-      await registerSkill(skill);
+      registerSkill(skill);
 
       const { getRegistry } = service.start({
         elasticsearch: { client: { asInternalUser: {} } } as any,
