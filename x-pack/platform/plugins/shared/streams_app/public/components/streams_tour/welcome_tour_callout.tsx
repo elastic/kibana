@@ -16,6 +16,8 @@ import {
   EuiButton,
   EuiLink,
   EuiSpacer,
+  EuiThemeProvider,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -48,7 +50,8 @@ export function WelcomeTourCallout({
 
   return (
     <>
-      <EuiPanel hasBorder paddingSize="m" color="subdued" grow={false} borderRadius="m">
+      {/* <EuiThemeProvider colorMode="dark"> */}
+      <EuiPanel hasBorder={false} color="subdued" paddingSize="m" grow={false} borderRadius="none">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <AssetImage type="yourPreviewWillAppearHere" size={140} />
@@ -88,7 +91,7 @@ export function WelcomeTourCallout({
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
                   {isTourEnabled && (
                     <EuiFlexItem grow={false}>
-                      <EuiButton color="primary" size="s" onClick={handleStartTour}>
+                      <EuiButton color="primary" size="s" fill onClick={handleStartTour}>
                         {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
                           defaultMessage: 'Start tour',
                         })}
@@ -96,7 +99,7 @@ export function WelcomeTourCallout({
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiButtonEmpty
                       color="primary"
                       size="s"
                       href={docLinks.links.observability.logsStreams}
@@ -108,24 +111,22 @@ export function WelcomeTourCallout({
                       {i18n.translate('xpack.streams.welcomeCallout.docsButton', {
                         defaultMessage: 'View docs',
                       })}
-                    </EuiButton>
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem
                     grow={false}
-                    css={css`
-                      margin-left: 10px;
-                    `}
                   >
-                    <EuiLink
+                    <EuiButtonEmpty
                       onClick={dismissCallout}
                       aria-label={i18n.translate('xpack.streams.welcomeCallout.dismissAriaLabel', {
                         defaultMessage: 'Dismiss welcome callout',
                       })}
+                      size="s"
                     >
                       {i18n.translate('xpack.streams.welcomeCallout.dismissButton', {
                         defaultMessage: "Don't show this again",
                       })}
-                    </EuiLink>
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -133,6 +134,7 @@ export function WelcomeTourCallout({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
+      {/* </EuiThemeProvider> */}
     </>
   );
 }
