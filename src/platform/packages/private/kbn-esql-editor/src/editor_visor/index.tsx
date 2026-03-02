@@ -18,6 +18,7 @@ import {
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -31,7 +32,6 @@ import type { ESQLEditorDeps } from '../types';
 export { VisorMode } from './mode_selector';
 
 export const NL_TO_ESQL_FLAG = 'esql.nlToEsqlEnabled';
-const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query

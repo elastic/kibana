@@ -14,6 +14,7 @@ import type {
   IUiSettingsClient,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -21,7 +22,6 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 
 import type { EsqlServerPluginStart } from '../types';
 
-const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 const resolveConnectorId = async ({
