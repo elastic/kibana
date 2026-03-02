@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -232,32 +232,32 @@ export const getDatatableVisualization = ({
     const title =
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
-            defaultMessage: 'As table',
-          })
+          defaultMessage: 'As table',
+        })
         : i18n.translate('xpack.lens.datatable.visualizationOf', {
-            defaultMessage: 'Table {operations}',
-            values: {
-              operations:
-                table.label ||
-                table.columns
-                  .map((col) => col.operation.label)
-                  .join(
-                    i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                      defaultMessage: ' & ',
-                      description:
-                        'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-                    })
-                  ),
-            },
-          });
+          defaultMessage: 'Table {operations}',
+          values: {
+            operations:
+              table.label ||
+              table.columns
+                .map((col) => col.operation.label)
+                .join(
+                  i18n.translate('xpack.lens.datatable.conjunctionSign', {
+                    defaultMessage: ' & ',
+                    description:
+                      'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
+                  })
+                ),
+          },
+        });
 
     const changeType = table.changeType;
     const changeFactor =
       changeType === 'reduced' || changeType === 'layers'
         ? 0.3
         : changeType === 'unchanged'
-        ? 0.5
-        : 1;
+          ? 0.5
+          : 1;
 
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
@@ -379,10 +379,10 @@ export const getDatatableVisualization = ({
                 triggerIconType: hidden
                   ? 'invisible'
                   : hasColoring
-                  ? 'colorBy'
-                  : collapseFn
-                  ? 'aggregate'
-                  : undefined,
+                    ? 'colorBy'
+                    : collapseFn
+                      ? 'aggregate'
+                      : undefined,
                 palette: hasColoring ? stops : undefined,
               };
             }),
@@ -652,9 +652,9 @@ export const getDatatableVisualization = ({
                 !canColor || !column.palette
                   ? undefined
                   : paletteService
-                      // The by value palette is a pseudo custom palette that is only custom from params level
-                      .get(colorByTerms ? column.palette.name : CUSTOM_PALETTE)
-                      .toExpression(paletteParams),
+                    // The by value palette is a pseudo custom palette that is only custom from params level
+                    .get(colorByTerms ? column.palette.name : CUSTOM_PALETTE)
+                    .toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
@@ -918,7 +918,7 @@ export const getDatatableVisualization = ({
           <>
             <FormattedMessage
               id="xpack.lens.datatableVisualization.colorMismatchLongMessage"
-              defaultMessage="Incompatible color configuration detected in {count, plural, one {column} other {columns}} {columnList}. Colors have been temporarily disabled for {count, plural, one {this column} other {these columns}}. Click {fixLabel} to apply a compatible configuration and save, or edit the color settings to customize."
+              defaultMessage="Color settings in {count, plural, one {column} other {columns}} {columnList} are incompatible and have been temporarily disabled. Fix the issue to update the colors automatically, or edit the color configuration manually."
               values={{
                 count: mismatchedColumnLabels.length,
                 columnList: <strong>{columnList}</strong>,
@@ -926,14 +926,17 @@ export const getDatatableVisualization = ({
               }}
             />
             {setState && fixedState && (
-              <EuiButton
-                data-test-subj="lensFixColorMismatchAction"
-                onClick={() => setState(fixedState)}
-              >
-                {i18n.translate('xpack.lens.datatableVisualization.colorMismatchFixActionLabel', {
-                  defaultMessage: 'Fix',
-                })}
-              </EuiButton>
+              <>
+                <EuiSpacer size="s" />
+                <EuiLink
+                  data-test-subj="lensFixColorMismatchAction"
+                  onClick={() => setState(fixedState)}
+                >
+                  {i18n.translate('xpack.lens.datatableVisualization.colorMismatchFixActionLabel', {
+                    defaultMessage: 'Fix color configuration',
+                  })}
+                </EuiLink>
+              </>
             )}
           </>
         ),
