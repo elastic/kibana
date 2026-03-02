@@ -448,9 +448,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Health Scan with real SLOs', function () {
-      // // Increase timeout for dataforge setup and transform operations
-      // this.timeout(300000);
-
       before(async () => {
         await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -509,14 +506,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { scanId } = scheduleResponse;
 
         let scanResults: any;
-        await retry.waitForWithTimeout('health scan to complete', 120000, async () => {
-          const response = await sloApi.getHealthScanResults(scanId, adminRoleAuthc, {});
-          if (response.scan.status !== 'completed') {
-            throw new Error(`Scan status is ${response.scan.status}, waiting for completed`);
-          }
-          scanResults = response;
-          return true;
-        });
+        await retry.tryWithRetries(
+          'wait for health scan to complete',
+          async () => {
+            const results = await sloApi.getHealthScanResults(scanId, adminRoleAuthc);
+            expect(results.scan.status).to.eql('completed');
+            scanResults = results;
+          },
+          { retryCount: 10, retryDelay: 3000 }
+        );
 
         expect(scanResults.results).to.be.an('array');
         expect(scanResults.total).to.be.greaterThan(0);
