@@ -177,7 +177,7 @@ describe('useComparisonColumns', () => {
           grow={false}
         >
           <EuiIcon
-            type="pinFilled"
+            type="pinFill"
           />
         </EuiFlexItem>
         <EuiFlexItem

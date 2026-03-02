@@ -122,7 +122,7 @@ export const Notes = memo(() => {
   const addNoteButton = useMemo(
     () => (
       <EuiButtonEmpty
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={openExpandedFlyoutNotesTab}
         size="s"
         disabled={cannotAddNotes}
@@ -138,7 +138,7 @@ export const Notes = memo(() => {
     () => (
       <EuiButtonIcon
         onClick={openExpandedFlyoutNotesTab}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         disabled={cannotAddNotes}
         css={css`
           margin-left: ${euiTheme.size.xs};

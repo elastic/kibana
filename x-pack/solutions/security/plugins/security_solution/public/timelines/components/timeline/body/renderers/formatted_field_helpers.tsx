@@ -112,7 +112,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           Component={Component}
           dataTestSubj="data-grid-host-details"
           href={href}
-          iconType="expand"
+          iconType="maximize"
           onClick={onClick ?? goToRuleDetails}
           title={title ?? ruleName}
         >

@@ -68,7 +68,7 @@ const TestTrailingColumn = () => {
       button={
         <EuiButtonIcon
           aria-label="show actions"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           color="text"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />

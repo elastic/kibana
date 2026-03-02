@@ -59,7 +59,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
   const plusButton = useMemo(
     () => (
       <EuiButtonIcon
-        iconType="plusInCircle"
+        iconType="plusCircle"
         iconSize="m"
         color="primary"
         data-test-subj="timeline-bottom-bar-open-button"
@@ -82,7 +82,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 color="text"
                 data-test-subj="timeline-bottom-bar-create-new-timeline"
                 onClick={handleCreateNewTimeline}
@@ -92,7 +92,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 color="text"
                 data-test-subj="timeline-bottom-bar-create-new-timeline-template"
                 onClick={handleCreateNewTimelineTemplate}

@@ -60,7 +60,7 @@ export const AlertPreviewButton: FC<AlertPreviewButtonProps> = ({
 
   return (
     <EuiButtonIcon
-      iconType="expand"
+      iconType="maximize"
       data-test-subj={dataTestSubj}
       onClick={openAlertPreview}
       aria-label={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.ariaLabel', {
