@@ -188,10 +188,6 @@ const handleFlattenedOutput = (
     ? filterModulesByScoutCiConfig(log, filteredModules)
     : filteredModules;
 
-  if (flagsReader.boolean('save')) {
-    validateConfigsHaveTests(modulesToFlatten, log);
-  }
-
   const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
 
   if (flagsReader.boolean('save')) {
@@ -250,7 +246,6 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    validateConfigsHaveTests(filteredForCiModules, log);
     // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
     const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
     saveModuleDiscoveryInfo(splitModules, log);
@@ -266,7 +261,6 @@ const handleNonFlattenedOutput = (
 
   if (flagsReader.boolean('validate')) {
     filterModulesByScoutCiConfig(log, filteredModules);
-    validateConfigsHaveTests(filteredModules, log);
     return;
   }
 
@@ -282,6 +276,11 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
+
+  if (flagsReader.boolean('save') || flagsReader.boolean('validate')) {
+    validateConfigsHaveTests(modulesWithTests, log);
+  }
+
   // Filter modules by target tags and compute server run flags
   const filteredModulesByTags = filterModulesByTargetTags(modulesWithTests, targetTags);
   const filteredModules = filterModulesByCustomServerPaths(
