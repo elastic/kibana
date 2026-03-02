@@ -148,7 +148,7 @@ components:
       type: object
       description: |
         > warn
-        > Run script response action will only be available with v9.4.0
+        > This functionality is currently not available
       required:
         - command
       properties:
