@@ -167,7 +167,7 @@ const validateConfigsHaveTests = (modules: ModuleDiscoveryInfo[], log: ToolingLo
   }
 
   if (configsWithoutTests.length > 0) {
-    log.error('The following Scout Playwright configs have no runnable tests:');
+    log.error('The following Scout Playwright configs have no tests:');
     for (const { module, configPath } of configsWithoutTests) {
       log.error(`  - [${module}] ${configPath}`);
     }

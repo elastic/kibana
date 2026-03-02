@@ -919,7 +919,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // The actual serverRunFlags computation happens in the function, so we just verify the configs are processed
   });
 
-  describe('validates configs have runnable tests', () => {
+  describe('validates configs have tests', () => {
     const moduleWithNoTests: ScoutTestableModuleWithConfigs = {
       name: 'pluginEmpty',
       group: 'groupEmpty',
