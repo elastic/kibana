@@ -86,7 +86,9 @@ async function runUpgradeManagedPackagePoliciesTask(
 export const setupUpgradeManagedPackagePolicies = async (soClient: SavedObjectsClientContract) => {
   appContextService
     .getLogger()
-    .debug('Scheduling required package policies upgrades for managed policies');
+    .debug(
+      '[UpgradeManagedPackagePoliciesTask] Scheduling required package policies upgrades for managed policies'
+    );
 
   const installedPackages = await getInstallations(soClient, {
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed AND ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.keep_policies_up_to_date:true`,
@@ -132,7 +134,7 @@ export const setupUpgradeManagedPackagePolicies = async (soClient: SavedObjectsC
       appContextService
         .getLogger()
         .debug(
-          `Scheduled package policies upgrades for package: ${installedPackage.name}@${installedPackage.version}`
+          `[UpgradeManagedPackagePoliciesTask] Scheduled package policies upgrades for package: ${installedPackage.name}@${installedPackage.version}`
         );
       await runUpgradeManagedPackagePoliciesTask(
         appContextService.getTaskManagerStart()!,
@@ -237,7 +239,9 @@ async function clearPendingUpgradeReview(soClient: SavedObjectsClientContract, p
   } catch (error) {
     appContextService
       .getLogger()
-      .warn(`Failed to clear pending upgrade review for ${pkgName}: ${error.message}`);
+      .warn(
+        `[UpgradeManagedPackagePoliciesTask] Failed to clear pending upgrade review for ${pkgName}: ${error.message}`
+      );
   }
 }
 

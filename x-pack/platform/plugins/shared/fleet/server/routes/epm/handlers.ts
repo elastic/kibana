@@ -722,6 +722,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       previous_version: attributes.previous_version,
       rolled_back: attributes.rolled_back,
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
+      pending_upgrade_review: attributes.pending_upgrade_review,
     };
 
     return {
