@@ -37,9 +37,9 @@ export interface TanstackVirtualGridProps {
   columnsMeta?: DataTableColumnsMeta;
 }
 
-const ROW_HEIGHT = 68;
+const ROW_HEIGHT = 90;
 const OVERSCAN = 10;
-const MAX_SUMMARY_FIELDS = 5;
+const MAX_SUMMARY_FIELDS = 10;
 
 const formatTimestamp = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
