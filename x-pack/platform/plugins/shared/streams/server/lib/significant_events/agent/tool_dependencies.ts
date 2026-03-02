@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { EbtTelemetryClient } from '../lib/telemetry';
-import type { GetScopedClients } from '../routes/types';
+import type { EbtTelemetryClient } from '../../telemetry';
+import type { GetScopedClients } from '../../../routes/types';
 
 /**
  * Dependencies passed into each Significant Events agent tool so handlers can access

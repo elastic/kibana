@@ -7,7 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server/types';
-import { SIGNIFICANT_EVENTS_AGENT_ID } from '../../common/constants';
+import { SIGNIFICANT_EVENTS_AGENT_ID } from '../../../../common/constants';
 import {
   SIGNIFICANT_EVENTS_AGENT_ANSWER_INSTRUCTIONS,
   SIGNIFICANT_EVENTS_AGENT_RESEARCH_INSTRUCTIONS,
