@@ -146,6 +146,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     const heading = page.testSubj.locator('breadcrumb last');
     await expect(heading).toHaveText('Editing ' + dashboardName);
   });
+
   test('lens panel custom actions - explore in Discover', async ({ page, pageObjects }) => {
     const panelTitle = 'Test Lens Panel';
     const dashboardName = 'Test Dashboard Lens Panel Actions';
@@ -240,8 +241,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       }
 
       await expect(syncTooltipsSwitch).toBeEnabled();
-      const tooltipsWasChecked =
-        (await syncTooltipsSwitch.getAttribute('aria-checked')) === 'true';
+      const tooltipsWasChecked = (await syncTooltipsSwitch.getAttribute('aria-checked')) === 'true';
       await syncTooltipsSwitch.click();
       const expectedTooltipsState = tooltipsWasChecked ? 'false' : 'true';
       await expect(syncTooltipsSwitch).toHaveAttribute('aria-checked', expectedTooltipsState);
@@ -254,6 +254,39 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       const heading = page.locator('#dashboardTitle');
       await expect(heading).toContainText(updatedTitle);
     });
+  });
+
+  test('should save, switch to view mode, and save as a copy', async ({ page, pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+    const saveAsCopyTitle = '[Logs] Web Traffic Copy';
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.switchToEditMode();
+
+    await pageObjects.dashboard.saveChangesToExistingDashboard();
+    await expect(page.testSubj.locator('saveDashboardSuccess')).toBeVisible();
+
+    await page.testSubj.click('dashboardViewOnlyMode');
+    await expect(page.testSubj.locator('dashboardEditMode')).toBeVisible();
+
+    await pageObjects.dashboard.switchToEditMode();
+    await page.testSubj.click('dashboardInteractiveSaveMenuItem');
+    await expect(page.testSubj.locator('savedObjectTitle')).toBeVisible();
+
+    const saveAsCheckbox = page.testSubj.locator('saveAsNewCheckbox');
+    if ((await saveAsCheckbox.getAttribute('aria-checked')) !== 'true') {
+      await saveAsCheckbox.click();
+    }
+
+    await page.testSubj.locator('savedObjectTitle').fill(saveAsCopyTitle);
+    await page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(page.testSubj.locator('saveDashboardSuccess')).toBeVisible();
+
+    await pageObjects.dashboard.goto();
+    const copyLink = page.testSubj.locator(
+      `dashboardListingTitleLink-${saveAsCopyTitle.split(' ').join('-')}`
+    );
+    await expect(copyLink).toBeVisible();
   });
 
   test('should export dashboard as PDF and download the report', async ({ page, pageObjects }) => {
