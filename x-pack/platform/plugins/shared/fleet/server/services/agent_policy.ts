@@ -1858,7 +1858,7 @@ class AgentPolicyService {
     await pMap(
       deployedPolicyIds,
       async (policyId) => {
-        const latestFleetPolicy = await this.getLatestFleetPolicy(esClient, policyId);
+        const latestFleetPolicy = await this.getLatestFleetPolicyRevision(esClient, policyId);
         const soRevision = policiesMap[policyId]?.revision;
         if (latestFleetPolicy && soRevision && latestFleetPolicy.revision_idx !== soRevision) {
           logger.warn(
@@ -1961,8 +1961,11 @@ class AgentPolicyService {
     }
   }
 
-  public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
-    const res = await esClient.search<FleetServerPolicy>({
+  public async getLatestFleetPolicyRevision(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ): Promise<Pick<FleetServerPolicy, 'revision_idx' | 'policy_id'> | null> {
+    const res = await esClient.search<Pick<FleetServerPolicy, 'revision_idx' | 'policy_id'>>({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
@@ -1980,7 +1983,7 @@ class AgentPolicyService {
       return null;
     }
 
-    return res.hits.hits[0]._source;
+    return res.hits.hits[0]._source ?? null;
   }
 
   public async getFleetServerPolicy(
