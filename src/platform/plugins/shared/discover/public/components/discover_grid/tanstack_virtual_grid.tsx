@@ -137,7 +137,6 @@ const VirtualRow = React.memo(
               dataView={dataView}
               shouldShowFieldHandler={shouldShowFieldHandler}
               maxEntries={MAX_SUMMARY_FIELDS}
-              isPlainRecord
               fieldFormats={fieldFormats}
               columnsMeta={columnsMeta}
               isCompressed
