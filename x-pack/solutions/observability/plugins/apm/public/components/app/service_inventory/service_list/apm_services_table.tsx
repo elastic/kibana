@@ -375,7 +375,7 @@ export function ApmServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
-  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+  const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
   const { slo, apmSourcesAccess } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
@@ -507,7 +507,7 @@ export function ApmServicesTable({
     openSloOverviewFlyout,
   ]);
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(
     apmEnableServiceInventoryTableSearchBar,
     true
   );
