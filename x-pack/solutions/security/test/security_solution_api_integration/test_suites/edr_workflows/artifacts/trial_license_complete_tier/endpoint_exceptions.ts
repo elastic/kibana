@@ -8,7 +8,10 @@
 import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
+import {
+  ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  GLOBAL_ARTIFACT_TAG,
+} from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
