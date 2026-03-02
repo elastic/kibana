@@ -677,6 +677,8 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      isServerless: this.isServerless,
+      featureFlags: core.featureFlags,
     });
 
     rulesSettingsClientFactory.initialize({
