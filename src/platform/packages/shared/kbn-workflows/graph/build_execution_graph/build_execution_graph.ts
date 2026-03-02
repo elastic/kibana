@@ -16,6 +16,7 @@ import type {
   ForEachStep,
   IfStep,
   KibanaStep,
+  LoopStepProps,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
@@ -424,6 +425,32 @@ function applyOnFailure(
   return graph;
 }
 
+function applyIterationGuardrails(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
+  loopStep: LoopStepProps,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  let graph = innerGraph;
+
+  if (loopStep['iteration-timeout']) {
+    graph = handleTimeout(
+      `iteration_${stepId}`,
+      'step_level_timeout',
+      loopStep['iteration-timeout'],
+      graph,
+      context
+    );
+  }
+
+  const iterationOnFailure = loopStep['iteration-on-failure'];
+  if (iterationOnFailure) {
+    graph = applyOnFailure(`iteration_${stepId}`, graph, iterationOnFailure, context);
+  }
+
+  return graph;
+}
+
 function visitOnFailure(
   currentStep: BaseStep,
   onFailureConfiguration: WorkflowOnFailure,
@@ -802,24 +829,11 @@ function createForeachGraph(
     stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
+    maxIterations: foreachStep['max-iterations'],
   };
   graph.setNode(exitNodeId, exitForeachNode);
   let innerGraph = createStepsSequence(foreachStep.steps || [], context);
-
-  if (foreachStep['iteration-timeout']) {
-    innerGraph = handleTimeout(
-      `iteration_${stepId}`,
-      'step_level_timeout',
-      foreachStep['iteration-timeout'],
-      innerGraph,
-      context
-    );
-  }
-
-  const iterationOnFailure = foreachStep['iteration-on-failure'];
-  if (iterationOnFailure) {
-    innerGraph = applyOnFailure(`iteration_${stepId}`, innerGraph, iterationOnFailure, context);
-  }
+  innerGraph = applyIterationGuardrails(stepId, innerGraph, foreachStep, context);
 
   insertGraphBetweenNodes(graph, innerGraph, enterForeachNodeId, exitNodeId);
   context.stack.pop();
