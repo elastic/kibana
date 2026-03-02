@@ -87,6 +87,60 @@ describe('project_routing on serverless non-CPS', () => {
         })
       ).resolves.not.toThrow();
     });
+
+    it('msearch does NOT inject project_routing and succeeds', async () => {
+      await expect(
+        client.msearch({
+          searches: [{ index: TEST_INDEX }, { query: { match_all: {} } }],
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('msearch strips project_routing from querystring and succeeds', async () => {
+      await expect(
+        client.transport.request(
+          {
+            method: 'POST',
+            path: '/_msearch',
+            body:
+              JSON.stringify({ index: TEST_INDEX }) +
+              '\n' +
+              JSON.stringify({ query: { match_all: {} } }) +
+              '\n',
+            querystring: { project_routing: ALL_PROJECT_ROUTING },
+          },
+          { headers: { 'content-type': 'application/x-ndjson' } }
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('msearch strips project_routing from NDJSON body entries and succeeds', async () => {
+      // project_routing in individual msearch body entries must be stripped so that
+      // non-CPS ES does not reject the request.
+      await expect(
+        client.transport.request({
+          method: 'POST',
+          path: '/_msearch',
+          bulkBody: [
+            { index: TEST_INDEX, project_routing: ALL_PROJECT_ROUTING },
+            { query: { match_all: {} }, project_routing: ALL_PROJECT_ROUTING },
+          ],
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('msearch via high-level client strips project_routing from header entries and succeeds', async () => {
+      // project_routing is a typed field on MsearchMultisearchHeader. The handler must strip it
+      // from the bulkBody array entries so non-CPS ES does not reject the request.
+      await expect(
+        client.msearch({
+          searches: [
+            { index: TEST_INDEX, project_routing: ALL_PROJECT_ROUTING },
+            { query: { match_all: {} } },
+          ],
+        })
+      ).resolves.not.toThrow();
+    });
   });
 
   describe(`'cps' plugin enabled`, () => {
@@ -128,6 +182,16 @@ describe('project_routing on serverless non-CPS', () => {
           query: { match_all: {} },
           // @ts-expect-error - project_routing is a valid body parameter
           body: { project_routing: ALL_PROJECT_ROUTING },
+        })
+      ).rejects.toThrow();
+    });
+
+    it('msearch injects project_routing as query param and requests fail (ES non-CPS)', async () => {
+      // Even though project_routing is injected correctly (as a query param), ES itself
+      // does not support CPS, so requests are expected to fail.
+      await expect(
+        client.msearch({
+          searches: [{ index: TEST_INDEX }, { query: { match_all: {} } }],
         })
       ).rejects.toThrow();
     });

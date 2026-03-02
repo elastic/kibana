@@ -487,7 +487,7 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -1455,7 +1455,11 @@ const ESQLEditorInternal = function ESQLEditor({
             selectedSources={selectedSources}
             position={dataSourceBrowserPosition}
             onSelect={handleDataSourceBrowserSelect}
-            onClose={() => setIsDataSourceBrowserOpen(false)}
+            onClose={() => {
+              setIsDataSourceBrowserOpen(false);
+              suppressSuggestionsRef.current = true;
+              editorRef.current?.focus();
+            }}
           />,
           document.body
         )}
