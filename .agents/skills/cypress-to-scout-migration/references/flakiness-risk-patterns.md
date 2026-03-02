@@ -1,5 +1,11 @@
 # Flakiness Risk Patterns for Migration
 
+## Table of Contents
+- [Critical — Will cause flakiness in Scout](#critical--will-cause-flakiness-in-scout)
+- [High — Likely to cause issues](#high--likely-to-cause-issues)
+- [Medium — Address during rewrite](#medium--address-during-rewrite)
+- [How to use this during triage](#how-to-use-this-during-triage)
+
 Scan Cypress source code for these patterns before migration. Each indicates a risk area that needs specific handling in the Scout rewrite. Check the test file **and its imported tasks/screens/objects**.
 
 ## Critical — Will cause flakiness in Scout

@@ -1,5 +1,5 @@
 ---
-name: cypress-to-scout-migration
+name: security-cypress-to-scout-migration
 description: >
   Security Solution specific extensions for Cypress-to-Scout migration. Adds Security Solution
   conventions, paths, packages, roles, and API services on top of the general cypress-to-scout-migration
@@ -31,7 +31,7 @@ When guidance from different sources conflicts:
 The general skill's Gate 4 has two parts — use the flaky-test-doctor for deeper analysis:
 
 - **Gate 4a (current status):** If the test is skipped or known-flaky, read the `flaky-test-doctor` skill and follow its analysis framework (Steps 0-5) to determine root cause before deciding whether to migrate, fix, or delete.
-- **Gate 4b (risk scan):** Use the general skill's `references/flakiness-risk-patterns.md` for the pattern catalog. Additionally, check the flaky-test-doctor's `references/common-flaky-patterns.md` for Cypress-specific anti-patterns — if any are present in the source test, they indicate app-level timing issues that should be fixed before migration, not papered over in the Scout rewrite.
+- **Gate 4b (risk scan):** Use the general skill's `references/flakiness-risk-patterns.md` for the pattern catalog. Additionally, check the flaky-test-doctor's `references/common-flaky-patterns.md` for Cypress-specific anti-patterns — if any are present in the source test, they indicate app-level timing issues. Fix before migration; do not paper over in the Scout rewrite.
 
 ## Security Solution paths and packages
 
@@ -177,13 +177,13 @@ After migration, run the `scout-best-practices-reviewer` skill against the new t
 
 ## Skill improvement
 
-After every migration, check if you learned something new that should be captured. In addition to the general skill's Phase 4 checklist, suggest updates to this skill if:
+After every migration, check for new learnings worth capturing. In addition to the general skill's Phase 4 checklist, suggest updates to this skill if:
 
 - **New Security API service** — a new `apiServices` method was created (update the API services table)
 - **New Security role convenience method** — a new `loginAs*` method was added (update the roles table)
 - **Security-specific ownership insight** — learned which plugin owns UI vs API for a feature (update Ownership notes)
 - **New cleanup requirement** — discovered a Security resource type that needs explicit cleanup (update Data cleanup section)
-- **New review checklist item** — found a Security-specific pattern that should be verified during review
+- **New review checklist item** — found a Security-specific pattern worth verifying during review
 
 Prompt the user: _"During this migration I learned [X]. Want me to add it to the Security Solution skill so future migrations benefit?"_
 
