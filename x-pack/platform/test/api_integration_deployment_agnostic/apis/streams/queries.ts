@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets } from '@kbn/streams-schema';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
@@ -22,6 +22,7 @@ import {
   putStream,
 } from './helpers/requests';
 import type { RoleCredentials } from '../../services';
+import { removeDynamicQueryFields } from './helpers/queries';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -624,12 +625,4 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getQueriesResponse.queries.map(removeDynamicQueryFields)).to.eql([queryWithFeature]);
     });
   });
-}
-
-function removeDynamicQueryFields(
-  query: StreamQuery
-): Omit<StreamQuery, 'created_at' | 'updated_at'> {
-  const { created_at, updated_at, ...partialQuery } = query;
-
-  return partialQuery;
 }

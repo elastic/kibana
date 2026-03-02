@@ -269,7 +269,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               query:
                 'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* | WHERE KQL("message: ERROR")',
             },
-            type: 'match',
+            type: 'match' as const,
+            category: 'operational' as const,
             tags: [],
           },
         ]);
