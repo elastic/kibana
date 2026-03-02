@@ -11,6 +11,7 @@ import { castArray } from 'lodash';
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ISavedObjectsEncryptionExtension } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsEsqlOptions,
@@ -96,7 +97,66 @@ export async function performEsql(
     filter,
   });
 
-  return result;
+  const { encryptionExtension } = extensions;
+  return stripEncryptedColumns(result, types, encryptionExtension);
+}
+
+/**
+ * Strips encrypted attribute values from ES|QL results by replacing them with null.
+ * Column structure is preserved so row indices remain stable.
+ *
+ * ES|QL columns for saved object attributes use the pattern `<type>.<attribute_name>`.
+ * If a type has encrypted attributes, any column matching `<type>.<encrypted_attr>` will
+ * have its values replaced with null.
+ */
+function stripEncryptedColumns(
+  response: SavedObjectsEsqlResponse,
+  types: string[],
+  encryptionExtension?: ISavedObjectsEncryptionExtension
+): SavedObjectsEsqlResponse {
+  if (!encryptionExtension) {
+    return response;
+  }
+
+  // Collect encrypted attribute names per type (fast path: skip if no types are encryptable)
+  const encryptedColumnPrefixes = new Map<string, ReadonlySet<string>>();
+  for (const typeName of types) {
+    if (!encryptionExtension.isEncryptableType(typeName)) {
+      continue;
+    }
+    const attrs = encryptionExtension.getEncryptedAttributes(typeName);
+    if (attrs && attrs.size > 0) {
+      encryptedColumnPrefixes.set(typeName, attrs);
+    }
+  }
+
+  if (encryptedColumnPrefixes.size === 0) {
+    return response;
+  }
+
+  // Find column indices that correspond to encrypted attributes
+  const encryptedColumnIndices = new Set<number>();
+  for (let i = 0; i < response.columns.length; i++) {
+    const columnName = response.columns[i].name;
+    for (const [typeName, attrs] of encryptedColumnPrefixes) {
+      for (const attrName of attrs) {
+        if (columnName === `${typeName}.${attrName}`) {
+          encryptedColumnIndices.add(i);
+        }
+      }
+    }
+  }
+
+  if (encryptedColumnIndices.size === 0) {
+    return response;
+  }
+
+  // Replace values in encrypted columns with null
+  const strippedValues = response.values.map((row) =>
+    row.map((value, colIdx) => (encryptedColumnIndices.has(colIdx) ? null : value))
+  );
+
+  return { ...response, values: strippedValues };
 }
 
 function mergeUserFilterWithNamespacesBool(
