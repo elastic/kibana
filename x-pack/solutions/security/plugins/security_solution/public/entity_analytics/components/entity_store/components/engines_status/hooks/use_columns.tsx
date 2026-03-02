@@ -149,7 +149,7 @@ export const useColumns = (
             <EuiButtonIcon
               onClick={() => onToggleExpandedItem(component)}
               aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
-              iconType={isItemExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isItemExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
           ) : null;
         },

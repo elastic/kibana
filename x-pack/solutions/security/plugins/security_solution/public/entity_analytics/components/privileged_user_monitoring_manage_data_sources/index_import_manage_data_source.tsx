@@ -74,7 +74,7 @@ export const IndexImportManageDataSource = ({
             )}
           </h4>
         </EuiText>
-        <EuiButton fullWidth={false} iconType="plusInCircle" onClick={showIndexModal}>
+        <EuiButton fullWidth={false} iconType="plusCircle" onClick={showIndexModal}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.btnText"
             defaultMessage="Select index"

@@ -78,7 +78,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
 
         return (
           <EuiButtonIcon
-            iconType="expand"
+            iconType="maximize"
             onClick={onClick}
             aria-label={i18n.translate(
               'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
