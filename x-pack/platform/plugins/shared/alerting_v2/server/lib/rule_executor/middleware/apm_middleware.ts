@@ -5,28 +5,50 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
+import agent from 'elastic-apm-node';
+import { injectable } from 'inversify';
 import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
-import type { RuleStepOutput } from '../types';
+import type { PipelineStateStream } from '../types';
 import { APP_ID } from '../../constants';
 
 /**
- * Middleware that wraps each step execution in an APM span for tracing.
+ * Middleware that wraps each step's stream processing in an APM span for tracing.
+ *
+ * The span stays open for the entire duration of the step's stream,
+ * capturing both success and failure outcomes.
  */
+@injectable()
 export class ApmMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'apm_span';
 
-  public async execute(
+  public execute(
     ctx: RuleExecutionMiddlewareContext,
-    next: () => Promise<RuleStepOutput>
-  ): Promise<RuleStepOutput> {
-    return withSpan(
-      {
-        name: `rule_executor:${ctx.step.name}`,
-        type: 'rule_executor',
-        labels: { plugin: APP_ID },
-      },
-      () => next()
-    );
+    next: (input: PipelineStateStream) => PipelineStateStream,
+    input: PipelineStateStream
+  ): PipelineStateStream {
+    const stream = next(input);
+
+    return (async function* () {
+      const span = agent.startSpan(`rule_executor:${ctx.step.name}`, 'rule_executor') ?? undefined;
+      span?.addLabels({ plugin: APP_ID });
+
+      try {
+        for await (const result of stream) {
+          yield result;
+        }
+
+        if (span) {
+          span.outcome = 'success';
+        }
+      } catch (error) {
+        if (span) {
+          span.outcome = 'failure';
+        }
+
+        throw error;
+      } finally {
+        span?.end();
+      }
+    })();
   }
 }
