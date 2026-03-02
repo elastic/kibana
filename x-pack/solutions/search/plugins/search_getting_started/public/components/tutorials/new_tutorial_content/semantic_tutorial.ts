@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import type {
+  TutorialDefinition,
+  TutorialStep,
+  CleanupItem,
+} from '../../../hooks/use_tutorial_content';
 import { sampleSemanticData } from './sample_data_sets';
 
 const semanticTutorialSteps: TutorialStep[] = [
@@ -134,6 +138,13 @@ const semanticTutorialSteps: TutorialStep[] = [
   },
 ];
 
+const semanticTutorialCleanup: CleanupItem[] = [
+  {
+    label: 'Index: kibana_sample_data_semantic',
+    apiSnippet: 'DELETE /kibana_sample_data_semantic',
+  },
+];
+
 export const semanticTutorial: TutorialDefinition = {
   slug: 'semantic-search',
   title: 'Semantic search',
@@ -161,4 +172,5 @@ export const semanticTutorial: TutorialDefinition = {
     ],
   },
   steps: semanticTutorialSteps,
+  cleanup: semanticTutorialCleanup,
 };

@@ -42,6 +42,13 @@ export interface TutorialSummaryLink {
   href: string;
 }
 
+export interface CleanupItem {
+  /** Display label shown in the cleanup list (e.g. "Index: my_index"). Supports {{variable}} substitution. */
+  label: string;
+  /** Console-style DELETE snippet (e.g. "DELETE /my_index") */
+  apiSnippet: ApiSnippet;
+}
+
 export interface TutorialDefinition {
   slug: string;
   title: string;
@@ -54,6 +61,8 @@ export interface TutorialDefinition {
     links: TutorialSummaryLink[];
   };
   steps: TutorialStep[];
+  /** Optional cleanup items shown as the final step; each item deletes a resource created by the tutorial */
+  cleanup?: CleanupItem[];
 }
 
 export const BULK_INGEST_SNIPPET_PREFIX = 'POST /{{index_name}}/_bulk';

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import type {
+  TutorialDefinition,
+  TutorialStep,
+  CleanupItem,
+} from '../../../hooks/use_tutorial_content';
 import { sampleEsqlData } from './sample_data_sets';
 
 const esqlTutorialSteps: TutorialStep[] = [
@@ -205,6 +209,13 @@ const esqlTutorialSteps: TutorialStep[] = [
   },
 ];
 
+const esqlTutorialCleanup: CleanupItem[] = [
+  {
+    label: 'Index: kibana_sample_data_esql',
+    apiSnippet: 'DELETE /kibana_sample_data_esql',
+  },
+];
+
 export const esqlTutorial: TutorialDefinition = {
   slug: 'esql',
   title: 'ES|QL for search',
@@ -232,4 +243,5 @@ export const esqlTutorial: TutorialDefinition = {
     ],
   },
   steps: esqlTutorialSteps,
+  cleanup: esqlTutorialCleanup,
 };

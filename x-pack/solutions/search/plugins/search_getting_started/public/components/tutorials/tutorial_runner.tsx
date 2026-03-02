@@ -19,9 +19,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { TutorialDefinition } from '../../hooks/use_tutorial_content';
+import { useResetWithCleanup } from '../../hooks/use_reset_with_cleanup';
 import { useTutorialState } from './tutorial_state';
 import { TutorialStepCard } from './tutorial_step_card';
 import { TutorialSummary } from './tutorial_summary';
+import { CleanupStepCard } from './cleanup_step_card';
 
 export interface TutorialRunnerProps {
   tutorial: TutorialDefinition;
@@ -31,6 +33,16 @@ export interface TutorialRunnerProps {
 export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack }) => {
   const { state, steps, executeStep, advanceStep, isStepReady, reset } = useTutorialState(
     tutorial.slug
+  );
+
+  const hasCleanup = !!tutorial.cleanup?.length;
+  const totalStepCount = steps.length + (hasCleanup ? 1 : 0);
+  const showCleanup = hasCleanup && state.currentStep >= steps.length && !state.completed;
+
+  const { resetWithCleanup, isResetting } = useResetWithCleanup(
+    tutorial.cleanup,
+    state.savedValues,
+    reset
   );
 
   const stepRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -74,11 +86,12 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
 
   const handleAdvance = useCallback(() => {
     const currentStepDef = steps[state.currentStep];
-    const isLastStep = state.currentStep === steps.length - 1;
-    if (isLastStep) {
+    const isOnCleanup = hasCleanup && state.currentStep === steps.length;
+    const isLastRegularStep = !hasCleanup && state.currentStep === steps.length - 1;
+    if (isOnCleanup || isLastRegularStep) {
       console.log('[Telemetry] Complete tutorial clicked', {
         tutorial: tutorial.slug,
-        stepId: currentStepDef?.source.id,
+        stepId: currentStepDef?.source.id ?? 'cleanup',
         stepIndex: state.currentStep,
       });
     } else {
@@ -89,7 +102,7 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
       });
     }
     advanceStep();
-  }, [advanceStep, state.currentStep, steps, tutorial.slug]);
+  }, [advanceStep, hasCleanup, state.currentStep, steps, tutorial.slug]);
 
   const visibleSteps = steps.slice(0, state.currentStep + 1);
 
@@ -129,8 +142,8 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
                   {i18n.translate('xpack.searchGettingStarted.tutorial.runner.stepProgress', {
                     defaultMessage: 'Step {current} of {total}',
                     values: {
-                      current: Math.min(state.currentStep + 1, steps.length),
-                      total: steps.length,
+                      current: Math.min(state.currentStep + 1, totalStepCount),
+                      total: totalStepCount,
                     },
                   })}
                 </EuiButtonEmpty>
@@ -140,7 +153,8 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
               <EuiButton
                 iconType="refresh"
                 color="text"
-                onClick={reset}
+                onClick={resetWithCleanup}
+                isLoading={isResetting}
                 data-test-subj="tutorialReset"
               >
                 {i18n.translate('xpack.searchGettingStarted.tutorial.runner.reset', {
@@ -173,10 +187,20 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
             isReady={isStepReady(i)}
             onExecute={() => handleExecute(i)}
             onAdvance={handleAdvance}
-            isLastStep={i === steps.length - 1}
+            isLastStep={!hasCleanup && i === steps.length - 1}
           />
         </div>
       ))}
+
+      {showCleanup && (
+        <div ref={(el) => setStepRef(steps.length, el)}>
+          <CleanupStepCard
+            cleanup={tutorial.cleanup!}
+            savedValues={state.savedValues}
+            onComplete={handleAdvance}
+          />
+        </div>
+      )}
 
       {state.completed && (
         <>

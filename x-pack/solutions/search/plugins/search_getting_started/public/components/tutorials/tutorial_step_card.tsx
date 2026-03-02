@@ -74,7 +74,9 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
 
   const apiSnippetHighlightLines = useMemo(() => {
     if (!isCompleted || !step.source.apiSnippetHighlights?.length) return undefined;
-    return getSnippetHighlightLines(resolved.apiSnippet, step.source.apiSnippetHighlights) || undefined;
+    return (
+      getSnippetHighlightLines(resolved.apiSnippet, step.source.apiSnippetHighlights) || undefined
+    );
   }, [isCompleted, resolved.apiSnippet, step.source.apiSnippetHighlights]);
 
   const showExplanation = isCompleted;
@@ -96,12 +98,7 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
 
       {isIngestData ? (
         <>
-          <EuiCodeBlock
-            language="json"
-            fontSize="s"
-            paddingSize="m"
-            isCopyable
-          >
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
             {resolved.apiSnippet}
           </EuiCodeBlock>
           <EuiSpacer size="m" />
@@ -126,6 +123,7 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
             <>
               <EuiSpacer size="s" />
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 iconType="error"
                 size="s"

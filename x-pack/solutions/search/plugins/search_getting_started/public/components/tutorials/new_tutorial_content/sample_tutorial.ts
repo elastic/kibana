@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import type {
+  TutorialDefinition,
+  TutorialStep,
+  CleanupItem,
+} from '../../../hooks/use_tutorial_content';
 import { sampleBookCatalogData } from './sample_data_sets';
 
 const sampleTutorialSteps: TutorialStep[] = [
@@ -138,6 +142,10 @@ const sampleTutorialSteps: TutorialStep[] = [
   },
 ];
 
+const sampleTutorialCleanup: CleanupItem[] = [
+  { label: 'Index: book_catalog', apiSnippet: 'DELETE /book_catalog' },
+];
+
 export const sampleTutorial: TutorialDefinition = {
   slug: 'sample-tutorial',
   title: 'Search basics',
@@ -165,4 +173,5 @@ export const sampleTutorial: TutorialDefinition = {
     ],
   },
   steps: sampleTutorialSteps,
+  cleanup: sampleTutorialCleanup,
 };

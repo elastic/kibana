@@ -62,8 +62,9 @@ const resolveStepContent = (
 
 export const useTutorialState = (slug: TutorialSlug) => {
   const execute = useExecuteTutorialStep();
-  const { steps: rawSteps, globalVariables, sampleData } = useTutorialContent(slug);
+  const { steps: rawSteps, globalVariables, sampleData, cleanup } = useTutorialContent(slug);
   const initialSavedValues = useMemo(() => ({ ...globalVariables }), [globalVariables]);
+  const totalStepCount = rawSteps.length + (cleanup?.length ? 1 : 0);
 
   const [state, setState] = useState<TutorialState>(() => ({
     selectedTutorial: slug,
@@ -150,10 +151,10 @@ export const useTutorialState = (slug: TutorialSlug) => {
       return {
         ...prev,
         currentStep: nextStep,
-        completed: nextStep >= rawSteps.length,
+        completed: nextStep >= totalStepCount,
       };
     });
-  }, [rawSteps.length]);
+  }, [totalStepCount]);
 
   const reset = useCallback(() => {
     setState({

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import type {
+  TutorialDefinition,
+  TutorialStep,
+  CleanupItem,
+} from '../../../hooks/use_tutorial_content';
 import { sampleBasicsData } from './sample_data_sets';
 
 const basicsTutorialSteps: TutorialStep[] = [
@@ -138,6 +142,13 @@ const basicsTutorialSteps: TutorialStep[] = [
   },
 ];
 
+const basicsTutorialCleanup: CleanupItem[] = [
+  {
+    label: 'Index: kibana_sample_data_basics',
+    apiSnippet: 'DELETE /kibana_sample_data_basics',
+  },
+];
+
 export const basicsTutorial: TutorialDefinition = {
   slug: 'basics',
   title: 'Elasticsearch basics',
@@ -161,4 +172,5 @@ export const basicsTutorial: TutorialDefinition = {
     ],
   },
   steps: basicsTutorialSteps,
+  cleanup: basicsTutorialCleanup,
 };

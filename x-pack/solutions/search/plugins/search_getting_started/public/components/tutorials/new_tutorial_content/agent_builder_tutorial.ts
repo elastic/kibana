@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import type {
+  TutorialDefinition,
+  TutorialStep,
+  CleanupItem,
+} from '../../../hooks/use_tutorial_content';
 import { sampleAgentBuilderData } from './sample_data_sets';
 
 const agentBuilderTutorialSteps: TutorialStep[] = [
@@ -189,6 +193,29 @@ const agentBuilderTutorialSteps: TutorialStep[] = [
   },
 ];
 
+const agentBuilderTutorialCleanup: CleanupItem[] = [
+  {
+    label: 'Conversation: {{default_conversation_id}}',
+    apiSnippet: 'DELETE kbn://api/agent_builder/conversations/{{default_conversation_id}}',
+  },
+  {
+    label: 'Conversation: {{custom_conversation_id}}',
+    apiSnippet: 'DELETE kbn://api/agent_builder/conversations/{{custom_conversation_id}}',
+  },
+  {
+    label: 'Agent: books-search-agent',
+    apiSnippet: 'DELETE kbn://api/agent_builder/agents/books-search-agent',
+  },
+  {
+    label: 'Tool: example-books-esql-tool',
+    apiSnippet: 'DELETE kbn://api/agent_builder/tools/example-books-esql-tool',
+  },
+  {
+    label: 'Index: kibana_sample_data_agents',
+    apiSnippet: 'DELETE /kibana_sample_data_agents',
+  },
+];
+
 export const agentBuilderTutorial: TutorialDefinition = {
   slug: 'agent-builder',
   title: 'Agent Builder',
@@ -220,4 +247,5 @@ export const agentBuilderTutorial: TutorialDefinition = {
     ],
   },
   steps: agentBuilderTutorialSteps,
+  cleanup: agentBuilderTutorialCleanup,
 };

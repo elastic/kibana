@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TutorialDefinition, TutorialStep } from '../../../hooks/use_tutorial_content';
+import type {
+  TutorialDefinition,
+  TutorialStep,
+  CleanupItem,
+} from '../../../hooks/use_tutorial_content';
 import { sampleTimeSeriesData } from './sample_data_sets';
 
 const timeSeriesTutorialSteps: TutorialStep[] = [
@@ -260,6 +264,17 @@ const timeSeriesTutorialSteps: TutorialStep[] = [
   },
 ];
 
+const timeSeriesTutorialCleanup: CleanupItem[] = [
+  {
+    label: 'Data stream: kibana_sample_weather_data_stream',
+    apiSnippet: 'DELETE _data_stream/kibana_sample_weather_data_stream',
+  },
+  {
+    label: 'Index template: kibana_sample_weather_index_template',
+    apiSnippet: 'DELETE _index_template/kibana_sample_weather_index_template',
+  },
+];
+
 export const timeSeriesTutorial: TutorialDefinition = {
   slug: 'time-series',
   title: 'Time series data streams',
@@ -287,4 +302,5 @@ export const timeSeriesTutorial: TutorialDefinition = {
     ],
   },
   steps: timeSeriesTutorialSteps,
+  cleanup: timeSeriesTutorialCleanup,
 };
