@@ -21,11 +21,12 @@ validation against the vendor API.
 
 ## Checklist
 
+**If the data source is MCP-based**, apply the MCP-specific checks in
+[reference/mcp-data-sources.md](reference/mcp-data-sources.md) in addition to the items below.
+
 ### Connector Spec
 
-- If MCP-based: the generated spec export in `all_specs.ts` has been **removed** (MCP connectors with empty
-  `actions: {}` crash Kibana)
-- If MCP-based: `minimumLicense` is `'enterprise'` (not `'basic'`)
+- Look at existing specs for patterns: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
 - If non-MCP: valid structure with required fields, correct auth type
 - **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnector(s).type`, `DataSource.iconType`, and
   `ConnectorIconsMap` key all match. IDs must start with a dot.
@@ -36,16 +37,13 @@ validation against the vendor API.
 - **Auth**: Auth type matches the service. **Auth format** (e.g. header value) must match the vendor's official docs;
   document or link how to obtain tokens. For OAuth, use defaults/overrides so users only fill instance URL, client ID,
   client secret where possible.
-- If non-MCP: spec is exported from the repo's connector specs "all specs" file (e.g. `all_specs.ts`). Do not add
+- Spec is exported from the repo's connector specs "all specs" file (e.g. `all_specs.ts`). Do not add
   unused/cargo-culted flags; only set flags the platform or this connector actually use.
-- Look at existing specs for patterns: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
 
 ### Workflows
 
 - Valid workflow YAML with correct step types
 - Proper Liquid templating syntax (no malformed `{{ }}` expressions)
-- **MCP tool names use underscores** (e.g. `tavily_search`), NOT hyphens — verify against MCP server docs or
-  `listTools`
 - Only pass parameters that the MCP tool or connector action actually accepts (check the tool's `inputSchema` —
   some params in third-party docs may be outdated or unavailable via MCP)
 - **Parameter descriptions**: Every workflow input has a clear `description`. For **query/search** parameters, state
@@ -64,11 +62,9 @@ validation against the vendor API.
 
 - Correct references to the connector spec and workflows
 - **IDs**: `id` (lowercase, hyphenated), `iconType` (dot-prefixed, matches ConnectorIconsMap), `stackConnector(s).type`
-  matches the connector spec ID (or `.mcp` for MCP)
+  matches the connector spec ID
 - Data source is imported and registered in the plugin's sources index (e.g. `server/sources/index.ts`)
 - `workflows.directory` points to the correct workflows folder; all workflows referenced exist as YAML files
-- `importedTools` array uses **exact** MCP tool names (underscores, not hyphens). Validate against the MCP server's
-  `listTools` / schema
 - Look at existing data sources for patterns in `x-pack/platform/plugins/shared/data_sources/server/sources/`
 
 ### Documentation and icons
