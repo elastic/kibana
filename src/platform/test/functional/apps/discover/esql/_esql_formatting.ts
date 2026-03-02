@@ -110,19 +110,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // not attempt to use numeric formatting from the data view
         const expectedValue = '[w1, w3]';
 
-        // 1. Verify the Summary column shows the string array values correctly
-        const summaryCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-        const summaryText = await summaryCell.getVisibleText();
-        expect(summaryText).to.be('recent[w1, w3]DistanceMiles[w1, w3]');
-
-        // 2. Add DistanceMiles as a separate column and verify
-        await unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
-        await discover.waitUntilTabIsLoaded();
+        // 1. Verify the column value is displayed correctly
+        // (columns are shown individually since only 2 columns are returned)
         const columnCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const columnText = await columnCell.getVisibleText();
         expect(columnText).to.be(expectedValue);
 
-        // 3. Verify the value in doc viewer flyout
+        // 2. Verify the value in doc viewer flyout
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         await discover.isShowingDocViewer();
         const flyoutValue = await testSubjects.getVisibleText(
