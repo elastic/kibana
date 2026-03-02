@@ -30,13 +30,13 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import type { Edge } from '@xyflow/react';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceNode } from '../../service_node';
 import { DependencyNode } from '../../dependency_node';
 import { ServiceMapEdge as ServiceMapEdgeComponent } from '../../service_map_edge';
 import { applyDagreLayout } from '../../layout';
 import type { ServiceMapNode } from '../../../../../../common/service_map';
-import type { Edge } from '@xyflow/react';
 import {
   DEFAULT_EDGE_COLOR,
   DEFAULT_EDGE_STROKE_WIDTH,
@@ -283,16 +283,12 @@ export const InvestigationAB: StoryFn = () => {
         `}
       </style>
 
-      <EuiCallOut
-        size="s"
-        title="User flow: Investigation (Service A → B)"
-        iconType="search"
-      >
+      <EuiCallOut size="s" title="User flow: Investigation (Service A → B)" iconType="search">
         <p>
-          Filter the map to problems between <strong>Service A</strong> and <strong>Service B</strong>:
-          set time range and turn on &quot;Focus: A → B&quot;. Faded nodes are outside the focus;
-          the red animated edge shows failed requests. Use &quot;Expand scope&quot; to see the full
-          map again. Data is mocked.
+          Filter the map to problems between <strong>Service A</strong> and{' '}
+          <strong>Service B</strong>: set time range and turn on &quot;Focus: A → B&quot;. Faded
+          nodes are outside the focus; the red animated edge shows failed requests. Use &quot;Expand
+          scope&quot; to see the full map again. Data is mocked.
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />

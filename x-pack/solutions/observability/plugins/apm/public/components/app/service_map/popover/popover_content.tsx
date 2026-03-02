@@ -146,11 +146,10 @@ export function PopoverContent({
   }
 
   const alertCount = selectedNode
-    ? (selectedNode.data as Record<string, unknown>)?.alertCount as number | undefined
+    ? ((selectedNode.data as Record<string, unknown>)?.alertCount as number | undefined)
     : undefined;
   const showAlerts = selectedNode && alertCount != null && alertCount > 0 && alertsProp?.length;
-  const failedRequests =
-    (selectedEdge && failedRequestsByEdge?.[selectedEdge.id]) ?? [];
+  const failedRequests = (selectedEdge && failedRequestsByEdge?.[selectedEdge.id]) ?? [];
   /** When demo failed-requests data is provided for an edge, we skip EdgeContents (it uses API hooks that error in Storybook). */
   const isEdgeDemoMode =
     !!selectedEdge && failedRequestsByEdge != null && selectedEdge.id in failedRequestsByEdge;
@@ -192,9 +191,7 @@ export function PopoverContent({
                 <EuiTableBody>
                   {failedRequests.map((r) => (
                     <EuiTableRow key={r.requestId}>
-                      <EuiTableCell>
-                        {r.time.replace('T', ' ').replace('Z', '')}
-                      </EuiTableCell>
+                      <EuiTableCell>{r.time.replace('T', ' ').replace('Z', '')}</EuiTableCell>
                       <EuiTableCell>{r.errorMessage}</EuiTableCell>
                       <EuiTableCell>{r.requestId}</EuiTableCell>
                     </EuiTableRow>
@@ -282,9 +279,7 @@ export function PopoverContent({
               <EuiTableBody>
                 {failedRequests.map((r) => (
                   <EuiTableRow key={r.requestId}>
-                    <EuiTableCell>
-                      {r.time.replace('T', ' ').replace('Z', '')}
-                    </EuiTableCell>
+                    <EuiTableCell>{r.time.replace('T', ' ').replace('Z', '')}</EuiTableCell>
                     <EuiTableCell>{r.errorMessage}</EuiTableCell>
                     <EuiTableCell>{r.requestId}</EuiTableCell>
                   </EuiTableRow>

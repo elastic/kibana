@@ -156,13 +156,55 @@ const BASE_NODES: ServiceMapNode[] = [
 ];
 
 const BASE_EDGES: ServiceMapEdge[] = [
-  { id: 'frontend-app~api-gateway', source: 'frontend-app', target: 'api-gateway', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
-  { id: 'api-gateway~auth-service', source: 'api-gateway', target: 'auth-service', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
-  { id: 'api-gateway~user-service', source: 'api-gateway', target: 'user-service', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
-  { id: 'auth-service~user-service', source: 'auth-service', target: 'user-service', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
-  { id: 'user-service~order-service', source: 'user-service', target: 'order-service', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
-  { id: 'order-service~payment-service', source: 'order-service', target: 'payment-service', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
-  { id: 'payment-service~postgresql', source: 'payment-service', target: 'postgresql', data: { isBidirectional: false }, ...createDefaultEdgeStyle() },
+  {
+    id: 'frontend-app~api-gateway',
+    source: 'frontend-app',
+    target: 'api-gateway',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'api-gateway~auth-service',
+    source: 'api-gateway',
+    target: 'auth-service',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'api-gateway~user-service',
+    source: 'api-gateway',
+    target: 'user-service',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'auth-service~user-service',
+    source: 'auth-service',
+    target: 'user-service',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'user-service~order-service',
+    source: 'user-service',
+    target: 'order-service',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'order-service~payment-service',
+    source: 'order-service',
+    target: 'payment-service',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
+  {
+    id: 'payment-service~postgresql',
+    source: 'payment-service',
+    target: 'postgresql',
+    data: { isBidirectional: false },
+    ...createDefaultEdgeStyle(),
+  },
 ];
 
 const nodeTypes: NodeTypes = {
@@ -209,13 +251,7 @@ export const GroupedServiceNodes: StoryFn = () => {
   }, []);
 
   const { nodes: rawNodes, edges: rawEdges } = useMemo(
-    () =>
-      applyExpandedServiceGroups(
-        BASE_NODES,
-        BASE_EDGES,
-        SERVICE_GROUPS,
-        expandedGroupIds
-      ),
+    () => applyExpandedServiceGroups(BASE_NODES, BASE_EDGES, SERVICE_GROUPS, expandedGroupIds),
     [expandedGroupIds]
   );
 
@@ -234,7 +270,11 @@ export const GroupedServiceNodes: StoryFn = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <EuiCallOut size="s" title="User flow: Grouped service nodes (Frontend / Backend)" iconType="folderOpen">
+      <EuiCallOut
+        size="s"
+        title="User flow: Grouped service nodes (Frontend / Backend)"
+        iconType="folderOpen"
+      >
         <p>
           Fully connected map: Frontend (frontend-app → api-gateway → auth-service) and Backend
           (user-service → order-service → payment-service → postgresql). Toggle groups below to
@@ -263,7 +303,9 @@ export const GroupedServiceNodes: StoryFn = () => {
       <EuiText size="s" color="subdued">
         <p>
           Nodes: {nodes.length} | Edges: {edges.length}
-          {` | Expanded: ${SERVICE_GROUPS.filter((g) => expandedGroupIds.has(g.id)).length}/${SERVICE_GROUPS.length} groups`}
+          {` | Expanded: ${SERVICE_GROUPS.filter((g) => expandedGroupIds.has(g.id)).length}/${
+            SERVICE_GROUPS.length
+          } groups`}
         </p>
       </EuiText>
       <EuiSpacer size="m" />
