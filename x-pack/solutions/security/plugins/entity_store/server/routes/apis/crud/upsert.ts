@@ -8,6 +8,7 @@
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
+import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -28,7 +29,7 @@ const querySchema = z.object({
 export function registerCRUDUpsert(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: '/internal/security/entity-store/entities/{entityType}',
+      path: ENTITY_STORE_ROUTES.CRUD_UPSERT,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
