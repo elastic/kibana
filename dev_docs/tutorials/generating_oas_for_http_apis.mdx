@@ -11,8 +11,8 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture', 'http', 'rest', 'api']
   If your route declares `access: 'public'` you **must** provide up-to-date OpenAPI specification for it. Docs for these routes get hosted on [on our docs site](https://www.elastic.co/docs/api/doc/serverless) and are used for client integrations. For example: our [Elastic stack terraform provider](https://github.com/elastic/terraform-provider-elasticstack).
 </DocCallOut>
 
-<DocCallOut title="Design code-first APIs for OAS first" color="warning">
-  Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit.
+<DocCallOut title="Designing good code-first APIs" color="warning">
+  Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see <DocLink id="kibHttpApiGuidelines" text="HTTP API Design" />.
 
   Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
 
@@ -57,9 +57,7 @@ Other useful query parameters for filtering are:
 </DocCallOut>
 
 ### Some good practices to consider
-
 <a id="oas-compatibility-kbn-config-schema-types"></a>
-#### `@kbn/config-schema` types and patterns that do not map cleanly to OAS 3.0
 
 Use this section as a practical checklist when authoring public APIs.
 
