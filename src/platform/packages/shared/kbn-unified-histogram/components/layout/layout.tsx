@@ -78,10 +78,10 @@ export const UnifiedHistogramLayout = ({
   const minTopPanelHeight = euiTheme.base * 12;
   const defaultTopPanelHeight = originalDefaultTopPanelHeight ?? minTopPanelHeight;
 
-  // When expanding chart (topPanelHeight is 'max-content'), allow the flex panel to shrink
-  // to just the hits bar height so the chart can fill the remaining space.
+  // In expand-chart mode (topPanelHeight === 'max-content'), use a tight min height for the
+  // top panel so the chart gets the remaining space and the hits bar stays compact.
   const isExpandChartMode = topPanelHeight === 'max-content' && (chart || hits);
-  // Hits bar with toggle buttons is ~32-40px; keep minimum tight to avoid extra whitespace
+  // Min flex panel height is kept tight (~euiTheme.base * 3, e.g. ~24px when base=8) to avoid extra whitespace
   const minMainPanelHeight = isExpandChartMode ? euiTheme.base * 3 : euiTheme.base * 10;
 
   const chartCss =
