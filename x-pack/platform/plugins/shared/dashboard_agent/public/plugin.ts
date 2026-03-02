@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -34,14 +35,20 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
-        attachments: plugins.agentBuilder.attachments,
+    const experimentalFeaturesEnabled = core.uiSettings.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+
+    if (experimentalFeaturesEnabled) {
+      import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
+        this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
+          attachments: plugins.agentBuilder.attachments,
+        });
       });
-    });
+    }
 
     return {};
   }
