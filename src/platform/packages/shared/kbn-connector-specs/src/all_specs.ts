@@ -19,4 +19,7 @@ export * from './specs/shodan/shodan';
 export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';
 export * from './specs/jina/jina_reader';
+export * from './specs/servicenow_search/servicenow_search';
 export * from './specs/sharepoint_online/sharepoint_online';
+export * from './specs/slack/slack';
+export * from './specs/zendesk/zendesk';

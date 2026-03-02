@@ -8,8 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { stripUnmappedKeys, throwOnUnmappedKeys } from './scope_tooling';
-import type { DashboardState } from './types';
+import { stripUnmappedKeys } from './scope_tooling';
 
 const mockGetTransforms = jest.fn();
 
@@ -247,108 +246,5 @@ describe('stripUnmappedKeys', () => {
         ],
       }
     `);
-  });
-
-  it('should drop pinned_panels', () => {
-    const dashboardState = {
-      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
-      title: 'my dashboard',
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped key 'pinned_panels' from dashboard",
-        ],
-      }
-    `);
-  });
-});
-
-describe('throwOnUnmappedKeys', () => {
-  it('should not throw when there are no unmapped keys', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            foo: 'some value',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).not.toThrow();
-  });
-
-  it('should throw when dashboard contains a panel without a schema', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            foo: 'some value',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithoutSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains a panel with enhancements', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({}),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            enhancements: {},
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains pinned_panels', () => {
-    const dashboardState = {
-      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
-      title: 'my dashboard',
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 });

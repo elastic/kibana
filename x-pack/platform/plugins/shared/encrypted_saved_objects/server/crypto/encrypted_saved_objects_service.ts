@@ -672,4 +672,42 @@ export class EncryptedSavedObjectsService {
       ...(this.options.decryptionOnlyCryptos ?? []),
     ];
   }
+
+  public __dangerousClone(
+    typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
+  ): EncryptedSavedObjectsService {
+    const dangerouslyExposeAttributes = (
+      registration: EncryptedSavedObjectTypeRegistration
+    ): EncryptedSavedObjectTypeRegistration => {
+      const attributesToEncrypt = new Set<string | AttributeToEncrypt>(
+        [...registration.attributesToEncrypt].map((attr) => {
+          const key = typeof attr === 'string' ? attr : attr.key;
+          return { key, dangerouslyExposeValue: true };
+        })
+      );
+      return { ...registration, attributesToEncrypt };
+    };
+
+    const clone = new EncryptedSavedObjectsService(this.options);
+
+    for (const registration of typeRegistrationOverrides ?? []) {
+      clone.registerType(dangerouslyExposeAttributes(registration));
+    }
+
+    for (const [type, { attributesToEncrypt, attributesToIncludeInAAD, enforceRandomId }] of this
+      .typeDefinitions) {
+      if (!clone.isRegistered(type)) {
+        clone.registerType(
+          dangerouslyExposeAttributes({
+            type,
+            attributesToEncrypt,
+            attributesToIncludeInAAD,
+            enforceRandomId,
+          })
+        );
+      }
+    }
+
+    return clone;
+  }
 }

@@ -13,10 +13,6 @@ import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import * as Fs from 'fs';
-import * as Path from 'path';
-
-import { finished } from 'stream';
 import type { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
@@ -120,10 +116,8 @@ export class DockerServersService {
     // run the image that we just pulled
     const containerId = await this.dockerRun(server);
 
-    lifecycle.cleanup.add(async () => {
+    lifecycle.cleanup.add(() => {
       try {
-        const logsPath = await this.exportLogs(name, containerId);
-        log.info(`[docker:${name}] exported logs to ${logsPath}`);
         execa.sync('docker', ['kill', containerId]);
         // we don't remove the containers on CI because removing them causes the
         // network list to be updated and aborts all in-flight requests in Chrome
@@ -225,38 +219,6 @@ export class DockerServersService {
     } catch {
       return false;
     }
-  }
-
-  private async exportLogs(name: string, containerId: string) {
-    const nameSanitized = name.replace(/[^a-zA-Z0-9]/g, '-');
-    const logsPath = Path.join('.es', `docker-${nameSanitized}.log`);
-    const logsStream = Fs.createWriteStream(logsPath);
-    const proc = execa('docker', ['logs', containerId], {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      reject: false,
-    });
-
-    proc.stdout!.pipe(logsStream);
-    proc.stderr!.pipe(logsStream);
-
-    return Promise.all([
-      new Promise<string>((resolve, reject) => {
-        finished(logsStream, (err) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(logsPath);
-          }
-        });
-        proc.on('error', (err) => {
-          reject(err);
-        });
-        proc.on('close', () => {
-          resolve(logsPath);
-        });
-      }),
-      proc,
-    ]);
   }
 
   private async startServers() {

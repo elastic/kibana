@@ -47,6 +47,40 @@ describe('Attachment', () => {
         right: defaultRequest,
       });
     });
+
+    it('accepts v2 unified format (comment payload with type and data)', () => {
+      const v2UnifiedRequest = {
+        comment: {
+          type: 'comment',
+          data: { content: 'unified comment content' },
+        },
+      };
+      const query = CommentUserActionPayloadRt.decode(v2UnifiedRequest);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right.comment).toHaveProperty('type', 'comment');
+        expect(query.right.comment).toHaveProperty('data', { content: 'unified comment content' });
+      }
+    });
+
+    it('accepts v2 unified format with attachment id', () => {
+      const v2UnifiedRequest = {
+        comment: {
+          type: 'lens',
+          attachmentId: 'attachment-123',
+          metadata: {
+            description: 'A test visualization',
+          },
+        },
+      };
+      const query = CommentUserActionPayloadRt.decode(v2UnifiedRequest);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right.comment).toEqual(v2UnifiedRequest.comment);
+      }
+    });
   });
   describe('CommentUserActionRt', () => {
     const defaultRequest = {
@@ -88,6 +122,28 @@ describe('Attachment', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('accepts v2 shape in payload', () => {
+      const v2PayloadRequest = {
+        type: UserActionTypes.comment,
+        payload: {
+          comment: {
+            type: 'comment',
+            data: { content: 'v2 unified comment' },
+          },
+        },
+      };
+      const query = CommentUserActionRt.decode(v2PayloadRequest);
+
+      expect(query._tag).toBe('Right');
+      if (query._tag === 'Right') {
+        expect(query.right.type).toBe(UserActionTypes.comment);
+        expect(query.right.payload.comment).toHaveProperty('type', 'comment');
+        expect(query.right.payload.comment).toHaveProperty('data', {
+          content: 'v2 unified comment',
+        });
+      }
     });
   });
 });

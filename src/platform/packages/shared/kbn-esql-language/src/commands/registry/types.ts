@@ -188,7 +188,7 @@ export interface ICommandCallbacks {
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
-  isResourceBrowserEnabled?: () => Promise<boolean>;
+  canSuggestResourceBrowser?: () => Promise<boolean>;
 }
 
 export interface ICommandContext {
@@ -295,6 +295,11 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+
+  /**
+   * In the MMR command
+   */
+  MMR = 'mmr',
 
   /**
    * In the PROMQL command (PromQL query expression)

@@ -71,14 +71,18 @@ export function generateBuiltInStepSnippet(
         },
       };
       break;
-    case 'http':
-      parameters = {
-        with: { url: 'https://api.example.com', method: 'GET' },
-      };
-      break;
     case 'wait':
       parameters = {
         with: { duration: '5s' },
+      };
+      break;
+    case 'workflow.execute':
+    case 'workflow.executeAsync':
+      parameters = {
+        with: {
+          'workflow-id': 'workflow-id',
+          inputs: {},
+        },
       };
       break;
     default:

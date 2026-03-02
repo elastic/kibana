@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/discover-plugin'
   - '@kbn/home-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/data-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/inspector-plugin'
@@ -87,7 +86,6 @@ dependsOn:
   - '@kbn/securitysolution-io-ts-types'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/serverless'
-  - '@kbn/repo-info'
   - '@kbn/index-management-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/react-kibana-mount'
@@ -96,7 +94,6 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-application-browser'
@@ -131,6 +128,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -144,6 +142,7 @@ fileGroups:
     - scripts/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OpenInDiscover } from './open_in_discover';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
@@ -28,11 +28,11 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';
 
-jest.mock('../../../../context/apm_service/use_apm_service_context');
+jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
-  typeof useApmServiceContext
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+  typeof useApmIndexSettingsContext
 >;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
   typeof useApmPluginContext
@@ -45,9 +45,7 @@ const mockLocatorGet = jest.fn().mockReturnValue({
 
 describe('OpenInDiscover', () => {
   beforeEach(() => {
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName: 'test-service',
-      transactionType: 'request',
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [
         {
           configurationName: 'transaction',
@@ -102,6 +100,24 @@ describe('OpenInDiscover', () => {
       expect(button).toHaveTextContent('Open in Discover');
     });
 
+    it('should render a button with custom label when provided', () => {
+      const { getByTestId } = render(
+        <OpenInDiscover
+          variant="button"
+          dataTestSubj="testButton"
+          indexType="traces"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          queryParams={{ serviceName: 'my-service' }}
+          label="Open full trace in Discover"
+        />
+      );
+
+      const button = getByTestId('testButton');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('Open full trace in Discover');
+    });
+
     it('should generate correct ESQL query and pass it to the locator', () => {
       render(
         <OpenInDiscover
@@ -127,9 +143,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should be disabled when indexSettings is empty', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -150,9 +164,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should show loading state when indexSettingsStatus is LOADING', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [
           {
             configurationName: 'transaction',
@@ -198,9 +210,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should render disabled link when indexSettings is empty', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -222,9 +232,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should render disabled link when indexSettingsStatus is not SUCCESS', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [
           {
             configurationName: 'transaction',
@@ -320,9 +328,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should return null ESQL query when indexSettings is empty', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -348,7 +354,7 @@ describe('OpenInDiscover', () => {
 
   describe('consumer scenarios', () => {
     describe('waterfall (transaction details) context', () => {
-      it('should generate correct query with service, transaction, and sample range params', () => {
+      it('should generate correct query with only traceId and sort by @timestamp ASC', () => {
         render(
           <OpenInDiscover
             variant="button"
@@ -356,30 +362,30 @@ describe('OpenInDiscover', () => {
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
+            label="Open full trace in Discover"
             queryParams={{
-              kuery: 'service.language.name: java',
-              serviceName: 'my-service',
-              environment: 'production',
-              transactionName: 'GET /api/users',
-              transactionType: 'request',
-              sampleRangeFrom: 1000,
-              sampleRangeTo: 5000,
+              traceId: 'trace-abc-123',
+              sortDirection: 'ASC',
             }}
           />
         );
+
+        const button = document.querySelector(
+          '[data-test-subj="apmWaterfallOpenInDiscoverButton"]'
+        );
+        expect(button).toHaveTextContent('Open full trace in Discover');
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).toContain(`FROM ${MOCK_TRACES_INDEX}`);
-        expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
-        expect(esqlArg).toContain(`\`${SERVICE_ENVIRONMENT}\` == "production"`);
-        expect(esqlArg).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
-        expect(esqlArg).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
-        expect(esqlArg).toContain(`\`${TRANSACTION_DURATION}\` >= 1000`);
-        expect(esqlArg).toContain(`\`${TRANSACTION_DURATION}\` <= 5000`);
-        expect(esqlArg).toContain('KQL("service.language.name: java")');
+        expect(esqlArg).toContain(`\`trace.id\` == "trace-abc-123"`);
+        expect(esqlArg).toContain('SORT @timestamp ASC');
+        expect(esqlArg).not.toContain(SERVICE_NAME);
+        expect(esqlArg).not.toContain(TRANSACTION_NAME);
+        expect(esqlArg).not.toContain(TRANSACTION_TYPE);
+        expect(esqlArg).not.toContain(TRANSACTION_DURATION);
       });
 
-      it('should generate query without sample range when not provided', () => {
+      it('should generate query without traceId filter when traceId is not provided', () => {
         render(
           <OpenInDiscover
             variant="button"
@@ -387,20 +393,14 @@ describe('OpenInDiscover', () => {
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
-            queryParams={{
-              serviceName: 'my-service',
-              environment: 'production',
-              transactionName: 'GET /api/users',
-              transactionType: 'request',
-            }}
+            label="Open full trace in Discover"
+            queryParams={{}}
           />
         );
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
-        expect(esqlArg).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
-        expect(esqlArg).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
-        expect(esqlArg).not.toContain(TRANSACTION_DURATION);
-        expect(esqlArg).not.toContain(SPAN_DURATION);
+        expect(esqlArg).not.toContain('trace.id');
+        expect(esqlArg).not.toContain('SORT');
       });
     });
 

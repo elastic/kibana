@@ -7,49 +7,87 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  type KeyboardEvent,
-  type ChangeEvent,
-} from 'react';
+import React, { useMemo, type ComponentType } from 'react';
 
+import type { IconType } from '@elastic/eui';
+
+import type { TimeRangeBounds, TimeRangeBoundsOption } from './types';
+import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
+import { DateRangePickerProvider } from './date_range_picker_context';
+import { DateRangePickerDialog } from './date_range_picker_dialog';
 import {
-  EuiBadge,
-  EuiFieldText,
-  EuiFormControlButton,
-  EuiFormControlLayout,
-  EuiOutsideClickDetector,
-  keys,
-  useEuiTheme,
-} from '@elastic/eui';
+  DateRangePickerPanelNavigationProvider,
+  DateRangePickerPanel,
+  type DateRangePickerPanelDescriptor,
+} from './date_range_picker_panel_navigation';
+import { MainPanel } from './panels/main_panel';
+import { CalendarPanel } from './panels/calendar_panel';
+import { CustomTimeRangePanel } from './panels/custom_time_range_panel';
+import { ExamplePanel, ExampleNestedPanel } from './panels/example_panel';
 
-import { css } from '@emotion/react';
+const DEFAULT_PANEL_ID = 'main' as const;
 
-import type { TimeRangeBounds, TimeRange } from './types';
-import { textToTimeRange } from './parse';
-import { durationToDisplayShortText, timeRangeToDisplayText } from './format';
+export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
+
+/** Configuration for a consumer-provided panel inside the date range picker dialog. */
+export interface DateRangePickerPanelConfig {
+  /** Unique panel identifier, used for navigation */
+  id: string;
+  /** Title shown in panel header and navigation button */
+  title: string;
+  /** Icon type passed to `EuiIcon` for the panel navigation item */
+  icon?: IconType;
+  /**
+   * Panel component to render. Must be a component reference (not an element).
+   * Rendered inside the provider tree so it can use
+   * `useDateRangePickerContext()` and `useDateRangePickerPanelNavigation()`.
+   */
+  component: ComponentType;
+}
 
 export interface DateRangePickerProps {
-  /** Text representation of the time range */
+  /** Initial text representation of the time range */
   defaultValue?: string;
-
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-
   /** Custom format for displaying (and parsing?) dates */
   dateFormat?: string;
-
   /** Show invalid state */
   isInvalid?: boolean;
-
+  /**
+   * Called when the editing input text changes.
+   * @beta
+   */
+  onInputChange?: (value: string) => void;
   /**
    * Reduce input height and padding
    * @default true
    */
   compressed?: boolean;
+  /**
+   * Show time window buttons (previous, zoom out, zoom in, next) beside the control.
+   * Pass `true` for defaults, or a config object for fine-grained control.
+   * @default false
+   */
+  showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
+  /**
+   * Additional panels rendered inside the dialog popover.
+   * Each panel is navigatable via `useDateRangePickerPanelNavigation().navigateTo(id)`.
+   */
+  panels?: DateRangePickerPanelConfig[];
+  /**
+   * Predefined time range options shown in the Presets section.
+   */
+  presets?: TimeRangeBoundsOption[];
+  /**
+   * Recently used time ranges shown in the Recent section.
+   * @default []
+   */
+  recent?: TimeRangeBoundsOption[];
+  /** Called when the user wants to save the current input time range as a preset. */
+  onPresetSave?: (option: TimeRangeBoundsOption) => void;
+  /** Called when the user wants to delete a saved preset. */
+  onPresetDelete?: (option: TimeRangeBoundsOption) => void;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
@@ -66,110 +104,43 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
 /**
  * A date range picker component that accepts natural language and date math input.
  */
-export function DateRangePicker(props: DateRangePickerProps) {
-  const { defaultValue, onChange, dateFormat, isInvalid, compressed = true } = props;
-  const { euiTheme } = useEuiTheme();
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const lastValidText = useRef('');
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => defaultValue ?? '');
-  const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
-  const displayText = useMemo(
-    () => timeRangeToDisplayText(timeRange, { dateFormat }),
-    [dateFormat, timeRange]
+export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps) {
+  const defaultPanelId = DEFAULT_PANEL_ID;
+  const panelDescriptors: DateRangePickerPanelDescriptor[] = useMemo(
+    () => panels.map(({ id, title, icon }) => ({ id, title, icon })),
+    [panels]
   );
-  const duration =
-    timeRange.startDate && timeRange.endDate
-      ? { startDate: timeRange.startDate, endDate: timeRange.endDate }
-      : null;
-  const displayDuration = duration
-    ? durationToDisplayShortText(duration.startDate, duration.endDate)
-    : null;
-
-  useEffect(() => {
-    if (!isEditing && text.trim() === '' && lastValidText.current) {
-      setText(lastValidText.current);
-      lastValidText.current = '';
-    }
-  }, [text, isEditing]);
-
-  const onButtonClick = () => {
-    setIsEditing(true);
-    if (text) {
-      lastValidText.current = text;
-    }
-  };
-  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value);
-  };
-  const onInputKeyDown = (event: KeyboardEvent) => {
-    if (event.key === keys.ENTER && isEditing && text) {
-      onChange({
-        start: timeRange.start,
-        end: timeRange.end,
-        startDate: timeRange.startDate,
-        endDate: timeRange.endDate,
-        value: timeRange.value,
-        isInvalid: timeRange.isInvalid,
-      });
-      setIsEditing(false);
-    }
-    if (event.key === keys.ESCAPE && isEditing) {
-      if (lastValidText.current) {
-        setText(lastValidText.current);
-        lastValidText.current = '';
-      }
-      setIsEditing(false);
-    }
-  };
-  const onInputClear = () => {
-    setText('');
-    inputRef.current?.focus();
-  };
-  const onOutsideClick = () => {
-    if (isEditing) setIsEditing(false);
-  };
-
-  const wrapperStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-  `;
 
   return (
-    <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-      <div css={wrapperStyles}>
-        <EuiFormControlLayout
-          compressed={compressed}
-          isInvalid={isInvalid}
-          clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
+    <DateRangePickerProvider {...props}>
+      <DateRangePickerDialog>
+        <DateRangePickerPanelNavigationProvider
+          defaultPanelId={defaultPanelId}
+          panelDescriptors={panelDescriptors}
         >
-          {isEditing ? (
-            <EuiFieldText
-              data-test-subj="dateRangePickerInput"
-              autoFocus
-              inputRef={inputRef}
-              controlOnly
-              value={text}
-              isInvalid={isInvalid}
-              onChange={onInputChange}
-              onKeyDown={onInputKeyDown}
-              compressed={compressed}
-            />
-          ) : (
-            <EuiFormControlButton
-              data-test-subj="dateRangePickerControlButton"
-              value={displayText}
-              onClick={onButtonClick}
-              isInvalid={isInvalid}
-              compressed={compressed}
-            >
-              {displayDuration && <EuiBadge>{displayDuration}</EuiBadge>}
-            </EuiFormControlButton>
-          )}
-        </EuiFormControlLayout>
-      </div>
-    </EuiOutsideClickDetector>
+          <DateRangePickerPanel id="main">
+            <MainPanel />
+          </DateRangePickerPanel>
+          <DateRangePickerPanel id={CalendarPanel.PANEL_ID}>
+            <CalendarPanel />
+          </DateRangePickerPanel>
+          <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
+            <CustomTimeRangePanel />
+          </DateRangePickerPanel>
+          {panels.map(({ id, component: Component }) => (
+            <DateRangePickerPanel key={id} id={id}>
+              <Component />
+            </DateRangePickerPanel>
+          ))}
+          {/* TODO Example panels, can be removed after initial development finishes */}
+          <DateRangePickerPanel id={ExamplePanel.PANEL_ID}>
+            <ExamplePanel />
+          </DateRangePickerPanel>
+          <DateRangePickerPanel id={ExampleNestedPanel.PANEL_ID}>
+            <ExampleNestedPanel />
+          </DateRangePickerPanel>
+        </DateRangePickerPanelNavigationProvider>
+      </DateRangePickerDialog>
+    </DateRangePickerProvider>
   );
 }
