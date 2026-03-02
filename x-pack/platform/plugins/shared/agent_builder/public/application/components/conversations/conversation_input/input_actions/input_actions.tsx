@@ -20,7 +20,6 @@ interface InputActionsProps {
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
   agentId?: string;
-  onModifyClick?: () => void;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
@@ -28,14 +27,12 @@ export const InputActions: React.FC<InputActionsProps> = ({
   isSubmitDisabled,
   resetToPendingMessage,
   agentId,
-  onModifyClick,
 }) => {
   const { getStepProps } = useAgentBuilderTour();
   const { isEmbeddedContext } = useConversationContext();
   const { agent } = useAgentBuilderAgentById(agentId);
 
-  // Only show modify button in full-screen mode (not in flyout/embedded) and for non-readonly agents
-  const showModifyButton = onModifyClick && !isEmbeddedContext && !agent?.readonly;
+  const showModifyButton = !isEmbeddedContext && !agent?.readonly;
 
   return (
     <EuiFlexItem grow={false}>
@@ -52,7 +49,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
                 <ConnectorSelector />
               </EuiTourStep>
             </EuiFlexItem>
-            {showModifyButton && <ModifyButton onClick={onModifyClick} />}
+            {showModifyButton && <ModifyButton />}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -14,6 +14,7 @@ import type {
   ConversationAction,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type { RuntimeAgentConfigurationOverrides } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ScreenContextAttachmentData,
@@ -30,7 +31,6 @@ import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
-import { useAgentOverrides } from '../agent_overrides/agent_overrides_context';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -39,6 +39,7 @@ interface UseSendMessageMutationProps {
 interface SendMessageParams {
   message?: string;
   action?: ConversationAction;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -112,7 +113,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { services } = useKibana();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();
-  const { overrides } = useAgentOverrides();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
@@ -158,7 +158,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message, action }: SendMessageParams) => {
+  const sendMessage = async ({ message, action, configurationOverrides }: SendMessageParams) => {
     const signal = messageControllerRef.current?.signal;
     const isRegenerate = action === 'regenerate';
     if (!signal) {
@@ -199,7 +199,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       connectorId,
       attachments: [...(attachments || []), ...contextAttachments],
       browserApiTools: browserApiToolsMetadata,
-      configurationOverrides: overrides,
+      configurationOverrides,
     });
 
     return subscribeToChatEvents(events$);

@@ -35,19 +35,28 @@ import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
-
-interface ConversationProps {
-  /** Optional callback for modify button click (only shown in full-screen view) */
-  onModifyClick?: () => void;
-}
+import {
+  AgentOverridesProvider,
+  useAgentOverrides,
+} from '../../context/agent_overrides/agent_overrides_context';
+import { AgentOverridesPanel } from './agent_overrides_panel/agent_overrides_panel';
 
 /**
  * Shared conversation component used by both full-screen and embedded views.
- * Does not include ModifyPanel or split-screen layout - those are view-specific.
+ * Wraps content with AgentOverridesProvider so all children have access to override state.
  */
-export const Conversation: React.FC<ConversationProps> = ({ onModifyClick }) => {
+export const Conversation: React.FC = () => {
+  return (
+    <AgentOverridesProvider>
+      <ConversationContent />
+    </AgentOverridesProvider>
+  );
+};
+
+const ConversationContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
+  const { isOverridesPanelOpen, closeOverridesPanel } = useAgentOverrides();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
@@ -144,11 +153,19 @@ export const Conversation: React.FC<ConversationProps> = ({ onModifyClick }) => 
         </EuiFlexGroup>
         {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
       </EuiFlexItem>
+      {isOverridesPanelOpen && (
+        <EuiFlexItem
+          css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+          grow={false}
+        >
+          <AgentOverridesPanel onClose={closeOverridesPanel} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
         grow={false}
       >
-        <ConversationInput onSubmit={scrollToMostRecentRoundTop} onModifyClick={onModifyClick} />
+        <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

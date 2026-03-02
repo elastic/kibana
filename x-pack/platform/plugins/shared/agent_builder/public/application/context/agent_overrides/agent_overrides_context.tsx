@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { RuntimeAgentConfigurationOverrides } from '@kbn/agent-builder-common';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useAgentBuilderAgentById } from '../../hooks/agents/use_agent_by_id';
+import { useConversationId } from '../conversation/use_conversation_id';
 
 /** Extract tool IDs from agent configuration tools */
 const extractToolIds = (tools: ToolSelection[] | undefined): Set<string> => {
@@ -41,12 +50,18 @@ interface AgentOverridesContextValue {
   isDirty: boolean;
   /** Overrides to send to API (only if dirty) */
   overrides: RuntimeAgentConfigurationOverrides | undefined;
+  /** Whether the overrides panel is open */
+  isOverridesPanelOpen: boolean;
   /** Set custom instructions */
   setInstructions: (instructions: string) => void;
   /** Toggle a tool's enabled state */
   toggleTool: (toolId: string) => void;
   /** Reset overrides to original agent values */
   resetOverrides: () => void;
+  /** Open the overrides panel */
+  openOverridesPanel: () => void;
+  /** Close the overrides panel */
+  closeOverridesPanel: () => void;
 }
 
 const AgentOverridesContext = createContext<AgentOverridesContextValue | undefined>(undefined);
@@ -57,12 +72,14 @@ interface AgentOverridesProviderProps {
 
 export const AgentOverridesProvider: React.FC<AgentOverridesProviderProps> = ({ children }) => {
   const agentId = useAgentId();
+  const conversationId = useConversationId();
   const { agent, isLoading: isAgentLoading } = useAgentBuilderAgentById(agentId);
 
   // Edited values
   const [instructions, setInstructions] = useState<string>('');
   const [enabledToolIds, setEnabledToolIds] = useState<Set<string>>(new Set());
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isOverridesPanelOpen, setIsOverridesPanelOpen] = useState(false);
 
   // Original values from agent
   const originalInstructions = agent?.configuration?.instructions ?? '';
@@ -88,6 +105,27 @@ export const AgentOverridesProvider: React.FC<AgentOverridesProviderProps> = ({ 
     }
   }, [isInitialized, initializeFromAgent]);
 
+  // Auto-close panel and reset overrides when conversation changes
+  const prevConversationIdRef = useRef<string | undefined>(conversationId);
+  useEffect(() => {
+    const prev = prevConversationIdRef.current;
+    if (prev && conversationId !== prev) {
+      setIsOverridesPanelOpen(false);
+      initializeFromAgent();
+    }
+    prevConversationIdRef.current = conversationId;
+  }, [conversationId, initializeFromAgent]);
+
+  // Auto-close panel when agent changes
+  const prevAgentIdRef = useRef<string | undefined>(agentId);
+  useEffect(() => {
+    const prev = prevAgentIdRef.current;
+    if (prev && agentId !== prev) {
+      setIsOverridesPanelOpen(false);
+    }
+    prevAgentIdRef.current = agentId;
+  }, [agentId]);
+
   const areInstructionsDirty = instructions !== originalInstructions;
   const areToolsDirty = !areSetsEqual(enabledToolIds, originalToolIds);
 
@@ -99,6 +137,9 @@ export const AgentOverridesProvider: React.FC<AgentOverridesProviderProps> = ({ 
   const resetOverrides = useCallback(() => {
     initializeFromAgent();
   }, [initializeFromAgent]);
+
+  const openOverridesPanel = useCallback(() => setIsOverridesPanelOpen(true), []);
+  const closeOverridesPanel = useCallback(() => setIsOverridesPanelOpen(false), []);
 
   const toggleTool = useCallback((toolId: string) => {
     setEnabledToolIds((prev) => {
@@ -134,11 +175,25 @@ export const AgentOverridesProvider: React.FC<AgentOverridesProviderProps> = ({ 
       enabledToolIds,
       isDirty,
       overrides,
+      isOverridesPanelOpen,
       setInstructions,
       toggleTool,
       resetOverrides,
+      openOverridesPanel,
+      closeOverridesPanel,
     }),
-    [instructions, enabledToolIds, isDirty, overrides, setInstructions, toggleTool, resetOverrides]
+    [
+      instructions,
+      enabledToolIds,
+      isDirty,
+      overrides,
+      isOverridesPanelOpen,
+      setInstructions,
+      toggleTool,
+      resetOverrides,
+      openOverridesPanel,
+      closeOverridesPanel,
+    ]
   );
 
   return <AgentOverridesContext.Provider value={value}>{children}</AgentOverridesContext.Provider>;

@@ -30,6 +30,7 @@ import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useAgentOverrides } from '../../../context/agent_overrides/agent_overrides_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 
 const INPUT_MIN_HEIGHT = '150px';
@@ -102,7 +103,6 @@ const InputContainer: React.FC<
 
 interface ConversationInputProps {
   onSubmit?: () => void;
-  onModifyClick?: () => void;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -119,12 +119,10 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({
-  onSubmit,
-  onModifyClick,
-}) => {
+export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
+  const { overrides } = useAgentOverrides();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -196,7 +194,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       return;
     }
     const content = messageEditor.getContent();
-    sendMessage({ message: content });
+    sendMessage({ message: content, configurationOverrides: overrides });
     messageEditor.clear();
     onSubmit?.();
   };
@@ -227,7 +225,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
             }
           }}
           agentId={agentId}
-          onModifyClick={onModifyClick}
         />
       )}
     </InputContainer>

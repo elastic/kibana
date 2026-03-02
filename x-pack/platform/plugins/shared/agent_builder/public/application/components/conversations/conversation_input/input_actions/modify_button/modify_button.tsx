@@ -18,12 +18,8 @@ const modifyButtonLabel = i18n.translate(
   }
 );
 
-interface ModifyButtonProps {
-  onClick: () => void;
-}
-
-export const ModifyButton: React.FC<ModifyButtonProps> = ({ onClick }) => {
-  const { isDirty } = useAgentOverrides();
+export const ModifyButton: React.FC = () => {
+  const { isDirty, openOverridesPanel } = useAgentOverrides();
   const { euiTheme } = useEuiTheme();
 
   const containerStyles = css`
@@ -46,7 +42,7 @@ export const ModifyButton: React.FC<ModifyButtonProps> = ({ onClick }) => {
       <EuiButtonEmpty
         size="s"
         iconType="wrench"
-        onClick={onClick}
+        onClick={openOverridesPanel}
         data-test-subj="agentBuilderModifyButton"
         color={isDirty ? 'primary' : 'text'}
       >
