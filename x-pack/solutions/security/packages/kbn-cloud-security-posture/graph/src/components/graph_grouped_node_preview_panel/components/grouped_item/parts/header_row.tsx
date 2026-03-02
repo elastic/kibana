@@ -63,7 +63,7 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {item.itemType === DOCUMENT_TYPE_ALERT && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warningFilled" size="m" color="danger" />
+          <EuiIcon type="warningFill" size="m" color="danger" />
         </EuiFlexItem>
       )}
       {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (

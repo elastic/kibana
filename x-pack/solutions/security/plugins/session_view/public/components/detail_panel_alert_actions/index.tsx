@@ -82,7 +82,7 @@ export const DetailPanelAlertActions = ({
         <EuiButtonIcon
           display="empty"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
             defaultMessage: 'More',
           })}
