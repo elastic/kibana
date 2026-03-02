@@ -39,19 +39,9 @@ spaceTest.describe(
           await timelinePage.selectCustomTemplates();
         });
 
-        await spaceTest.step(
-          'Expand template actions and create timeline from template',
-          async () => {
-            // The collapsed actions popover re-renders continuously due to an
-            // application issue in StatefulOpenTimeline: a useEffect on noteIds
-            // always creates a new itemIdToExpandedNotesRowMap reference and
-            // calls refetch(), causing the table and its popovers to detach.
-            // See: open_timeline/index.tsx lines ~406-419
-            // The page object uses force:true to work around the DOM instability.
-            await timelinePage.expandFirstEventAction();
-            await timelinePage.clickCreateFromTemplate();
-          }
-        );
+        await spaceTest.step('Create timeline from template', async () => {
+          await timelinePage.createTimelineFromTemplate();
+        });
 
         await spaceTest.step('Verify flyout is visible with the template query', async () => {
           await expect(timelinePage.flyoutWrapper).toHaveCSS('visibility', 'visible');

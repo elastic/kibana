@@ -143,23 +143,33 @@ export class TimelinePage {
     await this.collapsedActionsButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
-  async expandFirstEventAction() {
-    await this.collapsedActionsButton.click();
-    await this.createFromTemplateButton.waitFor({ state: 'visible', timeout: 10_000 });
+  async createTimelineFromTemplate() {
+    // The collapsed actions popover re-renders continuously due to an app bug
+    // in StatefulOpenTimeline (open_timeline/index.tsx ~406-419): a useEffect
+    // on noteIds triggers refetch(), causing the table and popovers to detach.
+    // The popover can close between opening and clicking the action item, so
+    // we retry the full open→click sequence as an atomic unit.
+    const maxAttempts = 5;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await this.collapsedActionsButton.click();
+        await this.createFromTemplateButton.waitFor({ state: 'visible', timeout: 3_000 });
+        await this.createFromTemplateButton.dispatchEvent('click');
+        return;
+      } catch {
+        if (attempt === maxAttempts) {
+          throw new Error(
+            'Failed to create timeline from template — popover keeps closing due to app re-rendering'
+          );
+        }
+      }
+    }
   }
 
   async hoverSaveButton() {
     // EUI wraps disabled buttons in a tooltip anchor <span> that intercepts
     // pointer events, so we hover the wrapper instead of the button itself.
     await this.saveButtonTooltipAnchor.hover();
-  }
-
-  async clickCreateFromTemplate() {
-    // EUI's collapsed actions popover re-renders continuously due to an app bug
-    // in StatefulOpenTimeline (open_timeline/index.tsx ~406-419), detaching the
-    // button before Playwright's stability check completes. dispatchEvent
-    // bypasses actionability checks without using force:true.
-    await this.createFromTemplateButton.dispatchEvent('click');
   }
 
   getTimelineRows() {
