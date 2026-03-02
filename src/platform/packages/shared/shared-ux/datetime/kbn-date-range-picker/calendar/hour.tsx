@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo, type ReactNode } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { useHourStyles } from './hour.styles';
 
 interface HourProps {
   children: ReactNode;
@@ -18,23 +18,33 @@ interface HourProps {
 }
 
 export function Hour({ children, onClick, isSelected = false }: HourProps) {
-  const buttonStyles = css`
-    inline-size: 100%;
-    min-block-size: 24px;
-    block-size: 24px;
-    font-size: 12px;
-  `;
+  const styles = useHourStyles();
+
+  const commonProps = useMemo(
+    () => ({
+      size: 's' as const,
+      textProps: false as const,
+      onClick,
+    }),
+    [onClick]
+  );
 
   if (isSelected) {
     return (
-      <EuiButton size="s" fill color="primary" css={buttonStyles} onClick={onClick}>
+      <EuiButton
+        {...commonProps}
+        fill
+        fullWidth={false}
+        color="primary"
+        css={styles.selectedButton}
+      >
         {children}
       </EuiButton>
     );
   }
 
   return (
-    <EuiButtonEmpty size="s" css={buttonStyles} onClick={onClick}>
+    <EuiButtonEmpty {...commonProps} css={styles.emptyButton}>
       {children}
     </EuiButtonEmpty>
   );

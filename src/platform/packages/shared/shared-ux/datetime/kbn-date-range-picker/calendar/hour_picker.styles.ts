@@ -10,19 +10,21 @@
 import { css } from '@emotion/react';
 import { euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 
+/** The scrolling container fixed height. Cannot be easily calculated. */
+const PANEL_BODY_HEIGHT = 394;
+
 export const hourPickerStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
 
-  // TODO: replace pixels
   const container = css`
+    align-items: center;
     display: flex;
     flex-direction: column;
-    padding: ${euiTheme.size.s};
-    width: 80px;
-    align-items: center;
-    height: 394px;
-    ${euiScrollBarStyles(euiThemeContext)}
+    height: ${PANEL_BODY_HEIGHT}px;
+    padding: ${euiTheme.size.s} ${euiTheme.size.base};
+    width: calc(${euiTheme.size.xxxl} + ${euiTheme.size.base}; * 2);
     overflow-y: auto;
+    ${euiScrollBarStyles(euiThemeContext)}
   `;
 
   return { container };

@@ -8,32 +8,30 @@
  */
 
 import { css } from '@emotion/react';
-import { type UseEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-export const hourStyles = (euiThemeContext: UseEuiTheme, isSelected: boolean) => {
-  const { euiTheme } = euiThemeContext;
+export const useHourStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-  const button = css`
-    display: block;
-    width: 100%;
-    padding: ${euiTheme.size.xs};
-    border: none;
-    background: ${isSelected ? euiTheme.colors.primary : 'transparent'};
-    color: ${isSelected ? euiTheme.colors.ghost : euiTheme.colors.text};
-    text-align: left;
-    cursor: pointer;
-    font-size: ${euiTheme.size.m};
-    transition: background-color ${euiTheme.animation.fast} ease-in-out;
+  const baseButton = css`
+    min-inline-size: 100%;
+    min-height: ${euiTheme.size.l};
+    ${useEuiFontSize('s')};
+  `;
+
+  const emptyButton = css`
+    ${baseButton};
+    color: ${euiTheme.colors.textParagraph};
 
     &:hover {
-      background: ${isSelected ? euiTheme.colors.primary : euiTheme.colors.lightestShade};
-    }
-
-    &:focus {
-      outline: 2px solid ${euiTheme.colors.primary};
-      outline-offset: -2px;
+      color: ${euiTheme.colors.textPrimary};
     }
   `;
 
-  return { button };
+  const selectedButton = css`
+    ${baseButton};
+    color: ${euiTheme.colors.textInverse};
+  `;
+
+  return { baseButton, emptyButton, selectedButton };
 };

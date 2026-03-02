@@ -18,11 +18,13 @@ interface HourPickerProps {
   onHourChange: (hour: string) => void;
 }
 
+const ONE_DIGIT_INDICES = 20;
 const HOURS_IN_DAY = 24;
 const HOURS = Array.from({ length: HOURS_IN_DAY * 2 }, (_, index) => {
+  const prefix = index < ONE_DIGIT_INDICES ? '0' : '';
   const hour = Math.floor(index / 2);
   const minute = index % 2 === 0 ? '00' : '30';
-  return `${hour}:${minute}`;
+  return `${prefix}${hour}:${minute}`;
 });
 
 export function HourPicker({ selectedHour, onHourChange }: HourPickerProps) {
