@@ -28,6 +28,8 @@ export interface StepCodeSectionProps {
   error?: string;
   isReady: boolean;
   onExecute: () => void;
+  apiSnippetHighlightLines?: string;
+  responseHighlightLines?: string;
 }
 
 const PLACEHOLDER_TEXT = i18n.translate(
@@ -54,10 +56,13 @@ const formatResponseBody = (response: EsResponse): string => {
   }
 };
 
-const ResponsePane: React.FC<Pick<StepCodeSectionProps, 'status' | 'response' | 'error'>> = ({
+const ResponsePane: React.FC<
+  Pick<StepCodeSectionProps, 'status' | 'response' | 'error' | 'responseHighlightLines'>
+> = ({
   status,
   response,
   error,
+  responseHighlightLines,
 }) => {
   if (status === 'running') {
     return (
@@ -97,6 +102,11 @@ const ResponsePane: React.FC<Pick<StepCodeSectionProps, 'status' | 'response' | 
         overflowHeight={CODE_PANEL_HEIGHT}
         isCopyable
         css={codeBlockFillHeight}
+        lineNumbers={
+          responseHighlightLines
+            ? { start: 1, highlight: responseHighlightLines }
+            : false
+        }
       >
         {formatResponseBody(response)}
       </EuiCodeBlock>
@@ -125,11 +135,15 @@ export const StepCodeSection: React.FC<StepCodeSectionProps> = ({
   error,
   isReady,
   onExecute,
+  apiSnippetHighlightLines,
+  responseHighlightLines,
 }) => {
   const { euiTheme } = useEuiTheme();
   const isExecuting = status === 'running';
   const isCompleted = status === 'completed';
+  const isFailed = status === 'failed';
   const canExecute = isReady && !isExecuting && !isCompleted;
+  const showHighlights = isCompleted || isFailed;
 
   const codePanelStyle = useMemo(
     () => css`
@@ -184,6 +198,11 @@ export const StepCodeSection: React.FC<StepCodeSectionProps> = ({
             overflowHeight={CODE_PANEL_HEIGHT}
             isCopyable
             css={codeBlockFillHeight}
+            lineNumbers={
+              showHighlights && apiSnippetHighlightLines
+                ? { start: 1, highlight: apiSnippetHighlightLines }
+                : false
+            }
           >
             {apiSnippet}
           </EuiCodeBlock>
@@ -217,7 +236,12 @@ export const StepCodeSection: React.FC<StepCodeSectionProps> = ({
 
       <EuiFlexItem grow={5}>
         <div css={codePanelStyle}>
-          <ResponsePane status={status} response={response} error={error} />
+          <ResponsePane
+            status={status}
+            response={response}
+            error={error}
+            responseHighlightLines={showHighlights ? responseHighlightLines : undefined}
+          />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>

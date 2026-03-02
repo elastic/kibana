@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,6 +19,10 @@ import { i18n } from '@kbn/i18n';
 import type { ResolvedStep } from './tutorial_state';
 import { StepCodeSection } from './step_code_section';
 import { StepExplanation } from './step_explanation';
+import {
+  getResponseHighlightLines,
+  getSnippetHighlightLines,
+} from '../../hooks/highlight_utils';
 
 export interface TutorialStepCardProps {
   step: ResolvedStep;
@@ -59,6 +63,17 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
 
   const retryInProgress = isRetrying && isRunning;
 
+  const responseHighlightLines = useMemo(() => {
+    if (!isCompleted || !state.response) return undefined;
+    const formatted = JSON.stringify(state.response.body, null, 2);
+    return getResponseHighlightLines(formatted, step.source.valuesToSave) || undefined;
+  }, [isCompleted, state.response, step.source.valuesToSave]);
+
+  const apiSnippetHighlightLines = useMemo(() => {
+    if (!isCompleted || !step.source.apiSnippetHighlights?.length) return undefined;
+    return getSnippetHighlightLines(resolved.apiSnippet, step.source.apiSnippetHighlights) || undefined;
+  }, [isCompleted, resolved.apiSnippet, step.source.apiSnippetHighlights]);
+
   const showExplanation = isCompleted;
   const showRetryButton = (isFailed || retryInProgress) && isCurrentStep;
   const showAdvanceButton =
@@ -82,6 +97,8 @@ export const TutorialStepCard: React.FC<TutorialStepCardProps> = ({
         error={state.error}
         isReady={isReady}
         onExecute={onExecute}
+        apiSnippetHighlightLines={apiSnippetHighlightLines}
+        responseHighlightLines={responseHighlightLines}
       />
 
       <EuiSpacer size="m" />

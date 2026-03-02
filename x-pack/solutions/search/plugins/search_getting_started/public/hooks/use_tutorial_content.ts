@@ -42,6 +42,8 @@ export interface TutorialStep {
   apiSnippet: ApiSnippet;
   valuesToInsert: Array<SnippetVariableKey>;
   valuesToSave: Record<SnippetVariableKey, ResponsePath>;
+  /** JSON paths into the apiSnippet body to highlight after execution (e.g. ['query.multi_match']) */
+  apiSnippetHighlights?: string[];
 }
 
 export interface TutorialSummaryLink {

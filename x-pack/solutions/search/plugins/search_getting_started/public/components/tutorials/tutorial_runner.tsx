@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -106,7 +107,18 @@ export const TutorialRunner: React.FC<TutorialRunnerProps> = ({ tutorial, onBack
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued" data-test-subj="tutorialStepProgress">
+                {i18n.translate('xpack.searchGettingStarted.tutorial.runner.stepProgress', {
+                  defaultMessage: 'Step {current} of {total}',
+                  values: {
+                    current: Math.min(state.currentStep + 1, steps.length),
+                    total: steps.length,
+                  },
+                })}
+              </EuiText>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="refresh"

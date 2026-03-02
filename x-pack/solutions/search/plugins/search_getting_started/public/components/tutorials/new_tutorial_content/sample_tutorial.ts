@@ -29,6 +29,7 @@ const sampleTutorialSteps: TutorialStep[] = [
     valuesToSave: {
       index_name: 'index',
     },
+    apiSnippetHighlights: ['mappings.properties'],
     explanation:
       'The index `{{index_name}}` has been created. Elasticsearch acknowledged the request and the index is ready to receive documents.',
   },
@@ -75,6 +76,7 @@ const sampleTutorialSteps: TutorialStep[] = [
       top_hit_title: 'hits.hits[0]._source.title',
       top_hit_score: 'hits.hits[0]._score',
     },
+    apiSnippetHighlights: ['query.multi_match'],
     explanation:
       'The search returned **{{total_hits}}** results. The top hit was "{{top_hit_title}}" with a relevance score of `{{top_hit_score}}`. Elasticsearch ranked it highest because the `description` field closely matched "dystopian future".',
   },
@@ -104,6 +106,7 @@ const sampleTutorialSteps: TutorialStep[] = [
       filtered_hits: 'hits.total.value',
       filtered_top_title: 'hits.hits[0]._source.title',
     },
+    apiSnippetHighlights: ['query.bool'],
     explanation:
       'With the `genre: sci-fi` filter applied, the search returned **{{filtered_hits}}** results. The top result is "{{filtered_top_title}}". The filter excluded non-sci-fi books before scoring, making the query both faster and more precise.',
   },
@@ -126,6 +129,7 @@ const sampleTutorialSteps: TutorialStep[] = [
       top_genre: 'aggregations.genres.buckets[0].key',
       top_genre_count: 'aggregations.genres.buckets[0].doc_count',
     },
+    apiSnippetHighlights: ['aggs.genres'],
     explanation:
       'The most common genre is **{{top_genre}}** with {{top_genre_count}} documents. Aggregations are a powerful way to build faceted navigation, dashboards, and analytics on top of your search data.',
   },
