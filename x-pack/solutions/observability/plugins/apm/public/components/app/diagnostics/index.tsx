@@ -189,7 +189,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       showServiceGroupSaveButton={false}
       selectedNavButton="serviceGroups"
       pageHeader={{
-        iconType: 'magnifyWithExclamation',
+        iconType: 'magnifyExclamation',
         rightSideItems: [<RefreshButton />],
         description: <TemplateDescription />,
         tabs,
@@ -204,10 +204,7 @@ function TemplateDescription() {
   const { isImported, setImportedDiagnosticsBundle } = useDiagnosticsContext();
   if (isImported) {
     return (
-      <EuiCallOut
-        title="Displaying results from the uploaded diagnostics report"
-        iconType="exportAction"
-      >
+      <EuiCallOut title="Displaying results from the uploaded diagnostics report" iconType="upload">
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"
           onClick={() => setImportedDiagnosticsBundle(undefined)}

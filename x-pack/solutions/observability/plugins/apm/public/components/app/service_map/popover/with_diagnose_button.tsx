@@ -39,7 +39,7 @@ export const withDiagnoseButton = <P extends Partial<WithDiagnoseButtonProps>>(
               <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiIcon type="crossInCircle" color="warning" size="m" aria-hidden={true} />{' '}
+                    <EuiIcon type="crossCircle" color="warning" size="m" aria-hidden={true} />{' '}
                     <strong>
                       {i18n.translate('xpack.apm.serviceMap.diagnosisTitle', {
                         defaultMessage: 'Missing connection?',

@@ -92,7 +92,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
               )}
             >
               <MLExplorerLink jobId={jobId}>
-                <EuiIcon type="visTable" />
+                <EuiIcon type="table" />
               </MLExplorerLink>
             </EuiToolTip>
           </EuiFlexItem>
@@ -230,7 +230,7 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
             <EuiButton
               data-test-subj="apmJobsListCreateJobButton"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onAddEnvironments}
               isDisabled={!canSave}
             >
