@@ -15,6 +15,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
+    await syntheticsServices.deleteCustomRules();
     await syntheticsServices.deleteSettingsAndConnectors();
     const location = await syntheticsServices.getDefaultLocation();
     locationId = location.id;
@@ -22,6 +23,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
 
   test.afterAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
+    await syntheticsServices.deleteCustomRules();
     await syntheticsServices.deleteSettingsAndConnectors();
   });
 
