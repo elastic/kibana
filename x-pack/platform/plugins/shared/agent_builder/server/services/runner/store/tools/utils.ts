@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolReturnSummarizerFn } from '@kbn/agent-builder-server/tools';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
  * Shared summarizer for all filestore tools.
@@ -14,11 +15,14 @@ import type { ToolReturnSummarizerFn } from '@kbn/agent-builder-server/tools';
  * preserving the original tool_result_id for traceability.
  */
 export const summarizeFilestoreToolReturn: ToolReturnSummarizerFn = (toolReturn) => {
+  const toolName = sanitizeToolId(toolReturn.tool_id);
   return toolReturn.results.map((result) => ({
     tool_result_id: result.tool_result_id,
     type: ToolResultType.other,
     data: {
-      comment: 'Tool result removed from the discussion, call the tool again to access the data',
+      comment: `Filestore tool result removed from the conversation. To retrieve this data, call the "${toolName}" tool with the parameters below.`,
+      recall_tool: toolName,
+      recall_parameters: toolReturn.params,
     },
   }));
 };
