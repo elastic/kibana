@@ -16,7 +16,7 @@ import { AssetManager } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
-import { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
+import { CcsLogsExtractionClient } from './domain/logs_extraction';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { CRUDClient } from './domain/crud_client';
 import type { TelemetryReporter } from './telemetry/events';

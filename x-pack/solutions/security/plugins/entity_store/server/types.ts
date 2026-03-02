@@ -27,7 +27,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
-import type { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
+import type { CcsLogsExtractionClient } from './domain/logs_extraction';
 import type { LogsExtractionClient } from './domain/logs_extraction';
 import type { CRUDClient } from './domain/crud_client';
 import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';

@@ -11,15 +11,15 @@ import moment from 'moment';
 import type {
   EntityType,
   ManagedEntityDefinition,
-} from '../../common/domain/definitions/entity_schema';
-import type { PaginationParams } from './logs_extraction/logs_extraction_query_builder';
+} from '../../../common/domain/definitions/entity_schema';
+import type { PaginationParams } from './logs_extraction_query_builder';
 import {
   buildCcsLogsExtractionEsqlQuery,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   extractPaginationParams,
-} from './logs_extraction/logs_extraction_query_builder';
-import { executeEsqlQuery, esqlResponseToBulkObjects } from '../infra/elasticsearch/esql';
-import type { CRUDClient } from './crud_client';
+} from './logs_extraction_query_builder';
+import { executeEsqlQuery, esqlResponseToBulkObjects } from '../../infra/elasticsearch/esql';
+import type { CRUDClient } from '../crud_client';
 
 export interface CcsExtractToUpdatesParams {
   type: EntityType;

@@ -38,7 +38,7 @@ import type {
 } from '../definitions/saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { parseDurationToMs } from '../../infra/time';
-import type { CcsLogsExtractionClient } from '../ccs_logs_extraction_client';
+import type { CcsLogsExtractionClient } from '.';
 
 interface LogsExtractionOptions {
   specificWindow?: {

@@ -6,7 +6,7 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { CcsLogsExtractionClient } from '../ccs_logs_extraction_client';
+import type { CcsLogsExtractionClient } from '.';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -30,8 +30,8 @@ function createMockCcsLogsExtractionClient(): jest.Mocked<
   };
 }
 
-jest.mock('../infra/elasticsearch/esql');
-jest.mock('../infra/elasticsearch/ingest');
+jest.mock('../../infra/elasticsearch/esql');
+jest.mock('../../infra/elasticsearch/ingest');
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;

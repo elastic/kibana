@@ -8,20 +8,20 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
-import type { CRUDClient } from './crud_client';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import { executeEsqlQuery } from '../infra/elasticsearch/esql';
+import { CcsLogsExtractionClient } from '.';
+import type { CRUDClient } from '../crud_client';
+import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   HASHED_ID_FIELD,
-} from './logs_extraction/logs_extraction_query_builder';
+} from './logs_extraction_query_builder';
 
 const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
 
-jest.mock('../infra/elasticsearch/esql', () => {
-  const actual = jest.requireActual<typeof import('../infra/elasticsearch/esql')>(
-    '../infra/elasticsearch/esql'
+jest.mock('../../infra/elasticsearch/esql', () => {
+  const actual = jest.requireActual<typeof import('../../infra/elasticsearch/esql')>(
+    '../../infra/elasticsearch/esql'
   );
   return {
     ...actual,
