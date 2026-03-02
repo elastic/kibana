@@ -19,7 +19,6 @@ jest.mock('@kbn/code-editor');
 
 describe('<StepMappings />', () => {
   test('allows you to add mappings', async () => {
-    const { httpSetup } = setupEnvironment();
     const onChange = jest.fn();
 
     const Comp = () => (
@@ -29,6 +28,24 @@ describe('<StepMappings />', () => {
         esDocsBase="https://example.test"
         esNodesPlugins={[]}
       />
+    );
+
+    const docLinks = docLinksServiceMock.createStartContract();
+    const appDependencies = {
+      docLinks,
+      canUseSyntheticSource: false,
+    } satisfies Pick<AppDependencies, 'docLinks' | 'canUseSyntheticSource'>;
+
+    render(
+      <I18nProvider>
+        <AppContextProvider value={appDependencies as unknown as AppDependencies}>
+          <MappingsEditorProvider>
+            <GlobalFlyout.GlobalFlyoutProvider>
+              <Comp />
+            </GlobalFlyout.GlobalFlyoutProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
+      </I18nProvider>
     );
 
     render(React.createElement(WithAppDependencies(Comp, httpSetup)));

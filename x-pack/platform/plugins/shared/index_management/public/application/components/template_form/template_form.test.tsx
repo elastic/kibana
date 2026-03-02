@@ -101,7 +101,11 @@ describe('<TemplateForm />', () => {
       </I18nProvider>
     );
 
-    render(React.createElement(WithAppDependencies(Comp, httpSetup)));
+    render(
+      <GlobalFlyout.GlobalFlyoutProvider>
+        <Comp />
+      </GlobalFlyout.GlobalFlyoutProvider>
+    );
 
     fireEvent.click(screen.getByTestId('mockSaveButton'));
 
@@ -126,7 +130,7 @@ describe('<TemplateForm />', () => {
       })
     );
 
-    expect((saved as any).lifecycle).toBeUndefined();
+    expect(saved.lifecycle).toBeUndefined();
     expect(clearSaveError).toHaveBeenCalled();
   });
 });
