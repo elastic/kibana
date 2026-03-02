@@ -20,9 +20,11 @@ export class SystemFlyoutRef implements OverlayRef {
   private _isClosed = false;
   private closeSubject = new Subject<void>();
   private container: HTMLElement;
+  private readonly flushEmotionCache?: () => void;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, flushEmotionCache?: () => void) {
     this.container = container;
+    this.flushEmotionCache = flushEmotionCache;
     this.onClose = firstValueFrom(this.closeSubject);
   }
 
@@ -33,6 +35,9 @@ export class SystemFlyoutRef implements OverlayRef {
   public close(): Promise<void> {
     if (!this._isClosed) {
       this._isClosed = true;
+      if (this.flushEmotionCache) {
+        this.flushEmotionCache();
+      }
       unmountComponentAtNode(this.container);
       this.container.remove();
 

@@ -27,6 +27,7 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/i18n",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-root",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
     "@kbn/core-user-profile-browser-mocks",

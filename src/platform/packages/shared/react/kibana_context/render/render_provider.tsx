@@ -39,11 +39,12 @@ export const KibanaRenderContextProvider: FC<
     modify,
     coreEnv,
     chrome,
+    cache,
   } = props;
   return (
     <KibanaRootContextProvider
       globalStyles={false}
-      {...{ executionContext, i18n, theme, userProfile, modify, colorMode, coreEnv, chrome }}
+      {...{ executionContext, i18n, theme, userProfile, modify, colorMode, coreEnv, chrome, cache }}
     >
       <KibanaErrorBoundaryProvider analytics={analytics}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>

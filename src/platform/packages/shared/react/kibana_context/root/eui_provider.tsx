@@ -20,6 +20,7 @@ import createCache from '@emotion/cache';
 import type { EuiProviderProps } from '@elastic/eui';
 import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
+import type { EmotionCache } from '@emotion/cache';
 import {
   getColorMode,
   defaultTheme,
@@ -29,6 +30,16 @@ import {
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
+/**
+ * Shape of the Emotion cache object passed to EuiProvider when using custom caches
+ * (e.g. per-flyout caches). Must include default, global, and utility caches.
+ */
+export interface KibanaEmotionCacheObject {
+  default: EmotionCache;
+  global: EmotionCache;
+  utility: EmotionCache;
+}
+
 interface UserSettings {
   contrastMode: 'system' | 'standard' | 'high';
 }
@@ -36,10 +47,17 @@ interface UserSettings {
 /**
  * Props for the KibanaEuiProvider.
  */
-export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
+export interface KibanaEuiProviderProps
+  extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
   userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
   globalStyles?: boolean;
+  /**
+   * Optional Emotion cache object. When provided (e.g. for a flyout), this cache is used
+   * instead of the shared module-level cache. The caller is responsible for flushing
+   * the cache before removing the container from the DOM.
+   */
+  cache?: KibanaEmotionCacheObject;
 }
 
 const sharedCacheOptions = {
@@ -79,6 +97,53 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
+/**
+ * Creates a set of Emotion caches targeting the given container (e.g. a flyout DOM node)
+ * and a flush callback. Use this for isolated render trees so that styles are injected
+ * into the container and can be flushed before the container is removed.
+ *
+ * @param container - DOM element that will host the style tags
+ * @param keyPrefix - Unique prefix for cache keys (e.g. `flyout-${id}-`)
+ * @returns Object with `cache` (for EuiProvider) and `flush()` to call before removing the container
+ */
+export const createEmotionCacheForContainer = (
+  container: HTMLElement,
+  keyPrefix: string
+): { cache: KibanaEmotionCacheObject; flush: () => void } => {
+  const defaultCache = createCache({
+    ...sharedCacheOptions,
+    key: `${keyPrefix}css`,
+    container,
+  });
+  const globalCacheForContainer = createCache({
+    ...sharedCacheOptions,
+    key: `${keyPrefix}${EUI_STYLES_GLOBAL}`,
+    container,
+  });
+  const utilityCacheForContainer = createCache({
+    ...sharedCacheOptions,
+    key: `${keyPrefix}${EUI_STYLES_UTILS}`,
+    container,
+  });
+  defaultCache.compat = true;
+  globalCacheForContainer.compat = true;
+  utilityCacheForContainer.compat = true;
+
+  const flyoutCache: KibanaEmotionCacheObject = {
+    default: defaultCache,
+    global: globalCacheForContainer,
+    utility: utilityCacheForContainer,
+  };
+
+  const flush = () => {
+    flyoutCache.default.sheet.flush();
+    flyoutCache.global.sheet.flush();
+    flyoutCache.utility.sheet.flush();
+  };
+
+  return { cache: flyoutCache, flush };
+};
+
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
     includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
@@ -101,9 +166,11 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
+  cache: cacheProp,
   children,
 }) => {
   const { theme$ } = theme;
+  const resolvedCache = cacheProp ?? cache;
 
   // use the selected theme if available before using the defaultTheme; this ensures that
   // Kibana loads with the currently selected theme without additional updates from default to selected
@@ -141,7 +208,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   return (
     <EuiProvider
       {...{
-        cache,
+        cache: resolvedCache,
         modify,
         colorMode,
         globalStyles,

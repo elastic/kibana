@@ -21,6 +21,7 @@ import type {
 } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { createEmotionCacheForContainer } from '@kbn/react-kibana-context-root';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
@@ -62,7 +63,12 @@ export class SystemFlyoutService {
         flyoutContainer.setAttribute('data-system-flyout', flyoutId);
         this.targetDomElement!.appendChild(flyoutContainer);
 
-        const flyoutRef = new SystemFlyoutRef(flyoutContainer);
+        const { cache: flyoutCache, flush: flushFlyoutCache } = createEmotionCacheForContainer(
+          flyoutContainer,
+          `flyout-${flyoutId}-`
+        );
+
+        const flyoutRef = new SystemFlyoutRef(flyoutContainer, flushFlyoutCache);
         this.activeFlyouts.set(flyoutId, flyoutRef);
 
         // Handle close events
@@ -120,6 +126,7 @@ export class SystemFlyoutService {
             i18n={i18n}
             theme={theme}
             userProfile={userProfile}
+            cache={flyoutCache}
           >
             <EuiFlyout
               {...options}

@@ -192,6 +192,17 @@ describe('SystemFlyoutService', () => {
       expect(ref.onClose).toBeInstanceOf(Promise);
     });
 
+    it('passes a per-flyout Emotion cache to KibanaRenderContextProvider', () => {
+      systemFlyouts.open(<div>System flyout content</div>);
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+      const [renderedElement] = mockReactDomRender.mock.calls[0];
+      expect(renderedElement.props.cache).toBeDefined();
+      const cache = renderedElement.props.cache;
+      expect(cache).toHaveProperty('default');
+      expect(cache).toHaveProperty('global');
+      expect(cache).toHaveProperty('utility');
+    });
+
     it('accepts a custom onClose handler', () => {
       const onClose = jest.fn();
       const ref = systemFlyouts.open(<div>System flyout content</div>, {
