@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/response_ops_cases.sh
-    cancel_on_build_failing: true
     label: 'Cases Cypress Tests on Security Solution'
     agents:
       machineType: n2-standard-4

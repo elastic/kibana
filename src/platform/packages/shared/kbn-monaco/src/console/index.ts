@@ -26,7 +26,7 @@ import {
 import { foldingRangeProvider } from './folding_range_provider';
 import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';
-import { checkForTripleQuotesAndQueries, unescapeInvalidChars } from './utils';
+import { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './utils';
 
 export { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
 /**
@@ -56,10 +56,10 @@ export const ConsoleLang: LangModuleType = {
         const fullText = model.getValue();
         const cursorOffset = model.getOffsetAt(position);
         const textBeforeCursor = fullText.slice(0, cursorOffset);
-        const { insideSingleQuotesQuery, insideTripleQuotesQuery, queryIndex } =
-          checkForTripleQuotesAndQueries(textBeforeCursor);
-        if (esqlCallbacks && (insideSingleQuotesQuery || insideTripleQuotesQuery)) {
-          const queryText = textBeforeCursor.slice(queryIndex, cursorOffset);
+        const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
+          checkForTripleQuotesAndEsqlQuery(textBeforeCursor);
+        if (esqlCallbacks && insideEsqlQuery) {
+          const queryText = textBeforeCursor.slice(esqlQueryIndex, cursorOffset);
           const unescapedQuery = unescapeInvalidChars(queryText);
           const esqlSuggestions = await suggest(
             unescapedQuery,
@@ -72,7 +72,7 @@ export const ConsoleLang: LangModuleType = {
               esqlSuggestions,
               queryText,
               false,
-              insideSingleQuotesQuery
+              !insideTripleQuotes
             ),
           };
         } else if (actionsProvider.current) {
