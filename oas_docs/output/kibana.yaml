@@ -21142,13 +21142,13 @@ paths:
               type: object
               properties:
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 id:
                   $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_ListName'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 type:
                   $ref: '#/components/schemas/Security_Lists_API_ListType'
                 version:
@@ -22235,12 +22235,15 @@ paths:
             Type of the importing list.
 
             Required when importing a new list that is `list_id` is not specified.
+          examples:
+            ip:
+              value: ip
           in: query
           name: type
           required: false
           schema:
             $ref: '#/components/schemas/Security_Lists_API_ListType'
-        - description: Determines when changes made by the request are made visible to search.
+        - description: Determines when changes made by the request are made visible to search
           in: query
           name: refresh
           required: false
@@ -53152,7 +53155,7 @@ components:
         created_by:
           type: string
         description:
-          $ref: '#/components/schemas/Security_Lists_API_ListDescription'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         id:
           $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         immutable:
@@ -53160,7 +53163,7 @@ components:
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
         name:
-          $ref: '#/components/schemas/Security_Lists_API_ListName'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         tie_breaker_id:
           type: string
         type:
@@ -53186,10 +53189,7 @@ components:
         - updated_at
         - updated_by
     Security_Lists_API_ListDescription:
-      description: Describes the value list.
-      format: nonempty
-      minLength: 1
-      type: string
+      $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
     Security_Lists_API_ListId:
       $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
     Security_Lists_API_ListItem:
