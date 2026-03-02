@@ -24,7 +24,7 @@ interface Arguments {
 
 export interface SavedLensInput {
   title?: string;
-  savedObjectId: string;
+  ref_id: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
@@ -75,7 +75,7 @@ export function savedLens(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
-          savedObjectId: id,
+          ref_id: id,
           filters: getQueryFilters(filters),
           timeRange: timerange || defaultTimeRange,
           title: title === null ? undefined : title,
