@@ -139,13 +139,67 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           },
           hosts: [
             {
-              id: ['zeek-sensor-san-francisco'],
+              id: ['host:zeek-sensor-san-francisco'],
               name: ['zeek-sensor-san-francisco'],
             },
           ],
         };
         expect(response?.edges[0].node).to.eql(expected);
       });
+    });
+  });
+
+  describe('host EUID', () => {
+    const hostUncommonProcessesArchive =
+      'x-pack/solutions/security/test/security_solution_cypress/es_archives/host_uncommon_processes';
+    const FROM_EUID = '2022-03-01T00:00:00.000Z';
+    const TO_EUID = '2022-03-31T23:59:59.999Z';
+
+    let supertestEuid: TestAgent;
+    let searchEuid: SearchService;
+
+    before(async () => {
+      const esArchiver = getService('esArchiver');
+      const utilsEuid = getService('securitySolutionUtils');
+      await esArchiver.load(hostUncommonProcessesArchive);
+      supertestEuid = await utilsEuid.createSuperTest();
+      searchEuid = await utilsEuid.createSearch();
+    });
+
+    after(async () => {
+      const esArchiver = getService('esArchiver');
+      await esArchiver.unload(hostUncommonProcessesArchive);
+    });
+
+    it('should count unique hosts using host EUID logic (host_count for process on 2 hosts)', async () => {
+      const response = await searchEuid.send<HostsUncommonProcessesStrategyResponse>({
+        supertest: supertestEuid,
+        options: {
+          factoryQueryType: HostsQueries.uncommonProcesses,
+          sourceId: 'default',
+          timerange: {
+            interval: '12h',
+            to: TO_EUID,
+            from: FROM_EUID,
+          },
+          pagination: {
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 50,
+            querySize: 20,
+          },
+          defaultIndex: ['auditbeat-uncommon-2022'],
+          inspect: false,
+        },
+        strategy: 'securitySolutionSearchStrategy',
+      });
+
+      const euidMultiHostEdge = response.edges.find(
+        (edge) => edge.node.process?.name?.[0] === 'euid_test_multi_host'
+      );
+      expect(euidMultiHostEdge).to.be.ok();
+      expect(euidMultiHostEdge?.node.hosts).to.have.length(2);
+      expect(euidMultiHostEdge?.node.instances).to.be(2);
     });
   });
 }

@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -57,11 +58,7 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -189,10 +186,9 @@ const NetworkDetailsComponent: React.FC = () => {
     aggregationInterval: 'auto',
   });
 
-  const entityFilter = useMemo(
+  const entityIdentifiers = useMemo(
     () => ({
-      field: `${flowTarget}.ip`,
-      value: detailName,
+      [`${flowTarget}.ip`]: detailName,
     }),
     [detailName, flowTarget]
   );
@@ -237,7 +233,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   }}
                   mode={CellActionsMode.HOVER_DOWN}
                   visibleCellActions={5}
-                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
                 >
                   {ip}
                 </SecurityCellActions>
@@ -276,13 +272,13 @@ const NetworkDetailsComponent: React.FC = () => {
                   <EuiFlexItem>
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
-                      entityFilter={entityFilter}
+                      entityIdentifiers={entityIdentifiers}
                       additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityFilter={entityFilter}
+                      entityIdentifiers={entityIdentifiers}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />

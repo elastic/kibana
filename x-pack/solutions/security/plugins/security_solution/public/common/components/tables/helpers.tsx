@@ -18,7 +18,8 @@ import {
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
@@ -29,6 +30,21 @@ interface GetRowItemsWithActionsParams {
   fieldName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
+  displayCount?: number;
+  maxOverflow?: number;
+}
+
+/** Item with value and optional entityIdentifiers for entity detail links */
+export interface RowItemWithEntityIdentifiers {
+  value: string;
+  entityIdentifiers?: Record<string, string>;
+}
+
+interface GetRowItemsWithActionsForEntitiesParams {
+  items: RowItemWithEntityIdentifiers[] | null | undefined;
+  fieldName: string;
+  idPrefix: string;
+  render: (item: RowItemWithEntityIdentifiers) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
 }
@@ -50,7 +66,7 @@ export const getRowItemsWithActions = ({
           mode={CellActionsMode.HOVER_DOWN}
           visibleCellActions={5}
           showActionTooltips
-          triggerId={SecurityCellActionsTrigger.DEFAULT}
+          triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
           data={{
             value,
             field: fieldName,
@@ -80,6 +96,124 @@ export const getRowItemsWithActions = ({
     return getEmptyTagValue();
   }
 };
+
+/**
+ * Renders row items with entityIdentifiers support (e.g. for HostDetailsLink).
+ * Use when each item has both a display value and entityIdentifiers for URL resolution.
+ */
+export const getRowItemsWithActionsForEntities = ({
+  items,
+  fieldName,
+  idPrefix,
+  render,
+  displayCount = 5,
+  maxOverflow = 5,
+}: GetRowItemsWithActionsForEntitiesParams): JSX.Element => {
+  if (items != null && items.length > 0) {
+    const visibleItems = items.slice(0, displayCount).map((item, index) => {
+      const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${item.value}-${index}`);
+      return (
+        <SecurityCellActions
+          key={id}
+          mode={CellActionsMode.HOVER_DOWN}
+          visibleCellActions={5}
+          showActionTooltips
+          triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+          data={{
+            value: item.value,
+            field: fieldName,
+          }}
+        >
+          <>{render(item)}</>
+        </SecurityCellActions>
+      );
+    });
+
+    return visibleItems.length > 0 ? (
+      <>
+        {visibleItems}{' '}
+        <RowItemOverflowForEntities
+          fieldName={fieldName}
+          items={items}
+          idPrefix={idPrefix}
+          overflowIndexStart={displayCount}
+          maxOverflowItems={maxOverflow}
+          render={render}
+        />
+      </>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else {
+    return getEmptyTagValue();
+  }
+};
+
+interface RowItemOverflowForEntitiesProps {
+  fieldName: string;
+  items: RowItemWithEntityIdentifiers[];
+  idPrefix: string;
+  overflowIndexStart: number;
+  maxOverflowItems: number;
+  render: (item: RowItemWithEntityIdentifiers) => React.ReactNode;
+}
+
+const RowItemOverflowForEntitiesComponent: React.FC<RowItemOverflowForEntitiesProps> = ({
+  fieldName,
+  items,
+  idPrefix,
+  overflowIndexStart = 5,
+  maxOverflowItems = 5,
+  render,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const maxVisibleItems = useMemo(
+    () => items.slice(0, maxOverflowItems + 1),
+    [items, maxOverflowItems]
+  );
+  return (
+    <>
+      {items.length > overflowIndexStart && (
+        <Popover count={items.length - overflowIndexStart} idPrefix={idPrefix}>
+          <EuiText size="xs">
+            <MoreContainer
+              fieldName={fieldName}
+              idPrefix={idPrefix}
+              values={maxVisibleItems.map((i) => i.value)}
+              overflowIndexStart={overflowIndexStart}
+              moreMaxHeight="none"
+              render={(value) => {
+                const item = items.find((i) => i.value === value);
+                return item ? render(item) : defaultToEmptyTag(value);
+              }}
+            />
+          </EuiText>
+          {items.length > overflowIndexStart + maxOverflowItems && (
+            <EuiFlexGroup
+              css={{ paddingTop: euiTheme.size.m }}
+              data-test-subj="popover-additional-overflow"
+            >
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <EuiTextColor color="subdued">
+                    {items.length - overflowIndexStart - maxOverflowItems}{' '}
+                    <FormattedMessage
+                      data-test-subj="popover-additional-overflow-text"
+                      id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
+                      defaultMessage="more not shown"
+                    />
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </Popover>
+      )}
+    </>
+  );
+};
+RowItemOverflowForEntitiesComponent.displayName = 'RowItemOverflowForEntitiesComponent';
+const RowItemOverflowForEntities = React.memo(RowItemOverflowForEntitiesComponent);
 
 interface RowItemOverflowProps {
   fieldName: string;

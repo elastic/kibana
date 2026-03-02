@@ -6,10 +6,13 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '@kbn/securitysolution-ecs';
+import { euid } from '@kbn/entity-store/common';
 import type { HostUncommonProcessesRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
 import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
+
+const HOST_EUID_FIELD = 'host.euid';
 
 export const buildQuery = ({
   defaultIndex,
@@ -23,7 +26,16 @@ export const buildQuery = ({
     ...processFieldsMap,
     ...userFieldsMap,
   }) as string[];
-  const hostFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, hostFieldsMap) as string[];
+  const hostFieldsFromMap = reduceFields(UNCOMMON_PROCESSES_FIELDS, hostFieldsMap) as string[];
+  const hostEuidDisplayFields = [
+    'host.entity.id',
+    'host.id',
+    'host.name',
+    'host.hostname',
+  ] as const;
+  const hostFields = [
+    ...new Set([...hostFieldsFromMap, ...hostEuidDisplayFields]),
+  ];
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -45,10 +57,15 @@ export const buildQuery = ({
     },
   };
 
+  const hostEuidRuntimeMapping = euid.getEuidPainlessRuntimeMapping('host');
+
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
+    runtime_mappings: {
+      [HOST_EUID_FIELD]: hostEuidRuntimeMapping,
+    },
     aggregations: {
       ...agg,
       group_by_process: {
@@ -84,12 +101,12 @@ export const buildQuery = ({
           },
           host_count: {
             cardinality: {
-              field: 'host.name',
+              field: HOST_EUID_FIELD,
             },
           },
           hosts: {
             terms: {
-              field: 'host.name',
+              field: HOST_EUID_FIELD,
             },
             aggregations: {
               host: {
