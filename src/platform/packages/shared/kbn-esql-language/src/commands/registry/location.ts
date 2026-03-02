@@ -28,8 +28,10 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  mmr: Location.MMR,
   rerank: Location.RERANK,
   'join:on': Location.JOIN,
+  'mmr:on': Location.MMR,
   'rerank:on': Location.RERANK,
 };
 
