@@ -47,7 +47,7 @@ function evaluateSingleCondition(
   switch (condition.type) {
     case 'severity_change':
     case 'field_change': {
-      if (condition.snapshotValue == null) {
+      if (condition.snapshotValue == null || currentStr == null) {
         return { met: false, reason: '' };
       }
       const changed = currentStr !== condition.snapshotValue;

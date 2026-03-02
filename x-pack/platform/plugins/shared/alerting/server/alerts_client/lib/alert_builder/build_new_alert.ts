@@ -48,7 +48,9 @@ import { nanosToMicros } from '../nanos_to_micros';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
 
-function snoozeEntryToAadFields(entry: SnoozedInstanceEntry): Partial<Record<string, unknown>> {
+export function snoozeEntryToAadFields(
+  entry: SnoozedInstanceEntry
+): Partial<Record<string, unknown>> {
   const fields: Partial<Record<string, unknown>> = {};
   if (entry.expiresAt != null) {
     fields[ALERT_SNOOZE_EXPIRES_AT] = entry.expiresAt;

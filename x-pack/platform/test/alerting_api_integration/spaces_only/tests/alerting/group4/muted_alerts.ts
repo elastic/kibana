@@ -752,6 +752,62 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     });
 
+    it('should unmute an alert that is both simple-muted and conditional-snoozed in a single rule SO update', async () => {
+      const ruleId = await createRule();
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      // Step 1: Apply conditional snooze (adds to snoozedInstances)
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      // Step 2: Apply simple mute (additive -- adds to mutedInstanceIds)
+      await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
+
+      // Verify both are populated
+      let { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(rule.muted_alert_ids).to.contain(alertInstanceId);
+      expect(
+        (rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)
+      ).to.be(true);
+
+      // Step 3: Unmute -- should remove from both lists
+      await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
+
+      rule = (await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`))
+        .body;
+      expect(rule.muted_alert_ids || []).not.to.contain(alertInstanceId);
+      expect(
+        (rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)
+      ).to.be(false);
+
+      // Verify AAD doc is also unmuted
+      await alertUtils.runSoon(ruleId);
+      await retry.try(async () => {
+        const unmutedAlerts = await getAlertsByRuleId(ruleId);
+        const a = unmutedAlerts.find((x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId);
+        expect(a).to.not.be(undefined);
+        expect(a._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
     it('should return 400 when applying conditional snooze to rule with muteAll', async () => {
       const ruleId = await createRule();
       await alertUtils.getMuteAllRequest(ruleId);

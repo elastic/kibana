@@ -159,6 +159,41 @@ describe('unmuteInstance()', () => {
     );
   });
 
+  test('unmutes both simple mute and conditional snooze in a single rule SO update', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        mutedInstanceIds: ['2', '3'],
+        snoozedInstances: [
+          { instanceId: '2', expiresAt: new Date(Date.now() + 86400000).toISOString() },
+        ],
+      },
+      version: '123',
+      references: [],
+    });
+
+    await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      expect.objectContaining({
+        mutedInstanceIds: ['3'],
+        snoozedInstances: [],
+        updatedAt: expect.any(String),
+      }),
+      { version: '123' }
+    );
+  });
+
   test('skips unmuting when alert instance not muted and not snoozed', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({

@@ -76,6 +76,34 @@ describe('evaluateSnoozeConditions', () => {
       });
       expect(result.shouldUnmute).toBe(false);
     });
+
+    it('returns shouldUnmute: false when monitored field is missing from alert data', () => {
+      const config: AlertSnoozeConfig = {
+        conditions: [
+          {
+            type: 'field_change',
+            field: 'kibana.alert.severity',
+            snapshotValue: 'critical',
+          },
+        ],
+      };
+      const result = evaluateSnoozeConditions(config, {});
+      expect(result.shouldUnmute).toBe(false);
+    });
+
+    it('returns shouldUnmute: false for severity_change when field is absent', () => {
+      const config: AlertSnoozeConfig = {
+        conditions: [
+          {
+            type: 'severity_change',
+            field: 'kibana.alert.severity',
+            snapshotValue: 'critical',
+          },
+        ],
+      };
+      const result = evaluateSnoozeConditions(config, {});
+      expect(result.shouldUnmute).toBe(false);
+    });
   });
 
   describe('severity_equals condition', () => {
