@@ -31,8 +31,6 @@ import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
-// Shallow copy: RulesList and LogsList are lazy-loaded from triggers_actions_ui
-// TODO: Move to unified_rules as part of subsequent full transitive copy PRs
 const LogsList = lazy(() =>
   import('@kbn/triggers-actions-ui-plugin/public').then((m) => ({
     default: m.GlobalRuleEventLogList,
@@ -73,17 +71,13 @@ const RulesPage = () => {
 
   tabs.push({
     id: 'rules',
-    name: (
-      <FormattedMessage id="xpack.unifiedRules.home.rulesTabTitle" defaultMessage="Rules" />
-    ),
+    name: <FormattedMessage id="xpack.unifiedRules.home.rulesTabTitle" defaultMessage="Rules" />,
   });
 
   if (authorizedToReadAnyRules) {
     tabs.push({
       id: 'logs',
-      name: (
-        <FormattedMessage id="xpack.unifiedRules.home.logsTabTitle" defaultMessage="Logs" />
-      ),
+      name: <FormattedMessage id="xpack.unifiedRules.home.logsTabTitle" defaultMessage="Logs" />,
     });
   }
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);

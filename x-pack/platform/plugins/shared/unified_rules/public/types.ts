@@ -35,6 +35,8 @@ import type {
   RuleTypeRegistryContract,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 export interface UnifiedRulesServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -65,4 +67,6 @@ export interface UnifiedRulesServices extends CoreStart {
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases?: CasesService;
+  security?: SecurityPluginStart;
 }

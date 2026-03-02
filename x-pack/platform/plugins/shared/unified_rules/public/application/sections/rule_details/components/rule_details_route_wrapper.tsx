@@ -6,33 +6,20 @@
  */
 
 import React, { Suspense, lazy } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { RulesPageTemplate } from '../../rules_page/rules_page_template';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
-// Shallow copy: RuleDetailsRouteWithApi lives in triggers_actions_ui until the full
-// transitive component tree is moved to unified_rules in a follow-up PR.
-const RuleDetailsRouteWithApi = lazy(() =>
-  import('@kbn/triggers-actions-ui-plugin/public').then((m) => ({
-    default: m.RuleDetailsRouteWithApi,
-  }))
-);
-
-type RuleDetailsRouteWrapperProps = RouteComponentProps<{
-  ruleId: string;
-}>;
+const RuleDetailsPage = lazy(() => import('../rule_details_page'));
 
 /**
- * Wrapper component for RuleDetailsRoute that provides KibanaPageTemplate layout.
- * Only used in the standalone rules page app (/app/rules), not in management plugin routes.
+ * Route wrapper for composable rule details page.
+ * Uses widget getters from triggers_actions_ui to compose the page layout
+ * and renders AlertsTable directly with custom alert actions.
  */
-const RuleDetailsRouteWrapper: React.FunctionComponent<RuleDetailsRouteWrapperProps> = (props) => {
+const RuleDetailsRouteWrapper: React.FunctionComponent = () => {
   return (
-    <RulesPageTemplate>
-      <Suspense fallback={<CenterJustifiedSpinner />}>
-        <RuleDetailsRouteWithApi {...props} />
-      </Suspense>
-    </RulesPageTemplate>
+    <Suspense fallback={<CenterJustifiedSpinner />}>
+      <RuleDetailsPage />
+    </Suspense>
   );
 };
 

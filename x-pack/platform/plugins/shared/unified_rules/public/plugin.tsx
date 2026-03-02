@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
@@ -29,6 +35,8 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 interface PluginsSetup {
@@ -37,6 +45,8 @@ interface PluginsSetup {
 }
 
 interface PluginsStart {
+  cases?: CasesPublicStart;
+  security?: SecurityPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -58,6 +68,8 @@ interface PluginsStart {
 }
 
 export class UnifiedRulesPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
+  constructor(_context: PluginInitializerContext) {}
+
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): void {
     core.application.register({
       id: 'rules',
@@ -115,6 +127,8 @@ export class UnifiedRulesPlugin implements Plugin<void, void, PluginsSetup, Plug
           share: pluginsStart.share,
           uiActions: pluginsStart.uiActions,
           triggersActionsUi: pluginsStart.triggersActionsUi,
+          cases: pluginsStart.cases,
+          security: pluginsStart.security,
         });
       },
     });

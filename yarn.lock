@@ -9373,6 +9373,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-rules-plugin@link:x-pack/platform/plugins/shared/unified_rules":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
   version "0.0.0"
   uid ""

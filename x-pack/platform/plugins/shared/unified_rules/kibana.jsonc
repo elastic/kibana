@@ -17,13 +17,14 @@
       "actions",
       "licensing",
       "expressions",
+      "fieldFormats",
       "lens",
       "fieldsMetadata",
       "uiActions",
       "unifiedSearch",
       "triggersActionsUi"
     ],
-    "optionalPlugins": ["cloud", "features", "spaces", "serverless", "share", "contentManagement"],
-    "requiredBundles": ["triggersActionsUi", "kibanaReact", "kibanaUtils"]
+    "optionalPlugins": ["cases", "cloud", "features", "security", "spaces", "serverless", "share", "contentManagement"],
+    "requiredBundles": ["triggersActionsUi", "kibanaReact", "kibanaUtils", "cases"]
   }
 }

@@ -45,6 +45,9 @@
     "@kbn/alerts-ui-shared",
     "@kbn/alerting-types",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/shared-ux-page-kibana-template"
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/cases-plugin",
+    "@kbn/security-plugin"
   ]
 }
