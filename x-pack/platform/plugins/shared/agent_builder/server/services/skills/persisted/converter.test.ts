@@ -39,11 +39,11 @@ describe('convertPersistedSkill', () => {
     expect(result.readonly).toBe(false);
   });
 
-  it('does not set basePath', () => {
+  it('set a default basepath', () => {
     const skill = createMockPersistedSkill();
     const result = convertPersistedSkill(skill);
 
-    expect(result.basePath).toBeUndefined();
+    expect(result.basePath).toBe('/skills');
   });
 
   it('does not set getInlineTools', () => {

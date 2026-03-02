@@ -261,6 +261,14 @@
                 "section": "def-common.SearchSessionsFindResponse",
                 "text": "SearchSessionsFindResponse"
               },
+              ">; status: (sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
+              },
               ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
@@ -882,6 +890,14 @@
                 "section": "def-common.SearchSessionsFindResponse",
                 "text": "SearchSessionsFindResponse"
               },
+              ">; status: (sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
+              },
               ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
@@ -913,7 +929,7 @@
           "<P>"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-        "lineNumber": 132,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -931,7 +947,7 @@
               "() => Promise<string>"
             ],
             "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-            "lineNumber": 136,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -951,7 +967,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-            "lineNumber": 142,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -967,7 +983,7 @@
               "() => Promise<{ id: string; initialState: P; restoreState: P; }>"
             ],
             "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-            "lineNumber": 148,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1333,10 +1349,18 @@
             "section": "def-common.SearchSessionsFindResponse",
             "text": "SearchSessionsFindResponse"
           },
+          ">; status: (sessionIds: string[]) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionStatusesResponse",
+            "text": "SearchSessionStatusesResponse"
+          },
           ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/sessions_client.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1401,7 +1425,7 @@
           "<P>, searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig | undefined) => void; isSessionStorageReady: () => boolean; getSearchSessionIndicatorUiConfig: () => SearchSessionIndicatorUiConfig; }"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-        "lineNumber": 67,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2773,7 +2797,7 @@
               ">; getConfig: () => Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 459,
+            "lineNumber": 469,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2789,7 +2813,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 459,
+                "lineNumber": 469,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -32307,6 +32331,32 @@
         "children": [
           {
             "parentPluginId": "data",
+            "id": "def-common.SearchSessionStatusesResponse.sessions",
+            "type": "Object",
+            "tags": [],
+            "label": "sessions",
+            "description": [
+              "\nWhen a session enters a completed state (success or error), we show a notification in the cliend side, but we need\nto know the minimal information to display the notification."
+            ],
+            "signature": [
+              "{ [x: string]: Pick<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", \"name\" | \"appId\" | \"restoreState\" | \"locatorId\">; }"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SearchSessionStatusesResponse.statuses",
             "type": "Object",
             "tags": [],
@@ -32326,7 +32376,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 122,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -37728,17 +37778,18 @@
             "section": "def-common.SearchSessionSavedObjectAttributes",
             "text": "SearchSessionSavedObjectAttributes"
           },
-          ", unknown> & ",
+          ", unknown> & { statuses: Record<string, ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionStatusesResponse",
-            "text": "SearchSessionStatusesResponse"
-          }
+            "section": "def-common.SearchSessionStatusResponse",
+            "text": "SearchSessionStatusResponse"
+          },
+          ">; }"
         ],
         "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-        "lineNumber": 128,
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
