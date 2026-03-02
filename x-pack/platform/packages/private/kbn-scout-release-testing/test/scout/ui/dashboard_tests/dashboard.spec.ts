@@ -180,6 +180,82 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     });
   });
 
+  test('should enter and exit fullscreen mode', async ({ page, pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+
+    const isInViewMode = await pageObjects.dashboard.getIsInViewMode();
+    if (!isInViewMode) {
+      await pageObjects.dashboard.clickCancelOutOfEditMode();
+    }
+
+    await page.testSubj.click('dashboardFullScreenMode');
+    await expect(page.locator('.dshDashboardViewportWrapper--isFullscreen')).toBeVisible();
+    await expect(page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.dshDashboardViewportWrapper--isFullscreen')).toBeHidden();
+    await expect(page.testSubj.locator('exitFullScreenModeButton')).toBeHidden();
+  });
+
+  test('should update dashboard settings', async ({ page, pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+    await pageObjects.dashboard.switchToEditMode();
+
+    await pageObjects.dashboard.openSettingsFlyout();
+    await expect(page.testSubj.locator('dashboardSettingsFlyout')).toBeVisible();
+
+    const updatedTitle = '[Logs] Web Traffic Updated';
+
+    await test.step('update title', async () => {
+      const titleInput = page.testSubj.locator('dashboardTitleInput');
+      await titleInput.fill(updatedTitle);
+      await expect(titleInput).toHaveValue(updatedTitle);
+    });
+
+    await test.step('update description', async () => {
+      const descriptionInput = page.testSubj.locator('dashboardDescriptionInput');
+      await descriptionInput.fill('Updated description for testing');
+      await expect(descriptionInput).toHaveValue('Updated description for testing');
+    });
+
+    await test.step('toggle store time with dashboard', async () => {
+      const storeTimeSwitch = page.testSubj.locator('storeTimeWithDashboard');
+      const wasChecked = (await storeTimeSwitch.getAttribute('aria-checked')) === 'true';
+      await storeTimeSwitch.click();
+      const expectedState = wasChecked ? 'false' : 'true';
+      await expect(storeTimeSwitch).toHaveAttribute('aria-checked', expectedState);
+    });
+
+    await test.step('enable sync cursor and toggle sync tooltips', async () => {
+      const syncCursorSwitch = page.testSubj.locator('dashboardSyncCursorCheckbox');
+      const syncTooltipsSwitch = page.testSubj.locator('dashboardSyncTooltipsCheckbox');
+
+      if ((await syncCursorSwitch.getAttribute('aria-checked')) !== 'true') {
+        await syncCursorSwitch.click();
+        await expect(syncCursorSwitch).toHaveAttribute('aria-checked', 'true');
+      }
+
+      await expect(syncTooltipsSwitch).toBeEnabled();
+      const tooltipsWasChecked =
+        (await syncTooltipsSwitch.getAttribute('aria-checked')) === 'true';
+      await syncTooltipsSwitch.click();
+      const expectedTooltipsState = tooltipsWasChecked ? 'false' : 'true';
+      await expect(syncTooltipsSwitch).toHaveAttribute('aria-checked', expectedTooltipsState);
+    });
+
+    await pageObjects.dashboard.applyDashboardSettings();
+    await expect(page.testSubj.locator('dashboardSettingsFlyout')).toBeHidden();
+
+    await test.step('verify title updated in dashboard heading', async () => {
+      const heading = page.locator('#dashboardTitle');
+      await expect(heading).toContainText(updatedTitle);
+    });
+  });
+
   test('should export dashboard as PDF and download the report', async ({ page, pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
