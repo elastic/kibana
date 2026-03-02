@@ -93,9 +93,10 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     type: 'name',
     label: 'Column.Name',
     allowMultiple: false,
-    defaultProps: { showDescription: true },
+    defaultProps: { showDescription: true, showTags: false },
     configurableProps: [
       { name: 'showDescription', label: 'showDescription', type: 'boolean', defaultValue: true },
+      { name: 'showTags', label: 'showTags', type: 'boolean', defaultValue: false },
       { name: 'width', label: 'width', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
