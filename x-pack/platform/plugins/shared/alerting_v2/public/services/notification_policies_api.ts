@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core-di-browser';
 import type {
   CreateNotificationPolicyData,
   NotificationPolicyResponse,
+  UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
@@ -35,6 +36,13 @@ export class NotificationPoliciesApi {
   public async createNotificationPolicy(data: CreateNotificationPolicyData) {
     return this.http.post<NotificationPolicyResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
+      { body: JSON.stringify(data) }
+    );
+  }
+
+  public async updateNotificationPolicy(id: string, data: UpdateNotificationPolicyBody) {
+    return this.http.put<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`,
       { body: JSON.stringify(data) }
     );
   }

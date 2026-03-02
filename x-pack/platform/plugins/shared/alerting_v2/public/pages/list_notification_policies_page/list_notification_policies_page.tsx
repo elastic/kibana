@@ -20,6 +20,7 @@ import {
 import type {
   CreateNotificationPolicyData,
   NotificationPolicyResponse,
+  UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,20 +29,30 @@ import { NotificationPolicyFormFlyout } from '../../components/notification_poli
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
 import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
+import { useUpdateNotificationPolicy } from '../../hooks/use_update_notification_policy';
+
+type FlyoutState = { mode: 'create' } | { mode: 'edit'; policy: NotificationPolicyResponse } | null;
 
 const DEFAULT_PER_PAGE = 20;
 
 export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [flyoutState, setFlyoutState] = useState<FlyoutState>(null);
 
   const { mutate: createNotificationPolicy, isLoading: isCreating } = useCreateNotificationPolicy();
+  const { mutate: updateNotificationPolicy, isLoading: isUpdating } = useUpdateNotificationPolicy();
+
+  const closeFlyout = () => setFlyoutState(null);
 
   const handleSave = (data: CreateNotificationPolicyData) => {
     createNotificationPolicy(data, {
-      onSuccess: () => setIsFlyoutOpen(false),
+      onSuccess: closeFlyout,
     });
+  };
+
+  const handleUpdate = (id: string, data: UpdateNotificationPolicyBody) => {
+    updateNotificationPolicy({ id, data }, { onSuccess: closeFlyout });
   };
 
   const { data, isLoading, isError, error } = useFetchNotificationPolicies({
@@ -132,6 +143,26 @@ export const ListNotificationPoliciesPage = () => {
       ),
       render: (createdAt: string) => new Date(createdAt).toLocaleString(),
     },
+    {
+      name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.edit', {
+            defaultMessage: 'Edit',
+          }),
+          description: i18n.translate(
+            'xpack.alertingV2.notificationPoliciesList.action.edit.description',
+            { defaultMessage: 'Edit this notification policy' }
+          ),
+          icon: 'pencil',
+          type: 'icon',
+          onClick: (item: NotificationPolicyResponse) =>
+            setFlyoutState({ mode: 'edit', policy: item }),
+        },
+      ],
+    },
   ];
 
   const errorMessage = isError && error ? error.message : null;
@@ -146,7 +177,7 @@ export const ListNotificationPoliciesPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton key="create-policy" onClick={() => setIsFlyoutOpen(true)}>
+          <EuiButton key="create-policy" onClick={() => setFlyoutState({ mode: 'create' })}>
             <FormattedMessage
               id="xpack.alertingV2.notificationPoliciesList.createPolicyButton"
               defaultMessage="Create policy"
@@ -184,11 +215,19 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage: 'Notification Policies',
         })}
       />
-      {isFlyoutOpen && (
+      {flyoutState?.mode === 'create' && (
         <NotificationPolicyFormFlyout
-          onClose={() => setIsFlyoutOpen(false)}
+          onClose={closeFlyout}
           onSave={handleSave}
           isLoading={isCreating}
+        />
+      )}
+      {flyoutState?.mode === 'edit' && (
+        <NotificationPolicyFormFlyout
+          onClose={closeFlyout}
+          onUpdate={handleUpdate}
+          initialValues={flyoutState.policy}
+          isLoading={isUpdating}
         />
       )}
     </>

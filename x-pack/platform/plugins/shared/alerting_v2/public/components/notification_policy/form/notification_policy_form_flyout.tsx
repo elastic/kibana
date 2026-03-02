@@ -19,15 +19,29 @@ import {
 import type {
   CreateNotificationPolicyData,
   NotificationPolicyResponse,
+  UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { DEFAULT_FORM_STATE } from './constants';
 import { NotificationPolicyForm } from './notification_policy_form';
 import type { NotificationPolicyFormState } from './types';
-import { DEFAULT_FORM_STATE } from './constants';
 
 const FLYOUT_TITLE_ID = 'notificationPolicyFlyoutTitle';
+
+function toFormState(response: NotificationPolicyResponse): NotificationPolicyFormState {
+  return {
+    name: response.name,
+    description: response.description,
+    matcher: response.matcher ?? '',
+    groupBy: response.group_by ?? [],
+    frequency: response.throttle
+      ? { type: 'throttle', interval: response.throttle.interval }
+      : { type: 'immediate' },
+    destinations: response.destinations.map((d) => ({ type: d.type, id: d.id })),
+  };
+}
 
 function toCreatePayload(state: NotificationPolicyFormState): CreateNotificationPolicyData {
   return {
@@ -42,9 +56,20 @@ function toCreatePayload(state: NotificationPolicyFormState): CreateNotification
   };
 }
 
+function toUpdatePayload(
+  state: NotificationPolicyFormState,
+  version: string
+): UpdateNotificationPolicyBody {
+  return {
+    ...toCreatePayload(state),
+    version,
+  };
+}
+
 interface NotificationPolicyFormFlyoutProps {
   onClose: () => void;
-  onSave: (data: CreateNotificationPolicyData) => void;
+  onSave?: (data: CreateNotificationPolicyData) => void;
+  onUpdate?: (id: string, data: UpdateNotificationPolicyBody) => void;
   isLoading?: boolean;
   initialValues?: NotificationPolicyResponse;
 }
@@ -52,15 +77,30 @@ interface NotificationPolicyFormFlyoutProps {
 export const NotificationPolicyFormFlyout = ({
   onClose,
   onSave,
+  onUpdate,
   isLoading = false,
+  initialValues,
 }: NotificationPolicyFormFlyoutProps) => {
+  const isEditMode = !!initialValues;
+
+  const defaultValues = useMemo(
+    () => (initialValues ? toFormState(initialValues) : DEFAULT_FORM_STATE),
+    [initialValues]
+  );
+
   const methods = useForm<NotificationPolicyFormState>({
     mode: 'onBlur',
-    defaultValues: DEFAULT_FORM_STATE,
+    defaultValues,
   });
 
   const onSubmitValid = (values: NotificationPolicyFormState) => {
-    onSave(toCreatePayload(values));
+    if (isEditMode && onUpdate && initialValues.version) {
+      onUpdate(initialValues.id, toUpdatePayload(values, initialValues.version));
+    } else if (!isEditMode && onSave) {
+      onSave(toCreatePayload(values));
+    } else {
+      throw new Error('Invalid form state: neither edit mode nor create mode');
+    }
   };
 
   return (
@@ -68,10 +108,17 @@ export const NotificationPolicyFormFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
           <h2>
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.flyout.title"
-              defaultMessage="Create notification policy"
-            />
+            {isEditMode ? (
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.flyout.editTitle"
+                defaultMessage="Edit notification policy"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.alertingV2.notificationPolicy.flyout.title"
+                defaultMessage="Create notification policy"
+              />
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -97,10 +144,17 @@ export const NotificationPolicyFormFlyout = ({
               isLoading={isLoading}
               disabled={!methods.formState.isValid}
             >
-              <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.flyout.save"
-                defaultMessage="Save"
-              />
+              {isEditMode ? (
+                <FormattedMessage
+                  id="xpack.alertingV2.notificationPolicy.flyout.update"
+                  defaultMessage="Update"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.alertingV2.notificationPolicy.flyout.save"
+                  defaultMessage="Save"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
