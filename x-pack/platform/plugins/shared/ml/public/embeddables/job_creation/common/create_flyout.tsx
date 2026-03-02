@@ -15,6 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { getMlGlobalServices } from '../../../application/util/get_services';
 
 export interface FlyoutComponentProps {
@@ -27,7 +28,8 @@ export function createFlyout(
   share: SharePluginStart,
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
-  lens?: LensPublicStart
+  lens?: LensPublicStart,
+  cps?: CPSPluginStart
 ): Promise<void> {
   const {
     http,
@@ -51,6 +53,7 @@ export function createFlyout(
               share,
               data,
               lens,
+              cps,
               dashboardService,
               mlServices: getMlGlobalServices(coreStart, data.dataViews),
             }}
