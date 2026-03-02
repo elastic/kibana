@@ -21,7 +21,7 @@ interface EsProfileDocument {
   id: string;
   name: string;
   description?: string;
-  target_type: string;
+  target_type: ProfileTargetType;
   target_id: string;
   rules: {
     field_rules: Array<{
@@ -32,14 +32,14 @@ interface EsProfileDocument {
     }>;
     regex_rules: Array<{
       id: string;
-      type: string;
+      type: 'regex';
       entity_class: string;
       pattern: string;
       enabled: boolean;
     }>;
     ner_rules: Array<{
       id: string;
-      type: string;
+      type: 'ner';
       model_id?: string;
       allowed_entity_classes: string[];
       enabled: boolean;
@@ -52,10 +52,15 @@ interface EsProfileDocument {
   updated_by: string;
 }
 
+type ProfileTargetType = AnonymizationProfile['targetType'];
+type EsFieldRuleDocument = EsProfileDocument['rules']['field_rules'][number];
+type EsRegexRuleDocument = EsProfileDocument['rules']['regex_rules'][number];
+type EsNerRuleDocument = EsProfileDocument['rules']['ner_rules'][number];
+
 interface CreateProfileParams {
   name: string;
   description?: string;
-  targetType: 'data_view' | 'index_pattern' | 'index';
+  targetType: ProfileTargetType;
   targetId: string;
   rules: AnonymizationProfileRules;
   namespace: string;
@@ -116,20 +121,20 @@ export class ProfilesRepository {
 
   private rulesToEsDoc(rules: AnonymizationProfileRules): EsProfileDocument['rules'] {
     return {
-      field_rules: rules.fieldRules.map((r) => ({
+      field_rules: rules.fieldRules.map<EsFieldRuleDocument>((r) => ({
         field: r.field,
         allowed: r.allowed,
         anonymized: r.anonymized,
         entity_class: r.entityClass,
       })),
-      regex_rules: (rules.regexRules ?? []).map((r) => ({
+      regex_rules: (rules.regexRules ?? []).map<EsRegexRuleDocument>((r) => ({
         id: r.id,
         type: r.type,
         entity_class: r.entityClass,
         pattern: r.pattern,
         enabled: r.enabled,
       })),
-      ner_rules: (rules.nerRules ?? []).map((r) => ({
+      ner_rules: (rules.nerRules ?? []).map<EsNerRuleDocument>((r) => ({
         id: r.id,
         type: r.type,
         model_id: r.modelId,
@@ -335,7 +340,7 @@ export class ProfilesRepository {
    */
   async findByTarget(
     namespace: string,
-    targetType: string,
+    targetType: ProfileTargetType,
     targetId: string
   ): Promise<AnonymizationProfile | null> {
     const result = await this.find({
@@ -357,7 +362,7 @@ export class ProfilesRepository {
       id: doc.id,
       name: doc.name,
       description: doc.description,
-      targetType: doc.target_type as 'data_view' | 'index_pattern' | 'index',
+      targetType: doc.target_type as ProfileTargetType,
       targetId: doc.target_id,
       rules: {
         fieldRules: (doc.rules.field_rules ?? []).map((r) => ({
