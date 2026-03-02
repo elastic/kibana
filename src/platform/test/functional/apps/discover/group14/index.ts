@@ -26,7 +26,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_discover_accessibility'));
     loadTestFile(require.resolve('./_discover_histogram_breakdown'));
-    loadTestFile(require.resolve('./_discover_histogram'));
-    loadTestFile(require.resolve('./_doc_accessibility'));
   });
 }

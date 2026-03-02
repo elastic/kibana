@@ -22,6 +22,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../apps/discover/esql_2'),
       require.resolve('../apps/discover/esql_3'),
       require.resolve('../apps/discover/esql_4'),
+      require.resolve('../apps/discover/esql_5'),
+      require.resolve('../apps/discover/esql_6'),
       require.resolve('../apps/discover/group1'),
       require.resolve('../apps/discover/group2_data_grid1'),
       require.resolve('../apps/discover/group2_data_grid2'),

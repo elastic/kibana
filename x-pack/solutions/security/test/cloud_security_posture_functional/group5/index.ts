@@ -19,8 +19,5 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pages/cis_integrations/kspm/cis_integration_k8s'));
     loadTestFile(require.resolve('./pages/cis_integrations/kspm/cis_integration_eks'));
     loadTestFile(require.resolve('./pages/benchmark'));
-    loadTestFile(require.resolve('./pages/alerts_flyout'));
-    loadTestFile(require.resolve('./pages/events_flyout'));
-    loadTestFile(require.resolve('./pages/entity_preview_flyout'));
   });
 }

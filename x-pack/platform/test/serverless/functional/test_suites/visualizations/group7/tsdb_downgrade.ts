@@ -82,25 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             { index: 'regular_index', create: true, removeTSDBFields: true },
           ],
         },
-        {
-          name: 'Dataview with an additional downsampled TSDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
-          ],
-        },
-        {
-          name: 'Dataview with additional regular index and a downsampled TSDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'regular_index', create: true, removeTSDBFields: true },
-            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
-          ],
-        },
-        {
-          name: 'Dataview with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, mode: 'tsdb' }],
-        },
       ];
 
       const { runTestsForEachScenario, toTimeForScenarios, fromTimeForScenarios } =

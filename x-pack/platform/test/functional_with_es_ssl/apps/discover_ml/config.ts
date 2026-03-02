@@ -20,9 +20,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
       ],
     },
-    testFiles: [resolve(__dirname, './discover'), resolve(__dirname, './ml')],
+    testFiles: [resolve(__dirname, './discover')],
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Discover, ML',
+      reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Discover ML - Discover',
     },
   };
 }

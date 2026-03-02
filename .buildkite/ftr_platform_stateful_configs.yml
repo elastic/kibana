@@ -68,11 +68,13 @@ enabled:
   - src/platform/test/functional/apps/dashboard_elements/links/config.ts
   - src/platform/test/functional/apps/dashboard_elements/markdown/config.ts
   - src/platform/test/functional/apps/dashboard/group1/config.ts
+  - src/platform/test/functional/apps/dashboard/group1/config.2.ts
   - src/platform/test/functional/apps/dashboard/group2/config.ts
   - src/platform/test/functional/apps/dashboard/group3/config.ts
   - src/platform/test/functional/apps/dashboard/group4/config.ts
   - src/platform/test/functional/apps/dashboard/group5/config.ts
   - src/platform/test/functional/apps/dashboard/group6/config.ts
+  - src/platform/test/functional/apps/dashboard/group6/config.2.ts
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
@@ -80,6 +82,8 @@ enabled:
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_3/config.ts
   - src/platform/test/functional/apps/discover/esql_4/config.ts
+  - src/platform/test/functional/apps/discover/esql_5/config.ts
+  - src/platform/test/functional/apps/discover/esql_6/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid2/config.ts
@@ -92,6 +96,7 @@ enabled:
   - src/platform/test/functional/apps/discover/group12/config.ts
   - src/platform/test/functional/apps/discover/group13/config.ts
   - src/platform/test/functional/apps/discover/group14/config.ts
+  - src/platform/test/functional/apps/discover/group14/config_2.ts
   - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group8/config.ts
   - src/platform/test/functional/apps/discover/group9/config.ts
@@ -108,6 +113,7 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs6/config.ts
   - src/platform/test/functional/apps/discover/tabs7/config.ts
   - src/platform/test/functional/apps/discover/tabs8/config.ts
+  - src/platform/test/functional/apps/discover/tabs10/config.ts
   - src/platform/test/functional/apps/discover/tabs9/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
@@ -136,6 +142,7 @@ enabled:
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
   - src/platform/test/functional/config.ccs.ts
+  - src/platform/test/functional/config.ccs_2.ts
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts
   - src/platform/test/functional/firefox/discover.config.ts
@@ -163,6 +170,7 @@ enabled:
   - src/platform/test/ui_capabilities/newsfeed_err/config.ts
   - x-pack/platform/test/accessibility/apps/group1/config.ts
   - x-pack/platform/test/accessibility/apps/group2/config.ts
+  - x-pack/platform/test/accessibility/apps/group2/config.2.ts
   - x-pack/platform/test/accessibility/apps/group3/config.ts
   - x-pack/platform/test/localization/config.ja_jp.ts
   - x-pack/platform/test/localization/config.fr_fr.ts
@@ -192,6 +200,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group12/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group13/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group1/config.ts
+  - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group1/config_2.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group2/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group3/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
@@ -235,9 +244,11 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ml.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.rules.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.rules_2.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
@@ -296,6 +307,7 @@ enabled:
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/maps/group7/config.ts
   - x-pack/platform/test/functional/apps/maps/group8/config.ts
+  - x-pack/platform/test/functional/apps/maps/group9/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts
@@ -304,12 +316,14 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
   - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
-  - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
+  - x-pack/platform/test/functional/apps/ml/stack_management_jobs/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/stack_management_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
@@ -360,6 +374,7 @@ enabled:
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/platform/test/saved_object_tagging/functional/config.ts
+  - x-pack/platform/test/saved_object_tagging/functional/config.2.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/platform/test/search_sessions_integration/config.discover.ts

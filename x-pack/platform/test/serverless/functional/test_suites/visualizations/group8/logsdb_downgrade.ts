@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const createDocs = getDocsGenerator(log, es, 'logsdb');
 
-  describe('lens logsdb downgrade', function () {
+  describe('lens logsdb downgrade - scenarios 1-2', function () {
     // see details: https://github.com/elastic/kibana/issues/195089
     this.tags(['failsOnMKI']);
     const logsdbIndex = 'kibana_sample_data_logslogsdb';
@@ -94,28 +94,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               create: true,
               mode: 'logsdb',
             },
-          ],
-        },
-        {
-          name: 'LogsDB stream with an additional regular index',
-          indexes: [{ index: initialIndex }, { index: 'regular_index', create: true }],
-        },
-        {
-          name: 'LogsDB stream with an additional LogsDB stream',
-          indexes: [
-            { index: initialIndex },
-            { index: 'logsdb_index_2', create: true, mode: 'logsdb' },
-          ],
-        },
-        {
-          name: 'LogsDB stream with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, mode: 'tsdb' }],
-        },
-        {
-          name: 'LogsDB stream with an additional TSDB stream downsampled',
-          indexes: [
-            { index: initialIndex },
-            { index: 'tsdb_index_downsampled', create: true, mode: 'tsdb', downsample: true },
           ],
         },
       ];

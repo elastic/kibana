@@ -37,6 +37,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./regression_creation_saved_search'));
     loadTestFile(require.resolve('./classification_creation_saved_search'));
-    loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
   });
 }

@@ -14,10 +14,5 @@ export default function ({ loadTestFile }: DatasetQualityFtrProviderContext) {
     loadTestFile(require.resolve('./dataset_quality_privileges'));
     loadTestFile(require.resolve('./dataset_quality_summary'));
     loadTestFile(require.resolve('./dataset_quality_table_filters'));
-    loadTestFile(require.resolve('./dataset_quality_table'));
-    loadTestFile(require.resolve('./degraded_field_flyout'));
-    loadTestFile(require.resolve('./failed_docs_flyout'));
-    loadTestFile(require.resolve('./home'));
-    loadTestFile(require.resolve('./dataset_quality_details_failure_store'));
   });
 }
