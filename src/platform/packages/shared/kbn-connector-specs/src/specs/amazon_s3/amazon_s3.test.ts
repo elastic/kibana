@@ -213,9 +213,7 @@ describe('AmazonS3', () => {
     await expect(AmazonS3.actions.listBuckets.handler(mockContext, {})).rejects.toThrow(
       'AWS S3 error (AccessDenied): Access denied'
     );
-    expect(mockContext.log.error).toHaveBeenCalledWith(
-      `Failed to list S3 buckets: ${error}`
-    );
+    expect(mockContext.log.error).toHaveBeenCalledWith(`Failed to list S3 buckets: ${error}`);
   });
 
   it('should list bucket objects without pagination', async () => {

@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
 import {
   S3Client,
   ListBucketsCommand,
@@ -17,6 +16,7 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
+import type { ConnectorSpec } from '../../connector_spec';
 
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
@@ -87,12 +87,9 @@ export const AmazonS3: ConnectorSpec = {
       .meta({
         sensitive: true,
         widget: 'password',
-        label: i18n.translate(
-          'core.kibanaConnectorSpecs.amazonS3.config.secretAccessKey.label',
-          {
-            defaultMessage: 'Secret Access Key',
-          }
-        ),
+        label: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.secretAccessKey.label', {
+          defaultMessage: 'Secret Access Key',
+        }),
         helpText: i18n.translate(
           'core.kibanaConnectorSpecs.amazonS3.config.secretAccessKey.helpText',
           {
@@ -145,8 +142,8 @@ export const AmazonS3: ConnectorSpec = {
           // Recursively list all buckets using pagination
           do {
             const command = new ListBucketsCommand({
-                ContinuationToken: continuationToken,
-                Prefix: typedInput.prefix,
+              ContinuationToken: continuationToken,
+              Prefix: typedInput.prefix,
             });
             const response = await s3Client.send(command);
             if (response.Buckets) {
@@ -240,7 +237,8 @@ export const AmazonS3: ConnectorSpec = {
       input: z.object({
         bucket: z.string().min(1).describe('The name of the S3 bucket'),
         key: z.string().min(1).describe('The key (path) of the file to download'),
-        maximumDownloadSizeBytes: z.number()
+        maximumDownloadSizeBytes: z
+          .number()
           .positive()
           .optional()
           .describe(
@@ -271,8 +269,10 @@ export const AmazonS3: ConnectorSpec = {
           const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
           if (metadata.ContentLength && metadata.ContentLength > maxSize) {
             const region = config.region || 'us-east-1';
-            const fileUrl = `https://${typedInput.bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(typedInput.key)}`;
-            
+            const fileUrl = `https://${
+              typedInput.bucket
+            }.s3.${region}.amazonaws.com/${encodeURIComponent(typedInput.key)}`;
+
             return {
               bucket: typedInput.bucket,
               key: typedInput.key,
