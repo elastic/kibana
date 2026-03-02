@@ -39,7 +39,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'winrar-7z-encryption',
     name: 'Encrypting Files with WinRar or 7z',
-    prompt: 'Alert when an archiving tool is used to create password-protected archives on Windows',
+    prompt:
+      'Alert when an archiving tool is used to create password-protected archives on Windows.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies the use of WinRAR or 7-Zip to create encrypted archives. Adversaries often compress and encrypt data in preparation for exfiltration.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -88,7 +89,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'lsass-malseclogon',
     name: 'Suspicious LSASS Access via MalSecLogon',
-    prompt: 'Detect suspicious access to Windows credential storage processes',
+    prompt:
+      'Detect suspicious access to Windows credential storage processes.\n\nAvailable data: logs-windows.sysmon_operational*',
     description:
       'Identifies suspicious access to LSASS handle via the MalSecLogon attack technique. This may indicate an attempt to dump credentials.',
     query: `process where host.os.type == "windows" and event.code == "10" and
@@ -117,7 +119,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'windows-defender-disabled-powershell',
     name: 'Windows Defender Disabled via PowerShell',
-    prompt: 'Alert when endpoint protection is disabled through a scripting engine',
+    prompt:
+      'Alert when endpoint protection is disabled through a scripting engine.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies use of PowerShell to disable Windows Defender. Adversaries may attempt to disable endpoint protection to evade detection.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -145,7 +148,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'remote-file-copy-powershell',
     name: 'Remote File Copy via PowerShell',
-    prompt: 'Detect when PowerShell is used to download files from the internet',
+    prompt:
+      'Detect when PowerShell is used to download files from the internet.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies the use of PowerShell to download files from remote locations. Adversaries may use PowerShell to download malicious payloads.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -175,7 +179,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'mimikatz-powershell',
     name: 'Mimikatz PowerShell Module Activity',
-    prompt: 'Alert on known credential dumping tools running via PowerShell',
+    prompt:
+      'Alert on known credential dumping tools running via PowerShell.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies use of Mimikatz PowerShell module. Mimikatz is a credential dumping tool used by adversaries to obtain credentials.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -203,7 +208,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'clearing-windows-event-logs',
     name: 'Clearing Windows Event Logs',
-    prompt: 'Detect when Windows audit logs are cleared or modified',
+    prompt:
+      'Detect when Windows audit logs are cleared or modified.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies attempts to clear Windows event logs. Adversaries may clear event logs to cover their tracks.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -234,7 +240,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'suspicious-windows-utility-execution',
     name: 'Suspicious Execution via Windows Utility',
-    prompt: 'Alert when built-in Windows utilities execute scripts or remote content',
+    prompt:
+      'Alert when built-in Windows utilities execute scripts or remote content.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies execution of a suspicious command via a Windows built-in utility. Adversaries may abuse trusted binaries to execute malicious code.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -265,7 +272,8 @@ export const sampleRules: ReferenceRule[] = [
   {
     id: 'network-connection-windows-binary',
     name: 'Suspicious Network Connection from Windows Binary',
-    prompt: 'Detect outbound network connections initiated by Windows system binaries',
+    prompt:
+      'Detect outbound network connections initiated by Windows system binaries.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies network connections from Windows system binaries. This may indicate abuse of trusted binaries for command and control.',
     query: `network where host.os.type == "windows" and event.type == "start" and

@@ -21,7 +21,7 @@ export const complexPairs: ReferenceRule[] = [
     id: 'nodejs-npm-pre-post-install-script',
     name: 'Node.js Pre or Post-Install Script Execution',
     prompt:
-      'This rule detects the execution of Node.js pre or post-install scripts. These scripts are executed by the Node.js package manager (npm) during the installation of packages. Adversaries may abuse this technique to execute arbitrary commands on the system and establish persistence. This activity was observed in the wild as part of the Shai-Hulud worm.',
+      'This rule detects the execution of Node.js pre or post-install scripts. These scripts are executed by the Node.js package manager (npm) during the installation of packages. Adversaries may abuse this technique to execute arbitrary commands on the system and establish persistence. This activity was observed in the wild as part of the Shai-Hulud worm.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Detects the execution of Node.js pre or post-install scripts executed by npm during package installation. Adversaries may abuse this technique to execute arbitrary commands on the system and establish persistence.',
     query: `sequence by host.id with maxspan=10s
@@ -61,7 +61,7 @@ export const complexPairs: ReferenceRule[] = [
     id: 'suspicious-genai-descendant-activity',
     name: 'Suspicious GenAI Coding Assistant Descendant Activity',
     prompt:
-      'Identifies suspicious network utilities, reconnaissance commands, or shell-based socket connections executed by descendant processes of GenAI coding assistants (Cursor, Claude, Copilot, etc.). This rule uses process ancestry tracking to detect activity from grandchildren and beyond, not just direct children. It specifically detects bash /dev/tcp and /dev/udp socket techniques commonly used as netcat alternatives. This may indicate prompt injection, compromised MCP servers, or malicious dependency exploitation.',
+      'Identifies suspicious network utilities, reconnaissance commands, or shell-based socket connections executed by descendant processes of GenAI coding assistants (Cursor, Claude, Copilot, etc.). This rule uses process ancestry tracking to detect activity from grandchildren and beyond, not just direct children. It specifically detects bash /dev/tcp and /dev/udp socket techniques commonly used as netcat alternatives. This may indicate prompt injection, compromised MCP servers, or malicious dependency exploitation.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies suspicious network utilities, reconnaissance commands, or shell-based socket connections executed by descendant processes of GenAI coding assistants. This may indicate prompt injection, compromised MCP servers, or malicious dependency exploitation.',
     query: '',
@@ -91,7 +91,7 @@ export const complexPairs: ReferenceRule[] = [
     id: 'github-runner-tracking-id-tampering',
     name: 'Tampering with RUNNER_TRACKING_ID in GitHub Actions Runners',
     prompt:
-      'This rule detects processes spawned by GitHub Actions runners where "RUNNER_TRACKING_ID" is overridden from its default "github_*" value. Such tampering has been associated with attempts to evade runner tracking/cleanup on self-hosted runners, including behavior observed in the Shai-Hulud 2.0 npm worm campaign.',
+      'This rule detects processes spawned by GitHub Actions runners where "RUNNER_TRACKING_ID" is overridden from its default "github_*" value. Such tampering has been associated with attempts to evade runner tracking/cleanup on self-hosted runners, including behavior observed in the Shai-Hulud 2.0 npm worm campaign.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Detects processes spawned by GitHub Actions runners where RUNNER_TRACKING_ID is overridden from its default "github_*" value. Such tampering has been associated with attempts to evade runner tracking/cleanup on self-hosted runners.',
     query: `process where host.os.type in ("linux", "macos") and event.type == "start" and event.action == "exec" and
@@ -130,7 +130,7 @@ not process.env_vars like~ "RUNNER_TRACKING_ID=github_*"`,
     id: 'suspicious-pod-container-creation-command',
     name: 'Pod or Container Creation with Suspicious Command-Line',
     prompt:
-      'This rule detects the creation of pods or containers that execute suspicious commands often associated with persistence or privilege escalation techniques. Attackers may use container orchestration tools like kubectl or container runtimes like docker to create pods or containers that run shell commands with arguments that indicate attempts to establish persistence (e.g., modifying startup scripts, creating backdoors).',
+      'This rule detects the creation of pods or containers that execute suspicious commands often associated with persistence or privilege escalation techniques. Attackers may use container orchestration tools like kubectl or container runtimes like docker to create pods or containers that run shell commands with arguments that indicate attempts to establish persistence (e.g., modifying startup scripts, creating backdoors).\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Detects the creation of pods or containers that execute suspicious commands often associated with persistence or privilege escalation techniques. Attackers may use container orchestration tools like kubectl or container runtimes like docker to create pods or containers that run shell commands with arguments that indicate attempts to establish persistence.',
     query: `process where host.os.type == "linux" and event.type == "start" and event.action in ("exec", "exec_event", "start", "ProcessRollup2", "executed", "process_started") and (
@@ -177,7 +177,7 @@ process.command_line like~ (
     id: 'kubeconfig-file-creation-or-modification',
     name: 'Kubeconfig File Creation or Modification',
     prompt:
-      'The kubeconfig file is a critical component in Kubernetes environments, containing configuration details for accessing and managing Kubernetes clusters. Attackers may attempt to get access to, create or modify kubeconfig files to gain unauthorized initial access to Kubernetes clusters or move laterally within the cluster.',
+      'The kubeconfig file is a critical component in Kubernetes environments, containing configuration details for accessing and managing Kubernetes clusters. Attackers may attempt to get access to, create or modify kubeconfig files to gain unauthorized initial access to Kubernetes clusters or move laterally within the cluster.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'The kubeconfig file is a critical component in Kubernetes environments, containing configuration details for accessing and managing Kubernetes clusters. Attackers may attempt to get access to, create or modify kubeconfig files to gain unauthorized initial access to Kubernetes clusters or move laterally within the cluster.',
     query: `file where host.os.type == "linux" and event.type != "deletion" and file.path like (

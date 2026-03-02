@@ -20,7 +20,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'uac-bypass-winfw-mmc-hijack',
     name: 'UAC Bypass via Windows Firewall Snap-In Hijack',
     prompt:
-      'Identifies attempts to bypass User Account Control (UAC) by hijacking the Microsoft Management Console (MMC) Windows Firewall snap-in. Attackers bypass UAC to stealthily execute code with elevated permissions.',
+      'Identifies attempts to bypass User Account Control (UAC) by hijacking the Microsoft Management Console (MMC) Windows Firewall snap-in. Attackers bypass UAC to stealthily execute code with elevated permissions.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies attempts to bypass User Account Control (UAC) by hijacking the Microsoft Management Console (MMC) Windows Firewall snap-in. Attackers bypass UAC to stealthily execute code with elevated permissions.',
     query: `process where host.os.type == "windows" and event.type == "start" and
@@ -58,7 +58,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'posh-obfuscation-high-number-proportion',
     name: 'Potential PowerShell Obfuscation via High Numeric Character Proportion',
     prompt:
-      'Detects long PowerShell script block content with unusually high numeric character density (high digit-to-length ratio), often produced by byte arrays, character-code reconstruction, or embedded encoded blobs. Attackers use numeric-heavy obfuscation to conceal payloads and rebuild them at runtime to avoid static inspection.',
+      'Detects long PowerShell script block content with unusually high numeric character density (high digit-to-length ratio), often produced by byte arrays, character-code reconstruction, or embedded encoded blobs. Attackers use numeric-heavy obfuscation to conceal payloads and rebuild them at runtime to avoid static inspection.\n\nAvailable data: logs-windows.powershell_operational*',
     description:
       'Detects long PowerShell script block content with unusually high numeric character density (high digit-to-length ratio), often produced by byte arrays, character-code reconstruction, or embedded encoded blobs. Attackers use numeric-heavy obfuscation to conceal payloads and rebuild them at runtime to avoid static inspection.',
     query: `from logs-windows.powershell_operational* metadata _id, _version, _index
@@ -95,7 +95,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'credential-access-web-config-file',
     name: 'Unusual Web Config File Access',
     prompt:
-      'Detects unusual access to the web.config file, which contains sensitive credential information such as database connection strings, machineKey validation/decryption keys, and SAML/OAuth token settings. Attackers can use the information extracted to forge malicious __VIEWSTATE requests for persistent RCE on the web server or pivot to the SQL server using exposed connection strings.',
+      'Detects unusual access to the web.config file, which contains sensitive credential information such as database connection strings, machineKey validation/decryption keys, and SAML/OAuth token settings. Attackers can use the information extracted to forge malicious __VIEWSTATE requests for persistent RCE on the web server or pivot to the SQL server using exposed connection strings.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Detects unusual access to the web.config file, which contains sensitive credential information such as database connection strings, machineKey validation/decryption keys, and SAML/OAuth token settings. Attackers can use the information extracted to forge malicious __VIEWSTATE requests for persistent RCE on the web server or pivot to the SQL server using exposed connection strings.',
     query: `event.category:file and host.os.type:windows and event.action:open and
@@ -127,7 +127,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'telnet-auth-bypass-cve-2026-24061',
     name: 'Potential Telnet Authentication Bypass (CVE-2026-24061)',
     prompt:
-      'Identifies potential exploitation of a Telnet remote authentication bypass vulnerability (CVE-2026-24061) in GNU Inetutils telnetd. The vulnerability allows unauthenticated access by supplying a crafted `-f <username>` value via the `USER` environment variable, resulting in a login process spawned with elevated privileges.',
+      'Identifies potential exploitation of a Telnet remote authentication bypass vulnerability (CVE-2026-24061) in GNU Inetutils telnetd. The vulnerability allows unauthenticated access by supplying a crafted `-f <username>` value via the `USER` environment variable, resulting in a login process spawned with elevated privileges.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies potential exploitation of a Telnet remote authentication bypass vulnerability (CVE-2026-24061) in GNU Inetutils telnetd. The vulnerability allows unauthenticated access by supplying a crafted `-f <username>` value via the `USER` environment variable, resulting in a login process spawned with elevated privileges.',
     query: `process where host.os.type == "linux" and event.type == "start" and
@@ -163,7 +163,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'potential-buffer-overflow-attack',
     name: 'Potential Buffer Overflow Attack Detected',
     prompt:
-      'Detects potential buffer overflow attacks by querying the "Segfault Detected" pre-built rule signal index, through a threshold rule, with a minimum number of 100 segfault alerts in a short timespan. A large amount of segfaults in a short time interval could indicate application exploitation attempts.',
+      'Detects potential buffer overflow attacks by querying the "Segfault Detected" pre-built rule signal index, through a threshold rule, with a minimum number of 100 segfault alerts in a short timespan. A large amount of segfaults in a short time interval could indicate application exploitation attempts.\n\nAvailable data: .alerts-security.*',
     description:
       'Detects potential buffer overflow attacks by querying the "Segfault Detected" pre-built rule signal index, through a threshold rule, with a minimum number of 100 segfault alerts in a short timespan. A large amount of segfaults in a short time interval could indicate application exploitation attempts.',
     query: `kibana.alert.rule.rule_id:"5c81fc9d-1eae-437f-ba07-268472967013" and host.os.type:linux and event.kind:signal`,
@@ -194,7 +194,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'macos-loginwindow-plist-modification',
     name: 'Potential Persistence via Login Hook',
     prompt:
-      'Identifies the creation or modification of the login window property list (plist). Adversaries may modify plist files to run a program during system boot or user login for persistence.',
+      'Identifies the creation or modification of the login window property list (plist). Adversaries may modify plist files to run a program during system boot or user login for persistence.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Identifies the creation or modification of the login window property list (plist). Adversaries may modify plist files to run a program during system boot or user login for persistence.',
     query: `event.category:file and host.os.type:macos and not event.type:"deletion" and
@@ -225,7 +225,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'aws-unusual-command-for-user-ml',
     name: 'Unusual AWS Command for a User',
     prompt:
-      'A machine learning job detected an AWS API command that, while not inherently suspicious or abnormal, is being made by a user context that does not normally use the command. This can be the result of compromised credentials or keys as someone uses a valid account to persist, move laterally, or exfiltrate data.',
+      'A machine learning job detected an AWS API command that, while not inherently suspicious or abnormal, is being made by a user context that does not normally use the command. This can be the result of compromised credentials or keys as someone uses a valid account to persist, move laterally, or exfiltrate data.\n\nAvailable data: logs-*',
     description:
       'A machine learning job detected an AWS API command that, while not inherently suspicious or abnormal, is being made by a user context that does not normally use the command. This can be the result of compromised credentials or keys as someone uses a valid account to persist, move laterally, or exfiltrate data.',
     query: '',
@@ -255,7 +255,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'aws-route53-resolver-query-log-deletion',
     name: 'AWS Route 53 Resolver Query Log Configuration Deleted',
     prompt:
-      'Identifies the deletion of an Amazon Route 53 Resolver Query Log Configuration. Resolver query logs provide critical visibility into DNS activity across VPCs, including lookups made by EC2 instances, containers, Lambda functions, and other AWS resources. Deleting a query log configuration immediately stops DNS query and response logging for the associated VPC. Adversaries may delete these configurations to evade detection, suppress forensic evidence, or degrade security monitoring capabilities.',
+      'Identifies the deletion of an Amazon Route 53 Resolver Query Log Configuration. Resolver query logs provide critical visibility into DNS activity across VPCs, including lookups made by EC2 instances, containers, Lambda functions, and other AWS resources. Deleting a query log configuration immediately stops DNS query and response logging for the associated VPC. Adversaries may delete these configurations to evade detection, suppress forensic evidence, or degrade security monitoring capabilities.\n\nAvailable data: logs-aws.cloudtrail*',
     description:
       'Identifies the deletion of an Amazon Route 53 Resolver Query Log Configuration. Resolver query logs provide critical visibility into DNS activity across VPCs, including lookups made by EC2 instances, containers, Lambda functions, and other AWS resources. Deleting a query log configuration immediately stops DNS query and response logging for the associated VPC. Adversaries may delete these configurations to evade detection, suppress forensic evidence, or degrade security monitoring capabilities.',
     query: `event.dataset: aws.cloudtrail 
@@ -287,7 +287,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'entra-id-service-principal-created',
     name: 'Entra ID Service Principal Created',
     prompt:
-      "Identifies when a new service principal is added in Microsoft Entra ID. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal. For security reasons, it's always recommended to use service principals with automated tools rather than allowing them to log in with a user identity.",
+      "Identifies when a new service principal is added in Microsoft Entra ID. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal. For security reasons, it's always recommended to use service principals with automated tools rather than allowing them to log in with a user identity.\n\nAvailable data: logs-azure.auditlogs*",
     description:
       'Identifies when a new service principal is added in Microsoft Entra ID. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal.',
     query: `event.dataset:azure.auditlogs
@@ -323,7 +323,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'gcp-logging-sink-deletion',
     name: 'GCP Logging Sink Deletion',
     prompt:
-      "Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink's export destination. An adversary may delete a Logging sink to evade detection.",
+      "Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink's export destination. An adversary may delete a Logging sink to evade detection.\n\nAvailable data: logs-gcp.audit*",
     description:
       "Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink's export destination. An adversary may delete a Logging sink to evade detection.",
     query: `event.dataset:gcp.audit and event.action:google.logging.v*.ConfigServiceV*.DeleteSink and event.outcome:success`,
@@ -349,7 +349,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'm365-security-compliance-potential-ransomware',
     name: 'M365 Security Compliance Potential Ransomware Activity',
     prompt:
-      'Identifies when Microsoft Cloud App Security flags potential ransomware activity in Microsoft 365. This rule detects events where the Security Compliance Center reports a "Ransomware activity" or "Potential ransomware activity" alert, which may indicate file encryption, mass file modifications, or uploads of ransomware-infected files to cloud services such as SharePoint or OneDrive.',
+      'Identifies when Microsoft Cloud App Security flags potential ransomware activity in Microsoft 365. This rule detects events where the Security Compliance Center reports a "Ransomware activity" or "Potential ransomware activity" alert, which may indicate file encryption, mass file modifications, or uploads of ransomware-infected files to cloud services such as SharePoint or OneDrive.\n\nAvailable data: logs-o365.audit*',
     description:
       'Identifies when Microsoft Cloud App Security flags potential ransomware activity in Microsoft 365. This rule detects events where the Security Compliance Center reports a "Ransomware activity" or "Potential ransomware activity" alert, which may indicate file encryption, mass file modifications, or uploads of ransomware-infected files to cloud services such as SharePoint or OneDrive.',
     query: `event.dataset:o365.audit and
@@ -380,7 +380,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'entra-id-device-reg-via-oauth-redirection',
     name: 'M365 Identity OAuth Flow by User Sign-in to Device Registration',
     prompt:
-      'Identifies attempts to register a new device in Microsoft Entra ID after OAuth authentication with authorization code grant. Adversaries may use OAuth phishing techniques to obtain an OAuth authorization code, which can then be exchanged for access and refresh tokens. This rule detects a sequence of events where a user principal authenticates via OAuth, followed by a device registration event, indicating potential misuse of the OAuth flow to establish persistence or access resources.',
+      'Identifies attempts to register a new device in Microsoft Entra ID after OAuth authentication with authorization code grant. Adversaries may use OAuth phishing techniques to obtain an OAuth authorization code, which can then be exchanged for access and refresh tokens. This rule detects a sequence of events where a user principal authenticates via OAuth, followed by a device registration event, indicating potential misuse of the OAuth flow to establish persistence or access resources.\n\nAvailable data: logs-o365.audit*',
     description:
       'Identifies attempts to register a new device in Microsoft Entra ID after OAuth authentication with authorization code grant. Adversaries may use OAuth phishing techniques to obtain an OAuth authorization code, which can then be exchanged for access and refresh tokens.',
     query: `sequence by related.user with maxspan=30m
@@ -418,7 +418,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'google-workspace-custom-gmail-route',
     name: 'Google Workspace Custom Gmail Route Created or Modified',
     prompt:
-      "Detects when a custom Gmail route is added or modified in Google Workspace. Adversaries can add a custom e-mail route for outbound mail to route these e-mails to their own inbox of choice for data gathering. This allows adversaries to capture sensitive information from e-mail and potential attachments, such as invoices or payment documents. By default, all email from current Google Workspace users with accounts are routed through a domain's mail server for inbound and outbound mail.",
+      "Detects when a custom Gmail route is added or modified in Google Workspace. Adversaries can add a custom e-mail route for outbound mail to route these e-mails to their own inbox of choice for data gathering. This allows adversaries to capture sensitive information from e-mail and potential attachments, such as invoices or payment documents. By default, all email from current Google Workspace users with accounts are routed through a domain's mail server for inbound and outbound mail.\n\nAvailable data: logs-google_workspace.admin*",
     description:
       'Detects when a custom Gmail route is added or modified in Google Workspace. Adversaries can add a custom e-mail route for outbound mail to route these e-mails to their own inbox of choice for data gathering.',
     query: `event.dataset:"google_workspace.admin" and event.action:("CREATE_GMAIL_SETTING" or "CHANGE_GMAIL_SETTING")
@@ -444,7 +444,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'mount-launched-inside-container',
     name: 'Mount Launched Inside a Container',
     prompt:
-      'This rule detects the use of the mount utility from inside a container. The mount command is used to make a device or file system accessible to the system, and then to connect its root directory to a specified mount point on the local file system. When launched inside a privileged container--a container deployed with all the capabilities of the host machine-- an attacker can access sensitive host level files which could be used for further privilege escalation and container escapes to the host machine. Any usage of mount inside a running privileged container should be further investigated.',
+      'This rule detects the use of the mount utility from inside a container. The mount command is used to make a device or file system accessible to the system, and then to connect its root directory to a specified mount point on the local file system. When launched inside a privileged container--a container deployed with all the capabilities of the host machine-- an attacker can access sensitive host level files which could be used for further privilege escalation and container escapes to the host machine. Any usage of mount inside a running privileged container should be further investigated.\n\nAvailable data: logs-endpoint.events.*',
     description:
       'Detects the use of the mount utility from inside a container. When launched inside a privileged container, an attacker can access sensitive host level files which could be used for further privilege escalation and container escapes to the host machine.',
     query: `process where host.os.type == "linux" and event.type == "start" and event.action == "exec" and
@@ -480,7 +480,7 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     id: 'vnc-to-the-internet',
     name: 'VNC (Virtual Network Computing) to the Internet',
     prompt:
-      'This rule detects network events that may indicate the use of VNC traffic to the Internet. VNC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or backdoor vector.',
+      'This rule detects network events that may indicate the use of VNC traffic to the Internet. VNC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or backdoor vector.\n\nAvailable data: logs-network_traffic.flow*',
     description:
       'Detects network events that may indicate the use of VNC traffic to the Internet. VNC should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or backdoor vector.',
     query: `(event.dataset: network_traffic.flow or (event.category: (network or network_traffic))) and
@@ -520,7 +520,7 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     id: 'elastic-defend-netsecurity-alerts-correlation',
     name: 'Elastic Defend and Network Security Alerts Correlation',
     prompt:
-      'This rule correlate any Elastic Defend alert with a set of suspicious events from Network security devices like Palo Alto Networks (PANW) and Fortinet Fortigate by host.ip and source.ip. This may indicate that this host is compromised and triggering multi-datasource alerts.',
+      'This rule correlate any Elastic Defend alert with a set of suspicious events from Network security devices like Palo Alto Networks (PANW) and Fortinet Fortigate by host.ip and source.ip. This may indicate that this host is compromised and triggering multi-datasource alerts.\n\nAvailable data: logs-*',
     description:
       'Correlates any Elastic Defend alert with a set of suspicious events from Network security devices like Palo Alto Networks (PANW) and Fortinet Fortigate by host.ip and source.ip. This may indicate that this host is compromised and triggering multi-datasource alerts.',
     query: `FROM logs-* metadata _id
@@ -561,7 +561,7 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     id: 'threat-intel-ip-address-indicator-match',
     name: 'Threat Intel IP Address Indicator Match',
     prompt:
-      'This rule is triggered when an IP address indicator from the Threat Intel Filebeat module or integrations has a match against a network event.',
+      'This rule is triggered when an IP address indicator from the Threat Intel Filebeat module or integrations has a match against a network event.\n\nAvailable data: logs-*',
     description:
       'This rule is triggered when an IP address indicator from the Threat Intel Filebeat module or integrations has a match against a network event.',
     query: `source.ip:* or destination.ip:*`,
@@ -586,7 +586,7 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     id: 'okta-multiple-sessions-single-user',
     name: 'Multiple Okta Sessions Detected for a Single User',
     prompt:
-      "Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user's session cookie and is using it to access the user's account from a different location.",
+      "Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user's session cookie and is using it to access the user's account from a different location.\n\nAvailable data: logs-okta.system*",
     description:
       "Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user's session cookie and is using it to access the user's account from a different location.",
     query: `event.dataset:okta.system
