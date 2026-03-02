@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../common/domain/definitions/common_fields';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
@@ -237,6 +238,8 @@ export class ResolutionClient {
       _source: true,
     });
 
+    this.warnIfTruncated(response, `getResolutionGroup for target '${targetId}'`);
+
     // 4. Separate target from aliases
     let target: Record<string, unknown> | undefined;
     const aliases: Array<Record<string, unknown>> = [];
@@ -265,6 +268,22 @@ export class ResolutionClient {
       aliases,
       group_size: 1 + aliases.length,
     };
+  }
+
+  /**
+   * Logs a warning if the search response was truncated by MAX_SEARCH_RESPONSE_SIZE.
+   */
+  private warnIfTruncated(response: SearchResponse, context: string): void {
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+    const returned = response.hits.hits.length;
+    if (total > returned) {
+      this.logger.warn(
+        `${context}: search returned ${returned} of ${total} results (truncated at MAX_SEARCH_RESPONSE_SIZE=${MAX_SEARCH_RESPONSE_SIZE})`
+      );
+    }
   }
 
   /**
@@ -310,6 +329,8 @@ export class ResolutionClient {
       },
       _source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
     });
+
+    this.warnIfTruncated(response, 'findEntitiesWithAliases');
 
     const result = new Map<string, string[]>();
     for (const hit of response.hits.hits) {
