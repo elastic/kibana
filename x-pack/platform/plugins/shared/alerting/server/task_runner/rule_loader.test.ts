@@ -255,7 +255,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -270,7 +270,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -285,7 +285,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
@@ -300,6 +300,16 @@ describe('rule_loader', () => {
         authorization: `ApiKey essu_uiam_api_key`,
       });
     });
+
+    test('when cpsEnabled is true, request includes URL with space path', () => {
+      const contextWithCpsDisabled = getTaskRunnerContext({
+        cpsEnabled: true,
+      }) as unknown as TaskRunnerContext;
+      const fakeRequest = getFakeKibanaRequest(contextWithCpsDisabled, spaceId, apiKey);
+      expect(mockBasePathService.set).toHaveBeenCalledWith(fakeRequest, '/s/rule-spaceId');
+      expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
+    });
   });
 });
 
@@ -311,10 +321,13 @@ function mockGetDecrypted(attributes: { apiKey?: string; enabled: boolean; consu
 }
 
 // return enough of TaskRunnerContext that rule_loader needs
-function getTaskRunnerContext() {
+function getTaskRunnerContext(overrides: { cpsEnabled?: boolean } = {}) {
   return {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
     basePathService: mockBasePathService,
+    logger: mockLogger,
+    cpsEnabled: false,
+    ...overrides,
   };
 }
