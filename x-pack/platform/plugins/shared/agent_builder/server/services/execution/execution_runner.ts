@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, EMPTY } from 'rxjs';
+import { merge, of, filter, tap, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -120,6 +120,7 @@ export const handleAgentExecution = async ({
   // Execute agent
   const agentEvents$ = executeAgent$({
     agentId,
+    executionId: execution.executionId,
     request,
     nextInput,
     capabilities,
@@ -162,6 +163,29 @@ export const handleAgentExecution = async ({
   return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
     merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
       handleCancellation(abortSignal),
+      tap((event) => {
+        try {
+          if (isRoundCompleteEvent(event)) {
+            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+            const currentRoundCount = isReplacingRound
+              ? conversation.rounds.length
+              : (conversation.rounds?.length ?? 0) + 1;
+            if (effectiveConversationId) {
+              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+            }
+            analyticsService?.reportRoundComplete({
+              conversationId: effectiveConversationId,
+              executionId: execution.executionId,
+              roundCount: currentRoundCount,
+              agentId,
+              round: event.data.round,
+              modelProvider,
+            });
+          }
+        } catch (error) {
+          logger.error(`Failed to report round complete telemetry: ${error}`);
+        }
+      }),
       convertErrors({
         agentId,
         logger,
@@ -169,6 +193,7 @@ export const handleAgentExecution = async ({
         trackingService,
         modelProvider,
         conversationId: effectiveConversationId,
+        executionId: execution.executionId,
       })
     )
   );

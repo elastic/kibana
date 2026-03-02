@@ -11,6 +11,7 @@ import {
   createBadRequestError,
   HookLifecycle,
   isToolNotFoundError,
+  ToolResultType,
 } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
@@ -23,6 +24,7 @@ import type {
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
+  RunAgentStackEntry,
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -90,7 +92,12 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     source = 'unknown',
   } = toolExecutionParams;
 
-  const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
+  const context = forkContextForToolRun({
+    parentContext: parentManager.context,
+    toolId: tool.id,
+    toolCallId,
+    source,
+  });
   const manager = parentManager.createChild(context);
   const { resultStore, promptManager } = manager.deps;
 
@@ -132,6 +139,16 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   }
 
+  const startTime = Date.now();
+  const toolHandlerContext = await createToolHandlerContext<TParams>({
+    toolExecutionParams: {
+      ...toolExecutionParams,
+      toolId: tool.id,
+      toolParams: toolParams as TParams,
+    },
+    manager,
+  });
+
   const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
@@ -153,15 +170,6 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
         );
       }
 
-      const toolHandlerContext = await createToolHandlerContext<TParams>({
-        toolExecutionParams: {
-          ...toolExecutionParams,
-          toolId: tool.id,
-          toolParams: toolParams as TParams,
-        },
-        manager,
-      });
-
       try {
         const toolHandler = await tool.getHandler();
         const result = await toolHandler(
@@ -177,6 +185,8 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
+  const duration = Date.now() - startTime;
+
   let runToolReturn: RunToolReturn;
   if (isToolHandlerStandardReturn(toolReturn)) {
     const resultsWithIds = toolReturn.results.map<ToolResult>(
@@ -187,6 +197,15 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
         } as ToolResult)
     );
     runToolReturn = { results: resultsWithIds };
+
+    reportToolCallTelemetry({
+      parentManager,
+      toolId: tool.id,
+      toolCallId,
+      source,
+      results: resultsWithIds,
+      duration,
+    });
   } else {
     runToolReturn = { prompt: toolReturn.prompt };
   }
@@ -199,6 +218,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     request: manager.deps.request,
     toolReturn: runToolReturn,
     abortSignal: manager.deps.abortSignal,
+    toolHandlerContext,
   };
   const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
   runToolReturn = afterToolHooksResult.toolReturn;
@@ -273,4 +293,66 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
+};
+
+const getAgentExecutionContext = (manager: RunnerManager): RunAgentStackEntry | undefined => {
+  return [...manager.context.stack].reverse().find((entry) => entry.type === 'agent');
+};
+
+const reportToolCallTelemetry = ({
+  parentManager,
+  toolId,
+  toolCallId,
+  source,
+  results,
+  duration,
+}: {
+  parentManager: RunnerManager;
+  toolId: string;
+  toolCallId: string;
+  source: string;
+  results: ToolResult[];
+  duration: number;
+}): void => {
+  const { analyticsService } = parentManager.deps;
+  if (!analyticsService) {
+    return;
+  }
+
+  try {
+    const agentContext = getAgentExecutionContext(parentManager);
+    const allErrors = results.length > 0 && results.every((r) => r.type === ToolResultType.error);
+
+    if (allErrors) {
+      const firstError = results[0];
+      const errorMessage =
+        firstError.type === ToolResultType.error
+          ? (firstError.data as { message: string }).message
+          : 'Unknown error';
+      analyticsService.reportToolCallError({
+        agentId: agentContext?.agentId,
+        conversationId: agentContext?.conversationId,
+        executionId: agentContext?.executionId,
+        toolId,
+        toolCallId,
+        source,
+        errorType: 'tool_error',
+        errorMessage,
+        duration,
+      });
+    } else {
+      analyticsService.reportToolCallSuccess({
+        agentId: agentContext?.agentId,
+        conversationId: agentContext?.conversationId,
+        executionId: agentContext?.executionId,
+        toolId,
+        toolCallId,
+        source,
+        resultTypes: results.map((r) => r.type),
+        duration,
+      });
+    }
+  } catch (e) {
+    parentManager.deps.logger.warn(`Failed to report tool call telemetry: ${e}`);
+  }
 };
