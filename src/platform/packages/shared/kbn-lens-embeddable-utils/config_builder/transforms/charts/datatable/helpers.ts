@@ -12,8 +12,9 @@ import type {
   GenericIndexPatternColumn,
   TextBasedLayerColumn,
 } from '@kbn/lens-common';
-import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
 import { ACCESSOR } from './constants';
+import { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 
 /**
  * Checks if the column is a metric column in a formBased layer
@@ -28,10 +29,6 @@ export function isMetricColumnNoESQL(
 
   // If the column is bucketed, it is a row column (not a metric)
   return !col.isTransposed && !layerColumn.isBucketed;
-  if (col.isTransposed || layerColumn.isBucketed) {
-    return false;
-  }
-  return true;
 }
 
 /**
@@ -58,26 +55,6 @@ export function getAccessorName(
     return `${ACCESSOR}_${type}`;
   }
   return `${ACCESSOR}_${type}_${index}`;
-}
-
-/**
- * Checks if the API color is of type color mapping
- */
-export function isColorMappingColor(color: unknown): color is ColorMappingType {
-  if (color == null) return false;
-  return (
-    typeof color === 'object' &&
-    'mode' in color &&
-    (color.mode === 'categorical' || color.mode === 'gradient')
-  );
-}
-
-/**
- * Checks if the API color is of type color by value
- */
-export function isColorByValueColor(color: unknown): color is ColorByValueType {
-  if (color == null) return false;
-  return typeof color === 'object' && 'type' in color && color.type === 'dynamic';
 }
 
 type InferredDatatype = 'number' | 'string';

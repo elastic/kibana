@@ -362,12 +362,10 @@ curl -s --max-time 600 -X POST http://localhost:5601/api/agent_builder/tools/_ex
   -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
-    "tool_id": "observability.run_investigation",
+    "tool_id": "observability.get_log_groups",
     "tool_params": { "start": "now-10m", "end": "now" }
   }'
 ```
-
-Note: the `run_investigation` tool makes multiple internal LLM calls and may take 60–120 seconds to complete. Use `--max-time 600` to avoid curl timeouts.
 
 ### Full Test Workflow
 
@@ -376,7 +374,7 @@ Note: the `run_investigation` tool makes multiple internal LLM calls and may tak
 2. Clean APM data:           (delete data streams — see above)
 3. Enable feature flag(s):   Edit demo.flagd.json
 4. Wait 30 minutes:          sleep 600
-5. Run investigation:        curl ... run_investigation with start=now-30m
+5. Run investigation:        curl ... get_log_groups with start=now-30m
 6. Review results
 7. Disable feature flag(s):  Reset defaultVariant to "off"
 8. Repeat from step 2 for next scenario
