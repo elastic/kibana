@@ -1927,7 +1927,15 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          ") => ",
+          ", columnsMeta: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined) => ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -1937,7 +1945,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-        "lineNumber": 35,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1959,7 +1967,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 46,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1982,7 +1990,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 47,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2005,7 +2013,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 48,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2022,7 +2030,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2045,11 +2053,35 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 50,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$6",
+            "type": "Object",
+            "tags": [],
+            "label": "columnsMeta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -5688,7 +5720,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 22,

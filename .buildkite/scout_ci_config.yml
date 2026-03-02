@@ -35,6 +35,7 @@ plugins:
     - spaces
     - streams
     - streams_app
+    - synthetics
     - transform
     - triggers_actions_ui
     - uptime
