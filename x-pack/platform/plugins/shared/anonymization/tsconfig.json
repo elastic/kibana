@@ -18,5 +18,6 @@
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/logging-mocks",
+    "@kbn/logging",
   ]
 }
