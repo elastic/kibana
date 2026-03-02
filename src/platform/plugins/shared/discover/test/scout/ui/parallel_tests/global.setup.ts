@@ -9,8 +9,8 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
-import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics';
-import { TRACES, simpleTrace } from '../fixtures/traces';
+import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
+import { TRACES, simpleTrace } from '../fixtures/traces_experience';
 
 globalSetupHook('Ingest metrics data to Elasticsearch', async ({ esClient, log }) => {
   log.debug('[setup] creating metrics test index (only if it does not exist)...');
