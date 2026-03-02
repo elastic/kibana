@@ -134,7 +134,7 @@ export function ServiceDashboards() {
   );
 
   const locator = useMemo(() => {
-    const baseLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
+    const baseLocator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
     if (!baseLocator) return;
 
     return {
