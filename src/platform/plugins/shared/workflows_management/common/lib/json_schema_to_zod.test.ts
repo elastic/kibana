@@ -8,7 +8,11 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { convertJsonSchemaToZod } from './json_schema_to_zod';
+import {
+  buildInputsZodValidator,
+  convertJsonSchemaToZod,
+  convertJsonSchemaToZodWithRefs,
+} from './json_schema_to_zod';
 
 describe('convertJsonSchemaToZod', () => {
   it('should convert a string schema to Zod', () => {
@@ -326,5 +330,106 @@ describe('convertJsonSchemaToZod', () => {
         expect(zodSchema).toBeDefined();
       }).not.toThrow();
     });
+  });
+});
+
+describe('convertJsonSchemaToZodWithRefs', () => {
+  it('should resolve $ref and convert referenced schema', () => {
+    const rootSchema = {
+      definitions: {
+        Email: { type: 'string' },
+      },
+      properties: {
+        email: { $ref: '#/definitions/Email' },
+      },
+    } as Parameters<typeof convertJsonSchemaToZodWithRefs>[1];
+    const propSchema: JSONSchema7 = { $ref: '#/definitions/Email' };
+    const zodSchema = convertJsonSchemaToZodWithRefs(propSchema, rootSchema);
+    expect(zodSchema.parse('a@b.co')).toBe('a@b.co');
+    expect(zodSchema.safeParse(123).success).toBe(false);
+  });
+
+  it('should recursively handle nested object with $ref in properties', () => {
+    const rootSchema = {
+      type: 'object',
+      definitions: {
+        Port: { type: 'number' },
+      },
+      properties: {
+        host: { type: 'string' },
+        port: { $ref: '#/definitions/Port' },
+      },
+    } as Parameters<typeof convertJsonSchemaToZodWithRefs>[1];
+    const objSchema: JSONSchema7 = {
+      type: 'object',
+      properties: {
+        host: { type: 'string' },
+        port: { $ref: '#/definitions/Port' },
+      },
+    };
+    const zodSchema = convertJsonSchemaToZodWithRefs(objSchema, rootSchema);
+    const result = zodSchema.parse({ host: 'localhost', port: 8080 }) as {
+      host: string;
+      port: number;
+    };
+    expect(result.host).toBe('localhost');
+    expect(result.port).toBe(8080);
+  });
+
+  it('should fall back to convertJsonSchemaToZod for non-object scalar types', () => {
+    const rootSchema = { properties: {} } as Parameters<typeof convertJsonSchemaToZodWithRefs>[1];
+    const stringSchema: JSONSchema7 = { type: 'string' };
+    const zodSchema = convertJsonSchemaToZodWithRefs(stringSchema, rootSchema);
+    expect(zodSchema.parse('hello')).toBe('hello');
+  });
+});
+
+describe('buildInputsZodValidator', () => {
+  it('should return empty object schema when schema has no properties', () => {
+    const validator = buildInputsZodValidator(null);
+    expect(validator.parse({})).toEqual({});
+    const validator2 = buildInputsZodValidator({});
+    expect(validator2.parse({})).toEqual({});
+  });
+
+  it('should validate required and optional inputs', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        age: { type: 'number' },
+      },
+      required: ['name'],
+    } as Parameters<typeof buildInputsZodValidator>[0];
+    const validator = buildInputsZodValidator(schema);
+    expect(validator.parse({ name: 'Alice' })).toEqual({ name: 'Alice' });
+    expect(validator.parse({ name: 'Bob', age: 30 })).toEqual({ name: 'Bob', age: 30 });
+    expect(validator.safeParse({ age: 30 }).success).toBe(false);
+  });
+
+  it('should apply defaults from schema', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', default: 'unknown' },
+        count: { type: 'number', default: 0 },
+      },
+    } as Parameters<typeof buildInputsZodValidator>[0];
+    const validator = buildInputsZodValidator(schema);
+    const result = validator.parse({}) as { name: string; count: number };
+    expect(result.name).toBe('unknown');
+    expect(result.count).toBe(0);
+  });
+
+  it('should reject invalid types', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        enabled: { type: 'boolean' },
+      },
+    } as Parameters<typeof buildInputsZodValidator>[0];
+    const validator = buildInputsZodValidator(schema);
+    expect(validator.safeParse({ enabled: 'yes' }).success).toBe(false);
+    expect(validator.safeParse({ enabled: true }).success).toBe(true);
   });
 });
