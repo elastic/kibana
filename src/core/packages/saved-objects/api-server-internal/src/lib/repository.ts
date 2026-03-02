@@ -54,6 +54,8 @@ import type {
   SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlResponse,
   ISavedObjectsRepository,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
@@ -348,6 +350,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<T, A>> {
     return performSearch({ options }, this.apiExecutionContext);
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.esql}
+   */
+  async esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse> {
+    throw new Error('esql method not yet implemented');
   }
 
   /**
