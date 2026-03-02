@@ -106,7 +106,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
           disabled={!canEditRules || !hasRulesToInstall || isRequestInProgress}
