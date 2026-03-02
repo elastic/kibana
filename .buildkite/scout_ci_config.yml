@@ -18,6 +18,8 @@ plugins:
     - spaces
     - streams_app
     - transform
+    - uptime
+    - ux
   disabled:
 
 packages:
