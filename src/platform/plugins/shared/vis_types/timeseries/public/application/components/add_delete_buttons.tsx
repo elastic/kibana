@@ -60,7 +60,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
           <EuiButtonIcon
             data-test-subj={`${testSubj}AddBtn`}
             aria-label={props.addTooltip}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={props.onAdd}
           />
         </EuiToolTip>
@@ -96,7 +96,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
       const tooltip = props.isPanelActive
         ? props.deactivatePanelTooltip
         : props.activatePanelTooltip;
-      const iconType = props.isPanelActive ? 'eye' : 'eyeClosed';
+      const iconType = props.isPanelActive ? 'eye' : 'eyeSlash';
 
       activatePanelBtn = (
         <EuiFlexItem grow={false}>

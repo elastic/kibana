@@ -110,7 +110,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationTopRight', {
       defaultMessage: 'Top right',
     }),
-    iconType: 'editorPositionTopRight',
+    iconType: 'alignTopRight',
   },
   {
     id: 'xy_location_alignment_top_left',
@@ -118,7 +118,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationTopLeft', {
       defaultMessage: 'Top left',
     }),
-    iconType: 'editorPositionTopLeft',
+    iconType: 'alignTopLeft',
   },
   {
     id: 'xy_location_alignment_bottom_right',
@@ -126,7 +126,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationBottomRight', {
       defaultMessage: 'Bottom right',
     }),
-    iconType: 'editorPositionBottomRight',
+    iconType: 'alignBottomRight',
   },
   {
     id: 'xy_location_alignment_bottom_left',
@@ -134,7 +134,7 @@ const locationAlignmentButtonsIcons: Array<{
     label: i18n.translate('xpack.lens.shared.legendLocationBottomLeft', {
       defaultMessage: 'Bottom left',
     }),
-    iconType: 'editorPositionBottomLeft',
+    iconType: 'alignBottomLeft',
   },
 ];
 

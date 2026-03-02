@@ -129,7 +129,7 @@ export const createGridColumns = (
                   handleFilterClick(field, rowValue, colIndex, rowIndex);
                   closeCellPopover?.();
                 }}
-                iconType="plusInCircle"
+                iconType="plusCircle"
               >
                 {filterForText}
               </Component>
@@ -169,7 +169,7 @@ export const createGridColumns = (
                   handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                   closeCellPopover?.();
                 }}
-                iconType="minusInCircle"
+                iconType="minusCircle"
               >
                 {filterOutText}
               </Component>
@@ -230,7 +230,7 @@ export const createGridColumns = (
           color: 'text',
           size: 'xs',
           onClick: () => onColumnHide({ columnId: originalColumnId || field }),
-          iconType: 'eyeClosed',
+          iconType: 'eyeSlash',
           label: i18n.translate('xpack.lens.table.hide.hideLabel', {
             defaultMessage: 'Hide',
           }),
@@ -245,7 +245,7 @@ export const createGridColumns = (
           color: 'text',
           size: 'xs',
           onClick: () => handleTransposedColumnClick(bucketValues, false),
-          iconType: 'plusInCircle',
+          iconType: 'plusCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
             defaultMessage: 'Filter for',
           }),
@@ -256,7 +256,7 @@ export const createGridColumns = (
           color: 'text',
           size: 'xs',
           onClick: () => handleTransposedColumnClick(bucketValues, true),
-          iconType: 'minusInCircle',
+          iconType: 'minusCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
             defaultMessage: 'Filter out',
           }),

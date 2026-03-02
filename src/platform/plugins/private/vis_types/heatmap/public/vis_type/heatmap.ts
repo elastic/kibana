@@ -25,7 +25,7 @@ export const getHeatmapVisTypeDefinition = ({
 }: HeatmapTypeProps): VisTypeDefinition<HeatmapVisParams> => ({
   name: 'heatmap',
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
-  icon: 'heatmap',
+  icon: 'chartHeatmap',
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
     defaultMessage: 'Display values as colors in a matrix.',
   }),

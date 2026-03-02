@@ -53,7 +53,7 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
   return (
     <EuiButtonIcon
       type="button"
-      iconType="list"
+      iconType="listBullet"
       color="text"
       onClick={onClick}
       css={[

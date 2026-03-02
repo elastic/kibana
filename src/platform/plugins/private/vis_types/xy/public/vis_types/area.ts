@@ -31,7 +31,7 @@ import { getVisTypeFromParams } from './get_vis_type_from_params';
 export const areaVisTypeDefinition = {
   name: 'area',
   title: i18n.translate('visTypeXy.area.areaTitle', { defaultMessage: 'Area' }),
-  icon: 'visArea',
+  icon: 'chartArea',
   description: i18n.translate('visTypeXy.area.areaDescription', {
     defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
