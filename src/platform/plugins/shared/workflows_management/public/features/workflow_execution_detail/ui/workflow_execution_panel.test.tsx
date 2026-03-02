@@ -15,15 +15,12 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import {
-  useWorkflowsCapabilities as mockedUseWorkflowsCapabilities,
-  mockWorkflowsManagementCapabilities,
-} from '../../../hooks/__mocks__/use_workflows_capabilities';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: mockedUseWorkflowsCapabilities,
+  useWorkflowsCapabilities: jest.fn(),
 }));
 
 // Mock child components

@@ -20,10 +20,7 @@ import {
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
-import {
-  useWorkflowsCapabilities as mockedUseWorkflowsCapabilities,
-  mockWorkflowsManagementCapabilities,
-} from '../../../hooks/__mocks__/use_workflows_capabilities';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
@@ -37,7 +34,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: mockedUseWorkflowsCapabilities,
+  useWorkflowsCapabilities: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
