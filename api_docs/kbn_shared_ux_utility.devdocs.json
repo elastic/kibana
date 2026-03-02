@@ -433,7 +433,7 @@
         "label": "Platform",
         "description": [],
         "signature": [
-          "\"other\" | \"windows\" | \"linux\" | \"mac\""
+          "\"other\" | \"mac\" | \"windows\" | \"linux\""
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
         "lineNumber": 10,
