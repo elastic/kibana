@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/std'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
