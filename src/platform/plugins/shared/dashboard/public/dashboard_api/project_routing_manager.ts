@@ -12,6 +12,7 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import { diffComparators } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatestWith, debounceTime, map } from 'rxjs';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { cpsService } from '../services/kibana_services';
 import type { DashboardState } from '../../common';
 
@@ -24,8 +25,11 @@ export function initializeProjectRoutingManager(
   if (!cpsService?.cpsManager) {
     return;
   }
-
   const cpsManager = cpsService.cpsManager;
+
+  cpsManager.registerAppAccess('dashboards', (location: string) =>
+    location.includes('#/list') ? ProjectRoutingAccess.DISABLED : ProjectRoutingAccess.EDITABLE
+  );
 
   const projectRouting$ = new BehaviorSubject<ProjectRouting>(initialState.project_routing);
 
