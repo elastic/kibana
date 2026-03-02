@@ -50,11 +50,9 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { useManageSlosUrl } from '../../../hooks/use_manage_slos_url';
-import {
-  APM_SLO_INDICATOR_TYPES,
-  type ApmIndicatorType,
-} from '../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { DEFAULT_INDICATOR_TYPE } from '../constants';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
@@ -107,8 +105,6 @@ const STATUS_PRIORITY: Record<string, number> = {
 };
 const SEARCH_DEBOUNCE_MS = 300;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
-
-const DEFAULT_INDICATOR_TYPE: ApmIndicatorType = 'sli.apm.transactionDuration';
 
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });

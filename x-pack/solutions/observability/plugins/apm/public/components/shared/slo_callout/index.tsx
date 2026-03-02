@@ -22,19 +22,15 @@ import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/pu
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import {
-  APM_SLO_INDICATOR_TYPES,
-  type ApmIndicatorType,
-} from '../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import illustrationSrc from './assets/illustration_slo_callout.svg';
+import { DEFAULT_INDICATOR_TYPE } from '../constants';
 
 interface Props {
   dismissCallout: () => void;
   serviceName: string;
   environment: string;
 }
-
-const DEFAULT_INDICATOR_TYPE: ApmIndicatorType = 'sli.apm.transactionDuration';
 
 export function SloCallout({ dismissCallout, serviceName, environment }: Props) {
   const {
