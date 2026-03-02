@@ -61,7 +61,7 @@ export const getFromPreloaded = async ({
         doc: {
           ...attributes,
           type: LENS_EMBEDDABLE_TYPE,
-          ...(initialInput.ref_id ? { ref_id: initialInput.ref_id } : {}),
+          savedObjectId: initialInput.ref_id,
         },
         sharingSavedObjectProps: {
           outcome: 'exactMatch',

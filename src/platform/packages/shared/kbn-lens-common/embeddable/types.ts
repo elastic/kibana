@@ -139,7 +139,7 @@ export interface LensOverrides {
  * Lens embeddable props broken down by type
  */
 interface LensByReferenceBase {
-  ref_id: string;
+  ref_id?: string;
   attributes?: never;
 }
 

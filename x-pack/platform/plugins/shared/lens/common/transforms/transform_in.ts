@@ -37,7 +37,7 @@ export const getTransformIn = (
           {
             name: LENS_SAVED_OBJECT_REF_NAME,
             type: DOC_TYPE,
-            id: ref_id,
+            id: ref_id!,
           },
           ...drilldownReferences,
         ],
