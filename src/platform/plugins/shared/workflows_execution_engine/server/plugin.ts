@@ -814,11 +814,8 @@ export class WorkflowsExecutionEnginePlugin
           { refresh: 'wait_for' }
         );
         if (request) {
-          await this.promoteNextQueuedIfNeeded(workflowExecutionId, spaceId, request).catch(
-            (err) =>
-              this.logger.error(
-                `Promotion failed after cancelling ${workflowExecutionId}: ${err}`
-              )
+          await this.promoteNextQueuedIfNeeded(workflowExecutionId, spaceId, request).catch((err) =>
+            this.logger.error(`Promotion failed after cancelling ${workflowExecutionId}: ${err}`)
           );
         }
         return;
@@ -1096,9 +1093,7 @@ export class WorkflowsExecutionEnginePlugin
               { refresh: 'wait_for' }
             )
             .catch((err) =>
-              this.logger.error(
-                `Failed to cancel stuck PENDING execution ${doc.id}: ${err}`
-              )
+              this.logger.error(`Failed to cancel stuck PENDING execution ${doc.id}: ${err}`)
             );
         } else {
           this.logger.info(
@@ -1110,9 +1105,7 @@ export class WorkflowsExecutionEnginePlugin
               { refresh: 'wait_for' }
             )
             .catch((err) =>
-              this.logger.error(
-                `Failed to revert PENDING execution ${doc.id} to QUEUED: ${err}`
-              )
+              this.logger.error(`Failed to revert PENDING execution ${doc.id} to QUEUED: ${err}`)
             );
         }
       }
@@ -1123,14 +1116,14 @@ export class WorkflowsExecutionEnginePlugin
     // is unavailable during a server restart. Queued executions will be promoted
     // when the next workflow execution completes (via promoteNextQueuedIfNeeded)
     // or when a user cancels a stuck execution.
-    const queuedCount = await this.workflowExecutionRepository.searchWorkflowExecutions(
+    const hasQueued = await this.workflowExecutionRepository.searchWorkflowExecutions(
       { bool: { filter: [{ term: { status: ExecutionStatus.QUEUED } }] } },
-      0
+      1
     );
-    if (queuedCount.length > 0 || stuckPending.length > 0) {
+    if (hasQueued.length > 0 || stuckPending.length > 0) {
       this.logger.info(
         `Queue recovery: cleaned up ${stuckPending.length} stuck PENDING executions. ` +
-          `${queuedCount.length} QUEUED executions remain and will drain on the next trigger.`
+          `QUEUED executions remain and will drain on the next trigger.`
       );
     }
   }
