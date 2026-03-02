@@ -107,6 +107,7 @@ export const getRightPanelParams = ({
       return {
         id: HostPanelKey,
         params: {
+          contextID: scopeId,
           entityIdentifiers,
           scopeId,
         },
@@ -115,6 +116,7 @@ export const getRightPanelParams = ({
       return {
         id: UserPanelKey,
         params: {
+          contextID: scopeId,
           entityIdentifiers,
           scopeId,
         },
@@ -167,6 +169,7 @@ export const getPreviewPanelParams = ({
       return {
         id: HostPreviewPanelKey,
         params: {
+          contextID: scopeId || 'highlighted-fields-host-preview',
           entityIdentifiers,
           scopeId,
           banner: HOST_PREVIEW_BANNER,
@@ -176,6 +179,7 @@ export const getPreviewPanelParams = ({
       return {
         id: UserPreviewPanelKey,
         params: {
+          contextID: scopeId || 'highlighted-fields-user-preview',
           entityIdentifiers,
           scopeId,
           banner: USER_PREVIEW_BANNER,

@@ -69,20 +69,27 @@ export const HostPanel = ({
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
+  // Guard: entityIdentifiers and contextID with fallbacks to prevent "Unable to load page" errors
+  const safeEntityIdentifiers = useMemo(() => entityIdentifiers ?? {}, [entityIdentifiers]);
+  const safeContextID = contextID ?? scopeId ?? 'host-panel';
+  const hasValidIdentifiers =
+    safeEntityIdentifiers && Object.keys(safeEntityIdentifiers).length > 0;
+
   // Extract hostName from entityIdentifiers
   // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
   const effectiveHostName = useMemo<string>(() => {
+    if (!hasValidIdentifiers) return '';
     const hostNameFromIdentifiers =
-      entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0];
-    return hostNameFromIdentifiers as string;
-  }, [entityIdentifiers]);
+      safeEntityIdentifiers['host.name'] || Object.values(safeEntityIdentifiers)[0];
+    return (hostNameFromIdentifiers as string) ?? '';
+  }, [safeEntityIdentifiers, hasValidIdentifiers]);
 
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
   const hostFilterQuery = useMemo(
     () =>
-      buildHostFilterFromEntityIdentifiers(entityIdentifiers) ??
+      buildHostFilterFromEntityIdentifiers(safeEntityIdentifiers) ??
       (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [entityIdentifiers, effectiveHostName]
+    [safeEntityIdentifiers, effectiveHostName]
   );
 
   const riskScoreState = useRiskScore({
@@ -108,12 +115,12 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(safeEntityIdentifiers);
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(safeEntityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    entityIdentifiers: safeEntityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -129,14 +136,14 @@ export const HostPanel = ({
   });
 
   const openDetailsPanel = useNavigateToHostDetails({
-    entityIdentifiers,
+    entityIdentifiers: safeEntityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
     isPreviewMode,
-    contextID,
+    contextID: safeContextID,
   });
 
   const openDefaultPanel = useCallback(
@@ -149,7 +156,7 @@ export const HostPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
-  const observedHost = useObservedHost(entityIdentifiers, scopeId);
+  const observedHost = useObservedHost(safeEntityIdentifiers, scopeId);
 
   return (
     <>
@@ -164,12 +171,12 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader entityIdentifiers={entityIdentifiers} lastSeen={observedHost.lastSeen} />
+      <HostPanelHeader entityIdentifiers={safeEntityIdentifiers} lastSeen={observedHost.lastSeen} />
       <HostPanelContent
-        entityIdentifiers={entityIdentifiers}
+        entityIdentifiers={safeEntityIdentifiers}
         observedHost={observedHost}
         riskScoreState={riskScoreState}
-        contextID={contextID}
+        contextID={safeContextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
         recalculatingScore={recalculatingScore}
@@ -178,13 +185,13 @@ export const HostPanel = ({
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter
-          entityIdentifiers={entityIdentifiers}
-          contextID={contextID}
+          entityIdentifiers={safeEntityIdentifiers}
+          contextID={safeContextID}
           scopeId={scopeId}
         />
       )}
       {!isPreviewMode && assetInventoryEnabled && (
-        <HostPanelFooter entityIdentifiers={entityIdentifiers} />
+        <HostPanelFooter entityIdentifiers={safeEntityIdentifiers} />
       )}
     </>
   );
