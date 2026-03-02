@@ -11,6 +11,7 @@ import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { IFileStore, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import { summarizeFilestoreToolReturn } from './utils';
 
 const schema = z.object({
   pattern: z.string().describe('Glob pattern to match files (e.g., "/**/*.json", "/logs/*.log")'),
@@ -27,6 +28,7 @@ export const globTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
+    summarizeToolReturn: summarizeFilestoreToolReturn,
     handler: async ({ pattern }, context) => {
       const entries = await filestore.glob(pattern);
       const summaries = entries.map(toSummary);
