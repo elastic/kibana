@@ -52,13 +52,13 @@ const getDefaultIconType = (type: CallOutType): string => {
     case 'primary':
       return 'info';
     case 'success':
-      return 'cheer';
+      return 'popper';
     case 'warning':
       return 'help';
     case 'danger':
       return 'warning';
     case 'accent':
-      return 'cheer';
+      return 'popper';
     default:
       return assertUnreachable(type);
   }
