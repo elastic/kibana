@@ -6,7 +6,6 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
@@ -29,17 +28,12 @@ export interface SloOverviewFlyoutStatusFilteredParams {
   statuses: string[];
 }
 
-export type TelemetryEventParams =
-  | SearchQuerySubmittedParams
-  | SloOverviewFlyoutSearchQueriedParams
-  | SloOverviewFlyoutStatusFilteredParams
-  | Record<string, never>;
-
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
   reportSloOverviewFlyoutViewed(): void;
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
+  reportSloInfoShown(): void;
 }
 
 export enum TelemetryEventTypes {
@@ -47,9 +41,24 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_VIEWED = 'slo_overview_flyout_viewed',
   SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'slo_overview_flyout_search_queried',
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
+  SLO_INFO_SHOWN = 'slo_info_shown',
 }
 
-export interface TelemetryEvent {
-  eventType: TelemetryEventTypes;
-  schema: RootSchema<TelemetryEventParams> | Record<string, never>;
-}
+export type TelemetryEvent =
+  | {
+      eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED;
+      schema: RootSchema<SearchQuerySubmittedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED;
+      schema: {};
+    }
+  | {
+      eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED;
+      schema: RootSchema<SloOverviewFlyoutSearchQueriedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED;
+      schema: RootSchema<SloOverviewFlyoutStatusFilteredParams>;
+    }
+  | { eventType: TelemetryEventTypes.SLO_INFO_SHOWN; schema: {} };

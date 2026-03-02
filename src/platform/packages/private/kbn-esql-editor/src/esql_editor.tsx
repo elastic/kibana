@@ -487,7 +487,7 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
