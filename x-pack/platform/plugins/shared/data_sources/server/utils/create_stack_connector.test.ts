@@ -430,6 +430,51 @@ describe('createStackConnector', () => {
       });
     });
 
+    it('should pass through config for non-MCP connector (e.g. Zendesk)', async () => {
+      const mockStackConnector = {
+        id: 'zendesk-connector-1',
+        name: '.zendesk',
+        actionTypeId: '.zendesk',
+      };
+
+      const zendeskConnectorConfig: StackConnectorConfig = {
+        type: '.zendesk',
+        config: { subdomain: 'test-company' },
+        importedTools: undefined,
+      };
+
+      const zendeskSpec = Object.values(connectorsSpecs).find(
+        (spec) => spec.metadata.id === '.zendesk'
+      );
+      if (!zendeskSpec) {
+        throw new Error('Zendesk spec not found');
+      }
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        zendeskConnectorConfig,
+        'agent@example.com/token:my-api-token'
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.zendesk',
+          config: { subdomain: 'test-company' },
+          secrets: expect.objectContaining({
+            authType: 'basic',
+            username: 'agent@example.com/token',
+            password: 'my-api-token',
+          }),
+        },
+      });
+    });
+
     it('should throw error when connector v2 spec is not found', async () => {
       const invalidConnectorConfig: StackConnectorConfig = {
         type: '.nonexistent',

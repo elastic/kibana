@@ -7,6 +7,7 @@
 * [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 * [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 * [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages via Slack.
+* [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles via the Zendesk API.
 
 **Threat intelligence**
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
