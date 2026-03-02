@@ -24,6 +24,7 @@ import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type {
   MinimumScheduleInterval,
   Rule,
@@ -73,6 +74,7 @@ export interface RuleFormPlugins {
   fieldsMetadata: FieldsMetadataPublicStart;
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
+  registerCpsPickerAccess?: (access: ProjectRoutingAccess) => void;
 }
 
 export interface RuleFormState<

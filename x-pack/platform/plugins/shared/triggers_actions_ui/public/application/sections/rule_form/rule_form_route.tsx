@@ -89,8 +89,8 @@ export const RuleFormRoute = () => {
     if (ruleTypeId || templateId) {
       setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('createRule')]);
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
+      registerCpsPickerAccess(ProjectRoutingAccess.READONLY);
     }
-    registerCpsPickerAccess(ProjectRoutingAccess.READONLY);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeId, templateId, id, getUrlForApp, useUnifiedRulesPage]);
 
@@ -119,6 +119,7 @@ export const RuleFormRoute = () => {
           actionTypeRegistry,
           contentManagement,
           uiActions,
+          registerCpsPickerAccess,
           ...startServices,
         }}
         initialValues={ruleTemplate}

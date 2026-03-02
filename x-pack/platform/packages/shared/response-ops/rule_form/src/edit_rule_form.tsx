@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import type { ResolvedRule, RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from './common/hooks';
 import { RulePage } from './rule_page';
@@ -40,6 +41,7 @@ export interface EditRuleFormProps {
   initialMetadata?: RuleTypeMetaData;
   initialEditStep?: RuleFormStepId;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+  registerCpsPickerAccess?: (access: ProjectRoutingAccess) => void;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
@@ -54,6 +56,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     onChangeMetaData,
     initialMetadata,
     initialEditStep,
+    registerCpsPickerAccess,
   } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, application, fieldsMetadata, ...deps } =
     plugins;
@@ -145,6 +148,19 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     }
     return initialMetadata;
   }, [ruleType, initialMetadata]);
+
+  useEffect(() => {
+    if (!fetchedFormData || !registerCpsPickerAccess) {
+      return;
+    }
+    // If CPS is enabled, enable the global CPS picker in readonly mode only if the rule has a
+    // UIAM API key, which means it's actually using CPS in its execution
+    registerCpsPickerAccess(
+      (fetchedFormData as ResolvedRule).uiamApiKey != null
+        ? ProjectRoutingAccess.READONLY
+        : ProjectRoutingAccess.DISABLED
+    );
+  }, [fetchedFormData, registerCpsPickerAccess]);
 
   if (isInitialLoading) {
     return (
