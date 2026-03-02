@@ -22,25 +22,18 @@ import {
   MITRE_ATTACK_TITLE_TEST_ID,
   WORKFLOW_STATUS_TITLE_TEST_ID,
 } from './test_ids';
+import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
+import { EventKind } from '../../shared/constants/event_kinds';
 
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
 
-const mockGetFieldsData: (field: string) => string = (field: string) => {
-  switch (field) {
-    case 'event.kind':
-      return 'signal';
-    default:
-      return '';
-  }
-};
-
-const renderAboutSection = (getFieldsData = mockGetFieldsData) => {
+const renderAboutSection = (searchHit = mockSearchHit) => {
   const contextValue = {
     ...mockContextValue,
-    getFieldsData,
+    searchHit,
   };
   return render(
     <TestProviders>
@@ -61,6 +54,7 @@ describe('<AboutSection />', () => {
 
   it('should render about component', async () => {
     const { getByTestId } = renderAboutSection();
+
     await act(async () => {
       expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toHaveTextContent('About');
       expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
@@ -71,6 +65,7 @@ describe('<AboutSection />', () => {
     mockUseExpandSection.mockReturnValue(false);
 
     const { getByTestId } = renderAboutSection();
+
     await act(async () => {
       expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
     });
@@ -78,73 +73,42 @@ describe('<AboutSection />', () => {
 
   it('should render the component expanded if value is true in local storage', async () => {
     const { getByTestId } = renderAboutSection();
+
     await act(async () => {
       expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeVisible();
     });
   });
 
-  it('should render about section for document', async () => {
-    const { getByTestId, getByText } = renderAboutSection();
+  it('should render alert related UI when event.kind is signal', async () => {
+    const customMockSearchHit = {
+      ...mockSearchHit,
+      fields: {
+        ...mockSearchHit.fields,
+        'event.kind': [EventKind.signal],
+      },
+    };
+
+    const { getByTestId, getByText, queryByTestId } = renderAboutSection(customMockSearchHit);
+
     await act(async () => {
-      expect(getByText('Document description')).toBeInTheDocument();
+      expect(getByText('Rule description')).toBeInTheDocument();
       expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
-    });
-  });
-
-  it('should render event kind description if event.kind is not event', async () => {
-    const _mockGetFieldsData = (field: string) => {
-      switch (field) {
-        case 'event.kind':
-          return 'alert';
-        case 'event.category':
-          return 'behavior';
-        default:
-          return '';
-      }
-    };
-
-    const { getByTestId, queryByTestId, queryByText } = renderAboutSection(_mockGetFieldsData);
-    await act(async () => {
-      expect(queryByText('Rule description')).not.toBeInTheDocument();
-      expect(queryByTestId(REASON_TITLE_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(MITRE_ATTACK_TITLE_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).not.toBeInTheDocument();
-
-      expect(getByTestId(EVENT_KIND_DESCRIPTION_TEST_ID)).toBeInTheDocument();
-
-      expect(
-        queryByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)
-      ).not.toBeInTheDocument();
-
-      expect(getByTestId(EVENT_RENDERER_TEST_ID)).toBeInTheDocument();
-    });
-  });
-
-  it('should render event category description if event.kind is event', async () => {
-    const _mockGetFieldsData = (field: string) => {
-      switch (field) {
-        case 'event.kind':
-          return 'event';
-        case 'event.category':
-          return 'behavior';
-        default:
-          return '';
-      }
-    };
-
-    const { getByTestId, queryByTestId, queryByText } = renderAboutSection(_mockGetFieldsData);
-    await act(async () => {
-      expect(queryByText('Rule description')).not.toBeInTheDocument();
-      expect(queryByTestId(REASON_TITLE_TEST_ID)).not.toBeInTheDocument();
-      expect(queryByTestId(MITRE_ATTACK_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).not.toBeInTheDocument();
 
       expect(queryByTestId(EVENT_KIND_DESCRIPTION_TEST_ID)).not.toBeInTheDocument();
+      expect(
+        queryByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)
+      ).not.toBeInTheDocument();
+      expect(queryByTestId(EVENT_RENDERER_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
 
-      expect(getByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)).toBeInTheDocument();
+  it('should render event related UI when event.kind is event', async () => {
+    const { getByText } = renderAboutSection();
 
-      expect(getByTestId(EVENT_RENDERER_TEST_ID)).toBeInTheDocument();
+    await act(async () => {
+      expect(getByText('Event renderer')).toBeInTheDocument();
     });
   });
 });
