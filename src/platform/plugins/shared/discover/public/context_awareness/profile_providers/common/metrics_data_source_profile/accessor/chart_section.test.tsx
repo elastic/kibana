@@ -45,6 +45,10 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
   },
 }));
 
+jest.mock('./use_metrics_info', () => ({
+  useMetricsInfo: jest.fn(),
+}));
+
 jest.mock('../../../../../application/main/state_management/redux', () => ({
   internalStateActions: {
     updateAppState: jest.fn(),
