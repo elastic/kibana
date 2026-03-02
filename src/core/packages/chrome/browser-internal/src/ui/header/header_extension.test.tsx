@@ -39,8 +39,7 @@ describe('HeaderExtension', () => {
   });
 
   describe('MountPoint extension', () => {
-    const createMountSpy = () =>
-      jest.fn((_el: HTMLDivElement) => jest.fn() as () => void);
+    const createMountSpy = () => jest.fn((_el: HTMLDivElement) => jest.fn() as () => void);
 
     it('calls the MountPoint function with a DOM element', () => {
       const mountSpy = createMountSpy();

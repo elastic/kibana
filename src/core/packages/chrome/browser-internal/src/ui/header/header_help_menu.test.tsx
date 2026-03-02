@@ -32,9 +32,7 @@ describe('HeaderHelpMenu', () => {
   };
 
   const renderAndOpenMenu = (overrides: Partial<ComponentProps<typeof HeaderHelpMenu>> = {}) => {
-    const component = mountWithIntl(
-      <HeaderHelpMenu {...defaultComponentProps} {...overrides} />
-    );
+    const component = mountWithIntl(<HeaderHelpMenu {...defaultComponentProps} {...overrides} />);
     component.find('EuiButtonEmpty').simulate('click');
     return component;
   };
