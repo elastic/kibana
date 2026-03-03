@@ -17,7 +17,6 @@ import {
   promptForConnector,
   promptForProject,
   isTTY,
-  parseConnectorsFromEnv,
   getAllAvailableConnectors,
   readLocalEsUrl,
   SCOUT_EVALS_ARGS,
@@ -122,10 +121,7 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
   throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
 };
 
-const hasEisConnectors = (): boolean => {
-  const connectors = parseConnectorsFromEnv();
-  return connectors.some((c) => c.id.startsWith('eis-'));
-};
+const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
 
 const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
   const suites = resolveEvalSuites(repoRoot, log);
@@ -219,6 +215,11 @@ export const startCmd: Command<void> = {
     }
 
     const skipServer = flagsReader.boolean('skip-server');
+    const requiresEisCcm =
+      isEisConnectorId(evaluationConnectorId) ||
+      (projects.length > 0
+        ? projects.some(isEisConnectorId)
+        : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
     log.info('');
     log.info(`Suite:     ${suiteId ?? configPath}`);
@@ -290,7 +291,7 @@ export const startCmd: Command<void> = {
       }
 
       // --- Step 3: EIS CCM ---
-      if (hasEisConnectors()) {
+      if (requiresEisCcm) {
         log.info('[3/4] Enabling EIS (Cloud Connected Mode)...');
         const ccmApiKey = fetchCcmApiKey(log);
 
@@ -317,7 +318,7 @@ export const startCmd: Command<void> = {
 
         log.info('[3/4] EIS CCM enabled');
       } else {
-        log.info('[3/4] Skipping EIS CCM (no eis- connectors detected)');
+        log.info('[3/4] Skipping EIS CCM (no eis- judge/models selected)');
       }
     }
 
