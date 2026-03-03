@@ -6,14 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
+import type { RuleFormServices } from '../form/contexts';
 
 export interface DynamicRuleFormFlyoutProps {
   /** Whether to use push flyout or overlay */
@@ -23,12 +21,7 @@ export interface DynamicRuleFormFlyoutProps {
   /** The query that drives form values - changes will sync to form state */
   query: string;
   /** Required services */
-  services: {
-    http: HttpStart;
-    data: DataPublicPluginStart;
-    dataViews: DataViewsPublicPluginStart;
-    notifications: NotificationsStart;
-  };
+  services: RuleFormServices;
 }
 
 /**
@@ -45,7 +38,7 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   query,
   services,
 }) => {
-  const { http, notifications, data, dataViews } = services;
+  const { http, notifications } = services;
 
   const { createRule, isLoading } = useCreateRule({
     http,
@@ -63,7 +56,7 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
         formId={RULE_FORM_ID}
         onSubmit={handleSubmit}
         query={query}
-        services={{ http, data, dataViews }}
+        services={services}
       />
     </RuleFormFlyout>
   );

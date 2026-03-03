@@ -86,18 +86,16 @@ export const Default: StoryObj<StoryArgs> = {
       );
     }
 
-    const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
-
     if (withIcon) {
       return (
-        <AiButton variant={variant} size={buttonSize} isDisabled={isDisabled} iconType={icon}>
+        <AiButton variant={variant} size={size} isDisabled={isDisabled} iconType={icon}>
           {label}
         </AiButton>
       );
     }
 
     return (
-      <AiButton variant={variant} size={buttonSize} isDisabled={isDisabled}>
+      <AiButton variant={variant} size={size} isDisabled={isDisabled}>
         {label}
       </AiButton>
     );

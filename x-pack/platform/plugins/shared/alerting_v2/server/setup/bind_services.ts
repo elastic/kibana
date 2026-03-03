@@ -5,39 +5,51 @@
  * 2.0.
  */
 
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { DirectorService } from '../lib/director/director';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
+import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { RulesClient } from '../lib/rules_client';
+import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import {
+  NotificationPolicySavedObjectServiceInternalToken,
+  NotificationPolicySavedObjectServiceScopedToken,
+} from '../lib/services/notification_policy_saved_object_service/tokens';
+import {
+  RulesSavedObjectServiceInternalToken,
+  RulesSavedObjectServiceScopedToken,
+} from '../lib/services/rules_saved_object_service/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
+import { RulesClient } from '../lib/rules_client';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
 } from '../lib/services/query_service/tokens';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
+import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
-import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
-import { RetryServiceToken } from '../lib/services/retry_service/tokens';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
-import { DirectorService } from '../lib/director/director';
-import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
-import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
-import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { UserService } from '../lib/services/user_service/user_service';
-import { TransitionStrategyToken } from '../lib/director/strategies/types';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
+import { UserService } from '../lib/services/user_service/user_service';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -73,7 +85,30 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   );
 
   bind(RulesSavedObjectService).toSelf().inRequestScope();
+  bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
+  bind(RulesSavedObjectServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
+      return new RulesSavedObjectService(() => internalClient, spaces);
+    })
+    .inSingletonScope();
+
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
+  bind(NotificationPolicySavedObjectServiceScopedToken).toService(
+    NotificationPolicySavedObjectService
+  );
+  bind(NotificationPolicySavedObjectServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const internalClient = savedObjects.createInternalRepository([
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+      ]);
+      return new NotificationPolicySavedObjectService(() => internalClient, spaces);
+    })
+    .inSingletonScope();
 
   bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
@@ -108,6 +143,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(DispatcherService).toSelf().inSingletonScope();
+  bind(DispatcherServiceInternalToken).toService(DispatcherService);
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();

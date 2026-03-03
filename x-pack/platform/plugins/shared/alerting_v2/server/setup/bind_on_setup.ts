@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ContainerModuleLoadOptions } from 'inversify';
 import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
-import { registerFeaturePrivileges } from '../lib/security/privileges';
-import { registerSavedObjects } from '../saved_objects';
-import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
+import type { ContainerModuleLoadOptions } from 'inversify';
 import type { PluginConfig } from '../config';
+import { registerFeaturePrivileges } from '../lib/security/privileges';
+import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
+import { registerSavedObjects } from '../saved_objects';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {

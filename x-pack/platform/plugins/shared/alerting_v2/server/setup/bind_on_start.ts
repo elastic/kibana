@@ -28,7 +28,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
     });
 
-    scheduleDispatcherTask({ taskManager }).catch((error) => {
+    scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
       logger.error(error as Error, {
         error: {
           code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',

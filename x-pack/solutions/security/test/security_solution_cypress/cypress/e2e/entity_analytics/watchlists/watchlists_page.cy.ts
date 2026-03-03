@@ -13,7 +13,7 @@ import { WATCHLISTS_MANAGEMENT_PAGE_TITLE } from '../../../screens/entity_analyt
 describe(
   'Entity Analytics Watchlists Management Page ',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

@@ -22,7 +22,7 @@ import snapshot from '../fixtures/schema_snapshot.json';
  *
  * See README.md for usage instructions.
  */
-apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -71,7 +71,14 @@ apiTest.describe('dashboard REST schema', { tag: tags.deploymentAgnostic }, () =
     expect(panelSchema).toBeDefined();
 
     const configSchema = panelSchema.properties.config;
-    expect(configSchema.anyOf).toHaveLength(2);
+    // API integration tests do not support jest expect
+    // so we had to roll our own toMatchSnapshot
+    // To update snapshot:
+    // 1) uncomment console.log
+    // 2) run test
+    // 3) replace snapshot file contents with copy of consoled output
+    // console.log(JSON.stringify(configSchema.anyOf, null, ' '));
+    expect(configSchema.anyOf).toHaveLength(8);
     expect(configSchema.anyOf).toStrictEqual(snapshot);
   });
 });

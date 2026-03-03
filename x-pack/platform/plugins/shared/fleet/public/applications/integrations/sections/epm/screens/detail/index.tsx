@@ -136,7 +136,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -423,6 +423,11 @@ export function Detail() {
         hash,
       });
 
+      const agentlessStatus = getAgentlessStatusForPackage(
+        packageInfo ?? undefined,
+        integration ?? undefined
+      );
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
@@ -431,8 +436,8 @@ export function Detail() {
         isFirstTimeAgentUser,
         pkgkey,
         prerelease,
-        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
-        isAgentlessDefault,
+        isAgentlessIntegration: agentlessStatus.isAgentless,
+        isAgentlessDefault: agentlessStatus.isDefaultDeploymentMode,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -467,9 +472,8 @@ export function Detail() {
       isFirstTimeAgentUser,
       pkgkey,
       prerelease,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       packageInfo,
-      isAgentlessDefault,
       returnAppId,
       returnPath,
       services.application,

@@ -491,6 +491,8 @@ export class AutomaticImportSavedObjectService {
           filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(
             integrationId
           )}`,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
         });
       return dataStreamsResponse.saved_objects.map((dataStream) => dataStream.attributes);
     } catch (error) {

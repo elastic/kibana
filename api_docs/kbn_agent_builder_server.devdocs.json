@@ -3698,7 +3698,7 @@
               "\nCache mode for the result\n- global: the result will be cached globally, for all spaces\n- space: the result will be cached per-space\n- none: the result shouldn't be cached (warning: this can lead to performance issues)"
             ],
             "signature": [
-              "\"none\" | \"space\" | \"global\""
+              "\"none\" | \"global\" | \"space\""
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
             "lineNumber": 57,

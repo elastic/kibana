@@ -6,7 +6,7 @@
  */
 
 import { WaitForResourcesStep } from './wait_for_resources_step';
-import { createRulePipelineState } from '../test_utils';
+import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 import { createMockResourceManager } from '../../services/resource_service/resource_manager.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
@@ -24,9 +24,9 @@ describe('WaitForResourcesStep', () => {
     resourceManager.waitUntilReady.mockResolvedValue(undefined);
 
     const state = createRulePipelineState();
-    const result = await step.execute(state);
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(results).toEqual([{ type: 'continue', state }]);
     expect(resourceManager.waitUntilReady).toHaveBeenCalledTimes(1);
   });
 
@@ -36,6 +36,8 @@ describe('WaitForResourcesStep', () => {
 
     const state = createRulePipelineState();
 
-    await expect(step.execute(state)).rejects.toThrow('Resource initialization failed');
+    await expect(
+      collectStreamResults(step.executeStream(createPipelineStream([state])))
+    ).rejects.toThrow('Resource initialization failed');
   });
 });

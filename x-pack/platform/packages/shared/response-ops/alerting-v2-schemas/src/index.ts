@@ -8,3 +8,5 @@
 export * from './rule_data_schema';
 export type { RuleResponse } from './rule_response';
 export { validateDuration, validateEsqlQuery } from './validation';
+export * from './notification_policy_data_schema';
+export type { NotificationPolicyResponse } from './notification_policy_response';

@@ -7,6 +7,9 @@
 
 import { CreateRecoveryEventsStep } from './create_recovery_events_step';
 import {
+  collectStreamResults,
+  createPipelineStream,
+  createRuleExecutionInput,
   createRulePipelineState,
   createAlertEvent,
   createRuleResponse,
@@ -49,17 +52,15 @@ describe('CreateRecoveryEventsStep', () => {
 
       const state = createRulePipelineState({
         rule: createRuleResponse({ kind: 'alert' }),
-        alertEvents: breachedEvents,
+        alertEventsBatch: breachedEvents,
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(result.type).toBe('continue');
-      expect(result).toHaveProperty('data.alertEvents');
-
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents } = result.data;
-
+      const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents).toHaveLength(3);
       expect(alertEvents[0].status).toBe('breached');
       expect(alertEvents[0].group_hash).toBe('hash-1');
@@ -78,15 +79,16 @@ describe('CreateRecoveryEventsStep', () => {
 
       const state = createRulePipelineState({
         rule: createRuleResponse({ kind: 'alert', recovery_policy: undefined }),
-        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
       expect(result.type).toBe('continue');
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents } = result.data;
+      const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents).toHaveLength(2);
       expect(alertEvents[1].status).toBe('recovered');
       expect(alertEvents[1].group_hash).toBe('hash-2');
@@ -95,17 +97,19 @@ describe('CreateRecoveryEventsStep', () => {
     it('skips recovery for non-alert rules', async () => {
       const { step, internalEsClient } = createStep();
 
-      const alertEvents = [createAlertEvent({ group_hash: 'hash-1' })];
+      const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
 
       const state = createRulePipelineState({
         rule: createRuleResponse({ kind: 'signal' }),
-        alertEvents,
+        alertEventsBatch,
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(internalEsClient.esql.query).not.toHaveBeenCalled();
-      expect(result).toEqual({ type: 'continue', data: { alertEvents } });
+      expect(result).toEqual({ type: 'continue', state });
     });
 
     it('returns original events when no active groups exist', async () => {
@@ -113,16 +117,18 @@ describe('CreateRecoveryEventsStep', () => {
 
       internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse([]));
 
-      const alertEvents = [createAlertEvent({ group_hash: 'hash-1' })];
+      const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
 
       const state = createRulePipelineState({
         rule: createRuleResponse({ kind: 'alert' }),
-        alertEvents,
+        alertEventsBatch,
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
-      expect(result).toEqual({ type: 'continue', data: { alertEvents } });
+      expect(result).toEqual({ type: 'continue', state });
     });
 
     it('does not create recovery events for groups that are still breaching', async () => {
@@ -132,21 +138,22 @@ describe('CreateRecoveryEventsStep', () => {
         createActiveGroupHashesResponse(['hash-1', 'hash-2'])
       );
 
-      const alertEvents = [
+      const alertEventsBatch = [
         createAlertEvent({ group_hash: 'hash-1' }),
         createAlertEvent({ group_hash: 'hash-2' }),
       ];
 
       const state = createRulePipelineState({
         rule: createRuleResponse({ kind: 'alert' }),
-        alertEvents,
+        alertEventsBatch,
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(result.type).toBe('continue');
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents: resultEvents } = result.data;
+      const resultEvents = result.state.alertEventsBatch!;
       expect(resultEvents).toHaveLength(2);
       expect(resultEvents.every((e: AlertEvent) => e.status === 'breached')).toBe(true);
     });
@@ -160,14 +167,15 @@ describe('CreateRecoveryEventsStep', () => {
 
       const state = createRulePipelineState({
         rule: createRuleResponse({ kind: 'alert' }),
-        alertEvents: [],
+        alertEventsBatch: [],
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(result.type).toBe('continue');
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents } = result.data;
+      const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents).toHaveLength(2);
       expect(alertEvents.every((e: AlertEvent) => e.status === 'recovered')).toBe(true);
     });
@@ -181,8 +189,6 @@ describe('CreateRecoveryEventsStep', () => {
         createActiveGroupHashesResponse(['hash-a', 'hash-b', 'hash-c'])
       );
 
-      // The recovery query returns rows whose group hashes match hash-a and hash-c
-      // (simulated via grouping fields; using empty grouping so hashes are content-based)
       scopedEsClient.esql.query.mockResolvedValue(
         createEsqlResponse(
           [{ name: 'host.name', type: 'keyword' }],
@@ -198,10 +204,12 @@ describe('CreateRecoveryEventsStep', () => {
             query: { base: 'FROM logs-* | WHERE recovered = true' },
           },
         }),
-        alertEvents: [],
+        alertEventsBatch: [],
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
         expect.objectContaining({ query: 'FROM logs-* | WHERE recovered = true' }),
@@ -225,10 +233,10 @@ describe('CreateRecoveryEventsStep', () => {
             query: { base: 'FROM logs-* | WHERE ok = true' },
           },
         }),
-        alertEvents: [],
+        alertEventsBatch: [],
       });
 
-      await step.execute(state);
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
       expect(internalEsClient.esql.query).toHaveBeenCalledTimes(1);
       expect(scopedEsClient.esql.query).toHaveBeenCalledTimes(1);
@@ -243,6 +251,8 @@ describe('CreateRecoveryEventsStep', () => {
 
       scopedEsClient.esql.query.mockResolvedValue(createEsqlResponse([], []));
 
+      const breachedEvents = [createAlertEvent({ group_hash: 'hash-3' })];
+
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
@@ -251,14 +261,15 @@ describe('CreateRecoveryEventsStep', () => {
             query: { base: 'FROM logs-* | WHERE recovered = true' },
           },
         }),
-        alertEvents: [createAlertEvent({ group_hash: 'hash-3' })],
+        alertEventsBatch: breachedEvents,
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(result.type).toBe('continue');
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents } = result.data;
+      const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents).toHaveLength(1);
       expect(alertEvents[0].group_hash).toBe('hash-3');
     });
@@ -270,8 +281,6 @@ describe('CreateRecoveryEventsStep', () => {
         createActiveGroupHashesResponse(['hash-a', 'hash-b'])
       );
 
-      // Recovery query returns a row that, when hashed with grouping fields, matches hash-a
-      // but not hash-b. Since grouping is ['host.name'], the hash depends on the field value.
       scopedEsClient.esql.query.mockResolvedValue(
         createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-recovered']])
       );
@@ -285,16 +294,15 @@ describe('CreateRecoveryEventsStep', () => {
             query: { base: 'FROM logs-* | WHERE error_count == 0 | STATS count(*) BY host.name' },
           },
         }),
-        alertEvents: [],
+        alertEventsBatch: [],
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(result.type).toBe('continue');
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents } = result.data;
-      // The recovery query result hashes won't match the synthetic 'hash-a'/'hash-b' strings,
-      // so no recovery events are produced (the hashes are sha256-based).
+      const alertEvents = result.state.alertEventsBatch!;
       expect(alertEvents.every((e: AlertEvent) => e.status === 'recovered')).toBe(true);
     });
 
@@ -315,16 +323,39 @@ describe('CreateRecoveryEventsStep', () => {
             query: { base: 'FROM logs-*' },
           },
         }),
-        alertEvents: breachedEvents,
+        alertEventsBatch: breachedEvents,
       });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
       expect(result.type).toBe('continue');
-      // @ts-expect-error: the above check ensures the alertEvents exists
-      const { alertEvents } = result.data;
-      expect(alertEvents[0].status).toBe('breached');
-      expect(alertEvents[0].group_hash).toBe('hash-new');
+      expect(result.state.alertEventsBatch![0].status).toBe('breached');
+      expect(result.state.alertEventsBatch![0].group_hash).toBe('hash-new');
+    });
+  });
+
+  describe('abort signal', () => {
+    it('passes executionContext signal to ES client', async () => {
+      const { step, internalEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse([]));
+
+      const abortController = new AbortController();
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+      const state = createRulePipelineState({
+        input,
+        rule: createRuleResponse({ kind: 'alert' }),
+        alertEventsBatch: [createAlertEvent()],
+      });
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(internalEsClient.esql.query).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ signal: abortController.signal })
+      );
     });
   });
 
@@ -332,21 +363,27 @@ describe('CreateRecoveryEventsStep', () => {
     it('halts with state_not_ready when rule is missing from state', async () => {
       const { step } = createStep();
 
-      const state = createRulePipelineState({ alertEvents: [createAlertEvent()] });
+      const state = createRulePipelineState({
+        alertEventsBatch: [createAlertEvent()],
+      });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
-      expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+      expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
     });
 
-    it('halts with state_not_ready when alertEvents is missing from state', async () => {
+    it('halts with state_not_ready when alertEventsBatch is missing from state', async () => {
       const { step } = createStep();
 
       const state = createRulePipelineState({ rule: createRuleResponse() });
 
-      const result = await step.execute(state);
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
-      expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+      expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
     });
   });
 });

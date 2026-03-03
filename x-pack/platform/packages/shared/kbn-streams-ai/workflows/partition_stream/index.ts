@@ -8,13 +8,18 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
+import {
+  getFeatureQueryFromToolArgs,
+  resolveFeatureTypeFilters,
+  toFeatureForLlmContext,
+} from './features_tool';
 
 const strictConditionSchema = DeepStrict(conditionSchema);
 
@@ -27,6 +32,7 @@ export async function partitionStream({
   end,
   maxSteps,
   signal,
+  getFeatures,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -36,6 +42,11 @@ export async function partitionStream({
   end: number;
   maxSteps?: number | undefined;
   signal: AbortSignal;
+  getFeatures(params?: {
+    type?: string[];
+    minConfidence?: number;
+    limit?: number;
+  }): Promise<Feature[]>;
 }): Promise<Array<{ name: string; condition: Condition }>> {
   const initialClusters = await clusterLogs({
     esClient,
@@ -67,6 +78,37 @@ export async function partitionStream({
     },
     maxSteps,
     toolCallbacks: {
+      get_stream_features: async (toolCall) => {
+        try {
+          const { featureTypes, minConfidence, limit } = getFeatureQueryFromToolArgs(
+            toolCall.function.arguments
+          );
+          const typeFilters = resolveFeatureTypeFilters(featureTypes);
+          const features = await getFeatures({
+            type: typeFilters,
+            minConfidence,
+            limit,
+          });
+          const llmFeatures = features.map(toFeatureForLlmContext);
+
+          return {
+            response: {
+              features: llmFeatures,
+              count: llmFeatures.length,
+            },
+          };
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.warn(`Failed to fetch stream features: ${errorMessage}`);
+          return {
+            response: {
+              features: [],
+              count: 0,
+              error: errorMessage,
+            },
+          };
+        }
+      },
       partition_logs: async (toolCall) => {
         const partitions = (toolCall.function.arguments.partitions ?? []) as Array<{
           name: string;

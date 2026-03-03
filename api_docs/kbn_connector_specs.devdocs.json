@@ -303,7 +303,27 @@
             "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ActionContext.client.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "AxiosRequestConfig",
+                  "<D>"
+                ],
+                "path": "node_modules/axios/index.d.ts",
+                "lineNumber": 523,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/connector-specs",
@@ -2121,7 +2141,7 @@
             "label": "backoffStrategy",
             "description": [],
             "signature": [
-              "\"fixed\" | \"linear\" | \"exponential\" | undefined"
+              "\"linear\" | \"fixed\" | \"exponential\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 150,

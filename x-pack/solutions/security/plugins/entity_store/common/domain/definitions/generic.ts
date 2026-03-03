@@ -21,7 +21,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     // entity.id doesn't need to be mapped because it's the main entity field
     // and it's already mapped by default
 
-    newestValue({ source: `entity.name` }),
+    newestValue({ source: 'entity.name' }),
     ...getEntityFieldsDescriptions(),
 
     newestValue({ source: 'cloud.account.id' }),
@@ -35,61 +35,6 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'cloud.provider' }),
     newestValue({ source: 'cloud.region' }),
     newestValue({ source: 'cloud.service.name' }),
-
-    newestValue({ source: 'host.architecture' }),
-    newestValue({ source: 'host.boot.id' }),
-    newestValue({
-      source: 'host.cpu.usage',
-      mapping: { type: 'scaled_float', scaling_factor: 1000 },
-    }),
-    newestValue({ source: 'host.disk.read.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.disk.write.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.domain' }),
-    newestValue({ source: 'host.hostname' }),
-    newestValue({ source: 'host.id' }),
-    newestValue({ source: 'host.mac' }),
-    newestValue({ source: 'host.name' }),
-    newestValue({ source: 'host.network.egress.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.network.egress.packets', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.network.ingress.bytes', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.network.ingress.packets', mapping: { type: 'long' } }),
-    newestValue({ source: 'host.pid_ns_ino' }),
-    newestValue({ source: 'host.type' }),
-    newestValue({ source: 'host.uptime', mapping: { type: 'long' } }),
-    newestValue({
-      source: 'host.ip',
-      mapping: {
-        type: 'ip',
-      },
-    }),
-
-    newestValue({ source: 'user.domain' }),
-    newestValue({ source: 'user.email' }),
-    newestValue({ source: 'user.roles' }),
-    newestValue({ source: 'user.hash' }),
-    newestValue({ source: 'user.id' }),
-    newestValue({
-      source: 'user.name',
-      mapping: {
-        type: 'keyword',
-        fields: {
-          text: {
-            type: 'match_only_text',
-          },
-        },
-      },
-    }),
-    newestValue({
-      source: 'user.full_name',
-      mapping: {
-        type: 'keyword',
-        fields: {
-          text: {
-            type: 'match_only_text',
-          },
-        },
-      },
-    }),
 
     newestValue({ source: 'orchestrator.api_version' }),
     newestValue({ source: 'orchestrator.cluster.id' }),

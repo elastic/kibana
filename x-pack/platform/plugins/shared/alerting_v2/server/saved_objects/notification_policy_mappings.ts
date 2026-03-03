@@ -15,7 +15,13 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
     name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     description: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
-    workflow_id: { type: 'keyword' },
+    destinations: {
+      type: 'object',
+      properties: {
+        type: { type: 'keyword' },
+        id: { type: 'keyword' },
+      },
+    },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },

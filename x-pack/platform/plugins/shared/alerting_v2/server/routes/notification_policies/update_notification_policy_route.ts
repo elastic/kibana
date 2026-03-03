@@ -10,7 +10,10 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod';
 import { inject, injectable } from 'inversify';
-import { omit } from 'lodash';
+import {
+  updateNotificationPolicyBodySchema,
+  type UpdateNotificationPolicyBody,
+} from '@kbn/alerting-v2-schemas';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
@@ -18,13 +21,6 @@ import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateNotificationPolicyParamsSchema = z.object({
   id: z.string(),
-});
-
-const updateNotificationPolicyBodySchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  workflow_id: z.string().optional(),
-  version: z.string(),
 });
 
 @injectable()
@@ -49,7 +45,7 @@ export class UpdateNotificationPolicyRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof updateNotificationPolicyParamsSchema>,
       unknown,
-      z.infer<typeof updateNotificationPolicyBodySchema>
+      UpdateNotificationPolicyBody
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
@@ -58,9 +54,10 @@ export class UpdateNotificationPolicyRoute {
 
   async handle() {
     try {
+      const { version, ...data } = this.request.body;
       const updated = await this.notificationPolicyClient.updateNotificationPolicy({
-        data: omit(this.request.body, ['version']),
-        options: { id: this.request.params.id, version: this.request.body.version },
+        data,
+        options: { id: this.request.params.id, version },
       });
 
       return this.response.ok({ body: updated });

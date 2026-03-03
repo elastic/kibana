@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-export interface CreateNotificationPolicyData {
-  name: string;
-  description: string;
-  workflow_id: string;
-}
-
-export interface UpdateNotificationPolicyData {
-  name?: string;
-  description?: string;
-  workflow_id?: string;
-}
+import type {
+  CreateNotificationPolicyData,
+  UpdateNotificationPolicyData,
+} from '@kbn/alerting-v2-schemas';
 
 export interface UpdateNotificationPolicyParams {
   data: UpdateNotificationPolicyData;
@@ -25,16 +18,4 @@ export interface UpdateNotificationPolicyParams {
 export interface CreateNotificationPolicyParams {
   data: CreateNotificationPolicyData;
   options?: { id?: string };
-}
-
-export interface NotificationPolicyResponse {
-  id: string;
-  version?: string;
-  name: string;
-  description: string;
-  workflow_id: string;
-  createdBy: string | null;
-  createdAt: string;
-  updatedBy: string | null;
-  updatedAt: string | null;
 }

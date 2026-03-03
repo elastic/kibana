@@ -972,7 +972,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined; http?: ",
+          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; idPrefix?: string | undefined; } | undefined; http?: ",
           "HttpSetup",
           " | undefined; }) => Promise<",
           {
@@ -998,7 +998,7 @@
             "label": "{\n  dataViewsService,\n  query,\n  options,\n  http,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -1020,7 +1020,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1033,7 +1033,7 @@
                 "label": "query",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1046,10 +1046,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined"
+                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; idPrefix?: string | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 63,
+                "lineNumber": 64,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1066,7 +1066,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 69,
+                "lineNumber": 71,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2698,7 +2698,7 @@
           "[]>; }; }) => Promise<string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-        "lineNumber": 101,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2711,7 +2711,7 @@
             "label": "deps",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-            "lineNumber": 106,
+            "lineNumber": 109,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -2735,7 +2735,7 @@
                   "[]>; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "lineNumber": 107,
+                "lineNumber": 110,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

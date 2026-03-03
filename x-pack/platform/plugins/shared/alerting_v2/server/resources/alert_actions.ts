@@ -40,7 +40,9 @@ const mappings: MappingsDefinition = {
     group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
     rule_id: { type: 'keyword' },
+    notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
+    reason: { type: 'text' },
   },
 };
 
@@ -50,9 +52,10 @@ export const alertActionSchema = z.object({
   last_series_event_timestamp: z.string(),
   expiry: z.string().optional(),
   actor: z.string().nullable(),
-  action_type: z.string(), // "fire" | "suppress"
+  action_type: z.string(),
   episode_id: z.string().optional(),
   rule_id: z.string(),
+  notification_group_id: z.string().optional(),
   source: z.string().optional(),
   tags: z.array(z.string()).optional(),
   reason: z.string().optional(),

@@ -128,6 +128,12 @@ export const optionsSchema = schema.object({
       meta: { description: 'Hide the panel titles in the dashboard.' },
     })
   ),
+  hide_panel_borders: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders,
+      meta: { description: 'Hide the panel borders in the dashboard.' },
+    })
+  ),
   use_margins: schema.maybe(
     schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.use_margins,

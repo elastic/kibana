@@ -53,60 +53,29 @@ describe(
       cy.getBySel('flyout-body-osquery').contains('platform');
     });
 
-    // response-actions-notification doesn't exist in expandable flyout
-    it.skip('should substitute parameters in live query and increase number of ran queries', () => {
-      let initialNotificationCount: number;
-      let updatedNotificationCount: number;
+    it('should be able to run take action query against all enrolled agents', () => {
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('response-actions-notification')
-        .should('not.have.text', '0')
-        .then((element) => {
-          initialNotificationCount = parseInt(element.text(), 10);
-        });
+      cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
+      cy.getBySel('osquery-action-item').click();
+      cy.getBySel('agentSelection').within(() => {
+        cy.getBySel('comboBoxClearButton').click();
+        cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
+        cy.contains('All agents');
+      });
+      inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+        parseSpecialCharSequences: false,
+      });
+      submitQuery();
+      cy.getBySel('flyout-body-osquery').within(() => {
+        // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
+        cy.get('[data-grid-row-index]', { timeout: 6000000 }).should('have.length.at.least', 2);
+      });
+    });
+
+    it('should substitute params in osquery ran from timelines alerts', () => {
+      cy.getBySel('send-alert-to-timeline-button').first().click();
+      cy.getBySel('docTableExpandToggleColumn').first().click();
       takeOsqueryActionWithParams();
-      cy.getBySel('osquery-empty-button').click();
-      cy.getBySel('response-actions-notification')
-        .should('not.have.text', '0')
-        .then((element) => {
-          updatedNotificationCount = parseInt(element.text(), 10);
-          expect(initialNotificationCount).to.be.equal(updatedNotificationCount - 1);
-        })
-        .then(() => {
-          cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
-          cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
-          cy.getBySel('responseActionsViewWrapper').within(() => {
-            cy.contains('tags');
-            cy.getBySel('osquery-results-comment').should('have.length', updatedNotificationCount);
-          });
-        });
-
-      it('should be able to run take action query against all enrolled agents', () => {
-        cy.getBySel('expand-event').first().click();
-        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
-        cy.getBySel('osquery-action-item').click();
-        cy.getBySel('agentSelection').within(() => {
-          cy.getBySel('comboBoxClearButton').click();
-          cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
-          cy.contains('All agents');
-        });
-        inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
-          parseSpecialCharSequences: false,
-        });
-        cy.wait(1000);
-        submitQuery();
-        cy.getBySel('flyout-body-osquery').within(() => {
-          // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
-          cy.get('[data-grid-row-index]', { timeout: 6000000 }).should('have.length.at.least', 2);
-        });
-      });
-
-      it('should substitute params in osquery ran from timelines alerts', () => {
-        cy.getBySel('send-alert-to-timeline-button').first().click();
-        cy.getBySel('query-events-table').within(() => {
-          cy.getBySel('expand-event').first().click();
-        });
-        takeOsqueryActionWithParams();
-      });
     });
   }
 );

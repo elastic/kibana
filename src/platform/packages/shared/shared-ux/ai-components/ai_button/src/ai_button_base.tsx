@@ -12,6 +12,7 @@ import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 
 import { useAiButtonGradientStyles, useSvgAiGradient } from './use_ai_gradient_styles';
+import { useAiButtonXsSizeCss } from './ai_button_xs_size_styles';
 import { SvgAiGradientDefs } from './svg_ai_gradient_defs';
 import { AiAssistantLogo } from './ai_assistant_logo';
 import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
@@ -19,12 +20,13 @@ import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
 const resolvedIconType = (iconType: AiButtonIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
-const getSyncedIconSize = (size?: string): 's' | 'm' => (size === 'm' ? 'm' : 's');
+const getSyncedIconSize = (size?: string): 's' | 'm' => (size === 'xs' ? 's' : 'm');
 
 export const AiButtonBase = (props: AiButtonProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
   const isFilled = variant === 'accent';
 
+  const euiButtonXsSizeCss = useAiButtonXsSizeCss();
   const { buttonCss, labelCss } = useAiButtonGradientStyles({
     isFilled,
     variant,
@@ -101,17 +103,20 @@ export const AiButtonBase = (props: AiButtonProps) => {
     children,
     css: userCss,
     iconType,
+    size,
     ...rest
   } = props as EuiButtonBranchProps;
+  const buttonSize: 's' | 'm' | undefined = size === 'xs' ? 's' : size;
 
   return (
     <>
       {svgGradientDefs}
       <EuiButton
         {...rest}
-        iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
+        size={buttonSize}
+        iconSize={rest.iconSize ?? getSyncedIconSize(size)}
         iconType={iconType ? resolvedIconType(iconType) : undefined}
-        css={[buttonCss, iconGradientCss, userCss]}
+        css={[buttonCss, iconGradientCss, size === 'xs' && euiButtonXsSizeCss, userCss]}
         fill={variant === 'accent'}
       >
         <span css={labelCss}>{children}</span>

@@ -552,6 +552,7 @@ export const fullConfigDatatableAttributes: LensAttributes = {
       headerRowHeight: 'auto',
       headerRowHeightLines: 'auto',
       rowHeightLines: 3,
+      showRowNumbers: true,
       paging: {
         size: 10,
         enabled: true,

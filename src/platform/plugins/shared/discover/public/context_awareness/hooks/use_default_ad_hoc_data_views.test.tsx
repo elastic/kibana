@@ -35,6 +35,7 @@ const rootProfileState = {
       const { id, ...restSpec } = dv.toSpec();
       return { id: id!, ...restSpec };
     }),
+  getDefaultEsqlQuery: () => undefined,
 };
 
 const renderDefaultAdHocDataViewsHook = async () => {

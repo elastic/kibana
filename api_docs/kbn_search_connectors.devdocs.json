@@ -7760,7 +7760,7 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; error: string | null; description: string | null; language: string | null; status: ",
+          "; error: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7768,7 +7768,7 @@
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
           },
-          "; configuration: ",
+          "; description: string | null; configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7776,7 +7776,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; pipeline?: ",
+          "; language: string | null; pipeline?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7958,7 +7958,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null; service_type: string | null; }; error: string | null; metadata: Record<string, unknown>; status: ",
+          " | null; service_type: string | null; }; error: string | null; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7966,7 +7966,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; created_at: string; job_type: ",
+          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

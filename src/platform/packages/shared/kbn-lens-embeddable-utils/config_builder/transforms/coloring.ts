@@ -60,6 +60,7 @@ export function fromColorByValueAPIToLensState(
         : API_TO_LEGACY_RANGE_NAMES.absolute,
       stops,
       colorStops: stops,
+      ...(color.continuity ? { continuity: color.continuity } : {}),
     },
   };
 }
@@ -73,10 +74,13 @@ export function fromColorByValueLensStateToAPI(
   const rangeType = color.params.rangeType
     ? LEGACY_TO_API_RANGE_NAMES[color.params.rangeType]
     : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
+  const continuity = color.params.continuity;
+
   if (rangeType === 'absolute') {
     return {
       type: 'dynamic',
       range: rangeType,
+      ...(continuity ? { continuity } : {}),
       steps:
         color.params.stops?.map((step, index) => {
           const isFirst = index === 0;
@@ -96,6 +100,7 @@ export function fromColorByValueLensStateToAPI(
     min: color.params.rangeMin ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_MIN,
     max: color.params.rangeMax ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_MAX,
     range: rangeType,
+    ...(continuity ? { continuity } : {}),
     steps:
       color.params.stops?.map((step, index) => {
         const isFirst = index === 0;

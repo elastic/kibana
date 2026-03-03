@@ -19,7 +19,30 @@ import {
   StorageService,
   type StorageServiceContract,
 } from '../../services/storage_service/storage_service';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
+import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
+import type {
+  RuleSavedObjectAttributes,
+  NotificationPolicySavedObjectAttributes,
+} from '../../../saved_objects';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
+import { DispatcherPipeline } from '../execution_pipeline';
+import {
+  FetchEpisodesStep,
+  FetchSuppressionsStep,
+  ApplySuppressionStep,
+  FetchRulesStep,
+  FetchPoliciesStep,
+  EvaluateMatchersStep,
+  BuildGroupsStep,
+  ApplyThrottlingStep,
+  DispatchStep,
+  StoreActionsStep,
+} from '../steps';
+import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
 
 /**
@@ -318,6 +341,8 @@ describe('DispatcherService integration tests', () => {
   let queryService: QueryServiceContract;
   let storageService: StorageServiceContract;
   let mockLoggerService: LoggerServiceContract;
+  let rulesSoService: RulesSavedObjectServiceContract;
+  let npSoService: NotificationPolicySavedObjectServiceContract;
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -325,7 +350,18 @@ describe('DispatcherService integration tests', () => {
     kibanaServer = servers.kibanaServer;
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
 
-    await new Promise((res) => setTimeout(res, 5000));
+    rulesSoService = new RulesSavedObjectService(
+      (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
+      undefined as unknown as SpacesPluginStart
+    );
+    npSoService = new NotificationPolicySavedObjectService(
+      (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
+      undefined as unknown as SpacesPluginStart
+    );
+
+    await waitForDataStreamsReady(esClient, [ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
+
+    await seedRulesAndPolicies(rulesSoService, npSoService);
   });
 
   afterAll(async () => {
@@ -344,7 +380,20 @@ describe('DispatcherService integration tests', () => {
 
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
-    dispatcherService = new DispatcherService(queryService, mockLoggerService, storageService);
+
+    const pipeline = new DispatcherPipeline(mockLoggerService, [
+      new FetchEpisodesStep(queryService),
+      new FetchSuppressionsStep(queryService),
+      new ApplySuppressionStep(),
+      new FetchRulesStep(rulesSoService),
+      new FetchPoliciesStep(npSoService),
+      new EvaluateMatchersStep(),
+      new BuildGroupsStep(),
+      new ApplyThrottlingStep(queryService, mockLoggerService),
+      new DispatchStep(mockLoggerService),
+      new StoreActionsStep(storageService),
+    ]);
+    dispatcherService = new DispatcherService(pipeline);
   });
 
   describe('when there are no alert events', () => {
@@ -378,7 +427,7 @@ describe('DispatcherService integration tests', () => {
 
       const actionsResponse = await esClient.search({
         index: ALERT_ACTIONS_DATA_STREAM,
-        query: { match_all: {} },
+        query: { term: { action_type: 'fire' } },
         size: 100,
       });
 
@@ -603,8 +652,46 @@ async function seedAlertEvents(esClient: ElasticsearchClient, events: AlertEvent
 
   await esClient.bulk({
     operations,
-    refresh: 'wait_for',
+    refresh: true,
   });
+}
+
+const NOTIFICATION_POLICY_ID = 'np-1';
+
+const TEST_RULE_IDS = ['rule-1', 'rule-001', 'rule-002', 'rule-003', 'rule-004', 'rule-005'];
+
+async function seedRulesAndPolicies(
+  rulesSoService: RulesSavedObjectServiceContract,
+  npSoService: NotificationPolicySavedObjectServiceContract
+): Promise<void> {
+  const policyAttrs: NotificationPolicySavedObjectAttributes = {
+    name: 'Test Policy',
+    description: 'Test notification policy',
+    destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
+    createdBy: null,
+    updatedBy: null,
+    createdAt: '2026-01-20T00:00:00.000Z',
+    updatedAt: '2026-01-20T00:00:00.000Z',
+  };
+  await npSoService.create({ attrs: policyAttrs, id: NOTIFICATION_POLICY_ID });
+
+  const ruleAttrs: RuleSavedObjectAttributes = {
+    kind: 'alert',
+    metadata: { name: 'Test Rule' },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    evaluation: { query: { base: 'FROM test' } },
+    notification_policies: [{ ref: NOTIFICATION_POLICY_ID }],
+    enabled: true,
+    createdBy: null,
+    updatedBy: null,
+    updatedAt: '2026-01-20T00:00:00.000Z',
+    createdAt: '2026-01-20T00:00:00.000Z',
+  };
+
+  await Promise.all(
+    TEST_RULE_IDS.map((ruleId) => rulesSoService.create({ attrs: ruleAttrs, id: ruleId }))
+  );
 }
 
 async function seedAlertActions(
@@ -618,6 +705,6 @@ async function seedAlertActions(
 
   await esClient.bulk({
     operations,
-    refresh: 'wait_for',
+    refresh: true,
   });
 }

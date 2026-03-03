@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { isEqual } from 'lodash';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
@@ -56,4 +57,16 @@ export function isFeature(feature: unknown): feature is Feature {
 
 export function isComputedFeature(feature: BaseFeature): boolean {
   return (COMPUTED_FEATURE_TYPES as unknown as string[]).includes(feature.type);
+}
+
+export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): boolean {
+  return (
+    feature.type === other.type &&
+    feature.subtype === other.subtype &&
+    isEqual(feature.properties, other.properties)
+  );
+}
+
+export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): boolean {
+  return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
 }

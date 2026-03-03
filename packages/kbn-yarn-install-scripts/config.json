@@ -91,6 +91,12 @@
       "reason": "Prints version scheme warning - not needed"
     },
     {
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
       "path": "puppeteer",
       "lifecycle": "postinstall",
       "required": false,
@@ -101,6 +107,12 @@
       "lifecycle": "install",
       "required": false,
       "reason": "Builds from source if required.  Prebuilds are sufficient."
+    },
+    {
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints warnings about potential dependency version mismatches. Not needed."
     },
     {
       "path": "@parcel/watcher",

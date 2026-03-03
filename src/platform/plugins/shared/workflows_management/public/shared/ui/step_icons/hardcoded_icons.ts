@@ -12,7 +12,7 @@ import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
 import console from './icons/console.svg';
 import email from './icons/email.svg';
-import globe from './icons/globe.svg';
+import flask from './icons/flask.svg';
 import elasticsearchLogoSvg from './icons/logo_elasticsearch.svg';
 import kibanaLogoSvg from './icons/logo_kibana.svg';
 import slackLogoSvg from './icons/logo_slack.svg';
@@ -31,7 +31,6 @@ export const HardcodedIcons: Record<string, string> = {
   elasticsearch: elasticsearchLogoSvg,
   kibana: kibanaLogoSvg,
   console,
-  http: globe,
   'data.set': tableOfContents,
   foreach: refresh,
   if: branch,
@@ -40,5 +39,6 @@ export const HardcodedIcons: Record<string, string> = {
   scheduled: clock,
   manual: user,
   trigger: bolt,
+  flask,
   default: plugs,
 };

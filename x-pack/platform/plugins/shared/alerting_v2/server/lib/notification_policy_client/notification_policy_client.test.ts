@@ -6,7 +6,6 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -76,7 +75,7 @@ describe('NotificationPolicyClient', () => {
         data: {
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
         },
         options: { id: 'policy-id-1' },
       });
@@ -86,7 +85,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -101,7 +100,7 @@ describe('NotificationPolicyClient', () => {
           version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -125,7 +124,7 @@ describe('NotificationPolicyClient', () => {
         data: {
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
         },
       });
 
@@ -134,7 +133,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
         }),
         expect.objectContaining({
           overwrite: false,
@@ -145,7 +144,23 @@ describe('NotificationPolicyClient', () => {
       expect(res.id).toEqual(expect.any(String));
       expect(res.name).toBe('my-policy');
       expect(res.description).toBe('my-policy description');
-      expect(res.workflow_id).toBe('my-workflow');
+      expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
+    });
+
+    it('throws 400 when data is invalid', async () => {
+      await expect(
+        client.createNotificationPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [],
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
     });
 
     it('throws 409 conflict when id already exists', async () => {
@@ -161,7 +176,7 @@ describe('NotificationPolicyClient', () => {
           data: {
             name: 'my-policy',
             description: 'my-policy description',
-            workflow_id: 'my-workflow',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
           },
           options: { id: 'policy-id-conflict' },
         })
@@ -176,7 +191,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
-        workflow_id: 'test-workflow',
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -220,12 +235,189 @@ describe('NotificationPolicyClient', () => {
     });
   });
 
+  describe('getNotificationPolicies', () => {
+    it('returns notification policies for multiple ids in input order', async () => {
+      const firstAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-two',
+        description: 'policy-two description',
+        destinations: [{ type: 'workflow', id: 'workflow-two' }],
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      const secondAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-one',
+        description: 'policy-one description',
+        destinations: [{ type: 'workflow', id: 'workflow-one' }],
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-id-get-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: firstAttributes,
+            references: [],
+            version: 'WzIsMV0=',
+          },
+          {
+            id: 'policy-id-get-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: secondAttributes,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+        ],
+      });
+
+      const res = await client.getNotificationPolicies({
+        ids: ['policy-id-get-2', 'policy-id-get-1'],
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'policy-id-get-2',
+          version: 'WzIsMV0=',
+          ...firstAttributes,
+        },
+        {
+          id: 'policy-id-get-1',
+          version: 'WzEsMV0=',
+          ...secondAttributes,
+        },
+      ]);
+    });
+
+    it('returns an empty array when ids are empty', async () => {
+      const res = await client.getNotificationPolicies({ ids: [] });
+
+      expect(res).toEqual([]);
+    });
+
+    it('ignores missing notification policies and returns found policies', async () => {
+      const firstAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-found-one',
+        description: 'policy-found-one description',
+        destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      const thirdAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-found-three',
+        description: 'policy-found-three description',
+        destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-id-get-found-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: firstAttributes,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'policy-id-get-missing',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [notification_policy/policy-id-get-missing] not found',
+            },
+          },
+          {
+            id: 'policy-id-get-found-3',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: thirdAttributes,
+            references: [],
+            version: 'WzMsMV0=',
+          },
+        ],
+      });
+
+      const res = await client.getNotificationPolicies({
+        ids: ['policy-id-get-found-1', 'policy-id-get-missing', 'policy-id-get-found-3'],
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'policy-id-get-found-1',
+          version: 'WzEsMV0=',
+          ...firstAttributes,
+        },
+        {
+          id: 'policy-id-get-found-3',
+          version: 'WzMsMV0=',
+          ...thirdAttributes,
+        },
+      ]);
+    });
+
+    it('ignores documents with non-404 errors and returns valid documents', async () => {
+      const validAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-valid',
+        description: 'policy-valid description',
+        destinations: [{ type: 'workflow', id: 'workflow-valid' }],
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-id-valid',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: validAttributes,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'policy-id-error-500',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 500,
+              error: 'Internal Server Error',
+              message: 'Something went wrong',
+            },
+          },
+        ],
+      });
+
+      const res = await client.getNotificationPolicies({
+        ids: ['policy-id-valid', 'policy-id-error-500'],
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'policy-id-valid',
+          version: 'WzEsMV0=',
+          ...validAttributes,
+        },
+      ]);
+    });
+  });
+
   describe('updateNotificationPolicy', () => {
     it('updates a notification policy successfully', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
-        workflow_id: 'original-workflow',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -247,7 +439,10 @@ describe('NotificationPolicyClient', () => {
       });
 
       const res = await client.updateNotificationPolicy({
-        data: { name: 'updated-policy', workflow_id: 'updated-workflow' },
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
         options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
       });
 
@@ -257,10 +452,9 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'updated-policy',
           description: 'original-policy description',
-          workflow_id: 'updated-workflow',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
-          // Preserves original createdBy and createdAt
           createdBy: 'creator_profile_uid',
           createdAt: '2024-12-01T00:00:00.000Z',
         }),
@@ -273,10 +467,24 @@ describe('NotificationPolicyClient', () => {
           version: 'WzIsMV0=',
           name: 'updated-policy',
           description: 'original-policy description',
-          workflow_id: 'updated-workflow',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       );
+    });
+
+    it('throws 400 when data is invalid', async () => {
+      await expect(
+        client.updateNotificationPolicy({
+          data: { destinations: [] },
+          options: { id: 'policy-id-update-invalid', version: 'WzEsMV0=' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws 404 when notification policy is not found', async () => {
@@ -289,7 +497,7 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.updateNotificationPolicy({
-          data: { workflow_id: 'some-workflow' },
+          data: { destinations: [{ type: 'workflow', id: 'some-workflow' }] },
           options: { id: 'policy-id-update-404', version: 'WzEsMV0=' },
         })
       ).rejects.toMatchObject({
@@ -301,7 +509,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
-        workflow_id: 'original-workflow',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -324,7 +532,7 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.updateNotificationPolicy({
-          data: { workflow_id: 'new-workflow' },
+          data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
           options: { id: 'policy-id-conflict', version: 'WzEsMV0=' },
         })
       ).rejects.toMatchObject({
@@ -338,7 +546,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
-        workflow_id: 'workflow-to-delete',
+        destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',

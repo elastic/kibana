@@ -1502,6 +1502,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/services/trial_companion_milestone_service.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/telemetry/events.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/trial_companion/nba_get_setup_panel.tsx"
               },

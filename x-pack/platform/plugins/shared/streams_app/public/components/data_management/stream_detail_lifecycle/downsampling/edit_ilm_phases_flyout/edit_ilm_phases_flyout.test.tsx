@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
@@ -86,6 +87,7 @@ const renderFlyout = (
           onClose={onClose}
           onChange={onChange}
           onSave={onSave}
+          isMetricsStream={true}
           onChangeDebounceMs={0}
           {...props}
         />
@@ -93,7 +95,11 @@ const renderFlyout = (
     );
   };
 
-  const { unmount } = render(<Wrapper />);
+  const { unmount } = render(
+    <I18nProvider>
+      <Wrapper />
+    </I18nProvider>
+  );
 
   return {
     onClose,
@@ -342,6 +348,28 @@ describe('EditIlmPhasesFlyout', () => {
       );
 
       expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingIntervalValue`)).toBeVisible();
+    });
+
+    it('shows a warning when downsampling is enabled but not supported', async () => {
+      renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+          },
+          isMetricsStream: false,
+        },
+        { initialSelectedPhase: 'warm' }
+      );
+
+      await tick();
+
+      const warmPanel = withinPhase('warm');
+      fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
+
+      expect(
+        await screen.findByTestId(`${DATA_TEST_SUBJ}DownsamplingNotSupportedCallout-warm`)
+      ).toBeInTheDocument();
     });
 
     it('defaults warm downsample interval to 2x the previous enabled downsample interval', async () => {

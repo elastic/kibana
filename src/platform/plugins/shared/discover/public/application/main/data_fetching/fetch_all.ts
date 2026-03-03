@@ -8,7 +8,8 @@
  */
 
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -43,7 +44,7 @@ export interface CommonFetchParams {
   internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
-  savedSearch: SavedSearch;
+  searchSource: ISearchSource;
   searchSessionId: string;
   services: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
@@ -72,7 +73,7 @@ export function fetchAll(
     scopedProfilesManager,
     scopedEbtManager,
     inspectorAdapters,
-    savedSearch,
+    searchSource: originalSearchSource,
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
@@ -80,7 +81,7 @@ export function fetchAll(
   const { data, expressions } = services;
 
   try {
-    const searchSource = savedSearch.searchSource.createChild();
+    const searchSource = originalSearchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
@@ -237,10 +238,10 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, services, savedSearch, getCurrentTab } = params;
+  const { dataSubjects, services, searchSource: originalSearchSource, getCurrentTab } = params;
 
   try {
-    const searchSource = savedSearch.searchSource.createChild();
+    const searchSource = originalSearchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);

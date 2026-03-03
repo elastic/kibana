@@ -12,7 +12,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { OverviewTab } from '../../../../flyout_v2/document/tabs/overview_tab';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useKibana } from '../../../lib/kibana';
+import { KibanaContextProvider, useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import {
   DocumentDetailsLeftPanelKey,
@@ -74,7 +74,10 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-  const { telemetry, overlays } = useKibana().services;
+
+  const { services } = useKibana();
+  const { telemetry, overlays } = services;
+
   const { openFlyout } = useExpandableFlyoutApi();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
 
@@ -102,12 +105,17 @@ const RowActionComponent = ({
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (newFlyoutSystemEnabled && esHitRecord) {
       const hit: DataTableRecord = buildDataTableRecord(esHitRecord);
-      overlays.openSystemFlyout(<OverviewTab hit={hit} />, {
-        // @ts-ignore EUI to fix this typing issue
-        resizable: true,
-        type: 'overlay',
-        ownFocus: false,
-      });
+      overlays.openSystemFlyout(
+        <KibanaContextProvider services={services}>
+          <OverviewTab hit={hit} />
+        </KibanaContextProvider>,
+        {
+          // @ts-ignore EUI to fix this typing issue
+          resizable: true,
+          type: 'overlay',
+          ownFocus: false,
+        }
+      );
     } else {
       openFlyout({
         right: {
@@ -131,6 +139,7 @@ const RowActionComponent = ({
     newFlyoutSystemEnabled,
     openFlyout,
     overlays,
+    services,
     tableId,
     telemetry,
   ]);

@@ -7,17 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { Suspense, useEffect, useRef, useState, useMemo } from 'react';
+import { from } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
-import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import { createTabAppStateObservable } from '../../../state_management/utils/create_tab_app_state_observable';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
+
+// Lazy load to avoid Jest module resolution issues with Monaco dependencies
+const DynamicRuleFormFlyout = React.lazy(() =>
+  import('@kbn/alerting-v2-rule-form').then((m) => ({ default: m.DynamicRuleFormFlyout }))
+);
 
 export function CreateESQLRuleFlyout({
   services,
@@ -33,7 +40,7 @@ export function CreateESQLRuleFlyout({
     (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
   );
 
-  const { http, data, dataViews, notifications, history } = services;
+  const { http, data, dataViews, notifications, history, core } = services;
 
   // Use a ref to avoid stale closure issues with onClose
   const onCloseRef = useRef(onClose);
@@ -43,7 +50,17 @@ export function CreateESQLRuleFlyout({
   const initialPathnameRef = useRef(history.location.pathname);
 
   // Create the app state observable once and memoize it
-  const appState$ = useMemo(() => stateContainer.createAppStateObservable(), [stateContainer]);
+  // Note: We create this manually instead of using ExtendedDiscoverStateContainer
+  // because we receive a DiscoverStateContainer from the top nav
+  const appState$ = useMemo(
+    () =>
+      createTabAppStateObservable({
+        tabId: stateContainer.getCurrentTab().id,
+        internalState$: from(stateContainer.internalState),
+        getState: stateContainer.internalState.getState,
+      }),
+    [stateContainer]
+  );
 
   useEffect(() => {
     const querySubscription = appState$.subscribe((appState) => {
@@ -53,7 +70,7 @@ export function CreateESQLRuleFlyout({
       }
     });
 
-    // Listen for route changes to close the flyout
+    // Listen for route changes within Discover to close the flyout
     // Only close on actual navigation (pathname change), not query param changes
     const unlisten = history.listen((location) => {
       if (location.pathname !== initialPathnameRef.current) {
@@ -61,23 +78,34 @@ export function CreateESQLRuleFlyout({
       }
     });
 
+    // Listen for app changes (navigating away from Discover entirely)
+    const appChangeSubscription = core.application.currentAppId$.subscribe((appId) => {
+      // If the app changes to something other than Discover, close the flyout
+      if (appId && appId !== 'discover') {
+        onCloseRef.current();
+      }
+    });
+
     return () => {
       querySubscription.unsubscribe();
       unlisten();
+      appChangeSubscription.unsubscribe();
     };
-  }, [appState$, history]);
+  }, [appState$, history, core.application.currentAppId$]);
 
   return (
-    <DynamicRuleFormFlyout
-      services={{
-        http,
-        data,
-        dataViews,
-        notifications,
-      }}
-      query={query}
-      onClose={onClose}
-    />
+    <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+      <DynamicRuleFormFlyout
+        services={{
+          http,
+          data,
+          dataViews,
+          notifications,
+        }}
+        query={query}
+        onClose={onClose}
+      />
+    </Suspense>
   );
 }
 

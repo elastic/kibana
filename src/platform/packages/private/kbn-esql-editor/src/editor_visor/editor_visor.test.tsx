@@ -14,8 +14,18 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: jest.fn().mockResolvedValue({
+    id: 'mock-adhoc-dataview',
+    title: 'test_index',
+    type: 'esql',
+  }),
+}));
 
 describe('Quick search visor', () => {
   const corePluginMock = coreMock.createStart();
@@ -32,9 +42,11 @@ describe('Quick search visor', () => {
 
   const kqlMock = kqlPluginMock.createStartContract();
   (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+  const dataMock = dataPluginMock.createStartContract();
 
   const services = {
     core: corePluginMock,
+    data: dataMock,
     kql: kqlMock,
   };
 

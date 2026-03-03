@@ -3071,13 +3071,13 @@
                 "signature": [
                   "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
                   " | ",
                   "SavedObjectsFindOptionsReference",
-                  "[] | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
                   "SavedObjectsPitParams",
                   " | undefined; searchAfter?: ",
                   "SortResults",
@@ -18878,7 +18878,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]) | undefined; } & Omit<Record<string, any>, \"index\" | \"query\" | \"filters\">"
+                  "[]) | undefined; } & Omit<Record<string, any>, \"index\" | \"filters\" | \"query\">"
                 ],
                 "path": "src/platform/plugins/shared/data/common/search/search_source/query_to_fields.ts",
                 "lineNumber": 47,
@@ -26868,7 +26868,26 @@
             "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStart.calculateAutoTimeExpression.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
+                "lineNumber": 19,
+                "columnNumber": 40,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -32747,7 +32766,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"pattern\" | \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -37733,7 +37752,7 @@
         "label": "SearchTypes",
         "description": [],
         "signature": [
-          "string | number | boolean | object | string[] | object[] | number[] | boolean[] | undefined"
+          "string | number | boolean | object | string[] | boolean[] | number[] | object[] | undefined"
         ],
         "path": "src/platform/plugins/shared/data/common/search/expressions/eql_raw_response.ts",
         "lineNumber": 21,

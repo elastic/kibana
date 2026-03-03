@@ -58,6 +58,7 @@ const mockFormServices: RuleFormServices = {
   http: mockServices.http,
   data: mockServices.data,
   dataViews: mockServices.dataViews,
+  notifications: mockServices.notifications,
 };
 
 // =============================================================================

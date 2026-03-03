@@ -6,16 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { validateDuration, validateEsqlQuery } from './validation';
+import { validateEsqlQuery } from './validation';
+import { durationSchema } from './common';
 
 /** Primitives */
-
-const durationSchema = z.string().superRefine((value, ctx) => {
-  const error = validateDuration(value);
-  if (error) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
-  }
-});
 
 const esqlQuerySchema = z
   .string()

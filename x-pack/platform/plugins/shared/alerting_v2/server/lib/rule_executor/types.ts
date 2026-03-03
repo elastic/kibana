@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
+import type { ExecutionContext } from '../execution_context';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -19,24 +19,26 @@ export interface RuleExecutionInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
-  readonly abortSignal: AbortSignal;
+  readonly executionContext: ExecutionContext;
 }
 
 export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
-  readonly esqlResponse?: EsqlQueryResponse;
-  readonly alertEvents?: AlertEvent[];
+  readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
+  readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
 
-export type RuleStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<RulePipelineState, 'input'>> }
-  | { type: 'halt'; reason: HaltReason };
+export type StepStreamResult =
+  | { type: 'continue'; state: RulePipelineState }
+  | { type: 'halt'; reason: HaltReason; state: RulePipelineState };
+
+export type PipelineStateStream = AsyncIterableIterator<StepStreamResult>;
 
 export interface RuleExecutionStep {
   readonly name: string;
-  execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput>;
+  executeStream(input: PipelineStateStream): PipelineStateStream;
 }

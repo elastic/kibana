@@ -16,7 +16,7 @@ import type {
   ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type { AgentsServiceStart } from '../../agents';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
 
 export const executeAgent$ = ({
   agentId,
@@ -24,7 +24,7 @@ export const executeAgent$ = ({
   capabilities,
   structuredOutput,
   outputSchema,
-  agentService,
+  runAgent,
   conversation,
   nextInput,
   abortSignal,
@@ -38,7 +38,7 @@ export const executeAgent$ = ({
   capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
-  agentService: AgentsServiceStart;
+  runAgent: RunAgentFn;
   conversation: Conversation;
   nextInput: ConverseInput;
   abortSignal?: AbortSignal;
@@ -48,34 +48,32 @@ export const executeAgent$ = ({
   action?: ConversationAction;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
-    agentService
-      .execute({
-        request,
-        agentId,
-        abortSignal,
-        defaultConnectorId,
-        agentParams: {
-          nextInput,
-          conversation,
-          capabilities,
-          browserApiTools,
-          configurationOverrides,
-          structuredOutput,
-          outputSchema,
-          action,
-        },
-        onEvent: (event) => {
-          observer.next(event);
-        },
-      })
-      .then(
-        () => {
-          observer.complete();
-        },
-        (error) => {
-          observer.error(error);
-        }
-      );
+    runAgent({
+      request,
+      agentId,
+      abortSignal,
+      defaultConnectorId,
+      agentParams: {
+        nextInput,
+        conversation,
+        capabilities,
+        browserApiTools,
+        configurationOverrides,
+        structuredOutput,
+        outputSchema,
+        action,
+      },
+      onEvent: (event) => {
+        observer.next(event);
+      },
+    }).then(
+      () => {
+        observer.complete();
+      },
+      (err) => {
+        observer.error(err);
+      }
+    );
 
     return () => {};
   }).pipe(shareReplay());

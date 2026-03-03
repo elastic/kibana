@@ -92,7 +92,13 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
+    contextSchema = getContextSchemaForPath(
+      workflowDefinition,
+      workflowGraph,
+      path,
+      yamlDocument,
+      absoluteOffset
+    );
   }
 
   if (parseResult?.fullKey) {

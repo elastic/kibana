@@ -7,7 +7,8 @@
 
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
-import { DispatcherService, type DispatcherServiceContract } from './dispatcher';
+import { type DispatcherServiceContract } from './dispatcher';
+import { DispatcherServiceInternalToken } from './tokens';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -19,7 +20,8 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 @injectable()
 export class DispatcherTaskRunner {
   constructor(
-    @inject(DispatcherService) private readonly dispatcherService: DispatcherServiceContract
+    @inject(DispatcherServiceInternalToken)
+    private readonly dispatcherService: DispatcherServiceContract
   ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {

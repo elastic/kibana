@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import Boom from '@hapi/boom';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { inject, injectable } from 'inversify';
+import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import { inject, injectable } from 'inversify';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
@@ -35,13 +35,16 @@ import {
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
 } from './utils';
+import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
+
+const withApm = withApmDecorator('RulesClient');
 
 @injectable()
 export class RulesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
-    @inject(RulesSavedObjectService)
+    @inject(RulesSavedObjectServiceScopedToken)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract
@@ -54,6 +57,7 @@ export class RulesClient {
     return { spaceId };
   }
 
+  @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
@@ -107,6 +111,7 @@ export class RulesClient {
     return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes);
   }
 
+  @withApm
   public async updateRule({
     id,
     data,
@@ -175,6 +180,7 @@ export class RulesClient {
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
 
+  @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
@@ -187,6 +193,7 @@ export class RulesClient {
     }
   }
 
+  @withApm
   public async getRules(ids: string[]): Promise<RuleResponse[]> {
     const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
@@ -199,6 +206,7 @@ export class RulesClient {
     });
   }
 
+  @withApm
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
@@ -217,6 +225,7 @@ export class RulesClient {
     await this.rulesSavedObjectService.delete({ id });
   }
 
+  @withApm
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;

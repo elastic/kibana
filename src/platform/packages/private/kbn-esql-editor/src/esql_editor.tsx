@@ -76,6 +76,7 @@ import {
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
+  getToggleCommentLines,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
   parseErrors,
@@ -412,23 +413,26 @@ const ESQLEditorInternal = function ESQLEditor({
     const currentSelection = editorRef?.current?.getSelection();
     const startLineNumber = currentSelection?.startLineNumber;
     const endLineNumber = currentSelection?.endLineNumber;
-    const edits = [];
     if (startLineNumber && endLineNumber) {
+      const lines: string[] = [];
       for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; lineNumber++) {
-        const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
-        const hasComment = lineContent?.startsWith('//');
-        const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
+        lines.push(editorModel.current?.getLineContent(lineNumber) ?? '');
+      }
 
-        edits.push({
+      const toggledLines = getToggleCommentLines(lines);
+
+      const edits = toggledLines.map((text, i) => {
+        const lineNumber = startLineNumber + i;
+        return {
           range: {
             startLineNumber: lineNumber,
             startColumn: 0,
             endLineNumber: lineNumber,
-            endColumn: (lineContent?.length ?? 0) + 1,
+            endColumn: (lines[i]?.length ?? 0) + 1,
           },
-          text: commentedLine,
-        });
-      }
+          text,
+        };
+      });
       // executeEdits allows to keep edit in history
       editorRef.current?.executeEdits('comment', edits);
     }
