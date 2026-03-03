@@ -420,7 +420,7 @@
     "timestampField",
     "type"
   ],
-  "entity-store-global-state-v1": [
+  "entity-store-global-state": [
     "entityMaintainers",
     "entityMaintainers.id",
     "entityMaintainers.interval",
@@ -431,7 +431,16 @@
     "historySnapshot.lastError.message",
     "historySnapshot.lastError.timestamp",
     "historySnapshot.lastExecutionTimestamp",
-    "historySnapshot.status"
+    "historySnapshot.status",
+    "logsExtraction",
+    "logsExtraction.filter",
+    "logsExtraction.additionalIndexPatterns",
+    "logsExtraction.fieldHistoryLength",
+    "logsExtraction.lookbackPeriod",
+    "logsExtraction.delay",
+    "logsExtraction.docsLimit",
+    "logsExtraction.timeout",
+    "logsExtraction.frequency"
   ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
