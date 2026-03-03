@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  addCommentStepCommonDefinition,
-  AddCommentStepTypeId,
-} from '../../common/workflows/steps/add_comment';
-import * as i18n from './translations';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { addCommentStepCommonDefinition } from '../../common/workflows/steps/add_comment';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 export const addCommentStepDefinition = createPublicStepDefinition({
@@ -21,22 +17,6 @@ export const addCommentStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.ADD_COMMENT_STEP_LABEL,
-  description: i18n.ADD_COMMENT_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.ADD_COMMENT_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Add comment to a case
-\`\`\`yaml
-- name: add_case_comment
-  type: ${AddCommentStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    comment: "Investigating this incident now."
-\`\`\``,
-    ],
-  },
-  actionsMenuGroup: ActionsMenuGroup.kibana,
   // TODO: enable one case_id can be a template AND an inputHandler
   // editorHandlers: caseIdInputEditorHandlers,
 });

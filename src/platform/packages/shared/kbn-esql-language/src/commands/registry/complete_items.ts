@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ISuggestionItem } from './types';
 import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
-import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
+import { buildConstantsDefinitions, TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 import { techPreviewLabel } from '../definitions/utils/shared';
 import { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
@@ -286,6 +286,58 @@ export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
   detail: 'Inference endpoint',
   sortText: '1',
 });
+
+export const mmrQueryVectorSuggestion: ISuggestionItem = {
+  label: 'query vector',
+  text: '[${0:0.1}, ${1:0.2}]::dense_vector ',
+  asSnippet: true,
+  kind: 'Value',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.queryVectorSuggestion', {
+    defaultMessage: 'Inline query vector',
+  }),
+  category: SuggestionCategory.VALUE,
+};
+
+export const mmrLimitKeywordSuggestion: ISuggestionItem = {
+  label: 'LIMIT',
+  text: 'LIMIT ',
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitKeywordSuggestion', {
+    defaultMessage: 'Limit',
+  }),
+};
+
+// wrapping in a function to avoid circular dependency issues with the tests
+export const mmrLimitValueSuggestions: () => ISuggestionItem[] = () =>
+  buildConstantsDefinitions(
+    ['10', '100', '1000'],
+    i18n.translate('kbn-esql-language.commands.mmr.autocomplete.limitValueSuggestion', {
+      defaultMessage: 'Suggested limit',
+    }),
+    undefined,
+    {
+      advanceCursorAndOpenSuggestions: true,
+    }
+  );
+
+export const mmrLambdaMapSuggestion: ISuggestionItem = {
+  label: 'lambda',
+  text: '{ "lambda": ${0:0.5} }',
+  asSnippet: true,
+  kind: 'Value',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.lambdaMapSuggestion', {
+    defaultMessage: 'MMR options configuration',
+  }),
+};
+
+export const mmrLambdaValueSuggestion: ISuggestionItem = {
+  label: '0.5',
+  text: '0.5',
+  kind: 'Value',
+  detail: i18n.translate('kbn-esql-language.commands.mmr.autocomplete.lambdaSuggestion', {
+    defaultMessage: 'Suggested lambda',
+  }),
+};
 
 // ================================
 // Map Expression Builders
