@@ -40,7 +40,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Overview tab is present', async () => {
-        await expect(pageObjects.tracesExperience.overviewTab).toBeVisible();
+        await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
       });
     });
 
@@ -50,7 +50,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Similar Spans section is visible', async () => {
-        await expect(pageObjects.tracesExperience.similarSpansSection).toBeVisible({
+        await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible({
           timeout: 30_000,
         });
       });
@@ -62,7 +62,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Trace Summary section is visible', async () => {
-        await expect(pageObjects.tracesExperience.traceSummarySection).toBeVisible({
+        await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible({
           timeout: 30_000,
         });
       });
@@ -74,7 +74,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Logs section is visible', async () => {
-        await expect(pageObjects.tracesExperience.logsSection).toBeVisible({
+        await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible({
           timeout: 30_000,
         });
       });

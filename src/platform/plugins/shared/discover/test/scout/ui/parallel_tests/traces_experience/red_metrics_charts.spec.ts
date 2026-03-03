@@ -41,12 +41,12 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify RED metrics charts are visible', async () => {
-        const { tracesExperience } = pageObjects;
+        const { charts } = pageObjects.tracesExperience;
 
-        await expect(tracesExperience.redMetricsGrid).toBeVisible();
+        await expect(charts.redMetricsCharts).toBeVisible();
 
-        for (const title of tracesExperience.expectedRedMetricsChartTitles) {
-          await expect(tracesExperience.getRedMetricsChartTitle(title)).toBeVisible();
+        for (const title of charts.expectedTitles) {
+          await expect(charts.getChartTitle(title)).toBeVisible();
         }
       });
     });
@@ -59,12 +59,12 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify RED metrics charts are visible', async () => {
-        const { tracesExperience } = pageObjects;
+        const { charts } = pageObjects.tracesExperience;
 
-        await expect(tracesExperience.redMetricsGrid).toBeVisible();
+        await expect(charts.redMetricsCharts).toBeVisible();
 
-        for (const title of tracesExperience.expectedRedMetricsChartTitles) {
-          await expect(tracesExperience.getRedMetricsChartTitle(title)).toBeVisible();
+        for (const title of charts.expectedTitles) {
+          await expect(charts.getChartTitle(title)).toBeVisible();
         }
       });
     });
@@ -76,8 +76,8 @@ spaceTest.describe(
           await pageObjects.discover.writeEsqlQuery(`${TRACES.ESQL_QUERY} | STATS count()`);
         });
 
-        await spaceTest.step('verify RED metrics grid is not visible', async () => {
-          await expect(pageObjects.tracesExperience.redMetricsGrid).toBeHidden();
+        await spaceTest.step('verify RED metrics charts are not visible', async () => {
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeHidden();
         });
       }
     );
@@ -90,8 +90,8 @@ spaceTest.describe(
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
 
-        await spaceTest.step('verify RED metrics grid is not visible', async () => {
-          await expect(pageObjects.tracesExperience.redMetricsGrid).toBeHidden();
+        await spaceTest.step('verify RED metrics charts are not visible', async () => {
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeHidden();
         });
       }
     );

@@ -50,7 +50,7 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify trace-specific columns are not present', async () => {
-            for (const column of pageObjects.tracesExperience.profileSpecificColumns) {
+            for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
               await expect(pageObjects.discover.getColumnHeader(column)).toBeHidden();
             }
           });
@@ -69,7 +69,7 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify RED metrics grid is not visible', async () => {
-            await expect(pageObjects.tracesExperience.redMetricsGrid).toBeHidden();
+            await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeHidden();
           });
         }
       );
@@ -86,7 +86,7 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify Overview tab is not present', async () => {
-            await expect(pageObjects.tracesExperience.overviewTab).toBeHidden();
+            await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeHidden();
           });
         }
       );

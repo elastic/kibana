@@ -8,3 +8,6 @@
  */
 
 export { TracesExperiencePage } from './traces_experience';
+export type { TracesFlyout } from './flyout';
+export type { TracesGrid } from './grid';
+export type { TracesCharts } from './charts';
