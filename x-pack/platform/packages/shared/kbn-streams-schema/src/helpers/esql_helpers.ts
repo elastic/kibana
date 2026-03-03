@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
-import type { ESQLCommand, ESQLSingleAstItem, ESQLSource } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
+import type { ESQLCommand, ESQLSingleAstItem, ESQLSource } from '@elastic/esql/types';
 
 /**
  * Builds the ES|QL AST node for `METADATA _id, _source`.
