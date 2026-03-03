@@ -56,7 +56,6 @@
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/ai-tools",
-    "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
     "@kbn/dissect-heuristics",
     "@kbn/streamlang",
