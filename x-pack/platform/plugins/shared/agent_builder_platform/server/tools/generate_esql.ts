@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { buildServerESQLCallbacks } from '@kbn/esql/server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
@@ -44,14 +43,12 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       { esClient, modelProvider, logger, events }
     ) => {
       const model = await modelProvider.getDefaultModel();
-      const esqlCallbacks = buildServerESQLCallbacks({ client: esClient.asCurrentUser });
 
       const esqlResponse = await generateEsql({
         nlQuery,
         index,
         additionalContext: context,
         executeQuery,
-        esqlCallbacks,
         model,
         esClient: esClient.asCurrentUser,
         logger,
