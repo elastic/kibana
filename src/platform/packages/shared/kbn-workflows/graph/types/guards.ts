@@ -20,7 +20,12 @@ import type {
   ExitConditionBranchNode,
   ExitIfNode,
 } from './nodes/branching_nodes';
-import type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
+import type {
+  EnterForeachNode,
+  EnterWhileNode,
+  ExitForeachNode,
+  ExitWhileNode,
+} from './nodes/loop_nodes';
 import type {
   EnterContinueNode,
   EnterNormalPathNode,
@@ -63,6 +68,12 @@ export const isEnterForeach = (node: GraphNodeUnion): node is EnterForeachNode =
 
 export const isExitForeach = (node: GraphNodeUnion): node is ExitForeachNode =>
   node.type === 'exit-foreach';
+
+export const isEnterWhile = (node: GraphNodeUnion): node is EnterWhileNode =>
+  node.type === 'enter-while';
+
+export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
+  node.type === 'exit-while';
 
 export const isEnterRetry = (node: GraphNodeUnion): node is EnterRetryNode =>
   node.type === 'enter-retry';

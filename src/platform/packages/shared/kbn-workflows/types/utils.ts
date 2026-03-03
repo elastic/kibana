@@ -26,6 +26,7 @@ import type {
   ParallelStep,
   Step,
   WaitStep,
+  WhileStep,
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
@@ -80,6 +81,7 @@ export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
 export const isForeachStep = (step: Step): step is ForEachStep => step.type === 'foreach';
+export const isWhileStep = (step: Step): step is WhileStep => step.type === 'while';
 export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
 export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
 export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';

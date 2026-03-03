@@ -410,6 +410,44 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
   return schema;
 };
 
+export const WhileStepConfigSchema = z.object({
+  condition: z
+    .string()
+    .describe(
+      'Condition expression evaluated after each iteration, e.g. "${{ steps.inner_http.output.status_code != 200 }}". First iteration always runs.'
+    ),
+  steps: z
+    .array(BaseStepSchema)
+    .min(1)
+    .describe('Steps to execute in each iteration of the while loop'),
+});
+
+export const WhileStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('while')
+    .describe(
+      'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
+    ),
+  ...WhileStepConfigSchema.shape,
+  ...LoopStepPropsSchema.shape,
+  ...TimeoutPropSchema.shape,
+});
+
+export type WhileStep = z.infer<typeof WhileStepSchema>;
+
+export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = WhileStepSchema.extend({
+    steps: z.array(stepSchema).min(1),
+    ...getLoopStepSchemaOverrides(stepSchema, loose),
+  });
+
+  if (loose) {
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
 export const IfStepConfigSchema = z.object({
   condition: z
     .string()
@@ -598,6 +636,7 @@ export const WorkflowConstsSchema = z.record(
 const StepSchema = z.lazy(() =>
   z.union([
     ForEachStepSchema,
+    WhileStepSchema,
     IfStepSchema,
     WaitStepSchema,
     DataSetStepSchema,
@@ -614,6 +653,7 @@ export type Step = z.infer<typeof StepSchema>;
 
 export const BuiltInStepTypes = [
   ForEachStepSchema.shape.type.value,
+  WhileStepSchema.shape.type.value,
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
