@@ -162,16 +162,22 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
-              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-                // otelcol inputs are not going to have the data_stream type and dataset in
-                // the compiled stream, get them directly from the user-defined variables.
-                const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
-                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+              const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+              if (dsTypeVar) {
                 fullStream.data_stream = {
                   ...fullStream.data_stream,
-                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
-                  ...(datasetVar ? { dataset: datasetVar } : {}),
+                  type: dsTypeVar,
                 };
+              }
+
+              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+                if (datasetVar) {
+                  fullStream.data_stream = {
+                    ...fullStream.data_stream,
+                    dataset: datasetVar,
+                  };
+                }
 
                 const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
                 if (useAPMVar !== undefined) {
