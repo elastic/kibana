@@ -22,6 +22,7 @@ import type {
   HookContext,
   HookRegistration,
 } from '@kbn/agent-builder-server';
+import { createToolHandlerContextMock } from '../../test_utils/runner';
 
 const baseContext: BeforeAgentHookContext = {
   nextInput: { message: 'hello', attachments: [] },
@@ -41,6 +42,7 @@ const createAfterToolCallContext = (
 ): AfterToolCallHookContext => ({
   ...baseToolCallContext,
   toolReturn: { results: [] },
+  toolHandlerContext: createToolHandlerContextMock(),
   ...overrides,
 });
 
