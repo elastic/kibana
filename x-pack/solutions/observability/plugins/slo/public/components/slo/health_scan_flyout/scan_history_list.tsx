@@ -111,7 +111,7 @@ export function ScanHistoryList({ onSelectScanId }: Props) {
     },
   ];
 
-  if (isLoading && data?.scans.length === 0) {
+  if (isLoading && !data) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" style={{ minHeight: 200 }}>
         <EuiFlexItem grow={false}>
@@ -152,7 +152,9 @@ export function ScanHistoryList({ onSelectScanId }: Props) {
 
       {data?.scans && data.scans.length > 0 ? (
         <EuiBasicTable
-          tableCaption="health scans"
+          tableCaption={i18n.translate('xpack.slo.healthScanFlyout.scanHistoryList.tableCaption', {
+            defaultMessage: 'Health scans',
+          })}
           items={data?.scans}
           columns={columns}
           rowProps={(scan) => ({

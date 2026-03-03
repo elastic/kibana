@@ -235,7 +235,7 @@ export function ScanResultsPanel({ scanId }: Props) {
               defaultMessage: 'Scan in progress',
             })}
             color="warning"
-            iconType="check"
+            iconType="clock"
           >
             <p>
               {i18n.translate('xpack.slo.healthScanFlyout.scanResults.pendingBody', {

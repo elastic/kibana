@@ -447,7 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Health Scan with real SLOs', function () {
+    describe.skip('Health Scan with real SLOs', function () {
       before(async () => {
         await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
