@@ -11,9 +11,9 @@ Every feature you output MUST include ALL required fields:
 - `properties` (object): stable, low-cardinality key facts for deduplication (**MUST NOT be empty**; if you cannot provide at least one stable identifying property, do not emit the feature)
 - `confidence` (number): 0–100
 - `evidence` (array of strings): supporting evidence from logs (2–5 items)
-- `evidence_doc_ids` (array of strings): Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Only include documents that support the evidence. Keep `[]` when not applicable.
+- `evidence_doc_ids` (array of strings): Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Only include documents that support the evidence. Ignore when not applicable
 - `tags` (array of strings): descriptive tags
-- `meta` (object): supplementary information that doesn't fit in `properties` — use for high-cardinality data, contextual notes, or interesting observations (can be `{}`)
+- `meta` (object): supplementary information that doesn't fit in `properties` — use for high-cardinality data, contextual notes, or interesting observations
 
 ## Feature Types
 
