@@ -24,7 +24,12 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
 
-const API_KEY_FIELDS = ['apiKey', 'uiamApiKey'] as const;
+const toAuthResponse = (
+  auth: NotificationPolicySavedObjectAttributes['auth']
+): NotificationPolicyResponse['auth'] => {
+  const { apiKey: _, ...rest } = auth;
+  return rest;
+};
 
 @injectable()
 export class NotificationPolicyClient {
@@ -52,7 +57,7 @@ export class NotificationPolicyClient {
 
     const attributes: NotificationPolicySavedObjectAttributes = {
       ...parsed.data,
-      ...apiKeyAttrs,
+      auth: apiKeyAttrs,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,
@@ -65,7 +70,7 @@ export class NotificationPolicyClient {
         id: params.options?.id,
       });
 
-      return { id, version, ...omit(attributes, API_KEY_FIELDS) };
+      return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
@@ -78,7 +83,12 @@ export class NotificationPolicyClient {
   public async getNotificationPolicy({ id }: { id: string }): Promise<NotificationPolicyResponse> {
     try {
       const doc = await this.notificationPolicySavedObjectService.get(id);
-      return { id, version: doc.version, ...omit(doc.attributes, API_KEY_FIELDS) };
+      return {
+        id,
+        version: doc.version,
+        ...omit(doc.attributes, ['auth']),
+        auth: toAuthResponse(doc.attributes.auth),
+      };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Notification policy with id "${id}" not found`);
@@ -103,7 +113,14 @@ export class NotificationPolicyClient {
         return [];
       }
 
-      return [{ id: doc.id, version: doc.version, ...omit(doc.attributes, API_KEY_FIELDS) }];
+      return [
+        {
+          id: doc.id,
+          version: doc.version,
+          ...omit(doc.attributes, ['auth']),
+          auth: toAuthResponse(doc.attributes.auth),
+        },
+      ];
     });
   }
 
@@ -128,9 +145,9 @@ export class NotificationPolicyClient {
     const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
-      ...omit(existingPolicy, ['id', 'version']),
+      ...omit(existingPolicy, ['id', 'version', 'auth']),
       ...parsed.data,
-      ...apiKeyAttrs,
+      auth: apiKeyAttrs,
       updatedBy: userProfileUid,
       updatedAt: now,
     };
@@ -145,7 +162,8 @@ export class NotificationPolicyClient {
       return {
         id: params.options.id,
         version: updated.version,
-        ...omit(nextAttrs, API_KEY_FIELDS),
+        ...omit(nextAttrs, ['auth']),
+        auth: toAuthResponse(nextAttrs.auth),
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {

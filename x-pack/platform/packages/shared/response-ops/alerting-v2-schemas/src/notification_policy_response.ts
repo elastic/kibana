@@ -16,8 +16,11 @@ export interface NotificationPolicyResponse {
   matcher?: string;
   group_by?: string[];
   throttle?: { interval: string };
-  apiKeyOwner: string;
-  apiKeyCreatedByUser: boolean;
+  auth: {
+    type: 'es' | 'uiam';
+    owner: string;
+    createdByUser: boolean;
+  };
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;

@@ -31,8 +31,6 @@ const createMockSecurityService = (
     api_key: 'uiam-key-secret',
   });
 
-  const uiamInvalidate = jest.fn().mockResolvedValue({ invalidated_api_keys: ['uiam-key-id'] });
-
   return {
     authc: {
       getCurrentUser: jest.fn().mockReturnValue(
@@ -49,7 +47,6 @@ const createMockSecurityService = (
           ? {
               uiam: {
                 grant: uiamGrant,
-                invalidate: uiamInvalidate,
               },
             }
           : { uiam: undefined }),
@@ -67,7 +64,7 @@ const createRequestWithApiKey = (id: string, key: string): KibanaRequest => {
 
 describe('ApiKeyService', () => {
   describe('create (grant path - password/token auth)', () => {
-    it('grants an ES API key and returns encoded attributes', async () => {
+    it('grants an ES API key when UIAM is not available', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService();
       const service = new ApiKeyService(request, security);
@@ -81,12 +78,12 @@ describe('ApiKeyService', () => {
       });
 
       expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
-      expect(result.uiamApiKey).toBeNull();
-      expect(result.apiKeyOwner).toBe('test-user');
-      expect(result.apiKeyCreatedByUser).toBe(false);
+      expect(result.type).toBe('es');
+      expect(result.owner).toBe('test-user');
+      expect(result.createdByUser).toBe(false);
     });
 
-    it('grants both ES and UIAM API keys when UIAM is available', async () => {
+    it('grants only a UIAM API key when UIAM is available', async () => {
       const request = httpServerMock.createKibanaRequest();
       const security = createMockSecurityService({ uiam: true });
       const service = new ApiKeyService(request, security);
@@ -96,12 +93,12 @@ describe('ApiKeyService', () => {
       expect(security.authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, {
         name: 'uiam-My Policy',
       });
-      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
 
-      expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
-      expect(result.uiamApiKey).toBe(Buffer.from('uiam-key-id:uiam-key-secret').toString('base64'));
-      expect(result.apiKeyOwner).toBe('test-user');
-      expect(result.apiKeyCreatedByUser).toBe(false);
+      expect(result.apiKey).toBe(Buffer.from('uiam-key-id:uiam-key-secret').toString('base64'));
+      expect(result.type).toBe('uiam');
+      expect(result.owner).toBe('test-user');
+      expect(result.createdByUser).toBe(false);
     });
 
     it('throws when no current user is found', async () => {
@@ -136,21 +133,6 @@ describe('ApiKeyService', () => {
         'Failed to create UIAM API key for notification policy: My Policy'
       );
     });
-
-    it('invalidates UIAM key if ES key grant fails', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const security = createMockSecurityService({ uiam: true });
-      security.authc.apiKeys.grantAsInternalUser = jest
-        .fn()
-        .mockRejectedValue(new Error('ES grant failed'));
-      const service = new ApiKeyService(request, security);
-
-      await expect(service.create('My Policy')).rejects.toThrow('ES grant failed');
-
-      expect(security.authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, {
-        id: 'uiam-key-id',
-      });
-    });
   });
 
   describe('create (reuse path - API key auth)', () => {
@@ -163,9 +145,9 @@ describe('ApiKeyService', () => {
 
       expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
       expect(result.apiKey).toBe(Buffer.from('my-key-id:my-key-secret').toString('base64'));
-      expect(result.uiamApiKey).toBeNull();
-      expect(result.apiKeyOwner).toBe('test-user');
-      expect(result.apiKeyCreatedByUser).toBe(true);
+      expect(result.type).toBe('es');
+      expect(result.owner).toBe('test-user');
+      expect(result.createdByUser).toBe(true);
     });
 
     it('extracts UIAM API key from authorization header when UIAM is available', async () => {
@@ -181,8 +163,8 @@ describe('ApiKeyService', () => {
 
       const expectedEncoded = Buffer.from(`uiam-id:${uiamKey}`).toString('base64');
       expect(result.apiKey).toBe(expectedEncoded);
-      expect(result.uiamApiKey).toBe(expectedEncoded);
-      expect(result.apiKeyCreatedByUser).toBe(true);
+      expect(result.type).toBe('uiam');
+      expect(result.createdByUser).toBe(true);
     });
 
     it('throws when UIAM credential is used in non-serverless environment', async () => {

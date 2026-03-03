@@ -96,9 +96,12 @@ describe('NotificationPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          apiKey: 'encoded-es-api-key',
-          apiKeyOwner: 'test-user',
-          apiKeyCreatedByUser: false,
+          auth: {
+            apiKey: 'encoded-es-api-key',
+            type: 'es',
+            owner: 'test-user',
+            createdByUser: false,
+          },
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -114,8 +117,11 @@ describe('NotificationPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          apiKeyOwner: 'test-user',
-          apiKeyCreatedByUser: false,
+          auth: {
+            type: 'es',
+            owner: 'test-user',
+            createdByUser: false,
+          },
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -123,8 +129,7 @@ describe('NotificationPolicyClient', () => {
         })
       );
 
-      expect(res).not.toHaveProperty('apiKey');
-      expect(res).not.toHaveProperty('uiamApiKey');
+      expect(res.auth).not.toHaveProperty('apiKey');
     });
 
     it('creates a notification policy without custom id', async () => {
@@ -152,9 +157,12 @@ describe('NotificationPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          apiKey: 'encoded-es-api-key',
-          apiKeyOwner: 'test-user',
-          apiKeyCreatedByUser: false,
+          auth: {
+            apiKey: 'encoded-es-api-key',
+            type: 'es',
+            owner: 'test-user',
+            createdByUser: false,
+          },
         }),
         expect.objectContaining({
           overwrite: false,
@@ -166,8 +174,7 @@ describe('NotificationPolicyClient', () => {
       expect(res.name).toBe('my-policy');
       expect(res.description).toBe('my-policy description');
       expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
-      expect(res).not.toHaveProperty('apiKey');
-      expect(res).not.toHaveProperty('uiamApiKey');
+      expect(res.auth).not.toHaveProperty('apiKey');
     });
 
     it('throws 400 when data is invalid', async () => {
@@ -210,15 +217,17 @@ describe('NotificationPolicyClient', () => {
   });
 
   describe('getNotificationPolicy', () => {
-    it('returns a notification policy by id with API key fields stripped', async () => {
+    it('returns a notification policy by id with auth.apiKey stripped', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        apiKey: 'encrypted-api-key',
-        uiamApiKey: null,
-        apiKeyOwner: 'test-user',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'encrypted-api-key',
+          type: 'es',
+          owner: 'test-user',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -239,10 +248,8 @@ describe('NotificationPolicyClient', () => {
         'policy-id-get-1',
         undefined
       );
-      expect(res.apiKeyOwner).toBe('test-user');
-      expect(res.apiKeyCreatedByUser).toBe(false);
-      expect(res).not.toHaveProperty('apiKey');
-      expect(res).not.toHaveProperty('uiamApiKey');
+      expect(res.auth).toEqual({ type: 'es', owner: 'test-user', createdByUser: false });
+      expect(res.auth).not.toHaveProperty('apiKey');
     });
 
     it('throws 404 when notification policy is not found', async () => {
@@ -267,10 +274,12 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-two',
         description: 'policy-two description',
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
-        apiKey: 'secret-key-2',
-        uiamApiKey: null,
-        apiKeyOwner: 'user-2',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'secret-key-2',
+          type: 'es',
+          owner: 'user-2',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -280,10 +289,12 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-one',
         description: 'policy-one description',
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
-        apiKey: 'secret-key-1',
-        uiamApiKey: null,
-        apiKeyOwner: 'user-1',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'secret-key-1',
+          type: 'es',
+          owner: 'user-1',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -313,12 +324,10 @@ describe('NotificationPolicyClient', () => {
       });
 
       expect(res).toHaveLength(2);
-      expect(res[0].apiKeyOwner).toBe('user-2');
-      expect(res[0]).not.toHaveProperty('apiKey');
-      expect(res[0]).not.toHaveProperty('uiamApiKey');
-      expect(res[1].apiKeyOwner).toBe('user-1');
-      expect(res[1]).not.toHaveProperty('apiKey');
-      expect(res[1]).not.toHaveProperty('uiamApiKey');
+      expect(res[0].auth).toEqual({ type: 'es', owner: 'user-2', createdByUser: false });
+      expect(res[0].auth).not.toHaveProperty('apiKey');
+      expect(res[1].auth).toEqual({ type: 'es', owner: 'user-1', createdByUser: false });
+      expect(res[1].auth).not.toHaveProperty('apiKey');
     });
 
     it('returns an empty array when ids are empty', async () => {
@@ -332,10 +341,12 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-found-one',
         description: 'policy-found-one description',
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
-        apiKey: 'key-1',
-        uiamApiKey: null,
-        apiKeyOwner: 'user-1',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'key-1',
+          type: 'es',
+          owner: 'user-1',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -345,10 +356,12 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-found-three',
         description: 'policy-found-three description',
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
-        apiKey: 'key-3',
-        uiamApiKey: null,
-        apiKeyOwner: 'user-3',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'key-3',
+          type: 'es',
+          owner: 'user-3',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -390,9 +403,9 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).toHaveLength(2);
       expect(res[0].id).toBe('policy-id-get-found-1');
-      expect(res[0]).not.toHaveProperty('apiKey');
+      expect(res[0].auth).not.toHaveProperty('apiKey');
       expect(res[1].id).toBe('policy-id-get-found-3');
-      expect(res[1]).not.toHaveProperty('apiKey');
+      expect(res[1].auth).not.toHaveProperty('apiKey');
     });
 
     it('ignores documents with non-404 errors and returns valid documents', async () => {
@@ -400,10 +413,12 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-valid',
         description: 'policy-valid description',
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
-        apiKey: 'valid-key',
-        uiamApiKey: null,
-        apiKeyOwner: 'valid-user',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'valid-key',
+          type: 'es',
+          owner: 'valid-user',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -438,9 +453,8 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).toHaveLength(1);
       expect(res[0].id).toBe('policy-id-valid');
-      expect(res[0].apiKeyOwner).toBe('valid-user');
-      expect(res[0]).not.toHaveProperty('apiKey');
-      expect(res[0]).not.toHaveProperty('uiamApiKey');
+      expect(res[0].auth).toEqual({ type: 'es', owner: 'valid-user', createdByUser: false });
+      expect(res[0].auth).not.toHaveProperty('apiKey');
     });
   });
 
@@ -450,10 +464,12 @@ describe('NotificationPolicyClient', () => {
         name: 'original-policy',
         description: 'original-policy description',
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        apiKey: 'old-api-key',
-        uiamApiKey: null,
-        apiKeyOwner: 'old-user',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'old-api-key',
+          type: 'es',
+          owner: 'old-user',
+          createdByUser: false,
+        },
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -491,9 +507,12 @@ describe('NotificationPolicyClient', () => {
           name: 'updated-policy',
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
-          apiKey: 'encoded-es-api-key',
-          apiKeyOwner: 'test-user',
-          apiKeyCreatedByUser: false,
+          auth: {
+            apiKey: 'encoded-es-api-key',
+            type: 'es',
+            owner: 'test-user',
+            createdByUser: false,
+          },
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
           createdBy: 'creator_profile_uid',
@@ -509,14 +528,16 @@ describe('NotificationPolicyClient', () => {
           name: 'updated-policy',
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
-          apiKeyOwner: 'test-user',
-          apiKeyCreatedByUser: false,
+          auth: {
+            type: 'es',
+            owner: 'test-user',
+            createdByUser: false,
+          },
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       );
 
-      expect(res).not.toHaveProperty('apiKey');
-      expect(res).not.toHaveProperty('uiamApiKey');
+      expect(res.auth).not.toHaveProperty('apiKey');
     });
 
     it('throws 400 when data is invalid', async () => {
@@ -556,10 +577,12 @@ describe('NotificationPolicyClient', () => {
         name: 'original-policy',
         description: 'original-policy description',
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        apiKey: 'old-api-key',
-        uiamApiKey: null,
-        apiKeyOwner: 'old-user',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'old-api-key',
+          type: 'es',
+          owner: 'old-user',
+          createdByUser: false,
+        },
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -597,10 +620,12 @@ describe('NotificationPolicyClient', () => {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
-        apiKey: 'some-key',
-        uiamApiKey: null,
-        apiKeyOwner: 'test-user',
-        apiKeyCreatedByUser: false,
+        auth: {
+          apiKey: 'some-key',
+          type: 'es',
+          owner: 'test-user',
+          createdByUser: false,
+        },
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',

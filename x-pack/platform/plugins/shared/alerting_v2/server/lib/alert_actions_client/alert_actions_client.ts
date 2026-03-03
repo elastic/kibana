@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';

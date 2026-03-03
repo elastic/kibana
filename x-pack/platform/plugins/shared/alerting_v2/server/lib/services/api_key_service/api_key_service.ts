@@ -9,14 +9,13 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
-import type { GrantAPIKeyResult } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
 
 export interface ApiKeyAttributes {
   apiKey: string;
-  uiamApiKey: string | null;
-  apiKeyOwner: string;
-  apiKeyCreatedByUser: boolean;
+  type: 'es' | 'uiam';
+  owner: string;
+  createdByUser: boolean;
 }
 
 export interface ApiKeyServiceContract {
@@ -81,65 +80,47 @@ export class ApiKeyService implements ApiKeyServiceContract {
 
     const encoded = encodeApiKey(apiKeyId, apiKey)!;
 
-    if (isUiamCredential(apiKey)) {
-      return {
-        apiKey: encoded,
-        uiamApiKey: encoded,
-        apiKeyOwner: username,
-        apiKeyCreatedByUser: true,
-      };
-    }
-
     return {
       apiKey: encoded,
-      uiamApiKey: null,
-      apiKeyOwner: username,
-      apiKeyCreatedByUser: true,
+      type: isUiamCredential(apiKey) ? 'uiam' : 'es',
+      owner: username,
+      createdByUser: true,
     };
   }
 
   private async grantAPIKeyAttributes(name: string, username: string): Promise<ApiKeyAttributes> {
-    let uiamResult: GrantAPIKeyResult | null | undefined;
     if (this.shouldGrantUiam()) {
-      uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
+      const uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
         name: `uiam-${name}`,
       });
 
       if (!uiamResult) {
         throw new Error(`Failed to create UIAM API key for notification policy: ${name}`);
       }
+
+      return {
+        apiKey: encodeApiKey(uiamResult.id, uiamResult.api_key)!,
+        type: 'uiam',
+        owner: username,
+        createdByUser: false,
+      };
     }
 
-    let esResult: GrantAPIKeyResult | null = null;
-    try {
-      esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
-        name,
-        role_descriptors: {},
-        metadata: { managed: true, kibana: { type: 'notification_policy' } },
-      });
-    } catch (err) {
-      if (uiamResult?.id) {
-        await this.securityService.authc.apiKeys.uiam
-          ?.invalidate(this.request, { id: uiamResult.id })
-          .catch(() => {});
-      }
-      throw err;
-    }
+    const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
+      name,
+      role_descriptors: {},
+      metadata: { managed: true, kibana: { type: 'notification_policy' } },
+    });
 
     if (!esResult) {
-      if (uiamResult?.id) {
-        await this.securityService.authc.apiKeys.uiam
-          ?.invalidate(this.request, { id: uiamResult.id })
-          .catch(() => {});
-      }
       throw new Error(`Failed to create ES API key for notification policy: ${name}`);
     }
 
     return {
       apiKey: encodeApiKey(esResult.id, esResult.api_key)!,
-      uiamApiKey: uiamResult ? encodeApiKey(uiamResult.id, uiamResult.api_key) : null,
-      apiKeyOwner: username,
-      apiKeyCreatedByUser: false,
+      type: 'es',
+      owner: username,
+      createdByUser: false,
     };
   }
 

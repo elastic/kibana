@@ -55,10 +55,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.throttle).to.eql({ interval: '1m' });
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
-      expect(response.body.apiKeyOwner).to.be.a('string');
-      expect(response.body.apiKeyCreatedByUser).to.be(true);
-      expect(response.body.apiKey).to.be(undefined);
-      expect(response.body.uiamApiKey).to.be(undefined);
+      expect(response.body.auth).to.be.an('object');
+      expect(response.body.auth.owner).to.be.a('string');
+      expect(response.body.auth.createdByUser).to.be(true);
+      expect(response.body.auth.type).to.be.a('string');
+      expect(response.body.auth.apiKey).to.be(undefined);
     });
 
     it('should create a notification policy with a custom id', async () => {
@@ -85,10 +86,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.matcher).to.be("env == 'staging' && region == 'eu-west-1'");
       expect(response.body.group_by).to.eql(['kubernetes.namespace']);
       expect(response.body.throttle).to.eql({ interval: '5m' });
-      expect(response.body.apiKeyOwner).to.be.a('string');
-      expect(response.body.apiKeyCreatedByUser).to.be(true);
-      expect(response.body.apiKey).to.be(undefined);
-      expect(response.body.uiamApiKey).to.be(undefined);
+      expect(response.body.auth).to.be.an('object');
+      expect(response.body.auth.owner).to.be.a('string');
+      expect(response.body.auth.createdByUser).to.be(true);
+      expect(response.body.auth.type).to.be.a('string');
+      expect(response.body.auth.apiKey).to.be(undefined);
     });
 
     it('should return 409 when creating a notification policy with an existing id', async () => {

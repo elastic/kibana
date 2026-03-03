@@ -17,9 +17,13 @@ import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attr
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
 
-export const NotificationPolicyAttributesToEncrypt = ['apiKey', 'uiamApiKey'];
+export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
 
-export const NotificationPolicyAttributesIncludedInAAD = ['apiKeyOwner', 'apiKeyCreatedByUser'];
+export const NotificationPolicyAttributesIncludedInAAD = [
+  'auth.type',
+  'auth.owner',
+  'auth.createdByUser',
+];
 
 export function registerSavedObjects({
   savedObjects,
