@@ -14,7 +14,8 @@
  * module produce the same sequence of values for the same seed. When not
  * initialized, falls back to `Math.random()` for backward compatibility.
  *
- * Algorithm: Mulberry32 — a 32-bit PRNG that passes PractRand and BigCrush.
+ * Implementation: simple 32-bit linear congruential generator (LCG) intended
+ * for reproducible test data, not for cryptographic or security-sensitive use.
  */
 
 let seededRng: (() => number) | null = null;
