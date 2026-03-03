@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { validate } from './validate';
-import { Parser } from '../../../parser';
-import type { ESQLMessage } from '../../../types';
+import { Parser } from '@elastic/esql';
+import type { ESQLMessage } from '@elastic/esql/types';
 
 const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);

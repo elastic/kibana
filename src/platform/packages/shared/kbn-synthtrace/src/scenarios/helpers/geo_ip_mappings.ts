@@ -39,8 +39,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'North America',
     location: { lat: 40.7128, lon: -74.006 },
     timezone: 'America/New_York',
-    ipv4Ranges: ['192.168.1.0/24', '10.0.1.0/24', '172.16.1.0/24'],
-    ipv6Ranges: ['2001:db8:1::/48', '2600:1700::/32'],
+    ipv4Ranges: ['74.6.231.0/24', '199.36.158.0/24', '64.233.160.0/24'],
+    ipv6Ranges: ['2600:1700:a0::/48', '2604:a880::/32'],
   },
   {
     city: 'Los Angeles',
@@ -49,8 +49,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'North America',
     location: { lat: 34.0522, lon: -118.2437 },
     timezone: 'America/Los_Angeles',
-    ipv4Ranges: ['192.168.2.0/24', '10.0.2.0/24'],
-    ipv6Ranges: ['2001:db8:2::/48', '2600:1702::/32'],
+    ipv4Ranges: ['104.16.0.0/16', '172.217.14.0/24'],
+    ipv6Ranges: ['2607:f8b0:4007::/48', '2600:1702::/32'],
   },
   {
     city: 'Chicago',
@@ -59,8 +59,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'North America',
     location: { lat: 41.8781, lon: -87.6298 },
     timezone: 'America/Chicago',
-    ipv4Ranges: ['192.168.3.0/24', '10.0.3.0/24'],
-    ipv6Ranges: ['2001:db8:3::/48', '2600:1703::/32'],
+    ipv4Ranges: ['98.137.11.0/24', '209.85.200.0/24'],
+    ipv6Ranges: ['2600:1703:a0::/48', '2607:f8b0:4009::/48'],
   },
   {
     city: 'Toronto',
@@ -69,8 +69,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'North America',
     location: { lat: 43.6532, lon: -79.3832 },
     timezone: 'America/Toronto',
-    ipv4Ranges: ['192.168.4.0/24', '10.0.4.0/24'],
-    ipv6Ranges: ['2001:db8:4::/48', '2607:f8b0::/32'],
+    ipv4Ranges: ['99.236.0.0/16', '192.206.151.0/24'],
+    ipv6Ranges: ['2607:f8b0:400b::/48', '2620:149::/32'],
   },
   {
     city: 'Mexico City',
@@ -79,8 +79,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'North America',
     location: { lat: 19.4326, lon: -99.1332 },
     timezone: 'America/Mexico_City',
-    ipv4Ranges: ['192.168.5.0/24', '10.0.5.0/24'],
-    ipv6Ranges: ['2001:db8:5::/48', '2806::/32'],
+    ipv4Ranges: ['189.203.0.0/16', '201.174.0.0/16'],
+    ipv6Ranges: ['2806:2f0::/32', '2806:108e::/32'],
   },
 
   // Europe
@@ -91,8 +91,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Europe',
     location: { lat: 51.5074, lon: -0.1278 },
     timezone: 'Europe/London',
-    ipv4Ranges: ['192.168.10.0/24', '10.0.10.0/24'],
-    ipv6Ranges: ['2001:db8:10::/48', '2a00:1450::/32'],
+    ipv4Ranges: ['185.89.218.0/24', '212.58.244.0/24'],
+    ipv6Ranges: ['2a00:1450:4009::/48', '2a02:c7f::/32'],
   },
   {
     city: 'Paris',
@@ -101,8 +101,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Europe',
     location: { lat: 48.8566, lon: 2.3522 },
     timezone: 'Europe/Paris',
-    ipv4Ranges: ['192.168.11.0/24', '10.0.11.0/24'],
-    ipv6Ranges: ['2001:db8:11::/48', '2a00:1450:4007::/48'],
+    ipv4Ranges: ['91.198.174.0/24', '195.154.0.0/16'],
+    ipv6Ranges: ['2a00:1450:4007::/48', '2001:660::/32'],
   },
   {
     city: 'Berlin',
@@ -111,8 +111,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Europe',
     location: { lat: 52.52, lon: 13.405 },
     timezone: 'Europe/Berlin',
-    ipv4Ranges: ['192.168.12.0/24', '10.0.12.0/24'],
-    ipv6Ranges: ['2001:db8:12::/48', '2a00:1450:4001::/48'],
+    ipv4Ranges: ['85.214.0.0/16', '178.63.0.0/16'],
+    ipv6Ranges: ['2a00:1450:4001::/48', '2a01:4f8::/32'],
   },
   {
     city: 'Amsterdam',
@@ -121,8 +121,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Europe',
     location: { lat: 52.3676, lon: 4.9041 },
     timezone: 'Europe/Amsterdam',
-    ipv4Ranges: ['192.168.13.0/24', '10.0.13.0/24'],
-    ipv6Ranges: ['2001:db8:13::/48', '2a00:1450:400e::/48'],
+    ipv4Ranges: ['82.94.164.0/24', '188.40.0.0/16'],
+    ipv6Ranges: ['2a00:1450:400e::/48', '2a10:50c0::/32'],
   },
   {
     city: 'Madrid',
@@ -131,8 +131,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Europe',
     location: { lat: 40.4168, lon: -3.7038 },
     timezone: 'Europe/Madrid',
-    ipv4Ranges: ['192.168.14.0/24', '10.0.14.0/24'],
-    ipv6Ranges: ['2001:db8:14::/48', '2a00:1450:400d::/48'],
+    ipv4Ranges: ['88.26.0.0/16', '195.235.0.0/16'],
+    ipv6Ranges: ['2a00:1450:400d::/48', '2a02:9000::/32'],
   },
 
   // Asia
@@ -143,8 +143,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 35.6762, lon: 139.6503 },
     timezone: 'Asia/Tokyo',
-    ipv4Ranges: ['192.168.20.0/24', '10.0.20.0/24'],
-    ipv6Ranges: ['2001:db8:20::/48', '2404:6800::/32'],
+    ipv4Ranges: ['103.5.140.0/24', '210.171.224.0/24'],
+    ipv6Ranges: ['2404:6800:4004::/48', '2001:df0::/32'],
   },
   {
     city: 'Singapore',
@@ -153,8 +153,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 1.3521, lon: 103.8198 },
     timezone: 'Asia/Singapore',
-    ipv4Ranges: ['192.168.21.0/24', '10.0.21.0/24'],
-    ipv6Ranges: ['2001:db8:21::/48', '2404:6800:4003::/48'],
+    ipv4Ranges: ['103.6.84.0/24', '202.166.0.0/16'],
+    ipv6Ranges: ['2404:6800:4003::/48', '2403:5800::/32'],
   },
   {
     city: 'Mumbai',
@@ -163,8 +163,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 19.076, lon: 72.8777 },
     timezone: 'Asia/Kolkata',
-    ipv4Ranges: ['192.168.22.0/24', '10.0.22.0/24'],
-    ipv6Ranges: ['2001:db8:22::/48', '2404:6800:4009::/48'],
+    ipv4Ranges: ['103.21.124.0/24', '182.73.0.0/16'],
+    ipv6Ranges: ['2404:6800:4009::/48', '2405:200::/32'],
   },
   {
     city: 'Seoul',
@@ -173,8 +173,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 37.5665, lon: 126.978 },
     timezone: 'Asia/Seoul',
-    ipv4Ranges: ['192.168.23.0/24', '10.0.23.0/24'],
-    ipv6Ranges: ['2001:db8:23::/48', '2404:6800:4004::/48'],
+    ipv4Ranges: ['121.254.0.0/16', '211.234.0.0/16'],
+    ipv6Ranges: ['2404:6800:4004::/48', '2001:2d8::/32'],
   },
   {
     city: 'Shanghai',
@@ -183,8 +183,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 31.2304, lon: 121.4737 },
     timezone: 'Asia/Shanghai',
-    ipv4Ranges: ['192.168.24.0/24', '10.0.24.0/24'],
-    ipv6Ranges: ['2001:db8:24::/48', '2404:6800:4008::/48'],
+    ipv4Ranges: ['114.114.114.0/24', '202.96.128.0/16'],
+    ipv6Ranges: ['2404:6800:4008::/48', '240e::/16'],
   },
 
   // Australia & Oceania
@@ -195,8 +195,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Oceania',
     location: { lat: -33.8688, lon: 151.2093 },
     timezone: 'Australia/Sydney',
-    ipv4Ranges: ['192.168.30.0/24', '10.0.30.0/24'],
-    ipv6Ranges: ['2001:db8:30::/48', '2404:6800:4006::/48'],
+    ipv4Ranges: ['103.243.0.0/16', '203.2.75.0/24'],
+    ipv6Ranges: ['2404:6800:4006::/48', '2401:d800::/32'],
   },
   {
     city: 'Melbourne',
@@ -205,8 +205,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Oceania',
     location: { lat: -37.8136, lon: 144.9631 },
     timezone: 'Australia/Melbourne',
-    ipv4Ranges: ['192.168.31.0/24', '10.0.31.0/24'],
-    ipv6Ranges: ['2001:db8:31::/48', '2404:6800:4007::/48'],
+    ipv4Ranges: ['110.232.0.0/16', '203.13.0.0/16'],
+    ipv6Ranges: ['2404:6800:4007::/48', '2401:d800:10::/48'],
   },
 
   // South America
@@ -217,8 +217,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'South America',
     location: { lat: -23.5505, lon: -46.6333 },
     timezone: 'America/Sao_Paulo',
-    ipv4Ranges: ['192.168.40.0/24', '10.0.40.0/24'],
-    ipv6Ranges: ['2001:db8:40::/48', '2800:3f0::/32'],
+    ipv4Ranges: ['177.71.128.0/20', '200.147.0.0/16'],
+    ipv6Ranges: ['2800:3f0:4001::/48', '2804:14c::/32'],
   },
   {
     city: 'Buenos Aires',
@@ -227,8 +227,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'South America',
     location: { lat: -34.6037, lon: -58.3816 },
     timezone: 'America/Argentina/Buenos_Aires',
-    ipv4Ranges: ['192.168.41.0/24', '10.0.41.0/24'],
-    ipv6Ranges: ['2001:db8:41::/48', '2800:3f0:4001::/48'],
+    ipv4Ranges: ['181.14.0.0/16', '200.49.0.0/16'],
+    ipv6Ranges: ['2800:3f0:4002::/48', '2800:a4::/32'],
   },
   {
     city: 'Lima',
@@ -237,8 +237,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'South America',
     location: { lat: -12.0464, lon: -77.0428 },
     timezone: 'America/Lima',
-    ipv4Ranges: ['192.168.42.0/24', '10.0.42.0/24'],
-    ipv6Ranges: ['2001:db8:42::/48', '2800:3f0:4002::/48'],
+    ipv4Ranges: ['190.12.0.0/16', '200.48.0.0/16'],
+    ipv6Ranges: ['2800:3f0:4003::/48', '2801:14::/32'],
   },
 
   // Africa
@@ -249,8 +249,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Africa',
     location: { lat: -26.2041, lon: 28.0473 },
     timezone: 'Africa/Johannesburg',
-    ipv4Ranges: ['192.168.50.0/24', '10.0.50.0/24'],
-    ipv6Ranges: ['2001:db8:50::/48', '2c0f:fb50::/32'],
+    ipv4Ranges: ['41.0.0.0/16', '196.211.0.0/16'],
+    ipv6Ranges: ['2c0f:fb50::/32', '2c0f:f248::/32'],
   },
   {
     city: 'Lagos',
@@ -259,8 +259,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Africa',
     location: { lat: 6.5244, lon: 3.3792 },
     timezone: 'Africa/Lagos',
-    ipv4Ranges: ['192.168.51.0/24', '10.0.51.0/24'],
-    ipv6Ranges: ['2001:db8:51::/48', '2c0f:ee00::/32'],
+    ipv4Ranges: ['41.58.0.0/16', '197.210.0.0/16'],
+    ipv6Ranges: ['2c0f:ee00::/32', '2c0f:fce8::/32'],
   },
   {
     city: 'Cairo',
@@ -269,8 +269,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Africa',
     location: { lat: 30.0444, lon: 31.2357 },
     timezone: 'Africa/Cairo',
-    ipv4Ranges: ['192.168.52.0/24', '10.0.52.0/24'],
-    ipv6Ranges: ['2001:db8:52::/48', '2c0f:f738::/32'],
+    ipv4Ranges: ['41.32.0.0/16', '197.0.0.0/16'],
+    ipv6Ranges: ['2c0f:f738::/32', '2c0f:fce0::/32'],
   },
 
   // Middle East
@@ -281,8 +281,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 25.2048, lon: 55.2708 },
     timezone: 'Asia/Dubai',
-    ipv4Ranges: ['192.168.60.0/24', '10.0.60.0/24'],
-    ipv6Ranges: ['2001:db8:60::/48', '2a03:2880::/32'],
+    ipv4Ranges: ['94.200.0.0/16', '185.56.0.0/16'],
+    ipv6Ranges: ['2a03:2880:f100::/48', '2a09:bac0::/32'],
   },
   {
     city: 'Tel Aviv',
@@ -291,8 +291,8 @@ export const GEO_LOCATIONS: GeoLocation[] = [
     continent: 'Asia',
     location: { lat: 32.0853, lon: 34.7818 },
     timezone: 'Asia/Jerusalem',
-    ipv4Ranges: ['192.168.61.0/24', '10.0.61.0/24'],
-    ipv6Ranges: ['2001:db8:61::/48', '2a03:2880:f003::/48'],
+    ipv4Ranges: ['84.108.0.0/16', '212.143.0.0/16'],
+    ipv6Ranges: ['2a03:2880:f003::/48', '2a06:c484::/32'],
   },
 ];
 
@@ -356,14 +356,80 @@ export function generateIPv6FromGeo(geo: GeoLocation): string {
 }
 
 /**
+ * Maps cloud provider region prefixes to the continents they are closest to.
+ * Used to bias client geo-locations towards the cloud region serving them,
+ * so a host in `eu-west-1` primarily serves European clients.
+ */
+const REGION_TO_CONTINENTS: Record<string, string[]> = {
+  // AWS
+  'us-': ['North America'],
+  'eu-': ['Europe'],
+  'ap-': ['Asia', 'Oceania'],
+  'sa-': ['South America'],
+  'me-': ['Asia'],
+  'af-': ['Africa'],
+  'ca-': ['North America'],
+  // GCP
+  'us-central': ['North America'],
+  'us-east': ['North America'],
+  'us-west': ['North America'],
+  'europe-': ['Europe'],
+  'asia-': ['Asia', 'Oceania'],
+  'southamerica-': ['South America'],
+  'australia-': ['Oceania'],
+  // Azure
+  eastus: ['North America'],
+  westus: ['North America'],
+  centralus: ['North America'],
+  northeurope: ['Europe'],
+  westeurope: ['Europe'],
+  southeastasia: ['Asia'],
+  eastasia: ['Asia'],
+  brazilsouth: ['South America'],
+  australiaeast: ['Oceania'],
+  southafricanorth: ['Africa'],
+};
+
+/**
+ * Get geo-locations that are geographically close to a given cloud region.
+ * Falls back to all locations if no mapping is found.
+ */
+function getGeoLocationsForRegion(cloudRegion: string): GeoLocation[] {
+  let matchedContinents: string[] | undefined;
+
+  for (const [prefix, continents] of Object.entries(REGION_TO_CONTINENTS)) {
+    if (cloudRegion.startsWith(prefix) || cloudRegion === prefix) {
+      matchedContinents = continents;
+      break;
+    }
+  }
+
+  if (!matchedContinents) {
+    return GEO_LOCATIONS;
+  }
+
+  const nearby = GEO_LOCATIONS.filter((geo) => matchedContinents.includes(geo.continent));
+  return nearby.length > 0 ? nearby : GEO_LOCATIONS;
+}
+
+/**
  * Generate a random IP address (90% IPv4, 10% IPv6) with associated geo-location data.
  */
-export function generateIPWithGeo(): {
+export function generateIPWithGeo(cloudRegion?: string): {
   ip: string;
   geo: GeoLocation;
   isIPv6: boolean;
 } {
-  const geo = getRandomGeoLocation();
+  // 80% of traffic comes from the same continent as the cloud region,
+  // 20% comes from anywhere (cross-region traffic is normal).
+  let geo: GeoLocation;
+  if (cloudRegion && Math.random() < 0.8) {
+    const nearbyLocations = getGeoLocationsForRegion(cloudRegion);
+    geo = nearbyLocations[Math.floor(Math.random() * nearbyLocations.length)];
+  } else {
+    geo = getRandomGeoLocation();
+  }
+
   const isIPv6 = Math.random() < 0.1; // 10% IPv6
 
   return {
