@@ -7,7 +7,9 @@ set -euo pipefail
 (buildkite-agent pipeline upload .buildkite/pipelines/pull_request/store_moon_cache.yml > /dev/null \
  && echo "Uploaded cache-warmup step" >&2) || echo "Failed to upload cache-warmup step" >&2
 
-ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
-status=$?
+# ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
+# status=$?
 
-exit $status
+# exit $status
+
+exit 1
