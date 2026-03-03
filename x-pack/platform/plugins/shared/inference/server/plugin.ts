@@ -200,7 +200,9 @@ export class InferencePlugin
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
         regexWorker: (() => {
           if (!this.regexWorker) {
-            this.logger.error('RegexWorkerService is not initialized — Anonymization plugin.start() may not have completed');
+            this.logger.error(
+              'RegexWorkerService is not initialized — Anonymization plugin.start() may not have completed'
+            );
           }
           return this.regexWorker!;
         })(),
