@@ -1648,7 +1648,11 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.2.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.3.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.2.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.3.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.2.ts @elastic/obs-presentation-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.3.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-presentation-team
@@ -1956,6 +1960,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/platform/test/functional/services/ml @elastic/ml-ui
 /x-pack/platform/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts @elastic/ml-ui
+/x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ml.ts @elastic/ml-ui
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/ml/ @elastic/ml-ui
 /x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
 /x-pack/platform/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
@@ -3245,7 +3250,9 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/functional_cloud @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/platform/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
+/x-pack/platform/test/accessibility/apps/**/config.2.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
+/x-pack/platform/test/accessibility/apps/**/index_2.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/fixtures/kbn_archives/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux

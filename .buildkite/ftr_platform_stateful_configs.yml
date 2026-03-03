@@ -1,4 +1,7 @@
 disabled:
+  # Replaced by group1/config.ts and group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
+
   # Stateful base config for deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts

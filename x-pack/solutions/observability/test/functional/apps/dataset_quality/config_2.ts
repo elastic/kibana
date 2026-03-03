@@ -9,12 +9,10 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 import createTestConfig from './config';
 
-export default async function createTestConfig2(
-  context: FtrConfigProviderContext
-): Promise<Awaited<ReturnType<typeof createTestConfig>>> {
+export default async function createTestConfig2(context: FtrConfigProviderContext) {
   const config = await createTestConfig(context);
   return {
     ...config,
-    testFiles: [require.resolve('./index_2.ts')],
+    testFiles: [require.resolve('./index_2')],
   };
 }
