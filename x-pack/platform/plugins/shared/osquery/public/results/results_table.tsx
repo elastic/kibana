@@ -36,10 +36,7 @@ import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table/src/types';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Query, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../types';
 import { useAllResults } from './use_all_results';
@@ -62,6 +59,8 @@ import { transformEdgesToRecords, getNestedOrFlat } from './transform_results';
 import { getOsqueryCellRenderers } from './cell_renderers';
 import { useOsqueryTrailingColumns } from './row_actions';
 import { OsqueryResultsFlyout } from './results_flyout';
+import { useResultsFiltering } from './use_results_filtering';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -112,7 +111,6 @@ const resultsTableContainerCss = {
   height: '100%',
 };
 
-
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
   minHeight: 0,
@@ -123,7 +121,6 @@ const gridStyleOverride = {
   header: 'shade' as const,
   stripes: false,
 };
-
 
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 250, 500];
@@ -187,6 +184,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     i18n: i18nStart,
     uiActions,
     unifiedSearch,
+    discover,
     chrome,
   } = useKibana().services;
 
@@ -236,7 +234,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex: any) => {
+    (pageIndex: number) => {
       if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
         showPaginationLimitToast();
 
@@ -262,54 +260,33 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const [density, setDensity] = useState<DataGridDensity>(DataGridDensity.EXPANDED);
   const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
 
-  // Server-side filtering state (unified table only)
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [filters, setFilters] = useState<Filter[]>([]);
+  const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
 
-  // Build combined KQL string from query + filters for the server API
-  const kuery = useMemo(() => {
-    if (!queryHistoryRework) return undefined;
+  // Always call hooks unconditionally (React rules of hooks), but skip data view fetch when flag is off
+  const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView({
+    skip: !queryHistoryRework,
+  });
 
-    const parts: string[] = [];
+  const resetFilterPagination = useCallback(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, []);
 
-    // Add query bar KQL
-    if (query.query && typeof query.query === 'string' && query.query.trim()) {
-      parts.push(query.query.trim());
-    }
-
-    // Add filter pill KQL equivalents
-    for (const filter of filters) {
-      if (filter.meta?.disabled) continue;
-
-      const { key, params, negate } = filter.meta ?? {};
-      if (!key) continue;
-
-      let filterKql: string | undefined;
-      if (filter.meta?.type === 'phrase' || filter.meta?.type === 'phrases') {
-        const value = (params as { query?: string })?.query ?? params;
-        if (value !== undefined && value !== null) {
-          const escapedValue =
-            typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : String(value);
-          filterKql = `${key}: ${escapedValue}`;
-        }
-      } else if (filter.query) {
-        // Fallback: use the raw query if available
-        const matchValue = filter.query?.match?.[key] ?? filter.query?.match_phrase?.[key];
-        if (matchValue !== undefined) {
-          const val = typeof matchValue === 'object' ? matchValue.query : matchValue;
-          const escapedVal =
-            typeof val === 'string' ? `"${val.replace(/"/g, '\\"')}"` : String(val);
-          filterKql = `${key}: ${escapedVal}`;
-        }
-      }
-
-      if (filterKql) {
-        parts.push(negate ? `NOT ${filterKql}` : filterKql);
-      }
-    }
-
-    return parts.length > 0 ? parts.join(' AND ') : undefined;
-  }, [queryHistoryRework, query, filters]);
+  const {
+    query,
+    filters,
+    kuery,
+    filtersForSuggestions,
+    handleQuerySubmit,
+    handleFiltersUpdated,
+    handleFilter,
+  } = useResultsFiltering(
+    {
+      enabled: queryHistoryRework,
+      dataView,
+      actionId,
+    },
+    resetFilterPagination
+  );
 
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
@@ -325,17 +302,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     })),
   });
 
-  // Always call hooks unconditionally (React rules of hooks), but skip data view fetch when flag is off
-  const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView({
-    skip: !queryHistoryRework,
-  });
-
   const columnVisibility = useMemo(
     () => ({ visibleColumns, setVisibleColumns }),
     [visibleColumns, setVisibleColumns]
   );
-
-  const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
 
   // --- Legacy EuiDataGrid path hooks ---
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
@@ -413,6 +383,48 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [ecsMappingColumns, getFleetAppUrl]
   );
 
+  // Hoist per-row hooks to table level: call once instead of per-row
+  const { data: logsDataView } = useLogsDataView({
+    skip: !queryHistoryRework || !actionId,
+    checkOnly: true,
+  });
+
+  const locator = discover?.locator;
+  const [discoverUrl, setDiscoverUrl] = useState<string>('');
+
+  useEffect(() => {
+    const getDiscoverUrl = async () => {
+      if (!locator || !logsDataView) return;
+
+      const newUrl = await locator.getUrl({
+        indexPatternId: logsDataView.id,
+        filters: [
+          {
+            meta: {
+              index: logsDataView.id,
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'action_id',
+              params: { query: actionId },
+            },
+            query: { match_phrase: { action_id: actionId } },
+            $state: { store: FilterStateStore.APP_STATE },
+          },
+        ],
+        refreshInterval: { pause: true, value: 0 },
+        timeRange:
+          startDate && endDate
+            ? { to: endDate, from: startDate, mode: 'absolute' }
+            : { to: 'now', from: 'now-1d', mode: 'relative' },
+      });
+      setDiscoverUrl(newUrl);
+    };
+
+    getDiscoverUrl();
+  }, [actionId, endDate, startDate, locator, logsDataView]);
+
   const trailingColumns = useOsqueryTrailingColumns({
     timelines,
     appName: appName ?? '',
@@ -423,6 +435,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     startDate,
     startServices,
     rows,
+    logsDataView,
+    discoverUrl,
   });
 
   // --- Shared hooks ---
@@ -697,70 +711,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         return;
       }
+
       setPagination((prev) => ({ ...prev, pageIndex }));
     },
     [pagination.pageSize, showPaginationLimitToast]
   );
 
-  const handleServerPageSizeChange = useCallback(
-    (pageSize: number) => {
-      setPagination({ pageIndex: 0, pageSize });
-    },
-    []
-  );
-
-  // SearchBar query submit handler
-  const handleQuerySubmit = useCallback(
-    (payload: { query?: Query }) => {
-      if (payload.query) {
-        setQuery(payload.query);
-      }
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    },
-    []
-  );
-
-  // SearchBar filters update handler
-  const handleFiltersUpdated = useCallback((updatedFilters: Filter[]) => {
-    setFilters(updatedFilters);
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  const handleServerPageSizeChange = useCallback((pageSize: number) => {
+    setPagination({ pageIndex: 0, pageSize });
   }, []);
-
-  // Cell action filter handler - creates proper Filter objects (pill badges)
-  const handleFilter = useCallback(
-    (field: DataViewField, values: unknown, operation: '+' | '-') => {
-      const value = Array.isArray(values) ? values[0] : values;
-      const stringValue = typeof value === 'string' ? value : String(value);
-
-      // Only set meta.index if the field actually exists in the DataView,
-      // otherwise the FilterBar's getDisplayValueFromFilter will throw
-      const fieldExistsInDataView = dataView?.fields.getByName(field.name) !== undefined;
-
-      const newFilter: Filter = {
-        meta: {
-          ...(fieldExistsInDataView && dataView?.id ? { index: dataView.id } : {}),
-          key: field.name,
-          value: stringValue,
-          params: { query: value },
-          type: 'phrase',
-          negate: operation === '-',
-          disabled: false,
-        },
-        query: {
-          match_phrase: {
-            [field.name]: value,
-          },
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-      };
-
-      setFilters((prev) => [...prev, newFilter]);
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    },
-    [dataView]
-  );
 
   const SearchBar = unifiedSearch.ui.SearchBar;
   const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
@@ -843,27 +802,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
     return [filteredDataView] as typeof indexPatterns;
   }, [dataView, allResultsData?.columns, ecsMappingColumns, sourceFieldNames, indexPatterns]);
-
-  // Scope value suggestions to only documents belonging to this action.
-  // Without this, typing `osquery.name: ` would suggest values from ALL osquery
-  // results across all actions, not just the current one.
-  const filtersForSuggestions = useMemo<Filter[]>(
-    () => [
-      {
-        meta: {
-          index: dataView?.id,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'action_id',
-          params: { query: actionId },
-        },
-        query: { match_phrase: { action_id: actionId } },
-        $state: { store: FilterStateStore.APP_STATE },
-      },
-    ],
-    [actionId, dataView?.id]
-  );
 
   const handleCloseFlyout = useCallback(() => {
     setExpandedDoc(undefined);
@@ -963,70 +901,70 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             />
           </div>
 
-        {!allResultsData?.edges.length ? (
-          <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
-            <EuiCallOut
-              announceOnMount
-              title={generateEmptyDataMessage(data?.aggregations.totalResponded ?? 0)}
-            />
-          </EuiPanel>
-        ) : (
-          <>
-            <div css={unifiedTableWrapperCss}>
-            <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-              <UnifiedDataTable
-                ariaLabelledBy="osquery-results"
-                data-test-subj="osqueryResultsTable"
-                dataView={dataView}
-                columns={visibleColumns}
-                rows={rows}
-                loadingState={
-                  isLoading ? DataLoadingState.loading : DataLoadingState.loaded
-                }
-                expandedDoc={expandedDoc}
-                setExpandedDoc={setExpandedDoc}
-                renderDocumentView={renderDocumentView}
-                trailingControlColumns={trailingColumns}
-                externalCustomRenderers={externalCustomRenderers}
-                sort={sortingColumns.map((col) => [col.id, col.direction])}
-                onSort={handleSort}
-                onSetColumns={handleSetColumns}
-                onResize={handleResize}
-                settings={gridSettings}
-                showTimeCol={false}
-                showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
-                showColumnTokens
-                canDragAndDropColumns
-                isSortEnabled
-                isPaginationEnabled={false}
-                rowHeightState={rowHeight}
-                onUpdateRowHeight={handleUpdateRowHeight}
-                dataGridDensityState={density}
-                onUpdateDataGridDensity={handleUpdateDensity}
-                sampleSizeState={allResultsData?.total ?? 0}
-                totalHits={allResultsData?.total}
-                services={unifiedDataTableServices}
-                consumer="osquery"
-                enableComparisonMode
-                controlColumnIds={CONTROL_COLUMN_IDS}
-                onFilter={handleFilter}
-                gridStyleOverride={gridStyleOverride}
+          {!allResultsData?.edges.length ? (
+            <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
+              <EuiCallOut
+                announceOnMount
+                title={generateEmptyDataMessage(data?.aggregations.totalResponded ?? 0)}
               />
-            </CellActionsProvider>
-            </div>
+            </EuiPanel>
+          ) : (
+            <>
+              <div css={unifiedTableWrapperCss}>
+                <CellActionsProvider
+                  getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                >
+                  <UnifiedDataTable
+                    ariaLabelledBy="osquery-results"
+                    data-test-subj="osqueryResultsTable"
+                    dataView={dataView}
+                    columns={visibleColumns}
+                    rows={rows}
+                    loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+                    expandedDoc={expandedDoc}
+                    setExpandedDoc={setExpandedDoc}
+                    renderDocumentView={renderDocumentView}
+                    trailingControlColumns={trailingColumns}
+                    externalCustomRenderers={externalCustomRenderers}
+                    sort={sortingColumns.map((col) => [col.id, col.direction])}
+                    onSort={handleSort}
+                    onSetColumns={handleSetColumns}
+                    onResize={handleResize}
+                    settings={gridSettings}
+                    showTimeCol={false}
+                    showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+                    showColumnTokens
+                    canDragAndDropColumns
+                    isSortEnabled
+                    isPaginationEnabled={false}
+                    rowHeightState={rowHeight}
+                    onUpdateRowHeight={handleUpdateRowHeight}
+                    dataGridDensityState={density}
+                    onUpdateDataGridDensity={handleUpdateDensity}
+                    sampleSizeState={allResultsData?.total ?? 0}
+                    totalHits={allResultsData?.total}
+                    services={unifiedDataTableServices}
+                    consumer="osquery"
+                    enableComparisonMode
+                    controlColumnIds={CONTROL_COLUMN_IDS}
+                    onFilter={handleFilter}
+                    gridStyleOverride={gridStyleOverride}
+                  />
+                </CellActionsProvider>
+              </div>
 
-            {/* Server-side pagination controls */}
-            <EuiTablePagination
-              pageCount={totalPages}
-              activePage={pagination.pageIndex}
-              onChangePage={handleServerPageChange}
-              itemsPerPage={pagination.pageSize}
-              onChangeItemsPerPage={handleServerPageSizeChange}
-              itemsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-              showPerPageOptions
-            />
-          </>
-        )}
+              {/* Server-side pagination controls */}
+              <EuiTablePagination
+                pageCount={totalPages}
+                activePage={pagination.pageIndex}
+                onChangePage={handleServerPageChange}
+                itemsPerPage={pagination.pageSize}
+                onChangeItemsPerPage={handleServerPageSizeChange}
+                itemsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+                showPerPageOptions
+              />
+            </>
+          )}
         </div>
       </>
     );

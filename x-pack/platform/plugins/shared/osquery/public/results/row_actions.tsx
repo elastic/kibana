@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RowControlColumn, DataTableRecord } from '@kbn/discover-utils';
-import { FilterStateStore } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { OsqueryTimelinesStart } from '../types';
 import { SECURITY_APP_NAME } from '../timelines/add_to_timeline_button';
 import { useKibana } from '../common/lib/kibana';
-import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 import { getLensAttributes } from '../packs/pack_queries_status_table';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
@@ -36,6 +30,8 @@ interface RowActionsOptions {
     i18n: unknown;
     theme: unknown;
   };
+  logsDataView: DataView | undefined;
+  discoverUrl: string;
 }
 
 const ACTIONS_LABEL = i18n.translate('xpack.osquery.resultsTable.rowAction.actions', {
@@ -51,10 +47,9 @@ const VIEW_IN_LENS_LABEL = i18n.translate('xpack.osquery.resultsTable.rowAction.
   defaultMessage: 'View in Lens',
 });
 
-const ADD_TO_TIMELINE_LABEL = i18n.translate(
-  'xpack.osquery.resultsTable.rowAction.addToTimeline',
-  { defaultMessage: 'Add to Timeline' }
-);
+const ADD_TO_TIMELINE_LABEL = i18n.translate('xpack.osquery.resultsTable.rowAction.addToTimeline', {
+  defaultMessage: 'Add to Timeline',
+});
 
 const ADD_TO_CASE_LABEL = i18n.translate('xpack.osquery.resultsTable.rowAction.addToCase', {
   defaultMessage: 'Add to Case',
@@ -88,6 +83,8 @@ interface RowActionsPopoverProps {
     i18n: unknown;
     theme: unknown;
   };
+  logsDataView: DataView | undefined;
+  discoverUrl: string;
 }
 
 const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
@@ -101,54 +98,18 @@ const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
   liveQueryActionId,
   agentIds,
   startServices,
+  logsDataView,
+  discoverUrl,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
-    discover,
     application,
     lens: lensService,
     notifications: { toasts },
   } = useKibana().services;
 
-  const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover_v2;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
-
-  const [discoverUrl, setDiscoverUrl] = useState<string>('');
-
-  useEffect(() => {
-    const getDiscoverUrl = async () => {
-      if (!locator || !logsDataView) return;
-
-      const newUrl = await locator.getUrl({
-        indexPatternId: logsDataView.id,
-        filters: [
-          {
-            meta: {
-              index: logsDataView.id,
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'action_id',
-              params: { query: actionId },
-            },
-            query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
-          },
-        ],
-        refreshInterval: { pause: true, value: 0 },
-        timeRange:
-          startDate && endDate
-            ? { to: endDate, from: startDate, mode: 'absolute' }
-            : { to: 'now', from: 'now-1d', mode: 'relative' },
-      });
-      setDiscoverUrl(newUrl);
-    };
-
-    getDiscoverUrl();
-  }, [actionId, endDate, startDate, locator, logsDataView]);
 
   const togglePopover = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -162,6 +123,7 @@ const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
     if (discoverUrl) {
       window.open(discoverUrl, '_blank');
     }
+
     closePopover();
   }, [closePopover, discoverUrl]);
 
@@ -175,13 +137,14 @@ const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
             timeRange: {
               from: startDate ?? 'now-1d',
               to: endDate ?? 'now',
-              mode: (startDate || endDate) ? 'absolute' : 'relative',
+              mode: startDate || endDate ? 'absolute' : 'relative',
             },
             attributes: getLensAttributes(logsDataView, actionId),
           },
           { openInNewTab: true, skipAppLeave: true }
         );
       }
+
       closePopover();
     },
     [actionId, closePopover, endDate, lensService, logsDataView, startDate]
@@ -219,6 +182,7 @@ const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
       const onClick = (button.props as { onClick?: () => void })?.onClick;
       onClick?.();
     }
+
     closePopover();
   }, [closePopover, record.id, startServices, timelines]);
 
@@ -274,16 +238,8 @@ const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
 
     if (liveQueryActionId) {
       menuItems.push(
-        <EuiContextMenuItem
-          key="case"
-          icon="casesApp"
-          data-test-subj="osquery-row-action-case"
-        >
-          <AddToCaseWrapper
-            actionId={liveQueryActionId}
-            queryId={actionId}
-            agentIds={agentIds}
-          />
+        <EuiContextMenuItem key="case" icon="casesApp" data-test-subj="osquery-row-action-case">
+          <AddToCaseWrapper actionId={liveQueryActionId} queryId={actionId} agentIds={agentIds} />
         </EuiContextMenuItem>
       );
     }
@@ -342,41 +298,17 @@ const RowActionsPopoverComponent: React.FC<RowActionsPopoverProps> = ({
 
 RowActionsPopoverComponent.displayName = 'RowActionsPopover';
 
-const RowActionsPopover = React.memo(RowActionsPopoverComponent);
+export const RowActionsPopover = React.memo(RowActionsPopoverComponent);
 
-export function useOsqueryRowActions({
-  timelines,
-  appName,
-  liveQueryActionId,
-  agentIds,
-  actionId,
-  endDate,
-  startDate,
-  startServices,
-}: RowActionsOptions): RowControlColumn[] {
-  return useMemo(
-    () => [
-      {
-        id: 'osquery-row-actions',
-        render: (Control: React.ComponentType<any>, { record }: { record: DataTableRecord }) => (
-          <RowActionsPopover
-            Control={Control}
-            record={record}
-            actionId={actionId}
-            endDate={endDate}
-            startDate={startDate}
-            timelines={timelines}
-            appName={appName}
-            liveQueryActionId={liveQueryActionId}
-            agentIds={agentIds}
-            startServices={startServices}
-          />
-        ),
-      },
-    ],
-    [actionId, agentIds, appName, endDate, liveQueryActionId, startDate, startServices, timelines]
-  );
-}
+const ButtonControl: React.FC<{
+  iconType: string;
+  label: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}> = ({ iconType, label, onClick, ...rest }) => (
+  <EuiButtonIcon iconType={iconType} aria-label={label} onClick={onClick} size="xs" {...rest} />
+);
+ButtonControl.displayName = 'ButtonControl';
 
 interface TrailingKebabCellProps {
   rowIndex: number;
@@ -389,6 +321,8 @@ interface TrailingKebabCellProps {
   liveQueryActionId: string | undefined;
   agentIds: string[] | undefined;
   startServices: { analytics: unknown; i18n: unknown; theme: unknown };
+  logsDataView: DataView | undefined;
+  discoverUrl: string;
 }
 
 const TrailingKebabCell: React.FC<TrailingKebabCellProps> = ({
@@ -402,18 +336,11 @@ const TrailingKebabCell: React.FC<TrailingKebabCellProps> = ({
   liveQueryActionId,
   agentIds,
   startServices,
+  logsDataView,
+  discoverUrl,
 }) => {
   const record = rows[rowIndex];
   if (!record) return null;
-
-  const ButtonControl: React.ComponentType<{
-    iconType: string;
-    label: string;
-    onClick: () => void;
-    'data-test-subj'?: string;
-  }> = ({ iconType, label, onClick, ...rest }) => (
-    <EuiButtonIcon iconType={iconType} aria-label={label} onClick={onClick} size="xs" {...rest} />
-  );
 
   return (
     <RowActionsPopover
@@ -427,9 +354,13 @@ const TrailingKebabCell: React.FC<TrailingKebabCellProps> = ({
       liveQueryActionId={liveQueryActionId}
       agentIds={agentIds}
       startServices={startServices}
+      logsDataView={logsDataView}
+      discoverUrl={discoverUrl}
     />
   );
 };
+
+TrailingKebabCell.displayName = 'TrailingKebabCell';
 
 export function useOsqueryTrailingColumns({
   timelines,
@@ -441,6 +372,8 @@ export function useOsqueryTrailingColumns({
   startDate,
   startServices,
   rows,
+  logsDataView,
+  discoverUrl,
 }: RowActionsOptions & { rows: DataTableRecord[] }): EuiDataGridControlColumn[] {
   return useMemo(
     () => [
@@ -460,6 +393,8 @@ export function useOsqueryTrailingColumns({
             liveQueryActionId={liveQueryActionId}
             agentIds={agentIds}
             startServices={startServices}
+            logsDataView={logsDataView}
+            discoverUrl={discoverUrl}
           />
         ),
       },
@@ -468,8 +403,10 @@ export function useOsqueryTrailingColumns({
       actionId,
       agentIds,
       appName,
+      discoverUrl,
       endDate,
       liveQueryActionId,
+      logsDataView,
       rows,
       startDate,
       startServices,
