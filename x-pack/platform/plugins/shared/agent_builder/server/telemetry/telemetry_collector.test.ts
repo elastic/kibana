@@ -107,7 +107,7 @@ describe('telemetry_collector', () => {
       expect(registeredCollector.schema.custom_agents.total.type).toBe('long');
     });
 
-    it('defines conversations schema', () => {
+    it('defines conversations schema with token breakdown', () => {
       expect(registeredCollector.schema.conversations).toBeDefined();
       expect(registeredCollector.schema.conversations.total.type).toBe('long');
       expect(registeredCollector.schema.conversations.total_rounds.type).toBe('long');
@@ -116,9 +116,19 @@ describe('telemetry_collector', () => {
       );
       expect(registeredCollector.schema.conversations.rounds_distribution.type).toBe('array');
       expect(registeredCollector.schema.conversations.tokens_used.type).toBe('long');
+      expect(registeredCollector.schema.conversations.tokens_input.type).toBe('long');
+      expect(registeredCollector.schema.conversations.tokens_output.type).toBe('long');
       expect(registeredCollector.schema.conversations.average_tokens_per_conversation.type).toBe(
         'float'
       );
+    });
+
+    it('defines daily schema matching conversations schema', () => {
+      expect(registeredCollector.schema.daily).toBeDefined();
+      expect(registeredCollector.schema.daily.total.type).toBe('long');
+      expect(registeredCollector.schema.daily.total_rounds.type).toBe('long');
+      expect(registeredCollector.schema.daily.tokens_input.type).toBe('long');
+      expect(registeredCollector.schema.daily.tokens_output.type).toBe('long');
     });
 
     it('defines query_to_result_time schema', () => {
@@ -178,6 +188,8 @@ describe('telemetry_collector', () => {
           avg_rounds_per_conversation: 5,
           rounds_distribution: [{ bucket: '1-5', count: 100 }],
           tokens_used: 50000,
+          tokens_input: 30000,
+          tokens_output: 20000,
           average_tokens_per_conversation: 500,
         }),
         getTTFTMetrics: jest.fn().mockResolvedValue({
@@ -324,6 +336,19 @@ describe('telemetry_collector', () => {
         avg_rounds_per_conversation: 5,
         rounds_distribution: [{ bucket: '1-5', count: 100 }],
         tokens_used: 50000,
+        tokens_input: 30000,
+        tokens_output: 20000,
+        average_tokens_per_conversation: 500,
+      });
+
+      expect(result.daily).toEqual({
+        total: 100,
+        total_rounds: 500,
+        avg_rounds_per_conversation: 5,
+        rounds_distribution: [{ bucket: '1-5', count: 100 }],
+        tokens_used: 50000,
+        tokens_input: 30000,
+        tokens_output: 20000,
         average_tokens_per_conversation: 500,
       });
 
@@ -419,17 +444,21 @@ describe('telemetry_collector', () => {
 
       expect(logger.error).toHaveBeenCalledWith('Failed to collect telemetry: Fetch error');
 
+      const emptyConversationMetrics = {
+        total: 0,
+        total_rounds: 0,
+        avg_rounds_per_conversation: 0,
+        rounds_distribution: [],
+        tokens_used: 0,
+        tokens_input: 0,
+        tokens_output: 0,
+        average_tokens_per_conversation: 0,
+      };
       expect(result).toEqual({
         custom_tools: { total: 0, by_type: [] },
         custom_agents: { total: 0 },
-        conversations: {
-          total: 0,
-          total_rounds: 0,
-          avg_rounds_per_conversation: 0,
-          rounds_distribution: [],
-          tokens_used: 0,
-          average_tokens_per_conversation: 0,
-        },
+        conversations: emptyConversationMetrics,
+        daily: emptyConversationMetrics,
         query_to_result_time: {
           p50: 0,
           p75: 0,
