@@ -14,6 +14,7 @@ import {
   getSecurityLabsArtifactName,
   getSecurityLabsIndexName,
   DocumentationProduct,
+  getOpenApiSpecIndexName,
   type ProductName,
   ResourceTypes,
 } from '@kbn/product-doc-common';
@@ -45,6 +46,7 @@ import {
 
 import { overrideInferenceSettings } from './steps/create_index';
 import { LATEST_PRODUCT_VERSION } from '../../../common/consts';
+
 interface PackageInstallerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -58,16 +60,16 @@ interface PackageInstallerOpts {
 }
 // Process each product (elasticsearch and kibana)
 const OPEN_API_SPEC_PRODUCTS: Array<{
-  productName: 'elasticsearch' | 'kibana';
+  productName: DocumentationProduct.elasticsearch | DocumentationProduct.kibana;
   indexName: string;
 }> = [
   {
-    productName: DocumentationProduct.elasticsearch as 'elasticsearch',
-    indexName: '.kibana_ai_openapi_spec_elasticsearch',
+    productName: DocumentationProduct.elasticsearch,
+    indexName: getOpenApiSpecIndexName(DocumentationProduct.elasticsearch),
   },
   {
-    productName: DocumentationProduct.kibana as 'kibana',
-    indexName: '.kibana_ai_openapi_spec_kibana',
+    productName: DocumentationProduct.kibana,
+    indexName: getOpenApiSpecIndexName(DocumentationProduct.kibana),
   },
 ];
 
