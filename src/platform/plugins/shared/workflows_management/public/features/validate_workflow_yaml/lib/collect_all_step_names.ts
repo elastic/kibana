@@ -42,8 +42,8 @@ export function collectAllStepNames(yamlDocument: Document): StepNameInfo[] {
 
       // Use the same logic as getStepNode to identify step names
       const path = getPathFromAncestors(ancestors);
-      const isInSteps =
-        path.length >= 3 && (path[path.length - 3] === 'steps' || path[path.length - 3] === 'else');
+      const parentContainer = path.length >= 3 ? path[path.length - 3] : undefined;
+      const isInSteps = ['steps', 'else', 'fallback'].includes(parentContainer);
 
       if (isInSteps) {
         const [startOffset, endOffset] = node.range;
