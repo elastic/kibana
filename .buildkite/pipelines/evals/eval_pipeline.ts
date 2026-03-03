@@ -18,6 +18,7 @@ export interface EvalsSuiteMetadataEntry {
   name?: string;
   ciLabels?: string[];
   configPath?: string;
+  serverConfigSet?: string;
 }
 
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
@@ -106,6 +107,9 @@ function buildEvalsYaml({
       const includeEisModelsEnv = includeEisModels
         ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
         : null;
+      const evalServerConfigSetEnv = suite.serverConfigSet
+        ? `          EVAL_SERVER_CONFIG_SET: '${suite.serverConfigSet}'`
+        : null;
       return [
         `      - label: '${label}'`,
         `        key: ${key}`,
@@ -118,6 +122,7 @@ function buildEvalsYaml({
         ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
+        ...(evalServerConfigSetEnv ? [evalServerConfigSetEnv] : []),
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          image: family/kibana-ubuntu-2404`,

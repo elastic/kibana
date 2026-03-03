@@ -2219,14 +2219,11 @@ steps:
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
-          bool: {
-            must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],
-          },
+          match: { workflowRunId: 'execution-1' },
         },
         _source: { excludes: ['input', 'output'] },
         sort: 'startedAt:desc',
-        from: 0,
-        size: 1000,
+        size: 10000,
       });
     });
 

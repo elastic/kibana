@@ -15,6 +15,8 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
+import { Parser } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ISuggestionItem,
@@ -34,8 +36,6 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../commands/definitions/all_operators';
-import { Parser } from '../../parser';
-import type { ESQLAstAllCommands } from '../../types';
 import type {
   FunctionParameterType,
   FunctionReturnType,

@@ -24,7 +24,16 @@ export interface StepInfo {
 export interface StepPropInfo {
   path: string[];
   keyNode: YAML.Scalar<unknown>;
+  /** Value node: always a scalar (leaf property). Intermediate map nodes are not recorded in propInfos. */
   valueNode: YAML.Scalar<unknown>;
+}
+
+/**
+ * Get plain JavaScript value from a step property value node (scalar).
+ */
+export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
+  if (!valueNode) return undefined;
+  return (valueNode as { value?: unknown }).value;
 }
 
 /**
@@ -166,6 +175,14 @@ export function inspectStep(
   return result;
 }
 
+/**
+ * Collects step property metadata for leaf values only.
+ * Intermediate map nodes (e.g. `with.inputs` when it is a mapping) are not
+ * recorded; only scalar leaves (e.g. `with.inputs.field1`) appear in the result.
+ * So e.g. propInfos['with.inputs'] exists only when the value is a scalar (e.g.
+ * a liquid template string), not when it is a map. Consumers can assume every
+ * propInfo.valueNode is a Scalar.
+ */
 function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
   const result: Record<string, StepPropInfo> = {};
   if (YAML.isMap(node.value)) {
