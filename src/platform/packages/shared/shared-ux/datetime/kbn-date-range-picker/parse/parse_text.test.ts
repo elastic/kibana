@@ -107,9 +107,7 @@ describe('textToTimeRange', () => {
     expect(range.end).toBe('2016-02-03');
   });
 
-  // --- Shorthand ---
-
-  describe('shorthand', () => {
+  describe('Shorthands', () => {
     it.each([
       ['7d', 'now-7d', 'now'],
       ['-7d', 'now-7d', 'now'],
@@ -138,9 +136,7 @@ describe('textToTimeRange', () => {
     });
   });
 
-  // --- Named ranges ---
-
-  describe('named ranges', () => {
+  describe('Named ranges', () => {
     it.each([
       ['yesterday', 'now-1d/d', 'now-1d/d'],
       ['tomorrow', 'now+1d/d', 'now+1d/d'],
@@ -160,9 +156,7 @@ describe('textToTimeRange', () => {
     });
   });
 
-  // --- Natural instant (future) ---
-
-  describe('natural instant (future)', () => {
+  describe('Natural instant (future)', () => {
     it.each([
       ['7 minutes from now', 'now', 'now+7m'],
       ['in 7 minutes', 'now', 'now+7m'],
@@ -177,9 +171,7 @@ describe('textToTimeRange', () => {
     });
   });
 
-  // --- Natural duration (future) ---
-
-  it('parses future natural duration "next 7 days"', () => {
+  it('Parses future natural duration "next 7 days"', () => {
     const range = textToTimeRange('next 7 days');
 
     expect(range.isNaturalLanguage).toBe(true);
@@ -188,9 +180,7 @@ describe('textToTimeRange', () => {
     expect(range.isInvalid).toBe(false);
   });
 
-  // --- Unix timestamps ---
-
-  describe('unix timestamps', () => {
+  describe('Unix timestamps', () => {
     it('parses 10-digit seconds timestamp', () => {
       const range = textToTimeRange('1454529600');
 
@@ -210,9 +200,7 @@ describe('textToTimeRange', () => {
     });
   });
 
-  // --- Universal `-` delimiter ---
-
-  it('accepts - (with spaces) as a universal delimiter', () => {
+  describe('Universal dash delimiter', () => {
     const range = textToTimeRange('now-7d - now');
 
     expect(range.start).toBe('now-7d');
@@ -221,9 +209,7 @@ describe('textToTimeRange', () => {
     expect(range.isInvalid).toBe(false);
   });
 
-  // --- Range type combinations ---
-
-  describe('range type combinations', () => {
+  describe('Type combinations', () => {
     it.each([
       ['now-7d to now', DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
       ['now to now+7d', DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
@@ -241,9 +227,7 @@ describe('textToTimeRange', () => {
     });
   });
 
-  // --- Forgiving absolute dates ---
-
-  describe('forgiving absolute dates', () => {
+  describe('Forgiving absolute dates', () => {
     beforeAll(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
@@ -288,8 +272,6 @@ describe('textToTimeRange', () => {
       expect(textToTimeRange('not a date').isInvalid).toBe(true);
     });
   });
-
-  // --- DateOffset assertions ---
 
   describe('DateOffset', () => {
     it('populates startOffset for relative start', () => {
