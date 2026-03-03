@@ -16,6 +16,7 @@ export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 export interface EmbeddableEditorState {
   originatingApp: string;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   embeddableId?: string;
   valueInput?: object;
 
@@ -24,6 +25,39 @@ export interface EmbeddableEditorState {
    * Editors could use it continue previous search session
    */
   searchSessionId?: string;
+}
+
+/**
+ * Builds breadcrumbs for the originating app context (e.g. [App] > [Tab])
+ * from the editor state fields populated by {@link EmbeddableEditorState}.
+ */
+export function getOriginatingAppBreadcrumbs({
+  originatingApp,
+  originatingPath,
+  breadcrumbTitle,
+  originatingAppName,
+  navigateToApp,
+}: {
+  originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbTitle?: string;
+  originatingAppName?: string;
+  navigateToApp: (appId: string, options?: { path?: string }) => void;
+}): Array<{ text: string; onClick: () => void }> {
+  if (!breadcrumbTitle || !originatingApp || !originatingPath) return [];
+  const lastSlashIndex = originatingPath.lastIndexOf('/');
+  const listingPath = lastSlashIndex > 0 ? originatingPath.substring(0, lastSlashIndex) : undefined;
+
+  return [
+    {
+      text: originatingAppName ?? originatingApp,
+      onClick: () => navigateToApp(originatingApp, listingPath ? { path: listingPath } : undefined),
+    },
+    {
+      text: breadcrumbTitle,
+      onClick: () => navigateToApp(originatingApp, { path: originatingPath }),
+    },
+  ];
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {

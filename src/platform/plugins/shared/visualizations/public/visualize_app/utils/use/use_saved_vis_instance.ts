@@ -35,7 +35,9 @@ export const useSavedVisInstance = (
   isChromeVisible: boolean | undefined,
   originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined,
-  embeddableInput?: VisualizeInput
+  embeddableInput?: VisualizeInput,
+  originatingPath?: string,
+  breadcrumbTitle?: string
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -112,7 +114,14 @@ export const useSavedVisInstance = (
 
         if (savedVis.id) {
           const breadcrumbs = getEditBreadcrumbs(
-            { originatingAppName, redirectToOrigin },
+            {
+              originatingApp,
+              originatingAppName,
+              originatingPath,
+              breadcrumbTitle,
+              redirectToOrigin,
+              navigateToApp,
+            },
             savedVis.title
           );
           if (serverless?.setBreadcrumbs) {
@@ -129,8 +138,12 @@ export const useSavedVisInstance = (
         } else {
           const createBreadcrumbs = getCreateBreadcrumbs({
             byValue: Boolean(originatingApp),
+            originatingApp,
             originatingAppName,
+            originatingPath,
+            breadcrumbTitle,
             redirectToOrigin,
+            navigateToApp,
           });
           if (serverless?.setBreadcrumbs) {
             serverless.setBreadcrumbs(
@@ -210,6 +223,8 @@ export const useSavedVisInstance = (
     state.savedVisInstance,
     state.visEditorController,
     embeddableInput,
+    originatingPath,
+    breadcrumbTitle,
   ]);
 
   useEffect(() => {

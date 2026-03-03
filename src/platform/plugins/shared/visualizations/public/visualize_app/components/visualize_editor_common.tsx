@@ -118,6 +118,7 @@ interface VisualizeEditorCommonProps {
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   eventEmitter?: EventEmitter;
@@ -135,6 +136,7 @@ export const VisualizeEditorCommon = ({
   onAppLeave,
   originatingApp,
   originatingPath,
+  breadcrumbTitle,
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
@@ -220,6 +222,7 @@ export const VisualizeEditorCommon = ({
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
           originatingPath={originatingPath}
+          breadcrumbTitle={breadcrumbTitle}
           setOriginatingApp={setOriginatingApp}
           visInstance={visInstance}
           stateContainer={appState}

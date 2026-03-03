@@ -64,6 +64,7 @@ export interface TopNavConfigParams {
   openInspector: () => void;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
@@ -97,6 +98,7 @@ export const getTopNavConfig = (
     openInspector,
     originatingApp,
     originatingPath,
+    breadcrumbTitle,
     setOriginatingApp,
     hasUnappliedChanges,
     visInstance,
@@ -227,17 +229,22 @@ export const getTopNavConfig = (
             const originatingAppName = originatingApp
               ? stateTransfer.getAppNameFromId(originatingApp)
               : undefined;
-            chrome.setBreadcrumbs(
-              getEditBreadcrumbs(
-                {
-                  ...(originatingAppName && {
-                    originatingAppName,
-                    redirectToOrigin: navigateToOriginatingApp,
-                  }),
-                },
-                savedVis.lastSavedTitle
-              )
+            const breadcrumbs = getEditBreadcrumbs(
+              {
+                ...(originatingAppName && {
+                  originatingAppName,
+                  redirectToOrigin: navigateToOriginatingApp,
+                }),
+                originatingApp,
+                originatingPath,
+                breadcrumbTitle,
+                navigateToApp: application.navigateToApp,
+              },
+              savedVis.lastSavedTitle
             );
+            chrome.setBreadcrumbs(breadcrumbs, {
+              project: { value: breadcrumbs, absolute: true },
+            });
           }
 
           if (id !== visualizationIdFromUrl) {

@@ -8,4 +8,5 @@
  */
 
 export { EmbeddableStateTransfer } from './embeddable_state_transfer';
+export { getOriginatingAppBreadcrumbs } from './types';
 export type { EmbeddableEditorState, EmbeddablePackageState } from './types';

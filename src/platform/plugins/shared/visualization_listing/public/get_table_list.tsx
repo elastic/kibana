@@ -24,6 +24,7 @@ export interface VisualizationListingPageServices {
   contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
   savedObjectsTagging?: SavedObjectTaggingOssPluginStart['getTaggingApi'];
+  breadcrumbTitle?: string;
 }
 
 export const getTableList = (
@@ -45,6 +46,7 @@ export const getTableList = (
         embeddable={services.embeddable}
         savedObjectsTagging={services.savedObjectsTagging?.()}
         parentProps={parentProps}
+        breadcrumbTitle={services.breadcrumbTitle}
       />
     </TableListViewKibanaProvider>
   );

@@ -280,6 +280,9 @@ export function App({
         isByValueMode,
         currentDocTitle,
         redirectToOrigin,
+        originatingApp: incomingState?.originatingApp,
+        originatingPath: incomingState?.originatingPath,
+        breadcrumbTitle: incomingState?.breadcrumbTitle,
         isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
         originatingAppName: getOriginatingAppName(),
       }
@@ -296,6 +299,9 @@ export function App({
     legacyEditorAppName,
     serverless,
     initialContext,
+    incomingState?.originatingApp,
+    incomingState?.originatingPath,
+    incomingState?.breadcrumbTitle,
   ]);
 
   const switchDatasource = useCallback(() => {

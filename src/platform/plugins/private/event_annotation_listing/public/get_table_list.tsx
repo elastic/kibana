@@ -33,6 +33,7 @@ export interface EventAnnotationListingPageServices {
   LensEmbeddableComponent: LensEmbeddableComponent;
   sessionService: ISessionService;
   embeddable: EmbeddableStart;
+  breadcrumbTitle?: string;
 }
 
 export const getTableList = (
@@ -60,11 +61,13 @@ export const getTableList = (
           queryInputServices={services.queryInputServices}
           navigateToLens={async () => {
             const currentApp = await firstValueFrom(services.core.application.currentAppId$);
+            if (!currentApp) return;
             await services.embeddable.getStateTransfer().navigateToEditor('lens', {
               path: '',
               state: {
-                originatingApp: currentApp ?? 'dashboards',
+                originatingApp: currentApp,
                 originatingPath: window.location.hash,
+                breadcrumbTitle: services.breadcrumbTitle,
               },
             });
           }}

@@ -16,6 +16,11 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardListingPageProps } from './dashboard_listing_page';
 import { DashboardListingPage } from './dashboard_listing_page';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({}),
+}));
+
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 jest.mock('../../dashboard_listing/dashboard_listing', () => {
