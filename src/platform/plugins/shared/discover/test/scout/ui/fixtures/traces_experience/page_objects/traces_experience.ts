@@ -50,10 +50,6 @@ export class TracesExperiencePage {
     this.spanLinksSection = page.testSubj.locator('unifiedDocViewerSpanLinksAccordion');
   }
 
-  public getColumnHeader(name: string): Locator {
-    return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
-  }
-
   public getRedMetricsChartTitle(title: string): Locator {
     return this.redMetricsGrid.getByText(title);
   }

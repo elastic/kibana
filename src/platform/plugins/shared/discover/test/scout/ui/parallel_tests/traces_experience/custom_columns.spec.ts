@@ -43,10 +43,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify trace-specific column headers', async () => {
-          const { tracesExperience } = pageObjects;
-
-          for (const column of tracesExperience.expectedColumns) {
-            await expect(tracesExperience.getColumnHeader(column)).toBeVisible();
+          for (const column of pageObjects.tracesExperience.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
         });
       }
@@ -58,10 +56,8 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
-        const { tracesExperience } = pageObjects;
-
-        for (const column of tracesExperience.expectedColumns) {
-          await expect(tracesExperience.getColumnHeader(column)).toBeVisible();
+        for (const column of pageObjects.tracesExperience.expectedColumns) {
+          await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
         }
       });
     });

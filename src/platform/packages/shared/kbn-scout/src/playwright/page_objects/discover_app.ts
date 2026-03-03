@@ -241,8 +241,12 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  getColumnHeader(name: string): Locator {
+    return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  }
+
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
+    const header = this.getColumnHeader(field);
     await header.click();
     await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
       state: 'visible',

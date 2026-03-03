@@ -50,9 +50,8 @@ spaceTest.describe(
           });
 
           await spaceTest.step('verify trace-specific columns are not present', async () => {
-            const { tracesExperience } = pageObjects;
-            for (const column of tracesExperience.profileSpecificColumns) {
-              await expect(tracesExperience.getColumnHeader(column)).toBeHidden();
+            for (const column of pageObjects.tracesExperience.profileSpecificColumns) {
+              await expect(pageObjects.discover.getColumnHeader(column)).toBeHidden();
             }
           });
         }
