@@ -6,14 +6,35 @@
  */
 import React, { useState, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
+import type { GroupOption } from '@kbn/grouping';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 import { ASSET_FIELDS, DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
 import { GroupWrapper } from './grouping/asset_inventory_grouping';
-import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
-import { AssetInventoryDataTable } from './asset_inventory_data_table';
+import { useAssetInventoryGrouping, type GroupingLabelOverrides } from './grouping/use_asset_inventory_grouping';
+import { AssetInventoryDataTable, type AssetInventoryDataTableProps } from './asset_inventory_data_table';
 
-export interface AssetInventoryTableSectionProps {
+export interface DataTableCustomizationProps {
+  onDocumentOpen?: (doc: DataTableRecord) => void;
+  onDocumentClose?: () => void;
+  getLeadingControlColumns?: (rows: DataTableRecord[]) => EuiDataGridControlColumn[];
+  rowTypeLabel?: string;
+  columnHeaderOverrides?: Record<string, string>;
+  inspectQueryId?: string;
+  inspectTitle?: string;
+  setQuery?: AssetInventoryDataTableProps['setQuery'];
+  deleteQuery?: AssetInventoryDataTableProps['deleteQuery'];
+  showLastUpdated?: boolean;
+  defaultColumns?: AssetInventoryDataTableProps['defaultColumns'];
+  additionalCustomRenderers?: AssetInventoryDataTableProps['additionalCustomRenderers'];
+}
+
+export interface AssetInventoryTableSectionProps extends DataTableCustomizationProps {
   state: AssetInventoryURLStateResult;
+  groupingOptions?: GroupOption[];
+  groupingId?: string;
+  groupingLabelOverrides?: GroupingLabelOverrides;
 }
 
 /**
@@ -30,13 +51,31 @@ export interface AssetInventoryTableSectionProps {
  *                 |-- DataTableWithLocalPagination
  *                     |-- AssetInventoryDataTable (grouping level = 2)
  */
-export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
-  const { grouping } = useAssetInventoryGrouping({ state });
+export const AssetInventoryTableSection = ({
+  state,
+  groupingOptions,
+  groupingId,
+  groupingLabelOverrides,
+  ...dataTableProps
+}: AssetInventoryTableSectionProps) => {
+  const groupingDisabled =
+    groupingOptions !== undefined && groupingOptions.length === 0;
+
+  const { grouping } = useAssetInventoryGrouping({
+    state,
+    groupingOptions,
+    groupingId,
+    groupingLabelOverrides,
+  });
   const selectedGroup = grouping.selectedGroups[0];
 
-  if (selectedGroup === 'none') {
+  if (groupingDisabled || selectedGroup === 'none') {
     return (
-      <AssetInventoryDataTable state={state} groupSelectorComponent={grouping.groupSelector} />
+      <AssetInventoryDataTable
+        state={state}
+        groupSelectorComponent={groupingDisabled ? undefined : grouping.groupSelector}
+        {...dataTableProps}
+      />
     );
   }
 
@@ -46,6 +85,8 @@ export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSection
       selectedGroup={selectedGroup}
       selectedGroupOptions={grouping.selectedGroups}
       groupSelectorComponent={grouping.groupSelector}
+      groupingLabelOverrides={groupingLabelOverrides}
+      dataTableProps={dataTableProps}
     />
   );
 };
@@ -55,6 +96,8 @@ interface GroupWithURLPaginationProps {
   selectedGroup: string;
   selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
+  groupingLabelOverrides?: GroupingLabelOverrides;
+  dataTableProps?: DataTableCustomizationProps;
 }
 
 const GroupWithURLPagination = ({
@@ -62,11 +105,14 @@ const GroupWithURLPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  groupingLabelOverrides,
+  dataTableProps,
 }: GroupWithURLPaginationProps) => {
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
     state,
     selectedGroup,
     groupFilters: [],
+    groupingLabelOverrides,
   });
 
   /**
@@ -89,6 +135,8 @@ const GroupWithURLPagination = ({
           groupingLevel={1}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
+          groupingLabelOverrides={groupingLabelOverrides}
+          dataTableProps={dataTableProps}
         />
       )}
       activePageIndex={state.pageIndex}
@@ -110,6 +158,8 @@ interface GroupContentProps {
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
+  groupingLabelOverrides?: GroupingLabelOverrides;
+  dataTableProps?: DataTableCustomizationProps;
 }
 
 /**
@@ -157,6 +207,8 @@ const GroupContent = ({
   selectedGroupOptions,
   parentGroupFilters,
   groupSelectorComponent,
+  groupingLabelOverrides,
+  dataTableProps,
 }: GroupContentProps) => {
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
@@ -176,6 +228,8 @@ const GroupContent = ({
         selectedGroupOptions={selectedGroupOptions}
         parentGroupFilters={JSON.stringify(newParentGroupFilters)}
         groupSelectorComponent={groupSelectorComponent}
+        groupingLabelOverrides={groupingLabelOverrides}
+        dataTableProps={dataTableProps}
       />
     );
   }
@@ -185,6 +239,7 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
+      dataTableProps={dataTableProps}
     />
   );
 };
@@ -201,6 +256,8 @@ const GroupWithLocalPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  groupingLabelOverrides,
+  dataTableProps,
 }: GroupWithLocalPaginationProps) => {
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
@@ -211,6 +268,7 @@ const GroupWithLocalPagination = ({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
     groupFilters,
+    groupingLabelOverrides,
   });
 
   /**
@@ -233,6 +291,8 @@ const GroupWithLocalPagination = ({
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
           parentGroupFilters={JSON.stringify(groupFilters)}
+          groupingLabelOverrides={groupingLabelOverrides}
+          dataTableProps={dataTableProps}
         />
       )}
       activePageIndex={subgroupPageIndex}
@@ -247,10 +307,11 @@ const GroupWithLocalPagination = ({
   );
 };
 
-interface DataTableWithLocalPagination {
+interface DataTableWithLocalPaginationProps {
   state: AssetInventoryURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
+  dataTableProps?: DataTableCustomizationProps;
 }
 
 const getDataGridFilter = (filter: Filter | null) => {
@@ -264,7 +325,8 @@ const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
-}: DataTableWithLocalPagination) => {
+  dataTableProps,
+}: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
@@ -289,5 +351,11 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <AssetInventoryDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
+  return (
+    <AssetInventoryDataTable
+      state={newState}
+      height={DEFAULT_TABLE_SECTION_HEIGHT}
+      {...dataTableProps}
+    />
+  );
 };

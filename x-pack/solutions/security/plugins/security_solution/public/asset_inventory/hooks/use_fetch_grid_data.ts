@@ -47,7 +47,7 @@ const getAssetsQuery = (
   }
 
   return {
-    index: indexPattern,
+    index: [indexPattern],
     sort: getMultiFieldsSort(sort),
     runtime_mappings: getRuntimeMappingsFromSort(
       ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS,
@@ -93,21 +93,23 @@ export function useFetchGridData(options: UseAssetsOptions) {
   return useInfiniteQuery(
     [QUERY_KEY_ASSET_INVENTORY, QUERY_KEY_GRID_DATA, { params: options }],
     async ({ pageParam }) => {
+      const queryParams = getAssetsQuery(options, pageParam, dataViewIndexPattern);
       const {
+        rawResponse,
         rawResponse: { hits },
       } = await lastValueFrom(
         data.search.search<LatestAssetsRequest, LatestAssetsResponse>({
-          params: getAssetsQuery(
-            options,
-            pageParam,
-            dataViewIndexPattern
-          ) as LatestAssetsRequest['params'],
+          params: queryParams as LatestAssetsRequest['params'],
         })
       );
 
       return {
         page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
+        inspect: {
+          dsl: [JSON.stringify(queryParams)],
+          response: [JSON.stringify(rawResponse)],
+        },
       };
     },
     {

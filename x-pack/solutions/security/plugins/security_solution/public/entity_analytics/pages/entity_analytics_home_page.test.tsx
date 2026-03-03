@@ -48,10 +48,50 @@ jest.mock('../components/home/anomalies_placeholder_panel', () => ({
   ),
 }));
 
-jest.mock('../components/home/entities_table', () => ({
-  EntitiesTable: () => (
+jest.mock('../../asset_inventory/components/asset_inventory_table_section', () => ({
+  AssetInventoryTableSection: () => (
     <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
   ),
+}));
+
+jest.mock('../components/home/use_entity_store_data_view', () => ({
+  useEntityStoreDataView: jest.fn(() => ({
+    dataView: { id: 'test-entity-store', fields: [] },
+    isLoading: false,
+    error: undefined,
+  })),
+}));
+
+jest.mock('../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state', () => ({
+  useAssetInventoryURLState: jest.fn(() => ({
+    sort: [],
+    filters: [],
+    pageFilters: [],
+    query: { bool: { filter: [], must: [], must_not: [], should: [] } },
+    pageIndex: 0,
+    urlQuery: { query: { language: 'kuery', query: '' }, filters: [] },
+    setUrlQuery: jest.fn(),
+    setTableOptions: jest.fn(),
+    handleUpdateQuery: jest.fn(),
+    pageSize: 25,
+    setPageSize: jest.fn(),
+    onChangeItemsPerPage: jest.fn(),
+    onChangePage: jest.fn(),
+    onSort: jest.fn(),
+    onResetFilters: jest.fn(),
+    columnsLocalStorageKey: 'entityAnalytics:columns',
+    getRowsFromPages: jest.fn(() => []),
+  })),
+}));
+
+jest.mock('../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn(() => 'default'),
+}));
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(() => ({
+    openRightPanel: jest.fn(),
+  })),
 }));
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;

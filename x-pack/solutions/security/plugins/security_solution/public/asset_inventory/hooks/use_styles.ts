@@ -73,6 +73,8 @@ export const useStyles = () => {
 
     & .unifiedDataTable__cellValue {
       font-family: ${euiTheme.font.family};
+      display: flex;
+      width: 200px;
     }
     & .unifiedDataTable__inner .euiDataGrid__controls {
       border-top: none;
@@ -80,15 +82,13 @@ export const useStyles = () => {
     & .euiDataGrid__leftControls {
       flex-grow: 1;
     }
-  `;
-
-  const groupBySelector = css`
-    margin-left: auto;
+    & [data-test-subj='dataGridHeaderCell-actions'] {
+      align-items: center !important;
+    }
   `;
 
   return {
     gridStyle,
-    groupBySelector,
     gridContainer,
     gridProgressBar,
   };

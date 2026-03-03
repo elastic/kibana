@@ -38,6 +38,7 @@ import {
   ASSET_FIELDS,
   LOCAL_STORAGE_ASSETS_GROUPING_KEY,
 } from '../../constants';
+import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import { groupPanelRenderer, groupStatsRenderer } from './utils/asset_inventory_group_renderer';
 import { type AssetsGroupingAggregation, useFetchGroupedData } from './use_fetch_grouped_data';
 import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './translations';
@@ -127,30 +128,46 @@ export const isAssetsRootGroupingAggregation = (
 /**
  * Utility hook to get the latest assets grouping data for the assets page
  */
+export interface GroupingLabelOverrides {
+  unit?: (n: number) => string;
+  groupsUnit?: (n: number, selectedGroup: string, hasNullGroup: boolean) => string;
+  title?: string;
+  getGroupStats?: (
+    selectedGroup: string,
+    bucket: RawBucket<AssetsGroupingAggregation>
+  ) => GroupStatsItem[];
+}
+
 export const useAssetInventoryGrouping = ({
   state,
   groupFilters = [],
   selectedGroup,
+  groupingOptions,
+  groupingId,
+  groupingLabelOverrides,
 }: {
   state: AssetInventoryURLStateResult;
   groupFilters?: Filter[];
   selectedGroup?: string;
+  groupingOptions?: GroupOption[];
+  groupingId?: string;
+  groupingLabelOverrides?: GroupingLabelOverrides;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const grouping = useGrouping({
     componentProps: {
-      unit: assetsUnit,
+      unit: groupingLabelOverrides?.unit ?? assetsUnit,
       groupPanelRenderer,
-      getGroupStats: groupStatsRenderer,
+      getGroupStats: groupingLabelOverrides?.getGroupStats ?? groupStatsRenderer,
       groupsUnit: assetGroupsUnit,
     },
-    defaultGroupingOptions,
+    defaultGroupingOptions: groupingOptions ?? defaultGroupingOptions,
     fields: dataViewIsLoading ? [] : dataView.fields,
-    groupingId: LOCAL_STORAGE_ASSETS_GROUPING_KEY,
+    groupingId: groupingId ?? LOCAL_STORAGE_ASSETS_GROUPING_KEY,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
-    title: groupingTitle,
+    title: groupingLabelOverrides?.title ?? groupingTitle,
     onGroupChange: ({ groupByFields }) => {
       setUrlQuery({
         groupBy: groupByFields,
