@@ -17,7 +17,6 @@ import type {
   NavigationItemInfo,
   SolutionId,
 } from '@kbn/core-chrome-browser';
-import { CustomizeNavigationModal } from '@kbn/core-chrome-navigation';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
@@ -41,9 +40,11 @@ export const CustomizeNavigationMenuItem: React.FC<CustomizeNavigationMenuItemPr
 }) => {
   const solutionId = useObservable(core.chrome.getActiveSolutionNavId$(), null);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback(async () => {
     if (!solutionId) return;
     closePopover();
+
+    const { CustomizeNavigationModal } = await import('@kbn/core-chrome-navigation');
 
     const session = core.overlays.openModal(
       toMountPoint(
