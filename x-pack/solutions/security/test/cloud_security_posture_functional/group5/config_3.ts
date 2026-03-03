@@ -14,7 +14,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseConfig.getAll(),
     testFiles: [require.resolve('./index_3')],
     junit: {
-      reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 5 Part 3 (Entity Preview Flyout)',
+      reportName:
+        'X-Pack Cloud Security Posture Functional Tests - Group 5 Part 3 (Entity Preview Flyout)',
     },
   };
 }

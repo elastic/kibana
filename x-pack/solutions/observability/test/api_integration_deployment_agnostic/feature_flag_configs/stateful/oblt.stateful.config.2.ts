@@ -13,6 +13,7 @@ export default createStatefulFeatureFlagTestConfig<typeof services>({
   testFiles: [require.resolve('./oblt.index.2.ts')],
   kbnServerArgs: ['--xpack.actions.preconfigured'],
   junit: {
-    reportName: 'Stateful Observability - Deployment-agnostic Feature Flag API Integration Tests (2)',
+    reportName:
+      'Stateful Observability - Deployment-agnostic Feature Flag API Integration Tests (2)',
   },
 });
