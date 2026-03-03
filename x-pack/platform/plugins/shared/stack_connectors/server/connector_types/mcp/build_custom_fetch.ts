@@ -15,10 +15,6 @@ interface TlsConnectOptions {
   rejectUnauthorized?: boolean;
   checkServerIdentity?: () => undefined;
   ca?: string | Buffer;
-  cert?: Buffer;
-  key?: Buffer;
-  pfx?: Buffer;
-  passphrase?: string;
 }
 
 /**
@@ -26,9 +22,12 @@ interface TlsConnectOptions {
  * the logic in `getNodeSSLOptions` from `@kbn/actions-utils`.
  */
 function getTlsOptionsFromVerificationMode(
+  logger: Logger,
   verificationMode?: string
 ): Pick<TlsConnectOptions, 'rejectUnauthorized' | 'checkServerIdentity'> {
   switch (verificationMode) {
+    case undefined:
+      return {};
     case 'none':
       return { rejectUnauthorized: false };
     case 'certificate':
@@ -36,45 +35,38 @@ function getTlsOptionsFromVerificationMode(
     case 'full':
       return { rejectUnauthorized: true };
     default:
-      return {};
+      logger.warn(`Unknown ssl verificationMode: ${verificationMode}`);
+      return { rejectUnauthorized: true };
   }
 }
 
 /**
  * Builds TLS connect options from global SSL settings plus optional
  * per-host overrides from `customHostSettings`.
+ *
+ * Mirrors the logic in `getCustomAgents` from `@kbn/actions-utils`:
+ * - Global `verificationMode` sets the base `rejectUnauthorized` / `checkServerIdentity`
+ * - Per-host `certificateAuthoritiesData` overrides `ca`
+ * - Per-host `verificationMode` overrides `rejectUnauthorized` / `checkServerIdentity`
  */
 function buildTlsConnectOptions(
+  logger: Logger,
   sslSettings: SSLSettings,
   customHostSettings?: CustomHostSettings
 ): TlsConnectOptions {
   const options: TlsConnectOptions = {
-    ...getTlsOptionsFromVerificationMode(sslSettings.verificationMode),
+    ...getTlsOptionsFromVerificationMode(logger, sslSettings.verificationMode),
   };
-
-  if (sslSettings.ca) {
-    options.ca = sslSettings.ca;
-  }
-  if (sslSettings.cert) {
-    options.cert = sslSettings.cert;
-  }
-  if (sslSettings.key) {
-    options.key = sslSettings.key;
-  }
-  if (sslSettings.pfx) {
-    options.pfx = sslSettings.pfx;
-  }
-  if (sslSettings.passphrase) {
-    options.passphrase = sslSettings.passphrase;
-  }
 
   const hostSsl = customHostSettings?.ssl;
   if (hostSsl) {
+    logger.debug(`Creating customized connection settings for: ${customHostSettings.url}`);
+
     if (hostSsl.certificateAuthoritiesData) {
       options.ca = hostSsl.certificateAuthoritiesData;
     }
     if (hostSsl.verificationMode) {
-      Object.assign(options, getTlsOptionsFromVerificationMode(hostSsl.verificationMode));
+      Object.assign(options, getTlsOptionsFromVerificationMode(logger, hostSsl.verificationMode));
     }
   }
 
@@ -85,11 +77,14 @@ function buildTlsConnectOptions(
  * Determines whether a proxy should be used for the given target URL,
  * based on `proxyBypassHosts` and `proxyOnlyHosts` configuration.
  */
-function shouldUseProxy(proxySettings: ProxySettings, targetUrl: string): boolean {
+function shouldUseProxy(logger: Logger, proxySettings: ProxySettings, targetUrl: string): boolean {
   let parsed: URL;
   try {
     parsed = new URL(targetUrl);
   } catch {
+    logger.warn(
+      `error determining proxy state for invalid url "${targetUrl}", using direct connection`
+    );
     return false;
   }
 
@@ -122,19 +117,30 @@ export function buildCustomFetch(
   const proxySettings = configurationUtilities.getProxySettings();
   const customHostSettings = configurationUtilities.getCustomHostSettings(targetUrl);
 
-  const tlsOptions = buildTlsConnectOptions(sslSettings, customHostSettings);
+  const tlsOptions = buildTlsConnectOptions(logger, sslSettings, customHostSettings);
 
   let dispatcher: Dispatcher;
 
-  if (proxySettings && shouldUseProxy(proxySettings, targetUrl)) {
+  if (proxySettings && shouldUseProxy(logger, proxySettings, targetUrl)) {
+    let proxyUrl: URL;
+    try {
+      proxyUrl = new URL(proxySettings.proxyUrl);
+    } catch {
+      logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored, using direct connection`);
+      dispatcher = new Agent({ connect: tlsOptions });
+
+      return createFetchWithDispatcher(dispatcher);
+    }
+
     logger.debug(`MCP connector: using proxy ${proxySettings.proxyUrl} for ${targetUrl}`);
 
     const proxyTls = getTlsOptionsFromVerificationMode(
+      logger,
       proxySettings.proxySSLSettings.verificationMode
     );
 
     dispatcher = new ProxyAgent({
-      uri: proxySettings.proxyUrl,
+      uri: proxyUrl.toString(),
       requestTls: tlsOptions,
       proxyTls,
       headers: proxySettings.proxyHeaders,
@@ -143,6 +149,10 @@ export function buildCustomFetch(
     dispatcher = new Agent({ connect: tlsOptions });
   }
 
+  return createFetchWithDispatcher(dispatcher);
+}
+
+function createFetchWithDispatcher(dispatcher: Dispatcher): FetchLike {
   return (url: string | URL, init?: RequestInit): Promise<Response> => {
     return fetch(url, {
       ...init,

@@ -87,6 +87,22 @@ describe('buildCustomFetch', () => {
       expect(connectOpts.checkServerIdentity()).toBeUndefined();
     });
 
+    it('warns and defaults to rejectUnauthorized=true for unknown verificationMode', () => {
+      configurationUtilities.getSSLSettings.mockReturnValue({
+        // @ts-expect-error invalid verification mode
+        verificationMode: 'bogus',
+      });
+      configurationUtilities.getProxySettings.mockReturnValue(undefined);
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      expect(logger.warn).toHaveBeenCalledWith('Unknown ssl verificationMode: bogus');
+      expect(Agent).toHaveBeenCalledWith({
+        connect: expect.objectContaining({ rejectUnauthorized: true }),
+      });
+    });
+
     it('applies custom host SSL CA overrides', () => {
       configurationUtilities.getSSLSettings.mockReturnValue({ verificationMode: 'full' });
       configurationUtilities.getProxySettings.mockReturnValue(undefined);
@@ -106,28 +122,26 @@ describe('buildCustomFetch', () => {
           rejectUnauthorized: false,
         }),
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Creating customized connection settings')
+      );
     });
 
-    it('applies global SSL cert/key/pfx settings', () => {
-      const cert = Buffer.from('cert');
-      const key = Buffer.from('key');
-      configurationUtilities.getSSLSettings.mockReturnValue({
-        verificationMode: 'full',
-        cert,
-        key,
-      });
+    it('applies custom host verificationMode=certificate with checkServerIdentity', () => {
+      configurationUtilities.getSSLSettings.mockReturnValue({ verificationMode: 'full' });
       configurationUtilities.getProxySettings.mockReturnValue(undefined);
-      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+      configurationUtilities.getCustomHostSettings.mockReturnValue({
+        url: 'https://mcp-server.example.com:443',
+        ssl: {
+          verificationMode: 'certificate',
+        },
+      });
 
       buildCustomFetch(configurationUtilities, logger, targetUrl);
 
-      expect(Agent).toHaveBeenCalledWith({
-        connect: expect.objectContaining({
-          rejectUnauthorized: true,
-          cert,
-          key,
-        }),
-      });
+      const connectOpts = (Agent as unknown as jest.Mock).mock.calls[0][0].connect;
+      expect(connectOpts.rejectUnauthorized).toBe(true);
+      expect(typeof connectOpts.checkServerIdentity).toBe('function');
     });
   });
 
@@ -150,7 +164,7 @@ describe('buildCustomFetch', () => {
       expect(ProxyAgent).toHaveBeenCalledTimes(1);
       expect(ProxyAgent).toHaveBeenCalledWith(
         expect.objectContaining({
-          uri: proxySettings.proxyUrl,
+          uri: expect.stringContaining('proxy.example.com:8080'),
           requestTls: expect.objectContaining({ rejectUnauthorized: true }),
           proxyTls: expect.objectContaining({ rejectUnauthorized: true }),
           headers: proxySettings.proxyHeaders,
@@ -220,6 +234,36 @@ describe('buildCustomFetch', () => {
           proxyTls: expect.objectContaining({ rejectUnauthorized: false }),
         })
       );
+    });
+
+    it('falls back to Agent when proxy URL is invalid', () => {
+      const invalidProxySettings = {
+        ...proxySettings,
+        proxyUrl: 'not-a-valid-url',
+      };
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue(invalidProxySettings);
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      buildCustomFetch(configurationUtilities, logger, targetUrl);
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid proxy URL'));
+      expect(Agent).toHaveBeenCalledTimes(1);
+      expect(ProxyAgent).not.toHaveBeenCalled();
+    });
+
+    it('warns when target URL is invalid for proxy bypass check', () => {
+      configurationUtilities.getSSLSettings.mockReturnValue({});
+      configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+      configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
+
+      buildCustomFetch(configurationUtilities, logger, 'not-a-url');
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('error determining proxy state')
+      );
+      expect(Agent).toHaveBeenCalledTimes(1);
+      expect(ProxyAgent).not.toHaveBeenCalled();
     });
   });
 
