@@ -11,7 +11,7 @@ import { EuiDelayRender } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
@@ -69,6 +69,30 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const [activeSection, setActiveSection] = useRestorableState('activeSection', undefined);
   const [activeDocId, setActiveDocId] = useRestorableState('activeDocId', null);
   const [activeDocIndex, setActiveDocIndex] = useRestorableState('activeDocIndex', undefined);
+
+  // When restoring state (e.g., returning from another Discover tab), defer mounting
+  // FullScreenWaterfall by one render cycle so the parent doc viewer flyout's EUI
+  // managed session registers first. Both flyouts use session="start", which creates
+  // a LEVEL_MAIN managed session. EUI's useLayoutEffect runs bottom-up, so without
+  // deferral the child session registers before the parent, pushing the trace timeline
+  // into the session history stack instead of the current session.
+  // Using useEffect (not useLayoutEffect) ensures the parent's layout effects have
+  // already completed by the time we trigger the deferred mount.
+  const isRestoringRef = useRef(showFullScreenWaterfall);
+  const [renderReady, setRenderReady] = useState(!isRestoringRef.current);
+
+  useEffect(() => {
+    if (isRestoringRef.current) {
+      setRenderReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (renderReady) {
+      isRestoringRef.current = false;
+    }
+  }, [renderReady]);
+
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const FocusedTraceWaterfall = discoverShared.features.registry.getById(
@@ -115,7 +139,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
 
   return (
     <>
-      {showFullScreenWaterfall ? (
+      {showFullScreenWaterfall && renderReady ? (
         <FullScreenWaterfall
           traceId={traceId}
           rangeFrom={rangeFrom}
@@ -126,6 +150,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           docIndex={activeDocIndex}
           activeFlyoutType={activeFlyoutType}
           activeSection={activeSection}
+          skipOpenAnimation={isRestoringRef.current}
           onNodeClick={(nodeSpanId) => {
             setActiveSection(undefined);
             setActiveDocId(nodeSpanId);
