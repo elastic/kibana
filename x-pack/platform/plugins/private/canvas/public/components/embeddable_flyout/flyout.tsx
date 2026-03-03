@@ -91,7 +91,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       // Otherwise we fallback to the embeddable type specific expressions.
       if (isByValueEnabled) {
         partialElement.expression = embeddableInputToExpression(
-          { ref_id: id },
+          { savedObjectId: id },
           type,
           undefined,
           true
