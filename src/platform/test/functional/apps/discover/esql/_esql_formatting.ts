@@ -100,8 +100,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // This query creates columns with ROW that have the same names as fields in kibana_sample_data_flights
         // but with different types (string arrays instead of numbers)
         // The DistanceMiles field in the data view is numeric, but ES|QL returns it as a string array
+        // Extra columns (col1–col5) ensure the result exceeds the table view column threshold
+        // so that Summary view is used
         const testQuery =
-          'ROW DistanceMiles = ["w1", "w2", "w3"], recent = ["w1", "w3"] | EVAL DistanceMiles = COALESCE(recent, DistanceMiles)';
+          'ROW DistanceMiles = ["w1", "w2", "w3"], recent = ["w1", "w3"], col1 = 1, col2 = 2, col3 = 3, col4 = 4, col5 = 5 | EVAL DistanceMiles = COALESCE(recent, DistanceMiles)';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
@@ -110,13 +112,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // not attempt to use numeric formatting from the data view
         const expectedValue = '[w1, w3]';
 
-        // 1. Verify the column value is displayed correctly
-        // (columns are shown individually since only 2 columns are returned)
+        // 1. Verify the Summary column shows the string array values correctly
+        const summaryCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+        const summaryText = await summaryCell.getVisibleText();
+        expect(summaryText).to.contain('recent[w1, w3]');
+        expect(summaryText).to.contain('DistanceMiles[w1, w3]');
+
+        // 2. Add DistanceMiles as a separate column and verify
+        await unifiedFieldList.clickFieldListItemAdd('DistanceMiles');
+        await discover.waitUntilTabIsLoaded();
         const columnCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const columnText = await columnCell.getVisibleText();
         expect(columnText).to.be(expectedValue);
 
-        // 2. Verify the value in doc viewer flyout
+        // 3. Verify the value in doc viewer flyout
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         await discover.isShowingDocViewer();
         const flyoutValue = await testSubjects.getVisibleText(
