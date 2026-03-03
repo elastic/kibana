@@ -58,7 +58,7 @@ describe('ResolutionClient', () => {
     mockLogger = loggerMock.create();
     mockEsClient = {
       search: jest.fn(),
-      updateByQuery: jest.fn(),
+      bulk: jest.fn(),
     } as unknown as jest.Mocked<ElasticsearchClient>;
 
     client = new ResolutionClient({
@@ -80,8 +80,8 @@ describe('ResolutionClient', () => {
       );
       // findEntitiesWithAliases — no aliases
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
-      // updateByQuery
-      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 2 } as never);
+      // bulk update
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
       const result = await client.linkEntities('target-1', ['entity-1', 'entity-2']);
 
@@ -90,12 +90,16 @@ describe('ResolutionClient', () => {
         skipped: [],
         target_id: 'target-1',
       });
-      expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          script: expect.objectContaining({
-            params: { targetId: 'target-1' },
-          }),
           refresh: true,
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              update: expect.objectContaining({
+                retry_on_conflict: 3,
+              }),
+            }),
+          ]),
         })
       );
     });
@@ -109,7 +113,7 @@ describe('ResolutionClient', () => {
         createSearchResponse([targetDoc, alreadyLinkedDoc, newDoc]) as never
       );
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
-      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
       const result = await client.linkEntities('target-1', ['entity-1', 'entity-2']);
 
@@ -136,7 +140,7 @@ describe('ResolutionClient', () => {
         skipped: ['entity-1'],
         target_id: 'target-1',
       });
-      expect(mockEsClient.updateByQuery).not.toHaveBeenCalled();
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should throw SelfLinkError when target is in entity_ids', async () => {
@@ -229,7 +233,7 @@ describe('ResolutionClient', () => {
         createSearchResponse([targetDoc, entity1Doc]) as never
       );
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
-      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
       const result = await client.linkEntities('target-1', ['entity-1', 'entity-1', 'entity-1']);
 
@@ -240,7 +244,7 @@ describe('ResolutionClient', () => {
       });
     });
 
-    it('should throw ResolutionUpdateError when updateByQuery has failures', async () => {
+    it('should throw ResolutionUpdateError when bulk update has errors', async () => {
       const targetDoc = createEntityDoc('target-1');
       const entity1Doc = createEntityDoc('entity-1');
 
@@ -248,9 +252,17 @@ describe('ResolutionClient', () => {
         createSearchResponse([targetDoc, entity1Doc]) as never
       );
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
-      mockEsClient.updateByQuery.mockResolvedValueOnce({
-        updated: 0,
-        failures: [{ index: '.entities', id: 'doc-1', cause: { reason: 'test failure' } }],
+      mockEsClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            update: {
+              _id: 'doc-1',
+              status: 409,
+              error: { type: 'version_conflict_engine_exception', reason: 'test failure' },
+            },
+          },
+        ],
       } as never);
 
       await expect(client.linkEntities('target-1', ['entity-1'])).rejects.toThrow(
@@ -284,17 +296,19 @@ describe('ResolutionClient', () => {
       const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
 
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
-      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
       const result = await client.unlinkEntities(['alias-1']);
 
       expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
-      expect(mockEsClient.updateByQuery).toHaveBeenCalledWith(
+      expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          script: expect.objectContaining({
-            source: expect.stringContaining('remove'),
-          }),
           refresh: true,
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              doc: { 'entity.relationships.resolution.resolved_to': null },
+            }),
+          ]),
         })
       );
     });
@@ -313,7 +327,7 @@ describe('ResolutionClient', () => {
       const result = await client.unlinkEntities(['entity-1']);
 
       expect(result).toEqual({ unlinked: [], skipped: ['entity-1'] });
-      expect(mockEsClient.updateByQuery).not.toHaveBeenCalled();
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should unlink aliases and skip non-aliases in mixed input', async () => {
@@ -323,7 +337,7 @@ describe('ResolutionClient', () => {
       mockEsClient.search.mockResolvedValueOnce(
         createSearchResponse([aliasDoc, standaloneDoc]) as never
       );
-      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
       const result = await client.unlinkEntities(['alias-1', 'entity-1']);
 
@@ -334,20 +348,28 @@ describe('ResolutionClient', () => {
       const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
 
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
-      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
 
       const result = await client.unlinkEntities(['alias-1', 'alias-1', 'alias-1']);
 
       expect(result).toEqual({ unlinked: ['alias-1'], skipped: [] });
     });
 
-    it('should throw ResolutionUpdateError when updateByQuery has failures', async () => {
+    it('should throw ResolutionUpdateError when bulk update has errors', async () => {
       const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
 
       mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
-      mockEsClient.updateByQuery.mockResolvedValueOnce({
-        updated: 0,
-        failures: [{ index: '.entities', id: 'doc-1', cause: { reason: 'test failure' } }],
+      mockEsClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            update: {
+              _id: 'doc-1',
+              status: 409,
+              error: { type: 'version_conflict_engine_exception', reason: 'test failure' },
+            },
+          },
+        ],
       } as never);
 
       await expect(client.unlinkEntities(['alias-1'])).rejects.toThrow(ResolutionUpdateError);

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getLatestEntitiesIndexName } from '../assets/latest_index';
@@ -19,6 +19,13 @@ import {
   ResolutionUpdateError,
   SelfLinkError,
 } from '../errors';
+import { hashEuid } from '../crud_client/utils';
+import {
+  searchEntitiesByIds,
+  searchByResolvedToField,
+  searchResolutionGroup,
+  bulkUpdateEntityDocs,
+} from '../../infra/elasticsearch/resolution';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
@@ -114,32 +121,16 @@ export class ResolutionClient {
       return { linked: [], skipped, target_id: targetId };
     }
 
-    // 8. Batch updateByQuery: set resolved_to on all entities to link
+    // 8. Bulk update: set resolved_to on all entities to link
     this.logger.debug(`Linking ${linked.length} entities to target '${targetId}'`);
 
-    const linkResult = await this.esClient.updateByQuery({
-      index,
-      query: {
-        bool: {
-          filter: [{ terms: { [ENTITY_ID_FIELD]: linked } }],
-        },
-      },
-      script: {
-        source: `ctx._source['${RESOLVED_TO_FIELD}'] = params.targetId`,
-        lang: 'painless',
-        params: { targetId },
-      },
-      refresh: true,
-    });
+    const updates = linked.map((entityId) => ({
+      docId: hashEuid(entityId),
+      doc: { [RESOLVED_TO_FIELD]: targetId },
+    }));
+    const linkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates });
 
-    if (linkResult.failures?.length) {
-      this.logger.error(
-        `updateByQuery failures while linking entities to '${targetId}': ${JSON.stringify(
-          linkResult.failures
-        )}`
-      );
-      throw new ResolutionUpdateError('link entities', linkResult.failures);
-    }
+    this.throwOnBulkErrors(linkResult, `linking entities to '${targetId}'`);
 
     return { linked, skipped, target_id: targetId };
   }
@@ -173,29 +164,16 @@ export class ResolutionClient {
       return { unlinked: [], skipped };
     }
 
-    // 3. Batch updateByQuery: remove resolved_to field
+    // 3. Bulk update: set resolved_to to null (effectively removes the link)
     this.logger.debug(`Unlinking ${toUnlink.length} entities`);
 
-    const unlinkResult = await this.esClient.updateByQuery({
-      index,
-      query: {
-        bool: {
-          filter: [{ terms: { [ENTITY_ID_FIELD]: toUnlink } }],
-        },
-      },
-      script: {
-        source: `ctx._source.remove('${RESOLVED_TO_FIELD}')`,
-        lang: 'painless',
-      },
-      refresh: true,
-    });
+    const updates = toUnlink.map((entityId) => ({
+      docId: hashEuid(entityId),
+      doc: { [RESOLVED_TO_FIELD]: null },
+    }));
+    const unlinkResult = await bulkUpdateEntityDocs(this.esClient, { index, updates });
 
-    if (unlinkResult.failures?.length) {
-      this.logger.error(
-        `updateByQuery failures while unlinking entities: ${JSON.stringify(unlinkResult.failures)}`
-      );
-      throw new ResolutionUpdateError('unlink entities', unlinkResult.failures);
-    }
+    this.throwOnBulkErrors(unlinkResult, 'unlinking entities');
 
     return { unlinked: toUnlink, skipped };
   }
@@ -216,19 +194,12 @@ export class ResolutionClient {
     const targetId = resolvedTo ?? entityId;
 
     // 3. Query for target + all aliases in one search
-    const response = await this.esClient.search<Record<string, unknown>>({
+    const response = await searchResolutionGroup(this.esClient, {
       index,
-      size: MAX_RESOLUTION_SEARCH_SIZE,
-      query: {
-        bool: {
-          should: [
-            { term: { [ENTITY_ID_FIELD]: targetId } },
-            { term: { [RESOLVED_TO_FIELD]: targetId } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      _source: true,
+      entityIdField: ENTITY_ID_FIELD,
+      resolvedToField: RESOLVED_TO_FIELD,
+      targetId,
+      maxSize: MAX_RESOLUTION_SEARCH_SIZE,
     });
 
     this.throwIfTruncated(response, `getResolutionGroup for target '${targetId}'`);
@@ -283,6 +254,19 @@ export class ResolutionClient {
   }
 
   /**
+   * Checks a bulk response for errors and throws ResolutionUpdateError if any.
+   */
+  private throwOnBulkErrors(result: BulkResponse, context: string): void {
+    if (result.errors) {
+      const failures = result.items
+        .filter((item) => item.update?.error)
+        .map((item) => item.update!);
+      this.logger.error(`Bulk update failures while ${context}: ${JSON.stringify(failures)}`);
+      throw new ResolutionUpdateError(context, failures);
+    }
+  }
+
+  /**
    * Fetches entities by their entity.id values and validates that all exist.
    * Throws EntitiesNotFoundError if any IDs are missing.
    */
@@ -290,15 +274,10 @@ export class ResolutionClient {
     entityIds: string[]
   ): Promise<Map<string, Record<string, unknown>>> {
     const index = getLatestEntitiesIndexName(this.namespace);
-    const response = await this.esClient.search<Record<string, unknown>>({
+    const response = await searchEntitiesByIds(this.esClient, {
       index,
-      size: entityIds.length,
-      query: {
-        bool: {
-          filter: [{ terms: { [ENTITY_ID_FIELD]: entityIds } }],
-        },
-      },
-      _source: true,
+      entityIdField: ENTITY_ID_FIELD,
+      entityIds,
     });
 
     const entities = new Map<string, Record<string, unknown>>();
@@ -322,15 +301,12 @@ export class ResolutionClient {
    */
   private async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
     const index = getLatestEntitiesIndexName(this.namespace);
-    const response = await this.esClient.search<Record<string, unknown>>({
+    const response = await searchByResolvedToField(this.esClient, {
       index,
-      size: MAX_RESOLUTION_SEARCH_SIZE,
-      query: {
-        bool: {
-          filter: [{ terms: { [RESOLVED_TO_FIELD]: entityIds } }],
-        },
-      },
-      _source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
+      resolvedToField: RESOLVED_TO_FIELD,
+      targetIds: entityIds,
+      maxSize: MAX_RESOLUTION_SEARCH_SIZE,
+      source: [ENTITY_ID_FIELD, RESOLVED_TO_FIELD],
     });
 
     this.throwIfTruncated(response, 'findEntitiesWithAliases');
