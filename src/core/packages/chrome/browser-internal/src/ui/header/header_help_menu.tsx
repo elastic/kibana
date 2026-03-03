@@ -15,7 +15,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonEmptyProps, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
@@ -288,16 +287,26 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
     const { navigateToUrl } = this.props;
     const { globalHelpExtensionMenuLinks } = this.state;
 
-    return globalHelpExtensionMenuLinks
+    if (globalHelpExtensionMenuLinks.length === 0) {
+      return null;
+    }
+
+    const links = globalHelpExtensionMenuLinks
       .sort((a, b) => b.priority - a.priority)
       .map((link, index) => {
         const { linkType, content: text, href, external, ...rest } = link;
-        return createCustomLink(index, text, true, {
+        return createCustomLink(index, text, index < globalHelpExtensionMenuLinks.length - 1, {
           href,
           onClick: external ? undefined : this.createOnClickHandler(href, navigateToUrl),
           ...rest,
         });
       });
+
+    return (
+      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
+        {links}
+      </EuiFlexGroup>
+    );
   }
 
   private renderCustomContent() {
@@ -430,9 +439,21 @@ const createCustomLink = (
 ) => {
   return (
     <Fragment key={`helpButton${index}`}>
-      <EuiButtonIcon color="text" {...buttonProps} size="s" flush="left">
-        {text}
-      </EuiButtonIcon>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          color="text"
+          size="s"
+          flush="left"
+          {...buttonProps}
+          css={css`
+            display: block;
+            text-align: left;
+            font-weight: normal;
+          `}
+        >
+          {text}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
       {addSpacer && <EuiSpacer size="xs" />}
     </Fragment>
   );

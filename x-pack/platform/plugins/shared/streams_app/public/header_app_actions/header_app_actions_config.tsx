@@ -176,6 +176,17 @@ export function getStreamDetailHeaderAppActionsConfig(
           defaultMessage: 'Discover',
         })}
       />,
+      <EuiButtonIcon
+        key="stream-detail-share"
+        size="xs"
+        color="text"
+        iconType="share"
+        onClick={onShare ?? noop}
+        data-test-subj="headerGlobalNav-appActionsStreamDetailShareButton"
+        aria-label={i18n.translate('xpack.streams.streamDetailHeaderAppActions.shareAriaLabel', {
+          defaultMessage: 'Share',
+        })}
+      />,
     ],
   };
 }
