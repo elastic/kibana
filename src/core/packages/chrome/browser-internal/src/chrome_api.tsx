@@ -72,23 +72,16 @@ export function createChromeApi({
   );
 
   const project: InternalChromeStart['project'] = {
-    setHome: (homeHref) => {
-      validateProjectStyle();
-      projectNavigation.setProjectHome(homeHref);
-    },
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
-    initNavigation: (id, navigationTree$, config) => {
+    initNavigation: (id, navigationTree$) => {
       validateProjectStyle();
-      projectNavigation.initNavigation(id, navigationTree$, config);
+      projectNavigation.initNavigation(id, navigationTree$);
     },
-    getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
+    getNavigation$: () => projectNavigation.getNavigation$(),
     setBreadcrumbs: (breadcrumbs, params) =>
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
-    getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
-    updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
-    changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
   };
 
   return {
