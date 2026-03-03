@@ -478,8 +478,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
-    return enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
-  }, [enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
+    return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
+  }, [replaceDefineStepView, enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
