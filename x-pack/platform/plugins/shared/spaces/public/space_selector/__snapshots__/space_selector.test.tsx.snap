@@ -1,110 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders with custom logo 1`] = `
-<_KibanaPageTemplate
-  css="unknown styles"
+<div
+  class="euiPageTemplate kbnPageTemplate emotion-euiPageOuter-row-grow-pageTemplateStyles"
   data-test-subj="kibanaSpaceSelector"
+  style="min-block-size: max(0, 100vh); padding-block-start: 0;"
 >
-  <Memo(BackgroundPortal) />
-  <EuiPageTemplate.Section
-    color="transparent"
-    paddingSize="xl"
+  <main
+    class="emotion-euiPageInner"
+    id="EuiPageTemplateInner_generated-id"
   >
-    <EuiText
-      size="s"
-      textAlign="center"
+    <section
+      class="emotion-euiPageSection-grow-xl-top-transparent"
     >
-      <EuiSpacer
-        size="xxl"
-      />
-      <EuiImage
-        alt="Custom logo"
-        size={64}
-        src="img.jpg"
-      />
-      <EuiSpacer
-        size="xxl"
-      />
-      <EuiTextColor
-        color="subdued"
+      <div
+        class="emotion-euiPageSection__content-xl-restrictWidth"
+        style="max-width: 1200px;"
       >
-        <h1
-          css="unknown styles"
-          tabIndex={-1}
+        <div
+          class="euiText emotion-euiText-s-euiTextAlign-center"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Select your space"
-            id="xpack.spaces.spaceSelector.selectSpacesTitle"
+          <div
+            class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
           />
-        </h1>
-        <p>
-          <MemoizedFormattedMessage
-            defaultMessage="You can change your space at anytime."
-            id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper"
+          >
+            <img
+              alt="Custom logo"
+              class="euiImage emotion-euiImage-customSize"
+              src="img.jpg"
+              style="max-width: 64px; max-height: 64px;"
+            />
+          </figure>
+          <div
+            class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
           />
-        </p>
-      </EuiTextColor>
-    </EuiText>
-    <EuiSpacer
-      size="xl"
-    />
-    <EuiLoadingSpinner
-      size="xl"
-    />
-  </EuiPageTemplate.Section>
-</_KibanaPageTemplate>
-`;
-
-exports[`it renders without crashing 1`] = `
-<_KibanaPageTemplate
-  css="unknown styles"
-  data-test-subj="kibanaSpaceSelector"
->
-  <Memo(BackgroundPortal) />
-  <EuiPageTemplate.Section
-    color="transparent"
-    paddingSize="xl"
-  >
-    <EuiText
-      size="s"
-      textAlign="center"
-    >
-      <EuiSpacer
-        size="xxl"
-      />
-      <KibanaSolutionAvatar
-        name="Elastic"
-        size="xl"
-      />
-      <EuiSpacer
-        size="xxl"
-      />
-      <EuiTextColor
-        color="subdued"
-      >
-        <h1
-          css="unknown styles"
-          tabIndex={-1}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Select your space"
-            id="xpack.spaces.spaceSelector.selectSpacesTitle"
-          />
-        </h1>
-        <p>
-          <MemoizedFormattedMessage
-            defaultMessage="You can change your space at anytime."
-            id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-          />
-        </p>
-      </EuiTextColor>
-    </EuiText>
-    <EuiSpacer
-      size="xl"
-    />
-    <EuiLoadingSpinner
-      size="xl"
-    />
-  </EuiPageTemplate.Section>
-</_KibanaPageTemplate>
+          <span
+            class="emotion-euiTextColor-subdued"
+          >
+            <h1
+              class="css-aruir-headerStyles"
+              tabindex="-1"
+            >
+              Select your space
+            </h1>
+            <p>
+              You can change your space at anytime.
+            </p>
+          </span>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
+        />
+        <span
+          aria-label="Loading"
+          class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+          role="progressbar"
+        />
+      </div>
+    </section>
+  </main>
+</div>
 `;
