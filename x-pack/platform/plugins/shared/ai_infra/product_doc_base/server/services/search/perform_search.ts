@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ProductDocumentationAttributes } from '@kbn/product-doc-common';
+import type { OpenAPIV3 } from 'openapi-types';
 
 // https://search-labs.elastic.co/search-labs/blog/elser-rag-search-for-relevance
 
@@ -172,6 +173,83 @@ export const performSecurityLabsSearch = async ({
           },
         }
       : {}),
+  });
+
+  return results.hits.hits;
+};
+
+export interface OpenapiSpecAttributes extends OpenAPIV3.OperationObject {
+  path: string;
+  method: OpenAPIV3.HttpMethods;
+  endpoint: string;
+}
+
+export const performOpenapiSpecSearch = async ({
+  searchQuery,
+  size,
+  highlights,
+  index,
+  client,
+}: {
+  searchQuery: string;
+  size: number;
+  highlights: number;
+  index: string;
+  client: ElasticsearchClient;
+}) => {
+  const results = await client.search<OpenapiSpecAttributes>({
+    index,
+    size,
+    query: {
+      bool: {
+        should: [
+          // Semantic matches (highest boost for understanding intent)
+          { semantic: { field: 'summary', query: searchQuery, boost: 5 } },
+          { semantic: { field: 'description', query: searchQuery, boost: 4 } },
+          { semantic: { field: 'endpoint', query: searchQuery, boost: 3 } },
+
+          {
+            match: {
+              summary: {
+                query: searchQuery,
+                boost: 2,
+                operator: 'and',
+              },
+            },
+          },
+          {
+            match: {
+              description: {
+                query: searchQuery,
+                boost: 1.5,
+                operator: 'and',
+              },
+            },
+          },
+          {
+            match: {
+              operationId: {
+                query: searchQuery,
+                boost: 1.5,
+                fuzziness: 'AUTO',
+              },
+            },
+          },
+          {
+            match: {
+              path: {
+                query: searchQuery,
+                boost: 1.2,
+              },
+            },
+          },
+        ],
+        // Require at least 2 conditions to match for better precision
+        minimum_should_match: 2,
+      },
+    },
+    // Only return documents with a minimum score to filter out weak matches
+    min_score: 5,
   });
 
   return results.hits.hits;
