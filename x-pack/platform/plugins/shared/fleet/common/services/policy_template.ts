@@ -15,6 +15,7 @@ import type {
   RegistryVarsEntry,
   RegistryDataStream,
   InstallablePackage,
+  NewPackagePolicy,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -144,6 +145,16 @@ const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
+  const enabledPolicyTemplates = new Set(
+    packagePolicy?.inputs
+      .filter((input) => input.enabled)
+      .map((input) => input.policy_template)
+      .filter((policyTemplate): policyTemplate is string => !!policyTemplate) ?? []
+  );
+  return enabledPolicyTemplates.size > 1;
+};
 
 export function filterPolicyTemplatesTiles<T>(
   templatesBehavior: string | undefined,
