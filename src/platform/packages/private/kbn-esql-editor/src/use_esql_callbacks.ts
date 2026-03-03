@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, type MutableRefObject } from 'react';
+import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLCallbacks, ESQLControlVariable } from '@kbn/esql-types';
@@ -71,7 +71,6 @@ interface UseEsqlCallbacksParams {
   histogramBarTarget: number;
   activeSolutionId?: Parameters<typeof getEditorExtensions>[2];
   minimalQueryRef: MutableRefObject<string>;
-  abortControllerRef: MutableRefObject<AbortController>;
   dataSourcesCache: MapCache;
   memoizedSources: MemoizedSources;
   esqlFieldsCache: MapCache;
@@ -92,7 +91,6 @@ export const useEsqlCallbacks = ({
   histogramBarTarget,
   activeSolutionId,
   minimalQueryRef,
-  abortControllerRef,
   dataSourcesCache,
   memoizedSources,
   esqlFieldsCache,
@@ -103,6 +101,9 @@ export const useEsqlCallbacks = ({
   getJoinIndicesCallback,
   enableResourceBrowser,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
+  const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
+  const previousColumnsQueryRef = useRef<string | undefined>(undefined);
+
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
     const getLicense = esqlService?.getLicense;
@@ -113,19 +114,38 @@ export const useEsqlCallbacks = ({
   const getColumnsFor = useCallback(
     async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
       if (queryToExecute) {
-        // Check if there's a stale entry and clear it
-        clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
+        // Abort any previous in-flight autocomplete column fetch and
+        // remove its potentially stale cache entry
+        if (columnsAbortControllerRef.current) {
+          columnsAbortControllerRef.current.abort();
+          if (previousColumnsQueryRef.current) {
+            esqlFieldsCache.delete(previousColumnsQueryRef.current);
+          }
+        }
+
+        const controller = new AbortController();
+        columnsAbortControllerRef.current = controller;
+        previousColumnsQueryRef.current = queryToExecute;
+
+        clearCacheWhenOld(esqlFieldsCache, queryToExecute);
         const timeRange = data.query.timefilter.timefilter.getTime();
-        return (
-          (await memoizedFieldsFromESQL({
-            esqlQuery: queryToExecute,
-            search: data.search.search,
-            timeRange,
-            signal: abortControllerRef.current.signal,
-            variables: esqlService?.variablesService?.esqlVariables,
-            dropNullColumns: true,
-          }).result) || []
-        );
+        const result = await memoizedFieldsFromESQL({
+          esqlQuery: queryToExecute,
+          search: data.search.search,
+          timeRange,
+          signal: controller.signal,
+          variables: esqlService?.variablesService?.esqlVariables,
+          dropNullColumns: true,
+        }).result;
+
+        if (controller.signal.aborted) {
+          esqlFieldsCache.delete(queryToExecute);
+          return [];
+        }
+
+        previousColumnsQueryRef.current = undefined;
+
+        return result || [];
       }
       return [];
     },
@@ -134,7 +154,6 @@ export const useEsqlCallbacks = ({
       data.search.search,
       esqlFieldsCache,
       memoizedFieldsFromESQL,
-      abortControllerRef,
       esqlService,
     ]
   );
