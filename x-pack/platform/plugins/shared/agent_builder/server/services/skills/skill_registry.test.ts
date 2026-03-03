@@ -49,6 +49,7 @@ const createMockPersistedProvider = (
     create: jest.fn(async (params) => ({
       ...params,
       readonly: false,
+      basePath: 'skills/user',
       getRegistryTools: () => params.tool_ids ?? [],
     })),
     update: jest.fn(async (id, update) => ({
@@ -57,6 +58,7 @@ const createMockPersistedProvider = (
       description: update.description ?? 'original-description',
       content: update.content ?? 'original-content',
       readonly: false,
+      basePath: 'skills/user',
       getRegistryTools: () => update.tool_ids ?? [],
     })),
     delete: jest.fn(async (_skillId: string) => undefined),

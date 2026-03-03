@@ -188,6 +188,7 @@ export {
   skillIdMaxLength,
   skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
   maxToolsPerSkill,
 } from './skills';
 export * from './telemetry';

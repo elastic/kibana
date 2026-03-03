@@ -8,7 +8,7 @@
 import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { MemoryVolume } from '../../filesystem';
-import { createSkillEntries, getSkillEntryPath } from './utils';
+import { createSkillEntries, getSkillEntryPath, getSkillReferencedContentEntryPath } from './utils';
 
 export const createSkillsStore = ({ skills }: { skills: InternalSkillDefinition[] }) => {
   return new SkillsStoreImpl({ skills });
@@ -43,6 +43,13 @@ export class SkillsStoreImpl implements WritableSkillsStore {
     if (skill) {
       const path = getSkillEntryPath({ skill });
       this.volume.remove(path);
+      skill.referencedContent?.forEach((rc) => {
+        const rcPath = getSkillReferencedContentEntryPath({
+          skill,
+          referencedContent: rc,
+        });
+        this.volume.remove(rcPath);
+      });
     }
     return this.skills.delete(skillId);
   }
