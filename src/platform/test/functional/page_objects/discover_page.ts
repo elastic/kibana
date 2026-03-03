@@ -1086,6 +1086,7 @@ export class DiscoverPageObject extends FtrService {
     await this.dashboardPanelActions.clickEdit();
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');
+    await this.waitForDiscoverAppOnScreen();
     await this.header.waitUntilLoadingHasFinished();
   }
 

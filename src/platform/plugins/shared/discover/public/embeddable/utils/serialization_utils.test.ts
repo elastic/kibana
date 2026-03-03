@@ -314,12 +314,14 @@ describe('Serialization utils', () => {
           serializeTimeRange: jest.fn(),
           serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
+          selectedTabId: 'tab-1',
         });
 
         expect(serializedState).toEqual({
           sampleSize: 500,
           sort: [['order_date', 'asc']],
           savedObjectId: 'test-id',
+          selectedTabId: 'tab-1',
         });
       });
 

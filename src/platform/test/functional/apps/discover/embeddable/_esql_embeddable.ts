@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('can edit a session and return to the dashboard', async () => {
       await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
-      await dashboardPanelActions.clickEdit();
+      await discover.editInDiscover();
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
       await Promise.all([
