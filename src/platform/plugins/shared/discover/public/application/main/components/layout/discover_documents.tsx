@@ -549,9 +549,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    // class is used in tests
     <EuiFlexItem
-      className="dscTable"
       data-test-subj="discoverDocumentsTable"
       aria-labelledby="documentsAriaLabel"
       css={styles.container}
