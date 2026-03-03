@@ -84,8 +84,15 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
+   *
+   * The optional `registerActionButtons` callback allows the rendered content to
+   * dynamically register action buttons that appear in the canvas header. This is
+   * useful when buttons depend on state only available at runtime.
    */
-  renderCanvasContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderCanvasContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    registerActionButtons: (buttons: ActionButton[]) => void
+  ) => ReactNode;
   /**
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.
