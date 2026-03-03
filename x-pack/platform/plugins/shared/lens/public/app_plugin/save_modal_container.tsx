@@ -332,7 +332,7 @@ export const runSaveLensVisualization = async (
     const newDoc = fromDocumentToSerializedState(
       docToSave,
       {
-        timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
+        time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
         savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
       originalInput
