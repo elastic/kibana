@@ -13,6 +13,8 @@ import type {
   BaseStep,
   DataSetStep,
   ElasticsearchStep,
+  FlowBreakStep,
+  FlowContinueStep,
   ForEachStep,
   IfStep,
   KibanaStep,
@@ -55,6 +57,8 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   ExitWhileNode,
+  FlowBreakNode,
+  FlowContinueNode,
   GraphNodeUnion,
   KibanaGraphNode,
   WaitGraphNode,
@@ -64,7 +68,7 @@ import type {
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach', 'while']);
+const flowControlStepTypes = new Set(['if', 'foreach', 'while', 'flow.break', 'flow.continue']);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -112,6 +116,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     if (workflowLevelOnFailureGraph) {
       return workflowLevelOnFailureGraph;
     }
+  }
+
+  if ((currentStep as FlowBreakStep).type === 'flow.break') {
+    return visitFlowBreakStep(currentStep as FlowBreakStep, context);
+  }
+
+  if ((currentStep as FlowContinueStep).type === 'flow.continue') {
+    return visitFlowContinueStep(currentStep as FlowContinueStep, context);
   }
 
   if ((currentStep as StepWithIfCondition).if) {
@@ -912,6 +924,65 @@ function createWhileGraph(
 
   insertGraphBetweenNodes(graph, innerGraph, enterWhileNodeId, exitNodeId);
   context.stack.pop();
+  return graph;
+}
+
+function findEnclosingLoop(context: GraphBuildContext): GraphNodeUnion {
+  for (let i = context.stack.length - 1; i >= 0; i--) {
+    const node = context.stack[i];
+    if (node.type === 'enter-foreach' || node.type === 'enter-while') {
+      return node;
+    }
+  }
+  throw new Error(
+    'flow.break and flow.continue are only valid inside a loop body (foreach or while). ' +
+      'Move the step inside a loop, or remove it.'
+  );
+}
+
+function visitFlowBreakStep(
+  currentStep: FlowBreakStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const loopExitNodeId =
+    enclosingLoop.type === 'enter-foreach'
+      ? (enclosingLoop as EnterForeachNode).exitNodeId
+      : (enclosingLoop as EnterWhileNode).exitNodeId;
+
+  const flowBreakNode: FlowBreakNode = {
+    id: stepId,
+    type: 'flow-break',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+    loopStepId: enclosingLoop.stepId,
+    condition: currentStep.if,
+  };
+  graph.setNode(flowBreakNode.id, flowBreakNode);
+  return graph;
+}
+
+function visitFlowContinueStep(
+  currentStep: FlowContinueStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const flowContinueNode: FlowContinueNode = {
+    id: stepId,
+    type: 'flow-continue',
+    stepId,
+    stepType: currentStep.type,
+    loopEnterNodeId: enclosingLoop.id,
+    condition: currentStep.if,
+  };
+  graph.setNode(flowContinueNode.id, flowContinueNode);
   return graph;
 }
 

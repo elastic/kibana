@@ -23,6 +23,7 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
+import { FlowBreakNodeSchema, FlowContinueNodeSchema } from './flow_control_nodes';
 import {
   EnterForeachNodeSchema,
   EnterWhileNodeSchema,
@@ -78,6 +79,8 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   OnFailureNodeSchema,
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
+  FlowBreakNodeSchema,
+  FlowContinueNodeSchema,
 ]);
 
 export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;

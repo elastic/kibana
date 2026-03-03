@@ -28,6 +28,18 @@ export class ExitForeachNodeImpl implements NodeImplementation {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);
     }
 
+    if (this.wfExecutionRuntimeManager.isLoopBreakRequested(this.node.stepId)) {
+      this.wfExecutionRuntimeManager.clearLoopBreak(this.node.stepId);
+      this.stepExecutionRuntime.finishStep();
+      this.workflowLogger.logDebug(
+        `Exiting foreach step "${this.node.stepId}" due to flow.break. ` +
+          `Processed ${foreachState.index + 1} of ${foreachState.total} items.`,
+        { workflow: { step_id: this.node.stepId } }
+      );
+      this.wfExecutionRuntimeManager.navigateToNextNode();
+      return;
+    }
+
     const nextIndex = foreachState.index + 1;
     const hasMoreItems = nextIndex < foreachState.total;
     const maxReached =

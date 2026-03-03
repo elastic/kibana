@@ -541,6 +541,27 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const FlowBreakStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('flow.break')
+    .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
+  if: z.string().optional().describe('Optional condition — break only when this evaluates to true'),
+});
+export type FlowBreakStep = z.infer<typeof FlowBreakStepSchema>;
+
+export const FlowContinueStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('flow.continue')
+    .describe(
+      'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
+    ),
+  if: z
+    .string()
+    .optional()
+    .describe('Optional condition — continue only when this evaluates to true'),
+});
+export type FlowContinueStep = z.infer<typeof FlowContinueStepSchema>;
+
 export const ConsoleStepInputSchema = z.object({
   message: z.unknown().optional(),
 });
@@ -646,6 +667,8 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    FlowBreakStepSchema,
+    FlowContinueStepSchema,
     BaseConnectorStepSchema,
   ])
 );
@@ -661,6 +684,8 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  FlowBreakStepSchema.shape.type.value,
+  FlowContinueStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 

@@ -26,6 +26,31 @@ import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
 import { getPropertyHandler } from '../../../../../../common/schema';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
+const loopStepTypes = new Set(['foreach', 'while']);
+
+/**
+ * Checks whether the current cursor position in the YAML document is inside
+ * the body (`steps` array) of a foreach or while loop step.
+ */
+function isInsideLoopBody(ctx: ExtendedAutocompleteContext): boolean {
+  const { yamlDocument, path } = ctx;
+  if (!yamlDocument || !path) return false;
+
+  for (let i = 0; i < path.length - 2; i++) {
+    if (path[i] === 'steps' && typeof path[i + 1] === 'number') {
+      const stepTypePath = [...path.slice(0, i + 2), 'type'];
+      const stepType = yamlDocument.getIn(stepTypePath);
+      if (typeof stepType === 'string' && loopStepTypes.has(stepType)) {
+        const remainingPath = path.slice(i + 2);
+        if (remainingPath[0] === 'steps') {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Creates an adjusted range for type suggestions that extends to the end of the line
  */
@@ -102,7 +127,8 @@ async function handleMatchTypeSuggestions(
         return getConnectorTypeSuggestions(
           lineParseResult.fullKey,
           adjustedRange,
-          autocompleteContext.dynamicConnectorTypes
+          autocompleteContext.dynamicConnectorTypes,
+          { isInsideLoopBody: isInsideLoopBody(autocompleteContext) }
         );
       }
       return null;

@@ -64,6 +64,7 @@ export class WorkflowExecutionRuntimeManager {
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private telemetryReported: boolean = false;
+  private loopBreakRequests = new Set<string>();
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
@@ -205,6 +206,18 @@ export class WorkflowExecutionRuntimeManager {
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
         .stackFrames,
     });
+  }
+
+  public requestLoopBreak(loopStepId: string): void {
+    this.loopBreakRequests.add(loopStepId);
+  }
+
+  public isLoopBreakRequested(loopStepId: string): boolean {
+    return this.loopBreakRequests.has(loopStepId);
+  }
+
+  public clearLoopBreak(loopStepId: string): void {
+    this.loopBreakRequests.delete(loopStepId);
   }
 
   public setWorkflowError(error: Error | undefined): void {

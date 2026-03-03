@@ -31,6 +31,8 @@ describe('ExitForeachNodeImpl', () => {
     wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
     wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
     wfExecutionRuntimeManager.navigateToNode = jest.fn();
+    wfExecutionRuntimeManager.isLoopBreakRequested = jest.fn().mockReturnValue(false);
+    wfExecutionRuntimeManager.clearLoopBreak = jest.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
     stepExecutionRuntime.finishStep = jest.fn();
@@ -119,6 +121,39 @@ describe('ExitForeachNodeImpl', () => {
       node.onLimit = 'fail';
       expect(() => underTest.run()).toThrow(
         `Foreach step "${node.stepId}" exceeded max-iterations limit of 2. Processed 2 of 5 items.`
+      );
+    });
+  });
+
+  describe('when loop break is requested', () => {
+    beforeEach(() => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      (wfExecutionRuntimeManager.isLoopBreakRequested as jest.Mock).mockReturnValue(true);
+    });
+
+    it('should finish the step and navigate to next node', () => {
+      underTest.run();
+
+      expect(wfExecutionRuntimeManager.clearLoopBreak).toHaveBeenCalledWith(node.stepId);
+      expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
+    });
+
+    it('should not loop back to the start node', () => {
+      underTest.run();
+
+      expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
+    });
+
+    it('should log the break message', () => {
+      underTest.run();
+
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('flow.break'),
+        expect.any(Object)
       );
     });
   });

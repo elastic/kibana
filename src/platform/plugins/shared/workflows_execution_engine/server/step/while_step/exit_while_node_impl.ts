@@ -29,6 +29,18 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       throw new Error(`While state for step ${this.node.stepId} not found`);
     }
 
+    if (this.wfExecutionRuntimeManager.isLoopBreakRequested(this.node.stepId)) {
+      this.wfExecutionRuntimeManager.clearLoopBreak(this.node.stepId);
+      this.stepExecutionRuntime.finishStep();
+      this.workflowLogger.logDebug(
+        `Exiting while step "${this.node.stepId}" due to flow.break. ` +
+          `Completed ${whileState.iteration + 1} iterations.`,
+        { workflow: { step_id: this.node.stepId } }
+      );
+      this.wfExecutionRuntimeManager.navigateToNextNode();
+      return;
+    }
+
     const nextIteration = whileState.iteration + 1;
     const maxReached =
       this.node.maxIterations !== undefined && nextIteration >= this.node.maxIterations;
