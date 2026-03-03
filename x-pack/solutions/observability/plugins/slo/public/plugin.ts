@@ -37,6 +37,8 @@ import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_histo
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   SLOPublicPluginsSetup,
   SLOPublicPluginsStart,
@@ -167,6 +169,21 @@ export class SLOPlugin
           );
           return getOverviewEmbeddableFactory({ coreStart, pluginsStart, sloClient });
         });
+        plugins.embeddable.registerLegacyURLTransform(
+          SLO_OVERVIEW_EMBEDDABLE_ID,
+          async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+            const { getTransformOut } = await import(
+              '../common/embeddables/overview/transforms/get_transform_out'
+            );
+            const transformOut = getTransformOut(transformDrilldownsOut);
+            return (
+              storedState: object,
+              panelReferences?: Reference[],
+              containerReferences?: Reference[],
+              id?: string
+            ) => transformOut(storedState as OverviewEmbeddableState, panelReferences);
+          }
+        );
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
           const { getAlertsEmbeddableFactory } = await import(
