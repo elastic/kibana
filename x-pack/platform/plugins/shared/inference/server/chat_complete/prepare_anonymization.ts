@@ -90,7 +90,7 @@ export const prepareAnonymization = async ({
     const encryptionKey = await getReplacementsEncryptionKey();
     if (requireReplacementsEncryptionKey && !encryptionKey) {
       throw createInferenceRequestError(
-        'xpack.inference.replacements.encryptionKey must be configured when anonymization replacements are active',
+        'Replacements encryption key is not available — verify the anonymization plugin is active and properly initialized',
         400
       );
     }
@@ -132,7 +132,7 @@ export const prepareAnonymization = async ({
   const encryptionKey = await getReplacementsEncryptionKey();
   if (requireReplacementsEncryptionKey && !encryptionKey) {
     throw createInferenceRequestError(
-      'xpack.inference.replacements.encryptionKey must be configured when anonymization replacements are active',
+      'Replacements encryption key is not available — verify the anonymization plugin is active and properly initialized',
       400
     );
   }
@@ -147,9 +147,18 @@ export const prepareAnonymization = async ({
   }
 
   if (existingReplacements) {
-    const updated = await repo.update(namespace, replacementsId, { replacements });
-    if (!updated) {
-      // Document disappeared between get/update; recover with new doc.
+    try {
+      const updated = await repo.update(namespace, replacementsId, { replacements });
+      if (!updated) {
+        replacementsId = uuidv4();
+        existingReplacements = null;
+      }
+    } catch (updateErr) {
+      logger.warn(
+        `Replacements update failed for ${replacementsId}, creating new document: ${
+          updateErr instanceof Error ? updateErr.message : String(updateErr)
+        }`
+      );
       replacementsId = uuidv4();
       existingReplacements = null;
     }

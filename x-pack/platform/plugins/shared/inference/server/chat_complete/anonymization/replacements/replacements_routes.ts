@@ -7,31 +7,26 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   replaceTokensWithOriginals,
   type DeanonymizeWithReplacementsRequestBody,
 } from '@kbn/anonymization-common';
-import { apiPrivileges } from '@kbn/anonymization-plugin/common';
+import {
+  apiPrivileges,
+  ANONYMIZATION_API_VERSION,
+  toErrorMessage,
+  toStatusCode,
+} from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
 import type { InferenceServerStart, InferenceStartDependencies } from '../../../types';
 
-const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
-
-const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
-
-const toStatusCode = (err: unknown): number => {
-  const directStatus = (err as { statusCode?: number })?.statusCode;
-  const metaStatus = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-  return directStatus ?? metaStatus ?? 500;
-};
 
 const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void => {
   if (!encryptionKey) {
     const error = new Error(
-      'xpack.inference.replacements.encryptionKey must be configured to use replacements APIs'
+      'Replacements encryption key is not available — verify the anonymization plugin is active and properly initialized'
     ) as Error & { statusCode?: number };
     error.statusCode = 400;
     throw error;
@@ -43,12 +38,10 @@ let replacementsIndexEnsuredAt = 0;
 
 const resolveEncryptionKey = async ({
   coreSetup,
-  request,
   namespace,
   configuredEncryptionKey,
 }: {
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-  request: KibanaRequest;
   namespace: string;
   configuredEncryptionKey?: string;
 }): Promise<string | undefined> => {
@@ -60,12 +53,15 @@ const resolveEncryptionKey = async ({
     return configuredEncryptionKey;
   }
 
-  return anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
+  try {
+    return await anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
+  } catch {
+    return configuredEncryptionKey;
+  }
 };
 
 const resolveReplacementsContext = async (
   context: RequestHandlerContext,
-  request: KibanaRequest,
   options: {
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
     encryptionKey?: string;
@@ -76,7 +72,6 @@ const resolveReplacementsContext = async (
   const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
   const encryptionKey = await resolveEncryptionKey({
     coreSetup: options.coreSetup,
-    request,
     namespace,
     configuredEncryptionKey: options.encryptionKey,
   });
@@ -113,7 +108,7 @@ export const registerReplacementsRoutes = (
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: ANONYMIZATION_API_VERSION,
         validate: {
           request: {
             params: schema.object({ id: schema.string() }),
@@ -122,7 +117,7 @@ export const registerReplacementsRoutes = (
       },
       async (context, request, response) => {
         try {
-          const { namespace, repo } = await resolveReplacementsContext(context, request, {
+          const { namespace, repo } = await resolveReplacementsContext(context, {
             ...options,
             logger,
           });
@@ -162,7 +157,7 @@ export const registerReplacementsRoutes = (
     })
     .addVersion(
       {
-        version: API_VERSION,
+        version: ANONYMIZATION_API_VERSION,
         validate: {
           request: {
             body: schema.object({
@@ -175,7 +170,7 @@ export const registerReplacementsRoutes = (
       async (context, request, response) => {
         try {
           const body = request.body as DeanonymizeWithReplacementsRequestBody;
-          const { namespace, repo } = await resolveReplacementsContext(context, request, {
+          const { namespace, repo } = await resolveReplacementsContext(context, {
             ...options,
             logger,
           });

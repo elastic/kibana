@@ -137,7 +137,7 @@ export class InferencePlugin
 
     if (anonymizationEnabled) {
       this.logger.info(
-        'Persistent anonymization replacements key material is auto-managed per space via anonymization; xpack.inference.replacements.encryptionKey is treated as a fallback override'
+        'Persistent anonymization replacements key material is auto-managed per space via the anonymization plugin'
       );
     }
 
@@ -198,7 +198,12 @@ export class InferencePlugin
       return {
         namespace,
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
-        regexWorker: this.regexWorker!,
+        regexWorker: (() => {
+          if (!this.regexWorker) {
+            this.logger.error('RegexWorkerService is not initialized — Anonymization plugin.start() may not have completed');
+          }
+          return this.regexWorker!;
+        })(),
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,

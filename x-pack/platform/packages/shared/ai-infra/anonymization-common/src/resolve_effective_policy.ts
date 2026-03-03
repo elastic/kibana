@@ -51,7 +51,10 @@ const fieldRuleToEffective = (rule: FieldRule): EffectiveFieldPolicy => {
     return { action: 'deny' };
   }
 
-  if (rule.anonymized && rule.entityClass) {
+  if (rule.anonymized) {
+    if (!rule.entityClass) {
+      return { action: 'deny' };
+    }
     return { action: 'anonymize', entityClass: rule.entityClass };
   }
 

@@ -34,3 +34,14 @@ export const uiPrivileges = {
   show: 'show',
   manage: 'manage',
 } as const;
+
+/** Extracts a human-readable error message from an unknown error. */
+export const toErrorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : String(err);
+
+/** Extracts an HTTP status code from an unknown error (Kibana SO or ES client shapes). */
+export const toStatusCode = (err: unknown): number => {
+  const directStatus = (err as { statusCode?: number })?.statusCode;
+  const metaStatus = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  return directStatus ?? metaStatus ?? 500;
+};

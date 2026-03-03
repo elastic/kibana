@@ -41,8 +41,14 @@ export const generateToken = (
     throw new Error('Secret must be non-empty for token generation');
   }
 
-  const safeHashLength = Math.min(Math.max(1, Math.floor(hashLength)), MAX_HASH_LENGTH);
-  const hmacInput = `${entityClass}:${field}:${value}`;
+  const safeHashLength =
+    Number.isFinite(hashLength) && hashLength > 0
+      ? Math.min(Math.floor(hashLength), MAX_HASH_LENGTH)
+      : DEFAULT_HASH_LENGTH;
+
+  // Length-prefixed format prevents delimiter collisions when components
+  // contain the separator character (e.g. entityClass="A:B" vs field="A:B").
+  const hmacInput = `${entityClass.length}:${entityClass}:${field.length}:${field}:${value}`;
   const hash = createHmac('sha256', secret).update(hmacInput).digest('hex');
   const truncatedHash = hash.substring(0, safeHashLength);
 

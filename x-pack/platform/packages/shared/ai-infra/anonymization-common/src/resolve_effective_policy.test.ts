@@ -101,4 +101,16 @@ describe('resolveEffectivePolicy', () => {
 
     expect(result['host.name']).toEqual({ action: 'deny' });
   });
+
+  it('returns deny when anonymized is true but entityClass is missing', () => {
+    const misconfiguredRule: FieldRule = {
+      field: 'host.name',
+      allowed: true,
+      anonymized: true,
+    };
+
+    const result = resolveEffectivePolicy([misconfiguredRule]);
+
+    expect(result['host.name']).toEqual({ action: 'deny' });
+  });
 });

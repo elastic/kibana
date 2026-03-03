@@ -153,12 +153,12 @@ export const updateAnonymizationProfileRequestSchema = z.object({
 /** Public API query payload for profile search. */
 export const findAnonymizationProfilesQuerySchema = z.object({
   filter: z.string().optional(),
-  target_type: z.string().optional(),
+  target_type: z.enum(['data_view', 'index_pattern', 'index']).optional(),
   target_id: z.string().optional(),
   sort_field: z.enum(['created_at', 'name', 'updated_at']).optional(),
   sort_order: z.enum(['asc', 'desc']).optional(),
-  page: z.number().int().positive().optional(),
-  per_page: z.number().int().min(1).max(1000).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  per_page: z.coerce.number().int().min(1).max(1000).optional(),
 });
 
 const tokenSourceEntryBaseSchema = z.object({

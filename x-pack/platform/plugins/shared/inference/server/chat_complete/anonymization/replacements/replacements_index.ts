@@ -25,8 +25,8 @@ export const ANONYMIZATION_REPLACEMENTS_MAPPINGS = {
       type: 'nested' as const,
       properties: {
         anonymized: { type: 'keyword' as const },
-        original: { type: 'keyword' as const },
-        original_encrypted: { type: 'keyword' as const },
+        original: { type: 'keyword' as const, index: false as const },
+        original_encrypted: { type: 'keyword' as const, index: false as const },
       },
     },
     created_at: { type: 'date' as const },

@@ -62,7 +62,6 @@ export class SaltService {
     const soNamespace = namespace === 'default' ? undefined : namespace;
 
     try {
-      // Try to read the existing salt (decrypted, server-only)
       const esoClient = this.encryptedSavedObjects.getClient({
         includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
       });
@@ -83,13 +82,16 @@ export class SaltService {
       const replacementsEncryptionKey = randomBytes(
         REPLACEMENTS_ENCRYPTION_KEY_LENGTH_BYTES
       ).toString('hex');
-      await this.updateKeyMaterial(namespace, id, {
+      const persisted = await this.updateKeyMaterial(namespace, id, {
         replacementsEncryptionKey,
       });
+      if (!persisted) {
+        // 409 conflict: another process wrote first — re-read to get the persisted key
+        return this.getOrCreateKeyMaterial(namespace);
+      }
       return { salt: attributes.salt, replacementsEncryptionKey };
     } catch (err) {
       if (err?.output?.statusCode === 404 || err?.statusCode === 404) {
-        // Salt doesn't exist yet — create it
         return this.createKeyMaterial(namespace);
       }
       throw err;
@@ -134,11 +136,14 @@ export class SaltService {
     }
   }
 
+  /**
+   * @returns `true` if the update was persisted, `false` on 409 version conflict.
+   */
   private async updateKeyMaterial(
     namespace: string,
     id: string,
     attributes: Partial<SaltAttributes>
-  ): Promise<void> {
+  ): Promise<boolean> {
     const internalSoClient = this.savedObjects
       .getUnsafeInternalClient({
         includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
@@ -151,10 +156,11 @@ export class SaltService {
         id,
         attributes
       );
+      return true;
     } catch (err) {
       if (err?.statusCode === 409) {
         this.logger.debug(`Salt key material update conflict in space: ${namespace}, re-reading`);
-        return;
+        return false;
       }
       throw err;
     }

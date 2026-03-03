@@ -16,6 +16,8 @@ import {
   ANONYMIZATION_API_VERSION,
   ANONYMIZATION_PROFILES_API_BASE,
   apiPrivileges,
+  toErrorMessage,
+  toStatusCode,
 } from '../../common';
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
@@ -24,14 +26,6 @@ import {
   isGlobalProfileTarget,
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
 } from '../initialization';
-
-const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
-
-const toStatusCode = (err: unknown): number => {
-  const directStatus = (err as { statusCode?: number })?.statusCode;
-  const metaStatus = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-  return directStatus ?? metaStatus ?? 500;
-};
 
 const validateGlobalProfileRules = (fieldRules: FieldRule[]): string | undefined => {
   if (fieldRules.length > 0) {

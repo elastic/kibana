@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { NER_MODEL_ID } from '@kbn/anonymization-common';
 
 const baseRuleSchema = schema.object({
   enabled: schema.boolean(),
@@ -64,7 +65,7 @@ export function getUiSettings({
             },
             {
               type: 'NER',
-              modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
+              modelId: NER_MODEL_ID,
               enabled: false,
               allowedEntityClasses: ['PER', 'ORG', 'LOC'],
               timeoutSeconds: 30,

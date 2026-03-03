@@ -280,11 +280,18 @@ export class ProfilesRepository {
       return false;
     }
 
-    await this.esClient.delete({
-      index: ANONYMIZATION_PROFILES_INDEX,
-      id: profileId,
-      refresh: 'wait_for',
-    });
+    try {
+      await this.esClient.delete({
+        index: ANONYMIZATION_PROFILES_INDEX,
+        id: profileId,
+        refresh: 'wait_for',
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return true;
+      }
+      throw err;
+    }
 
     return true;
   }

@@ -187,17 +187,28 @@ export async function executeNerRule({
 
           let anonymizedValue = allTexts[position];
 
-          for (const entity of (
+          const filteredEntities = (
             (nerOutput?.entities ?? []) as Array<{
               class_name: string;
               start_pos: number;
               end_pos: number;
             }>
-          ).filter((e) =>
-            allowedNerEntities
-              ? isNerEntityClass(e.class_name) && allowedNerEntities.includes(e.class_name)
-              : true
-          )) {
+          )
+            .filter((e) =>
+              allowedNerEntities
+                ? isNerEntityClass(e.class_name) && allowedNerEntities.includes(e.class_name)
+                : true
+            )
+            .sort((a, b) => a.start_pos - b.start_pos);
+
+          // Resolve overlapping spans: skip entities whose start falls before the previous entity's end
+          let lastEndPos = -1;
+          for (const entity of filteredEntities) {
+            if (entity.start_pos < lastEndPos) {
+              continue;
+            }
+            lastEndPos = entity.end_pos;
+
             const from = entity.start_pos + offset;
             const to = entity.end_pos + offset;
 

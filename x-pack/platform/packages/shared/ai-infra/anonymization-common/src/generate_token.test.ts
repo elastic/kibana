@@ -85,10 +85,23 @@ describe('generateToken', () => {
   it('clamps hash length to valid range', () => {
     const tokenMin = generateToken(secret, entityClass, field, value, 0);
     const hashPartMin = tokenMin.replace(`${entityClass}_`, '');
-    expect(hashPartMin).toHaveLength(1);
+    expect(hashPartMin).toHaveLength(32);
 
     const tokenMax = generateToken(secret, entityClass, field, value, 100);
     const hashPartMax = tokenMax.replace(`${entityClass}_`, '');
     expect(hashPartMax).toHaveLength(64);
+  });
+
+  it('returns default hash length when hashLength is NaN', () => {
+    const token = generateToken(secret, entityClass, field, value, NaN);
+    const hashPart = token.replace(`${entityClass}_`, '');
+    expect(hashPart).toHaveLength(32);
+  });
+
+  it('returns different tokens when components contain the delimiter character', () => {
+    const token1 = generateToken(secret, 'A', 'B:C', 'D');
+    const token2 = generateToken(secret, 'A:B', 'C', 'D');
+
+    expect(token1).not.toBe(token2);
   });
 });
