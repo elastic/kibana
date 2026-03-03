@@ -12,7 +12,7 @@ import { appContextService } from '../../app_context';
 import { PackageNotFoundError } from '../../../errors';
 
 import { dataStreamService } from '../../data_streams';
-
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import {
