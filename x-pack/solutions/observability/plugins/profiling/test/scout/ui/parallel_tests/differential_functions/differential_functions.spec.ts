@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
+test.describe('Differential Functions page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
   const comparisonRangeFrom = '2023-04-18T00:01:00.000Z';
   const comparisonRangeTo = '2023-04-18T00:01:30.000Z';

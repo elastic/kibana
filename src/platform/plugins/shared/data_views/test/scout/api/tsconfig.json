@@ -1,0 +1,12 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*"],
+  "kbn_references": [
+    "@kbn/scout",
+    "@kbn/core-http-common"
+  ],
+  "exclude": ["target/**/*"]
+}

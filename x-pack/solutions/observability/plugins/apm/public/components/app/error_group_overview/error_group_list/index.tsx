@@ -187,7 +187,7 @@ export function ErrorGroupList({
               serviceName={serviceName}
               query={{
                 ...query,
-                kuery: `error.exception.type:"${type}"`,
+                kuery: `error.exception.type:"${type}" OR error.type:"${type}"`,
               }}
             >
               {type}

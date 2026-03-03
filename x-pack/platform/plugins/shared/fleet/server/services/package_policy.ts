@@ -51,6 +51,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -2827,7 +2828,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult> {
     const savedObjectType = await getPackagePolicySavedObjectType();
 
@@ -2849,7 +2851,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicies.forEach((policy) => {
       const namespace = getSpaceForPackagePolicySO(policy);
 
-      if (!policy.id.endsWith(':prev')) {
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
         const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
         if (previousRevision?.attributes) {
           if (!policiesToCreate[namespace]) {
@@ -2872,7 +2878,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
           });
         }
-      } else {
+      } else if (policy.id.endsWith(':prev')) {
         if (!previousVersionPolicies[namespace]) {
           previousVersionPolicies[namespace] = [];
         }
@@ -3228,6 +3234,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
         })
       );
     }
+  }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
   }
 }
 

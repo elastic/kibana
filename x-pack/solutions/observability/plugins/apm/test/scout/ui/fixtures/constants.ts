@@ -18,6 +18,15 @@ export const ERROR_MESSAGE = '[MockError] Foo';
 export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
 export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
 
+// Span links test data dates
+export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
+export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';
+export const SPAN_LINKS_PRODUCER_INTERNAL_ONLY_END = '2022-01-01T00:01:00.000Z';
+export const SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY = 'zzz-producer-internal-only';
+export const SERVICE_SPAN_LINKS_PRODUCER_EXTERNAL_ONLY = 'zzz-producer-external-only';
+export const SERVICE_SPAN_LINKS_PRODUCER_CONSUMER = 'zzz-producer-consumer';
+export const SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE = 'zzz-consumer-multiple';
+
 // APM-specific role definitions matching authentication.ts
 export const APM_ROLES = {
   apmAllPrivilegesWithoutWriteSettings: {
