@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { PREFERRED_DEFAULT_CONNECTOR_ID } from '../../../../common/constants';
+import { getFirstRecommendedConnectorId } from '../../../../common/recommended_connectors';
 
 interface UseDefaultConnectorParams {
   connectors: AIConnector[];
@@ -28,19 +29,25 @@ export function useDefaultConnector({
       return defaultConnectorId;
     }
 
-    // 2. If no default, prefer the preconfigured Claude Sonnet 4.5 connector when available
+    // 2. Prefer the first recommended connector when available (SOTA per provider + open-weight)
+    const recommendedId = getFirstRecommendedConnectorId(connectors.map((c) => c.id));
+    if (recommendedId) {
+      return recommendedId;
+    }
+
+    // 3. If not recommended, prefer the preconfigured Claude Sonnet 4.5 connector when available
     const preferredConnector = connectors.find((c) => c.id === PREFERRED_DEFAULT_CONNECTOR_ID);
     if (preferredConnector) {
       return preferredConnector.id;
     }
 
-    // 3. Otherwise use the first preconfigured connector (Elastic-managed LLM)
+    // 4. Otherwise use the first preconfigured connector (Elastic-managed LLM)
     const preconfiguredConnector = connectors.find((c) => c.isPreconfigured);
     if (preconfiguredConnector) {
       return preconfiguredConnector.id;
     }
 
-    // 4. If no preconfigured connector, use the first custom connector
+    // 5. If no preconfigured connector, use the first custom connector
     return connectors[0]?.id;
   }, [connectors, defaultConnectorId]);
 }

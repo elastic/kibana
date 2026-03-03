@@ -150,6 +150,75 @@ describe('fields_parser', () => {
       expect(result.dimensions).toHaveLength(0);
     });
 
+    it('returns only allowed metric types (gauge, counter, histogram) when multiple types are present', () => {
+      const dataViewFieldMap: DataViewFieldMap = {
+        'metric.gauge': {
+          name: 'metric.gauge',
+          type: 'number',
+          esTypes: ['double'],
+          searchable: true,
+          aggregatable: true,
+          timeSeriesMetric: 'gauge',
+        },
+        'metric.counter': {
+          name: 'metric.counter',
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
+          timeSeriesMetric: 'counter',
+        },
+        'metric.histogram': {
+          name: 'metric.histogram',
+          type: 'number',
+          esTypes: ['double'],
+          searchable: true,
+          aggregatable: true,
+          timeSeriesMetric: 'histogram',
+        },
+        'metric.position': {
+          name: 'metric.position',
+          type: 'number',
+          esTypes: ['double'],
+          searchable: true,
+          aggregatable: true,
+          timeSeriesMetric: 'position',
+        },
+        'metric.summary': {
+          name: 'metric.summary',
+          type: 'number',
+          esTypes: ['double'],
+          searchable: true,
+          aggregatable: true,
+          timeSeriesMetric: 'summary',
+        },
+      };
+
+      const columns: DatatableColumn[] = [
+        { id: 'metric.gauge', name: 'metric.gauge', meta: { type: 'number', esType: 'double' } },
+        { id: 'metric.counter', name: 'metric.counter', meta: { type: 'number', esType: 'long' } },
+        {
+          id: 'metric.histogram',
+          name: 'metric.histogram',
+          meta: { type: 'number', esType: 'double' },
+        },
+        {
+          id: 'metric.position',
+          name: 'metric.position',
+          meta: { type: 'number', esType: 'double' },
+        },
+        {
+          id: 'metric.summary',
+          name: 'metric.summary',
+          meta: { type: 'number', esType: 'double' },
+        },
+      ];
+
+      const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
+      const metricNames = result.metricFields.map((f) => f.name).sort();
+      expect(metricNames).toEqual(['metric.counter', 'metric.gauge', 'metric.histogram']);
+    });
+
     describe('sorting', () => {
       it('sorts metric fields alphabetically by name (case-insensitive)', () => {
         const dataViewFieldMap: DataViewFieldMap = {

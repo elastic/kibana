@@ -57,7 +57,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
           sort: { field: 'creation', direction: 'desc' },
-          from: 0,
           size: 25,
           filters: {},
         })

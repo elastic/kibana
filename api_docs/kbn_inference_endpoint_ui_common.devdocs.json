@@ -14,7 +14,7 @@
           "({ onFlyoutClose, http, toasts, isEdit, enforceAdaptiveAllocations, onSubmitSuccess, inferenceEndpoint, enableEisPromoTour, focusTrapProps, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-        "lineNumber": 110,
+        "lineNumber": 124,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30,7 +30,7 @@
               "InferenceFlyoutWrapperProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
-            "lineNumber": 110,
+            "lineNumber": 124,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,

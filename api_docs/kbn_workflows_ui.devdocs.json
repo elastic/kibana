@@ -199,6 +199,84 @@
       },
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.searchWorkflows",
+        "type": "Function",
+        "tags": [],
+        "label": "searchWorkflows",
+        "description": [],
+        "signature": [
+          "(http: ",
+          "HttpSetup",
+          ", params: ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.WorkflowsSearchParams",
+            "text": "WorkflowsSearchParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.WorkflowListDto",
+            "text": "WorkflowListDto"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/services/search_workflows.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.searchWorkflows.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/services/search_workflows.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.searchWorkflows.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowsSearchParams",
+                "text": "WorkflowsSearchParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/services/search_workflows.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.TagsBadge",
         "type": "Function",
         "tags": [],
@@ -263,7 +341,7 @@
           ", unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -285,7 +363,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,

@@ -115,6 +115,49 @@ export const afterGreaterThanPreviousStep: DslValidationFunc = (arg) => {
   }
 };
 
+export const afterSmallerThanDataRetention = ({
+  retentionMs,
+  retentionEsFormat,
+}: {
+  retentionMs: number;
+  retentionEsFormat: string;
+}): DslValidationFunc => {
+  return (arg) => {
+    const { formData, path } = arg as DslValidationArg;
+
+    if (!Number.isFinite(retentionMs) || retentionMs < 0) return;
+    if (!/^_meta\.downsampleSteps\[\d+\]\.afterValue$/.test(path)) return;
+
+    const stepIndex = getStepIndexFromPath(path);
+    if (stepIndex === null) return;
+
+    const value = getAsString(formData, getStepFieldPath(stepIndex, 'afterValue')).trim();
+    if (value === '') return;
+
+    const unit = getAsString(
+      formData,
+      getStepFieldPath(stepIndex, 'afterUnit'),
+      'd'
+    ) as PreservedTimeUnit;
+    const computed = toMilliseconds(value, unit);
+    const ms = getAsNumber(
+      formData,
+      getStepFieldPath(stepIndex, 'afterToMilliSeconds'),
+      Number.isFinite(computed) ? computed : -1
+    );
+
+    // If a downsampling step happens at or after data retention, it will never execute before deletion.
+    if (ms >= 0 && ms >= retentionMs) {
+      return {
+        message: i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanRetentionError', {
+          defaultMessage: 'Must be smaller than the data retention period ({retention}).',
+          values: { retention: retentionEsFormat },
+        }),
+      };
+    }
+  };
+};
+
 export const requiredFixedIntervalValue: DslValidationFunc = (arg) =>
   emptyField(
     i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalRequired', {
