@@ -22,7 +22,7 @@ export class EntityStoreGlobalStateClient {
   ) {}
 
   async find(): Promise<EntityStoreGlobalState | undefined> {
-    const response = await this.findResponse();
+    const response = await this.findSO();
     return response.total === 0 ? undefined : response.saved_objects[0].attributes;
   }
 
@@ -36,12 +36,12 @@ export class EntityStoreGlobalStateClient {
     return response;
   }
 
-  async init(initialState?: Partial<EntityStoreGlobalState>): Promise<EntityStoreGlobalState> {
+  async init(
+    initialState?: Partial<EntityStoreGlobalState>
+  ): Promise<Partial<EntityStoreGlobalState>> {
     const existing = await this.find();
-    if (existing != null) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Found existing global state for this namespace'
-      );
+    if (existing !== undefined) {
+      return this.updateInternal(this.getSavedObjectId(), initialState ?? {});
     }
 
     const id = this.getSavedObjectId();
@@ -70,21 +70,24 @@ export class EntityStoreGlobalStateClient {
     await this.findOrThrow();
 
     const id = this.getSavedObjectId();
+    return this.updateInternal(id, partial);
+  }
+
+  private async updateInternal(
+    id: string,
+    partial: Partial<EntityStoreGlobalState>
+  ): Promise<Partial<EntityStoreGlobalState>> {
     const { attributes } = await this.soClient.update<EntityStoreGlobalState>(
       EntityStoreGlobalStateTypeName,
       id,
       partial,
-      {
-        refresh: 'wait_for',
-        mergeAttributes: true,
-      }
+      { refresh: 'wait_for', mergeAttributes: true }
     );
-
     return attributes;
   }
 
   async delete(): Promise<void> {
-    const response = await this.findResponse();
+    const response = await this.findSO();
     if (response.total === 0) {
       return;
     }
@@ -105,7 +108,7 @@ export class EntityStoreGlobalStateClient {
     return `entity-store-global-state-${this.namespace}`;
   }
 
-  private findResponse(): Promise<SavedObjectsFindResponse<EntityStoreGlobalState>> {
+  private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalState>> {
     return this.soClient.find<EntityStoreGlobalState>({
       type: EntityStoreGlobalStateTypeName,
       namespaces: [this.namespace],

@@ -19,7 +19,6 @@ import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
   type EngineDescriptorClient,
-  type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
   LogExtractionConfig,
@@ -36,7 +35,6 @@ import type {
   EntityStoreStatus,
   EngineComponentStatus,
   EngineComponentResource,
-  EngineDescriptorWithMergedLogExtraction,
   GetStatusResult,
 } from './types';
 import { getExtractEntityTaskId } from '../tasks/extract_entity_task';
@@ -109,7 +107,7 @@ export class AssetManager {
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       await Promise.all([
-        this.initGlobalState(logsExtraction, historySnapshot),
+        this.globalStateClient.init({ historySnapshot, logsExtraction }),
 
         ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
 
@@ -215,52 +213,38 @@ export class AssetManager {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [rawEngines, globalState] = await Promise.all([
+      const [
+        engines,
+        { historySnapshot, logsExtraction: logsExtractionConfig, entityMaintainers },
+      ] = await Promise.all([
         this.engineDescriptorClient.getAll(),
-        this.globalStateClient.find(),
+        this.globalStateClient.findOrThrow(),
       ]);
-      const engines = this.mergeEnginesWithLogExtractionConfig(rawEngines, globalState);
-      const status = this.calculateEntityStoreStatus(rawEngines);
+
+      const status = this.calculateEntityStoreStatus(engines);
 
       if (withComponents) {
         const enginesWithComponents = await Promise.all(
           engines.map((engine) => this.getEngineWithComponents(engine))
         );
-        return { status, engines: enginesWithComponents };
+        return {
+          status,
+          engines: enginesWithComponents,
+          historySnapshot,
+          logsExtractionConfig,
+          entityMaintainers,
+        };
       }
 
-      return { status, engines };
+      return { status, engines, historySnapshot, logsExtractionConfig, entityMaintainers };
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return { status: ENTITY_STORE_STATUS.NOT_INSTALLED, engines: [] };
+      }
+
       this.logger.error('Error getting status', { error });
       throw error;
     }
-  }
-
-  private mergeEnginesWithLogExtractionConfig(
-    rawEngines: EngineDescriptor[],
-    globalState?: EntityStoreGlobalState
-  ): EngineDescriptorWithMergedLogExtraction[] {
-    const config = globalState?.logsExtraction ?? LogExtractionConfig.parse({});
-    return rawEngines.map((engine) => ({
-      ...engine,
-      logExtractionState: {
-        ...config,
-        ...engine.logExtractionState,
-      } as EngineDescriptorWithMergedLogExtraction['logExtractionState'],
-    }));
-  }
-
-  private async initGlobalState(
-    logsExtraction: LogExtractionConfig,
-    historySnapshot: HistorySnapshotState
-  ): Promise<void> {
-    const existing = await this.globalStateClient.find();
-    if (existing == null) {
-      await this.globalStateClient.init({ historySnapshot, logsExtraction });
-      return;
-    }
-
-    await this.globalStateClient.update({ logsExtraction, historySnapshot });
   }
 
   public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
@@ -345,8 +329,8 @@ export class AssetManager {
   }
 
   private async getEngineWithComponents(
-    engine: EngineDescriptorWithMergedLogExtraction
-  ): Promise<EngineDescriptorWithMergedLogExtraction & { components: EngineComponentStatus[] }> {
+    engine: EngineDescriptor
+  ): Promise<EngineDescriptor & { components: EngineComponentStatus[] }> {
     const definition = getEntityDefinition(engine.type, this.namespace);
     const components = await this.getComponentsForEngine(engine.type, definition);
     return { ...engine, components };
@@ -365,7 +349,7 @@ export class AssetManager {
       taskComponent,
     ] = await Promise.all([
       this.getEntityDefinitionComponent(definition),
-      this.getIndexTemplateComponents(definition),
+      this.getIndexTemplateComponents(),
       this.getIndexComponents(),
       this.getComponentTemplateComponents(definition),
       this.getIlmPolicyComponents(),
@@ -390,9 +374,7 @@ export class AssetManager {
     };
   }
 
-  private async getIndexTemplateComponents(
-    definition: ManagedEntityDefinition
-  ): Promise<EngineComponentStatus[]> {
+  private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
     const updatesId = getUpdatesIndexTemplateId(this.namespace);

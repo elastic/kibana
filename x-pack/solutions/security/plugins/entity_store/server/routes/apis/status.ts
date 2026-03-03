@@ -12,17 +12,15 @@ import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import type {
-  EntityStoreStatus,
-  GetStatusResult,
-  MergedLogExtractionState,
-} from '../../domain/types';
+import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
+import type { LogExtractionConfig } from '../../domain/definitions/saved_objects';
+import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
 type LogExtractionStateForV1 = Omit<
-  MergedLogExtractionState,
+  LogExtractionConfig,
   'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
 >;
 interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
@@ -31,9 +29,13 @@ interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
   enrichPolicyExecutionInterval: null;
   timestampField: '@timestamp';
   maxPageSearchSize: 10000;
+  lastExecutionTimestamp: string | undefined;
 }
 
-type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
+type StatusEngine = Omit<
+  GetStatusSuccessResult['engines'][number],
+  'versionState' | 'logExtractionState'
+> &
   LegacyEngineDescriptorV1;
 
 interface EntityStoreStatusResponseBody {
@@ -46,10 +48,14 @@ const querySchema = z.object({
 });
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
-function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngine {
-  const { versionState, ...rest } = engine;
+function toPublicEngine(
+  engine: GetStatusSuccessResult['engines'][number],
+  logsExtractionConfig: LogExtractionConfig
+): StatusEngine {
+  const { versionState, logExtractionState, ...rest } = engine;
   const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
-    rest.logExtractionState;
+    logsExtractionConfig;
+
   return {
     ...rest,
     // TODO: Remove the legacy fields once we stop supporting V1.
@@ -64,6 +70,7 @@ function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngin
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
   };
 }
 
@@ -92,12 +99,20 @@ export function registerStatus(router: EntityStorePluginRouter) {
           const { logger, assetManager } = entityStoreCtx;
           logger.debug('Status API invoked');
           const withComponents = req.query.include_components;
-          const { status, engines } = await assetManager.getStatus(withComponents);
+          const { status, engines, ...rest } = await assetManager.getStatus(withComponents);
+
+          if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
+            return res.ok({
+              body: { status, engines: [] },
+            });
+          }
+
+          const { logsExtractionConfig } = rest as GetStatusSuccessResult;
 
           return res.ok({
             body: {
               status,
-              engines: engines.map(toPublicEngine),
+              engines: engines.map((engine) => toPublicEngine(engine, logsExtractionConfig)),
             },
           });
         }

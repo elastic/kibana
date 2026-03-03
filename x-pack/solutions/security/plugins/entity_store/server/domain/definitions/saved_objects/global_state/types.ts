@@ -75,7 +75,8 @@ const historySnapshotSchema = schema.object({
 
 const logExtractionSchema = schema.object({
   filter: schema.maybe(schema.string()),
-  additionalIndexPatterns: schema.maybe(schema.arrayOf(schema.string())),
+  // large max size to avoid unbounded array validation
+  additionalIndexPatterns: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   fieldHistoryLength: schema.maybe(schema.number()),
   lookbackPeriod: schema.maybe(schema.string()),
   delay: schema.maybe(schema.string()),

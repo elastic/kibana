@@ -101,7 +101,7 @@ export class LogsExtractionClient {
     this.ccsLogsExtractionClient = ccsLogsExtractionClient;
   }
 
-  private async getLogExtractionConfigAndRuntime(
+  private async getLogExtractionConfigAndState(
     type: EntityType
   ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
@@ -119,7 +119,7 @@ export class LogsExtractionClient {
     this.logger.debug('starting entity extraction');
 
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndRuntime(type);
+      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const delayMs = parseDurationToMs(config.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
       const { count, pages, indexPatterns, lastSearchTimestamp, ccsError } =
@@ -164,7 +164,7 @@ export class LogsExtractionClient {
 
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndRuntime(type);
+      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const delayMs = parseDurationToMs(config.delay);
       const indexPatterns = await this.getLocalIndexPatterns(config.additionalIndexPatterns);
       const { fromDateISO } = this.getExtractionWindow(config, engineState, delayMs);
