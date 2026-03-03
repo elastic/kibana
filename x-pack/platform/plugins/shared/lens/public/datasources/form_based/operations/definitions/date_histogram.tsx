@@ -45,6 +45,7 @@ import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
+import { AUTO_TARGET_NUMBER_OF_BUCKETS, T_END, T_START } from '../../generate_esql_query';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -104,26 +105,41 @@ function getTimeZoneAndInterval(
   };
 }
 
-export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
-  if (interval !== 'm' && interval.endsWith('m')) {
-    return interval.replace('m', ' minutes');
+export function splitIntervalToValueAndUnit(
+  interval: string
+): { value: number; unit: string } | null {
+  if (!interval || interval === 'auto') return null;
+  const trimmed = interval.trim();
+  const numMatch = trimmed.match(/^[\d.]+/);
+  const value = numMatch ? parseFloat(numMatch[0]) : 1;
+  const unit = trimmed.replace(/^[\d.\s]+/, '').trim() || 'h';
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return { value, unit };
+}
+
+const ESQL_UNIT_MAP: Record<string, [string, string]> = {
+  ms: ['millisecond', 'milliseconds'],
+  s: ['second', 'seconds'],
+  m: ['minute', 'minutes'],
+  h: ['hour', 'hours'],
+  d: ['day', 'days'],
+  w: ['week', 'weeks'],
+  M: ['month', 'months'],
+  y: ['year', 'years'],
+  q: ['quarter', 'quarters'],
+};
+
+export function mapToEsqlInterval(_dateRange: DateRange, interval: string): string {
+  const parsed = splitIntervalToValueAndUnit(interval);
+  if (!parsed) return '1 hour';
+  const { value, unit } = parsed;
+  const n = value;
+  const pair = ESQL_UNIT_MAP[unit];
+  if (pair) {
+    const word = n === 1 ? pair[0] : pair[1];
+    return `${n} ${word}`;
   }
-  switch (interval) {
-    case '1M':
-      return '1 month';
-    case 'd':
-      return '1d';
-    case 'h':
-      return '1h';
-    case 'm':
-      return '1 minute';
-    case 's':
-      return '1s';
-    case 'ms':
-      return '1ms';
-    default:
-      return interval;
-  }
+  return interval;
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -230,17 +246,18 @@ export const dateHistogramOperation: OperationDefinition<
   },
   toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
     if (column.params?.includeEmptyRows) return;
+
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
-    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
-    const resolvedInterval =
-      interval === 'auto'
-        ? mapToEsqlInterval(
-            dateRange,
-            calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          )
-        : mapToEsqlInterval(dateRange, interval);
+    if (interval === 'auto') {
+      return {
+        template: `BUCKET(${esql.col(
+          column.sourceField
+        )}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${T_START}, ${T_END})`,
+      };
+    }
 
+    const resolvedInterval = mapToEsqlInterval(dateRange, interval);
     return {
       template: `BUCKET(${esql.col(column.sourceField)}, ${resolvedInterval})`,
     };

@@ -26,9 +26,10 @@ export interface CreateEsAggsIdMapEntryParams {
   /** Format configuration for the column (accepts ValueFormatConfig or serialized format) */
   format?: ValueFormatConfig | Record<string, unknown>;
   /** Interval for date histogram buckets (in ms) */
-  interval?: number;
+  interval?: 'auto' | number;
   /** Whether to include sourceField in the output (for bucket columns) */
   includeSourceField?: boolean;
+  esAggsId?: string;
 }
 
 /**
@@ -45,6 +46,7 @@ export function createEsAggsIdMapEntry({
   uiSettings,
   dateRange,
   includeSourceField = false,
+  esAggsId,
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
   const label = col.customLabel
     ? col.label
@@ -61,10 +63,10 @@ export function createEsAggsIdMapEntry({
     return [
       {
         id: colId,
-        label,
+        label: interval === 'auto' ? esAggsId ?? label : label,
         operationType: 'date_histogram',
         sourceField: col.sourceField!,
-        interval,
+        ...(interval !== 'auto' ? { interval } : {}),
         ...(format !== undefined ? { format } : {}),
         ...(col.dataType ? { dataType: col.dataType } : {}),
         ...(col.customLabel ? { customLabel: col.customLabel } : {}),

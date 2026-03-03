@@ -101,6 +101,11 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   ms: '1ms',
 };
 
+export const T_START = '?_tstart';
+export const T_END = '?_tend';
+
+export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -131,7 +136,7 @@ export function generateEsqlQuery(
 
   if (indexPattern.timeFieldName) {
     const timeField = `${esql.col(indexPattern.timeFieldName)}`;
-    queryParts.push(`WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`);
+    queryParts.push(`WHERE ${timeField} >= ${T_START} AND ${timeField} <= ${T_END}`);
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -306,18 +311,19 @@ export function generateEsqlQuery(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
-    let interval: number | undefined;
+    let interval: 'auto' | number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
-      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
-
       const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
-      const kibanaInterval =
-        dateHistogramColumn.params?.interval === 'auto'
-          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          : dateHistogramColumn.params?.interval || '1h';
-      const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-      interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
+
+      if (dateHistogramColumn.params?.interval === 'auto') {
+        interval = 'auto';
+      } else {
+        const kibanaInterval = dateHistogramColumn.params?.interval || '1h';
+        const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
+        const duration = moment.duration(esInterval.value, esInterval.unit).as('ms');
+        interval = duration;
+      }
     }
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
@@ -335,6 +341,7 @@ export function generateEsqlQuery(
       }
     }
 
+    // ok
     const rawResult = def.toESQL(
       {
         ...col,
@@ -380,6 +387,7 @@ export function generateEsqlQuery(
       uiSettings,
       dateRange,
       includeSourceField: true,
+      esAggsId,
     });
 
     return { esql: rawResult.template };

@@ -17,7 +17,7 @@ export type OriginalColumn = {
   dataType?: DataType;
   customLabel?: boolean;
 } & (
-  | { operationType: 'date_histogram'; sourceField: string; interval: number }
+  | { operationType: 'date_histogram'; sourceField: string; interval?: number }
   | { operationType: string; sourceField?: string; interval: never }
 );
 
