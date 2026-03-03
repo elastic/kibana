@@ -109,7 +109,8 @@ export const AmazonS3: ConnectorSpec = {
         }),
         placeholder: 'us-east-1',
         helpText: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.region.helpText', {
-          defaultMessage: 'The AWS region where your S3 buckets are located (for example, us-east-1)',
+          defaultMessage:
+            'The AWS region where your S3 buckets are located (for example, us-east-1)',
         }),
       }),
   }),
@@ -173,8 +174,17 @@ export const AmazonS3: ConnectorSpec = {
       input: z.object({
         bucket: z.string().min(1).describe('The name of the S3 bucket'),
         prefix: z.string().optional().describe('The prefix to filter objects by'),
-        continuationToken: z.string().optional().describe('Continuation token for paginated listing'),
-        maxKeys: z.number().int().positive().optional().describe('Maximum number of keys to return in a single page').default(1000),
+        continuationToken: z
+          .string()
+          .optional()
+          .describe('Continuation token for paginated listing'),
+        maxKeys: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe('Maximum number of keys to return in a single page')
+          .default(1000),
       }),
       handler: async (ctx, input) => {
         const config = ctx.config as {
