@@ -32,7 +32,7 @@ describe('transformPanelsOut', () => {
     expect(panels).toBeDefined();
     expect(panels).toHaveLength(1);
     expect(panels![0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       uid: 'panel-1',
     });
   });
