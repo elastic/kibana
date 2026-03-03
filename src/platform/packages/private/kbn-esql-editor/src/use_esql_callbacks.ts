@@ -143,6 +143,8 @@ export const useEsqlCallbacks = ({
           return [];
         }
 
+        previousColumnsQueryRef.current = undefined;
+
         return result || [];
       }
       return [];
