@@ -21,6 +21,10 @@ export const ProjectRouting: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
+  if (!projectRouting) {
+    return null;
+  }
+
   return (
     <>
       <EuiSpacer size="m" />

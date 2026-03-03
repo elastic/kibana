@@ -251,7 +251,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           )}
-          {cps?.cpsManager ? (
+          {cps?.cpsManager && projectRouting ? (
             <span>
               {
                 <FormattedMessage
