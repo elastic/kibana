@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { formatRuntime } from '../../lib/format_runtime';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useRunningQueriesAppContext } from '../app_context';
@@ -37,30 +38,6 @@ interface QueryDetailFlyoutProps {
   isStopRequested: boolean;
   onClose: () => void;
   onStopQuery: (taskId: string) => void;
-}
-
-function formatRuntime(startTime: number): string {
-  const duration = moment.duration(Date.now() - startTime);
-  const hours = Math.floor(duration.asHours());
-  const minutes = duration.minutes();
-
-  if (hours > 0) {
-    return minutes > 0
-      ? i18n.translate('xpack.runningQueries.flyout.runtimeHoursMinutes', {
-          defaultMessage:
-            '{hours} {hours, plural, one {hour} other {hours}} {minutes} {minutes, plural, one {min} other {mins}}',
-          values: { hours, minutes },
-        })
-      : i18n.translate('xpack.runningQueries.flyout.runtimeHours', {
-          defaultMessage: '{hours} {hours, plural, one {hour} other {hours}}',
-          values: { hours },
-        });
-  }
-
-  return i18n.translate('xpack.runningQueries.flyout.runtimeMinutes', {
-    defaultMessage: '{minutes} {minutes, plural, one {min} other {mins}}',
-    values: { minutes },
-  });
 }
 
 export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
@@ -132,7 +109,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow">
-              {query.queryType === 'ES|QL' ? 'ESQL' : query.queryType}
+              {query.queryType}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -186,20 +163,6 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             </EuiText>
           )}
         </EuiText>
-
-        {query.remoteSearch && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.runningQueries.flyout.remoteSearchLabel', {
-                  defaultMessage: 'Remote search',
-                })}
-              </strong>{' '}
-              {query.remoteSearch}
-            </EuiText>
-          </>
-        )}
 
         <EuiSpacer size="l" />
 
@@ -286,15 +249,19 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {(isStopRequested || (canCancelTasks && query.cancellable && !query.cancelled)) && (
+            {(isStopRequested || (canCancelTasks && query.cancellable) || query.cancelled) && (
               <EuiButton
                 color="danger"
                 fill
                 onClick={() => onStopQuery(query.taskId)}
-                isDisabled={isStopRequested}
+                isDisabled={isStopRequested || query.cancelled}
                 isLoading={isStopRequested}
               >
-                {isStopRequested
+                {query.cancelled
+                  ? i18n.translate('xpack.runningQueries.flyout.queryStoppedText', {
+                      defaultMessage: 'Query was stopped',
+                    })
+                  : isStopRequested
                   ? i18n.translate('xpack.runningQueries.flyout.stoppingQueryText', {
                       defaultMessage: 'Stopping the query…',
                     })
