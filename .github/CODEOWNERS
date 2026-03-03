@@ -1108,8 +1108,6 @@ x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
-x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
-x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
@@ -2307,9 +2305,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
-# AppEx AI Infra
-/x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
-/x-pack/platform/test/functional_gen_ai/inference @elastic/appex-ai-infra
+# Inference Plugins (Search Solution)
+x-pack/platform/plugins/shared/inference @elastic/search-kibana
+x-pack/platform/test/functional_gen_ai/inference @elastic/search-kibana
+x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 
 # AppEx Platform Services Security
 /x-pack/platform/test/serverless/api_integration/test_suites/security_response_headers.ts  @elastic/kibana-security
