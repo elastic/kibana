@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands, ESQLSource } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { findFinalWord, findPreviousWord } from '../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitions } from '../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../definitions/utils/operators';
 import { unescapeColumnName } from '../../definitions/utils/shared';
-import type { ESQLAstAllCommands, ESQLSource } from '../../../types';
 import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,

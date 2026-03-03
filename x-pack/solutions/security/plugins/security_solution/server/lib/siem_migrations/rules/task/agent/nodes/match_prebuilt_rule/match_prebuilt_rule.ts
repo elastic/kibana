@@ -81,7 +81,8 @@ export const getMatchPrebuiltRuleNode = ({
     } else {
       promptTemplate = await MATCH_PREBUILT_RULE_PROMPT_GENERIC.formatMessages({
         rules: JSON.stringify(elasticSecurityRules, null, 2),
-        nl_rule_description: state.nl_query,
+        nl_rule_description:
+          state.nl_query || `${state.original_rule.title} \n ${state.original_rule.description}`,
       });
     }
 
