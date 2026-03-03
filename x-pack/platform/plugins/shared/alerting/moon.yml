@@ -84,7 +84,6 @@ dependsOn:
   - '@kbn/core-feature-flags-server-mocks'
   - '@kbn/core-feature-flags-server'
   - '@kbn/scout'
-  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod
