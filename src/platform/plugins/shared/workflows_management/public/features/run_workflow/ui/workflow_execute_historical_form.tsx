@@ -207,7 +207,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                     formatOnType: true,
                     quickSuggestions: false,
                     suggestOnTriggerCharacters: false,
-                    wordBasedSuggestions: false,
+                    wordBasedSuggestions: 'off',
                     parameterHints: {
                       enabled: false,
                     },
