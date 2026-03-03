@@ -28,7 +28,7 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
-  describe('search action', () => {
+  describe('query action', () => {
     it('should run SOQL query', async () => {
       const mockResponse = {
         data: {
@@ -39,29 +39,29 @@ describe('SalesforceConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await SalesforceConnector.actions.search.handler(mockContext, {
+      const result = await SalesforceConnector.actions.query.handler(mockContext, {
         soql: 'SELECT Id, Name FROM Account LIMIT 10',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v59.0/query`, {
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id, Name FROM Account LIMIT 10' },
       });
       expect(result).toEqual(mockResponse.data);
     });
 
     it('should use nextRecordsUrl when provided', async () => {
-      const nextUrl = '/services/data/v59.0/query/01gxx0000001';
+      const nextUrl = '/services/data/v66.0/query/01gxx0000001';
       const mockResponse = {
         data: {
           totalSize: 2000,
           done: false,
-          nextRecordsUrl: '/services/data/v59.0/query/01gxx0000002',
+          nextRecordsUrl: '/services/data/v66.0/query/01gxx0000002',
           records: [],
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      await SalesforceConnector.actions.search.handler(mockContext, {
+      await SalesforceConnector.actions.query.handler(mockContext, {
         soql: '',
         nextRecordsUrl: nextUrl,
       });
@@ -87,10 +87,81 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        `${baseUrl}/services/data/v59.0/sobjects/Account/001xx000001`,
+        `${baseUrl}/services/data/v66.0/sobjects/Account/001xx000001`,
         {}
       );
       expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('search action (SOSL)', () => {
+    it('should run SOSL search with search term and returning objects', async () => {
+      const mockResponse = {
+        data: {
+          searchRecords: [
+            { attributes: { type: 'Account' }, Id: '001xx000001', Name: 'Acme Corp' },
+            { attributes: { type: 'Contact' }, Id: '003xx000001', Name: 'Jane Doe' },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SalesforceConnector.actions.search.handler(mockContext, {
+        searchTerm: 'Acme',
+        returning: 'Account,Contact,Opportunity',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/search`, {
+        params: { q: 'FIND {Acme} RETURNING Account,Contact,Opportunity' },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should use nextRecordsUrl when provided', async () => {
+      const nextUrl = '/services/data/v66.0/search/01gxx0000001';
+      mockClient.get.mockResolvedValue({ data: { searchRecords: [] } });
+
+      await SalesforceConnector.actions.search.handler(mockContext, {
+        searchTerm: 'test',
+        returning: 'Account',
+        nextRecordsUrl: nextUrl,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
+    });
+  });
+
+  describe('describe action', () => {
+    it('should get sobject describe metadata', async () => {
+      const mockResponse = {
+        data: {
+          name: 'Account',
+          fields: [
+            { name: 'Id', type: 'id' },
+            { name: 'Name', type: 'string' },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SalesforceConnector.actions.describe.handler(mockContext, {
+        sobjectName: 'Account',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${baseUrl}/services/data/v66.0/sobjects/Account/describe`,
+        {}
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw on invalid sobject name', async () => {
+      await expect(
+        SalesforceConnector.actions.describe.handler(mockContext, {
+          sobjectName: 'Account; DROP TABLE User;--',
+        })
+      ).rejects.toThrow('Invalid sobject name');
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -109,7 +180,7 @@ describe('SalesforceConnector', () => {
         sobjectName: 'Account',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v59.0/query`, {
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id FROM Account LIMIT 50' },
       });
       expect(result).toEqual(mockResponse.data);
@@ -124,13 +195,13 @@ describe('SalesforceConnector', () => {
         limit: 50,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v59.0/query`, {
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id FROM Contact LIMIT 50' },
       });
     });
 
     it('should use nextRecordsUrl when provided', async () => {
-      const nextUrl = '/services/data/v59.0/query/01gxx0000001';
+      const nextUrl = '/services/data/v66.0/query/01gxx0000001';
       mockClient.get.mockResolvedValue({ data: { records: [], done: true } });
 
       await SalesforceConnector.actions.list_records.handler(mockContext, {
@@ -139,6 +210,36 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
+    });
+
+    it('should throw on invalid sobject name (SOQL injection safety)', async () => {
+      await expect(
+        SalesforceConnector.actions.list_records.handler(mockContext, {
+          sobjectName: 'Account; DROP TABLE User;--',
+        })
+      ).rejects.toThrow('Invalid sobject name');
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('download_file action', () => {
+    it('should download file content and return base64', async () => {
+      const fileContent = Buffer.from('Hello, file content');
+      mockClient.get.mockResolvedValue({
+        data: fileContent,
+        headers: { 'content-type': 'application/pdf' },
+      });
+
+      const result = await SalesforceConnector.actions.download_file.handler(mockContext, {
+        contentVersionId: '068xx000001AbcDEF',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${baseUrl}/services/data/v66.0/sobjects/ContentVersion/068xx000001AbcDEF/VersionData`,
+        { responseType: 'arraybuffer' }
+      );
+      expect(result.base64).toBe(fileContent.toString('base64'));
+      expect(result.contentType).toBe('application/pdf');
     });
   });
 
@@ -153,7 +254,7 @@ describe('SalesforceConnector', () => {
       }
       const result = await SalesforceConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v59.0/query`, {
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id FROM User LIMIT 1' },
       });
       expect(result).toEqual({

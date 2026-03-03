@@ -1,0 +1,17 @@
+version: '1'
+name: 'sources.salesforce.describe'
+description: 'Get metadata for a Salesforce object (fields, relationships, picklist values). Use before query or search to discover object and field names.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sobject_name
+    type: string
+    description: "Salesforce object API name (standard or custom), e.g. Account, Contact, or MyObject__c"
+steps:
+  - name: describe
+    type: salesforce.describe
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      sobjectName: "${{inputs.sobject_name}}"

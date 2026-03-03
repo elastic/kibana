@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.salesforce.query'
+description: 'Run a SOQL query against Salesforce. Make sure you know the correct salesforce object name. For large result sets, use nextRecordsUrl from the response to fetch the next page.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: soql
+    type: string
+    required: true
+    description: "SOQL query string, e.g. SELECT Id, Name FROM Account LIMIT 10"
+  - name: next_records_url
+    type: string
+    required: false
+    description: "URL from previous response's nextRecordsUrl for pagination"
+steps:
+  - name: query
+    type: salesforce.query
+    connector-id: <%= salesforce-stack-connector-id %>
+    with:
+      soql: "${{inputs.soql}}"
+      nextRecordsUrl: "${{inputs.next_records_url}}"

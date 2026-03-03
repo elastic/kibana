@@ -10,15 +10,36 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const SALESFORCE_API_VERSION = 'v59.0';
+const SALESFORCE_API_VERSION = 'v66.0';
 
 /** Derive instance base URL from the full token URL (strip /services/oauth2/token and any path). */
 function getBaseUrl(tokenUrl: string | undefined): string {
-  if (!tokenUrl) return '';
+  if (!tokenUrl || tokenUrl.trim() === '') {
+    throw new Error(
+      'Salesforce connector is not configured: tokenUrl (OAuth token endpoint) is required.'
+    );
+  }
   const base = tokenUrl.includes('/services/oauth2/token')
     ? tokenUrl.replace(/\/services\/oauth2\/token.*$/, '')
     : tokenUrl;
   return base.replace(/\/+$/, '');
+}
+
+/** Resolve Salesforce nextRecordsUrl (relative path) to a full URL. */
+function createPaginationUrl(baseUrl: string, nextRecordsUrl: string): string {
+  return `${baseUrl}${nextRecordsUrl}`;
+}
+
+/** Salesforce object API names: letters, numbers, underscore only. Throws if invalid (SOQL injection safety). */
+const SOBJECT_NAME_REGEX = /^[A-Za-z0-9_]+$/;
+function validateSobjectName(name: string): void {
+  if (!name || !SOBJECT_NAME_REGEX.test(name.trim())) {
+    throw new Error(
+      `Invalid sobject name: must contain only letters, numbers, and underscore (e.g. Account, MyObject__c). Got: ${
+        name?.substring(0, 50) ?? ''
+      }`
+    );
+  }
 }
 
 export const SalesforceConnector: ConnectorSpec = {
@@ -47,7 +68,7 @@ export const SalesforceConnector: ConnectorSpec = {
   },
 
   actions: {
-    search: {
+    query: {
       input: z.object({
         soql: z.string(),
         nextRecordsUrl: z.string().optional(),
@@ -56,11 +77,7 @@ export const SalesforceConnector: ConnectorSpec = {
         const typedInput = input as { soql: string; nextRecordsUrl?: string };
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
         if (typedInput.nextRecordsUrl) {
-          const url = typedInput.nextRecordsUrl.startsWith('http')
-            ? typedInput.nextRecordsUrl
-            : `${baseUrl}${typedInput.nextRecordsUrl.startsWith('/') ? '' : '/'}${
-                typedInput.nextRecordsUrl
-              }`;
+          const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
           const response = await ctx.client.get(url, {});
           return response.data;
         }
@@ -79,9 +96,12 @@ export const SalesforceConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string; recordId: string };
+        validateSobjectName(typedInput.sobjectName);
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const sobjectSegment = encodeURIComponent(typedInput.sobjectName.trim());
+        const recordIdSegment = encodeURIComponent(typedInput.recordId);
         const response = await ctx.client.get(
-          `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/${typedInput.sobjectName}/${typedInput.recordId}`,
+          `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/${sobjectSegment}/${recordIdSegment}`,
           {}
         );
         return response.data;
@@ -102,21 +122,82 @@ export const SalesforceConnector: ConnectorSpec = {
         };
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
         if (typedInput.nextRecordsUrl) {
-          const url = typedInput.nextRecordsUrl.startsWith('http')
-            ? typedInput.nextRecordsUrl
-            : `${baseUrl}${typedInput.nextRecordsUrl.startsWith('/') ? '' : '/'}${
-                typedInput.nextRecordsUrl
-              }`;
+          const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
           const response = await ctx.client.get(url, {});
           return response.data;
         }
+        validateSobjectName(typedInput.sobjectName);
         const limit = Math.min(typedInput.limit ?? 50, 2000);
-        const soql = `SELECT Id FROM ${typedInput.sobjectName} LIMIT ${limit}`;
+        const soql = `SELECT Id FROM ${typedInput.sobjectName.trim()} LIMIT ${limit}`;
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
           { params: { q: soql } }
         );
         return response.data;
+      },
+    },
+
+    search: {
+      input: z.object({
+        searchTerm: z.string(),
+        returning: z.string().describe('Object API names to search (comma-separated)'),
+        nextRecordsUrl: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          searchTerm: string;
+          returning: string;
+          nextRecordsUrl?: string;
+        };
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string);
+        if (typedInput.nextRecordsUrl) {
+          const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
+          const response = await ctx.client.get(url, {});
+          return response.data;
+        }
+        const soslQuery = `FIND {${
+          typedInput.searchTerm
+        }} RETURNING ${typedInput.returning.trim()}`;
+        const response = await ctx.client.get(
+          `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/search`,
+          { params: { q: soslQuery } }
+        );
+        return response.data;
+      },
+    },
+
+    describe: {
+      input: z.object({
+        sobjectName: z.string().describe('SObject API name (e.g. Account, Contact, MyObject__c).'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { sobjectName: string };
+        validateSobjectName(typedInput.sobjectName);
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const sobjectSegment = encodeURIComponent(typedInput.sobjectName.trim());
+        const response = await ctx.client.get(
+          `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/${sobjectSegment}/describe`,
+          {}
+        );
+        return response.data;
+      },
+    },
+
+    download_file: {
+      input: z.object({
+        contentVersionId: z.string().describe('ContentVersion record Id from query.'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { contentVersionId: string };
+        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const id = encodeURIComponent(typedInput.contentVersionId.trim());
+        const url = `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/ContentVersion/${id}/VersionData`;
+        const response = await ctx.client.get(url, { responseType: 'arraybuffer' });
+        const buffer = Buffer.from(response.data as ArrayBuffer);
+        return {
+          base64: buffer.toString('base64'),
+          contentType: (response.headers as { 'content-type'?: string })?.['content-type'],
+        };
       },
     },
   },

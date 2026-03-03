@@ -8,8 +8,10 @@ triggers:
 inputs:
   - name: sobject_name
     type: string
+    description: "Salesforce object API name (standard or custom), e.g. Account, Contact, or MyCustomObject__c"
   - name: record_id
     type: string
+    description: "Record ID (15- or 18-character)"
 steps:
   - name: get-record
     type: salesforce.get_record

@@ -3,7 +3,7 @@ navigation_title: "Salesforce"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/salesforce-action-type.html
 applies_to:
-  stack: preview 9.3
+  stack: preview 9.4
   serverless: preview
 ---
 

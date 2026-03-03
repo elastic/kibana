@@ -17,12 +17,6 @@ export const salesforceDataSource: DataSource = {
 
   iconType: '.salesforce',
 
-  oauthConfiguration: {
-    initiatePath: '/salesforce/oauth/authorize',
-    fetchSecretsPath: '/oauth/fetch_request_secrets',
-    oauthBaseUrl: 'https://localhost:8052', // update once EARS deploys to QA
-  },
-
   stackConnectors: [
     {
       type: '.salesforce',
