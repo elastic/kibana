@@ -66,7 +66,7 @@ describe('MongoConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockClientInstance = mockCreateMockClient();
-    (mongodb.MongoClient as jest.Mock).mockImplementation(function (this: unknown) {
+    (mongodb.MongoClient as unknown as jest.Mock).mockImplementation(function (this: unknown) {
       mockClientInstance = mockCreateMockClient();
       return mockClientInstance;
     });
