@@ -63,7 +63,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     return null;
   }
 
-  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   return (
     <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
