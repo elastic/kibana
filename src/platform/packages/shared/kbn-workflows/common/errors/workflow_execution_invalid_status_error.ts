@@ -17,8 +17,3 @@ export class WorkflowExecutionInvalidStatusError extends Error {
     this.name = 'WorkflowExecutionInvalidStatusError';
   }
 }
-
-export const isWorkflowExecutionInvalidStatusError = (
-  error: Error
-): error is WorkflowExecutionInvalidStatusError =>
-  error instanceof WorkflowExecutionInvalidStatusError;
