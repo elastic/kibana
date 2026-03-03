@@ -67,7 +67,7 @@ export class RegexWorkerService {
       if (err?.name === 'AbortError') {
         // Destroy the tainted pool and replace it with a fresh one so
         // subsequent tasks don't run on a degraded pool.
-        await this.worker.destroy({ force: true }).catch(() => {});
+        await this.worker.destroy().catch(() => {});
         this.worker = this.createWorkerPool();
         throw new Error('Regex anonymization task timed out');
       }

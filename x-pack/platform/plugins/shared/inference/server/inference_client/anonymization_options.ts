@@ -17,7 +17,6 @@ export interface InferenceAnonymizationOptions {
   ) => Promise<EffectivePolicy | undefined>;
   replacements?: {
     esClient?: ElasticsearchClient;
-    encryptionKey?: string;
     encryptionKeyPromise?: Promise<string | undefined>;
     usePersistentReplacements?: boolean;
     requireEncryptionKey?: boolean;

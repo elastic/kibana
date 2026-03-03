@@ -39,24 +39,22 @@ let replacementsIndexEnsuredAt = 0;
 const resolveEncryptionKey = async ({
   coreSetup,
   namespace,
-  configuredEncryptionKey,
 }: {
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
   namespace: string;
-  configuredEncryptionKey?: string;
 }): Promise<string | undefined> => {
   const [, pluginsStart] = await coreSetup.getStartServices();
   const anonymizationPlugin = pluginsStart.anonymization;
   const anonymizationEnabled = anonymizationPlugin?.isEnabled() ?? false;
 
   if (!anonymizationEnabled) {
-    return configuredEncryptionKey;
+    return undefined;
   }
 
   try {
     return await anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
   } catch {
-    return configuredEncryptionKey;
+    return undefined;
   }
 };
 
@@ -64,7 +62,6 @@ const resolveReplacementsContext = async (
   context: RequestHandlerContext,
   options: {
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-    encryptionKey?: string;
     logger: Logger;
   }
 ) => {
@@ -73,7 +70,6 @@ const resolveReplacementsContext = async (
   const encryptionKey = await resolveEncryptionKey({
     coreSetup: options.coreSetup,
     namespace,
-    configuredEncryptionKey: options.encryptionKey,
   });
   assertReplacementsEncryptionKeyConfigured(encryptionKey);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -92,7 +88,6 @@ export const registerReplacementsRoutes = (
   logger: Logger,
   options: {
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-    encryptionKey?: string;
   }
 ): void => {
   // GET /internal/inference/anonymization/replacements/{id} — Resolve by ID

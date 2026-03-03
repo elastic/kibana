@@ -137,7 +137,6 @@ export function createChatCompleteCallbackApi({
               regexWorker,
               esClient,
               replacementsEsClient: anonymization?.replacements?.esClient,
-              replacementsEncryptionKey: anonymization?.replacements?.encryptionKey,
               replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
               usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
               requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,

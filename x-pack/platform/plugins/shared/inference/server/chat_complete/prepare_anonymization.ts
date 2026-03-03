@@ -27,7 +27,6 @@ interface PrepareAnonymizationOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
-  replacementsEncryptionKey?: string;
   replacementsEncryptionKeyPromise?: Promise<string | undefined>;
   usePersistentReplacements?: boolean;
   requireReplacementsEncryptionKey?: boolean;
@@ -47,7 +46,6 @@ export const prepareAnonymization = async ({
   regexWorker,
   esClient,
   replacementsEsClient,
-  replacementsEncryptionKey,
   replacementsEncryptionKeyPromise,
   usePersistentReplacements = true,
   requireReplacementsEncryptionKey = false,
@@ -76,7 +74,7 @@ export const prepareAnonymization = async ({
   const replacementsClient = replacementsEsClient ?? esClient;
   let repo: ReplacementsRepository | undefined;
   let replacementsId = carriedReplacementsId;
-  let resolvedReplacementsEncryptionKey = replacementsEncryptionKey;
+  let resolvedReplacementsEncryptionKey: string | undefined;
 
   const getReplacementsEncryptionKey = async (): Promise<string | undefined> => {
     if (resolvedReplacementsEncryptionKey) {
@@ -116,7 +114,10 @@ export const prepareAnonymization = async ({
     esClient,
     salt: salt ?? undefined,
     effectivePolicy,
-    knownReplacements: existingReplacements?.replacements ?? [],
+    knownReplacements: (existingReplacements?.replacements ?? []).filter(
+      (r): r is { anonymized: string; original: string } =>
+        typeof r.anonymized === 'string' && typeof r.original === 'string'
+    ),
   });
 
   const replacements = anonymization.anonymizations.map(({ entity }) => ({

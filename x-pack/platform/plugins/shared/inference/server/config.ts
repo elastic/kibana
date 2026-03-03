@@ -9,11 +9,6 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  replacements: schema.object({
-    // Deprecated fallback override; when xpack.anonymization.active=true
-    // key material is auto-managed per-space by the anonymization plugin.
-    encryptionKey: schema.maybe(schema.string({ minLength: 1 })),
-  }),
   workers: schema.object({
     anonymization: schema.object({
       enabled: schema.boolean({ defaultValue: true }),

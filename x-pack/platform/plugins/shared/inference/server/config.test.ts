@@ -8,20 +8,9 @@
 import { configSchema } from './config';
 
 describe('inference config schema', () => {
-  it('does not require replacements encryption key in schema', () => {
+  it('validates with defaults', () => {
     expect(configSchema.validate({})).toMatchObject({
       enabled: true,
-      replacements: {},
-    });
-  });
-
-  it('accepts explicit replacements encryption key', () => {
-    expect(
-      configSchema.validate({
-        replacements: { encryptionKey: 'my-explicit-replacements-encryption-key' },
-      })
-    ).toMatchObject({
-      replacements: { encryptionKey: 'my-explicit-replacements-encryption-key' },
     });
   });
 });

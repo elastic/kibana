@@ -57,38 +57,22 @@ const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   return enabledRules;
 };
 
-export const getValidatedReplacementsEncryptionKey = ({
-  anonymizationEnabled,
-  encryptionKey,
-}: {
-  anonymizationEnabled: boolean;
-  encryptionKey?: string;
-}): string | undefined => {
-  return anonymizationEnabled ? encryptionKey : undefined;
-};
-
 export const resolveReplacementsEncryptionKey = async ({
   namespace,
   anonymizationEnabled,
   policyService,
-  configuredEncryptionKey,
 }: {
   namespace: string;
   anonymizationEnabled: boolean;
   policyService?: {
     getReplacementsEncryptionKey: (targetNamespace: string) => Promise<string>;
   };
-  configuredEncryptionKey?: string;
 }): Promise<string | undefined> => {
-  if (!anonymizationEnabled) {
-    return configuredEncryptionKey;
+  if (!anonymizationEnabled || !policyService) {
+    return undefined;
   }
 
-  if (policyService) {
-    return policyService.getReplacementsEncryptionKey(namespace);
-  }
-
-  return configuredEncryptionKey;
+  return policyService.getReplacementsEncryptionKey(namespace);
 };
 
 export class InferencePlugin
@@ -120,9 +104,6 @@ export class InferencePlugin
       router,
       coreSetup,
       logger: this.logger,
-      replacements: {
-        encryptionKey: this.config.replacements.encryptionKey,
-      },
     });
 
     return {};
@@ -130,10 +111,6 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
-    const configuredReplacementsEncryptionKey = getValidatedReplacementsEncryptionKey({
-      anonymizationEnabled,
-      encryptionKey: this.config.replacements.encryptionKey,
-    });
 
     if (anonymizationEnabled) {
       this.logger.info(
@@ -193,14 +170,15 @@ export class InferencePlugin
         namespace,
         anonymizationEnabled,
         policyService,
-        configuredEncryptionKey: configuredReplacementsEncryptionKey,
       });
       return {
         namespace,
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
         regexWorker: (() => {
           if (!this.regexWorker) {
-            this.logger.error('RegexWorkerService is not initialized — Anonymization plugin.start() may not have completed');
+            this.logger.error(
+              'RegexWorkerService is not initialized — Anonymization plugin.start() may not have completed'
+            );
           }
           return this.regexWorker!;
         })(),

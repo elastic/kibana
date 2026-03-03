@@ -17,20 +17,15 @@ export const registerRoutes = ({
   router,
   logger,
   coreSetup,
-  replacements,
 }: {
   router: IRouter;
   logger: Logger;
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-  replacements: {
-    encryptionKey?: string;
-  };
 }) => {
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerPromptRoute({ router, coreSetup, logger: logger.get('prompt') });
   registerConnectorsRoute({ router, coreSetup });
   registerReplacementsRoutes(router, logger.get('replacements'), {
     coreSetup,
-    ...replacements,
   });
 };
