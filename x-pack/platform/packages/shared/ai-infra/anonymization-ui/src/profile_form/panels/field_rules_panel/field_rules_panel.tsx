@@ -51,6 +51,7 @@ export const FieldRulesPanel = ({
     selectedFields: state.selectedFields,
     setSelectedFields: state.setSelectedFields,
     allFieldsSelected: state.allFieldsSelected,
+    hasActiveFieldFilters: state.hasActiveFieldFilters,
     selectedCount: state.selectedCount,
     toggleSelectAllFields: state.toggleSelectAllFields,
     onRuleActionChange: state.onRuleActionChange,

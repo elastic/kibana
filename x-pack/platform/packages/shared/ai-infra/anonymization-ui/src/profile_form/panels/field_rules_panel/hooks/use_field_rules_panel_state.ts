@@ -78,18 +78,29 @@ export const useFieldRulesPanelState = ({
   );
 
   const allRuleFields = useMemo(() => fieldRules.map((rule) => rule.field), [fieldRules]);
+  const hasActiveFieldFilters = normalizedSearchQuery.length > 0 || fieldActionFilter !== 'all';
+  const selectableRuleFields = useMemo(
+    () => (hasActiveFieldFilters ? rankedRules.map((rule) => rule.field) : allRuleFields),
+    [allRuleFields, hasActiveFieldFilters, rankedRules]
+  );
+  const selectableFieldSet = useMemo(() => new Set(selectableRuleFields), [selectableRuleFields]);
+  const areAllSelectableFieldsSelected =
+    selectableRuleFields.length > 0 &&
+    selectableRuleFields.every((field) => selectedFields.includes(field));
   const selectedCount = selectedFields.length;
-  const allFieldsSelected = allRuleFields.length > 0 && selectedCount === allRuleFields.length;
+  const allFieldsSelected = areAllSelectableFieldsSelected;
   const policyCounters = useMemo(() => countPolicies(fieldRules), [fieldRules]);
 
   const toggleSelectAllFields = useCallback(() => {
     if (allFieldsSelected) {
-      setSelectedFields([]);
+      setSelectedFields((prev) =>
+        prev.filter((selectedField) => !selectableFieldSet.has(selectedField))
+      );
       return;
     }
 
-    setSelectedFields(allRuleFields);
-  }, [allFieldsSelected, allRuleFields, setSelectedFields]);
+    setSelectedFields(selectableRuleFields);
+  }, [allFieldsSelected, selectableFieldSet, selectableRuleFields, setSelectedFields]);
 
   const onRuleActionChange = useCallback(
     (field: string, action: FieldRuleAction) => {
@@ -166,5 +177,6 @@ export const useFieldRulesPanelState = ({
     onRuleEntityClassChange,
     applyBulkAction,
     policyCounters,
+    hasActiveFieldFilters,
   };
 };

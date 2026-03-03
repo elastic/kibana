@@ -154,7 +154,6 @@ export const useAnonymizationProfilesSectionState = ({
     if (result?.profile) {
       if (flyoutState.mode === 'create') {
         setCreateConflict(null);
-        form.reset();
         closeFlyout();
         onCreateSuccess?.();
       } else {

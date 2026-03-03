@@ -26,6 +26,7 @@ const contextValue = {
   selectedFields: [],
   setSelectedFields: jest.fn(),
   allFieldsSelected: false,
+  hasActiveFieldFilters: false,
   selectedCount: 0,
   toggleSelectAllFields: jest.fn(),
   onRuleActionChange: jest.fn(),

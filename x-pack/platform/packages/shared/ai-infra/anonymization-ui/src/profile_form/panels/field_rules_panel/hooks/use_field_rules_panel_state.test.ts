@@ -61,7 +61,7 @@ describe('useFieldRulesPanelState', () => {
     ]);
   });
 
-  it('toggles select all fields across the entire dataset', () => {
+  it('toggles select all matching fields when filters are active', () => {
     const onFieldRulesChange = jest.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
@@ -75,16 +75,15 @@ describe('useFieldRulesPanelState', () => {
     });
 
     expect(result.current.filteredRules).toHaveLength(1);
+    expect(result.current.hasActiveFieldFilters).toBe(true);
     expect(result.current.selectedCount).toBe(0);
 
     act(() => {
       result.current.toggleSelectAllFields();
     });
 
-    expect(result.current.selectedCount).toBe(4);
-    expect(new Set(result.current.selectedFields)).toEqual(
-      new Set(['alpha.field', 'event.action', 'host.name', 'user.email'])
-    );
+    expect(result.current.selectedCount).toBe(1);
+    expect(result.current.selectedFields).toEqual(['user.email']);
     expect(result.current.allFieldsSelected).toBe(true);
 
     act(() => {
@@ -93,6 +92,26 @@ describe('useFieldRulesPanelState', () => {
 
     expect(result.current.selectedCount).toBe(0);
     expect(result.current.selectedFields).toEqual([]);
+  });
+
+  it('toggles select all fields across all rules when no filters are active', () => {
+    const onFieldRulesChange = jest.fn();
+    const { result } = renderHook(() =>
+      useFieldRulesPanelState({
+        fieldRules: baseRules,
+        onFieldRulesChange,
+      })
+    );
+
+    expect(result.current.hasActiveFieldFilters).toBe(false);
+    act(() => {
+      result.current.toggleSelectAllFields();
+    });
+
+    expect(result.current.selectedCount).toBe(4);
+    expect(new Set(result.current.selectedFields)).toEqual(
+      new Set(['alpha.field', 'event.action', 'host.name', 'user.email'])
+    );
   });
 
   it('applies bulk action to selected rows only', () => {

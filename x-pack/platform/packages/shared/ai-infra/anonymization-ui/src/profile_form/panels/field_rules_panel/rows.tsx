@@ -31,6 +31,7 @@ export const FieldRulesPanelRows = () => {
     selectedFields,
     setSelectedFields,
     allFieldsSelected,
+    hasActiveFieldFilters,
     toggleSelectAllFields,
     validationError,
     onRuleActionChange,
@@ -57,9 +58,15 @@ export const FieldRulesPanelRows = () => {
         id="anonymizationProfilesSelectAllFieldRules"
         checked={allFieldsSelected}
         onChange={toggleSelectAllFields}
-        label={i18n.translate('anonymizationUi.profiles.fieldRules.selectAllFields', {
-          defaultMessage: 'Select all fields',
-        })}
+        label={
+          hasActiveFieldFilters
+            ? i18n.translate('anonymizationUi.profiles.fieldRules.selectAllMatchingFields', {
+                defaultMessage: 'Select all matching fields',
+              })
+            : i18n.translate('anonymizationUi.profiles.fieldRules.selectAllFields', {
+                defaultMessage: 'Select all fields',
+              })
+        }
         disabled={!isManageMode || isSubmitting}
       />
       <EuiSpacer size="s" />

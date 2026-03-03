@@ -35,6 +35,7 @@ const createContextValue = (
     selectedFields: [],
     setSelectedFields: jest.fn(),
     allFieldsSelected: false,
+    hasActiveFieldFilters: false,
     selectedCount: 2,
     toggleSelectAllFields: jest.fn(),
     onRuleActionChange: jest.fn(),

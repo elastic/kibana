@@ -28,6 +28,7 @@ export interface FieldRulesPanelContextValue {
   selectedFields: string[];
   setSelectedFields: (fields: string[]) => void;
   allFieldsSelected: boolean;
+  hasActiveFieldFilters: boolean;
   selectedCount: number;
   toggleSelectAllFields: () => void;
   onRuleActionChange: (field: string, action: FieldRuleAction) => void;
