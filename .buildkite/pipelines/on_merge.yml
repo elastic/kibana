@@ -37,7 +37,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c4d-standard-16-lssd
-      zones: us-central1-c,us-central1-b,us-central1-a
       diskType: pd-ssd
     key: build
     timeout_in_minutes: 60
