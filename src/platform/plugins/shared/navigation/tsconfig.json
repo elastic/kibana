@@ -29,7 +29,9 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/core-chrome-navigation",
+    "@kbn/security-plugin"
   ],
   "exclude": [
     "target/**/*",
