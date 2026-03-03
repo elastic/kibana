@@ -157,5 +157,9 @@ describe('getAgentSyncValue', () => {
     it('returns undefined for base otlp without language', () => {
       expect(getAgentSyncValue('otlp')).toBeUndefined();
     });
+
+    it('returns undefined for undefined agentName', () => {
+      expect(getAgentSyncValue(undefined)).toBeUndefined();
+    });
   });
 });

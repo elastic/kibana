@@ -54,7 +54,11 @@ export const agentsSyncMap = new Map<SyncBadgeAgentName, boolean>([
  * @param agentName - The agent name (e.g., 'nodejs', 'opentelemetry/java', 'otlp/python/elastic')
  * @returns true for sync agents, false for async agents, undefined if unknown
  */
-export function getAgentSyncValue(agentName: AgentName): boolean | undefined {
+export function getAgentSyncValue(agentName?: AgentName): boolean | undefined {
+  if (!agentName) {
+    return undefined;
+  }
+
   if (isSyncBadgeAgentName(agentName)) {
     return agentsSyncMap.get(agentName);
   }
