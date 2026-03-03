@@ -105,8 +105,11 @@ describe('scripts/generate_plugin', () => {
     ]
   `);
 
-    expect(JSON.parse(Fs.readFileSync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'), 'utf-8')))
-      .toMatchInlineSnapshot(`
+    expect(
+      JSON.parse(
+        Fs.readFileSync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'), 'utf-8')
+      )
+    ).toMatchInlineSnapshot(`
     Object {
       "description": "",
       "id": "fooTestPlugin",

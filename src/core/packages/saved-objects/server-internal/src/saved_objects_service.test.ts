@@ -162,7 +162,9 @@ describe('SavedObjectsService', () => {
     });
 
     it('registers the deprecation provider with the correct kibanaVersion', async () => {
-      const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+      const pkg = JSON.parse(
+        readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')
+      ) as RawPackageInfo;
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
@@ -181,7 +183,9 @@ describe('SavedObjectsService', () => {
     });
 
     it('calls registerRoutes with the correct kibanaVersion', async () => {
-      const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+      const pkg = JSON.parse(
+        readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')
+      ) as RawPackageInfo;
       const kibanaVersion = pkg.version;
 
       const coreContext = createCoreContext({
@@ -482,7 +486,9 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with correct version', async () => {
-        const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+        const pkg = JSON.parse(
+          readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')
+        ) as RawPackageInfo;
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
@@ -500,7 +506,9 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with waitForMigrationCompletion=false for the default ui+background tasks role', async () => {
-        const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+        const pkg = JSON.parse(
+          readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')
+        ) as RawPackageInfo;
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
@@ -526,7 +534,9 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with waitForMigrationCompletion=false for the ui only role', async () => {
-        const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+        const pkg = JSON.parse(
+          readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')
+        ) as RawPackageInfo;
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
@@ -552,7 +562,9 @@ describe('SavedObjectsService', () => {
       });
 
       it('calls KibanaMigrator with waitForMigrationCompletion=true for the background tasks only role', async () => {
-        const pkg = JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')) as RawPackageInfo;
+        const pkg = JSON.parse(
+          readFileSync(join(REPO_ROOT, 'package.json'), 'utf-8')
+        ) as RawPackageInfo;
         const kibanaVersion = pkg.version;
 
         const coreContext = createCoreContext({
