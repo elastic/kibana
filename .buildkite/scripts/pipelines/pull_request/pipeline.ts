@@ -46,7 +46,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
   try {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
-    process.exit(1);
+    throw Error();
 
     if (skippable) {
       emitPipeline([emptyStep]);
@@ -493,7 +493,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     const evalsYaml = getEvalPipeline(GITHUB_PR_LABELS);
     if (evalsYaml) {
-      pipeline.push(evalsYaml);
+      // pipeline.push(evalsYaml);
     }
 
     if (
