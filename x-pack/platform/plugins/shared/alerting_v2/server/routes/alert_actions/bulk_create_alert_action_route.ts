@@ -10,10 +10,13 @@ import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
+import {
+  bulkCreateAlertActionBodySchema,
+  type BulkCreateAlertActionBody,
+} from '@kbn/alerting-v2-schemas';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from '../constants';
-import { bulkCreateAlertActionBodySchema, type BulkCreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 
 @injectable()
 export class BulkCreateAlertActionRoute implements RouteHandler {

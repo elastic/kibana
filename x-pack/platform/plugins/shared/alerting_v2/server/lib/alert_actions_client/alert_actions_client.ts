@@ -9,12 +9,12 @@ import Boom from '@hapi/boom';
 import { esql } from '@kbn/esql-language';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
-import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import type {
   BulkCreateAlertActionItemBody,
   CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
