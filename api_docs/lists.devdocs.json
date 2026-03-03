@@ -2002,7 +2002,7 @@
             "signature": [
               "({ id }: ",
               "GetListOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
             "lineNumber": 152,
@@ -2039,12 +2039,12 @@
             "tags": [],
             "label": "createList",
             "description": [
-              "\nCreates a list, if given at least the \"name\", \"description\", \"type\", and \"version\"\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nfor more information around formats of the deserializer and serializer"
+              "\nCreates a list, if given at least the \"name\", \"description\", \"type\", and \"version\"\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}"
             ],
             "signature": [
-              "({ id, deserializer, immutable, serializer, name, description, type, meta, version, }: ",
+              "({ id, immutable, name, description, type, meta, version, }: ",
               "CreateListOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
             "lineNumber": 164,
@@ -2057,13 +2057,13 @@
                 "id": "def-server.ListClient.createList.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    id,\n    deserializer,\n    immutable,\n    serializer,\n    name,\n    description,\n    type,\n    meta,\n    version,\n  }",
+                "label": "{\n    id,\n    immutable,\n    name,\n    description,\n    type,\n    meta,\n    version,\n  }",
                 "description": [],
                 "signature": [
                   "CreateListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 180,
+                "lineNumber": 177,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2081,15 +2081,15 @@
             "tags": [],
             "label": "createListIfItDoesNotExist",
             "description": [
-              "\nCreates a list, if given at least the \"name\", \"description\", \"type\", and \"version\"\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nfor more information around formats of the deserializer and serializer.\nThis will create the list if it does not exist. If the list exists, this will ignore creating\nanything and just return the existing list."
+              "\nCreates a list, if given at least the \"name\", \"description\", \"type\", and \"version\"\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nThis will create the list if it does not exist. If the list exists, this will ignore creating\nanything and just return the existing list."
             ],
             "signature": [
-              "({ id, deserializer, serializer, name, description, immutable, type, meta, version, }: ",
+              "({ id, name, description, immutable, type, meta, version, }: ",
               "CreateListIfItDoesNotExistOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 209,
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2099,13 +2099,13 @@
                 "id": "def-server.ListClient.createListIfItDoesNotExist.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    id,\n    deserializer,\n    serializer,\n    name,\n    description,\n    immutable,\n    type,\n    meta,\n    version,\n  }",
+                "label": "{\n    id,\n    name,\n    description,\n    immutable,\n    type,\n    meta,\n    version,\n  }",
                 "description": [],
                 "signature": [
                   "CreateListIfItDoesNotExistOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 227,
+                "lineNumber": 217,
                 "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2129,7 +2129,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 256,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2151,7 +2151,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 266,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2173,7 +2173,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 276,
+            "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2195,7 +2195,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 286,
+            "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2219,7 +2219,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 296,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -2242,7 +2242,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 307,
+            "lineNumber": 293,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2264,7 +2264,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 317,
+            "lineNumber": 303,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2284,7 +2284,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 344,
+            "lineNumber": 330,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2306,7 +2306,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 371,
+            "lineNumber": 357,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -2329,7 +2329,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 382,
+            "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2351,7 +2351,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 392,
+            "lineNumber": 378,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2373,7 +2373,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 402,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2395,7 +2395,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 412,
+            "lineNumber": 398,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2417,7 +2417,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 422,
+            "lineNumber": 408,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2439,7 +2439,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 432,
+            "lineNumber": 418,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2461,7 +2461,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 442,
+            "lineNumber": 428,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2483,7 +2483,7 @@
               "() => Record<string, unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 452,
+            "lineNumber": 438,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2505,7 +2505,7 @@
               "() => Record<string, unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 461,
+            "lineNumber": 447,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2527,7 +2527,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 470,
+            "lineNumber": 456,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2549,7 +2549,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 481,
+            "lineNumber": 467,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2573,7 +2573,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 492,
+            "lineNumber": 478,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -2598,7 +2598,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 503,
+            "lineNumber": 489,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -2621,7 +2621,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 514,
+            "lineNumber": 500,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2643,7 +2643,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 524,
+            "lineNumber": 510,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2665,7 +2665,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 534,
+            "lineNumber": 520,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2687,7 +2687,7 @@
               "() => Promise<boolean>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 544,
+            "lineNumber": 530,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2709,7 +2709,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 554,
+            "lineNumber": 540,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2731,7 +2731,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 564,
+            "lineNumber": 550,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2753,7 +2753,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 574,
+            "lineNumber": 560,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2775,7 +2775,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 584,
+            "lineNumber": 570,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2797,7 +2797,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 594,
+            "lineNumber": 580,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2819,7 +2819,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 604,
+            "lineNumber": 590,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2839,7 +2839,7 @@
               "() => Promise<unknown>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 621,
+            "lineNumber": 607,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2861,7 +2861,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 631,
+            "lineNumber": 617,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2880,10 +2880,10 @@
             "signature": [
               "({ id, refresh, }: ",
               "DeleteListItemOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 648,
+            "lineNumber": 634,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2899,7 +2899,7 @@
                   "DeleteListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 652,
+                "lineNumber": 638,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2922,10 +2922,10 @@
             "signature": [
               "({ listId, value, type, refresh, }: ",
               "DeleteListItemByValueOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 661,
+            "lineNumber": 647,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2941,7 +2941,7 @@
                   "DeleteListItemByValueOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 669,
+                "lineNumber": 655,
                 "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2964,10 +2964,10 @@
             "signature": [
               "({ id }: ",
               "DeleteListOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 687,
+            "lineNumber": 673,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2983,7 +2983,7 @@
                   "DeleteListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 693,
+                "lineNumber": 679,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3009,7 +3009,7 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 705,
+            "lineNumber": 691,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3025,7 +3025,7 @@
                   "ExportListItemsToStreamOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 712,
+                "lineNumber": 698,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3049,7 +3049,7 @@
               ") => Promise<string | undefined>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 728,
+            "lineNumber": 714,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3065,7 +3065,7 @@
                   "GetImportFilename"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 734,
+                "lineNumber": 720,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3081,15 +3081,15 @@
             "tags": [],
             "label": "importListItemsToStream",
             "description": [
-              "\nImports list items to a stream. If the list already exists, this will append the list items to the existing list.\nIf the list does not exist, this will auto-create the list and then add the items to that list.\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nfor more information around formats of the deserializer and serializer."
+              "\nImports list items to a stream. If the list already exists, this will append the list items to the existing list.\nIf the list does not exist, this will auto-create the list and then add the items to that list.\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}"
             ],
             "signature": [
-              "({ deserializer, serializer, type, listId, stream, meta, version, refresh, }: ",
+              "({ type, listId, stream, meta, version, refresh, }: ",
               "ImportListItemsToStreamOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 755,
+            "lineNumber": 741,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3099,13 +3099,13 @@
                 "id": "def-server.ListClient.importListItemsToStream.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    deserializer,\n    serializer,\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n    refresh,\n  }",
+                "label": "{\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "ImportListItemsToStreamOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 769,
+                "lineNumber": 752,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3126,10 +3126,10 @@
             "signature": [
               "({ listId, value, type, }: ",
               "GetListItemByValueOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 799,
+            "lineNumber": 778,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3145,7 +3145,7 @@
                   "GetListItemByValueOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 807,
+                "lineNumber": 786,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3163,15 +3163,15 @@
             "tags": [],
             "label": "createListItem",
             "description": [
-              "\nCreates a list item given at least \"value\", \"type\", and a \"listId\" where \"listId\" is the parent container that this list\nitem belongs to.\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}\nfor more information around formats of the deserializer and serializer."
+              "\nCreates a list item given at least \"value\", \"type\", and a \"listId\" where \"listId\" is the parent container that this list\nitem belongs to.\nSee {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}"
             ],
             "signature": [
-              "({ id, deserializer, serializer, listId, value, type, meta, refresh, }: ",
+              "({ id, listId, value, type, meta, refresh, }: ",
               "CreateListItemOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 823,
+            "lineNumber": 802,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3181,13 +3181,13 @@
                 "id": "def-server.ListClient.createListItem.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    id,\n    deserializer,\n    serializer,\n    listId,\n    value,\n    type,\n    meta,\n    refresh,\n  }",
+                "label": "{\n    id,\n    listId,\n    value,\n    type,\n    meta,\n    refresh,\n  }",
                 "description": [],
                 "signature": [
                   "CreateListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 837,
+                "lineNumber": 813,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3208,10 +3208,10 @@
             "signature": [
               "({ _version, id, value, meta, }: ",
               "UpdateListItemOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 864,
+            "lineNumber": 836,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3227,7 +3227,7 @@
                   "UpdateListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 874,
+                "lineNumber": 846,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3248,10 +3248,10 @@
             "signature": [
               "({ _version, id, value, meta, refresh, }: ",
               "UpdateListItemOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 894,
+            "lineNumber": 866,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3267,7 +3267,7 @@
                   "UpdateListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 904,
+                "lineNumber": 876,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3288,10 +3288,10 @@
             "signature": [
               "({ _version, id, name, description, meta, version, }: ",
               "UpdateListOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 926,
+            "lineNumber": 898,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3307,7 +3307,7 @@
                   "UpdateListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 938,
+                "lineNumber": 910,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3328,10 +3328,10 @@
             "signature": [
               "({ _version, id, name, description, meta, version, }: ",
               "UpdateListOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 962,
+            "lineNumber": 934,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3347,7 +3347,7 @@
                   "UpdateListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 972,
+                "lineNumber": 944,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3368,10 +3368,10 @@
             "signature": [
               "({ id }: ",
               "GetListItemOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 996,
+            "lineNumber": 968,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3387,7 +3387,7 @@
                   "GetListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 1002,
+                "lineNumber": 974,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3410,10 +3410,10 @@
             "signature": [
               "({ type, listId, value, }: ",
               "GetListItemsByValueOptions",
-              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]>"
+              ") => Promise<{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 1012,
+            "lineNumber": 984,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3429,7 +3429,7 @@
                   "GetListItemsByValueOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 1020,
+                "lineNumber": 992,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3452,10 +3452,10 @@
             "signature": [
               "({ type, listId, value, }: ",
               "SearchListItemByValuesOptions",
-              ") => Promise<{ items: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
+              ") => Promise<{ items: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]; value: unknown; }[]>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 1036,
+            "lineNumber": 1008,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3471,7 +3471,7 @@
                   "SearchListItemByValuesOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 1044,
+                "lineNumber": 1016,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3494,10 +3494,10 @@
             "signature": [
               "({ filter, currentIndexPosition, perPage, page, sortField, sortOrder, searchAfter, runtimeMappings, }: ",
               "FindListOptions",
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; meta: { [key: string]: unknown; } | undefined; name: string; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 1060,
+            "lineNumber": 1032,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3513,7 +3513,7 @@
                   "FindListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 1073,
+                "lineNumber": 1045,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3536,10 +3536,10 @@
             "signature": [
               "({ listId, filter, currentIndexPosition, perPage, page, runtimeMappings, sortField, sortOrder, searchAfter, }: ",
               "FindListItemOptions",
-              ") => Promise<{ cursor: string; data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
+              ") => Promise<{ cursor: string; data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]; page: number; per_page: number; total: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 1099,
+            "lineNumber": 1071,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3555,7 +3555,7 @@
                   "FindListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 1114,
+                "lineNumber": 1086,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3576,10 +3576,10 @@
             "signature": [
               "({ listId, filter, sortField, sortOrder, }: ",
               "FindAllListItemsOptions",
-              ") => Promise<{ data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; deserializer: string | undefined; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]; total: number; } | null>"
+              ") => Promise<{ data: { _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; updated_at: string; updated_by: string; value: string; }[]; total: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-            "lineNumber": 1144,
+            "lineNumber": 1116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3595,7 +3595,7 @@
                   "FindAllListItemsOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/lists/list_client.ts",
-                "lineNumber": 1144,
+                "lineNumber": 1116,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,

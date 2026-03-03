@@ -14,6 +14,7 @@ import {
   type SelectionContext,
   type StepPropertyHandler,
 } from '@kbn/workflows';
+import { getValueFromValueNode } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { cacheSearchOptions } from '../../../../../../shared/lib/custom_property_selection_cache';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
@@ -69,7 +70,8 @@ export async function getCustomPropertySuggestions(
     return [];
   }
   const [startOffset, endOffset] = focusedYamlPair.valueNode.range;
-  const currentValue = focusedYamlPair.valueNode.value;
+  const rawValue = getValueFromValueNode(focusedYamlPair.valueNode);
+  const currentValue = typeof rawValue === 'string' ? rawValue : String(rawValue ?? '');
   const startPos = yamlLineCounter?.linePos(startOffset);
   const endPos = yamlLineCounter?.linePos(endOffset);
   const replaceRange = {
