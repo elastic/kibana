@@ -93,6 +93,8 @@
     "@kbn/kql",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/deeplinks-observability",
+    "@kbn/cps-utils",
+    "@kbn/cps",
   ],
   "exclude": ["target/**/*"]
 }
