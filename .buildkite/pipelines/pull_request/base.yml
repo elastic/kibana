@@ -18,11 +18,11 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      machineType: c4d-standard-8
-      diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-c,us-central1-a
-      diskSizeGb: 105
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      cpu: 16
+      ephemeralStorage: '20G'
+      memory: '8G'
     key: quick_checks
     timeout_in_minutes: 60
     retry:
