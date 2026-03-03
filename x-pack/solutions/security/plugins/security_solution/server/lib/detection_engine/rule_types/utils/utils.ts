@@ -893,6 +893,10 @@ export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
 };
 
+export const getMissingIdFieldWarning = (): string => {
+  return `ES|QL query does not return _id metadata field for a non-aggregating query. This may result in duplicate alerts. Consider adding "METADATA _id" to the FROM command and make sure _id is returned in the query results.`;
+};
+
 export const getDisabledActionsWarningText = ({
   alertsCreated,
   disabledActions,

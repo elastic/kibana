@@ -21,7 +21,10 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import {
+  getMaxSignalsWarning as getMaxAlertsWarning,
+  getMissingIdFieldWarning,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
@@ -1855,6 +1858,90 @@ export default ({ getService }: FtrProviderContext) => {
             ecs_compliant_synthetic_source: 100,
           });
         });
+      });
+    });
+
+    describe('missing _id warning', () => {
+      it('generates warning when non-aggregating query does not return _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1" | DROP _id`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('does not generate warning when non-aggregating query returns _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('does not generate warning for aggregating queries without _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | stats counted=count(agent.name)`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
       });
     });
 

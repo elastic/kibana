@@ -46,6 +46,7 @@ import {
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
+  getMissingIdFieldWarning,
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -176,6 +177,14 @@ export const esqlExecutor = async ({
         });
 
         logClusterShardFailuresEsql({ response, result });
+
+        if (!isRuleAggregating && iteration === 0 && response.values.length > 0) {
+          const hasIdColumn = response.columns.some((col) => col.name === '_id');
+          if (!hasIdColumn) {
+            result.warningMessages.push(getMissingIdFieldWarning());
+          }
+        }
+
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 

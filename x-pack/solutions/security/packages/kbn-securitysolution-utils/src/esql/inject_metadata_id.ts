@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression, ESQLAstItem, ESQLFunction } from '@kbn/esql-language';
+import type { ESQLAstQueryExpression, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import {
   Parser,
   Builder,
@@ -13,7 +13,7 @@ import {
   mutate,
   isColumn,
   isFunctionExpression,
-} from '@kbn/esql-language';
+} from '@elastic/esql';
 
 /**
  * Injects `METADATA _id` into the FROM command of an ES|QL query and performs
