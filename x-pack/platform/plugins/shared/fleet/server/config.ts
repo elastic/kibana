@@ -218,7 +218,7 @@ export const config: PluginConfigDescriptor = {
           ),
           customIntegrations: schema.maybe(
             schema.object({
-              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+              enabled: schema.maybe(schema.boolean({ defaultValue: true })), // TMP for testing
             })
           ),
           backgroundSync: schema.maybe(
