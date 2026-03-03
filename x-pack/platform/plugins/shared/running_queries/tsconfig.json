@@ -14,7 +14,9 @@
     "@kbn/deeplinks-analytics",
     "@kbn/discover-plugin",
     "@kbn/share-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
