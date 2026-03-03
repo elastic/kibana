@@ -729,7 +729,6 @@ const ESQLEditorInternal = function ESQLEditor({
     histogramBarTarget,
     activeSolutionId: activeSolutionId ?? undefined,
     minimalQueryRef,
-    abortControllerRef,
     dataSourcesCache,
     memoizedSources,
     esqlFieldsCache,

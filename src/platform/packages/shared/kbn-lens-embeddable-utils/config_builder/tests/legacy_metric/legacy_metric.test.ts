@@ -9,7 +9,12 @@
 
 import { legacyMetricStateSchema } from '../../schema/charts/legacy_metric';
 import { validateConverter, validateAPIConverter } from '../validate';
-import { simpleLegacyMetricAttributes } from './lens_state_config.mock';
+import {
+  customColorByValueAttributes,
+  defaultColorByValueAttributes,
+  selectorColorByValueAttributes,
+  simpleLegacyMetricAttributes,
+} from './lens_state_config.mock';
 import {
   basicLegacyMetricWithAdHocDataView,
   basicLegacyMetricWithDataView,
@@ -25,6 +30,18 @@ describe('Legacy Metric', () => {
   describe('validateConverter', () => {
     it('should convert a simple legacy metric', () => {
       validateConverter(simpleLegacyMetricAttributes, legacyMetricStateSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(defaultColorByValueAttributes, legacyMetricStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(selectorColorByValueAttributes, legacyMetricStateSchema);
+    });
+
+    it('should convert a custom metric with a color by value palette', () => {
+      validateConverter(customColorByValueAttributes, legacyMetricStateSchema);
     });
   });
 
