@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOptionNode } from '../../../ast/is';
+import { isOptionNode } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
   ESQLAstMmrCommand,
   ESQLCommand,
   ESQLMessage,
-} from '../../../types';
+} from '@elastic/esql/types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateMap } from '../../definitions/utils/validation/map';
