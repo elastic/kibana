@@ -8,10 +8,15 @@
  */
 
 import React from 'react';
+
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
 
+import firecrawlIcon from './firecrawl.png';
+
+/**
+ * Firecrawl brand icon. Source: https://www.firecrawl.dev/brand
+ */
 export default (props: ConnectorIconProps) => {
-  // Placeholder icon: use built-in EUI icon until a custom one is added
-  return <EuiIcon type="globe" {...props} aria-hidden={true} />;
+  return <EuiIcon type={firecrawlIcon} {...props} />;
 };
