@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiTest as baseApiTest } from '@kbn/scout';
-
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
-/** The base API path for dashboard endpoints (no leading slash for apiClient). */
-export const DASHBOARD_API_PATH = 'api/dashboards';
+export { getRemoteDefaultBranchRefs } from './get_remote_default_branch_refs';
+export { createIndexSnapshotCommit } from './create_index_snapshot_commit';
+export { countCommitsBetweenRefs } from './count_commits_between_refs';
+export { hasStagedChanges } from './has_staged_changes';
+export { resolveNearestMergeBase } from './resolve_nearest_merge_base';
+export type { NearestMergeBaseCandidate } from './resolve_nearest_merge_base';
