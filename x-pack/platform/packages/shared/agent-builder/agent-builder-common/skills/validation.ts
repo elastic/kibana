@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 export const skillIdMaxLength = 64;
 export const skillNameMaxLength = 64;
 export const skillIdRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
-export const skillNameRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+export const skillNameRegexp = /^[a-zA-Z0-9](?:[a-zA-Z0-9 _-]*[a-zA-Z0-9])?$/;
 export const maxToolsPerSkill = 5;
 
 const skillNameSchema = z
@@ -19,7 +19,7 @@ const skillNameSchema = z
   .max(skillNameMaxLength, `Name must be at most ${skillNameMaxLength} characters`)
   .regex(
     skillNameRegexp,
-    'Name must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores'
+    'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
   );
 
 const skillDescriptionSchema = z

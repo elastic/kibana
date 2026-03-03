@@ -39,7 +39,7 @@ const validationMessages = {
     }),
     format: i18n.translate('xpack.agentBuilder.skills.validation.name.format', {
       defaultMessage:
-        'Name must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores.',
+        'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores.',
     }),
   },
   description: {
