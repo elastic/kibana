@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ProjectHeader } from './project';
 export { LoadingIndicator } from './loading_indicator';
-export { Sidebar } from './sidebar';
+export type { LoadingIndicatorProps } from './loading_indicator';
+export { HeaderTopBanner } from './header_top_banner';
+export { HeaderBreadcrumbsBadges } from './header_breadcrumbs_badges';

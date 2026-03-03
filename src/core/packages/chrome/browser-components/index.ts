@@ -10,9 +10,8 @@
 export { createChromeComponents } from './src/chrome_components';
 export type { ChromeComponentsDeps } from './src/chrome_components';
 
-export { Header } from './src/header';
-export type { HeaderProps } from './src/header';
+export { Header } from './src/classic';
+export type { HeaderProps } from './src/classic';
 export { ProjectHeader } from './src/project';
-export { LoadingIndicator } from './src/loading_indicator';
 export { Sidebar } from './src/sidebar';
-export { HeaderBreadcrumbsBadges } from './src/header/header_breadcrumbs_badges';
+export { LoadingIndicator, HeaderBreadcrumbsBadges } from './src/shared';

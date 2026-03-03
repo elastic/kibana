@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { prepareBreadcrumbs } from '../breadcrumb_utils';
+import { prepareBreadcrumbs } from '../shared/breadcrumb_utils';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
