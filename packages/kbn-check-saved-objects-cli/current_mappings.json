@@ -1417,7 +1417,7 @@
       }
     }
   },
-  "entity-store-global": {
+  "entity-store-global-state": {
     "dynamic": false,
     "properties": {
       "historySnapshot": {
@@ -1439,6 +1439,34 @@
             "type": "date"
           },
           "status": {
+            "type": "keyword"
+          }
+        }
+      },
+      "logsExtraction": {
+        "properties": {
+          "filter": {
+            "type": "keyword"
+          },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
+          "fieldHistoryLength": {
+            "type": "integer"
+          },
+          "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "delay": {
+            "type": "keyword"
+          },
+          "docsLimit": {
+            "type": "integer"
+          },
+          "timeout": {
+            "type": "keyword"
+          },
+          "frequency": {
             "type": "keyword"
           }
         }
