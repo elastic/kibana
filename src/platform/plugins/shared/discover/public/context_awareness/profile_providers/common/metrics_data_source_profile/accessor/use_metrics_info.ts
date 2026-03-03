@@ -25,9 +25,7 @@ export function useMetricsInfo(
   isComponentVisible: boolean
 ): void {
   const esql =
-    fetchParams.query && 'esql' in fetchParams.query
-      ? (fetchParams.query as { esql: string }).esql
-      : undefined;
+    fetchParams.query && 'esql' in fetchParams.query ? fetchParams.query.esql : undefined;
   const shouldFetch =
     isComponentVisible && !!esql && !!fetchParams.isESQLQuery && !hasTransformationalCommand(esql);
 
