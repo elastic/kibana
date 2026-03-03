@@ -68,8 +68,8 @@ const DEFAULT_DELETE_DESCRIPTION = i18n.translate(
  * - The table is in read-only mode.
  * - No delete handler (`onDelete`) is configured on the item config.
  *
- * The `onClick` handler is a **no-op stub**. The actual delete flow (confirmation
- * modal, provider-level delete state) will be wired by the Delete Orchestration PR.
+ * The `onClick` handler calls {@link BuilderContextActions.onDelete} to open
+ * the delete confirmation modal at the table level.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Delete` element.
  * @param context - Builder context with provider configuration.
@@ -79,7 +79,7 @@ export const buildDeleteAction = (
   attributes: DeleteActionProps,
   context: ActionBuilderContext
 ): ActionOutput | undefined => {
-  const { itemConfig, isReadOnly } = context;
+  const { itemConfig, isReadOnly, actions } = context;
 
   if (isReadOnly) {
     return undefined;
@@ -97,8 +97,7 @@ export const buildDeleteAction = (
     type: 'icon',
     color: 'danger',
     isPrimary: true,
-    // TODO: Wire to provider-level delete orchestration.
-    onClick: () => {},
+    onClick: (item) => actions?.onDelete?.([item]),
     'data-test-subj': 'content-list-table-action-delete',
   };
 };

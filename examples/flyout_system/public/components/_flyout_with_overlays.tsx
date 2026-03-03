@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
-import { css } from '@emotion/react';
 
 import {
   EuiButton,
@@ -109,12 +108,21 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
   const [isChildFlyoutAOpen, setIsChildFlyoutAOpen] = useState<boolean>(false);
   const [isChildFlyoutBOpen, setIsChildFlyoutBOpen] = useState<boolean>(false);
 
+  // Refs for manual focus management - return focus to child trigger buttons
+  const childTriggerARef = useRef<HTMLButtonElement>(null);
+  const childTriggerBRef = useRef<HTMLButtonElement>(null);
+
   const handleCloseChildFlyoutA = useCallback(() => {
     if (childFlyoutRefA.current) {
       childFlyoutRefA.current.close();
       childFlyoutRefA.current = null;
       setIsChildFlyoutAOpen(false);
     }
+
+    // Return focus to child trigger button after closing child flyout A
+    setTimeout(() => {
+      childTriggerARef.current?.focus();
+    }, 100);
   }, [childFlyoutRefA]);
   const handleCloseChildFlyoutB = useCallback(() => {
     if (childFlyoutRefB.current) {
@@ -122,6 +130,11 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       childFlyoutRefB.current = null;
       setIsChildFlyoutBOpen(false);
     }
+
+    // Return focus to child trigger button after closing child flyout B
+    setTimeout(() => {
+      childTriggerBRef.current?.focus();
+    }, 100);
   }, [childFlyoutRefB]);
 
   const openChildFlyoutA = useCallback(() => {
@@ -141,6 +154,11 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
           console.log('close child flyout', title); // eslint-disable-line no-console
           childFlyoutRefA.current = null;
           setIsChildFlyoutAOpen(false);
+
+          // Return focus to child trigger button after closing child flyout A
+          setTimeout(() => {
+            childTriggerARef.current?.focus();
+          }, 100);
         },
       }
     );
@@ -164,6 +182,11 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
           console.log('close child flyout B', title); // eslint-disable-line no-console
           childFlyoutRefB.current = null;
           setIsChildFlyoutBOpen(false);
+
+          // Return focus to child trigger button after closing child flyout B
+          setTimeout(() => {
+            childTriggerBRef.current?.focus();
+          }, 100);
         },
       }
     );
@@ -222,10 +245,16 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         <EuiSpacer />
         {childSize && (
           <>
-            <EuiButton onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}>
+            <EuiButton
+              buttonRef={childTriggerARef}
+              onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}
+            >
               {isChildFlyoutAOpen ? 'Close child flyout A' : 'Open child flyout A'}
             </EuiButton>{' '}
-            <EuiButton onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}>
+            <EuiButton
+              buttonRef={childTriggerBRef}
+              onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}
+            >
               {isChildFlyoutBOpen ? 'Close child flyout B' : 'Open child flyout B'}
             </EuiButton>
           </>
@@ -254,6 +283,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const childFlyoutRefA = useRef<OverlayRef | null>(null);
   const childFlyoutRefB = useRef<OverlayRef | null>(null);
 
+  // Ref for manual focus management - return focus to trigger button
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
   // Callbacks for state synchronization
   const mainFlyoutOnActive = useCallback(() => {
     console.log('activate main flyout', title); // eslint-disable-line no-console
@@ -265,6 +297,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       flyoutRef.current = null;
       setIsFlyoutOpen(false);
     }
+
+    // Return focus to trigger button after closing main flyout
+    setTimeout(() => {
+      triggerRef.current?.focus();
+    }, 100);
   }, []);
 
   const openFlyout = useCallback(() => {
@@ -331,7 +368,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={openFlyout} disabled={isFlyoutOpen}>
+          <EuiButton buttonRef={triggerRef} onClick={openFlyout} disabled={isFlyoutOpen}>
             Open {title}
           </EuiButton>
         </EuiFlexItem>
@@ -349,6 +386,9 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
     const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
     const flyoutRef = useRef<OverlayRef | null>(null);
 
+    // Ref for manual focus management - return focus to trigger button
+    const triggerRef = useRef<HTMLButtonElement>(null);
+
     const openFlyout = useCallback(() => {
       // Create a handler that will be called to close the flyout
       const handleClose = () => {
@@ -357,6 +397,11 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
           flyoutRef.current = null;
         }
         setIsFlyoutOpen(false);
+
+        // Return focus to trigger button after closing flyout
+        setTimeout(() => {
+          triggerRef.current?.focus();
+        }, 100);
       };
 
       const ref = overlays.openFlyout(
@@ -422,7 +467,7 @@ const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={openFlyout} disabled={isFlyoutOpen}>
+          <EuiButton buttonRef={triggerRef} onClick={openFlyout} disabled={isFlyoutOpen}>
             Open Non-session Flyout
           </EuiButton>
         </EuiFlexItem>
@@ -468,11 +513,6 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
             description: <SessionFlyout title="Session Z" mainSize="fill" overlays={overlays} />,
           },
         ]}
-        css={css`
-          dt {
-            min-width: 25em;
-          }
-        `}
       />
 
       <EuiSpacer size="m" />
@@ -491,11 +531,6 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
             description: <NonSessionFlyout overlays={overlays} rendering={rendering} />,
           },
         ]}
-        css={css`
-          dt {
-            min-width: 25em;
-          }
-        `}
       />
     </EuiPanel>
   </>

@@ -35,6 +35,19 @@ export const useStyles = () => {
       min-width: 0;
     `;
 
-    return { sectionStyles, headerStyles, headerNoStepsStyles, footerStyles, tabsContainerStyles };
-  }, [euiTheme.size.l, euiTheme.size.m]);
+    const tabsErrorSelectedUnderlineStyles = css`
+      .streamsDslStepsTab--hasErrors.euiTab-isSelected::after {
+        border-color: ${euiTheme.colors.danger};
+      }
+    `;
+
+    return {
+      sectionStyles,
+      headerStyles,
+      headerNoStepsStyles,
+      footerStyles,
+      tabsContainerStyles,
+      tabsErrorSelectedUnderlineStyles,
+    };
+  }, [euiTheme.colors.danger, euiTheme.size.l, euiTheme.size.m]);
 };

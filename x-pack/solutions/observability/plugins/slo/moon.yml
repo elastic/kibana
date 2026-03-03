@@ -121,6 +121,9 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
   - '@kbn/observability-get-padded-alert-time-range-util'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
@@ -132,7 +135,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - ./emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:

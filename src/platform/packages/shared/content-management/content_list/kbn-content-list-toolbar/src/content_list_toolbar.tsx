@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiSearchBar } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
@@ -15,6 +15,7 @@ import { useContentListConfig, useContentListSearch } from '@kbn/content-list-pr
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
+import { SelectionBar } from './selection_bar';
 
 /**
  * Props for the {@link ContentListToolbar} component.
@@ -36,6 +37,10 @@ const defaultPlaceholder = i18n.translate(
  *
  * Provides a toolbar with search and filter controls for content lists using `EuiSearchBar`.
  * Currently supports search and the Sort filter; additional filters will be added in subsequent PRs.
+ *
+ * When items are selected in the table, a "Delete N entities" button appears in the
+ * toolbar's left tools area (via `EuiSearchBar`'s `toolsLeft`), matching the existing
+ * `TableListView` pattern.
  *
  * **Smart Defaults**: When no children are provided, auto-renders filters
  * based on provider configuration.
@@ -65,7 +70,7 @@ const ContentListToolbarComponent = ({
   children,
   'data-test-subj': dataTestSubj = 'contentListToolbar',
 }: ContentListToolbarProps) => {
-  const { labels } = useContentListConfig();
+  const { labels, supports } = useContentListConfig();
   const { search, setSearch, isSupported: searchIsSupported } = useContentListSearch();
   const filters = useFilters(children);
 
@@ -81,6 +86,16 @@ const ContentListToolbarComponent = ({
     [setSearch]
   );
 
+  // Only include the selection bar when selection is supported to avoid
+  // running selection hooks unnecessarily in read-only or selection-disabled modes.
+  const toolsLeft = useMemo(
+    () =>
+      supports.selection
+        ? [<SelectionBar key="selection" data-test-subj={`${dataTestSubj}-selectionBar`} />]
+        : undefined,
+    [supports.selection, dataTestSubj]
+  );
+
   return (
     <EuiSearchBar
       query={search}
@@ -91,6 +106,7 @@ const ContentListToolbarComponent = ({
         disabled: !searchIsSupported,
       }}
       onChange={handleSearchChange}
+      toolsLeft={toolsLeft}
       filters={filters}
       data-test-subj={dataTestSubj}
     />
@@ -98,4 +114,7 @@ const ContentListToolbarComponent = ({
 };
 
 // Attach sub-components to `ContentListToolbar` namespace.
-export const ContentListToolbar = Object.assign(ContentListToolbarComponent, { Filters });
+export const ContentListToolbar = Object.assign(ContentListToolbarComponent, {
+  Filters,
+  SelectionBar,
+});

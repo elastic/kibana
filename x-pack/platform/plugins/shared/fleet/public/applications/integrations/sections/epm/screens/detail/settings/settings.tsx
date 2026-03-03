@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import type { PackageInfo, PackageMetadata } from '../../../../../types';
+import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useGetPackagePoliciesQuery,
@@ -48,7 +48,7 @@ import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
-import { DeprecationCallout } from '../overview/overview';
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
 
 import { wrapTitleWithDeprecated } from '../../../components/utils';
 
@@ -95,10 +95,11 @@ interface Props {
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
   isCustomPackage: boolean;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage, integrationInfo }: Props) => {
     const authz = useAuthz();
     const canInstallPackages = authz.integrations.installPackages;
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
@@ -253,7 +254,8 @@ export const SettingsPage: React.FC<Props> = memo(
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <DeprecationCallout packageInfo={packageInfo} />
+              <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+              <DeprecatedFeaturesCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>

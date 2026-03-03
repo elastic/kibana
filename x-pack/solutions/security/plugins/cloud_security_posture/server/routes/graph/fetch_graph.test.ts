@@ -95,6 +95,7 @@ describe('fetchGraph', () => {
       indexPatterns: baseParams.indexPatterns,
       spaceId: baseParams.spaceId,
       esQuery: undefined,
+      pinnedIds: undefined,
     });
   });
 
@@ -210,5 +211,31 @@ describe('fetchGraph', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to fetch entity relationships: Connection refused'
     );
+  });
+
+  describe('Pinned IDs', () => {
+    it('should pass pinnedIds to fetchEvents when provided', async () => {
+      const pinnedIds = ['entity-1', 'entity-2'];
+
+      await fetchGraph({ ...baseParams, pinnedIds });
+
+      expect(mockedFetchEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ pinnedIds: ['entity-1', 'entity-2'] })
+      );
+    });
+
+    it('should pass pinnedIds as undefined to fetchEvents when not provided', async () => {
+      await fetchGraph(baseParams);
+
+      expect(mockedFetchEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ pinnedIds: undefined })
+      );
+    });
+
+    it('should pass empty pinnedIds array to fetchEvents when provided as empty', async () => {
+      await fetchGraph({ ...baseParams, pinnedIds: [] });
+
+      expect(mockedFetchEvents).toHaveBeenCalledWith(expect.objectContaining({ pinnedIds: [] }));
+    });
   });
 });

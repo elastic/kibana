@@ -76,13 +76,15 @@ export const ContentListProvider = ({
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
 
   // Resolve feature support flags.
+  // Selection is disabled when explicitly set to `false` or when the list is read-only.
   const supports: ContentListSupports = useMemo(
     () => ({
       sorting: features.sorting !== false,
       pagination: features.pagination !== false,
       search: features.search !== false,
+      selection: features.selection !== false && !isReadOnly,
     }),
-    [features.sorting, features.pagination, features.search]
+    [features.sorting, features.pagination, features.search, features.selection, isReadOnly]
   );
 
   // Create context value.

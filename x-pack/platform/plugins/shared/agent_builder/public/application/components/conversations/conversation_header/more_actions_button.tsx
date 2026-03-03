@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -68,6 +70,9 @@ const fullscreenLabels = {
   }),
   tools: i18n.translate('xpack.agentBuilder.conversationActions.tools', {
     defaultMessage: 'View all tools',
+  }),
+  sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
+    defaultMessage: 'View all sources',
   }),
   rename: i18n.translate('xpack.agentBuilder.conversationActions.rename', {
     defaultMessage: 'Rename',
@@ -124,9 +129,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const { manageAgents } = useUiPrivileges();
 
   const {
-    services: { application },
+    services: { application, uiSettings },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -219,6 +225,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
+    ...(isDataSourcesEnabled
+      ? [
+          <EuiContextMenuItem
+            key="sources"
+            icon="plugs"
+            onClick={closePopover}
+            href={application.getUrlForApp(DATA_SOURCES_APP_ID)}
+            data-test-subj="agentBuilderActionsSources"
+          >
+            {fullscreenLabels.sources}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(hasAccessToGenAiSettings
       ? [
           <EuiContextMenuItem

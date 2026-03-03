@@ -64,6 +64,7 @@ export interface EventEdge extends GraphEdge {
    * they should share the same label node because they originate from the same document(s).
    */
   labelNodeId: string;
+  pinned?: string | null;
 }
 
 /**

@@ -79,6 +79,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL in Discover', () => {
+      beforeEach(async () => {
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
+      });
+
       it('should render esql view correctly', async function () {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();

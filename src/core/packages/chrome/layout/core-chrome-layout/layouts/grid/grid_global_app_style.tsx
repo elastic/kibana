@@ -116,6 +116,13 @@ const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
   .kbnBody {
+    // adjust position of the classic side-navigation
+    .euiFlyout.euiCollapsibleNav {
+      ${logicalCSS('top', layoutVar('application.top', '0px'))};
+      ${logicalCSS('left', layoutVar('application.left', '0px'))};
+      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+    }
+
     // overlay mask "belowHeader" should only cover the application area
     .euiOverlayMask[data-relative-to-header='below'] {
       ${logicalCSS('top', layoutVar('application.top', '0px'))};

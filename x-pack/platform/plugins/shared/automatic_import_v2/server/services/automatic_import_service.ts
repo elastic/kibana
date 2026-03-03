@@ -38,6 +38,33 @@ import type {
   CreateUpdateIntegrationParams,
 } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
+
+/**
+ * Derives the integration status from its data streams.
+ * - 'approved' if all data streams are completed and there is at least one
+ * - 'completed' if all data streams are completed
+ * - 'failed' if any data stream has failed
+ * - 'processing' if any data stream is processing
+ * - 'pending' otherwise (no data streams or all pending)
+ */
+function deriveIntegrationStatus(dataStreams: DataStreamAttributes[]): TaskStatus {
+  if (dataStreams.length === 0) {
+    return 'pending' as TaskStatus;
+  }
+
+  const statuses = dataStreams.map((ds) => ds.job_info?.status);
+
+  if (statuses.some((s) => s === TASK_STATUSES.failed)) {
+    return 'failed' as TaskStatus;
+  }
+  if (statuses.some((s) => s === TASK_STATUSES.processing)) {
+    return 'processing' as TaskStatus;
+  }
+  if (statuses.every((s) => s === TASK_STATUSES.completed)) {
+    return 'completed' as TaskStatus;
+  }
+  return 'pending' as TaskStatus;
+}
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
 import type { AutomaticImportV2PluginStartDependencies } from '../types';
@@ -103,7 +130,6 @@ export class AutomaticImportService {
 
         const updateData: IntegrationAttributes = {
           ...existing,
-          status: TASK_STATUSES.pending,
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
           metadata: {
@@ -146,7 +172,10 @@ export class AutomaticImportService {
       title: integrationSO.metadata.title,
       logo: integrationSO.metadata.logo,
       description: integrationSO.metadata.description,
-      status: integrationSO.status as TaskStatus,
+      version: integrationSO.metadata.version,
+      createdBy: integrationSO.created_by,
+      createdByProfileUid: integrationSO.created_by_profile_uid,
+      status: deriveIntegrationStatus(dataStreamsSO),
       dataStreams: dataStreamsResponses,
     };
     return integrationResponse;
@@ -174,7 +203,10 @@ export class AutomaticImportService {
           title: integration.metadata.title,
           logo: integration.metadata.logo,
           description: integration.metadata.description,
-          status: integration.status as TaskStatus,
+          version: integration.metadata.version,
+          createdBy: integration.created_by,
+          createdByProfileUid: integration.created_by_profile_uid,
+          status: deriveIntegrationStatus(dataStreams),
           dataStreams: dataStreamsResponses,
         };
       })
@@ -216,7 +248,6 @@ export class AutomaticImportService {
 
     const updateData: IntegrationAttributes = {
       ...existing,
-      status: TASK_STATUSES.approved,
       last_updated_by: authenticatedUser.username,
       last_updated_at: new Date().toISOString(),
       metadata: {
@@ -224,7 +255,7 @@ export class AutomaticImportService {
       },
     };
 
-    // Update integration status and bump semantic version (defaults to patch).
+    // Bump semantic version (defaults to patch) on approval.
     await this.savedObjectService.updateIntegration(updateData, version);
   }
 

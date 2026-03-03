@@ -52,8 +52,12 @@ export function SuggestedStreamPanel({
   onEdit(index: number, suggestion: PartitionSuggestion): void;
   onSave?: (suggestion: PartitionSuggestion) => void;
 }) {
-  const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
-    useStreamRoutingEvents();
+  const {
+    changeSuggestionNameDebounced,
+    changeSuggestionCondition,
+    reviewSuggestedRule,
+    setConditionEditorValidity,
+  } = useStreamRoutingEvents();
 
   const isEditing = useStreamsRoutingSelector(
     (snapshot) =>
@@ -124,6 +128,7 @@ export function SuggestedStreamPanel({
             status="enabled"
             condition={currentSuggestion.condition}
             onConditionChange={handleConditionChange}
+            onValidityChange={setConditionEditorValidity}
             onStatusChange={() => {}}
             isSuggestionRouting={true}
           />

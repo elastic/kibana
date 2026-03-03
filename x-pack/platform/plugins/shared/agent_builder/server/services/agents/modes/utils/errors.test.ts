@@ -55,6 +55,41 @@ describe('errors', () => {
       });
     });
 
+    describe('ES inference API errors with "status [XXX]" format', () => {
+      it('propagates 403 from an inference entity error', () => {
+        const message =
+          'Error calling connector: event: error\ndata: {"error":{"code":"forbidden","message":"Received an unsuccessful status code for request from inference entity id [.gp-llm-v2-chat_completion] status [403]. Error message: [Organization is not authorized to access any resource]","type":"error"}}';
+        const err = new Error(message);
+        const converted = convertError(err);
+
+        expect(isAgentExecutionError(converted)).toBe(true);
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.connectorError);
+        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBe(403);
+        expect(converted.message).toBe(message);
+      });
+
+      it('propagates 401 from an inference authentication error', () => {
+        const message =
+          'Error calling connector: Received an authentication error status code for request from inference entity id [openai-chat_completion-uuid] status [401]. Error message: [Incorrect API key provided]';
+        const err = new Error(message);
+        const converted = convertError(err);
+
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.connectorError);
+        expect('statusCode' in converted.meta ? converted.meta.statusCode : undefined).toBe(401);
+      });
+
+      it('returns unknownError when inference status code is outside 4xx/5xx range', () => {
+        const message = 'Error calling connector: status [200] for inference entity id [some-id]';
+        const err = new Error(message);
+        const converted = convertError(err);
+
+        expect(converted.meta.errCode).toBe(AgentExecutionErrorCode.unknownError);
+        expect(
+          'statusCode' in converted.meta ? converted.meta.statusCode : undefined
+        ).toBeUndefined();
+      });
+    });
+
     describe('non-connector and unparseable errors', () => {
       it('returns unknownError for generic errors without connector prefix', () => {
         const err = new Error('Something went wrong');

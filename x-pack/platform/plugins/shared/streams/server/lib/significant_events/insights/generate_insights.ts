@@ -25,6 +25,7 @@ export async function generateInsights({
   inferenceClient,
   signal,
   logger,
+  streamNames,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -32,8 +33,15 @@ export async function generateInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  /** When provided, only generate insights for these streams. Otherwise all streams are used. */
+  streamNames?: string[];
 }): Promise<InsightsResult> {
-  const streams = await streamsClient.listStreams();
+  const allStreams = await streamsClient.listStreams();
+  let streams = allStreams;
+  if (streamNames !== undefined && streamNames.length > 0) {
+    const streamNamesSet = new Set(streamNames);
+    streams = allStreams.filter((s) => streamNamesSet.has(s.name));
+  }
   const streamInsightsResults = await Promise.all(
     streams.map(async (stream) => {
       const streamInsightResult = await generateStreamInsights({

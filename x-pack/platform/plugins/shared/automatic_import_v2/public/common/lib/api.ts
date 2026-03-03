@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type {
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationResponse,
+  GetAllAutoImportIntegrationsResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 
 import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
@@ -29,12 +30,26 @@ export interface RequestDeps {
 }
 
 export interface EpmPackageResponse {
-  items: [{ id: string; type: string }];
+  items: Array<{ id: string; type: string }>;
   _meta?: {
     install_source: string;
     name: string;
   };
 }
+
+export const runInstallPackage = async (
+  zipFile: Blob,
+  { http, abortSignal }: RequestDeps
+): Promise<EpmPackageResponse> =>
+  http.post<EpmPackageResponse>(FLEET_PACKAGES_PATH, {
+    headers: {
+      ...fleetDefaultHeaders,
+      Accept: 'application/zip',
+      'Content-Type': 'application/zip',
+    },
+    body: zipFile,
+    signal: abortSignal,
+  });
 
 export const getInstalledPackages = async ({
   http,
@@ -82,6 +97,15 @@ export const getIntegrationById = async ({
       signal: abortSignal,
     }
   );
+
+export const getAllIntegrations = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<GetAllAutoImportIntegrationsResponse> =>
+  http.get<GetAllAutoImportIntegrationsResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    signal: abortSignal,
+  });
 
 export interface UploadSamplesRequest {
   integrationId: string;

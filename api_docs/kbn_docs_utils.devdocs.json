@@ -17,14 +17,18 @@
         "type": "Function",
         "tags": [],
         "label": "findPlugins",
-        "description": [],
+        "description": [
+          "\nFinds all plugins and packages that should have API documentation generated.\n"
+        ],
         "signature": [
-          "(pluginOrPackageFilter: string[] | undefined) => ",
+          "(options: ",
+          "FindPluginsOptions",
+          " | undefined) => ",
           "PluginOrPackage",
           "[]"
         ],
         "path": "packages/kbn-docs-utils/src/find_plugins.ts",
-        "lineNumber": 72,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,22 +36,27 @@
           {
             "parentPluginId": "@kbn/docs-utils",
             "id": "def-server.findPlugins.$1",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
-            "label": "pluginOrPackageFilter",
-            "description": [],
+            "label": "options",
+            "description": [
+              "- Optional filter options for plugins and packages."
+            ],
             "signature": [
-              "string[] | undefined"
+              "FindPluginsOptions",
+              " | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/find_plugins.ts",
-            "lineNumber": 72,
+            "lineNumber": 88,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "Array of plugins and packages to document."
+        ],
         "initialIsOpen": false
       },
       {
@@ -63,7 +72,7 @@
           "[]"
         ],
         "path": "packages/kbn-docs-utils/src/find_plugins.ts",
-        "lineNumber": 98,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -79,7 +88,7 @@
               "string"
             ],
             "path": "packages/kbn-docs-utils/src/find_plugins.ts",
-            "lineNumber": 98,
+            "lineNumber": 127,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -100,8 +109,27 @@
           "() => void"
         ],
         "path": "packages/kbn-docs-utils/src/build_api_docs_cli.ts",
-        "lineNumber": 41,
+        "lineNumber": 47,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/docs-utils",
+        "id": "def-server.runCheckPackageDocsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckPackageDocsCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-docs-utils/src/check_package_docs_cli.ts",
+        "lineNumber": 180,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
