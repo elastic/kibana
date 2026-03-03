@@ -19,7 +19,10 @@ export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
+//
+// Do not change constant value - part of public REST APIs
+//
+export const SEARCH_EMBEDDABLE_TYPE = 'discover_session';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';

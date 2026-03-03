@@ -32,7 +32,7 @@ Embeddables are React components that manage their own state, can be serialized 
 
 Plugins register new embeddable types with the embeddable plugin.
 ```
-embeddablePublicSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
+embeddablePublicSetup.registerReactEmbeddableFactory('my_embeddable_type', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
   return myEmbeddableFactory;
 });
