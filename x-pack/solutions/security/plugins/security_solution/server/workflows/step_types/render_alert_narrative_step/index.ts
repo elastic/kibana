@@ -6,3 +6,6 @@
  */
 
 export { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
+export { buildNarrative } from './narrative_registry';
+export type { NarrativeStrategy } from './narrative_strategy';
+export type { AlertSource } from './narrative_utils';

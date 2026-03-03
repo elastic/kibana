@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { get } from 'lodash/fp';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-type Source = Record<string, unknown>;
+import type { AlertSource } from './narrative_utils';
+import { buildNarrative } from './narrative_registry';
 
 const inputSchema = z.object({
   alertId: z.string().describe('The alert ID'),
@@ -25,9 +25,14 @@ const outputSchema = z.object({
 });
 
 const SOURCE_INCLUDES = [
+  // Core event fields
   'event.category',
   'event.action',
   'event.outcome',
+  'event.dataset',
+  'event.module',
+
+  // Process fields
   'process.name',
   'process.pid',
   'process.args',
@@ -39,271 +44,77 @@ const SOURCE_INCLUDES = [
   'process.hash.sha256',
   'process.parent.name',
   'process.parent.pid',
+
+  // File fields
   'file.name',
+  'file.path',
+  'file.hash.sha256',
+  'file.extension',
+  'file.size',
+
+  // Network fields
   'source.ip',
   'source.port',
   'destination.ip',
   'destination.port',
+  'network.protocol',
+  'network.transport',
+  'network.direction',
+  'network.bytes',
+
+  // DNS fields
+  'dns.question.name',
+  'dns.question.type',
+  'dns.resolved_ip',
+  'dns.response_code',
+
+  // Authentication fields
+  'source.as.organization.name',
+
+  // Registry fields (Windows)
+  'registry.key',
+  'registry.path',
+  'registry.data.strings',
+  'registry.value',
+
+  // Cloud fields
+  'cloud.provider',
+  'cloud.account.id',
+  'cloud.region',
+  'cloud.service.name',
+  'aws.cloudtrail.user_identity.arn',
+  'aws.cloudtrail.user_identity.type',
+  'aws.cloudtrail.event_type',
+  'aws.cloudtrail.error_code',
+  'aws.cloudtrail.request_parameters',
+  'azure.auditlogs.properties.initiated_by.user.user_principal_name',
+  'azure.activitylogs.identity.claims_initiated_by_user.name',
+  'gcp.audit.authentication_info.principal_email',
+  'gcp.audit.method_name',
+  'gcp.audit.resource_name',
+
+  // Threat indicator fields
+  'threat.indicator.matched.atomic',
+  'threat.indicator.matched.type',
+  'threat.indicator.matched.field',
+  'threat.indicator.provider',
+  'threat.feed.name',
+
+  // Identity fields
   'user.name',
   'user.domain',
+  'user.id',
   'host.name',
+  'host.id',
+  'host.os.name',
+
+  // Alert metadata
   'kibana.alert.severity',
   'kibana.alert.rule.name',
+  'kibana.alert.rule.type',
+
   'message',
 ] as const;
-
-const toStringArray = (value: unknown): string[] | undefined => {
-  if (value == null) return undefined;
-
-  if (Array.isArray(value)) {
-    const out = value
-      .map((x) => (x == null ? '' : String(x)))
-      .map((x) => x.trim())
-      .filter((x) => x.length > 0);
-    return out.length ? out : undefined;
-  }
-
-  const asString = String(value).trim();
-  return asString.length ? [asString] : undefined;
-};
-
-const getValues = (source: Source, field: string): string[] | undefined =>
-  toStringArray(get(field, source));
-
-const joinValues = (values: string[] | undefined): string | undefined =>
-  values != null && values.length ? values.join(', ') : undefined;
-
-const shouldShowWith = (source: Source): boolean =>
-  [
-    'destination.ip',
-    'destination.port',
-    'file.name',
-    'process.name',
-    'process.parent.name',
-    'source.ip',
-    'source.port',
-  ].some((field) => (getValues(source, field)?.length ?? 0) > 0);
-
-/**
- * Generates a Timeline-like English string similar to the Timeline alert row renderer.
- * This is intentionally "plain English" (no i18n), as it is used in workflows.
- */
-export const buildAlertTimelineString = (source: Source): string => {
-  const eventCategory = joinValues(getValues(source, 'event.category'));
-  const processName = joinValues(getValues(source, 'process.name'));
-  const processParentName = joinValues(getValues(source, 'process.parent.name'));
-  const fileName = joinValues(getValues(source, 'file.name'));
-  const sourceIp = joinValues(getValues(source, 'source.ip'));
-  const sourcePort = joinValues(getValues(source, 'source.port'));
-  const destinationIp = joinValues(getValues(source, 'destination.ip'));
-  const destinationPort = joinValues(getValues(source, 'destination.port'));
-  const userName = joinValues(getValues(source, 'user.name'));
-  const hostName = joinValues(getValues(source, 'host.name'));
-  const severity = joinValues(getValues(source, 'kibana.alert.severity'));
-  const ruleName = joinValues(getValues(source, 'kibana.alert.rule.name'));
-
-  let text = `${eventCategory ?? 'alert'} event`;
-
-  if (shouldShowWith(source)) {
-    text += ' with';
-  }
-
-  if (processName != null) text += ` process ${processName},`;
-  if (processParentName != null) text += ` parent process ${processParentName},`;
-  if (fileName != null) text += ` file ${fileName},`;
-
-  if (sourceIp != null) text += ` source ${sourceIp}`;
-  if (sourcePort != null) text += `:${sourcePort},`;
-
-  if (destinationIp != null) text += ` destination ${destinationIp}`;
-  if (destinationPort != null) text += `:${destinationPort},`;
-
-  if (userName != null) text += ` by ${userName}`;
-  if (hostName != null) text += ` on ${hostName}`;
-
-  if (severity != null) {
-    text += ` created ${severity} alert`;
-    if (ruleName != null) {
-      text += ` ${ruleName}.`;
-    } else {
-      text += '.';
-    }
-  } else if (ruleName != null) {
-    text += ` ${ruleName}.`;
-  }
-
-  // Normalize spacing after punctuation that we intentionally omit a trailing space for (commas).
-  return text.replace(/,\s*/g, ', ').replace(/\s+/g, ' ').trim();
-};
-
-const normalizeSpaces = (text: string): string =>
-  text
-    .replace(/,\s*/g, ', ')
-    .replace(/\s+([,.:;])/g, '$1')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const getSingleValue = (source: Source, field: string): string | undefined =>
-  joinValues(getValues(source, field));
-
-const getNumberValue = (source: Source, field: string): number | undefined => {
-  const v = get(field, source);
-  if (v == null) return undefined;
-  if (Array.isArray(v)) {
-    const first = v[0];
-    const asNumber = typeof first === 'number' ? first : Number(first);
-    return Number.isFinite(asNumber) ? asNumber : undefined;
-  }
-  const asNumber = typeof v === 'number' ? v : Number(v);
-  return Number.isFinite(asNumber) ? asNumber : undefined;
-};
-
-const getArgs = (source: Source): string[] | undefined => {
-  const raw = get('process.args', source);
-  const values = toStringArray(raw);
-  return values?.length ? values : undefined;
-};
-
-const getProcessActionText = (eventAction: string | undefined): string => {
-  const action = (eventAction ?? '').toLowerCase();
-  switch (action) {
-    case 'fork':
-      return 'forked process';
-    case 'exec':
-      return 'executed process';
-    case 'start':
-    case 'process_started':
-    case 'creation_event':
-    case 'creation':
-      return 'started process';
-    case 'end':
-    case 'termination_event':
-    case 'process_stopped':
-    case 'deletion_event':
-      return 'terminated process';
-    default:
-      return 'process';
-  }
-};
-
-/**
- * Generates a Timeline-like English string similar to the Timeline system/endpoint process row renderer.
- * (user@host in cwd) + (action text) + process(pid) + args/title + exit code + parent + outcome + sha256
- */
-export const buildProcessTimelineString = (source: Source): string => {
-  const userName = getSingleValue(source, 'user.name');
-  const userDomain = getSingleValue(source, 'user.domain');
-  const hostName = getSingleValue(source, 'host.name');
-  const workingDirectory = getSingleValue(source, 'process.working_directory');
-
-  const eventAction = getSingleValue(source, 'event.action');
-  const actionText = getProcessActionText(eventAction);
-
-  const processName =
-    getSingleValue(source, 'process.name') ?? getSingleValue(source, 'process.executable');
-  const processPid = getNumberValue(source, 'process.pid');
-  const args = getArgs(source);
-  const processTitle = getSingleValue(source, 'process.title');
-
-  const processExitCode = getNumberValue(source, 'process.exit_code');
-
-  const parentName = getSingleValue(source, 'process.parent.name');
-  const parentPid = getNumberValue(source, 'process.parent.pid');
-  const ppid = getNumberValue(source, 'process.ppid');
-
-  const outcome = getSingleValue(source, 'event.outcome');
-  const processHashSha256 = getSingleValue(source, 'process.hash.sha256');
-
-  const message = getSingleValue(source, 'message');
-
-  // If we have none of the core process-ish fields, return empty so the caller can omit this segment.
-  const hasAnyProcessDetails =
-    userName != null ||
-    userDomain != null ||
-    hostName != null ||
-    workingDirectory != null ||
-    processName != null ||
-    processPid != null ||
-    (args?.length ?? 0) > 0 ||
-    processTitle != null ||
-    processExitCode != null ||
-    parentName != null ||
-    parentPid != null ||
-    ppid != null ||
-    outcome != null ||
-    processHashSha256 != null;
-
-  if (!hasAnyProcessDetails) {
-    return '';
-  }
-
-  let text = '';
-
-  if (userName != null) text += userName;
-  if (userDomain != null) text += `${userName != null ? '\\' : ''}${userDomain}`;
-  if (hostName != null && userName != null) text += `@${hostName}`;
-  else if (hostName != null) text += hostName;
-
-  if (workingDirectory != null) {
-    if (text.length) text += ' ';
-    text += `in ${workingDirectory}`;
-  }
-
-  if (text.length) text += ' ';
-  text += actionText;
-
-  if (processName != null) {
-    text += ` ${processName}`;
-    if (processPid != null) {
-      text += ` (${processPid})`;
-    }
-  } else if (processPid != null) {
-    text += ` (${processPid})`;
-  }
-
-  if (args?.length) {
-    text += ` ${args.join(' ')}`;
-  }
-  if (processTitle != null) {
-    text += ` ${processTitle}`;
-  }
-
-  if (processExitCode != null) {
-    text += ` with exit code ${processExitCode}`;
-  }
-
-  if (parentName != null || parentPid != null || ppid != null) {
-    text += ' via parent process';
-    if (parentName != null) text += ` ${parentName}`;
-    if (parentPid != null) text += ` (${parentPid})`;
-    if (ppid != null) text += ` (${ppid})`;
-  }
-
-  if (outcome != null) {
-    text += ` with result ${outcome}`;
-  }
-
-  if (processHashSha256 != null) {
-    text += ` ${processHashSha256}`;
-  }
-
-  if (message != null) {
-    text += ` ${message}`;
-  }
-
-  return normalizeSpaces(text);
-};
-
-export const buildCombinedTimelineString = (source: Source): string => {
-  const alertPart = normalizeSpaces(buildAlertTimelineString(source));
-  const processPart = buildProcessTimelineString(source);
-
-  if (processPart.length && alertPart.length) {
-    return normalizeSpaces(`${alertPart} ${processPart}`);
-  }
-
-  return processPart.length ? processPart : alertPart;
-};
 
 const getAlertSource = async ({
   esClient,
@@ -313,14 +124,14 @@ const getAlertSource = async ({
   esClient: ElasticsearchClient;
   alertIndex: string;
   alertId: string;
-}): Promise<Source> => {
-  const response = await esClient.get<Source>({
+}): Promise<AlertSource> => {
+  const response = await esClient.get<AlertSource>({
     index: alertIndex,
     id: alertId,
     _source_includes: [...SOURCE_INCLUDES],
   });
 
-  return (response as { _source?: Source })._source ?? {};
+  return response._source ?? {};
 };
 
 export const renderAlertNarrativeStepDefinition = createServerStepDefinition({
@@ -333,7 +144,7 @@ export const renderAlertNarrativeStepDefinition = createServerStepDefinition({
       const esClient = context.contextManager.getScopedEsClient();
 
       const source = await getAlertSource({ esClient, alertId, alertIndex });
-      const timelineString = buildCombinedTimelineString(source);
+      const timelineString = buildNarrative(source);
 
       return {
         output: {
