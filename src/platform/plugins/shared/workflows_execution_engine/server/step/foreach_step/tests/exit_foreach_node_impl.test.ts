@@ -105,8 +105,20 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Exiting foreach step ${node.stepId} after processing all items.`,
+        `Exiting foreach step \"${node.stepId}\" after processing all items. Processed 3 of 3 items.`,
         { workflow: { step_id: node.stepId } }
+      );
+    });
+
+    it('should throw an error if max-iterations limit is reached with on-limit fail', () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'fail';
+      expect(() => underTest.run()).toThrow(
+        `Foreach step "${node.stepId}" exceeded max-iterations limit of 2. Processed 2 of 5 items.`
       );
     });
   });
