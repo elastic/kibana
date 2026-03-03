@@ -50,9 +50,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Similar Spans section is visible', async () => {
-        await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible({
-          timeout: 30_000,
-        });
+        await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible();
       });
     });
 
@@ -62,9 +60,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Trace Summary section is visible', async () => {
-        await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible({
-          timeout: 30_000,
-        });
+        await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible();
       });
     });
 
@@ -74,9 +70,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Logs section is visible', async () => {
-        await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible({
-          timeout: 30_000,
-        });
+        await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible();
       });
     });
   }
