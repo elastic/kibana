@@ -126,6 +126,9 @@ export interface FleetConfigType {
   versionSpecificPolicyAssignment?: {
     taskInterval?: string;
   };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
