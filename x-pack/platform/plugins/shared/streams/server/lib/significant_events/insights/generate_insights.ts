@@ -8,15 +8,15 @@
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Streams } from '@kbn/streams-schema';
 import type { InsightsResult } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
+import { parseError } from '../../streams/errors/parse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
-import { getErrorMessage } from '../../streams/errors/parse_error';
-import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
-import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
+import { extractInsightsFromResponse } from './extract_insights_from_response';
+import { generateStreamInsights } from './generate_stream_insights';
+import { getChangedQueryIdsByStream } from './get_changed_query_ids_by_stream';
 
 export async function generateInsights({
   streamsClient,
@@ -26,6 +26,8 @@ export async function generateInsights({
   signal,
   logger,
   streamNames,
+  from,
+  to,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -33,8 +35,11 @@ export async function generateInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-  /** When provided, only generate insights for these streams. Otherwise all streams are used. */
   streamNames?: string[];
+  /** Start of the time range to filter all Elasticsearch queries (ISO 8601). */
+  from: string;
+  /** End of the time range to filter all Elasticsearch queries (ISO 8601). */
+  to: string;
 }): Promise<InsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
@@ -42,21 +47,60 @@ export async function generateInsights({
     const streamNamesSet = new Set(streamNames);
     streams = allStreams.filter((s) => streamNamesSet.has(s.name));
   }
+  logger.debug(
+    () =>
+      `Generating insights for ${streams.length} streams: ${streams
+        .map((stream) => stream.name)
+        .join(', ')}`
+  );
+
+  const changedQueryIdsByStream = await getChangedQueryIdsByStream({
+    queryClient,
+    esClient,
+    streamNames: streams.map((s) => s.name),
+    from,
+    to,
+    signal,
+    logger,
+  });
+
+  if (changedQueryIdsByStream.size === 0) {
+    logger.debug(`No queries have changes in the time range`);
+    return {
+      insights: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+    };
+  }
+
+  logger.debug(
+    () =>
+      `Found ${Array.from(changedQueryIdsByStream.values()).reduce(
+        (sum, queryIds) => sum + queryIds.size,
+        0
+      )} queries with changes in the time range`
+  );
+
   const streamInsightsResults = await Promise.all(
-    streams.map(async (stream) => {
-      const streamInsightResult = await generateStreamInsights({
-        stream,
-        queryClient,
-        esClient,
-        inferenceClient,
-        signal,
-        logger,
-      });
-      return {
-        streamName: stream.name,
-        ...streamInsightResult,
-      };
-    })
+    streams
+      .filter((stream) => changedQueryIdsByStream.has(stream.name))
+      .map(async (stream) => {
+        const changedQueryIdsForStream = changedQueryIdsByStream.get(stream.name) ?? new Set();
+        const streamInsightResult = await generateStreamInsights({
+          stream,
+          queryClient,
+          esClient,
+          inferenceClient,
+          signal,
+          logger,
+          changedQueryIds: changedQueryIdsForStream,
+          from,
+          to,
+        });
+        return {
+          streamName: stream.name,
+          ...streamInsightResult,
+        };
+      })
   );
 
   // Filter out streams with no insights
@@ -71,6 +115,7 @@ export async function generateInsights({
 
   // If no stream insights, return empty
   if (streamInsightsWithData.length === 0) {
+    logger.debug(`No insights found for any stream`);
     return {
       insights: [],
       tokensUsed,
@@ -78,6 +123,13 @@ export async function generateInsights({
   }
 
   try {
+    logger.debug(
+      () =>
+        `Generating insights summary for ${streamInsightsWithData.length} streams:\n` +
+        streamInsightsWithData
+          .map((result) => `- ${result.streamName}: ${result.insights.length} insights`)
+          .join('\n')
+    );
     const response = await inferenceClient.prompt({
       prompt: SummarizeStreamsPrompt,
       input: {
@@ -88,13 +140,15 @@ export async function generateInsights({
 
     const insights = extractInsightsFromResponse(response, logger);
 
+    logger.debug(() => `Generated ${insights.length} system insights`);
+
     return {
       insights,
       tokensUsed: sumTokens(tokensUsed, response.tokens),
     };
   } catch (error) {
     if (
-      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
+      parseError(error).message.includes(`The request exceeded the model's maximum context length`)
     ) {
       logger.debug(
         `Context too big when generating system insights, number of streams: ${streamInsightsWithData.length}`,
@@ -103,76 +157,6 @@ export async function generateInsights({
       return {
         insights: [],
         tokensUsed,
-      };
-    }
-
-    throw error;
-  }
-}
-
-async function generateStreamInsights({
-  stream,
-  queryClient,
-  esClient,
-  inferenceClient,
-  signal,
-  logger,
-}: {
-  stream: Streams.all.Definition;
-  queryClient: QueryClient;
-  esClient: ElasticsearchClient;
-  inferenceClient: BoundInferenceClient;
-  signal: AbortSignal;
-  logger: Logger;
-}): Promise<InsightsResult> {
-  const queries = await queryClient.getAssets(stream.name);
-
-  const queryDataResults = await Promise.all(
-    queries.map((query) =>
-      collectQueryData({
-        query,
-        esClient,
-      })
-    )
-  );
-
-  // Filter out queries with no events
-  const queryDataList = queryDataResults.filter((data): data is QueryData => data !== undefined);
-
-  if (queryDataList.length === 0) {
-    return {
-      insights: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
-    };
-  }
-
-  try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeQueriesPrompt,
-      input: {
-        streamName: stream.name,
-        queries: JSON.stringify(queryDataList),
-      },
-      abortSignal: signal,
-    });
-
-    const insights = extractInsightsFromResponse(response, logger);
-
-    return {
-      insights,
-      tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
-    };
-  } catch (error) {
-    if (
-      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
-    ) {
-      logger.debug(
-        `Context too big when generating insights for stream ${stream.name}, number of queries: ${queryDataList.length}`,
-        { error } as LogMeta
-      );
-      return {
-        insights: [],
-        tokensUsed: { prompt: 0, completion: 0, total: 0 },
       };
     }
 

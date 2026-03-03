@@ -20,6 +20,10 @@ export interface InsightsDiscoveryTaskParams {
   connectorId: string;
   /** When provided, only generate insights for these stream names. Otherwise all streams are used. */
   streamNames?: string[];
+  /** Start of the time range (ISO string). */
+  from: string;
+  /** End of the time range (ISO string). */
+  to: string;
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -35,7 +39,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamNames, _task } = runContext.taskInstance
+              const { connectorId, streamNames, from, to, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
@@ -57,8 +61,10 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   esClient: scopedClusterClient.asCurrentUser,
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('insights_discovery'),
+                  logger: taskContext.logger.get('insight_discovery'),
                   streamNames,
+                  from,
+                  to,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
@@ -69,7 +75,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsResult>(
                   _task,
-                  { connectorId, streamNames },
+                  { connectorId, streamNames, from, to },
                   result
                 );
               } catch (error) {
@@ -93,7 +99,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
-                  { connectorId, streamNames },
+                  { connectorId, streamNames, from, to },
                   errorMessage
                 );
                 return getDeleteTaskRunResult();
