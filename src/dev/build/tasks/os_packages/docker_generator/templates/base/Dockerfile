@@ -92,6 +92,9 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
+# Wolfi updated glibc from 2.42 to 2.43, which changed memory allocation behavior. This flag disables the new behavior.
+ENV GLIBC_TUNABLES=glibc.malloc.hugetlb=0
+
 RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}}
 {{/wolfi}}
 
