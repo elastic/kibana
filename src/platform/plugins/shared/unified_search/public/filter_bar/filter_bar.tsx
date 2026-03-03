@@ -110,7 +110,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const filtersAppliedLabel = i18n.translate(
     'unifiedSearch.filter.filterBar.filtersAppliedAccordionButton',
     {
-      defaultMessage: '{count, plural, one {# filter applied} other {# filters applied}}',
+      defaultMessage: '{count} filters applied',
       values: { count: filterCount },
     }
   );
