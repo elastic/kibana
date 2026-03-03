@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useMemo, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiButton, useIsWithinBreakpoints } from '@elastic/eui';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -32,6 +32,15 @@ import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 
 const navigationWrapperStyles = css`
   display: flex;
+`;
+
+const customizeButtonWrapperCss = css`
+  padding-top: 8px;
+  list-style: none;
+
+  .euiButton {
+    width: 100%;
+  }
 `;
 
 export interface NavigationProps {
@@ -71,6 +80,10 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * (optional) Callback fired when the "Customize navigation" button is clicked in the More menu.
+   */
+  onCustomizeNavigation?: () => void;
+  /**
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
@@ -82,6 +95,7 @@ export const Navigation = ({
   items,
   logo,
   onItemClick,
+  onCustomizeNavigation,
   onToggleCollapsed,
   setWidth,
   sidePanelFooter,
@@ -104,9 +118,29 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
-  const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
-    items.primaryItems
+  // Separate hidden-by-user items before responsive calculation so the hook
+  // only measures items that are actually rendered in the DOM.
+  const nonHiddenPrimaryItems = useMemo(
+    () => items.primaryItems.filter((item) => !item.hiddenByUser),
+    [items.primaryItems]
+  );
+  const hiddenByUserItems = useMemo(
+    () => items.primaryItems.filter((item) => item.hiddenByUser),
+    [items.primaryItems]
+  );
+
+  const hasHiddenItems = hiddenByUserItems.length > 0;
+
+  const {
+    overflowMenuItems: responsiveOverflowItems,
+    primaryMenuRef,
+    visibleMenuItems,
+  } = useResponsiveMenu(isCollapsed, nonHiddenPrimaryItems, hasHiddenItems);
+
+  // Overflow = items that don't fit + items hidden by user
+  const overflowMenuItems = useMemo(
+    () => [...responsiveOverflowItems, ...hiddenByUserItems],
+    [responsiveOverflowItems, hiddenByUserItems]
   );
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
@@ -262,39 +296,60 @@ export const Navigation = ({
                         )}
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
-                          <SideNav.NestedSecondaryMenu.Section>
-                            {overflowMenuItems.map((item, index) => {
-                              const hasSubmenu = getHasSubmenu(item);
-                              const { sections, ...itemProps } = item;
-                              const isFirstItem = index === 0;
-                              const ariaDescribedBy =
-                                [
-                                  isFirstItem && panelNavigationInstructionsId,
-                                  hasSubmenu && panelEnterSubmenuInstructionsId,
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ') || undefined;
-                              return (
-                                <SideNav.NestedSecondaryMenu.PrimaryMenuItem
-                                  key={item.id}
-                                  aria-describedby={ariaDescribedBy}
-                                  isHighlighted={item.id === visuallyActivePageId}
-                                  isNew={getIsNewPrimary(item.id)}
-                                  hasSubmenu={hasSubmenu}
-                                  onClick={() => {
-                                    onItemClick?.(item);
-                                    if (!hasSubmenu) {
+                          <>
+                            <SideNav.NestedSecondaryMenu.Section>
+                              {overflowMenuItems.map((item, index) => {
+                                const hasSubmenu = getHasSubmenu(item);
+                                const { sections, ...itemProps } = item;
+                                const isFirstItem = index === 0;
+                                const ariaDescribedBy =
+                                  [
+                                    isFirstItem && panelNavigationInstructionsId,
+                                    hasSubmenu && panelEnterSubmenuInstructionsId,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' ') || undefined;
+                                return (
+                                  <SideNav.NestedSecondaryMenu.PrimaryMenuItem
+                                    key={item.id}
+                                    aria-describedby={ariaDescribedBy}
+                                    isHighlighted={item.id === visuallyActivePageId}
+                                    isNew={getIsNewPrimary(item.id)}
+                                    hasSubmenu={hasSubmenu}
+                                    onClick={() => {
+                                      onItemClick?.(item);
+                                      if (!hasSubmenu) {
+                                        closePopover();
+                                        focusMainContent();
+                                      }
+                                    }}
+                                    {...itemProps}
+                                  >
+                                    {item.label}
+                                  </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
+                                );
+                              })}
+                              {onCustomizeNavigation && (
+                                <li role="none" css={customizeButtonWrapperCss}>
+                                  <EuiButton
+                                    iconType="controls"
+                                    color="text"
+                                    size="s"
+                                    onClick={() => {
                                       closePopover();
-                                      focusMainContent();
-                                    }
-                                  }}
-                                  {...itemProps}
-                                >
-                                  {item.label}
-                                </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
-                              );
-                            })}
-                          </SideNav.NestedSecondaryMenu.Section>
+                                      onCustomizeNavigation();
+                                    }}
+                                    data-test-subj="customizeNavigationMoreMenuButton"
+                                  >
+                                    <FormattedMessage
+                                      id="core.ui.chrome.sideNavigation.customizeNavigationButton"
+                                      defaultMessage="Customize navigation"
+                                    />
+                                  </EuiButton>
+                                </li>
+                              )}
+                            </SideNav.NestedSecondaryMenu.Section>
+                          </>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {overflowMenuItems.filter(getHasSubmenu).map((item) => (

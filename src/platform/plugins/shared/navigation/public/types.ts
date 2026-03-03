@@ -10,7 +10,12 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type {
+  SolutionNavigationDefinition,
+  NavigationCustomization,
+  NavigationItemInfo,
+  SolutionId,
+} from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -52,6 +57,22 @@ export interface NavigationPublicStart {
   addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
+  /**
+   * Set navigation customization for an existing solution. Pass undefined to reset to original order.
+   * Changes are persisted unless editing mode is active (see setIsEditingNavigation).
+   */
+  setNavigationCustomization: (
+    id: SolutionId,
+    customization: NavigationCustomization | undefined
+  ) => void;
+  /**
+   * Set navigation editing mode.
+   * When editing, customization changes are previewed but not persisted.
+   * When exiting edit mode, reverts to the last persisted state.
+   */
+  setIsEditingNavigation: (isEditing: boolean) => void;
+  /** Get a simplified list of primary navigation items. */
+  getNavigationPrimaryItems: () => NavigationItemInfo[];
 }
 
 export interface NavigationPublicSetupDependencies {

@@ -127,9 +127,13 @@ export const toNavigationItems = (
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 
+    // Items hidden by nav definition are completely excluded
     if (navNode.sideNavStatus === 'hidden') {
       return null;
     }
+
+    // Items hidden by user customization go to overflow menu
+    const hiddenByUser = navNode.sideNavStatus === 'hiddenByUser';
 
     // This was like a sub-section title without a link in the old navigation.
     // In the new navigation, just flatten it into its children, since we must have links in the primary items.
@@ -241,6 +245,7 @@ export const toNavigationItems = (
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
+      hiddenByUser,
     } as MenuItem;
   };
 

@@ -58,4 +58,33 @@ describe('cacheMenuItemHeights', () => {
 
     expect(ref.current).toEqual([75]);
   });
+
+  it('caches only item heights when there is an extra "More" button child', () => {
+    const itemHeights = [42, 58];
+    const moreButtonHeight = 36;
+    const items = itemHeights.map((_, index) => createMenuItem(`item-${index}`));
+    const menu = document.createElement('div');
+
+    // Add item children
+    itemHeights.forEach((height) => {
+      const child = document.createElement('div');
+      Object.defineProperty(child, 'clientHeight', { configurable: true, value: height });
+      menu.appendChild(child);
+    });
+
+    // Add the "More" button as an extra child
+    const moreChild = document.createElement('div');
+    Object.defineProperty(moreChild, 'clientHeight', {
+      configurable: true,
+      value: moreButtonHeight,
+    });
+    menu.appendChild(moreChild);
+
+    const ref = { current: [] };
+
+    cacheMenuItemHeights(ref, menu, items);
+
+    // Only the item heights are cached, not the "More" button
+    expect(ref.current).toEqual(itemHeights);
+  });
 });

@@ -17,6 +17,8 @@ import type {
   AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
+  NavigationCustomization,
+  NavigationItemInfo,
   CloudURLs,
   SolutionNavigationDefinitions,
   SolutionId,
@@ -140,6 +142,11 @@ export interface InternalChromeStart extends ChromeStart {
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
 
     /**
+     * Returns a simplified list of primary navigation items.
+     */
+    getNavigationPrimaryItems: () => NavigationItemInfo[];
+
+    /**
      * Returns an observable of the active nodes in the project navigation.
      */
     getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
@@ -167,6 +174,34 @@ export interface InternalChromeStart extends ChromeStart {
      * If `false`, the new solution navigation definitions will be merged with the existing ones.
      */
     updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
+
+    /**
+     * Set navigation customization for a solution.
+     * Pass undefined to clear the customization and revert to the original order.
+     * Changes are persisted unless editing mode is active (see setIsEditingNavigation).
+     *
+     * @param id The solution id to set the customization for.
+     * @param customization The customization configuration, or undefined to reset.
+     */
+    setNavigationCustomization(
+      id: SolutionId,
+      customization: NavigationCustomization | undefined
+    ): void;
+
+    /**
+     * Set navigation editing mode.
+     * When editing, customization changes are previewed but not persisted.
+     * When exiting edit mode, reverts to the last persisted state.
+     *
+     * @param isEditing Whether editing mode is active.
+     */
+    setIsEditingNavigation(isEditing: boolean): void;
+
+    /**
+     * Get navigation editing state.
+     * @internal
+     */
+    getIsEditing$(): Observable<boolean>;
 
     /**
      * Change the active solution navigation.

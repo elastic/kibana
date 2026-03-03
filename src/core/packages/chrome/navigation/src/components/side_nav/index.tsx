@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { FC, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useIsWithinBreakpoints, type UseEuiTheme } from '@elastic/eui';
+import { layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
 import { Footer } from '../footer';
@@ -33,9 +35,20 @@ const getNavWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolea
   width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
 `;
 
+const getEditingStyles = (position: DOMRect, theme: UseEuiTheme['euiTheme']) => css`
+  position: fixed;
+  top: ${position.top}px;
+  left: ${position.left}px;
+  z-index: ${layoutLevels.navigationEditing};
+  background: ${theme.colors.backgroundBasePlain};
+  pointer-events: none;
+`;
+
 export interface SideNavProps {
   children: ReactNode;
   isCollapsed: boolean;
+  /** When true, renders the nav in a portal above the modal overlay for live preview */
+  isEditing?: boolean;
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
@@ -57,19 +70,57 @@ interface SideNavComponent extends FC<SideNavProps> {
  * - the footer,
  * - the side panel.
  */
-export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
+export const SideNav: SideNavComponent = ({ children, isCollapsed, isEditing = false }) => {
   const { euiTheme } = useEuiTheme();
+  const [navPosition, setNavPosition] = useState<DOMRect | null>(null);
+  // Don't portal on mobile/small screens where customize navigation modal goes fullscreen
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const shouldPortal = isEditing && !isMobile;
 
   const wrapperStyles = useMemo(
     () => getNavWrapperStyles(euiTheme, isCollapsed),
     [euiTheme, isCollapsed]
   );
 
-  return (
-    <div className={NAVIGATION_ROOT_SELECTOR} css={wrapperStyles}>
+  const editingStyles = useMemo(
+    () => (navPosition ? getEditingStyles(navPosition, euiTheme) : null),
+    [navPosition, euiTheme]
+  );
+
+  // Capture position when entering portal mode
+  useEffect(() => {
+    if (shouldPortal && !navPosition) {
+      const navElement = document.querySelector(`.${NAVIGATION_ROOT_SELECTOR}`);
+      if (navElement) {
+        setNavPosition(navElement.getBoundingClientRect());
+      }
+    }
+  }, [shouldPortal, navPosition]);
+
+  // Reset position when exiting portal mode
+  useEffect(() => {
+    if (!shouldPortal) {
+      setNavPosition(null);
+    }
+  }, [shouldPortal]);
+
+  const navContent = (
+    <div className={NAVIGATION_ROOT_SELECTOR} css={[wrapperStyles, shouldPortal && editingStyles]}>
       {children}
     </div>
   );
+
+  // When portaling, render empty placeholder to hold space + portal above the modal
+  if (shouldPortal && navPosition) {
+    return (
+      <>
+        <div css={wrapperStyles} />
+        {createPortal(navContent, document.body)}
+      </>
+    );
+  }
+
+  return navContent;
 };
 
 SideNav.Logo = Logo;

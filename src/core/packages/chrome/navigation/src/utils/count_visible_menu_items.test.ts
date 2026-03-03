@@ -35,4 +35,16 @@ describe('countVisibleMenuItems', () => {
 
     expect(countVisibleMenuItems(heights, gap, menuHeight)).toBe(MAX_MENU_ITEMS - 1);
   });
+
+  it('reserves space for the "More" button when hasExternalOverflow is true even if all items fit', () => {
+    const heights = [40, 40, 40];
+    const gap = 8;
+    const menuHeight = 3 * 40 + 2 * gap; // Exactly enough for all 3 items
+
+    // Without external overflow, all items fit
+    expect(countVisibleMenuItems(heights, gap, menuHeight)).toBe(3);
+
+    // With external overflow, the "More" button is always present so fewer items fit
+    expect(countVisibleMenuItems(heights, gap, menuHeight, true)).toBe(2);
+  });
 });

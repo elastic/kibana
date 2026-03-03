@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -20,6 +22,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
@@ -41,6 +44,7 @@ import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
 import { SecurityNavControlService } from './nav_control';
+import { CustomizeNavigationMenuItem } from './nav_control/customize_navigation_menu_item';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
@@ -62,6 +66,7 @@ export interface PluginStartDependencies {
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   cloud?: CloudStart;
+  navigation?: NavigationPublicPluginStart;
 }
 
 export class SecurityPlugin
@@ -190,7 +195,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { management, share }: PluginStartDependencies
+    { management, share, navigation }: PluginStartDependencies
   ): SecurityPluginStart {
     const { application, http, notifications, overlays } = core;
     const { anonymousPaths } = http;
@@ -225,9 +230,29 @@ export class SecurityPlugin
 
     this.analyticsService.start({ http: core.http });
 
+    const navControlServiceStart = this.navControlService.start({ core, authc: this.authc });
+
+    if (navigation) {
+      navControlServiceStart.addUserMenuLinks([
+        {
+          content: ({ closePopover }) => (
+            <CustomizeNavigationMenuItem
+              core={core}
+              navigation={navigation}
+              closePopover={closePopover}
+            />
+          ),
+          order: 500,
+          label: '',
+          iconType: '',
+          href: '',
+        },
+      ]);
+    }
+
     return {
       uiApi: getUiApi({ core }),
-      navControlService: this.navControlService.start({ core, authc: this.authc }),
+      navControlService: navControlServiceStart,
       authc: this.authc as AuthenticationServiceStart,
       authz: this.authz as AuthorizationServiceStart,
       userProfiles: {

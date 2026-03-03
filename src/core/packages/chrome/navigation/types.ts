@@ -94,6 +94,11 @@ export interface MenuItem {
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) Whether the item has been hidden by the user.
+   * Hidden items are moved to the overflow menu.
+   */
+  hiddenByUser?: boolean;
 }
 
 /**
