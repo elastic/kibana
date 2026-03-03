@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
+import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
 
 const VIEW_DETAILS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.viewDetailsLabel',
@@ -28,13 +29,19 @@ const MORE_ACTIONS = i18n.translate(
   { defaultMessage: 'More actions' }
 );
 
+const VIEW_IN_APP = i18n.translate(
+  'xpack.triggersActionsUI.ruleDetails.alertsTable.viewInAppLabel',
+  { defaultMessage: 'View in app' }
+);
+
 /**
  * Actions cell for the rule details alerts table.
- * Contains three buttons: expand row, view in app, and a kebab menu with common actions.
+ * Contains up to three buttons: expand row, view in app (when available), and a kebab menu with common actions.
  */
 export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props) => {
-  const { rowIndex } = props;
+  const { rowIndex, alert, getAlertFormatter, openLinksInNewTab } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const viewInAppUrl = useViewInAppUrl(alert, getAlertFormatter);
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -77,6 +84,21 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
           />
         </EuiToolTip>
       </EuiFlexItem>
+
+      {viewInAppUrl && (
+        <EuiFlexItem>
+          <EuiToolTip content={VIEW_IN_APP} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="viewInAppAlertAction"
+              aria-label={VIEW_IN_APP}
+              color="text"
+              iconType="eye"
+              onClick={() => window.open(viewInAppUrl, openLinksInNewTab ? '_blank' : '_self')}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem>
         <EuiPopover
