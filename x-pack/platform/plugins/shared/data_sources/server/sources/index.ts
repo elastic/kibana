@@ -11,6 +11,9 @@ import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
+import { zendeskDataSource } from './zendesk';
+import { pagerdutyDataSource } from './pagerduty';
+import { servicenowDataSource } from './servicenow';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
@@ -19,4 +22,7 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
+  dataCatalog.register(zendeskDataSource);
+  dataCatalog.register(servicenowDataSource);
+  dataCatalog.register(pagerdutyDataSource);
 }

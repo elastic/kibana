@@ -6,16 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getExpressionType, getMessageFromId } from '../../definitions/utils';
-import { settings } from '../../definitions/generated/settings';
-import { isBinaryExpression, isIdentifier, isLiteral, isMap } from '../../../ast/is';
+import { isBinaryExpression, isIdentifier, isLiteral, isMap } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLCommand,
   ESQLIdentifier,
   ESQLMessage,
   ESQLSingleAstItem,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { getExpressionType, getMessageFromId } from '../../definitions/utils';
+import { settings } from '../../definitions/generated/settings';
 import type { SupportedDataType } from '../..';
 import { TypeMap, validateMap } from '../../definitions/utils/validation/map';
 

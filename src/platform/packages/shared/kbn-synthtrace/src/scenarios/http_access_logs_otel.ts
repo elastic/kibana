@@ -40,6 +40,8 @@ import { parseHttpAccessLogsOpts } from './helpers/http_access_logs_opts_parser'
 import { getGeneratorForPattern, TrafficPattern } from './helpers/http_access_logs_data_generator';
 import { estimateDataGeneration } from './helpers/http_generation_estimator';
 import { convertEcsToOtel } from './helpers/ecs_to_otel';
+import { getInfraPool } from './helpers/http_infra_pool';
+import { initSessionPool } from './helpers/http_session_pool';
 
 const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   const parsedOpts = parseHttpAccessLogsOpts(runOptions.scenarioOpts);
@@ -51,6 +53,21 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
     ...parsedOpts,
     scale,
   };
+
+  // Deterministic provider index derived from the start time so all worker
+  // threads in a multi-worker run pick the same cloud provider.
+  const providerIndex = Math.floor(runOptions.from / 86400000) % 3;
+
+  // Initialize infrastructure pool with consistent cloud/host/pod identities
+  const infraPool = getInfraPool(scale, providerIndex);
+  logger.info(
+    `Infrastructure pool: ${infraPool.hosts.length} hosts on ${
+      infraPool.cloudConfig.name
+    } (${infraPool.cloudConfig.regions.join(', ')})`
+  );
+
+  // Initialize session pool with all regions so each gets correct geo bias
+  initSessionPool(scale, infraPool.cloudConfig.regions);
 
   // Calculate and display generation estimates
   const timeRangeMs = runOptions.to - runOptions.from;
@@ -91,6 +108,10 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   );
 
   return {
+    bootstrap: async ({ streamsClient }) => {
+      await streamsClient.enable();
+      logger.info('Streams enabled for HTTP access logs');
+    },
     generate: ({ range, clients: { logsEsClient } }) => {
       // Select traffic generator based on mode
       let trafficGenerator;

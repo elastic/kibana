@@ -330,6 +330,7 @@ export class Plugin
               fieldsMetadata: pluginsStart.fieldsMetadata,
               contentManagement: pluginsStart.contentManagement,
               share: pluginsStart.share,
+              uiActions: pluginsStart.uiActions,
             });
           },
         });

@@ -111,6 +111,39 @@ export const TLS_CIPHERS = [
 ];
 
 /**
+ * Realistic HTTP referrers with weighted distribution.
+ * Mirrors real-world traffic sources: organic search, direct, internal
+ * navigation, social media, email campaigns, and aggregator sites.
+ */
+export const REFERRERS = [
+  { value: '-', weight: 30 },
+  { value: 'https://www.google.com/search?q=products', weight: 20 },
+  { value: 'https://www.google.com/', weight: 8 },
+  { value: 'https://www.bing.com/search?q=services', weight: 4 },
+  { value: 'https://duckduckgo.com/?q=app', weight: 2 },
+  { value: 'https://app.example.com/dashboard', weight: 8 },
+  { value: 'https://app.example.com/products', weight: 5 },
+  { value: 'https://app.example.com/settings', weight: 3 },
+  { value: 'https://t.co/abc123', weight: 3 },
+  { value: 'https://www.facebook.com/', weight: 3 },
+  { value: 'https://www.linkedin.com/feed', weight: 2 },
+  { value: 'https://www.reddit.com/r/technology', weight: 2 },
+  { value: 'https://mail.google.com/', weight: 3 },
+  { value: 'https://outlook.office365.com/', weight: 2 },
+  { value: 'https://news.ycombinator.com/', weight: 2 },
+  { value: 'https://github.com/', weight: 1 },
+  { value: 'https://stackoverflow.com/', weight: 1 },
+  { value: 'android-app://com.example.app', weight: 1 },
+];
+
+/**
+ * Generate a realistic referrer using weighted distribution.
+ */
+export function generateReferrer(): string {
+  return getWeightedRandomItem(REFERRERS).value;
+}
+
+/**
  * Network protocols.
  */
 export const NETWORK_PROTOCOLS = ['http', 'https'];
