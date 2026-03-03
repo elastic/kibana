@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ApplicationStart } from '@kbn/core/public';
 import type {
   DiscoverSessionTab,
   SavedSearchByValueAttributes,
@@ -17,10 +16,7 @@ import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embedd
 export class EmbeddableEditorService {
   private embeddableState?: EmbeddableEditorState;
 
-  constructor(
-    private application: ApplicationStart,
-    private embeddableStateTransfer: EmbeddableStateTransfer
-  ) {
+  constructor(private embeddableStateTransfer: EmbeddableStateTransfer) {
     this.embeddableState = embeddableStateTransfer.getIncomingEditorState('discover', true);
   }
 
@@ -38,22 +34,16 @@ export class EmbeddableEditorService {
 
       if (app && path) {
         this.embeddableStateTransfer.clearEditorState('discover');
-        if (state) {
-          this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
-            path,
-            state: [
-              {
-                type: SEARCH_EMBEDDABLE_TYPE,
-                serializedState: { attributes: state },
-                embeddableId: this.embeddableState?.embeddableId,
-              },
-            ],
-          });
-        } else {
-          this.application.navigateToApp(app, {
-            path,
-          });
-        }
+        this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
+          path,
+          state: [
+            {
+              type: SEARCH_EMBEDDABLE_TYPE,
+              serializedState: { attributes: state },
+              embeddableId: this.embeddableState?.embeddableId,
+            },
+          ],
+        });
       }
     }
   };
