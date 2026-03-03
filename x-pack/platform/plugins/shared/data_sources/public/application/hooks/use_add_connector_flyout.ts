@@ -17,7 +17,6 @@ import { queryKeys } from '../query_keys';
 
 export interface UseAddConnectorFlyoutOptions {
   onConnectorCreated?: (connector: ActionConnector) => void;
-  dataSourceType?: string;
   suggestedName?: string;
   icon?: IconType;
 }
@@ -33,7 +32,6 @@ interface CreateDataConnectorPayload {
  */
 export const useAddConnectorFlyout = ({
   onConnectorCreated,
-  dataSourceType,
   suggestedName,
   icon,
 }: UseAddConnectorFlyoutOptions = {}) => {
@@ -48,16 +46,19 @@ export const useAddConnectorFlyout = ({
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedConnectorType, setSelectedConnectorType] = useState<string | undefined>();
+  const [dataSourceType, setDataSourceType] = useState<string | undefined>();
   const loadingToastRef = useRef<ReturnType<typeof toasts.addInfo> | undefined>();
 
-  const openFlyout = useCallback((actionTypeId?: string) => {
+  const openFlyout = useCallback((actionTypeId?: string, dataSourceId?: string) => {
     setSelectedConnectorType(actionTypeId);
+    setDataSourceType(dataSourceId);
     setIsOpen(true);
   }, []);
 
   const closeFlyout = useCallback(() => {
     setIsOpen(false);
     setSelectedConnectorType(undefined);
+    setDataSourceType(undefined);
   }, []);
 
   // Mutation for creating data connector

@@ -12,6 +12,7 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getTabStateMock, getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import {
+  fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,
@@ -246,6 +247,42 @@ describe('tab mapping utils', () => {
           "uiState": Object {},
         }
       `);
+    });
+  });
+
+  describe('fromSavedObjectTabToSearchSource', () => {
+    it('should create a search source from a saved object tab', async () => {
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [dataViewMockWithTimeField],
+      });
+      const persistedTab = getPersistedTabMock({
+        tabId: 'test-tab',
+        dataView: dataViewMockWithTimeField,
+        services: toolkit.services,
+        appStateOverrides: tab1.appState,
+        globalStateOverrides: tab1.globalState,
+      });
+      await toolkit.initializeTabs({
+        persistedDiscoverSession: createDiscoverSessionMock({
+          id: 'test-session',
+          tabs: [persistedTab],
+        }),
+      });
+
+      const searchSource = await fromSavedObjectTabToSearchSource({
+        tab: persistedTab,
+        services: toolkit.services,
+      });
+
+      expect(searchSource.getSerializedFields()).toEqual({
+        filter: [],
+        index: 'the-data-view-id',
+        query: {
+          language: 'kuery',
+          query: '',
+        },
+      });
     });
   });
 

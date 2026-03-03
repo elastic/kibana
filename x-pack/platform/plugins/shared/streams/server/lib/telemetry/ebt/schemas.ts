@@ -14,6 +14,7 @@ import type {
   StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
+  StreamsFeaturesIdentifiedProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -274,6 +275,69 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
     },
   };
 
+const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
+  inferred_total_count: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of inferred features',
+    },
+  },
+  inferred_dedup_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inferred features after deduplication',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the identification request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the identification request',
+    },
+  },
+  total_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of tokens used for the identification request',
+    },
+  },
+  total_duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'The total duration of the features identification task in milliseconds',
+    },
+  },
+  identification_duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'The duration of the LLM features identification in milliseconds',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  state: {
+    type: 'keyword',
+    _meta: {
+      description: 'The state of the features identification task (success, failure, or canceled)',
+    },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -282,4 +346,5 @@ export {
   streamsSignificantEventsQueriesGeneratedSchema,
   streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
+  streamsFeaturesIdentifiedSchema,
 };
