@@ -50,7 +50,7 @@ export interface FetchEsqlParams {
   };
 }
 
-const MAX_MULTIPLIED_ROWS = 100_000;
+const MAX_MULTIPLIED_ROWS = 1_000_000;
 
 function getMultiplierFromESQLQuery(esql: string): number {
   if (!esql) return 1;

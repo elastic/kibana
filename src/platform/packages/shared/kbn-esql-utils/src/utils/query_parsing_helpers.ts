@@ -33,7 +33,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
-const MAX_MULTIPLIED_ROWS = 100_000;
+const MAX_MULTIPLIED_ROWS = 1_000_000;
 
 /**
  * Parses an ES|QL query for a row-multiplier comment such as `// 1000x` or `/* 500x *\/`.
