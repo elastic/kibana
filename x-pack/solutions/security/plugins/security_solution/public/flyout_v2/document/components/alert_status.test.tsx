@@ -11,11 +11,9 @@ import { render } from '@testing-library/react';
 import { AlertStatus } from './alert_status';
 import { WORKFLOW_STATUS_DETAILS_TEST_ID, WORKFLOW_STATUS_TITLE_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../common/mock';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../common/lib/kibana';
+import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../../common/hooks/use_app_toasts');
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles');
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -36,6 +34,12 @@ const alertHitWithoutWorkflowUser = createMockHit({
   'kibana.alert.workflow_status_updated_at': '2023-11-01T22:33:26.893Z',
 });
 
+const alertHitWithNullWorkflowUser = createMockHit({
+  'event.kind': 'signal',
+  'kibana.alert.workflow_user': null,
+  'kibana.alert.workflow_status_updated_at': '2023-11-01T22:33:26.893Z',
+});
+
 const renderAlertStatus = (hit: DataTableRecord) =>
   render(
     <TestProviders>
@@ -48,20 +52,12 @@ const mockUserProfiles = [
 ];
 
 describe('<AlertStatus />', () => {
-  let bulkGet: jest.Mock;
+  const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    bulkGet = jest.fn().mockResolvedValue(mockUserProfiles);
-    (useAppToasts as jest.Mock).mockReturnValue({ addError: jest.fn() });
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        core: {
-          userProfile: {
-            bulkGet,
-          },
-        },
-      },
+    mockUseBulkGetUserProfiles.mockReturnValue({
+      data: mockUserProfiles,
     });
   });
 
@@ -74,12 +70,20 @@ describe('<AlertStatus />', () => {
       'Alert status updated by'
     );
     expect(await findByTestId(WORKFLOW_STATUS_DETAILS_TEST_ID)).toHaveTextContent('User 1');
-    expect(bulkGet).toHaveBeenCalledTimes(1);
+    expect(mockUseBulkGetUserProfiles).toHaveBeenCalledWith({ uids: new Set(['user-id-1']) });
   });
 
   it('should render empty component if missing workflow_user value', async () => {
     const { container } = renderAlertStatus(alertHitWithoutWorkflowUser);
 
     expect(container).toBeEmptyDOMElement();
+    expect(mockUseBulkGetUserProfiles).toHaveBeenCalledWith({ uids: new Set() });
+  });
+
+  it('should render empty component and not request profile for null workflow_user', async () => {
+    const { container } = renderAlertStatus(alertHitWithNullWorkflowUser);
+
+    expect(container).toBeEmptyDOMElement();
+    expect(mockUseBulkGetUserProfiles).toHaveBeenCalledWith({ uids: new Set() });
   });
 });
