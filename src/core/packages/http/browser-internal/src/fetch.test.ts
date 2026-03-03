@@ -214,7 +214,9 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.callHistory.lastCall()?.options!.headers?.['kbn-system-request']).toBeUndefined();
+      expect(
+        fetchMock.callHistory.lastCall()?.options!.headers?.['kbn-system-request']
+      ).toBeUndefined();
     });
 
     it('should not set kbn-system-request header when asSystemRequest: false', async () => {
@@ -224,7 +226,9 @@ describe('Fetch', () => {
         asSystemRequest: false,
       });
 
-      expect(fetchMock.callHistory.lastCall()?.options!.headers?.['kbn-system-request']).toBeUndefined();
+      expect(
+        fetchMock.callHistory.lastCall()?.options!.headers?.['kbn-system-request']
+      ).toBeUndefined();
     });
 
     it('should set kbn-system-request header when asSystemRequest: true', async () => {

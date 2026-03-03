@@ -100,7 +100,9 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('bar', 'foo');
     await uiSettingsApi.batchSet('bar', 'box');
 
-    expect(fetchMock.callHistory.calls()).toMatchSnapshot('two requests, second only sends bar, not foo');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot(
+      'two requests, second only sends bar, not foo'
+    );
   });
 
   it('rejects on 404 response', async () => {
@@ -217,7 +219,9 @@ describe('#batchSetGlobal', () => {
     uiSettingsApi.batchSetGlobal('bar', 'foo');
     await uiSettingsApi.batchSetGlobal('bar', 'box');
 
-    expect(fetchMock.callHistory.calls()).toMatchSnapshot('two requests, second only sends bar, not foo');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot(
+      'two requests, second only sends bar, not foo'
+    );
   });
 
   it('rejects on 404 response', async () => {
