@@ -8,7 +8,7 @@
 const resolveFeatureSourcesToRun = (
   source: string | undefined
 ): Array<'auto' | 'canonical' | 'snapshot'> => {
-  // Default to running both variants so results are directly comparable.
+  // Default to running both variants so results are directly comparable
   if (source == null || source === 'both') {
     return ['canonical', 'snapshot'];
   }

@@ -10,7 +10,6 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 import { tags } from '@kbn/scout';
 import kbnDatemath from '@kbn/datemath';
 import type { Feature } from '@kbn/streams-schema';
-// import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   canonicalFeaturesFromExpectedGroundTruth,
@@ -26,9 +25,13 @@ import { createScenarioCriteriaLlmEvaluator } from '../../../src/evaluators/scen
 import { getActiveDatasets, resolveScenarioSnapshotSource } from '../datasets';
 import { FEATURE_SOURCES_TO_RUN } from './resolve_feature_sources';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
+import { getComputedFeaturesFromDocs } from './get_computed_features_from_docs';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
 const SAMPLE_DOCS_SIZE = 500;
+
+const MANAGED_STREAM_NAME = 'logs';
+const MANAGED_STREAM_SEARCH_PATTERN = 'logs*';
 
 const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.basePathPrefix}`;
 
@@ -65,7 +68,6 @@ evaluate.describe(
           `${dataset.id} / ${scenario.input.scenario_id} (${featureSource})`,
           () => {
             let sampleLogs: string[] = [];
-            let testIndex: string | undefined;
             let features: Feature[] = [];
 
             evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
@@ -140,16 +142,6 @@ evaluate.describe(
                 source.gcs
               );
 
-              features = resolvedFeatures;
-              if (features.length === 0) {
-                const details = shouldUseCanonicalFeatures
-                  ? 'No canonical features could be derived from expected_ground_truth.'
-                  : `No snapshot features found for "${source.snapshotName}". Ensure the snapshot includes sigevents-streams-features-<scenario>.`;
-                throw new Error(
-                  `No features available for scenario "${scenario.input.scenario_id}". ${details}`
-                );
-              }
-
               if (stats.created === 0) {
                 throw new Error(
                   `No documents indexed after replaying snapshot "${source.snapshotName}" into managed stream`
@@ -159,7 +151,7 @@ evaluate.describe(
               await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
 
               const searchResult = await esClient.search<Record<string, unknown>>({
-                index: 'logs*',
+                index: MANAGED_STREAM_SEARCH_PATTERN,
                 size: SAMPLE_DOCS_SIZE,
                 query: { match_all: {} },
                 sort: [{ '@timestamp': { order: 'desc' } }],
@@ -169,22 +161,28 @@ evaluate.describe(
                 extractLogTextFromSourceDoc(hit._source)
               );
 
-              testIndex = [
-                'logs-otel-query-gen',
-                dataset.id,
-                scenario.input.scenario_id,
-                featureSource,
-                Date.now(),
-              ].join('-');
-              await esClient.indices.createDataStream({ name: testIndex });
+              if (shouldUseCanonicalFeatures) {
+                const sourceDocs = searchResult.hits.hits
+                  .map((hit) => hit._source)
+                  .filter((doc): doc is Record<string, unknown> => doc != null);
 
-              const bulkBody = searchResult.hits.hits.flatMap((hit) => [
-                { create: { _index: testIndex } },
-                hit._source as Record<string, unknown>,
-              ]);
+                const computedFeatures = getComputedFeaturesFromDocs({
+                  streamName: scenario.input.stream_name,
+                  docs: sourceDocs,
+                });
 
-              if (bulkBody.length > 0) {
-                await esClient.bulk({ refresh: true, body: bulkBody });
+                features = [...resolvedFeatures, ...computedFeatures];
+              } else {
+                features = resolvedFeatures;
+              }
+
+              if (features.length === 0) {
+                const details = shouldUseCanonicalFeatures
+                  ? 'No canonical features could be derived from expected_ground_truth.'
+                  : `No snapshot features found for "${source.snapshotName}". Ensure the snapshot includes sigevents-streams-features-<scenario>.`;
+                throw new Error(
+                  `No features available for scenario "${scenario.input.scenario_id}". ${details}`
+                );
               }
             });
 
@@ -216,25 +214,20 @@ evaluate.describe(
                           },
                           metadata: {
                             ...scenario.metadata,
-                            test_index: testIndex,
+                            test_index: MANAGED_STREAM_SEARCH_PATTERN,
                           },
                         },
                       ],
                     },
                     task: async () => {
-                      if (!testIndex) {
-                        throw new Error('Missing temporary test index for query generation');
-                      }
+                      const { stream: logsStream } = await apiServices.streams.getStreamDefinition(
+                        MANAGED_STREAM_NAME
+                      );
 
-                      const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
-                      const { queries } = await generateSignificantEvents({
+                      const stream = { ...logsStream, name: MANAGED_STREAM_SEARCH_PATTERN };
+
+                      const { queries, toolUsage } = await generateSignificantEvents({
                         stream,
-                        // system: {
-                        //   type: 'system',
-                        //   name: scenario.input.stream_name,
-                        //   description: scenario.input.stream_description,
-                        //   filter: ALWAYS_CONDITION,
-                        // },
                         esClient,
                         start: kbnDatemath.parse('now-24h')!.valueOf(),
                         end: kbnDatemath.parse('now')!.valueOf(),
@@ -244,6 +237,10 @@ evaluate.describe(
                         systemPrompt: significantEventsPrompt,
                         getFeatures: async () => features,
                       });
+
+                      logger.info(
+                        `[DEBUG] Tool usage: add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}`
+                      );
 
                       return queries;
                     },
@@ -258,11 +255,6 @@ evaluate.describe(
 
             evaluate.afterAll(async ({ esClient, apiServices, log }) => {
               log.debug('Cleaning up query-generation test data');
-
-              if (testIndex) {
-                await esClient.indices.deleteDataStream({ name: testIndex }).catch(() => {});
-              }
-
               await apiServices.streams.disable().catch(() => {});
               await cleanSignificantEventsDataStreams(esClient, log);
             });

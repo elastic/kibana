@@ -27,7 +27,7 @@ const snapshotCatalogKey = (gcs: GcsConfig): string => `${gcs.bucket}/${gcs.base
 evaluate.describe.configure({ timeout: 300_000 });
 
 evaluate.describe(
-  'Streams feature extraction',
+  'Significant events feature extraction',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
