@@ -13,12 +13,10 @@ import type {
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { EsqlServerPluginSetup } from '@kbn/esql/server/plugin';
 
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
-  esql?: EsqlServerPluginSetup;
 }
 
 export interface PluginStartDependencies {
