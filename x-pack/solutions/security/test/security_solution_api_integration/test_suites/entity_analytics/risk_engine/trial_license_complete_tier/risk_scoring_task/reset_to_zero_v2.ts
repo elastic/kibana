@@ -18,6 +18,7 @@ import {
   readRiskScores,
   riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
+  waitForRiskEngineRun,
   enableEntityStoreV2,
   disableEntityStoreV2,
   entityStoreV2RouteHelpersFactory,
@@ -114,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       await riskEngineRoutes.init();
+      await waitForRiskEngineRun({ log, supertest });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
       const initialScores = normalizeScores(await readRiskScores(es));
