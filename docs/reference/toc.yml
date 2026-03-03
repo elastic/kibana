@@ -87,6 +87,7 @@ toc:
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
+          - file: connectors-kibana/zoom-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
