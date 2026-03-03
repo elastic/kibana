@@ -142,5 +142,37 @@ export const MANIFEST_V1: JSONSchema = {
       `,
       type: 'boolean',
     },
+    globals: {
+      description: desc`
+        Global DI token declarations.  The platform uses these for documentation, startup health
+        checks, and future bundle-loading optimisation.
+      `,
+      type: 'object',
+      properties: {
+        provides: {
+          description: desc`
+            Global DI token names (in \`<pluginId>.<ServiceName>\` format) that this plugin
+            provides for cross-plugin consumption.  Auto-maintained by \`node scripts/lint_packages --fix\`.
+          `,
+          type: 'array',
+          items: {
+            type: 'string',
+            pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+          },
+        },
+        consumes: {
+          description: desc`
+            Global DI token names (in \`<pluginId>.<ServiceName>\` format) that this plugin
+            consumes from other plugins.  Auto-maintained by \`node scripts/lint_packages --fix\`.
+          `,
+          type: 'array',
+          items: {
+            type: 'string',
+            pattern: '^[a-z][a-zA-Z0-9]*\\.[A-Z][a-zA-Z0-9]*$',
+          },
+        },
+      },
+      additionalProperties: false,
+    },
   },
 };

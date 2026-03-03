@@ -223,6 +223,15 @@ export interface PluginManifest {
   readonly runtimePluginDependencies: readonly string[];
 
   /**
+   * Global DI token declarations for this plugin.  Used for documentation, startup health checks,
+   * and future bundle-loading optimisation.
+   */
+  readonly globals: {
+    readonly provides: readonly string[];
+    readonly consumes: readonly string[];
+  };
+
+  /**
    * Specifies whether plugin includes some client/browser specific functionality
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */

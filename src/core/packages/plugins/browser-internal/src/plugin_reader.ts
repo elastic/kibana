@@ -21,6 +21,7 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, unknown>;
  */
 export interface PluginDefinition {
   module?: ContainerModule;
+  services?: ContainerModule;
   plugin?: UnknownPluginInitializer;
 }
 
@@ -47,8 +48,14 @@ export function read(name: string) {
   }
 
   const pluginExport = coreWindow.__kbnBundles__.get(exportId);
-  if (!pluginExport?.module && typeof pluginExport?.plugin !== 'function') {
-    throw new Error(`Definition of plugin "${name}" should either be a function or a module.`);
+  if (
+    !pluginExport?.services &&
+    !pluginExport?.module &&
+    typeof pluginExport?.plugin !== 'function'
+  ) {
+    throw new Error(
+      `Definition of plugin "${name}" should export "plugin", "services", or "module".`
+    );
   }
 
   return pluginExport;

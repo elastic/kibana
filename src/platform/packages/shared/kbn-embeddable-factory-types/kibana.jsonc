@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/embeddable-factory-types",
+  "owner": ["@elastic/kibana-presentation"],
+  "description": "DI service token for embeddable factory registration via Global injection.",
+  "group": "platform",
+  "visibility": "shared"
+}

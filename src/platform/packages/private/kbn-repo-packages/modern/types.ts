@@ -126,6 +126,10 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     requiredBundles?: string[];
     runtimePluginDependencies?: string[];
     enabledOnAnonymousPages?: boolean;
+    globals?: {
+      provides?: string[];
+      consumes?: string[];
+    };
     type?: 'preboot';
     extraPublicDirs?: string[];
     [PLUGIN_CATEGORY]?: PluginCategoryInfo;

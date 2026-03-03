@@ -17,6 +17,7 @@ const {
   isValidPluginId,
   isValidPkgType,
   isArrOfIds,
+  isArrOfGlobalTokenIds,
   isArrOfStrings,
   PACKAGE_TYPES,
 } = require('./parse_helpers');
@@ -62,6 +63,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     configPath,
     requiredPlugins,
     optionalPlugins,
+    globals,
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,
@@ -99,10 +101,30 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
 
   if (optionalPlugins !== undefined && !isArrOfIds(optionalPlugins)) {
     throw err(
-      `plugin.requiredPlugins`,
+      `plugin.optionalPlugins`,
       optionalPlugins,
       `must be an array of strings in camel or snake case`
     );
+  }
+
+  if (globals !== undefined) {
+    if (!isObj(globals)) {
+      throw err(`plugin.globals`, globals, `must be an object when defined`);
+    }
+    if (globals.provides !== undefined && !isArrOfGlobalTokenIds(globals.provides)) {
+      throw err(
+        `plugin.globals.provides`,
+        globals.provides,
+        `must be an array of strings in <pluginId>.<ServiceName> format`
+      );
+    }
+    if (globals.consumes !== undefined && !isArrOfGlobalTokenIds(globals.consumes)) {
+      throw err(
+        `plugin.globals.consumes`,
+        globals.consumes,
+        `must be an array of strings in <pluginId>.<ServiceName> format`
+      );
+    }
   }
 
   if (runtimePluginDependencies !== undefined && !isArrOfIds(runtimePluginDependencies)) {
@@ -163,6 +185,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     configPath,
     requiredPlugins,
     optionalPlugins,
+    globals,
     requiredBundles,
     runtimePluginDependencies,
     enabledOnAnonymousPages,

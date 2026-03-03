@@ -31,6 +31,8 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/slo-schema'
   - '@kbn/slo-shared-plugin'
+  - '@kbn/slo-flyout-types'
+  - '@kbn/core-di-internal'
   - '@kbn/alerting-plugin'
   - '@kbn/rison'
   - '@kbn/embeddable-plugin'

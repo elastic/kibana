@@ -25,6 +25,7 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { validateGlobalTokens } from './validate_global_tokens';
 
 const Sec = 1000;
 
@@ -36,9 +37,14 @@ export class PluginsSystem<T extends PluginType> {
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
+  private globalTokenValidation: 'warn' | 'error' | 'off' = 'warn';
 
   constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
+  }
+
+  public setGlobalTokenValidation(mode: 'warn' | 'error' | 'off') {
+    this.globalTokenValidation = mode;
   }
 
   public addPlugin(plugin: PluginWrapper) {
@@ -227,6 +233,10 @@ export class PluginsSystem<T extends PluginType> {
 
     this.runtimeResolver.resolveStartRequests(contracts);
 
+    if (this.globalTokenValidation !== 'off') {
+      validateGlobalTokens(this.plugins, this.globalTokenValidation, this.log);
+    }
+
     return contracts;
   }
 
@@ -293,6 +303,7 @@ export class PluginsSystem<T extends PluginType> {
             runtimePluginDependencies:
               plugin.manifest.runtimePluginDependencies.filter(filterUiPlugins),
             requiredBundles: plugin.manifest.requiredBundles,
+            globals: plugin.manifest.globals,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },
         ];
@@ -488,7 +499,9 @@ export const findCircularDependencies = (
  * This helps identify duplicate cycles regardless of where we start traversing
  */
 export const normalizeCycle = (cycle: PluginName[]): PluginName[] => {
-  if (cycle.length <= 1) return cycle;
+  if (cycle.length <= 1) {
+    return cycle;
+  }
   if (new Set(cycle).size !== cycle.length) {
     throw new Error(`Cycle contains duplicate plugins: ${cycle}`);
   }

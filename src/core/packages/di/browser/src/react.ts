@@ -9,6 +9,7 @@
 
 import type { Container, GetOptions, OptionalGetOptions, ServiceIdentifier } from 'inversify';
 import { createContext, useContext, useMemo } from 'react';
+import { rethrowDiError } from '@kbn/core-di-internal';
 
 /**
  * The React context to provide the dependency injection container.
@@ -54,5 +55,12 @@ export function useService<T>(...params: Parameters<Container['get']>): T {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => container.get<T>(...params), [container, ...params]);
+  return useMemo(() => {
+    const [token] = params;
+    try {
+      return container.get<T>(...params);
+    } catch (err) {
+      rethrowDiError(token, err);
+    }
+  }, [container, ...params]);
 }

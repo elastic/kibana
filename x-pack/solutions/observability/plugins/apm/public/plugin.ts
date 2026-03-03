@@ -84,7 +84,8 @@ import type {
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
 import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
-import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+// SLO flyouts are now consumed via Global DI tokens from `@kbn/slo-flyout-types`
+// instead of the `SLOPublicStart` plugin contract.
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -174,7 +175,6 @@ export interface ApmPluginStartDeps {
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
-  slo?: SLOPublicStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {

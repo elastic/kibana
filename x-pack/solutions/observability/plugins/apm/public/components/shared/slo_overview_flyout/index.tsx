@@ -46,14 +46,13 @@ import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import { useSloFlyouts } from '../../../hooks/use_slo_flyouts';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { useManageSlosUrl } from '../../../hooks/use_manage_slos_url';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { DEFAULT_INDICATOR_TYPE } from '../constants';
-
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
 const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
@@ -109,8 +108,8 @@ const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { uiSettings, slo: sloPlugin, telemetry } = services;
+  const { uiSettings, telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { SLODetailsFlyout, CreateSLOFormFlyout } = useSloFlyouts();
   const { link } = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');
@@ -214,7 +213,9 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   // Sort SLOs by alerts count (alerts data is fetched separately, so we sort client-side)
   const sortedSlos = useMemo(() => {
-    if (!sloData.length) return [];
+    if (!sloData.length) {
+      return [];
+    }
 
     return [...sloData].sort((a, b) => {
       const alertsA = activeAlerts?.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
@@ -292,24 +293,9 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     refetch();
   }, [refetch]);
 
-  const CreateSloFlyout = createSloFlyoutOpen
-    ? sloPlugin?.getCreateSLOFormFlyout({
-        initialValues: {
-          name: `APM SLO for ${serviceName}`,
-          indicator: {
-            type: DEFAULT_INDICATOR_TYPE,
-            params: {
-              service: serviceName,
-              environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
-            },
-          },
-        },
-        onClose: closeCreateSloFlyout,
-        formSettings: {
-          allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
-        },
-      })
-    : null;
+  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
+
+  const showCreateSloFlyout = createSloFlyoutOpen && CreateSLOFormFlyout;
 
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
@@ -330,7 +316,9 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         width: '70px',
         render: (_: unknown, sloItem: SLOWithSummaryResponse) => {
           const alertCount = getActiveAlertsForSlo(sloItem);
-          if (!alertCount) return null;
+          if (!alertCount) {
+            return null;
+          }
           return (
             <EuiToolTip
               position="top"
@@ -403,7 +391,9 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         width: '90px',
         align: 'center',
         render: (sliValue: number, sloItem: SLOWithSummaryResponse) => {
-          if (sloItem.summary?.status === 'NO_DATA') return '-';
+          if (sloItem.summary?.status === 'NO_DATA') {
+            return '-';
+          }
           return numeral(sliValue).format(percentFormat);
         },
       },
@@ -677,8 +667,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           </>
         )}
       </EuiFlyoutBody>
-      {selectedSloId && sloPlugin?.getSLODetailsFlyout && (
-        <sloPlugin.getSLODetailsFlyout
+      {selectedSloId && SLODetailsFlyout && (
+        <SLODetailsFlyout
           sloId={selectedSloId}
           onClose={handleCloseSloDetails}
           size="m"
@@ -687,7 +677,24 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           initialTabId={selectedSloTabId}
         />
       )}
-      {CreateSloFlyout}
+      {showCreateSloFlyout && (
+        <CreateSLOFormFlyout
+          initialValues={{
+            name: `APM SLO for ${serviceName}`,
+            indicator: {
+              type: defaultIndicatorType,
+              params: {
+                service: serviceName,
+                environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
+              },
+            },
+          }}
+          onClose={closeCreateSloFlyout}
+          formSettings={{
+            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
+          }}
+        />
+      )}
     </EuiFlyout>
   );
 }

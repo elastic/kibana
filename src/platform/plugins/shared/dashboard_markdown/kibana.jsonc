@@ -12,6 +12,8 @@
     "requiredPlugins": [
       "contentManagement",
       "dataViews",
+      // TODO(DI): browser-side factory registration moved to DI module;
+      // `embeddable` remains required for server-side `registerTransforms`.
       "embeddable",
       "uiActions",
       "dashboard",
@@ -20,7 +22,12 @@
       "dataViewFieldEditor",
       "visualizations",
     ],
-    "requiredBundles":[
+    "globals": {
+      "consumes": [
+        "embeddable.FactoryRegistration"
+      ]
+    },
+    "requiredBundles": [
       "kibanaUtils"
     ]
   }

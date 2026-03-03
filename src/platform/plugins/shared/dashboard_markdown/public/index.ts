@@ -8,11 +8,26 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-
+import { declareServices } from '@kbn/core-di';
+import { EmbeddableFactoryRegistration } from '@kbn/embeddable-factory-types';
 import { DashboardMarkdownPlugin } from './plugin';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardMarkdownPlugin();
 }
+
+/**
+ * Registers the markdown embeddable factory globally.
+ */
+export const services = declareServices(({ publish }) => {
+  publish(EmbeddableFactoryRegistration).toConstantValue({
+    type: MARKDOWN_EMBEDDABLE_TYPE,
+    getFactory: async () => {
+      const { markdownEmbeddableFactory } = await import('./async_services');
+      return markdownEmbeddableFactory;
+    },
+  });
+});

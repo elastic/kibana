@@ -18,6 +18,11 @@ import {
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
+// TODO: once the Global DI pattern is validated and stable, re-export `Global`
+// from the public `@kbn/core-di` package so plugins don't need to depend on
+// `@kbn/core-di-internal`.
+export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
+
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
 /**
@@ -27,11 +32,6 @@ type ScopeFactory = (id?: PluginOpaqueId) => Container;
  * The `Context` service holds a reference to the child container and is used to resolve global services within the current context, making short-lived services available.
  */
 const Context = Symbol('Context') as ServiceIdentifier<Container>;
-
-/**
- * The service identifier for the global service references.
- */
-export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
 
 /**
  * Current plugin scope identifier.

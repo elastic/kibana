@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-di-internal",
+    "@kbn/core-di-server",
+    "@kbn/core-http-server",
+    "@kbn/di-global-alpha-types",
+    "@kbn/di-global-beta-types"
+  ]
+}

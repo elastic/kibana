@@ -152,6 +152,7 @@
     "@kbn/kql",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
+    "@kbn/slo-flyout-types",
     "@kbn/esql-language",
   ],
   "exclude": ["target/**/*"]

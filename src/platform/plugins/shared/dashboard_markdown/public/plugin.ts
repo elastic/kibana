@@ -39,15 +39,10 @@ export class DashboardMarkdownPlugin
     core: CoreSetup<MarkdownStartDeps>,
     { embeddable, contentManagement }: MarkdownSetupDeps
   ) {
-    embeddable.registerReactEmbeddableFactory(MARKDOWN_EMBEDDABLE_TYPE, async () => {
-      const { markdownEmbeddableFactory } = await import('./async_services');
-      return markdownEmbeddableFactory;
-    });
-
     // Registering the markdown saved object type with content management
-    // to support "Add from library" flyout in dashboard
-    // Only 'mSearch' implemented to support markdown saved objects in 'api/content_management/rpc/mSearch' route
-    // CRUD content management routes not implemented and throw
+    // to support "Add from library" flyout in dashboard.
+    // Only 'mSearch' implemented to support markdown saved objects in 'api/content_management/rpc/mSearch' route.
+    // CRUD content management routes not implemented and throw.
     contentManagement.registry.register({
       id: MARKDOWN_SAVED_OBJECT_TYPE,
       name: 'Markdown',

@@ -6429,6 +6429,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/di-global-alpha-plugin@link:examples/di_global_alpha":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-alpha-types@link:examples/di_global_alpha_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-beta-plugin@link:examples/di_global_beta":
+  version "0.0.0"
+  uid ""
+
+"@kbn/di-global-beta-types@link:examples/di_global_beta_types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""
@@ -6530,6 +6546,10 @@
   uid ""
 
 "@kbn/embeddable-examples-plugin@link:examples/embeddable_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/embeddable-factory-types@link:src/platform/packages/shared/kbn-embeddable-factory-types":
   version "0.0.0"
   uid ""
 
@@ -8958,6 +8978,10 @@
   uid ""
 
 "@kbn/siem-readiness@link:x-pack/solutions/security/packages/siem-readiness":
+  version "0.0.0"
+  uid ""
+
+"@kbn/slo-flyout-types@link:x-pack/platform/packages/shared/kbn-slo-flyout-types":
   version "0.0.0"
   uid ""
 

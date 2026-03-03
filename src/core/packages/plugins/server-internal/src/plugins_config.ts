@@ -37,6 +37,16 @@ const configSchema = schema.object({
     )
   ),
   /**
+   * Controls startup validation of `globals.consumes` DI tokens.
+   * - `'warn'` (default): log a warning for each consumed token with no provider.
+   * - `'error'`: throw and prevent startup if any consumed token has no provider.
+   * - `'off'`: skip validation entirely.
+   */
+  globalTokenValidation: schema.oneOf(
+    [schema.literal('warn'), schema.literal('error'), schema.literal('off')],
+    { defaultValue: 'warn' }
+  ),
+  /**
    * Internal config, not intended to be used by end users. Only for specific
    * internal purposes.
    */
@@ -83,11 +93,17 @@ export class PluginsConfig {
    */
   public readonly allowlistPluginGroups?: readonly KibanaGroup[];
 
+  /**
+   * Controls startup validation of `globals.consumes` DI tokens.
+   */
+  public readonly globalTokenValidation: 'warn' | 'error' | 'off';
+
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
     this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
+    this.globalTokenValidation = rawConfig.globalTokenValidation;
   }
 }

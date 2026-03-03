@@ -11,6 +11,10 @@ examples/data_streams_example @elastic/kibana-core
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 examples/dependency_injection @elastic/kibana-core
 examples/developer_examples @elastic/appex-sharedux
+examples/di_global_alpha @elastic/kibana-core
+examples/di_global_alpha_types @elastic/kibana-core
+examples/di_global_beta @elastic/kibana-core
+examples/di_global_beta_types @elastic/kibana-core
 examples/discover_customization_examples @elastic/kibana-data-discovery
 examples/embeddable_examples @elastic/kibana-presentation
 examples/error_boundary @elastic/appex-sharedux
@@ -525,6 +529,7 @@ src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @e
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-edot-collector @elastic/obs-ai-team
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-exploration-team
+src/platform/packages/shared/kbn-embeddable-factory-types @elastic/kibana-presentation
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
 src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
@@ -1001,6 +1006,7 @@ x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
+x-pack/platform/packages/shared/kbn-slo-flyout-types @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/obs-onboarding-team

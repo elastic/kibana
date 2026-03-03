@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-03-02T21:40:01.137Z",
+  "tokens": {
+    "diGlobalAlpha.AlphaService": {
+      "providedBy": "diGlobalAlpha",
+      "consumedBy": [
+        "diGlobalBeta"
+      ]
+    },
+    "diGlobalBeta.BetaService": {
+      "providedBy": "diGlobalBeta",
+      "consumedBy": [
+        "diGlobalAlpha"
+      ]
+    },
+    "embeddable.FactoryRegistration": {
+      "providedBy": "embeddable",
+      "consumedBy": [
+        "dashboard_markdown",
+        "image_embeddable",
+        "lens"
+      ]
+    },
+    "slo.CreateSLOFormFlyout": {
+      "providedBy": "slo",
+      "consumedBy": [
+        "apm"
+      ]
+    },
+    "slo.SLODetailsFlyout": {
+      "providedBy": "slo",
+      "consumedBy": [
+        "apm"
+      ]
+    }
+  },
+  "warnings": {
+    "orphanConsumers": [],
+    "unused": []
+  }
+}
