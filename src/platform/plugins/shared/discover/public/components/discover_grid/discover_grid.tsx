@@ -26,6 +26,7 @@ import {
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
 import { TanstackVirtualGrid } from './tanstack_virtual_grid';
+import { TanStackDataGrid } from './tanstack_data_grid';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -132,6 +133,39 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       }
       return /\/\*[\s\S]*?\btanstack\b[\s\S]*?\*\/|\/\/.*\btanstack\b/i.test(query.esql);
     }, [query]);
+
+    const isTanStackDataGrid = useMemo(() => {
+      if (!isOfAggregateQueryType(query)) {
+        return false;
+      }
+      return /\/\*[\s\S]*?\bTanStackGrid\b[\s\S]*?\*\/|\/\/.*\bTanStackGrid\b/.test(query.esql);
+    }, [query]);
+
+    if (isTanStackDataGrid) {
+      return (
+        <TanStackDataGrid
+          rows={props.rows ?? []}
+          columns={props.columns}
+          columnsMeta={props.columnsMeta}
+          dataView={props.dataView}
+          query={isOfAggregateQueryType(query) ? query : undefined}
+          showTimeCol={props.showTimeCol}
+          sort={props.sort}
+          onSort={props.onSort}
+          isSortEnabled={props.isSortEnabled}
+          settings={props.settings}
+          onResize={props.onResize}
+          onSetColumns={props.onSetColumns}
+          expandedDoc={props.expandedDoc}
+          setExpandedDoc={props.setExpandedDoc}
+          renderDocumentView={props.renderDocumentView}
+          loadingState={props.loadingState}
+          onFilter={props.onFilter}
+          getRowIndicator={getRowIndicator}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+        />
+      );
+    }
 
     if (isTanstackVirtualPoc) {
       return (

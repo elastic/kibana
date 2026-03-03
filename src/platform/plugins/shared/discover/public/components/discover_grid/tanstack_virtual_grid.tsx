@@ -58,7 +58,10 @@ const parseStatsByColumns = (
   const byMatch = esql.match(/\bSTATS\b[\s\S]+?\bBY\b\s+(.+?)(?:\||$)/i);
   if (!byMatch) return undefined;
 
-  const byFields = byMatch[1]
+  // Strip trailing comments (// or /* ... */) from the BY clause
+  const byClause = byMatch[1].replace(/\/\/.*$|\/\*[\s\S]*?\*\//g, '');
+
+  const byFields = byClause
     .split(',')
     .map((f) => f.trim())
     .filter(Boolean);
