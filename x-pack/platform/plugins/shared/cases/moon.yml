@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/openapi-generator'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/lens-embeddable-utils'
 tags:
   - plugin
   - prod
