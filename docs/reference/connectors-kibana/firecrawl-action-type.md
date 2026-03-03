@@ -68,4 +68,4 @@ To use the Firecrawl connector, you need to:
 3. Create an API key or copy an existing one (for example, `fc-...`).
 4. In Kibana, when creating or editing the Firecrawl connector, provide this key as the Bearer token (API key / secret).
 
-Rate limits and billing depend on your Firecrawl plan; see [Firecrawl billing](https://docs.firecrawl.dev/billing) for details.
+Rate limits and billing depend on your Firecrawl plan. Check [Firecrawl billing](https://docs.firecrawl.dev/billing) for details.
