@@ -154,7 +154,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginA/config1.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'abc123',
               tests: [
                 {
@@ -181,7 +180,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginA/parallel.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'def456',
               tests: [
                 {
@@ -210,7 +208,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginB/config3.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'ghi789',
               tests: [
                 {
@@ -239,7 +236,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'packageA/config4.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'jkl012',
               tests: [
                 {
@@ -350,7 +346,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'custom123',
               tests: [
                 {
@@ -358,7 +353,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Custom Test 1',
                   expectedStatus: 'passed',
                   location: { file: 'custom.spec.ts', line: 1, column: 1 },
-                  tags: ['@ess'],
+                  tags: ['@local-stateful-classic'],
                 },
               ],
             },
@@ -370,7 +365,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'normal456',
               tests: [
                 {
@@ -378,7 +372,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Normal Test 1',
                   expectedStatus: 'passed',
                   location: { file: 'normal.spec.ts', line: 1, column: 1 },
-                  tags: ['@ess'],
+                  tags: ['@local-stateful-classic'],
                 },
               ],
             },
@@ -425,7 +419,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: excludedConfigPath,
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'exclude123',
               tests: [
                 {
@@ -433,7 +426,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Excluded Test',
                   expectedStatus: 'passed',
                   location: { file: 'excluded.spec.ts', line: 1, column: 1 },
-                  tags: ['@ess'],
+                  tags: ['@local-stateful-classic'],
                 },
               ],
             },
@@ -445,7 +438,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'include456',
               tests: [
                 {
@@ -453,7 +445,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Included Test',
                   expectedStatus: 'passed',
                   location: { file: 'included.spec.ts', line: 1, column: 1 },
-                  tags: ['@ess'],
+                  tags: ['@local-stateful-classic'],
                 },
               ],
             },
@@ -531,7 +523,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginNoMatch/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'mno345',
               tests: [
                 {
@@ -614,7 +605,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginNoTests/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'pqr678',
               tests: [
                 {
@@ -667,7 +657,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginMixedTests/config.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'stu901',
               tests: [
                 {
@@ -768,7 +757,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginTestModes/config1.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'vwx234',
               tests: [
                 {
@@ -792,7 +780,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
             manifest: {
               path: 'pluginTestModes/config2.playwright.config.ts',
               exists: true,
-              lastModified: '2024-01-01T00:00:00Z',
               sha1: 'yza567',
               tests: [
                 {
@@ -842,7 +829,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginSearch/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'bcd234',
                 tests: [
                   {
@@ -862,7 +848,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginSearch/config2.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'cde345',
                 tests: [
                   {
@@ -891,7 +876,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginPlatform/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'def456',
                 tests: [
                   {
@@ -920,7 +904,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginOblt/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'efg567',
                 tests: [
                   {
@@ -1133,7 +1116,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
               manifest: {
                 path: 'pluginMultiMode/config1.playwright.config.ts',
                 exists: true,
-                lastModified: '2024-01-01T00:00:00Z',
                 sha1: 'fgh678',
                 tests: [
                   {

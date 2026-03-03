@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   copyToClipboard,
   EuiButton,
@@ -18,7 +19,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
 import { TestQueryRowTable } from './test_query_row_table';
 
@@ -41,6 +43,7 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
 }) => {
   const {
     onTestQuery,
+    resetTestQueryResponse,
     testQueryResult,
     testQueryError,
     testQueryWarning,
@@ -49,6 +52,11 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
   } = useTestQuery(fetch);
 
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
+  const [copyQueryError, setCopyQueryError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCopyQueryError(null);
+  }, [fetch]);
 
   return (
     <>
@@ -61,6 +69,7 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
               iconSide="left"
               iconType="playFilled"
               onClick={() => {
+                setCopyQueryError(null);
                 onTestQuery();
               }}
               disabled={hasValidationErrors}
@@ -87,13 +96,24 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
                   iconSide="left"
                   iconType="copyClipboard"
                   onClick={() => {
-                    const copied = copyToClipboard(copyQuery());
-                    if (copied) {
-                      setCopiedMessage(
-                        <FormattedMessage
-                          id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
-                          defaultMessage="Copied"
-                        />
+                    setCopyQueryError(null);
+                    resetTestQueryResponse();
+                    try {
+                      const copied = copyToClipboard(copyQuery());
+                      if (copied) {
+                        setCopiedMessage(
+                          <FormattedMessage
+                            id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
+                            defaultMessage="Copied"
+                          />
+                        );
+                      }
+                    } catch (err) {
+                      setCopyQueryError(
+                        i18n.translate('xpack.stackAlerts.esQuery.ui.copyQueryError', {
+                          defaultMessage: 'Error copying query: {message}',
+                          values: { message: err.message },
+                        })
                       );
                     }
                   }}
@@ -134,6 +154,13 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
         <EuiFormRow>
           <EuiText data-test-subj="testQueryError" color="danger" size="s">
             <p>{testQueryError}</p>
+          </EuiText>
+        </EuiFormRow>
+      )}
+      {copyQueryError && (
+        <EuiFormRow>
+          <EuiText data-test-subj="copyQueryError" color="danger" size="s">
+            <p>{copyQueryError}</p>
           </EuiText>
         </EuiFormRow>
       )}
