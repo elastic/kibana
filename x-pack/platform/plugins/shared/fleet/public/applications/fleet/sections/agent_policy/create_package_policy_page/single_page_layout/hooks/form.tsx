@@ -46,10 +46,7 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import {
-  isVerificationError,
-  packageToPackagePolicy,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import type { CreatePackagePolicyResponse } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -540,12 +537,7 @@ export function useOnSubmit({
       }
       return { ...input, enabled: false };
     });
-  }, [
-    packagePolicy.inputs,
-    packagePolicy.var_group_selections,
-    isAgentlessSelected,
-    packageInfo,
-  ]);
+  }, [packagePolicy.inputs, packagePolicy.var_group_selections, isAgentlessSelected, packageInfo]);
 
   // Compare current vs desired input enabled states so the effect below only fires
   // when a var_group selection actually hides or reveals an input, preventing
