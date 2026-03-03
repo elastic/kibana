@@ -21,6 +21,20 @@ Respond with JSON only. Use this exact shape:
 
 Do not include any other text or markdown.`;
 
+/** Max conversation turns included in context (most recent only). */
+const MAX_CONVERSATION_HISTORY_MESSAGES = 20;
+
+/** Max characters per attachment's stringified data; beyond this we truncate. */
+const MAX_ATTACHMENT_DATA_CHARS = 5000;
+
+/** Max number of attachments included in context. */
+const MAX_ATTACHMENTS = 10;
+
+function truncate(str: string, maxChars: number): string {
+  if (str.length <= maxChars) return str;
+  return `${str.slice(0, maxChars)}...[truncated]`;
+}
+
 function buildContextText(input: {
   message: string;
   conversation_history?: Array<{ role?: string; content: string }>;
@@ -29,8 +43,9 @@ function buildContextText(input: {
   const parts: string[] = ['## Current message\n', input.message];
 
   if (input.conversation_history?.length) {
+    const recent = input.conversation_history.slice(-MAX_CONVERSATION_HISTORY_MESSAGES);
     parts.push('\n## Conversation history\n');
-    for (const msg of input.conversation_history) {
+    for (const msg of recent) {
       const role = msg.role ?? 'user';
       if (msg.content) {
         parts.push(`[${role}]: ${msg.content}\n`);
@@ -39,13 +54,16 @@ function buildContextText(input: {
   }
 
   if (input.attachments?.length) {
+    const limited = input.attachments.slice(0, MAX_ATTACHMENTS);
     parts.push('\n## Attachments\n');
-    for (const att of input.attachments) {
+    for (const att of limited) {
       if (att.data && typeof att.data === 'object') {
         try {
-          parts.push(`[${att.type}]: ${JSON.stringify(att.data)}\n`);
+          const raw = JSON.stringify(att.data);
+          parts.push(`[${att.type}]: ${truncate(raw, MAX_ATTACHMENT_DATA_CHARS)}\n`);
         } catch {
-          parts.push(`[${att.type}]: ${String(att.data)}\n`);
+          const raw = String(att.data);
+          parts.push(`[${att.type}]: ${truncate(raw, MAX_ATTACHMENT_DATA_CHARS)}\n`);
         }
       }
     }

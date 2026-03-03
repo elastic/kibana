@@ -135,4 +135,35 @@ describe('aiGuardrailsStepDefinition', () => {
     expect(modelInput[1].content).toContain('prev');
     expect(modelInput[1].content).toContain('alert');
   });
+
+  it('limits conversation_history to last 20 messages', async () => {
+    const manyMessages = Array.from({ length: 25 }, (_, i) => ({ content: `msg-${i}` }));
+    mockContext.input = {
+      message: 'current',
+      conversation_history: manyMessages,
+    };
+
+    const step = aiGuardrailsStepDefinition(mockCoreSetup);
+    await step.handler(mockContext);
+
+    const [, userContent] = mockRunnable.invoke.mock.calls[0][0];
+    expect(userContent.content).toContain('msg-5'); // from last 20 (indices 5..24)
+    expect(userContent.content).not.toContain('msg-0');
+    expect(userContent.content).toContain('msg-24');
+  });
+
+  it('truncates long attachment data and appends [truncated]', async () => {
+    const longData = { payload: 'x'.repeat(10000) };
+    mockContext.input = {
+      message: 'check',
+      attachments: [{ type: 'doc', data: longData }],
+    };
+
+    const step = aiGuardrailsStepDefinition(mockCoreSetup);
+    await step.handler(mockContext);
+
+    const [, userContent] = mockRunnable.invoke.mock.calls[0][0];
+    expect(userContent.content).toContain('...[truncated]');
+    expect(userContent.content).toContain('[doc]:');
+  });
 });
