@@ -28,11 +28,7 @@ export const buildAuthenticationNarrative = (source: AlertSource): string => {
 
   if (action.includes('logon') || action.includes('log_on') || action.includes('login')) {
     text = `Authentication logon ${outcome ?? 'attempt'}`;
-  } else if (
-    action.includes('logoff') ||
-    action.includes('log_off') ||
-    action.includes('logout')
-  ) {
+  } else if (action.includes('logoff') || action.includes('log_off') || action.includes('logout')) {
     text = 'Authentication logoff';
   } else {
     text = `Authentication event${eventAction != null ? ` ${eventAction}` : ''}`;

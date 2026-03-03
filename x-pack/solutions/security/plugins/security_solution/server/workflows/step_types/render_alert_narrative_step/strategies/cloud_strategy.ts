@@ -6,11 +6,7 @@
  */
 
 import type { NarrativeStrategy } from '../narrative_strategy';
-import {
-  getSingleValue,
-  normalizeSpaces,
-  appendAlertSuffix,
-} from '../narrative_utils';
+import { getSingleValue, normalizeSpaces, appendAlertSuffix } from '../narrative_utils';
 import type { AlertSource } from '../narrative_utils';
 
 export const buildCloudNarrative = (source: AlertSource): string => {
@@ -69,10 +65,8 @@ export const cloudStrategy: NarrativeStrategy = {
   match: (source) =>
     getSingleValue(source, 'cloud.provider') != null ||
     getSingleValue(source, 'aws.cloudtrail.user_identity.arn') != null ||
-    getSingleValue(
-      source,
-      'azure.auditlogs.properties.initiated_by.user.user_principal_name'
-    ) != null ||
+    getSingleValue(source, 'azure.auditlogs.properties.initiated_by.user.user_principal_name') !=
+      null ||
     getSingleValue(source, 'gcp.audit.authentication_info.principal_email') != null,
   build: buildCloudNarrative,
 };

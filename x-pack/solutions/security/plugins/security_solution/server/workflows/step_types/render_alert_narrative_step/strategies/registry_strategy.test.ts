@@ -14,9 +14,9 @@ describe('registryStrategy', () => {
     });
 
     it('returns true for endpoint.events.registry dataset', () => {
-      expect(
-        registryStrategy.match({ event: { dataset: ['endpoint.events.registry'] } })
-      ).toBe(true);
+      expect(registryStrategy.match({ event: { dataset: ['endpoint.events.registry'] } })).toBe(
+        true
+      );
     });
 
     it('returns false without registry fields', () => {
@@ -48,9 +48,9 @@ describe('registryStrategy', () => {
     });
 
     it('handles minimal registry data', () => {
-      expect(
-        buildRegistryNarrative({ registry: { key: ['HKLM\\Software\\Test'] } })
-      ).toBe('Registry event on HKLM\\Software\\Test');
+      expect(buildRegistryNarrative({ registry: { key: ['HKLM\\Software\\Test'] } })).toBe(
+        'Registry event on HKLM\\Software\\Test'
+      );
     });
   });
 });

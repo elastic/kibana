@@ -10,9 +10,7 @@ import { authenticationStrategy, buildAuthenticationNarrative } from './authenti
 describe('authenticationStrategy', () => {
   describe('match', () => {
     it('returns true for authentication category', () => {
-      expect(authenticationStrategy.match({ event: { category: ['authentication'] } })).toBe(
-        true
-      );
+      expect(authenticationStrategy.match({ event: { category: ['authentication'] } })).toBe(true);
     });
 
     it('returns true for endpoint security dataset', () => {
@@ -72,9 +70,9 @@ describe('authenticationStrategy', () => {
     });
 
     it('handles minimal auth data', () => {
-      expect(
-        buildAuthenticationNarrative({ event: { category: ['authentication'] } })
-      ).toBe('Authentication event');
+      expect(buildAuthenticationNarrative({ event: { category: ['authentication'] } })).toBe(
+        'Authentication event'
+      );
     });
   });
 });

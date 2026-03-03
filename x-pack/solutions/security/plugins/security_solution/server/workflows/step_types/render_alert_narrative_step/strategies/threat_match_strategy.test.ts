@@ -24,9 +24,9 @@ describe('threatMatchStrategy', () => {
     });
 
     it('returns false for other rule types', () => {
-      expect(
-        threatMatchStrategy.match({ kibana: { alert: { rule: { type: ['query'] } } } })
-      ).toBe(false);
+      expect(threatMatchStrategy.match({ kibana: { alert: { rule: { type: ['query'] } } } })).toBe(
+        false
+      );
     });
   });
 
