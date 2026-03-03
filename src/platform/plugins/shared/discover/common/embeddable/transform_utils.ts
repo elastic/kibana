@@ -71,7 +71,7 @@ export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
   storedSearch: StoredSearchEmbeddableByReferenceState,
   references: SavedObjectReference[] = []
 ): DiscoverSessionEmbeddableByReferenceState {
-  const { title, description, timeRange } = storedSearch;
+  const { title, description, time_range: timeRange } = storedSearch;
   const savedObjectRef = references.find(
     (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
   );
@@ -79,7 +79,7 @@ export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
   return {
     title,
     description,
-    timeRange,
+    time_range: timeRange,
     discover_session_id: savedObjectRef.id,
     selected_tab_id: undefined, // Waiting on https://github.com/elastic/kibana/pull/252311
   };
@@ -94,15 +94,18 @@ export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
     type: SavedSearchType,
     id: apiState.discover_session_id,
   };
-  const { discover_session_id, selected_tab_id, timeRange, ...state } = apiState;
-  return { state: { ...state, timeRange }, references: [discoverSessionReference, ...references] };
+  const { discover_session_id, selected_tab_id, time_range: timeRange, ...state } = apiState;
+  return {
+    state: { ...state, time_range: timeRange },
+    references: [discoverSessionReference, ...references],
+  };
 }
 
 export function byValueSavedSearchToDiscoverSessionEmbeddableState(
   storedSearch: StoredSearchEmbeddableByValueState,
   references: SavedObjectReference[] = []
 ): DiscoverSessionEmbeddableByValueState {
-  const { title, description, timeRange } = storedSearch;
+  const { title, description, time_range: timeRange } = storedSearch;
   const [tab] = storedSearch.attributes.tabs ?? extractTabs(storedSearch.attributes).tabs;
   const {
     columns,
@@ -151,7 +154,7 @@ export function byValueSavedSearchToDiscoverSessionEmbeddableState(
   return {
     title,
     description,
-    timeRange,
+    time_range: timeRange,
     tabs: [newTab],
   };
 }

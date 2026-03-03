@@ -10,10 +10,11 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
-import { aggregateQuerySchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { aggregateQuerySchema, querySchema } from '@kbn/es-query-server';
 import {
   type SerializedTitles,
   serializedTitlesSchema,
+  serializedTimeRangeSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
@@ -317,31 +318,36 @@ const esqlTabSchema = schema.allOf([
 
 const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
 
-const discoverSessionBaseEmbeddableSchema = serializedTitlesSchema.extends({
-  timeRange: schema.maybe(timeRangeSchema), // Waiting on https://github.com/elastic/kibana/pull/253789
-});
-
-const discoverSessionByValueEmbeddableSchema = discoverSessionBaseEmbeddableSchema.extends({
-  tabs: schema.arrayOf(tabSchema, {
-    minSize: 1,
-    maxSize: 1,
-    meta: {
-      description: 'Array of tabs for the Discover session embeddable. Currently supports one tab.',
-    },
-  }),
-});
-
-const discoverSessionByReferenceEmbeddableSchema = discoverSessionBaseEmbeddableSchema.extends({
-  discover_session_id: schema.string(),
-  selected_tab_id: schema.maybe(
-    schema.string({
+const discoverSessionByValueEmbeddableSchema = schema.allOf([
+  serializedTitlesSchema,
+  serializedTimeRangeSchema,
+  schema.object({
+    tabs: schema.arrayOf(tabSchema, {
+      minSize: 1,
+      maxSize: 1,
       meta: {
         description:
-          'The selected tab in the Discover session. If omitted, defaults to the first tab.',
+          'Array of tabs for the Discover session embeddable. Currently supports one tab.',
       },
-    })
-  ),
-});
+    }),
+  }),
+]);
+
+const discoverSessionByReferenceEmbeddableSchema = schema.allOf([
+  serializedTitlesSchema,
+  serializedTimeRangeSchema,
+  schema.object({
+    discover_session_id: schema.string(),
+    selected_tab_id: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The selected tab in the Discover session. If omitted, defaults to the first tab.',
+        },
+      })
+    ),
+  }),
+]);
 
 export const discoverSessionEmbeddableSchema = schema.oneOf([
   discoverSessionByValueEmbeddableSchema,

@@ -133,7 +133,7 @@ describe('search embeddable transform utils', () => {
       const storedSearch: StoredSearchEmbeddableByReferenceState = {
         title: 'My Saved Search',
         description: 'My description',
-        timeRange: { from: 'now-15m', to: 'now' },
+        time_range: { from: 'now-15m', to: 'now' },
       };
       const references: SavedObjectReference[] = [
         { name: 'savedObjectRef', type: SavedSearchType, id: 'session-123' },
@@ -145,7 +145,7 @@ describe('search embeddable transform utils', () => {
       expect(result).toEqual({
         title: 'My Saved Search',
         description: 'My description',
-        timeRange: { from: 'now-15m', to: 'now' },
+        time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-123',
         selected_tab_id: undefined,
       });
@@ -157,7 +157,7 @@ describe('search embeddable transform utils', () => {
       const apiState: DiscoverSessionEmbeddableByReferenceState = {
         title: 'My Search',
         description: 'My description',
-        timeRange: { from: 'now-15m', to: 'now' },
+        time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-456',
         selected_tab_id: 'tab-1',
       };
@@ -172,7 +172,7 @@ describe('search embeddable transform utils', () => {
       expect(result.state).toEqual({
         title: 'My Search',
         description: 'My description',
-        timeRange: { from: 'now-15m', to: 'now' },
+        time_range: { from: 'now-15m', to: 'now' },
       });
     });
   });
@@ -182,7 +182,7 @@ describe('search embeddable transform utils', () => {
       const apiState: DiscoverSessionEmbeddableByValueState = {
         title: 'Panel Title',
         description: 'Panel description',
-        timeRange: { from: 'now-1h', to: 'now' },
+        time_range: { from: 'now-1h', to: 'now' },
         tabs: [
           {
             columns: [{ name: 'message' }, { name: '@timestamp', width: 200 }],
@@ -229,7 +229,7 @@ describe('search embeddable transform utils', () => {
     it('converts index-pattern tab with runtime fields to stored state', () => {
       const apiState: DiscoverSessionEmbeddableByValueState = {
         title: 'Adhoc',
-        timeRange: { from: 'now-1h', to: 'now' },
+        time_range: { from: 'now-1h', to: 'now' },
         tabs: [
           {
             columns: [{ name: 'foo' }],

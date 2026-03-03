@@ -39,7 +39,7 @@ describe('searchEmbeddableTransforms', () => {
       const state: StoredSearchEmbeddableState = {
         title: 'Test Title',
         description: 'Test Description',
-        timeRange: { from: 'now-15m', to: 'now' },
+        time_range: { from: 'now-15m', to: 'now' },
       };
       const references = [
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-123' },
@@ -51,7 +51,7 @@ describe('searchEmbeddableTransforms', () => {
       expect(result).toEqual({
         title: 'Test Title',
         description: 'Test Description',
-        timeRange: { from: 'now-15m', to: 'now' },
+        time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-123',
         selected_tab_id: undefined,
       });
@@ -155,7 +155,7 @@ describe('searchEmbeddableTransforms', () => {
         const apiState: DiscoverSessionEmbeddableByReferenceState = {
           title: 'Test Search',
           description: 'Test Description',
-          timeRange: { from: 'now-15m', to: 'now' },
+          time_range: { from: 'now-15m', to: 'now' },
           discover_session_id: 'test-saved-object-id',
           selected_tab_id: undefined,
         };
@@ -166,7 +166,7 @@ describe('searchEmbeddableTransforms', () => {
         expect(result.state).toEqual({
           title: 'Test Search',
           description: 'Test Description',
-          timeRange: { from: 'now-15m', to: 'now' },
+          time_range: { from: 'now-15m', to: 'now' },
         });
         expect(result.references).toEqual([
           {
@@ -182,7 +182,7 @@ describe('searchEmbeddableTransforms', () => {
         const apiState: DiscoverSessionEmbeddableByReferenceState = {
           title: 'My Search',
           description: 'My description',
-          timeRange: { from: 'now-1h', to: 'now' },
+          time_range: { from: 'now-1h', to: 'now' },
           discover_session_id: 'session-456',
           selected_tab_id: 'tab-1',
         };
@@ -193,7 +193,7 @@ describe('searchEmbeddableTransforms', () => {
         expect(result.state).toEqual({
           title: 'My Search',
           description: 'My description',
-          timeRange: { from: 'now-1h', to: 'now' },
+          time_range: { from: 'now-1h', to: 'now' },
         });
         expect(result.references).toEqual([
           {
