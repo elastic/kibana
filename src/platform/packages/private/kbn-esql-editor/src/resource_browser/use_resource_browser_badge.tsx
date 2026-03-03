@@ -12,19 +12,22 @@ import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { getSupportedCommand, SUPPORTED_COMMANDS } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { getSupportedCommand } from './utils';
+import { IndicesBrowserOpenMode } from './types';
+import { SUPPORTED_COMMANDS } from './constants';
 
 interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   openIndicesBrowser: (options?: { openedFrom?: IndicesBrowserOpenMode }) => void;
+  suppressSuggestionsRef: MutableRefObject<boolean>;
 }
 
 export const useSourcesBadge = ({
   editorRef,
   editorModel,
   openIndicesBrowser,
+  suppressSuggestionsRef,
 }: UseSourcesBadgeParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
@@ -34,22 +37,33 @@ export const useSourcesBadge = ({
   const sourcesBadgeStyle = css`
     .${sourcesBadgeClassName} {
       cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
-      padding-inline: ${euiTheme.size.xxs};
+      display: inline-flex;
+      align-items: center;
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
       max-inline-size: 100%;
       font-size: ${euiTheme.font.scale.s};
-      line-height: ${`calc(${euiTheme.size.m} * 1.5)`};
-      font-weight: ${euiTheme.font.weight.medium};
+      font-weight: ${euiTheme.font.weight.medium} !important;
+      line-height: 1;
       white-space: nowrap;
       text-decoration: none;
-      border-radius: ${euiTheme.border.radius.small};
+      border-radius: ${euiTheme.size.xl};
       text-align: start;
-      border-width: ${euiTheme.border.width.thin};
-      border-style: solid;
-      color: ${euiTheme.colors.plainLight} !important;
-      background-color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.primary} !important;
+      background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
+      box-sizing: border-box;
+      transition: background-color ${euiTheme.animation.fast} ease-in-out,
+        box-shadow ${euiTheme.animation.fast} ease-in-out;
+    }
+
+    .${sourcesBadgeClassName}:hover {
+      background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
+    }
+
+    /* Monaco decorations aren't keyboard-focusable DOM nodes, so we use the editor's
+   * focus state to provide a "focus" treatment for the badge.
+   */
+    .monaco-editor:focus-within .${sourcesBadgeClassName} {
+      background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
     }
   `;
 
@@ -67,6 +81,19 @@ export const useSourcesBadge = ({
     const firstSupportedCommand = getSupportedCommand(queryText);
 
     if (!firstSupportedCommand || !firstSupportedCommand.range) return;
+
+    // Only show the badge when there is whitespace after the command keyword.
+    // When the text is just "FROM" or "TS" with nothing after it, the badge would
+    // cover the entire clickable area and prevent the user from clicking into the
+    // editor to continue typing.
+    const commandEndOffset = model.getOffsetAt(
+      new monaco.Position(
+        firstSupportedCommand.range.lineNumber,
+        firstSupportedCommand.range.endColumn
+      )
+    );
+    if (!/\s/.test(queryText[commandEndOffset] ?? '')) return;
+
     collections.push({
       range: new monaco.Range(
         firstSupportedCommand.range.lineNumber,
@@ -110,16 +137,33 @@ export const useSourcesBadge = ({
         currentWord.startColumn >= firstSupportedCommand.range.startColumn &&
         currentWord.endColumn <= firstSupportedCommand.range.endColumn
       ) {
+        // Don't open the browser when there's no whitespace after the command keyword
+        // (e.g. "FROM" with no trailing space) -- the user is trying to click into the
+        // editor to continue typing, not to open the data source browser.
+        const commandEndOffset = model.getOffsetAt(
+          new monaco.Position(
+            firstSupportedCommand.range.lineNumber,
+            firstSupportedCommand.range.endColumn
+          )
+        );
+        if (!/\s/.test(queryText[commandEndOffset] ?? '')) return;
+
         const positionAfterCommand = new monaco.Position(
           firstSupportedCommand.range.lineNumber,
           firstSupportedCommand.range.endColumn + 1
         );
         editor.setPosition(positionAfterCommand);
-        editor.revealPosition(positionAfterCommand);
+
+        suppressSuggestionsRef.current = true;
+
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
+
+        // Remove focus from the editor immediately so there is no visible
+        // focus state while the popover mounts and takes over.
+        (editor.getDomNode()?.ownerDocument.activeElement as HTMLElement)?.blur();
       }
     },
-    [editorModel, editorRef, openIndicesBrowser]
+    [editorModel, editorRef, openIndicesBrowser, suppressSuggestionsRef]
   );
 
   return {

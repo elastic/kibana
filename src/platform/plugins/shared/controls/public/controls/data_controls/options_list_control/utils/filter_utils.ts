@@ -21,19 +21,19 @@ export const buildFilter = (
   controlId: string,
   filterState: Pick<
     OptionsListDSLControlState,
-    'fieldName' | 'existsSelected' | 'exclude' | 'selectedOptions'
+    'field_name' | 'exists_selected' | 'exclude' | 'selected_options'
   > & { sectionId?: string }
 ) => {
   let newFilter: Filter | undefined;
-  const field = dataView.getFieldByName(filterState.fieldName);
+  const field = dataView.getFieldByName(filterState.field_name);
   if (field) {
-    if (filterState.existsSelected) {
+    if (filterState.exists_selected) {
       newFilter = buildExistsFilter(field, dataView);
-    } else if (filterState.selectedOptions && filterState.selectedOptions.length > 0) {
+    } else if (filterState.selected_options && filterState.selected_options.length > 0) {
       newFilter =
-        filterState.selectedOptions.length === 1
-          ? buildPhraseFilter(field, filterState.selectedOptions[0], dataView)
-          : buildPhrasesFilter(field, filterState.selectedOptions, dataView);
+        filterState.selected_options.length === 1
+          ? buildPhraseFilter(field, filterState.selected_options[0], dataView)
+          : buildPhrasesFilter(field, filterState.selected_options, dataView);
     }
   }
   if (newFilter) {

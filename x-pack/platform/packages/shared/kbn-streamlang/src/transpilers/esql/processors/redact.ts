@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import type { RedactProcessor } from '../../../../types/processors';
 import { compileGrokPatternsToRegex } from '../../../../types/utils/grok_to_regex';
 import { buildIgnoreMissingFilter } from './common';
@@ -106,7 +106,7 @@ export function convertRedactProcessorToESQL(processor: RedactProcessor): ESQLAs
   const commands: ESQLAstCommand[] = [];
 
   // Add missing field filter if needed (ignore_missing = false)
-  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }

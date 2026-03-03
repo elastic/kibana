@@ -667,6 +667,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 1,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
         {
@@ -674,6 +675,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 1,
           successfulDataStreamCount: 1,
+          createdBy: 'user-2',
           status: 'completed' as const,
         },
       ];
@@ -688,6 +690,7 @@ describe('integration schemas', () => {
           title: 'Integration 1',
           totalDataStreamCount: 0,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -705,6 +708,7 @@ describe('integration schemas', () => {
           title: 'Integration 1',
           totalDataStreamCount: 0,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -721,6 +725,7 @@ describe('integration schemas', () => {
           integrationId: 'integration-1',
           totalDataStreamCount: 0,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -737,6 +742,7 @@ describe('integration schemas', () => {
           integrationId: 'integration-1',
           title: 'Test Integration',
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -753,6 +759,7 @@ describe('integration schemas', () => {
           integrationId: 'integration-1',
           title: 'Test Integration',
           totalDataStreamCount: 5,
+          createdBy: 'user-1',
           status: 'pending' as const,
         },
       ];
@@ -770,6 +777,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 5,
           successfulDataStreamCount: 3,
+          createdBy: 'user-1',
         },
       ];
 
@@ -796,6 +804,7 @@ describe('integration schemas', () => {
             title: 'Test Integration',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'user-1',
             status,
           },
         ];
@@ -812,6 +821,7 @@ describe('integration schemas', () => {
           title: 'Test Integration',
           totalDataStreamCount: 1,
           successfulDataStreamCount: 0,
+          createdBy: 'user-1',
           status: 'pending' as const,
           unknown: 'property',
         },
@@ -1150,6 +1160,7 @@ describe('integration schemas', () => {
             title: 'Apache Logs',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'admin',
             status: 'pending' as const,
           },
           {
@@ -1157,6 +1168,7 @@ describe('integration schemas', () => {
             title: 'MySQL Logs',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'admin',
             status: 'pending' as const,
           },
         ];
@@ -1176,6 +1188,7 @@ describe('integration schemas', () => {
             title: 'Apache Logs',
             totalDataStreamCount: 1,
             successfulDataStreamCount: 0,
+            createdBy: 'admin',
             status: 'pending' as const,
           },
         ];

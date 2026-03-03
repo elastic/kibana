@@ -8,7 +8,11 @@
  {{> disclaimer}}
 
 import type { ZodTypeDef } from '@kbn/zod';
+{{#if config.experimentallyImportZodV4}}
+import { z } from '@kbn/zod/v4';
+{{else}}
 import { z } from '@kbn/zod';
+{{/if}}
 import { requiredOptional, isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 {{#each imports}}

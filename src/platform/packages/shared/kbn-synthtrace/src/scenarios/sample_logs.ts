@@ -23,10 +23,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm, streamType, systems } = (runOptions.scenarioOpts ?? {}) as {
+  const { rpm, streamType, systems, isLogsEnabled, skipFork } = (runOptions.scenarioOpts ?? {}) as {
     rpm?: number;
     systems?: string | string[];
     streamType?: 'classic' | 'wired';
+    skipFork?: boolean;
+    isLogsEnabled?: boolean;
   };
 
   const generators = await client.getLogGenerators({
@@ -41,41 +43,63 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     bootstrap: async ({ streamsClient }) => {
       await streamsClient.enable();
 
-      try {
+      if (skipFork) {
+        return;
+      }
+
+      const setupChildStreams = async (rootStream: string) => {
+        const isEcsStream = rootStream === 'logs.ecs';
+        // OTel streams use 'attributes.' prefix, ECS streams don't
+        const prefix = isEcsStream ? '' : 'attributes.';
+        const customPrefix = 'attributes.';
+
         // Setting linux child stream
         await streamsClient.forkStream(
-          'logs',
+          rootStream,
           {
-            stream: { name: 'logs.linux' },
-            where: { field: 'attributes.filepath', eq: 'Linux.log' },
+            stream: { name: `${rootStream}.linux` },
+            where: { field: `${prefix}filepath`, eq: 'Linux.log' },
           },
           { ignore: [409] }
         );
 
         // Setting windows child stream
         await streamsClient.forkStream(
-          'logs',
+          rootStream,
           {
-            stream: { name: 'logs.windows' },
-            where: { field: 'attributes.filepath', eq: 'Windows.log' },
+            stream: { name: `${rootStream}.windows` },
+            where: { field: `${prefix}filepath`, eq: 'Windows.log' },
           },
           { ignore: [409] }
         );
 
         // Setting android child stream
         await streamsClient.forkStream(
-          'logs',
+          rootStream,
           {
-            stream: { name: 'logs.android' },
-            where: { field: 'attributes.filepath', eq: 'Android.log' },
+            stream: { name: `${rootStream}.android` },
+            where: { field: `${prefix}filepath`, eq: 'Android.log' },
           },
           {
             ignore: [409],
           }
         );
 
-        await streamsClient.enableFailureStore('logs.android');
-        await streamsClient.putIngestStream('logs.android', {
+        await streamsClient.enableFailureStore(`${rootStream}.android`);
+
+        // For ECS streams, don't define custom wired fields - rely on dynamic mapping
+        // For OTel streams, define the fields with attributes namespace
+        const wiredFields = isEcsStream
+          ? { fields: {}, routing: [] }
+          : {
+              fields: {
+                [`${prefix}process.name`]: { type: 'keyword', ignore_above: 18 },
+                [`${customPrefix}secure`]: { type: 'boolean' },
+              },
+              routing: [],
+            };
+
+        await streamsClient.putIngestStream(`${rootStream}.android`, {
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -84,7 +108,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 // Set up some failed documents
                 {
                   condition: {
-                    field: 'attributes.user.name',
+                    field: `${prefix}user.name`,
                     eq: 'user1',
                     steps: [
                       {
@@ -92,7 +116,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                         where: {
                           always: {},
                         },
-                        from: 'attributes.user.name',
+                        from: `${prefix}user.name`,
                         formats: ['UNIX_MS'],
                         ignore_failure: false,
                         customIdentifier: 'icd139630-bfc9-11f0-be91-458063de4bb2',
@@ -107,7 +131,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                   where: {
                     always: {},
                   },
-                  to: 'attributes.secure',
+                  to: `${customPrefix}secure`,
                   value: 'false',
                   override: true,
                   ignore_failure: false,
@@ -117,10 +141,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 {
                   action: 'set',
                   where: {
-                    field: 'attributes.user.name',
+                    field: `${prefix}user.name`,
                     eq: 'user3',
                   },
-                  to: 'attributes.secure',
+                  to: `${customPrefix}secure`,
                   value: 'true',
                   override: true,
                   ignore_failure: false,
@@ -128,16 +152,24 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 },
               ],
             },
-            wired: {
-              fields: {
-                'attributes.process.name': { type: 'keyword', ignore_above: 18 },
-                'attributes.secure': { type: 'boolean' },
-              },
-              routing: [],
-            },
+            wired: wiredFields,
             failure_store: { inherit: {} },
           } as WiredIngestUpsertRequest,
         });
+      };
+
+      try {
+        // Set up legacy logs stream if enabled
+        if (isLogsEnabled) {
+          logger.info('Setting up legacy logs and child streams');
+          await setupChildStreams('logs');
+        }
+
+        logger.info('Setting up logs.otel and child streams');
+        await setupChildStreams('logs.otel');
+
+        logger.info('Setting up logs.ecs and child streams');
+        await setupChildStreams('logs.ecs');
       } catch (error) {
         logger.error(new Error(`Error occurred while forking streams`, { cause: error }));
       }

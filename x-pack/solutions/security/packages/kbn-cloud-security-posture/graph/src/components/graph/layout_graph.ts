@@ -43,7 +43,15 @@ export const layoutGraph = (
     })
     .setDefaultEdgeLabel(() => ({}));
 
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+  // Build set of stacked node IDs (nodes with parentId) to filter edges
+  const stackedNodeIds = new Set(nodes.filter((node) => node.parentId).map((node) => node.id));
+
+  // Only add edges where both source and target are NOT stacked nodes
+  // Stacked nodes are positioned inside their parent group, not by Dagre
+  edges
+    .filter((edge) => !stackedNodeIds.has(edge.source) && !stackedNodeIds.has(edge.target))
+    .forEach((edge) => g.setEdge(edge.source, edge.target));
+
   const nodesOfParent: { [key: string]: Array<Node<NodeViewModel>> } = {};
 
   nodes.forEach((node) => {
@@ -93,10 +101,14 @@ export const layoutGraph = (
 
   Dagre.layout(g);
 
-  alignNodesCenterInPlace(g, (nodeId: string) => {
-    const node = nodesById[nodeId].data;
-    return node && isStackedLabel(node);
-  });
+  alignNodesCenterInPlace(
+    g,
+    (nodeId: string) => {
+      const node = nodesById[nodeId].data;
+      return node && isStackedLabel(node);
+    },
+    nodesById
+  );
 
   const layoutedNodes = nodes.map((node) => {
     // For stacked nodes, we want to keep the original position relative to the parent
@@ -191,6 +203,7 @@ const layoutStackedLabels = (
  * Shared context for graph alignment operations.
  * - Y/Height/setY: accessors for node vertical position and height in Dagre
  * - prevNodeY: tracks original Y positions before adjustments for cascading calculations
+ * - nodesById: map of node ID to node data for accessing node properties
  */
 interface GraphHelpers {
   g: Dagre.graphlib.Graph;
@@ -199,6 +212,7 @@ interface GraphHelpers {
   Height: (id: string) => number;
   setY: (id: string, y: number) => number;
   prevNodeY: Record<string, number>;
+  nodesById: Record<string, Node<NodeViewModel>>;
 }
 
 /** Returns child nodes (successors) that pass the filter. */
@@ -248,9 +262,20 @@ const findSiblingsWithSharedChildren = (
 };
 
 /**
+ * Calculates the center Y position from a set of node IDs.
+ */
+const calculateCenterY = (nodeIds: string[], Y: (id: string) => number): number => {
+  if (nodeIds.length === 0) return 0;
+
+  const first = nodeIds.reduce((min, nodeId) => (Y(nodeId) < Y(min) ? nodeId : min), nodeIds[0]);
+  const last = nodeIds.reduce((max, nodeId) => (Y(nodeId) > Y(max) ? nodeId : max), nodeIds[0]);
+  return Y(first) + (Y(last) - Y(first)) / 2;
+};
+
+/**
  * Positions a node with multiple children at the vertical center of its children.
  * If siblings share the same children (fan-in pattern), distributes them evenly
- * around that center to prevent overlap while maintaining visual balance.
+ * around a common center (based on union of all siblings' children) to prevent overlap.
  */
 const handleMultipleChildren = (
   helpers: GraphHelpers,
@@ -259,16 +284,6 @@ const handleMultipleChildren = (
 ): void => {
   const { g, filter, Y, Height, setY, prevNodeY } = helpers;
   const currY = Y(currNode);
-
-  const first = children.reduce(
-    (min, childNode) => (Y(childNode) < Y(min) ? childNode : min),
-    children[0]
-  );
-  const last = children.reduce(
-    (max, childNode) => (Y(childNode) > Y(max) ? childNode : max),
-    children[0]
-  );
-  const centerY = Y(first) + (Y(last) - Y(first)) / 2;
 
   const parents = getFilteredPredecessors(g, currNode, filter);
   const siblingsWithSharedChildren = findSiblingsWithSharedChildren(
@@ -279,17 +294,25 @@ const handleMultipleChildren = (
   );
 
   if (siblingsWithSharedChildren.length > 1) {
-    siblingsWithSharedChildren.sort((a, b) => Y(a) - Y(b));
+    // Calculate common centerY from union of ALL children of ALL siblings
+    const allChildrenSet = new Set<string>();
+    for (const sibling of siblingsWithSharedChildren) {
+      const siblingChildren = getFilteredSuccessors(g, sibling, filter);
+      siblingChildren.forEach((child) => allChildrenSet.add(child));
+    }
+    const allChildren = Array.from(allChildrenSet);
+    const commonCenterY = calculateCenterY(allChildren, Y);
 
     const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
     const siblingCount = siblingsWithSharedChildren.length;
     const spacing = Height(currNode) + GRID_SIZE_OFFSET;
     const totalHeight = (siblingCount - 1) * spacing;
-    const newY = centerY - totalHeight / 2 + siblingIndex * spacing;
+    const newY = commonCenterY - totalHeight / 2 + siblingIndex * spacing;
 
     prevNodeY[currNode] = currY;
     setY(currNode, snapped(newY));
   } else {
+    const centerY = calculateCenterY(children, Y);
     prevNodeY[currNode] = currY;
     setY(currNode, snapped(centerY));
   }
@@ -401,7 +424,11 @@ const handleSingleParent = (helpers: GraphHelpers, currNode: string, parent: str
  * Runs in O(V + E) on Dagre's directed graphs.
  * Mutates the Dagre graph in place.
  */
-const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean) => {
+const alignNodesCenterInPlace = (
+  g: Dagre.graphlib.Graph,
+  filter: (node: string) => boolean,
+  nodesById: Record<string, Node<NodeViewModel>>
+) => {
   const helpers: GraphHelpers = {
     g,
     filter,
@@ -409,6 +436,7 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
     Height: (id: string) => (g.node(id) as Dagre.Node).height,
     setY: (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y),
     prevNodeY: {},
+    nodesById,
   };
 
   const topo = topsort(g, filter);

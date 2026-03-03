@@ -44,6 +44,9 @@ export const createAttachmentsService = ({
     getTypeDefinition: (type) => {
       return attachmentsStart.getTypeDefinition(type);
     },
+    getRegisteredTypeIds: () => {
+      return attachmentsStart.getRegisteredTypeIds();
+    },
     convertAttachmentTool: toolConverterFn,
   };
 };

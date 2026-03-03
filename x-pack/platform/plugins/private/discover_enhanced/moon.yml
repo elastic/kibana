@@ -19,7 +19,6 @@ project:
     sourceRoot: x-pack/platform/plugins/private/discover_enhanced
 dependsOn:
   - '@kbn/core'
-  - '@kbn/data-plugin'
   - '@kbn/discover-plugin'
   - '@kbn/share-plugin'
   - '@kbn/kibana-utils-plugin'

@@ -52,7 +52,13 @@ export const waffleStateSharedSchema = {
         visible: legendVisibleSchema,
         size: legendSizeSchema,
       },
-      { meta: { id: 'waffleLegend', description: 'Legend configuration for waffle chart' } }
+      {
+        meta: {
+          id: 'waffleLegend',
+          title: 'Legend',
+          description: 'Legend configuration for waffle chart',
+        },
+      }
     )
   ),
   value_display: valueDisplaySchema,
@@ -110,7 +116,11 @@ export const waffleStateSchemaNoESQL = schema.object(
     ),
   },
   {
-    meta: { id: 'waffleNoESQL', description: 'Waffle chart configuration for standard queries' },
+    meta: {
+      id: 'waffleNoESQL',
+      title: 'Waffle Chart (DSL)',
+      description: 'Waffle chart configuration for standard queries',
+    },
     validate: validateMultipleMetricsCriteria,
   }
 );
@@ -142,7 +152,11 @@ const waffleStateSchemaESQL = schema.object(
     ),
   },
   {
-    meta: { id: 'waffleESQL', description: 'Waffle chart configuration for ES|QL queries' },
+    meta: {
+      id: 'waffleESQL',
+      title: 'Waffle Chart (ES|QL)',
+      description: 'Waffle chart configuration for ES|QL queries',
+    },
     validate: validateMultipleMetricsCriteria,
   }
 );
@@ -152,7 +166,8 @@ const waffleStateSchemaESQL = schema.object(
  */
 export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
   meta: {
-    id: 'waffleChartSchema',
+    id: 'waffleChart',
+    title: 'Waffle Chart',
     description: 'Waffle chart configuration: DSL or ES|QL query based',
   },
 });

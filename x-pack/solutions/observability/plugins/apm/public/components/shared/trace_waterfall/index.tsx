@@ -45,6 +45,11 @@ export interface Props {
   isFiltered?: boolean;
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
+  showCriticalPath?: boolean;
+  defaultShowCriticalPath?: boolean;
+  onShowCriticalPathChange?: (value: boolean) => void;
+  children?: React.ReactNode;
+  entryTransactionId?: string;
 }
 
 export function TraceWaterfall({
@@ -62,6 +67,11 @@ export function TraceWaterfall({
   isFiltered,
   agentMarks,
   showCriticalPathControl = false,
+  showCriticalPath,
+  defaultShowCriticalPath,
+  onShowCriticalPathChange,
+  children,
+  entryTransactionId,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -79,10 +89,15 @@ export function TraceWaterfall({
       errors={errors}
       agentMarks={agentMarks}
       showCriticalPathControl={showCriticalPathControl}
+      showCriticalPath={showCriticalPath}
+      defaultShowCriticalPath={defaultShowCriticalPath}
+      onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
       </TraceWarning>
+      {children}
     </TraceWaterfallContextProvider>
   );
 }
@@ -111,45 +126,73 @@ function TraceWaterfallComponent() {
     return [...agentMarks, ...errorMarks];
   }, [agentMarks, errorMarks]);
 
+  const stickyTop = isEmbeddable
+    ? '0px'
+    : 'var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))';
+
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {showCriticalPathControl && (
         <EuiFlexItem>
           <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
         </EuiFlexItem>
       )}
-      {showLegend && serviceName && (
-        <EuiFlexItem>
-          <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem>
         <div style={{ position: 'relative' }}>
-          <div
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
             css={css`
-              display: flex;
               position: sticky;
-              top: ${isEmbeddable ? '0px' : 'var(--euiFixedHeadersOffset, 0)'};
+              top: ${stickyTop};
               z-index: ${euiTheme.levels.menu};
               background-color: ${euiTheme.colors.emptyShade};
               border-bottom: ${euiTheme.border.thin};
             `}
           >
-            {showAccordion && (
-              <WaterfallAccordionButton isOpen={isAccordionOpen} onClick={toggleAllAccordions} />
+            {showLegend && serviceName && (
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  padding-top: ${euiTheme.size.base};
+                `}
+              >
+                <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+              </EuiFlexItem>
             )}
-            <TimelineAxisContainer
-              xMax={duration}
-              margins={{
-                top: 40,
-                left,
-                right,
-                bottom: 0,
-              }}
-              numberOfTicks={3}
-              marks={marks}
-            />
-          </div>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                responsive={false}
+                css={css`
+                  position: relative;
+                `}
+              >
+                {showAccordion && (
+                  <EuiFlexItem grow={false}>
+                    <WaterfallAccordionButton
+                      isOpen={isAccordionOpen}
+                      onClick={toggleAllAccordions}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <TimelineAxisContainer
+                    xMax={duration}
+                    margins={{
+                      top: 40,
+                      left,
+                      right,
+                      bottom: 0,
+                    }}
+                    numberOfTicks={3}
+                    marks={marks}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <VerticalLinesContainer
             xMax={duration}
             margins={{

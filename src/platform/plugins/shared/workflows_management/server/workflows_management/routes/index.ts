@@ -30,6 +30,7 @@ import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
 import { registerPostTestStepRoute } from './post_test_step';
 import { registerPostTestWorkflowRoute } from './post_test_workflow';
+import { registerPostValidateWorkflowRoute } from './post_validate_workflow';
 import { registerPutUpdateWorkflowRoute } from './put_update_workflow';
 import type { RouteDependencies } from './types';
 import type { WorkflowsRouter } from '../../types';
@@ -64,4 +65,5 @@ export function defineRoutes(
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerGetWorkflowJsonSchemaRoute(deps);
+  registerPostValidateWorkflowRoute(deps);
 }

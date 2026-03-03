@@ -41,6 +41,9 @@ describe('caseTemplateSavedObjectType', () => {
           "isDefault": Object {
             "type": "boolean",
           },
+          "isLatest": Object {
+            "type": "boolean",
+          },
           "lastUsedAt": Object {
             "type": "date",
           },

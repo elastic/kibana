@@ -45,6 +45,7 @@ async function sha256(str: string) {
  * @param options.allowNoIndex - Whether to allow creating a DataView for non-existent indices
  * @param options.skipFetchFields - Whether to skip fetching fields for performance reasons
  * @param options.createNewInstanceEvenIfCachedOneAvailable - Forces creation of a new instance, clearing any cached DataView
+ * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
  *
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
@@ -64,6 +65,7 @@ export async function getESQLAdHocDataview({
     allowNoIndex?: boolean;
     createNewInstanceEvenIfCachedOneAvailable?: boolean;
     skipFetchFields?: boolean;
+    idPrefix?: string;
   };
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
@@ -76,7 +78,8 @@ export async function getESQLAdHocDataview({
   })) as { timeField?: string } | undefined;
   const timeField = response?.timeField;
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const dataViewId = await sha256(`esql-${indexPattern}`);
+  const prefix = options?.idPrefix ?? 'esql';
+  const dataViewId = await sha256(`${prefix}-${indexPattern}`);
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field

@@ -17,14 +17,14 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
-import { hasStartEndParams } from '@kbn/esql-utils';
+import { hasStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
-  alertLimit: number | undefined;
+  alertLimit: number;
   params: OnlyEsqlQueryRuleParams;
   spacePrefix: string;
   services: {
@@ -108,7 +108,7 @@ export async function fetchEsqlQuery({
 
 export const getEsqlQuery = (
   params: OnlyEsqlQueryRuleParams,
-  alertLimit: number | undefined,
+  alertLimit: number,
   dateStart: string,
   dateEnd: string
 ) => {
@@ -125,7 +125,7 @@ export const getEsqlQuery = (
   ];
 
   const query = {
-    query: alertLimit ? `${params.esqlQuery.esql} | limit ${alertLimit}` : params.esqlQuery.esql,
+    query: appendLimitToQuery(params.esqlQuery.esql, alertLimit),
     filter: {
       bool: {
         filter: rangeFilter,

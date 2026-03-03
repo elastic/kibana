@@ -1,5 +1,5 @@
 ---
-navigation_title: Validate
+navigation_title: Validate type changes
 ---
 
 # Validate changes in Saved Object types [saved-objects-validate]

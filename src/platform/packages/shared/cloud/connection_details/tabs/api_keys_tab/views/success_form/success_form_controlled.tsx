@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiLiveAnnouncer, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ApiKey } from './types';
@@ -28,10 +28,54 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
   onFormatChange,
   onCopyClick,
 }) => {
+  const [announcement, setAnnouncement] = React.useState('');
+  const formatLabels = React.useMemo(
+    () => ({
+      encoded: i18n.translate('cloud.connectionDetails.apiKeyFormat.encoded.title', {
+        defaultMessage: 'Encoded',
+      }),
+      beats: i18n.translate('cloud.connectionDetails.apiKeyFormat.beats.title', {
+        defaultMessage: 'Beats',
+      }),
+      logstash: i18n.translate('cloud.connectionDetails.apiKeyFormat.logstash.title', {
+        defaultMessage: 'Logstash',
+      }),
+    }),
+    []
+  );
   const keyValue = format === 'encoded' ? apiKey.encoded : `${apiKey.id}:${apiKey.key}`;
+  const screenReaderHint = i18n.translate(
+    'cloud.connectionDetails.apiKeys.successForm.screenReaderHint',
+    {
+      defaultMessage: 'Press to copy the API key to the clipboard.',
+    }
+  );
+
+  const handleCopySuccess = React.useCallback(() => {
+    const message = i18n.translate('cloud.connectionDetails.apiKeys.copySuccessAnnouncement', {
+      defaultMessage: 'API key copied to clipboard in {format} format.',
+      values: {
+        format: formatLabels[format],
+      },
+    });
+    setAnnouncement(message);
+  }, [formatLabels, format]);
+
+  React.useEffect(() => {
+    setAnnouncement(
+      i18n.translate('cloud.connectionDetails.apiKeys.successForm.mountAnnouncement', {
+        defaultMessage:
+          'API key created successfully. Current format is {format}. You can change the format in the dropdown and copy the API key using the copy button.',
+        values: {
+          format: formatLabels[format],
+        },
+      })
+    );
+  }, [formatLabels, format]);
 
   return (
     <>
+      <EuiLiveAnnouncer>{announcement}</EuiLiveAnnouncer>
       <EuiCallOut
         color="success"
         iconType="check"
@@ -39,7 +83,7 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
           defaultMessage: 'Created API key "{name}"',
           values: { name: apiKey.name },
         })}
-        data-test-subj={'connectionDetailsApiKeySuccessForm'}
+        data-test-subj="connectionDetailsApiKeySuccessForm"
       >
         <p>
           {i18n.translate('cloud.connectionDetails.apiKeys.successForm.message', {
@@ -63,9 +107,14 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
             defaultMessage: 'API key value',
           })}
           fullWidth
-          data-test-subj={'connectionDetailsApiKeyValueRow'}
+          data-test-subj="connectionDetailsApiKeyValueRow"
         >
-          <CopyInput value={keyValue} onCopyClick={onCopyClick} />
+          <CopyInput
+            value={keyValue}
+            onCopyClick={onCopyClick}
+            onCopySuccess={handleCopySuccess}
+            screenReaderHint={screenReaderHint}
+          />
         </EuiFormRow>
       </EuiCallOut>
 

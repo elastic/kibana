@@ -11,8 +11,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiSwitch,
-  EuiLoadingSpinner,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -35,25 +33,29 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { WiredStreamsToggle } from './wired_streams_toggle';
 import { getFormattedError } from '../../util/errors';
 
 export function StreamsSettingsFlyout({
   onClose,
   refreshStreams,
+  streamsStatus,
+  onRefreshStatus,
 }: {
   onClose: () => void;
   refreshStreams: () => void;
+  streamsStatus: WiredStreamsStatus | undefined;
+  onRefreshStatus: () => Promise<void>;
 }) {
   const { signal } = useAbortController();
   const context = useKibana();
   const {
     dependencies: {
       start: {
-        streams: { getWiredStatus, enableWiredMode, disableWiredMode },
+        streams: { enableWiredMode, disableWiredMode },
       },
     },
     core,
@@ -62,48 +64,46 @@ export function StreamsSettingsFlyout({
 
   const {
     ui: { manage: canManageWiredKibana },
-    features: { significantEvents },
   } = useStreamsPrivileges();
 
-  const [canManageWiredElasticsearch, setCanManageWiredElasticsearch] =
-    React.useState<boolean>(true);
-
-  const [wiredChecked, setWiredChecked] = React.useState<boolean | undefined>(undefined);
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
   const [showDisableModal, setShowDisableModal] = React.useState(false);
   const [disableConfirmChecked, setDisableConfirmChecked] = React.useState(false);
   const [isDisabling, setIsDisabling] = React.useState(false);
 
-  React.useEffect(() => {
-    const fetchWiredStatus = async () => {
-      try {
-        const status = await getWiredStatus();
-        setWiredChecked(status.enabled === true);
-        setCanManageWiredElasticsearch(Boolean(status.can_manage));
-      } catch (error) {
-        core.notifications.toasts.addError(getFormattedError(error), {
-          title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
-            defaultMessage: 'Error fetching wired streams status',
-          }),
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const canManageWiredElasticsearch = streamsStatus?.can_manage ?? true;
 
-    fetchWiredStatus();
-  }, [getWiredStatus, core.notifications.toasts]);
+  const isToggleOn = React.useMemo(() => {
+    if (!streamsStatus) return false;
+    const hasConflict =
+      streamsStatus.logs === 'conflict' ||
+      streamsStatus['logs.otel'] === 'conflict' ||
+      streamsStatus['logs.ecs'] === 'conflict';
+    if (hasConflict) return false;
+    return streamsStatus['logs.otel'] === true && streamsStatus['logs.ecs'] === true;
+  }, [streamsStatus]);
 
   const handleSwitchChange = async () => {
-    if (wiredChecked) {
+    if (isToggleOn) {
+      // Currently enabled, show disable modal
       setShowDisableModal(true);
     } else {
+      // Currently disabled or in conflict, attempt to enable
       try {
         setLoading(true);
         await enableWiredMode(signal);
         telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: true });
-        setWiredChecked(true);
+
+        // Refresh status and streams list
+        await onRefreshStatus();
         refreshStreams();
+
+        // Show success toast
+        core.notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.streams.streamsListView.wiredStreamsEnabledToastTitle', {
+            defaultMessage: 'Wired streams have been enabled successfully',
+          }),
+        });
       } catch (error) {
         core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate('xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle', {
@@ -122,52 +122,24 @@ export function StreamsSettingsFlyout({
     try {
       await disableWiredMode(signal);
       telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: false });
-      setWiredChecked(false);
+
+      // Refresh status and streams list
+      await onRefreshStatus();
       refreshStreams();
+
       setShowDisableModal(false);
       setDisableConfirmChecked(false);
     } catch (error) {
       core.notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle', {
+        title: i18n.translate('xpack.streams.streamsListView.disableWiredStreamsErrorToastTitle', {
           defaultMessage: 'Error updating wired streams setting',
         }),
         toastLifeTimeMs: 5000,
       });
     } finally {
       setIsDisabling(false);
-      setLoading(false);
     }
   };
-
-  const [{ loading: isChangingSignificantEvents }, toggleSignificantEvents] = useAsyncFn(
-    async (event) => {
-      const isEnabled = event.target.checked;
-      try {
-        await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
-
-        core.notifications.toasts.addInfo(
-          isEnabled
-            ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
-                defaultMessage: 'Significant events enabled',
-              })
-            : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
-                defaultMessage: 'Significant events disabled',
-              })
-        );
-      } catch (error) {
-        core.notifications.toasts.addError(getFormattedError(error), {
-          title: i18n.translate(
-            'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
-            {
-              defaultMessage: 'Error updating Significant events setting',
-            }
-          ),
-          toastLifeTimeMs: 5000,
-        });
-      }
-    },
-    [core]
-  );
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -296,80 +268,14 @@ output.elasticsearch:
             }
           >
             <EuiFormRow fullWidth>
-              {loading ? (
-                <EuiLoadingSpinner size="l" />
-              ) : (
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.streams.streamsListView.enableWiredStreamsSwitchLabel',
-                    {
-                      defaultMessage: 'Enable wired streams',
-                    }
-                  )}
-                  checked={Boolean(wiredChecked)}
-                  onChange={handleSwitchChange}
-                  data-test-subj="streamsWiredSwitch"
-                  disabled={!(canManageWiredKibana && canManageWiredElasticsearch)}
-                />
-              )}
+              <WiredStreamsToggle
+                streamsStatus={streamsStatus}
+                loading={loading}
+                disabled={!(canManageWiredKibana && canManageWiredElasticsearch)}
+                onChange={handleSwitchChange}
+              />
             </EuiFormRow>
           </EuiDescribedFormGroup>
-
-          {significantEvents?.available && (
-            <EuiDescribedFormGroup
-              fullWidth
-              descriptionFlexItemProps={{ grow: 2 }}
-              title={
-                <h3>
-                  <EuiFlexGroup gutterSize="s">
-                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
-                      defaultMessage: 'Significant events',
-                    })}
-                    <EuiBetaBadge
-                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                        defaultMessage: 'Technical Preview',
-                      })}
-                      tooltipContent={i18n.translate(
-                        'xpack.streams.streamsListView.betaBadgeDescription',
-                        {
-                          defaultMessage:
-                            'This functionality is experimental and not supported. It may change or be removed at any time.',
-                        }
-                      )}
-                      alignment="middle"
-                      size="s"
-                    />
-                  </EuiFlexGroup>
-                </h3>
-              }
-              description={
-                <p>
-                  {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
-                    defaultMessage:
-                      "A Significant event is a single, 'interesting' log event identified by an automated rule as being important for understanding a system's behavior.",
-                  })}
-                </p>
-              }
-            >
-              <EuiFormRow fullWidth>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.streams.streamsListView.enableSignificantEventsSwitchLabel',
-                    {
-                      defaultMessage: 'Enable Significant events',
-                    }
-                  )}
-                  checked={Boolean(significantEvents?.enabled)}
-                  onChange={toggleSignificantEvents}
-                  data-test-subj="streamsSignificantEventsSwitch"
-                  disabled={
-                    core.uiSettings.isOverridden(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS) ||
-                    isChangingSignificantEvents
-                  }
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-          )}
 
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiText size="xs">

@@ -164,7 +164,6 @@
       "src/platform/plugins/shared/ui_actions",
       "src/platform/packages/shared/kbn-ui-actions-browser"
     ],
-    "uiActionsEnhanced": "src/platform/plugins/shared/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/platform/plugins/shared/usage_collection",
     "userProfileComponents": "src/platform/packages/shared/kbn-user-profile-components",

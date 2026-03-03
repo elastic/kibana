@@ -11,23 +11,31 @@ import { i18n } from '@kbn/i18n';
 import type { LifecyclePhase } from './lifecycle_types';
 import { LifecyclePhase as LifecyclePhaseComponent } from './lifecycle_phase';
 
-interface LifecycleBarProps {
+export interface LifecycleBarProps {
   phases: LifecyclePhase[];
   gridTemplateColumns: string;
   phaseColumnSpans: number[];
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
-  isIlm?: boolean;
+  testSubjPrefix?: string;
+  showPhaseActions?: boolean;
   onRemovePhase?: (phaseName: string) => void;
+  onEditPhase?: (phaseName: string) => void;
+  editedPhaseName?: string;
   canManageLifecycle: boolean;
+  isEditLifecycleFlyoutOpen?: boolean;
 }
 
 const renderLifecyclePhase = (
   index: number,
   phase: LifecyclePhase,
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
-  isIlm?: boolean,
+  showPhaseActions?: boolean,
   onRemovePhase?: (phaseName: string) => void,
-  canManageLifecycle?: boolean
+  onEditPhase?: (phaseName: string) => void,
+  editedPhaseName?: string,
+  canManageLifecycle?: boolean,
+  isEditLifecycleFlyoutOpen?: boolean,
+  testSubjPrefix?: string
 ) => {
   const commonProps = {
     description: phase.description,
@@ -38,10 +46,14 @@ const renderLifecyclePhase = (
     onClick: () => {
       onPhaseClick?.(phase, index);
     },
-    isIlm,
+    showActions: showPhaseActions,
     minAge: phase.min_age,
+    testSubjPrefix,
     onRemovePhase,
+    onEditPhase,
+    isBeingEdited: Boolean(editedPhaseName && editedPhaseName === phase.label),
     canManageLifecycle: canManageLifecycle ?? false,
+    isEditLifecycleFlyoutOpen,
   };
 
   return phase.isDelete ? (
@@ -58,15 +70,19 @@ const renderLifecyclePhase = (
   );
 };
 
-export const LifecycleBar = ({
+export const LifecycleBar: React.FC<LifecycleBarProps> = ({
   phases,
   gridTemplateColumns,
   phaseColumnSpans,
   onPhaseClick,
-  isIlm,
+  testSubjPrefix,
+  showPhaseActions,
   onRemovePhase,
+  onEditPhase,
+  editedPhaseName,
   canManageLifecycle,
-}: LifecycleBarProps) => {
+  isEditLifecycleFlyoutOpen,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -115,9 +131,13 @@ export const LifecycleBar = ({
                 index,
                 phase,
                 onPhaseClick,
-                isIlm,
+                showPhaseActions,
                 onRemovePhase,
-                canManageLifecycle
+                onEditPhase,
+                editedPhaseName,
+                canManageLifecycle,
+                isEditLifecycleFlyoutOpen,
+                testSubjPrefix
               )}
             </EuiFlexItem>
           ))}
