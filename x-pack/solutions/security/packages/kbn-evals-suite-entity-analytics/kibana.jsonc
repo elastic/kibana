@@ -1,6 +1,6 @@
 {
   "type": "functional-tests",
-  "id": "@kbn/test-suites-security-solution-evals",
+  "id": "@kbn/evals-suite-entity-analytics",
   "owner": "@elastic/security-entity-analytics",
   "group": "security",
   "visibility": "private",
