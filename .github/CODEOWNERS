@@ -955,8 +955,8 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-act
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
-x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
-x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
+x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-kibana
+x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kibana
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
@@ -1108,7 +1108,7 @@ x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
-x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/inference @elastic/search-kibana
 x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
@@ -1248,6 +1248,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/co
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
+x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -1288,7 +1289,6 @@ x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
-x-pack/solutions/security/test/security-solution-evals @elastic/security-entity-analytics
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/test @elastic/workchat-eng
@@ -2307,9 +2307,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
-# AppEx AI Infra
-/x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
-/x-pack/platform/test/functional_gen_ai/inference @elastic/appex-ai-infra
+# Inference Plugins (Search Solution)
+x-pack/platform/plugins/shared/inference @elastic/search-kibana
+x-pack/platform/test/functional_gen_ai/inference @elastic/search-kibana
+x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 
 # AppEx Platform Services Security
 /x-pack/platform/test/serverless/api_integration/test_suites/security_response_headers.ts  @elastic/kibana-security
@@ -3067,6 +3068,7 @@ x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insight
 /x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/automatic_troubleshooting @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics

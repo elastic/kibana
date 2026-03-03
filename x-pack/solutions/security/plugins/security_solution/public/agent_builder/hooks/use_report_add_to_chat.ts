@@ -18,7 +18,6 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'alerts_table_rule_flyout'
     | 'entity_highlights'
     | 'entity_risk_contribution'
-    | 'rules_table'
     | 'rule_creation'
     | 'rule_editing'
     | 'rule_details'
@@ -26,7 +25,10 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'rule_query_error'
     | 'attack_discovery_take_action'
     | 'attack_discovery_top'
-    | 'attack_discovery_bottom';
+    | 'attack_discovery_bottom'
+    | 'attacks_page_group_summary'
+    | 'attacks_page_group_take_action'
+    | 'attacks_page_flyout_take_action';
   /**
    * Attachment type
    */
