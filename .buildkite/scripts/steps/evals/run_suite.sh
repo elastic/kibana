@@ -38,6 +38,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Generate LiteLLM connectors (or skip when only EIS models are requested).
+# This must run after bootstrap so Node is available for the generator script.
+source .buildkite/scripts/steps/evals/setup_connectors.sh
+
 # Fan out into one Buildkite step per connector project when requested.
 # This is the only practical way to run all connector projects within the 1h job timeout.
 EVAL_FANOUT="${EVAL_FANOUT:-}"
@@ -128,15 +132,20 @@ EOF
           KBN_EVALS: "1"
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+          EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
           EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
+          EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
         agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
           machineType: n2-standard-8
           preemptible: true
         retry:
@@ -159,7 +168,12 @@ fi
 
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
-SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
+if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
+  SCOUT_SERVER_ARGS+=(--serverConfigSet "$EVAL_SERVER_CONFIG_SET")
+else
+  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
+fi
+
 node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
 SCOUT_PID=$!
 

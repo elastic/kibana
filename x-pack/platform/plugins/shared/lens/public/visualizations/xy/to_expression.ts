@@ -40,6 +40,8 @@ import {
 } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import { KbnPalette } from '@kbn/palettes';
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
   XYState,
@@ -50,8 +52,9 @@ import type {
   AxisConfig,
   ValidXYDataLayerConfig,
   XYLayerConfig,
+  SeriesType as LensSeriesType,
 } from './types';
-import { getColumnToLabelMap } from './state_helpers';
+import { getColumnToLabelMap, isLineSeries } from './state_helpers';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -455,6 +458,17 @@ const annotationLayerToExpression = (
   return buildExpression([extendedAnnotationLayerFn]).toAst();
 };
 
+/**
+ * Returns the default palette for a given series type.
+ * Line charts use a line-optimized palette for better contrast between overlapping series.
+ */
+function getDefaultPalette(seriesType: LensSeriesType): KbnPaletteId {
+  if (isLineSeries(seriesType)) {
+    return KbnPalette.ElasticLineOptimized;
+  }
+  return KbnPalette.Default;
+}
+
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
   yAxisConfigs: AxisConfig[],
@@ -517,7 +531,7 @@ const dataLayerToExpression = (
             default: [paletteService.get(layer.palette.name).toExpression(layer.palette.params)],
           })
         : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
-            name: 'default',
+            name: getDefaultPalette(layer.seriesType),
           }),
     ]).toAst(),
     colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,

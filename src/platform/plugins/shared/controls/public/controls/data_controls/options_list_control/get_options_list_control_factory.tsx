@@ -28,12 +28,15 @@ import {
 } from '@kbn/controls-constants';
 import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiHasPinnedPanels,
+  apiHasSections,
+  initializeUnsavedChanges,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
-import { coreServices } from '../../../services/kibana_services';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -141,21 +144,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
         });
 
-      // we do not want to delay the embeddable creation waiting for this, so do not await promise
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
-      coreServices.http
-        .get<{
-          allowExpensiveQueries: boolean;
-        }>('/internal/controls/getExpensiveQueriesSetting', {
-          version: '1',
-        })
-        .catch(() => {
-          return { allowExpensiveQueries: true }; // default to true on error
-        })
-        .then(({ allowExpensiveQueries }) => {
-          if (!allowExpensiveQueries) allowExpensiveQueries$.next(false);
-        });
-
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
@@ -168,7 +156,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           parentApi,
           uuid,
         },
-        allowExpensiveQueries$,
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
@@ -187,7 +174,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         // fetch was successful so set all attributes from result
         const successResponse = result as OptionsListSuccessResponse;
         temporaryStateManager.api.setAvailableOptions(successResponse.suggestions);
-        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality ?? 0);
+        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality);
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
@@ -341,8 +328,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
-        allowExpensiveQueries$,
       };
+
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
@@ -359,6 +347,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -369,7 +359,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                 displaySettings: state.display_settings ?? {},
               }}
             >
-              <OptionsListControl />
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },

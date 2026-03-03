@@ -1090,7 +1090,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsXY\"; state: { query: ",
+          "[]; visualizationType: \"lnsXY\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1106,15 +1114,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1162,7 +1162,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsPie\"; state: { query: ",
+          "[]; visualizationType: \"lnsPie\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1178,15 +1186,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1234,7 +1234,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+          "[]; visualizationType: \"lnsHeatmap\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1250,15 +1258,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1306,7 +1306,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+          "[]; visualizationType: \"lnsGauge\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1322,15 +1330,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1378,7 +1378,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+          "[]; visualizationType: \"lnsDatatable\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1394,15 +1402,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1450,7 +1450,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+          "[]; visualizationType: \"lnsLegacyMetric\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1466,15 +1474,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1564,7 +1564,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+          "[]; visualizationType: \"lnsMetric\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1580,15 +1588,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1636,7 +1636,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsChoropleth\"; state: { query: ",
+          "[]; visualizationType: \"lnsChoropleth\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1652,15 +1660,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1708,7 +1708,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsTagcloud\"; state: { query: ",
+          "[]; visualizationType: \"lnsTagcloud\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1724,15 +1732,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1780,7 +1780,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: string; state: { query: ",
+          "[]; visualizationType: string; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1796,15 +1804,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",

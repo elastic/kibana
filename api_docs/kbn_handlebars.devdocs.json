@@ -41,7 +41,7 @@
           {
             "parentPluginId": "@kbn/handlebars",
             "id": "def-common.HelperDelegateFixed.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -52,7 +52,27 @@
             "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/handlebars",
+                "id": "def-common.HelperDelegateFixed.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 124,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -385,7 +405,7 @@
           {
             "parentPluginId": "@kbn/handlebars",
             "id": "def-common.TemplateDelegateFixed.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -396,7 +416,51 @@
             "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/handlebars",
+                "id": "def-common.TemplateDelegateFixed.Unnamed.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/handlebars",
+                "id": "def-common.TemplateDelegateFixed.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/handlebars",
+                    "scope": "common",
+                    "docId": "kibKbnHandlebarsPluginApi",
+                    "section": "def-common.RuntimeOptions",
+                    "text": "RuntimeOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/handlebars",
