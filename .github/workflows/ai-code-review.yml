@@ -40,8 +40,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Run Claude PR Review (Read-Only)
-        uses: elastic/ai-github-actions/claude-workflows/pr-review/ro@caf5c041b5d92721cd165f61cf9ce3a16f8a4925 # v0.2.6
+      - name: Run Claude PR Review
+        uses: anthropics/claude-code-action@64c7a0ef71df67b14cb4471f4d9c8565c61042bf # v1.0.66
         with:
-          claude-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github-token: ${{ github.token }}
+          anthropic_api_base: ${{ secrets.LITELLM_BASE_URL }}
+          anthropic_api_key: ${{ secrets.LITELLM_API_KEY }}
+          anthropic_model: 'llm-gateway/claude-opus-4-5'
+          prompt: '/review'
+          claude_args: '--max-turns 5'
