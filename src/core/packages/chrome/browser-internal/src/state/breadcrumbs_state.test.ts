@@ -8,7 +8,14 @@
  */
 
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import React from 'react';
 import { createBreadcrumbsState } from './breadcrumbs_state';
+
+const createDeps = () => ({
+  rendering: {
+    addContext: (element: React.ReactNode) => React.createElement(React.Fragment, null, element),
+  },
+});
 
 const createExtension = (): ChromeBreadcrumbsAppendExtension => ({
   content: () => () => undefined,
@@ -22,7 +29,7 @@ const getBadgesContent = (extensions: ChromeBreadcrumbsAppendExtension[]) => {
 
 describe('createBreadcrumbsState', () => {
   it('keeps badges content stable when only non-badge extensions change', () => {
-    const state = createBreadcrumbsState();
+    const state = createBreadcrumbsState(createDeps());
     const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
     const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
       emissions.push(extensions);
@@ -49,7 +56,7 @@ describe('createBreadcrumbsState', () => {
   });
 
   it('recreates badges content when badges change', () => {
-    const state = createBreadcrumbsState();
+    const state = createBreadcrumbsState(createDeps());
     const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
     const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
       emissions.push(extensions);
@@ -70,7 +77,7 @@ describe('createBreadcrumbsState', () => {
   });
 
   it('recreates badges content when isFirst changes', () => {
-    const state = createBreadcrumbsState();
+    const state = createBreadcrumbsState(createDeps());
     const emissions: ChromeBreadcrumbsAppendExtension[][] = [];
     const subscription = state.breadcrumbsAppendExtensionsWithBadges$.subscribe((extensions) => {
       emissions.push(extensions);
