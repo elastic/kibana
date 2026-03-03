@@ -80,6 +80,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/security/config.group26.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group27.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group28.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group29.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group30.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group31.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group32.ts
