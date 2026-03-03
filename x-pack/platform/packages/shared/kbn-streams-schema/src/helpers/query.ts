@@ -6,7 +6,7 @@
  */
 
 import { conditionToESQLAst } from '@kbn/streamlang';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
 import type { StreamQueryInput } from '../queries';
 
 export const buildEsqlQuery = (
