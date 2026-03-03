@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-13T09:53:16.149Z",
-  "sha1": "70d8b6b54d27fd092c649ee83642c64872df70ff",
+  "sha1": "9ca727cce51262c545b5226c7dd65fb11bc7dae8",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -974,8 +973,8 @@
       }
     },
     {
-      "id": "643cc1fa64531d4-f2ac6d88c5c68d0",
-      "title": "Stream data routing - previewing data should allow updating the condition manually by syntax editor",
+      "id": "643cc1fa64531d4-977efc79a2edfc7",
+      "title": "Stream data routing - previewing data should allow updating the condition manually after toggling syntax editor",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1001,7 +1000,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 164,
+        "line": 159,
         "column": 9
       }
     },
@@ -1017,7 +1016,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 179,
+        "line": 174,
         "column": 9
       }
     },
@@ -1033,7 +1032,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 189,
+        "line": 184,
         "column": 9
       }
     },
@@ -1049,13 +1048,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 220,
+        "line": 215,
         "column": 9
       }
     },
     {
-      "id": "643cc1fa64531d4-b12f8559105ec78",
-      "title": "Stream data routing - previewing data should handle filter controls with complex conditions",
+      "id": "643cc1fa64531d4-47c5f5f37f7eb15",
+      "title": "Stream data routing - previewing data should handle filter controls when condition matches no documents",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1065,7 +1064,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 257,
+        "line": 252,
         "column": 9
       }
     },
@@ -1081,7 +1080,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 286,
+        "line": 284,
         "column": 9
       }
     },
@@ -1097,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 297,
+        "line": 295,
         "column": 9
       }
     },
@@ -1113,7 +1112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 304,
+        "line": 302,
         "column": 9
       }
     },

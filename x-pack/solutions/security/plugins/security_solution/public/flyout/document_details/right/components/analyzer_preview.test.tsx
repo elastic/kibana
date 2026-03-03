@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
@@ -14,12 +14,7 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { DocumentDetailsContext } from '../../shared/context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import * as mock from '../mocks/mock_analyzer_data';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -37,36 +32,26 @@ const mockTreeValues = {
   statsNodes: mock.mockStatsNodes,
 };
 
-const renderAnalyzerPreview = (contextValue: DocumentDetailsContext) =>
+const renderAnalyzerPreview = (
+  contextValue: DocumentDetailsContext,
+  dataViewIndices: string[] = ['index']
+) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={contextValue}>
-        <AnalyzerPreview />
+        <AnalyzerPreview dataViewIndices={dataViewIndices} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
-
-const dataView: DataView = createStubDataView({
-  spec: { title: '.alerts-security.alerts-default' },
-});
 
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue(mockTreeValues);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
-    (useDataView as jest.Mock).mockReturnValue({
-      status: 'ready',
-      dataView: {
-        ...dataView,
-        hasMatchedIndices: jest.fn().mockReturnValue(true),
-      },
-    });
   });
 
-  it('shows analyzer preview correctly when documentId and index are present', () => {
+  it('shows analyzer preview correctly when documentId and index are present', async () => {
     const contextValue = {
       ...mockContextValue,
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
@@ -74,29 +59,33 @@ describe('<AnalyzerPreview />', () => {
     const wrapper = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      isActiveTimeline: false,
       documentId: 'eventId',
       indices: ['rule-indices'],
     });
-    expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
   });
 
-  it('should use selected index patterns for non-alerts', () => {
+  it('should use provided data view indices for non-alerts', async () => {
     const contextValue = {
       ...mockContextValue,
       dataFormattedForFieldBrowser: [],
     };
-    const wrapper = renderAnalyzerPreview(contextValue);
+    const wrapper = renderAnalyzerPreview(contextValue, ['index']);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      isActiveTimeline: false,
       documentId: 'eventId',
       indices: ['index'],
     });
-    expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
   });
 
-  it('should use ancestor id as document id when in preview', () => {
+  it('should use ancestor id as document id when in rule preview', async () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: () => 'ancestors-id',
@@ -106,39 +95,13 @@ describe('<AnalyzerPreview />', () => {
     const wrapper = renderAnalyzerPreview(contextValue);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      isActiveTimeline: false,
       documentId: 'ancestors-id',
       indices: ['rule-indices'],
     });
-    expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
-  });
 
-  it('should show loading skeleton when the data view is loading', () => {
-    (useDataView as jest.Mock).mockReturnValue({
-      status: 'loading',
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
     });
-
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    };
-    const { getByTestId } = renderAnalyzerPreview(contextValue);
-
-    expect(getByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should show loading skeleton when the data view is pristine', () => {
-    (useDataView as jest.Mock).mockReturnValue({
-      status: 'pristine',
-    });
-
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    };
-    const { getByTestId } = renderAnalyzerPreview(contextValue);
-
-    expect(getByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
   it('should show loading skeleton when the process tree is being fetched', () => {
@@ -155,44 +118,25 @@ describe('<AnalyzerPreview />', () => {
     expect(getByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should show error message if the data view is error', () => {
-    (useDataView as jest.Mock).mockReturnValue({
-      status: 'error',
-    });
-
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    };
-    const { getByText } = renderAnalyzerPreview(contextValue);
-
-    expect(getByText('Unable to retrieve the data view for analyzer.')).toBeInTheDocument();
-  });
-
-  it('should show error message if the data view is ready but no matched indices', () => {
-    (useDataView as jest.Mock).mockReturnValue({
-      status: 'ready',
-      dataView: {
-        ...dataView,
-        hasMatchedIndices: jest.fn().mockReturnValue(false),
-      },
-    });
-
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    };
-    const { getByText } = renderAnalyzerPreview(contextValue);
-
-    expect(getByText('Unable to retrieve the data view for analyzer.')).toBeInTheDocument();
-  });
-
   it('should show error message when there is an error fetching the process tree data', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: true,
       alertIds: undefined,
       statsNodes: undefined,
+    });
+
+    const { getByText } = renderAnalyzerPreview(mockContextValue);
+
+    expect(getByText('An error is preventing this alert from being analyzed.')).toBeInTheDocument();
+  });
+
+  it('should show error message when the process tree is empty', () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: [],
+      statsNodes: [],
     });
 
     const { getByText } = renderAnalyzerPreview(mockContextValue);

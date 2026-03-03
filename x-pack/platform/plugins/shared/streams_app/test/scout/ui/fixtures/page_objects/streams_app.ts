@@ -285,6 +285,10 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppConditionEditorSwitch').click();
   }
 
+  getConditionEditorSyntaxTextBox() {
+    return this.page.getByTestId('streamsAppConditionEditorCodeEditor').getByRole('textbox');
+  }
+
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
     // Focus source item and activate DnD
@@ -500,15 +504,78 @@ export class StreamsApp {
   }
 
   async fillCustomSamplesEditor(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
-      .getByRole('textbox')
-      .fill(value);
+    const editor = this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor');
+    const activateEditModeButton = editor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    const textbox = editor.getByRole('textbox');
+    const inputArea = editor.locator('textarea.inputarea');
+
+    // Focus the Monaco editor reliably
+    await editor.click();
+    if ((await activateEditModeButton.count()) > 0) {
+      // Clicking can be intercepted by Monaco's view-layer; activate via keyboard.
+      await activateEditModeButton.focus();
+      await activateEditModeButton.press('Enter');
+    }
+    // The accessible textbox is sometimes not enough to receive keyboard input (Monaco uses a textarea).
+    if ((await inputArea.count()) > 0) {
+      await inputArea.focus();
+    } else {
+      await textbox.focus();
+    }
+
+    const isValidCustomSamplesJson = (raw: string) => {
+      const parsed = JSON.parse(raw) as unknown;
+      return (
+        Array.isArray(parsed) &&
+        parsed.length > 0 &&
+        typeof parsed[0] === 'object' &&
+        parsed[0] !== null &&
+        '@timestamp' in (parsed[0] as Record<string, unknown>) &&
+        'message' in (parsed[0] as Record<string, unknown>)
+      );
+    };
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await this.page.keyboard.press('ControlOrMeta+A');
+      await this.page.keyboard.press('Backspace');
+
+      if ((await inputArea.count()) > 0) {
+        await inputArea.fill(value);
+      } else {
+        await textbox.fill(value);
+      }
+
+      const currentValueAfterFill =
+        (await inputArea.count()) > 0 ? await inputArea.inputValue() : await textbox.inputValue();
+      try {
+        if (isValidCustomSamplesJson(currentValueAfterFill)) {
+          return;
+        }
+      } catch {
+        // retry with slow typing
+      }
+
+      await this.page.keyboard.press('ControlOrMeta+A');
+      await this.page.keyboard.press('Backspace');
+      await this.page.keyboard.type(value, { delay: 5 });
+      await this.page.waitForTimeout(150);
+
+      const currentValueAfterType =
+        (await inputArea.count()) > 0 ? await inputArea.inputValue() : await textbox.inputValue();
+      try {
+        if (isValidCustomSamplesJson(currentValueAfterType)) {
+          return;
+        }
+      } catch {
+        // retry
+      }
+    }
+
+    throw new Error(
+      `Failed to set custom samples editor value after multiple attempts (value length: ${value.length})`
+    );
   }
 
   async fillCondition(field: string, operator: string, value: string) {
