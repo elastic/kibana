@@ -8619,6 +8619,14 @@
                         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
                       },
                       {
+                        "plugin": "synthetics",
+                        "path": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/fixtures/page_objects/synthetics_app.ts"
+                      },
+                      {
+                        "plugin": "synthetics",
+                        "path": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/fixtures/page_objects/synthetics_app.ts"
+                      },
+                      {
                         "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"
                       }
@@ -9865,10 +9873,6 @@
               {
                 "plugin": "@kbn/scout",
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/dashboard_app.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
               }
             ],
             "children": [

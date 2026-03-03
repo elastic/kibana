@@ -11,6 +11,14 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture', 'http', 'rest', 'api']
   If your route declares `access: 'public'` you **must** provide up-to-date OpenAPI specification for it. Docs for these routes get hosted on [on our docs site](https://www.elastic.co/docs/api/doc/serverless) and are used for client integrations. For example: our [Elastic stack terraform provider](https://github.com/elastic/terraform-provider-elasticstack).
 </DocCallOut>
 
+<DocCallOut title="Designing good code-first APIs" color="warning">
+  Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see <DocLink id="kibHttpApiGuidelines" text="HTTP API Design" />.
+
+  Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
+
+  Always make sure to preview the OAS you generated before merging it to `main`, run `make help` in `<REPO_ROOT>/oas_docs` for preview commands.
+</DocCallOut>
+
 ### Important components
 
 To get OAS generated for HTTP APIs you must use the following components:
@@ -49,6 +57,18 @@ Other useful query parameters for filtering are:
 </DocCallOut>
 
 ### Some good practices to consider
+<a id="oas-compatibility-kbn-config-schema-types"></a>
+
+Use this section as a practical checklist when authoring public APIs.
+
+| `@kbn/config-schema` type/pattern | Why this is problematic for OAS 3.0 | Preferred alternative |
+| --- | --- | --- |
+| `schema.byteSize()` / `schema.duration()` | Parses to runtime-specific value types (`ByteSizeValue`, `moment.Duration`) that are not standard JSON schema primitives for OpenAPI consumers. | Use `schema.string()` (human-readable units) or `schema.number()` (normalized base unit), and document units in `meta.description` (for example: "duration in milliseconds", "size in bytes"). |
+| `schema.buffer()` / `schema.stream()` | Binary and stream runtime objects do not map naturally to standard JSON request/response bodies. | Model payloads as JSON-friendly primitives/objects. For binary transport, document media type and use explicit OpenAPI request/response content definitions. |
+| `schema.any()` | Escape hatch that produces little to no useful contract in generated OAS. | Use a small explicit `schema.object({...})`, `schema.recordOf(...)`, or a constrained union with documented fields. |
+| `schema.mapOf()` / `schema.recordOf()` when key shape matters | OAS generally represents these as `type: object` with `additionalProperties`, which does not clearly communicate all key constraints to clients. | If keys are known, model explicit object properties. If keys are dynamic, keep values simple and document key format in descriptions. |
+| `schema.oneOf()` for object variants (especially nested `oneOf`) | Unions without a clear discriminator are harder for humans/tools to understand. Nested forms like `schema.oneOf([schema.oneOf([a, b]), schema.oneOf([c, d])])` are especially hard to read and lead to poor validation errors. | Prefer `schema.discriminatedUnion('type', [...])` with a stable discriminator and flat variants. |
+| `schema.conditional()`, `schema.contextRef()`, `schema.siblingRef()` in HTTP contracts | Behavior depends on runtime context, which is difficult to encode as a stable, portable OAS contract. | Prefer explicit route versions or explicit discriminator/object shapes so behavior is statically visible in the contract. |
 
 #### 1. Runtime schema definitions
 
