@@ -476,6 +476,14 @@ export interface ValidationErrors {
     message: string;
     type: { paramName: string; expectedType: string; actualType: string };
   };
+  mmrQueryVectorWrongType: {
+    message: string;
+    type: { type: string };
+  };
+  mmrOnFieldWrongType: {
+    message: string;
+    type: { type: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

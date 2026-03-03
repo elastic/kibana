@@ -57,7 +57,7 @@ export function transformPanelsIn(
 
 function transformPanelIn(
   panel: DashboardPanel,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean
 ): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
@@ -69,9 +69,11 @@ function transformPanelIn(
   // TODO remove when lens as code transforms are ready for production
   const type = panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
   const transforms = embeddableService?.getTransforms(type);
-  const panelSchema = transforms?.schema;
 
-  if (panelSchema) {
+  // Dashboard application routes do not validate panel.config at route level
+  // Instead, panel.config must be validated in the handler
+  const panelSchema = transforms?.schema;
+  if (isDashboardAppRequest && panelSchema) {
     try {
       panelSchema.validate(config);
     } catch (error) {

@@ -10,23 +10,25 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
+import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
-import { throwOnUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
 
-export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerUpdateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  isDashboardAppRequest: boolean
+) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${basePath}/{id}`,
     summary: `Replace current dashboard state with the dashboard state from request body.`,
-    ...commonRouteConfig,
+    ...routeConfig,
   });
 
   updateRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
           params: schema.object({
@@ -39,21 +41,18 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
               allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
             })
           ),
-          body: getUpdateRequestBodySchema(),
+          body: getUpdateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
           200: {
-            body: getUpdateResponseBodySchema,
+            body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
-        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body);
-
-        const result = await update(ctx, req.params.id, req.body, allowUnmappedKeys);
+        const result = await update(ctx, req.params.id, req.body, isDashboardAppRequest);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {

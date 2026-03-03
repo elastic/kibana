@@ -479,6 +479,22 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'mmrQueryVectorWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrQueryVectorWrongType', {
+          defaultMessage: '[MMR] Query vector must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
+    case 'mmrOnFieldWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrOnFieldWrongType', {
+          defaultMessage: '[MMR] ON field must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }

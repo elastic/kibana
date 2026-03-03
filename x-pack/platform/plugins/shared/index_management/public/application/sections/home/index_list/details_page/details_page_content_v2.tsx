@@ -18,6 +18,7 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
+import { useLoadIndexDocumentsSample } from '../../../../services/api';
 import type { Index } from '../../../../../../common';
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
@@ -33,14 +34,7 @@ import { IndexErrorCallout } from './index_error_callout';
 import { DetailsPageOverviewV2 } from './details_page_overview/details_page_overview_v2';
 
 const defaultTabs: IndexDetailsTab[] = [
-  {
-    id: IndexDetailsSection.Overview,
-    name: i18n.translate('xpack.idxMgmt.indexDetails.overviewTitle', {
-      defaultMessage: 'Overview',
-    }),
-    renderTabContent: ({ index }) => <DetailsPageOverviewV2 indexDetails={index} />,
-    order: 10,
-  },
+  // Overview tab is injected in component to pass live docs sample data.
   {
     id: IndexDetailsSection.Mappings,
     name: i18n.translate('xpack.idxMgmt.indexDetails.mappingsTitle', {
@@ -97,9 +91,32 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
 
   const indexErrors = useIndexErrors(index, ml, hasMLPermissions);
+  const {
+    data: documentsSampleData,
+    isLoading: isDocumentsSampleLoading,
+    error: documentsSampleError,
+    resendRequest: resendDocumentsSampleRequest,
+  } = useLoadIndexDocumentsSample(index.name);
 
   const tabs = useMemo(() => {
-    const sortedTabs = [...defaultTabs];
+    const sortedTabs: IndexDetailsTab[] = [
+      {
+        id: IndexDetailsSection.Overview,
+        name: i18n.translate('xpack.idxMgmt.indexDetails.overviewTitle', {
+          defaultMessage: 'Overview',
+        }),
+        renderTabContent: ({ index: selectedIndex }) => (
+          <DetailsPageOverviewV2
+            indexDetails={selectedIndex}
+            sampleDocuments={documentsSampleData?.results ?? []}
+            isDocumentsLoading={isDocumentsSampleLoading}
+            documentsError={documentsSampleError}
+          />
+        ),
+        order: 10,
+      },
+      ...defaultTabs,
+    ];
     if (enableIndexStats) {
       sortedTabs.push(statsTab);
     }
@@ -113,7 +130,14 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
       return tabA.order - tabB.order;
     });
     return sortedTabs;
-  }, [enableIndexStats, extensionsService.indexDetailsTabs, index]);
+  }, [
+    documentsSampleData,
+    isDocumentsSampleLoading,
+    documentsSampleError,
+    enableIndexStats,
+    extensionsService.indexDetailsTabs,
+    index,
+  ]);
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
@@ -121,6 +145,10 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
     },
     [history, index.name, search]
   );
+
+  const onIndexRefresh = useCallback(() => {
+    return resendDocumentsSampleRequest();
+  }, [resendDocumentsSampleRequest]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tabConfig) => ({
@@ -151,6 +179,7 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
             index={index}
             reloadIndexDetails={fetchIndexDetails}
             navigateToIndicesList={navigateToIndicesList}
+            onIndexRefresh={onIndexRefresh}
             fill={true}
           />,
           <DiscoverLink indexName={index.name} asButton={true} fill={false} />,

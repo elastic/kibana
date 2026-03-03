@@ -261,7 +261,7 @@ export function correctQuerySyntax(_query: string) {
   const bracketsToAppend = getBracketsToClose(query);
 
   const endsWithBinaryOperatorRegex =
-    /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+    /(?:\+|\/|==|>=|>|<=|<|:|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
   const endsWithCastingOperatorRegex = /::\s*$/i;
   const endsWithCommaRegex = /,\s+$/;
 

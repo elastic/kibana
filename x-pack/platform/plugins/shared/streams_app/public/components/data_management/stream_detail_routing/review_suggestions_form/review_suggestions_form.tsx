@@ -105,7 +105,7 @@ export function ReviewSuggestionsForm({
             'xpack.streams.streamDetailRouting.childStreamList.suggestPartitionsDescription',
             {
               defaultMessage:
-                'Preview each suggestion before accepting - They will change how your data is ingested. All suggestions are based on the same sample: each proposal uses 1,000 documents from the original stream.',
+                'Preview each suggestion before accepting - they will change how your data is ingested. All suggestions are based on the same sample: each proposal uses up to 1,000 documents from the stream that are not already matched by enabled child stream routing rules.',
             }
           )}
         </EuiText>

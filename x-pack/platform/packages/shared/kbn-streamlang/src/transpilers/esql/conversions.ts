@@ -28,6 +28,8 @@ import type {
   LowercaseProcessor,
   TrimProcessor,
   JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
 } from '../../../types/processors';
@@ -47,6 +49,8 @@ import { convertRedactProcessorToESQL } from './processors/redact';
 import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
+import { convertSplitProcessorToESQL } from './processors/split';
+import { convertSortProcessorToESQL } from './processors/sort';
 import { convertConcatProcessorToESQL } from './processors/concat';
 import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
 
@@ -105,6 +109,12 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'join':
       return convertJoinProcessorToESQL(processor as JoinProcessor);
+
+    case 'split':
+      return convertSplitProcessorToESQL(processor as SplitProcessor);
+
+    case 'sort':
+      return convertSortProcessorToESQL(processor as SortProcessor);
 
     case 'concat':
       return convertConcatProcessorToESQL(processor as ConcatProcessor);

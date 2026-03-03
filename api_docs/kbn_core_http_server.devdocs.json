@@ -3509,6 +3509,10 @@
                 "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
               {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_npre_value.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/internal/get_active_space.ts"
               },
@@ -3865,6 +3869,14 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
+              },
+              {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
@@ -3999,6 +4011,10 @@
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts"
+              },
+              {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -4215,14 +4231,6 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
-              },
-              {
-                "plugin": "workflowsExtensions",
-                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
-              },
-              {
-                "plugin": "workflowsExtensions",
-                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -4443,10 +4451,6 @@
               {
                 "plugin": "customBranding",
                 "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -5027,6 +5031,14 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/functions.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_npre_value.test.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_npre_value.test.ts"
               },
               {
                 "plugin": "cps",
@@ -6561,6 +6573,10 @@
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/copy_to_space.ts"
               },
@@ -7121,6 +7137,10 @@
                 "path": "x-pack/platform/plugins/private/graph/server/routes/explore.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/index/register_retry_route.ts"
               },
@@ -7449,10 +7469,6 @@
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/hidden_saved_object_routes.ts"
               },
@@ -7555,6 +7571,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8065,10 +8085,6 @@
                 "path": "src/platform/plugins/shared/content_management/server/plugin.test.ts"
               },
               {
-                "plugin": "cps",
-                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
-              },
-              {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/preview_scripted_field.ts"
               },
@@ -8147,6 +8163,10 @@
               {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/server_integration/plugins/status_plugin_a/server/plugin.ts"
+              },
+              {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
               {
                 "plugin": "mockIdpPlugin",
@@ -9453,6 +9473,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_update_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "logstash",
                 "path": "x-pack/platform/plugins/private/logstash/server/routes/pipeline/save.ts"
               },
@@ -9575,10 +9599,6 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_license_route.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -10337,6 +10357,10 @@
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/auto_follow_pattern/register_delete_route.ts"
               },
               {
+                "plugin": "grokdebugger",
+                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/policies/register_delete_route.ts"
               },
@@ -10403,10 +10427,6 @@
               {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/database/delete.ts"
-              },
-              {
-                "plugin": "grokdebugger",
-                "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -14033,6 +14053,10 @@
                 "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
               },
               {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/lifecycle/auth.ts"
               },
@@ -16546,6 +16570,26 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/read/register_read_route.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_runs.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_run.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/get_run_scores.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/traces/get_trace.ts"
+              },
+              {
                 "plugin": "inferenceEndpoint",
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
@@ -16564,6 +16608,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/find_live_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_history_users_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -17550,6 +17598,10 @@
               },
               {
                 "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
@@ -17599,6 +17651,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
+              },
+              {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/update/register_update_route.ts"
               },
               {
                 "plugin": "inferenceEndpoint",
@@ -18484,6 +18540,14 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/alerting.ts"
               },
               {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/search/register_search_route.ts"
+              },
+              {
                 "plugin": "inferenceEndpoint",
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
@@ -19093,6 +19157,10 @@
               },
               {
                 "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/force_ccs_extract_to_updates.ts"
+              },
+              {
+                "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/uninstall.ts"
               },
               {
@@ -19508,6 +19576,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
+              },
+              {
+                "plugin": "dashboardMarkdown",
+                "path": "src/platform/plugins/shared/dashboard_markdown/server/api/delete/register_delete_route.ts"
               },
               {
                 "plugin": "osquery",

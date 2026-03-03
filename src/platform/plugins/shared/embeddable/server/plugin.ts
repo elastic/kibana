@@ -59,7 +59,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
-  getAllEmbeddableSchemas: () => ObjectType[];
+  getAllEmbeddableSchemas: () => { [key: string]: ObjectType };
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {

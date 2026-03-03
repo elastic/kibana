@@ -88,6 +88,7 @@ import { MetricsInfoCommandContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
 import { UriPartsCommandContext } from "./esql_parser.js";
+import { RegisteredDomainCommandContext } from "./esql_parser.js";
 import { SetCommandContext } from "./esql_parser.js";
 import { SetFieldContext } from "./esql_parser.js";
 import { MmrCommandContext } from "./esql_parser.js";
@@ -948,6 +949,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitUriPartsCommand?: (ctx: UriPartsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.registeredDomainCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRegisteredDomainCommand?: (ctx: RegisteredDomainCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.registeredDomainCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRegisteredDomainCommand?: (ctx: RegisteredDomainCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.setCommand`.
 	 * @param ctx the parse tree

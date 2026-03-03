@@ -3,8 +3,10 @@
 * [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 * [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
+* [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 * [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 * [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages via Slack.
+* [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles via the Zendesk API.
 
 **Threat intelligence**
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.

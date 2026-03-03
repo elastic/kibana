@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { isTemplateReference } from './is_template_reference';
 import {
   getActionTypeDisplayNameFromStepType,
   getActionTypeIdFromStepType,
@@ -61,7 +62,7 @@ export function validateConnectorIds(
   }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
-    (item) => !item.key?.startsWith('${{') || !item.key.endsWith('}}')
+    (item) => !isTemplateReference(item.key)
   );
 
   for (const connectorIdItem of notReferenceConnectorIds) {
