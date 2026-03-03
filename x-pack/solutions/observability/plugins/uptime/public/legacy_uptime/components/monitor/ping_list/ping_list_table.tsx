@@ -231,6 +231,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
       itemId="docId"
       itemIdToExpandedRowMap={expandedRows}
       pagination={pagination}
+      data-test-subj="uptimePingListTable"
       noItemsMessage={
         loading
           ? i18n.translate('xpack.uptime.pingList.pingsLoadingMesssage', {

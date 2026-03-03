@@ -19,9 +19,9 @@ project:
     sourceRoot: src/platform/packages/shared/kbn-unified-chart-section-viewer
 dependsOn:
   - '@kbn/field-types'
+  - '@kbn/react-field'
   - '@kbn/unified-histogram'
   - '@kbn/shared-ux-utility'
-  - '@kbn/esql-language'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/chart-icons'

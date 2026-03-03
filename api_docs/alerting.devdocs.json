@@ -739,6 +739,193 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.ensureAuthorizedByRuleType",
+            "type": "Function",
+            "tags": [],
+            "label": "ensureAuthorizedByRuleType",
+            "description": [
+              "\nLike `ensureAuthorized` but without a consumer. Checks authorization by ruleTypeId only,\nsucceeding if the user is authorized under any registered consumer."
+            ],
+            "signature": [
+              "({ ruleTypeId, operation, entity, consumerRequiredPrivilege, }: { ruleTypeId: string; operation: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.ReadOperations",
+                "text": "ReadOperations"
+              },
+              " | ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.WriteOperations",
+                "text": "WriteOperations"
+              },
+              "; entity: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingAuthorizationEntity",
+                "text": "AlertingAuthorizationEntity"
+              },
+              "; consumerRequiredPrivilege: keyof HasPrivileges; }) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+            "lineNumber": 392,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.ensureAuthorizedByRuleType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    ruleTypeId,\n    operation,\n    entity,\n    consumerRequiredPrivilege,\n  }",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                "lineNumber": 401,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.AlertingAuthorization.ensureAuthorizedByRuleType.$1.ruleTypeId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "ruleTypeId",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                    "lineNumber": 402,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.AlertingAuthorization.ensureAuthorizedByRuleType.$1.operation",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "operation",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "alerting",
+                        "scope": "server",
+                        "docId": "kibAlertingPluginApi",
+                        "section": "def-server.ReadOperations",
+                        "text": "ReadOperations"
+                      },
+                      " | ",
+                      {
+                        "pluginId": "alerting",
+                        "scope": "server",
+                        "docId": "kibAlertingPluginApi",
+                        "section": "def-server.WriteOperations",
+                        "text": "WriteOperations"
+                      }
+                    ],
+                    "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                    "lineNumber": 403,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.AlertingAuthorization.ensureAuthorizedByRuleType.$1.entity",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "entity",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "alerting",
+                        "scope": "server",
+                        "docId": "kibAlertingPluginApi",
+                        "section": "def-server.AlertingAuthorizationEntity",
+                        "text": "AlertingAuthorizationEntity"
+                      }
+                    ],
+                    "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                    "lineNumber": 404,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.AlertingAuthorization.ensureAuthorizedByRuleType.$1.consumerRequiredPrivilege",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "consumerRequiredPrivilege",
+                    "description": [],
+                    "signature": [
+                      "keyof HasPrivileges"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                    "lineNumber": 405,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.getByRuleTypeAuthorizationFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "getByRuleTypeAuthorizationFilter",
+            "description": [
+              "\nLike `getAuthorizationFilter` but without consumers. Returns a filter scoped to authorized\nrule types and an `ensureRuleTypeIsAuthorized` callback for post-query validation."
+            ],
+            "signature": [
+              "(params: GetAuthorizationFilterParams) => Promise<{ filter: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonObject",
+                "text": "JsonObject"
+              },
+              "; ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => void; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+            "lineNumber": 426,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getByRuleTypeAuthorizationFilter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "GetAuthorizationFilterParams"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
+                "lineNumber": 430,
+                "columnNumber": 49,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingAuthorization.getAuthorizedRuleTypes",
             "type": "Function",
             "tags": [],
@@ -750,7 +937,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
-            "lineNumber": 392,
+            "lineNumber": 465,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -766,7 +953,7 @@
                   "GetAuthorizedRuleTypesParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/authorization/alerting_authorization.ts",
-                "lineNumber": 393,
+                "lineNumber": 466,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2388,7 +2575,7 @@
         "label": "BulkOperationError",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-        "lineNumber": 168,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2401,7 +2588,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 169,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2417,7 +2604,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 170,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2433,7 +2620,7 @@
               "{ id: string; name: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 171,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5773,7 +5960,7 @@
           "BulkFillGapsByRuleIdsOptions",
           ") => Promise<",
           "BulkFillGapsByRuleIdsResult",
-          ">; getRuleIdsWithGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string[] | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; highestPriorityGapFillStatuses?: (\"unfilled\" | \"filled\" | \"in_progress\")[] | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; } & {}>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{ gapFillStatus?: string | undefined; } & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
+          ">; getRuleIdsWithGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; ruleIds?: string[] | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; highestPriorityGapFillStatuses?: (\"unfilled\" | \"filled\" | \"in_progress\")[] | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; } & {}>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; summary: Readonly<{} & { totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; totalDurationMs: number; rulesByGapFillStatus: Readonly<{} & { unfilled: number; filled: number; inProgress: number; }>; }>; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{ gapFillStatus?: string | undefined; } & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
           "CreateGapAutoFillSchedulerParams",
           ") => Promise<",
           "GapAutoFillSchedulerResponse",

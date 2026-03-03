@@ -10,7 +10,7 @@ import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
-import { apiPrivileges } from '../../common/features';
+import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
@@ -50,9 +50,7 @@ export function registerAgentRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/agents`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List agents',
       description:
@@ -84,9 +82,7 @@ export function registerAgentRoutes({
   router.versioned
     .get({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get an agent by ID',
       description:
@@ -127,9 +123,7 @@ export function registerAgentRoutes({
   router.versioned
     .post({
       path: `${publicApiPath}/agents`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create an agent',
       description:
@@ -241,9 +235,7 @@ export function registerAgentRoutes({
   router.versioned
     .put({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update an agent',
       description:
@@ -361,9 +353,7 @@ export function registerAgentRoutes({
   router.versioned
     .delete({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete an agent',
       description:
