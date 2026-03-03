@@ -12,6 +12,7 @@ import { sharepointOnlineDataSource } from './sharepoint_online';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
 import { zendeskDataSource } from './zendesk';
+import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
 import { amazonS3DataSource } from './amazon_s3';
 
@@ -24,5 +25,6 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(jiraDataSource);
   dataCatalog.register(zendeskDataSource);
   dataCatalog.register(servicenowDataSource);
+  dataCatalog.register(pagerdutyDataSource);
   dataCatalog.register(amazonS3DataSource);
 }
