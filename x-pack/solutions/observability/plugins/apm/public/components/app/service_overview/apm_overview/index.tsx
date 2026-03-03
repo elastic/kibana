@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elasti
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -85,10 +86,15 @@ export function ApmOverview() {
 
   const { hasSlos } = useServiceSloContext();
 
+  const trackEvent = useUiTracker({ app: 'apm' });
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
     false
   );
+  const dismissSloCallout = useCallback(() => {
+    setSloCalloutDismissed(true);
+    trackEvent({ metric: 'slo_callout_dismissed', metricType: METRIC_TYPE.CLICK });
+  }, [trackEvent, setSloCalloutDismissed]);
 
   const handleOnLoadTable = (key: keyof TablesLoadedState) =>
     setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
@@ -102,9 +108,7 @@ export function ApmOverview() {
       {!sloCalloutDismissed && !hasSlos && (
         <>
           <SloCallout
-            dismissCallout={() => {
-              setSloCalloutDismissed(true);
-            }}
+            dismissCallout={dismissSloCallout}
             serviceName={serviceName}
             environment={environment}
           />
