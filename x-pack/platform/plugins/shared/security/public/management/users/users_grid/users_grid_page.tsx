@@ -256,8 +256,6 @@ export class UsersGridPage extends Component<Props, State> {
           }
         />
 
-        <EuiSpacer size="l" />
-
         {showDeleteConfirmation ? (
           <ConfirmDeleteUsers
             onCancel={this.onCancelDelete}

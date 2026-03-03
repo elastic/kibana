@@ -182,8 +182,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           }
         />
 
-        <EuiSpacer size="l" />
-
         {!this.state.hasCompatibleRealms && (
           <>
             <NoCompatibleRealms />

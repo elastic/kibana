@@ -14,9 +14,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 /** Body-only padding; Management uses mainProps paddingSize 'none' so tabs are edge-to-edge. */
-const bodyPaddingCss = css`
-  padding: 16px;
-`;
+// const bodyPaddingCss = css`
+//   padding: 16px;
+// `;
 
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
@@ -133,7 +133,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         `}
       />
       <div id="rules-list-callout-slot" data-test-subj="rulesListCalloutSlot" />
-      <div css={bodyPaddingCss}>
+      <div>
         <HealthContextProvider>
           <PerformanceContextProvider>
             <HealthCheck waitForCheck={true}>

@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import type { BehaviorSubject, Observable } from 'rxjs';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
@@ -26,12 +27,23 @@ import type { ManagementSection } from '../../utils';
 import { MANAGEMENT_BREADCRUMB, MANAGEMENT_BREADCRUMB_NO_HREF } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
+import { getManagementHeaderAppActionsConfig } from '../header_app_actions/header_app_actions_config';
 import type {
   SectionsServiceStart,
   NavigationCardsSubject,
   AppDependencies,
   AutoOpsStatusHook,
 } from '../../types';
+
+/** Hide page headers rendered by section apps (e.g. Spaces, Users); primary "New" action lives in the global header. */
+const hidePageHeadersCss = css`
+  & .euiPageHeader {
+    display: none;
+  }
+  & .euiPageContentBody {
+    padding: 12px;
+  }
+`;
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -91,6 +103,10 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     setSections(dependencies.sections.getSectionsEnabled());
   }, [dependencies.sections]);
 
+  useEffect(() => {
+    coreStart.chrome.setHeaderAppActionsConfig(getManagementHeaderAppActionsConfig());
+  }, [coreStart.chrome]);
+
   if (!sections) {
     return null;
   }
@@ -134,14 +150,16 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
             mainProps={{ paddingSize: 'none' }}
             panelled
           >
-            <ManagementRouter
-              history={history}
-              theme={coreStart.theme}
-              setBreadcrumbs={setBreadcrumbsScoped}
-              onAppMounted={onAppMounted}
-              sections={sections}
-              analytics={coreStart.analytics}
-            />
+            <div css={hidePageHeadersCss} data-test-subj="management-template-content">
+              <ManagementRouter
+                history={history}
+                theme={coreStart.theme}
+                setBreadcrumbs={setBreadcrumbsScoped}
+                onAppMounted={onAppMounted}
+                sections={sections}
+                analytics={coreStart.analytics}
+              />
+            </div>
           </KibanaPageTemplate>
         </AppContextProvider>
       </RedirectAppLinks>

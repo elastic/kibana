@@ -412,7 +412,6 @@ export const RolesGridPage: FC<Props> = ({
   ) : (
     <>
       <KibanaPageTemplate.Header
-        bottomBorder
         data-test-subj="rolesGridPageHeader"
         pageTitle={
           buildFlavor === 'serverless' ? (
@@ -472,7 +471,6 @@ export const RolesGridPage: FC<Props> = ({
         }
       />
 
-      <EuiSpacer size="l" />
       <KibanaPageTemplate.Section paddingSize="none">
         {showDeleteConfirmation ? (
           <ConfirmDelete
