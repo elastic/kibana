@@ -182,7 +182,7 @@ export const esqlExecutor = async ({
           hasLoggedRequestsReachedLimit,
           runtimeMappings: sharedParams.runtimeMappings,
           excludedDocuments,
-          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+          filters: dataTiersFilters,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           primaryTimestamp,
