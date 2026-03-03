@@ -7,7 +7,7 @@ applies_to:
 
 # Salesforce connector [salesforce-action-type]
 
-The Salesforce connector communicates with the Salesforce REST API to query and retrieve data from your Salesforce org. It supports SOQL queries, fetching records by ID, and listing records for standard and custom objects.
+The Salesforce connector communicates with the Salesforce REST API to query and retrieve data from your Salesforce org. It supports SOQL queries, SOSL full-text search, fetching records by ID, listing records for standard and custom objects, retrieving sobject metadata (describe), and downloading file content from ContentVersion records.
 
 ## Create connectors in {{kib}} [define-salesforce-ui]
 
@@ -34,9 +34,16 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 
 The Salesforce connector has the following actions:
 
-Search
+Query
 :   Run a SOQL query against Salesforce. Returns query results; for large result sets, the response may include `nextRecordsUrl` for pagination.
     - **soql** (required): A valid SOQL query string (for example, `SELECT Id, Name FROM Account LIMIT 10`).
+    - **nextRecordsUrl** (optional): URL from a previous response to fetch the next page of results.
+
+Search
+:   Run a SOSL full-text search across one or more sobjects. Only searches objects you list in **returning**; custom objects must have "Allow Search" enabled. Results are capped at about 2000. Use **describe** or list objects first to discover valid object names.
+    - **searchTerm** (required): Text to search for (for example, `Acme Corp` or `Q4 renewal`).
+    - **returning** (required): Comma-separated sobject API names to search (for example, `Account,Contact,Opportunity`).
+    - **nextRecordsUrl** (optional): URL from a previous response to fetch the next page of search results.
 
 Get record
 :   Retrieve a single record by object type and record ID.
@@ -47,6 +54,15 @@ List records
 :   List records for a Salesforce sobject. Returns a page of record IDs; use `nextRecordsUrl` from the response to fetch the next page.
     - **sobjectName** (required): The API name of the sobject (for example, `Account`, `Contact`).
     - **limit** (optional): Maximum number of records to return. Default is 50; maximum is 2000.
+    - **nextRecordsUrl** (optional): URL from a previous response to fetch the next page of results.
+
+Describe
+:   Get metadata for an sobject (fields, layout, and other describe information). Use this to discover field names and types before building SOQL queries or mapping data.
+    - **sobjectName** (required): The API name of the sobject (for example, `Account`, `Contact`, `MyObject__c`).
+
+Download file
+:   Download file content from a ContentVersion record. Returns the file as base64 and the content-type header when present.
+    - **contentVersionId** (required): The ContentVersion record Id (from a SOQL query or related record).
 
 ## Connector networking configuration [salesforce-connector-networking-configuration]
 
