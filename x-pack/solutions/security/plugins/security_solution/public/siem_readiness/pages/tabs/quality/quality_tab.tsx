@@ -15,6 +15,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButtonEmpty,
+  EuiProgress,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +34,8 @@ import { QualityWarningPrompt } from './quality_warning_prompt';
 import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { useAutoCheckIndices } from './use_auto_check_indices';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
@@ -45,6 +49,7 @@ interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
 export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   activeCategories,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
@@ -57,6 +62,23 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
+
+  // Extract flat list of all index names for auto-checking
+  const allIndexNames = useMemo(() => {
+    if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
+
+    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
+      activeCategories.includes(category.category as MainCategories)
+    );
+
+    return activeOnly.flatMap((category) => category.indices.map((index) => index.indexName));
+  }, [getReadinessCategoriesData?.mainCategoriesMap, activeCategories]);
+
+  // Auto-check all indices when tab is visited
+  const { isChecking, isComplete, progress, currentIndexName, cancelChecks } = useAutoCheckIndices({
+    indexNames: allIndexNames,
+    enabled: !getReadinessCategories.isLoading && allIndexNames.length > 0,
+  });
 
   // Prepare categories data with computed status field, filtered by active categories
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
@@ -360,6 +382,26 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           <EuiSpacer size="m" />
         </>
       )}
+      {(isChecking || isComplete) && (
+        <EuiProgress
+          value={progress.checked}
+          max={progress.total}
+          size="s"
+          color={isComplete ? 'success' : 'primary'}
+          label={
+            isComplete
+              ? i18n.translate('xpack.securitySolution.siemReadiness.quality.complete.label', {
+                  defaultMessage: 'All indices checked',
+                })
+              : i18n.translate('xpack.securitySolution.siemReadiness.quality.checking.label', {
+                  defaultMessage: 'Checking: {indexName}',
+                  values: { indexName: currentIndexName },
+                })
+          }
+          valueText={`${progress.checked}/${progress.total}`}
+          style={{ marginBottom: euiTheme.size.base }}
+        />
+      )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <EuiText size="s" color="subdued">
@@ -408,6 +450,7 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           defaultMessage: 'indices',
         })}
         defaultSortField="indexName"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
       />
     </>
   );
