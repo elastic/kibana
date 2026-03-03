@@ -19,20 +19,29 @@ export const DATE_TYPE_NOW = 'NOW' as const;
 /** Default Moment.js format for displaying dates (e.g. "Feb 3 2025, 14:30") */
 export const DEFAULT_DATE_FORMAT = 'MMM D YYYY, HH:mm';
 
+/** Absolute date formats that are always accepted regardless of locale */
+export const UNIVERSAL_ABSOLUTE_FORMATS = [
+  'YYYY-MM-DD',
+  'YYYY-MM-DDTHH:mm:ss.SSSZ',
+  'YYYY-MM-DDTHH:mm:ssZ',
+  'YYYY-MM-DDTHH:mm',
+];
+
 /** Time-only format, used when start and end fall on the same day (e.g. "14:30") */
 export const FORMAT_TIME_ONLY = 'HH:mm';
 
 /** Date format without year, used when start and end fall in the same year (e.g. "Feb 3, 14:30") */
 export const FORMAT_NO_YEAR = 'MMM D, HH:mm';
 
-/** Delimiter between start and end when the user types a range (e.g. "now-1d to now") */
-export const DATE_RANGE_INPUT_DELIMITER = 'to';
+/** Delimiter between start and end when the user types a range (e.g. "now-1d - now") */
+export const DATE_RANGE_INPUT_DELIMITER = '-';
 
 /** Delimiter used in the display text between start and end (e.g. "Feb 3 → Feb 10") */
 export const DATE_RANGE_DISPLAY_DELIMITER = '→';
 
 /** Maps single-character date-math units to their full English names (e.g. "d" → "day") */
 export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
+  ms: 'millisecond',
   s: 'second',
   m: 'minute',
   h: 'hour',

@@ -26,6 +26,8 @@ describe('isValidTimeRange', () => {
     type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
     isNaturalLanguage: false,
     isInvalid: true,
+    startOffset: null,
+    endOffset: null,
   });
 
   it('returns false when a date is missing', () => {
@@ -132,11 +134,11 @@ describe('getOptionInputText', () => {
   });
 
   it('joins both fragments with delimiter when neither bound is now', () => {
-    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
+    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
   });
 
   it('keeps bounds as-is when now prefix cannot be stripped', () => {
-    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d to now/d');
+    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d - now/d');
   });
 
   it('returns now when both bounds are now', () => {

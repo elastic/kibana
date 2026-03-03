@@ -33,8 +33,59 @@ export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
 }
 
+/** Canonical date-math time units */
+export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
+
+/** Structured offset extracted from a relative date-math string like `now-7d/d` */
+export interface DateOffset {
+  /** Signed offset. Negative = past, positive = future. */
+  count: number;
+  /** Time unit for the offset */
+  unit: TimeUnit;
+  /** Optional rounding unit (the `/d` in `now-1d/d`) */
+  roundTo?: TimeUnit;
+}
+
+/**
+ * Locale definition for the date range text parser.
+ *
+ * Templates use `{count}` and `{unit}` placeholders. The parser converts
+ * `{count}` to `(\d+)` and `{unit}` to `(\w+)` when building regexes,
+ * tracking capture-group positions from the template. This handles
+ * arbitrary word order across languages.
+ *
+ * The parser always supports these universally, regardless of locale:
+ * - Delimiter: `'-'` (with spaces: `start - end`)
+ * - Absolute formats: ISO 8601, unix timestamps (10-digit seconds, 13-digit ms)
+ */
+export interface ParserLocale {
+  /** The keyword for "now" in input text */
+  now: string;
+  /** Additional locale-specific delimiters (e.g. `['to', 'until']` for English). `'-'` is always accepted. */
+  delimiters: string[];
+  /** Named ranges: label -> datemath bounds */
+  namedRanges: Record<string, { start: string; end: string }>;
+  /** Maps user-typed unit strings to canonical TimeUnit */
+  unitAliases: Record<string, TimeUnit>;
+  /** Natural language duration patterns with `{count}` and `{unit}` placeholders */
+  naturalDuration: {
+    past: string[];
+    future: string[];
+  };
+  /** Natural language instant patterns with `{count}` and `{unit}` placeholders */
+  naturalInstant: {
+    past: string[];
+    future: string[];
+  };
+  /** Additional locale-specific absolute date formats (moment.js format strings). ISO 8601 and unix timestamps are always accepted. */
+  absoluteFormats: string[];
+}
+
 export interface TimeRangeTransformOptions {
   presets?: TimeRangeBoundsOption[];
+  /** Locale for the parser. @default English */
+  locale?: ParserLocale;
+  /** Additional accepted delimiter (on top of locale and universal `'-'`) */
   delimiter?: string;
   dateFormat?: string;
 }
@@ -48,4 +99,8 @@ export interface TimeRange {
   type: [DateType, DateType];
   isNaturalLanguage: boolean;
   isInvalid: boolean;
+  /** Non-null only when the start bound is RELATIVE */
+  startOffset: DateOffset | null;
+  /** Non-null only when the end bound is RELATIVE */
+  endOffset: DateOffset | null;
 }

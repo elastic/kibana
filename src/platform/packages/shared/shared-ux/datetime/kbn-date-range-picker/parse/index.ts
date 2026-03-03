@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { textToTimeRange } from './parse_text';
+export { textToTimeRange, matchPreset } from './parse_text';
+export { en as enLocale } from './locales/en';
 export type { TimeRangeTransformOptions } from '../types';
