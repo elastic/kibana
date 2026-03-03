@@ -80,54 +80,32 @@ const extractRetentionInfo = (
   dataStream: IndicesGetDataStreamResponse['data_streams'][0],
   ilmPolicies: IlmGetLifecycleResponse
 ): { retentionType: RetentionType; retentionPeriod: string | null; policyName: string | null } => {
-  // Extract DSL retention info
   const lifecycle = dataStream.lifecycle as Record<string, unknown> | undefined;
   const dslEnabled = lifecycle && lifecycle.enabled !== false;
 
-  // DSL retention: effective_retention is the actual applied value after considering
-  // cluster-level limits and defaults. data_retention is the configured value.
-  // effective_retention takes priority as it reflects what's actually enforced.
-  // Falls back to data_retention for older ES versions or edge cases where
-  // effective_retention isn't computed yet.
+  // DSL retention: effective_retention takes priority over data_retention
   const effectiveRetention = lifecycle?.effective_retention as string | undefined;
   const dataRetention = lifecycle?.data_retention as string | undefined;
-  const hasDslRetention = dslEnabled && (effectiveRetention || dataRetention);
+  const dslRetention = effectiveRetention ?? dataRetention ?? null;
+  const hasDslRetention = dslEnabled && dslRetention;
 
-  // Extract ILM info (policy may exist without delete phase)
+  // ILM info
   const ilmPolicyName = dataStream.ilm_policy ?? null;
   const ilmPolicy = ilmPolicyName ? ilmPolicies[ilmPolicyName] : undefined;
   const ilmRetention = ilmPolicy ? getIlmRetentionPeriod(ilmPolicy) : null;
 
-  // Check prefer_ilm setting (default is true)
+  // prefer_ilm defaults to true
   const preferIlm = (lifecycle?.prefer_ilm as boolean | undefined) ?? true;
 
-  // Determine which takes priority
-  if (hasDslRetention && ilmPolicyName) {
-    // Both configured - use prefer_ilm to decide
-    if (preferIlm) {
-      return { retentionType: 'ilm', retentionPeriod: ilmRetention, policyName: ilmPolicyName };
-    } else {
-      return {
-        retentionType: 'dsl',
-        retentionPeriod: effectiveRetention ?? dataRetention ?? null,
-        policyName: null,
-      };
-    }
-  }
+  // Determine winner: ILM wins if it exists and is preferred (or DSL doesn't exist)
+  const useIlm = ilmPolicyName && (preferIlm || !hasDslRetention);
 
-  // Only one configured - use whichever is present
-  if (hasDslRetention) {
-    return {
-      retentionType: 'dsl',
-      retentionPeriod: effectiveRetention ?? dataRetention ?? null,
-      policyName: null,
-    };
-  }
-  if (ilmPolicyName) {
-    // ILM policy exists (may or may not have delete phase)
+  if (useIlm) {
     return { retentionType: 'ilm', retentionPeriod: ilmRetention, policyName: ilmPolicyName };
   }
-
+  if (hasDslRetention) {
+    return { retentionType: 'dsl', retentionPeriod: dslRetention, policyName: null };
+  }
   return { retentionType: null, retentionPeriod: null, policyName: null };
 };
 
