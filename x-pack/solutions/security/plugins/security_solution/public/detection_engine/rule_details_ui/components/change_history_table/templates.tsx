@@ -116,7 +116,7 @@ const renderChanges = (item: ChangeHistoryResult, euiTheme: EuiThemeComputed) =>
             {` and `}
             <EuiToolTip
               css={css`
-                color: ${euiTheme.colors.ink};
+                color: ${euiTheme.colors.textInk};
                 background-color: ${euiTheme.colors.backgroundBaseSubdued};
               `}
               position="top"
