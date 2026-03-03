@@ -27,7 +27,7 @@ user_activity:
         type: json
   filters:
     - policy: keep
-      actions: [dashboard_created, dashboard_deleted]
+      actions: [user_logged_in]
 ```
 
 - `user_activity.enabled`: Enables or disables emitting user activity events.
