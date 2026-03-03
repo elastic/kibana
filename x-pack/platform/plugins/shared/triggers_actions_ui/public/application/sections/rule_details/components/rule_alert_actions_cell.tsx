@@ -18,6 +18,7 @@ import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/d
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { useViewInAppUrl } from '@kbn/response-ops-alerts-table/hooks/use_view_in_app_url';
+import { CaseAlertActions } from './case_alert_actions';
 
 const VIEW_DETAILS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.viewDetailsLabel',
@@ -58,6 +59,13 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
   const { onExpandedAlertIndexChange, renderCellValue, ...defaultActionProps } = props;
 
   const actionsMenuItems = [
+    <CaseAlertActions
+      key="caseActions"
+      alert={props.alert}
+      cases={props.services.cases}
+      refresh={props.refresh}
+      onActionExecuted={closeActionsPopover}
+    />,
     <DefaultAlertActions
       key="defaultRowActions"
       onActionExecuted={closeActionsPopover}

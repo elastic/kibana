@@ -38,6 +38,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -63,6 +64,7 @@ const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'))
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
+  cases?: CasesPublicStart;
   cloud?: CloudSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

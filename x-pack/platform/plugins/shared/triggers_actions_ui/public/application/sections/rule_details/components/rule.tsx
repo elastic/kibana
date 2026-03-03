@@ -75,6 +75,7 @@ export function RuleComponent({
   const {
     ruleTypeRegistry,
     actionTypeRegistry,
+    cases,
     data,
     http,
     notifications,
@@ -150,7 +151,12 @@ export function RuleComponent({
           actionsColumnWidth={120}
           lastReloadRequestTime={lastReloadRequestTime}
           getAlertFormatter={getAlertFormatter}
+          casesConfiguration={{
+            featureId: 'management',
+            owner: ['cases'],
+          }}
           services={{
+            cases,
             data,
             http,
             notifications,
@@ -164,6 +170,7 @@ export function RuleComponent({
     }
   }, [
     application,
+    cases,
     data,
     fieldFormats,
     getAlertFormatter,
