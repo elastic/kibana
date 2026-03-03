@@ -424,6 +424,9 @@ describe('start', () => {
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
 
+      chrome.setChromeStyle('project');
+      chrome.project.initNavigation('es', Rx.of({ body: [] }));
+
       chrome.project.setCloudUrls({
         deploymentUrl: 'my-deployment-url.com',
       });
