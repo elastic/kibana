@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { NotificationPolicyFormFlyout } from './notification_policy_form_flyout';
+export { NotificationPolicyFormFlyout } from '../form_flyout/notification_policy_form_flyout';
 export { toFormState, toCreatePayload, toUpdatePayload } from './form_utils';

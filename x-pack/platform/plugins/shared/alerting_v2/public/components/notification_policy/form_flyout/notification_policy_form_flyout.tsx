@@ -24,10 +24,10 @@ import type {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { DEFAULT_FORM_STATE } from './constants';
-import { toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
-import { NotificationPolicyForm } from './notification_policy_form';
-import type { NotificationPolicyFormState } from './types';
+import { DEFAULT_FORM_STATE } from '../form/constants';
+import { toCreatePayload, toFormState, toUpdatePayload } from '../form/form_utils';
+import { NotificationPolicyForm } from '../form/notification_policy_form';
+import type { NotificationPolicyFormState } from '../form/types';
 
 const FLYOUT_TITLE_ID = 'notificationPolicyFlyoutTitle';
 
