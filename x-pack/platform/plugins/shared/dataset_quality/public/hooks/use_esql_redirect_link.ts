@@ -14,13 +14,6 @@ import type { TimeRangeConfig } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 import type { SendTelemetryFn } from './use_redirect_link_telemetry';
 
-function ensureSortByTimestamp(esqlQuery: string): string {
-  if (/\|\s*sort\s+/i.test(esqlQuery)) {
-    return esqlQuery;
-  }
-  return `${esqlQuery} | SORT @timestamp DESC`;
-}
-
 export const useEsqlRedirectLink = ({
   esqlQuery,
   timeRangeConfig,
@@ -40,13 +33,12 @@ export const useEsqlRedirectLink = ({
     linkProps: RouterLinkProps;
     navigate: () => void;
   }>(() => {
-    const queryWithSort = ensureSortByTimestamp(esqlQuery);
     const params: DiscoverAppLocatorParams = {
       timeRange: {
         from,
         to,
       },
-      query: { esql: queryWithSort },
+      query: { esql: esqlQuery },
     };
 
     const locator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
