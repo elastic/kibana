@@ -319,18 +319,24 @@ function runFastHelp() {
   logInfo('For full command help/flags: node scripts/evals --full-help');
   logInfo('');
   logInfo('Commands:');
+  logInfo('  init                          Set up connectors for local evals');
+  logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
+  logInfo('  stop [--service <name>]       Stop backgrounded eval services');
+  logInfo('  logs [--service <name>]       Tail logs from eval services');
+  logInfo('  scout                         Start Scout server for evals');
+  logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
-  logInfo('  run --suite <id> [...]        Run an eval suite');
   logInfo('  compare <run-a> <run-b>       Compare two eval runs');
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
   logInfo('  ci-map [--json]               Output CI label mapping');
   logInfo('');
   logInfo('Examples:');
-  logInfo('  node scripts/evals list');
-  logInfo(
-    '  node scripts/evals run --suite obs-ai-assistant --evaluation-connector-id bedrock-claude'
-  );
+  logInfo('  node scripts/evals init');
+  logInfo('  node scripts/evals start --suite agent-builder --model eis-gpt-4.1');
+  logInfo('  node scripts/evals stop');
+  logInfo('  node scripts/evals logs --service scout');
+  logInfo('  node scripts/evals run --suite agent-builder --judge eis-gpt-4.1');
   return true;
 }
 

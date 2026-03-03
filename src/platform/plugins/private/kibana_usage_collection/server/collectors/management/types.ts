@@ -56,6 +56,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
+  'workflows:aiAgent:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;

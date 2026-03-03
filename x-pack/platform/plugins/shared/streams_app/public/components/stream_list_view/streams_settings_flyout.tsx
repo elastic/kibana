@@ -11,7 +11,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiSwitch,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -35,8 +34,6 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { WiredStreamsToggle } from './wired_streams_toggle';
@@ -67,7 +64,6 @@ export function StreamsSettingsFlyout({
 
   const {
     ui: { manage: canManageWiredKibana },
-    features: { significantEvents },
   } = useStreamsPrivileges();
 
   const [loading, setLoading] = React.useState(false);
@@ -144,36 +140,6 @@ export function StreamsSettingsFlyout({
       setIsDisabling(false);
     }
   };
-
-  const [{ loading: isChangingSignificantEvents }, toggleSignificantEvents] = useAsyncFn(
-    async (event) => {
-      const isEnabled = event.target.checked;
-      try {
-        await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
-
-        core.notifications.toasts.addInfo(
-          isEnabled
-            ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
-                defaultMessage: 'Significant events enabled',
-              })
-            : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
-                defaultMessage: 'Significant events disabled',
-              })
-        );
-      } catch (error) {
-        core.notifications.toasts.addError(getFormattedError(error), {
-          title: i18n.translate(
-            'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
-            {
-              defaultMessage: 'Error updating Significant events setting',
-            }
-          ),
-          toastLifeTimeMs: 5000,
-        });
-      }
-    },
-    [core]
-  );
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -310,62 +276,6 @@ output.elasticsearch:
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
-
-          {significantEvents?.available && (
-            <EuiDescribedFormGroup
-              fullWidth
-              descriptionFlexItemProps={{ grow: 2 }}
-              title={
-                <h3>
-                  <EuiFlexGroup gutterSize="s">
-                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
-                      defaultMessage: 'Significant events',
-                    })}
-                    <EuiBetaBadge
-                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                        defaultMessage: 'Technical Preview',
-                      })}
-                      tooltipContent={i18n.translate(
-                        'xpack.streams.streamsListView.betaBadgeDescription',
-                        {
-                          defaultMessage:
-                            'This functionality is experimental and not supported. It may change or be removed at any time.',
-                        }
-                      )}
-                      alignment="middle"
-                      size="s"
-                    />
-                  </EuiFlexGroup>
-                </h3>
-              }
-              description={
-                <p>
-                  {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
-                    defaultMessage:
-                      "A Significant event is a single, 'interesting' log event identified by an automated rule as being important for understanding a system's behavior.",
-                  })}
-                </p>
-              }
-            >
-              <EuiFormRow fullWidth>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.streams.streamsListView.enableSignificantEventsSwitchLabel',
-                    {
-                      defaultMessage: 'Enable Significant events',
-                    }
-                  )}
-                  checked={Boolean(significantEvents?.enabled)}
-                  onChange={toggleSignificantEvents}
-                  data-test-subj="streamsSignificantEventsSwitch"
-                  disabled={
-                    core.uiSettings.isOverridden(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS) ||
-                    isChangingSignificantEvents
-                  }
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-          )}
 
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiText size="xs">
