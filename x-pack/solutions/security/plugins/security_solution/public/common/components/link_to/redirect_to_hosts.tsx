@@ -8,8 +8,14 @@
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
-import type { EntityIdentifiers } from './redirect_to_users';
-import { encodeEntityIdentifiersForUrl } from './redirect_to_users';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+
+const encodeEntityIdentifiersForUrl = (entityIdentifiers: EntityIdentifiers): string =>
+  encodeURIComponent(
+    JSON.stringify(
+      Object.fromEntries(Object.entries(entityIdentifiers).sort(([a], [b]) => a.localeCompare(b)))
+    )
+  );
 
 export const getHostsUrl = (search?: string) => `${HOSTS_PATH}${appendSearch(search)}`;
 
@@ -23,12 +29,7 @@ export const getHostDetailsUrl = (
   search?: string,
   entityIdentifiers?: EntityIdentifiers
 ) => {
-  return getTabsOnHostDetailsUrl(
-    detailName,
-    DEFAULT_HOST_TAB,
-    search,
-    entityIdentifiers
-  );
+  return getTabsOnHostDetailsUrl(detailName, DEFAULT_HOST_TAB, search, entityIdentifiers);
 };
 
 export const getTabsOnHostDetailsUrl = (

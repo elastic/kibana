@@ -13,7 +13,6 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 import type { UserItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
-import { EntityIdentifiers } from '@kbn/security-solution-plugin/public/flyout/document_details/shared/utils';
 
 export const OBSERVED_USER_QUERY_ID = 'observedUsersDetailsQuery';
 
@@ -28,7 +27,7 @@ export interface UserDetailsArgs {
 
 interface UseUserDetails {
   endDate: string;
-  entityIdentifiers: EntityIdentifiers;
+  userName: string;
   id?: string;
   indexNames: string[];
   skip?: boolean;
@@ -37,7 +36,7 @@ interface UseUserDetails {
 
 export const useObservedUserDetails = ({
   endDate,
-  entityIdentifiers,
+  userName,
   indexNames,
   id = OBSERVED_USER_QUERY_ID,
   skip = false,
@@ -74,7 +73,8 @@ export const useObservedUserDetails = ({
     () => ({
       defaultIndex: indexNames,
       factoryQueryType: UsersQueries.observedDetails,
-      entityIdentifiers,
+      userName,
+      entityIdentifiers: { 'user.name': userName },
       timerange: {
         interval: '12h',
         from: startDate,
@@ -82,7 +82,7 @@ export const useObservedUserDetails = ({
       },
       filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     }),
-    [endDate, indexNames, startDate, entityIdentifiers]
+    [endDate, indexNames, startDate, userName]
   );
 
   useEffect(() => {

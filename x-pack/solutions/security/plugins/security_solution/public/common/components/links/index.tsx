@@ -29,7 +29,7 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import type { EntityIdentifiers } from '../link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../containers/anomalies/anomalies_query_tab_body/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
 import type { ReputationLinkSetting, ReputationLinkOverflowProps } from './helpers';
 import {
