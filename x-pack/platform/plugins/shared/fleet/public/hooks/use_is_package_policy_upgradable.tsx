@@ -12,10 +12,10 @@ import { installationStatuses } from '../../common/constants';
 import type { Installation } from '../../common/types';
 import type { PackagePolicy } from '../types';
 
-import { useGetPackages } from './use_request/epm';
+import { useGetPackagesQuery } from './use_request/epm';
 
 export const useIsPackagePolicyUpgradable = () => {
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackagesQuery({
     prerelease: true,
   });
 

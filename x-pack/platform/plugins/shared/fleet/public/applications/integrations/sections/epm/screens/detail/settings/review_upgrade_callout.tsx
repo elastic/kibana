@@ -45,8 +45,8 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
         onSuccess: () => {
           notifications.toasts.addSuccess({
             title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewAcceptedTitle', {
-              defaultMessage: 'Policy upgrade accepted for {title}',
-              values: { title: pkgTitle },
+              defaultMessage: 'Auto-upgrade accepted for {title} {version}',
+              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
           });
         },
@@ -71,18 +71,24 @@ export const PendingUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> = 
         onSuccess: () => {
           notifications.toasts.addInfo({
             title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewDismissedTitle', {
-              defaultMessage: 'Policy upgrade dismissed for {version}',
-              values: { version: pendingUpgradeReview.target_version },
+              defaultMessage: 'Auto-upgrade dismissed for {title} {version}',
+              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
             text: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewDismissedText', {
-              defaultMessage: 'Auto-upgrade is paused for version {version}',
-              values: { version: pendingUpgradeReview.target_version },
+              defaultMessage: 'Auto-upgrade is paused for {title} {version}',
+              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
           });
         },
       }
     );
-  }, [reviewUpgradeMutation, pkgName, pendingUpgradeReview.target_version, notifications.toasts]);
+  }, [
+    reviewUpgradeMutation,
+    pkgName,
+    pkgTitle,
+    pendingUpgradeReview.target_version,
+    notifications.toasts,
+  ]);
 
   return (
     <>
@@ -156,8 +162,8 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
         onSuccess: () => {
           notifications.toasts.addSuccess({
             title: i18n.translate('xpack.fleet.integrations.settings.upgradeReviewReEnabledTitle', {
-              defaultMessage: 'Upgrade review re-enabled for {title}',
-              values: { title: pkgTitle },
+              defaultMessage: 'Upgrade review resumed for {title}{version}',
+              values: { title: pkgTitle, version: pendingUpgradeReview.target_version },
             }),
           });
         },
@@ -188,14 +194,14 @@ export const DeclinedUpgradeReviewCallout: React.FC<ReviewUpgradeCalloutProps> =
         <p>
           <FormattedMessage
             id="xpack.fleet.integrations.settings.declinedUpgradeReviewDescription"
-            defaultMessage="You previously dismissed the upgrade review. Click below to re-enable the review prompt."
+            defaultMessage="You previously dismissed the upgrade review. Click below to resume the upgrade."
           />
         </p>
         <EuiSpacer size="s" />
         <EuiButton size="s" onClick={handleReEnable} isLoading={reviewUpgradeMutation.isLoading}>
           <FormattedMessage
             id="xpack.fleet.integrations.settings.reEnableUpgradeButton"
-            defaultMessage="Re-enable upgrade review"
+            defaultMessage="Resume upgrade"
           />
         </EuiButton>
       </EuiCallOut>

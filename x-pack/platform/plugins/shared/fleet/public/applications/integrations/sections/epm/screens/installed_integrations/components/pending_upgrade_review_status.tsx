@@ -20,7 +20,7 @@ import {
   EuiModalFooter,
   EuiText,
   useGeneratedHtmlId,
-  EuiIconTip,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -35,9 +35,17 @@ export interface UpgradeReviewProps {
   pendingUpgradeReview: NonNullable<Installation['pending_upgrade_review']>;
 }
 
+const autoOpenModalForPackages = new Set<string>();
+
 export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewProps> = React.memo(
   ({ pkgName, pendingUpgradeReview, pkgTitle }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(() => {
+      if (autoOpenModalForPackages.has(pkgName)) {
+        autoOpenModalForPackages.delete(pkgName);
+        return true;
+      }
+      return false;
+    });
     const reviewUpgradeMutation = useReviewUpgradeMutation();
     const { notifications } = useStartServices();
     const { getHref } = useLink();
@@ -60,14 +68,15 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               title: (
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.upgradeReviewAcceptedTitle"
-                  defaultMessage="Policy upgrade accepted"
+                  defaultMessage="Auto-upgrade accepted for {title} {version}"
+                  values={{ title: pkgTitle, version: targetVersion }}
                 />
               ) as unknown as string,
             });
           },
         }
       );
-    }, [reviewUpgradeMutation, pkgName, targetVersion, notifications.toasts, closeModal]);
+    }, [reviewUpgradeMutation, pkgName, pkgTitle, targetVersion, notifications.toasts, closeModal]);
 
     const handleDismiss = useCallback(() => {
       reviewUpgradeMutation.mutate(
@@ -79,21 +88,22 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               title: (
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedTitle"
-                  defaultMessage="Policy upgrade dismissed"
+                  defaultMessage="Auto-upgrade dismissed for {title} {version}"
+                  values={{ title: pkgTitle, version: targetVersion }}
                 />
               ) as unknown as string,
               text: (
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedText"
-                  defaultMessage="Auto-upgrade is paused for version {version}"
-                  values={{ version: targetVersion }}
+                  defaultMessage="Auto-upgrade is paused for {title} {version}"
+                  values={{ title: pkgTitle, version: targetVersion }}
                 />
               ) as unknown as string,
             });
           },
         }
       );
-    }, [reviewUpgradeMutation, pkgName, targetVersion, notifications.toasts, closeModal]);
+    }, [reviewUpgradeMutation, pkgName, pkgTitle, targetVersion, notifications.toasts, closeModal]);
 
     return (
       <>
@@ -174,6 +184,7 @@ export const DeclinedUpgradeStatus: React.FunctionComponent<UpgradeReviewProps> 
     const targetVersion = pendingUpgradeReview.target_version;
 
     const handleReEnable = useCallback(() => {
+      autoOpenModalForPackages.add(pkgName);
       reviewUpgradeMutation.mutate(
         { pkgName, action: 'pending', targetVersion },
         {
@@ -194,33 +205,24 @@ export const DeclinedUpgradeStatus: React.FunctionComponent<UpgradeReviewProps> 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            type="warning"
-            color="warning"
+          <EuiToolTip
             position="top"
             content={i18n.translate(
               'xpack.fleet.epmInstalledIntegrations.statusUpgradePausedTooltip',
               {
-                defaultMessage: 'Upgrade to version {version} paused.',
+                defaultMessage:
+                  'Auto-upgrade to version {version} has been paused. Click to review the changes.',
                 values: { version: pendingUpgradeReview.target_version },
               }
             )}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            color="warning"
-            iconType="play"
-            fill={true}
-            onClick={handleReEnable}
-            isLoading={reviewUpgradeMutation.isLoading}
           >
-            <FormattedMessage
-              id="xpack.fleet.epmInstalledIntegrations.reEnableUpgradeButton"
-              defaultMessage="Re-enable"
-            />
-          </EuiButton>
+            <EuiButton color="primary" onClick={handleReEnable} size="s">
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.reEnableUpgradeButton"
+                defaultMessage="Resume upgrade"
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

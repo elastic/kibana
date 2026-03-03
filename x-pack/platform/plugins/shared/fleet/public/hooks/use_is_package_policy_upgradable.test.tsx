@@ -8,17 +8,17 @@
 import { renderHook } from '@testing-library/react';
 
 import { useIsPackagePolicyUpgradable } from './use_is_package_policy_upgradable';
-import { useGetPackages } from './use_request/epm';
+import { useGetPackagesQuery } from './use_request/epm';
 
 jest.mock('./use_request/epm');
 
-const mockedUseGetPackages = useGetPackages as jest.MockedFunction<typeof useGetPackages>;
+const mockedUseGetPackagesQuery = useGetPackagesQuery as jest.MockedFunction<
+  typeof useGetPackagesQuery
+>;
 
 describe('useIsPackagePolicyUpgradable', () => {
   beforeEach(() => {
-    mockedUseGetPackages.mockReturnValue({
-      error: null,
-      isInitialRequest: false,
+    mockedUseGetPackagesQuery.mockReturnValue({
       isLoading: false,
       data: {
         items: [

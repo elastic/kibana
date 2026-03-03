@@ -499,8 +499,9 @@ export const useReviewUpgradeMutation = () => {
         version: API_VERSIONS.public.v1,
         body: { action, target_version: targetVersion },
       }),
-    onSuccess: () => {
+    onSuccess: (_data, { pkgName }) => {
       queryClient.invalidateQueries(['get-packages']);
+      queryClient.invalidateQueries([pkgName]);
     },
   });
 };
