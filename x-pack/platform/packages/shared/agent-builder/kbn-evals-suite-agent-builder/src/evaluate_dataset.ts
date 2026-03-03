@@ -31,6 +31,7 @@ import {
   getStringMeta,
   getToolCallSteps,
 } from '@kbn/evals';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
@@ -59,6 +60,29 @@ export type EvaluateDataset = ({
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
 
+const RAG_EVAL_EXECUTION_MODE_ENV_VAR = 'RAG_EVAL_EXECUTION_MODE';
+const RAG_EVAL_EXECUTION_MODES = ['converse', 'search_tool'] as const;
+export type RagEvaluationExecutionMode = (typeof RAG_EVAL_EXECUTION_MODES)[number];
+
+export function getRagEvaluationExecutionMode(
+  env: Record<string, string | undefined> = process.env
+): RagEvaluationExecutionMode {
+  const value = env[RAG_EVAL_EXECUTION_MODE_ENV_VAR];
+  if (!value) {
+    return 'converse';
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'converse' || normalized === 'search_tool') {
+    return normalized;
+  }
+
+  throw new Error(
+    `Invalid ${RAG_EVAL_EXECUTION_MODE_ENV_VAR} value: "${value}". ` +
+      `Expected one of: ${RAG_EVAL_EXECUTION_MODES.join(', ')}.`
+  );
+}
+
 function configureExperiment({
   evaluators,
   chatClient,
@@ -73,7 +97,13 @@ function configureExperiment({
   task: ExperimentTask<DatasetExample, TaskOutput>;
   evaluators: ReturnType<typeof selectEvaluators>;
 } {
-  const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
+  const ragExecutionMode = getRagEvaluationExecutionMode();
+
+  const converseTask: ExperimentTask<DatasetExample, TaskOutput> = async ({
+    input,
+    output,
+    metadata,
+  }) => {
     const agentId = getStringMeta(metadata, 'agentId');
     const response = await chatClient.converse({
       messages: [{ message: input.question }],
@@ -110,6 +140,62 @@ function configureExperiment({
       groundednessAnalysis: groundednessResult?.metadata,
     };
   };
+
+  const searchToolTask: ExperimentTask<DatasetExample, TaskOutput> = async ({
+    input,
+    output,
+    metadata,
+  }) => {
+    const agentId = getStringMeta(metadata, 'agentId');
+    const searchIndex = getStringMeta(metadata, 'searchIndex');
+    const [converseResponse, searchResponse] = await Promise.all([
+      chatClient.converse({
+        messages: [{ message: input.question }],
+        options: agentId ? { agentId } : undefined,
+      }),
+      chatClient.executeTool({
+        toolId: platformCoreTools.search,
+        toolParams: {
+          query: input.question,
+          ...(searchIndex ? { index: searchIndex } : {}),
+        },
+      }),
+    ]);
+
+    // In search_tool mode, non-RAG evaluators should still rely on converse output.
+    const [correctnessResult, groundednessResult] = await Promise.all([
+      withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+        evaluators.correctnessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: converseResponse,
+          metadata,
+        })
+      ),
+      withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+        evaluators.groundednessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: converseResponse,
+          metadata,
+        })
+      ),
+    ]);
+
+    return {
+      errors: converseResponse.errors,
+      messages: converseResponse.messages,
+      steps: converseResponse.steps,
+      traceId: converseResponse.traceId,
+      correctnessAnalysis: correctnessResult?.metadata,
+      groundednessAnalysis: groundednessResult?.metadata,
+      // Dedicated direct-search output consumed by RAG extractor in search_tool mode.
+      searchToolResults: searchResponse.results,
+      searchToolErrors: searchResponse.errors,
+    };
+  };
+
+  const task = ragExecutionMode === 'search_tool' ? searchToolTask : converseTask;
 
   const ragEvaluators = createRagEvaluators({
     k: 10,
@@ -191,7 +277,10 @@ function configureExperiment({
     }),
   ]);
 
-  return { task, evaluators: selectedEvaluators };
+  return {
+    task,
+    evaluators: selectedEvaluators,
+  };
 }
 
 export function createEvaluateDataset({

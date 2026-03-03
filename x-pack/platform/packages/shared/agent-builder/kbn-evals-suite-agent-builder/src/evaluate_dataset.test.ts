@@ -51,6 +51,49 @@ describe('extractSearchRetrievedDocs', () => {
     ]);
   });
 
+  it('extracts docs from direct tool execution output results', () => {
+    const output = {
+      results: [
+        {
+          data: {
+            resources: [
+              { reference: { index: 'elastic_knowledge_base', id: '3325_1' } },
+              { reference: { index: 'elastic_knowledge_base', id: '3325_3' } },
+            ],
+          },
+        },
+      ],
+    } satisfies TaskOutput;
+
+    expect(extractSearchRetrievedDocs(output)).toEqual([
+      { index: 'elastic_knowledge_base', id: '3325_1' },
+      { index: 'elastic_knowledge_base', id: '3325_3' },
+    ]);
+  });
+
+  it('prefers dedicated searchToolResults when provided', () => {
+    const output = {
+      searchToolResults: [
+        {
+          data: {
+            resources: [{ reference: { index: 'wix_knowledge_base', id: 'direct-doc' } }],
+          },
+        },
+      ],
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.search',
+          results: [{ data: { reference: { index: 'elastic_knowledge_base', id: 'step-doc' } } }],
+        },
+      ],
+    } satisfies TaskOutput;
+
+    expect(extractSearchRetrievedDocs(output)).toEqual([
+      { index: 'wix_knowledge_base', id: 'direct-doc' },
+    ]);
+  });
+
   it('handles mixed result shapes and ignores malformed references', () => {
     const output = {
       steps: [
