@@ -11,7 +11,16 @@ import { getSnapshotMetadata, deleteRepository, generateRepoName } from './repos
 import { filterIndicesToRestore, restoreIndices } from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, indices } = config;
+  const {
+    esClient,
+    log,
+    repository,
+    snapshotName,
+    indices,
+    renamePattern,
+    renameReplacement,
+    allowNoMatches,
+  } = config;
 
   const result: LoadResult = {
     success: false,
@@ -44,6 +53,14 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
     log.info(`Found ${indicesToRestore.length} indices to restore`);
 
     if (indicesToRestore.length === 0) {
+      if (allowNoMatches) {
+        log.warning(
+          `No indices in snapshot match the specified patterns: ${indices?.join(', ')}. ` +
+            `Nothing to restore.`
+        );
+        result.success = true;
+        return result;
+      }
       throw new Error(
         `No indices in snapshot match the specified patterns: ${indices?.join(', ')}. ` +
           `Available indices: ${snapshotInfo.indices.slice(0, 10).join(', ')}${
@@ -59,6 +76,8 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
       repoName,
       snapshotName: snapshotInfo.snapshot,
       indices: indicesToRestore,
+      renamePattern,
+      renameReplacement,
     });
     result.restoredIndices = restoredIndices;
 
