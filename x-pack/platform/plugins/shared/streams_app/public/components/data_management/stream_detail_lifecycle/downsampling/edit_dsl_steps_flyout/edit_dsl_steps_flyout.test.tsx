@@ -287,9 +287,11 @@ describe('EditDslStepsFlyout', () => {
       await tick();
 
       const panel = withinStep(0);
-      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-        target: { value: '1.5' },
-      });
+      const fixedValueInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(fixedValueInput, { target: { value: '1.5' } });
+      fireEvent.blur(fixedValueInput);
 
       fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
 
@@ -313,9 +315,11 @@ describe('EditDslStepsFlyout', () => {
       await tick();
 
       const panel = withinStep(0);
-      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-        target: { value: '1.5' },
-      });
+      const fixedValueInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(fixedValueInput, { target: { value: '1.5' } });
+      fireEvent.blur(fixedValueInput);
 
       // Trigger validation via submit attempt to ensure the form has recorded blocking errors.
       fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
@@ -350,9 +354,11 @@ describe('EditDslStepsFlyout', () => {
       await tick();
 
       const invalidPanel = withinStep(1);
-      fireEvent.change(invalidPanel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-        target: { value: '1.5' },
-      });
+      const fixedValueInput = invalidPanel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(fixedValueInput, { target: { value: '1.5' } });
+      fireEvent.blur(fixedValueInput);
 
       // Trigger validation via submit attempt to ensure the form has recorded blocking errors.
       fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
@@ -393,9 +399,11 @@ describe('EditDslStepsFlyout', () => {
       fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalUnit`), {
         target: { value: 'm' },
       });
-      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-        target: { value: '1' },
-      });
+      const fixedValueInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(fixedValueInput, { target: { value: '1' } });
+      fireEvent.blur(fixedValueInput);
 
       fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
 
@@ -410,6 +418,68 @@ describe('EditDslStepsFlyout', () => {
 
       fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}CancelButton`));
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('after', () => {
+    it('restores the last after value on blur when cleared', async () => {
+      const onChange = jest.fn();
+      renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '20d', fixed_interval: '1h' }],
+          },
+        },
+        onChange,
+      });
+
+      await tick();
+      onChange.mockClear();
+
+      const panel = withinStep(0);
+      const valueInput = panel.getByTestId(`${DATA_TEST_SUBJ}AfterValue`) as HTMLInputElement;
+
+      fireEvent.change(valueInput, { target: { value: '' } });
+      expect(valueInput.value).toBe('');
+
+      await tick();
+      expect(onChange).toHaveBeenCalledTimes(0);
+
+      fireEvent.blur(valueInput);
+      expect(valueInput.value).toBe('20');
+    });
+  });
+
+  describe('fixed_interval', () => {
+    it('restores the last fixed_interval value on blur when cleared', async () => {
+      const onChange = jest.fn();
+      renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '20d', fixed_interval: '5d' }],
+          },
+        },
+        onChange,
+      });
+
+      await tick();
+      onChange.mockClear();
+
+      const panel = withinStep(0);
+      const valueInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+
+      fireEvent.change(valueInput, { target: { value: '' } });
+      expect(valueInput.value).toBe('');
+
+      await tick();
+      expect(onChange).toHaveBeenCalledTimes(0);
+
+      fireEvent.blur(valueInput);
+      expect(valueInput.value).toBe('5');
     });
   });
 
@@ -523,9 +593,11 @@ describe('EditDslStepsFlyout', () => {
 
       // Make step 2 invalid.
       const step2Panel = withinStep(1);
-      fireEvent.change(step2Panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-        target: { value: '1.5' },
-      });
+      const fixedValueInput = step2Panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(fixedValueInput, { target: { value: '1.5' } });
+      fireEvent.blur(fixedValueInput);
 
       fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
       await tick();
@@ -598,9 +670,11 @@ describe('EditDslStepsFlyout', () => {
       onChange.mockClear();
 
       const panel = withinStep(0);
-      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-        target: { value: '1.5' },
-      });
+      const fixedValueInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+      fireEvent.change(fixedValueInput, { target: { value: '1.5' } });
+      fireEvent.blur(fixedValueInput);
 
       await waitFor(() => {
         const lastCall = onChange.mock.calls.at(-1);
@@ -634,15 +708,15 @@ describe('EditDslStepsFlyout', () => {
         clearTimeoutSpy.mockClear();
 
         const panel = withinStep(0);
-        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-          target: { value: '1' },
-        });
-        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-          target: { value: '2' },
-        });
-        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-          target: { value: '3' },
-        });
+        const fixedValueInput = panel.getByTestId(
+          `${DATA_TEST_SUBJ}FixedIntervalValue`
+        ) as HTMLInputElement;
+        fireEvent.change(fixedValueInput, { target: { value: '1' } });
+        fireEvent.blur(fixedValueInput);
+        fireEvent.change(fixedValueInput, { target: { value: '2' } });
+        fireEvent.blur(fixedValueInput);
+        fireEvent.change(fixedValueInput, { target: { value: '3' } });
+        fireEvent.blur(fixedValueInput);
 
         expect(onChange).toHaveBeenCalledTimes(0);
 
@@ -697,9 +771,13 @@ describe('EditDslStepsFlyout', () => {
         clearTimeoutSpy.mockClear();
 
         const panel = withinStep(0);
-        fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
-          target: { value: '2' },
-        });
+        const fixedValueInput = panel.getByTestId(
+          `${DATA_TEST_SUBJ}FixedIntervalValue`
+        ) as HTMLInputElement;
+        fireEvent.change(fixedValueInput, { target: { value: '2' } });
+
+        // Commit happens on blur.
+        fireEvent.blur(fixedValueInput);
 
         unmount();
 

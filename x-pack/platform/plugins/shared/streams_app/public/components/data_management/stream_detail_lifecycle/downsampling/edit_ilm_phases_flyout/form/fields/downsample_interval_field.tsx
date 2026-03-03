@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import {
   getFieldValidityAndErrorMessage,
+  type FieldHook,
   UseField,
   useFormContext,
   useFormData,
@@ -29,6 +30,140 @@ export interface DownsampleIntervalFieldProps {
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
   isEnabled: boolean;
 }
+
+const DownsampleIntervalFieldControl = ({
+  phaseName,
+  dataTestSubj,
+  timeUnitOptions,
+  isEnabled,
+  valueField,
+  unitField,
+}: {
+  phaseName: PhaseName;
+  dataTestSubj: string;
+  timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  isEnabled: boolean;
+  valueField: FieldHook<string>;
+  unitField: FieldHook<PreservedTimeUnit>;
+}) => {
+  const form = useFormContext();
+
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
+  const committedValue = String(valueField.value ?? '');
+  const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
+
+  const isEditingRef = useRef(false);
+  const [draftValue, setDraftValue] = useState<string>(committedValue);
+
+  useEffect(() => {
+    if (isEditingRef.current) return;
+    setDraftValue(committedValue);
+  }, [committedValue]);
+
+  const unitOptions = getUnitSelectOptions(timeUnitOptions, currentUnit);
+
+  const showInvalid = isEnabled && isInvalid;
+  const showError = isEnabled ? errorMessage : null;
+
+  const getPhaseDownsampleIntervalMs = (phase: DownsamplePhase): number | null =>
+    getPhaseDurationMs(form, phase, {
+      valuePathSuffix: 'downsample.fixedIntervalValue',
+      unitPathSuffix: 'downsample.fixedIntervalUnit',
+      extraEnabledPathSuffix: 'downsampleEnabled',
+    });
+
+  const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
+    DOWNSAMPLE_PHASES,
+    phaseName as DownsamplePhase,
+    getPhaseDownsampleIntervalMs
+  );
+  const { min, max } = getBoundsHelpTextValues({
+    lowerBoundMs,
+    upperBoundMs,
+    unit: currentUnit,
+  });
+
+  const helpText =
+    upperBoundMs === undefined
+      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBound', {
+          defaultMessage: 'Must be larger than {min} based on current configuration.',
+          values: { min },
+        })
+      : i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpRange', {
+          defaultMessage:
+            'Must be larger than {min} and smaller than {max} based on current configuration.',
+          values: {
+            min,
+            max,
+          },
+        });
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel', {
+        defaultMessage: 'Interval',
+      })}
+      helpText={showInvalid ? undefined : helpText}
+      isInvalid={showInvalid}
+      error={showError}
+    >
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        <EuiFlexItem>
+          <EuiFieldNumber
+            compressed
+            min={0}
+            fullWidth
+            aria-label={i18n.translate(
+              'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel',
+              {
+                defaultMessage: 'Downsample interval value',
+              }
+            )}
+            value={draftValue}
+            disabled={!isEnabled}
+            isInvalid={showInvalid}
+            data-test-subj={`${dataTestSubj}DownsamplingIntervalValue`}
+            onChange={(e) => {
+              isEditingRef.current = true;
+              const nextValue = e.target.value;
+              setDraftValue(nextValue);
+            }}
+            onBlur={() => {
+              isEditingRef.current = false;
+              const nextValue = draftValue.trim();
+              if (nextValue === '') {
+                setDraftValue(committedValue);
+                return;
+              }
+
+              // Commit only on blur.
+              if (nextValue !== committedValue.trim()) {
+                valueField.setValue(nextValue);
+              }
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSelect
+            compressed
+            fullWidth
+            disabled={!isEnabled}
+            aria-label={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingUnitAria', {
+              defaultMessage: 'Downsampling interval unit',
+            })}
+            options={unitOptions}
+            value={currentUnit}
+            data-test-subj={`${dataTestSubj}DownsamplingIntervalUnit`}
+            onChange={(e) => {
+              const nextUnit = e.target.value as PreservedTimeUnit;
+              unitField.setValue(nextUnit);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
 
 export const DownsampleIntervalField = ({
   phaseName,
@@ -59,111 +194,20 @@ export const DownsampleIntervalField = ({
     ],
   });
 
-  const getPhaseDownsampleIntervalMs = (phase: DownsamplePhase): number | null =>
-    getPhaseDurationMs(form, phase, {
-      valuePathSuffix: 'downsample.fixedIntervalValue',
-      unitPathSuffix: 'downsample.fixedIntervalUnit',
-      extraEnabledPathSuffix: 'downsampleEnabled',
-    });
-
   return (
     <UseField path={valuePath} onError={(errors) => onFieldErrorsChange?.(valuePath, errors)}>
       {(valueField) => (
         <UseField path={unitPath}>
-          {(unitField) => {
-            const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
-            const currentValue = String(valueField.value ?? '');
-            const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
-
-            const unitOptions = getUnitSelectOptions(timeUnitOptions, currentUnit);
-
-            const showInvalid = isEnabled && isInvalid;
-            const showError = isEnabled ? errorMessage : null;
-
-            const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
-              DOWNSAMPLE_PHASES,
-              phaseName as DownsamplePhase,
-              getPhaseDownsampleIntervalMs
-            );
-            const { min, max } = getBoundsHelpTextValues({
-              lowerBoundMs,
-              upperBoundMs,
-              unit: currentUnit,
-            });
-
-            const helpText =
-              upperBoundMs === undefined
-                ? i18n.translate(
-                    'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpLowerBound',
-                    {
-                      defaultMessage: 'Must be larger than {min} based on current configuration.',
-                      values: { min },
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalHelpRange',
-                    {
-                      defaultMessage:
-                        'Must be larger than {min} and smaller than {max} based on current configuration.',
-                      values: {
-                        min,
-                        max,
-                      },
-                    }
-                  );
-
-            return (
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel',
-                  {
-                    defaultMessage: 'Interval',
-                  }
-                )}
-                helpText={showInvalid ? undefined : helpText}
-                isInvalid={showInvalid}
-                error={showError}
-              >
-                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                  <EuiFlexItem>
-                    <EuiFieldNumber
-                      compressed
-                      min={0}
-                      fullWidth
-                      aria-label={i18n.translate(
-                        'xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel',
-                        {
-                          defaultMessage: 'Downsample interval value',
-                        }
-                      )}
-                      value={currentValue}
-                      disabled={!isEnabled}
-                      isInvalid={showInvalid}
-                      data-test-subj={`${dataTestSubj}DownsamplingIntervalValue`}
-                      onChange={(e) => valueField.onChange(e)}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiSelect
-                      compressed
-                      fullWidth
-                      disabled={!isEnabled}
-                      aria-label={i18n.translate(
-                        'xpack.streams.editIlmPhasesFlyout.downsamplingUnitAria',
-                        {
-                          defaultMessage: 'Downsampling interval unit',
-                        }
-                      )}
-                      options={unitOptions}
-                      value={currentUnit}
-                      data-test-subj={`${dataTestSubj}DownsamplingIntervalUnit`}
-                      onChange={(e) => unitField.setValue(e.target.value as PreservedTimeUnit)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            );
-          }}
+          {(unitField) => (
+            <DownsampleIntervalFieldControl
+              phaseName={phaseName}
+              dataTestSubj={dataTestSubj}
+              timeUnitOptions={timeUnitOptions}
+              isEnabled={isEnabled}
+              valueField={valueField as FieldHook<string>}
+              unitField={unitField as FieldHook<PreservedTimeUnit>}
+            />
+          )}
         </UseField>
       )}
     </UseField>
