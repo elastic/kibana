@@ -8,11 +8,15 @@
  */
 
 /**
- * Determines whether the cursor position (given by providing the buffer up to the cursor) is
- * currently within an ES|QL `"query"` string for a `POST /_query` request, including triple-quoted
- * strings (`""" ... """`).
+ * This function takes a Console text up to the current position and determines whether
+ * the current position is:
+ * - inside a `""" ... """` triple-quoted string
+ * - inside the JSON string value for the `"query"` key (either `"..."` or `"""..."""`)
+ * - and whether the surrounding request section is a POST /_query(/async) request.
  *
- * @param text The Console buffer up to the cursor position.
+ * When inside an ES|QL query value, it returns the start index of the query text (the first
+ * character after the opening quote(s)).
+ * @param text The text up to the current position
  */
 const TRIPLE_QUOTES = '"""';
 const QUERY_KEY = '"query"';
@@ -29,6 +33,10 @@ const ASCII = {
 const isWhitespace = (ch: string | undefined) =>
   ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
 
+/**
+ * Walks backwards from `fromIndex` until a non-whitespace character is found.
+ * Returns that index, or -1 if the scan runs past the beginning.
+ */
 const skipWhitespaceBackward = (text: string, fromIndex: number): number => {
   for (let index = fromIndex; index >= 0; index--) {
     if (!isWhitespace(text[index])) {
@@ -47,14 +55,27 @@ const isAsciiLetter = (ch: string | undefined): boolean => {
   );
 };
 
+/**
+ * Returns true when `index` is positioned at the start of a line.
+ * This logic treats `\n` as the line separator.
+ */
 const isStartOfLine = (text: string, index: number): boolean => {
   if (index === 0) {
     return true;
   }
-  return text[index - 1] === '\n';
+  const previousChar = text[index - 1];
+  return previousChar === '\n';
 };
 
+/**
+ * Checks whether `text[quoteIndex]` (the opening quote character of either `"` or `"""`) is the
+ * start of the JSON value for the `"query"` key, i.e. the preceding text ends with:
+ * `"query"\s*:\s*`.
+ *
+ * This is intentionally implemented without regexes and without creating large substrings.
+ */
 const isQueryValueStartAtQuote = (text: string, quoteIndex: number): boolean => {
+  // We expect the preceding text to end with: `"query"\s*:\s*`
   const colonIndex = skipWhitespaceBackward(text, quoteIndex - 1);
   if (colonIndex < 0 || text[colonIndex] !== ':') {
     return false;
@@ -69,6 +90,10 @@ const isQueryValueStartAtQuote = (text: string, quoteIndex: number): boolean => 
   return text.startsWith(QUERY_KEY, keyStartIndex);
 };
 
+/**
+ * Case-insensitive word match at `startIndex` for ASCII methods.
+ * Ensures we don't accidentally match longer identifiers (e.g. `GETS`).
+ */
 const matchesWordAt = (text: string, startIndex: number, word: string): boolean => {
   for (let offset = 0; offset < word.length; offset++) {
     const ch = text[startIndex + offset];
@@ -76,9 +101,14 @@ const matchesWordAt = (text: string, startIndex: number, word: string): boolean 
       return false;
     }
   }
+  // Ensure we don't match a larger identifier (e.g. GETS).
   return !isAsciiLetter(text[startIndex + word.length]);
 };
 
+/**
+ * Returns true when `text[startIndex...]` starts with an HTTP method token (GET/POST/...)
+ * and is not part of a longer word.
+ */
 const isRequestMethodAt = (text: string, startIndex: number): boolean => {
   if (!isAsciiLetter(text[startIndex])) return false;
   for (const method of HTTP_METHODS) {
@@ -89,17 +119,32 @@ const isRequestMethodAt = (text: string, startIndex: number): boolean => {
   return false;
 };
 
+/**
+ * Returns true if the given request line corresponds to an ES|QL request (`POST /_query` or
+ * `POST /_query/async`), allowing querystring suffixes.
+ */
 const isEsqlQueryRequestLine = (line: string): boolean => ESQL_QUERY_REQUEST_LINE_RE.test(line);
 
+/**
+ * Returns the index where query text begins if `quoteIndex` starts the `"query"` value.
+ * Otherwise returns -1.
+ */
 const getQueryValueStartIndex = (text: string, quoteIndex: number, quoteLen: 1 | 3): number => {
   return isQueryValueStartAtQuote(text, quoteIndex) ? quoteIndex + quoteLen : -1;
 };
 
+/**
+ * Attempts to interpret the line starting at `lineStartIndex` as a Console request line
+ * (HTTP method + path). When a request line is found, returns:
+ * - `isEsqlQueryRequest`: whether this request line is a POST /_query(/async) request
+ * - `nextIndex`: where the main scan loop should continue (the beginning of the next line)
+ */
 const scanRequestLineFrom = (
   text: string,
   lineStartIndex: number
 ): { nextIndex: number; isEsqlQueryRequest: boolean } | undefined => {
   let scanIndex = lineStartIndex;
+  // Skip leading spaces/tabs on the request line.
   while (scanIndex < text.length && (text[scanIndex] === ' ' || text[scanIndex] === '\t')) {
     scanIndex++;
   }
@@ -110,9 +155,11 @@ const scanRequestLineFrom = (
 
   const newlineIndex = text.indexOf('\n', scanIndex);
   const lineEnd = newlineIndex === -1 ? text.length : newlineIndex;
+  // The request line is typically short; substring allocation here is bounded.
   const line = text.slice(scanIndex, lineEnd);
   const isEsqlQueryRequest = isEsqlQueryRequestLine(line);
 
+  // Move the index past the current request line.
   const nextIndex = newlineIndex === -1 ? text.length : newlineIndex + 1;
   return { nextIndex, isEsqlQueryRequest };
 };
@@ -120,14 +167,19 @@ const scanRequestLineFrom = (
 export const checkForTripleQuotesAndEsqlQuery = (
   text: string
 ): { insideTripleQuotes: boolean; insideEsqlQuery: boolean; esqlQueryIndex: number } => {
+  // Quote tracking for the JSON body:
+  // - inDoubleQuoteString: between unescaped `" ... "`
+  // - inTripleQuoteString: between `""" ... """` (only toggled when not already in double quotes)
   let inDoubleQuoteString = false;
   let inTripleQuoteString = false;
   let inQueryValueString = false;
 
+  // Tracks whether the current request section is a POST /_query(/async) request.
   let inEsqlQueryRequest = false;
   let esqlQueryStartIndex = -1;
 
   for (let index = 0; index < text.length; ) {
+    // Detect request boundaries (only meaningful outside quoted regions).
     if (!inDoubleQuoteString && !inTripleQuoteString && isStartOfLine(text, index)) {
       const requestLineScan = scanRequestLineFrom(text, index);
       if (requestLineScan) {
@@ -137,6 +189,7 @@ export const checkForTripleQuotesAndEsqlQuery = (
       }
     }
 
+    // Triple quotes (only when we're not already inside a standard JSON string).
     if (!inDoubleQuoteString && text.startsWith(TRIPLE_QUOTES, index)) {
       inTripleQuoteString = !inTripleQuoteString;
       if (inTripleQuoteString) {
@@ -150,6 +203,7 @@ export const checkForTripleQuotesAndEsqlQuery = (
       continue;
     }
 
+    // Standard JSON string quotes (unescaped only, and only when not in triple quotes).
     if (!inTripleQuoteString && text[index] === '"' && text[index - 1] !== '\\') {
       inDoubleQuoteString = !inDoubleQuoteString;
       if (inDoubleQuoteString) {
