@@ -95,6 +95,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/cps-utils",
     "@kbn/cps",
+    "@kbn/cases-plugin",
+    "@kbn/security-plugin",
   ],
   "exclude": ["target/**/*"]
 }
