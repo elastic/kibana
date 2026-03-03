@@ -301,36 +301,6 @@ describe('Options list popover', () => {
     });
   });
 
-  describe('allow expensive queries warning', () => {
-    test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent(contextMock);
-      const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeNull();
-    });
-
-    test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent({
-        ...contextMock,
-        componentApi: {
-          ...contextMock.componentApi,
-          allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
-        },
-      });
-      const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeInstanceOf(HTMLDivElement);
-    });
-  });
-
   describe('advanced settings', () => {
     const ensureComponentIsHidden = async ({
       displaySettings,

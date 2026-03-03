@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSuperSelect,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,13 +26,12 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../system_selector';
+import { ConditionPanel } from '../../../data_management/shared/condition_display';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQuery;
   onSave: (query: StreamQuery) => void;
-  systems: Omit<System, 'description'>[];
   dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -45,19 +43,13 @@ export function GeneratedEventPreview({
   isEditing,
   setIsEditing,
   onSave,
-  systems,
   dataViews,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
   const [query, setQuery] = useState<StreamQuery>(initialQuery);
 
-  const options = [
-    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...systems.map((system) => ({ value: system, inputDisplay: system.name })),
-  ];
-
-  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
+  const [touched, setTouched] = useState({ title: false, kql: false });
   const validation = validateQuery(query);
 
   return (
@@ -96,7 +88,6 @@ export function GeneratedEventPreview({
                         setQuery(initialQuery);
                         setTouched({
                           title: false,
-                          feature: false,
                           kql: false,
                         });
                       }}
@@ -118,7 +109,6 @@ export function GeneratedEventPreview({
                         onSave(query);
                         setTouched({
                           title: false,
-                          feature: false,
                           kql: false,
                         });
                       }}
@@ -190,51 +180,6 @@ export function GeneratedEventPreview({
           label={
             <EuiFormLabel>
               {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSystemLabel',
-                { defaultMessage: 'System' }
-              )}
-            </EuiFormLabel>
-          }
-        >
-          <EuiSuperSelect
-            options={options}
-            valueOfSelected={
-              query.feature
-                ? options.find(
-                    (option) =>
-                      option.value.name === query.feature?.name &&
-                      option.value.type === query.feature?.type
-                  )?.value
-                : ALL_DATA_OPTION.value
-            }
-            onBlur={() => {
-              setTouched((prev) => ({ ...prev, feature: true }));
-            }}
-            onChange={(value) => {
-              const feature =
-                value.type === ALL_DATA_OPTION.value.type
-                  ? undefined
-                  : {
-                      name: value.name,
-                      filter: value.filter,
-                      type: value.type,
-                    };
-              setQuery({ ...query, feature });
-              setTouched((prev) => ({ ...prev, feature: true }));
-            }}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.systemPlaceholder',
-              { defaultMessage: 'Select system' }
-            )}
-            disabled={!isEditing}
-            fullWidth
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldQueryLabel',
                 { defaultMessage: 'Query' }
               )}
@@ -269,6 +214,27 @@ export function GeneratedEventPreview({
             submitOnBlur
           />
         </EuiFormRow>
+
+        {query.feature?.filter && (
+          <EuiFormRow
+            label={
+              <EuiFormLabel>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldAdditionalFilterLabel',
+                  { defaultMessage: 'Additional filter' }
+                )}
+              </EuiFormLabel>
+            }
+            helpText={i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.additionalFilterHelpText',
+              {
+                defaultMessage: 'This filter was inherited from a system and cannot be modified.',
+              }
+            )}
+          >
+            <ConditionPanel condition={query.feature.filter} />
+          </EuiFormRow>
+        )}
       </EuiForm>
 
       <EuiHorizontalRule margin="m" />

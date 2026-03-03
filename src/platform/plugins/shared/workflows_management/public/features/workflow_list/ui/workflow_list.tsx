@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -70,6 +70,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
+  // Use a ref here to avoid re-rendering when the selected items change
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+
   const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
   const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
@@ -81,15 +85,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const onRefresh = useCallback(async () => {
     const result = await refetch();
-    // Update selected items with fresh data after refetch
-    if (result.data?.results && selectedItems.length > 0) {
-      const selectedIds = selectedItems.map((item) => item.id);
+
+    const currentSelectedItems = selectedItemsRef.current;
+    if (result.data?.results && currentSelectedItems.length > 0) {
+      const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
       const updatedSelectedItems = result.data.results.filter((workflow) =>
-        selectedIds.includes(workflow.id)
+        selectedIds.has(workflow.id)
       );
       setSelectedItems(updatedSelectedItems);
     }
-  }, [refetch, selectedItems]);
+  }, [refetch]);
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
@@ -120,7 +125,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const handleDeleteWorkflow = useCallback(
     (item: WorkflowListItemDto) => setWorkflowToDelete(item),
-    [setWorkflowToDelete]
+    []
   );
 
   const handleConfirmDelete = useCallback(() => {
@@ -155,6 +160,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          skipRefetch: true,
         },
         {
           onError: (err: unknown) => {
@@ -506,7 +512,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {workflowToDelete && (
         <EuiConfirmModal
           title={i18n.translate('workflows.workflowList.deleteModal.title', {
-            defaultMessage: `Delete "${workflowToDelete.name}"?`,
+            defaultMessage: 'Delete "{name}"?',
             values: { name: workflowToDelete.name },
           })}
           titleProps={{ id: modalTitleId }}
@@ -525,7 +531,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         >
           <p>
             {i18n.translate('workflows.workflowList.deleteModal.message', {
-              defaultMessage: `Delete the "${workflowToDelete.name}" workflow? This action cannot be undone.`,
+              defaultMessage: 'Delete the "{name}" workflow? This action cannot be undone.',
               values: { name: workflowToDelete.name },
             })}
           </p>
