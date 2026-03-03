@@ -32,13 +32,13 @@ export const registerTools = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { agentBuilder, esql } = setupDeps;
+  const { agentBuilder } = setupDeps;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool(),
     getDocumentByIdTool(),
     executeEsqlTool(),
-    generateEsqlTool(esql?.buildServerESQLCallbacks),
+    generateEsqlTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),

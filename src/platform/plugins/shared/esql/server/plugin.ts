@@ -13,11 +13,9 @@ import type { ContentManagementServerSetup } from '@kbn/content-management-plugi
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
-import { buildServerESQLCallbacks } from './services/build_server_esql_callbacks';
 
 export interface EsqlServerPluginSetup {
   getExtensionsRegistry: () => ESQLExtensionsRegistry;
-  buildServerESQLCallbacks: typeof buildServerESQLCallbacks;
 }
 
 export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
@@ -45,7 +43,6 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
 
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,
-      buildServerESQLCallbacks,
     };
   }
 

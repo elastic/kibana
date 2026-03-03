@@ -6,9 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ESQLCallbacks } from '@kbn/esql-types';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { buildServerESQLCallbacks } from '@kbn/esql/server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
@@ -34,9 +33,7 @@ const nlToEsqlToolSchema = z.object({
     ),
 });
 
-export const generateEsqlTool = (
-  buildServerESQLCallbacks?: (opts: { client: ElasticsearchClient }) => ESQLCallbacks
-): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
@@ -47,7 +44,7 @@ export const generateEsqlTool = (
       { esClient, modelProvider, logger, events }
     ) => {
       const model = await modelProvider.getDefaultModel();
-      const esqlCallbacks = buildServerESQLCallbacks?.({ client: esClient.asCurrentUser });
+      const esqlCallbacks = buildServerESQLCallbacks({ client: esClient.asCurrentUser });
 
       const esqlResponse = await generateEsql({
         nlQuery,
