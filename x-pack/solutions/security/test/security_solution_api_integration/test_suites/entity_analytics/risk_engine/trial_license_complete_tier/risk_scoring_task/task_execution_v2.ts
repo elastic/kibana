@@ -21,7 +21,7 @@ import {
   enableEntityStoreV2,
   disableEntityStoreV2,
   entityStoreV2RouteHelpersFactory,
-  assertRiskScoresPropagatedToEntityStore,
+  assertRiskScoresWrittenToEntityStore,
   getEntityId,
   getEntityRisk,
   setupEntityStoreV2,
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         return acc;
       }, {});
 
-      const entities = await assertRiskScoresPropagatedToEntityStore({
+      const entities = await assertRiskScoresWrittenToEntityStore({
         es,
         log,
         expectedValuesByEntityId: expectedValues,

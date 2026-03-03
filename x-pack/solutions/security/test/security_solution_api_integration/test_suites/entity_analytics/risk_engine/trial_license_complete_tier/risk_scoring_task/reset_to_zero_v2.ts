@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
 import {
-  assertRiskScoresPropagatedToEntityStore,
+  assertRiskScoresWrittenToEntityStore,
   buildDocument,
   cleanupRiskEngineV2,
   createAndSyncRuleAndAlertsFactory,
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext): void => {
         return acc;
       }, {});
 
-      await assertRiskScoresPropagatedToEntityStore({
+      await assertRiskScoresWrittenToEntityStore({
         es,
         log,
         entityStoreRoutes,

@@ -14,7 +14,7 @@ import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common
 import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
-  assertRiskScoresPropagatedToEntityStore,
+  assertRiskScoresWrittenToEntityStore,
   buildDocument,
   cleanupRiskEngineV2,
   createAndSyncRuleAndAlertsFactory,
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(persistedScoreByApi).to.eql(expectedScore);
         expect(persistedScoreByApi).to.eql(persistedScoreByEngine);
 
-        const entities = await assertRiskScoresPropagatedToEntityStore({
+        const entities = await assertRiskScoresWrittenToEntityStore({
           es,
           log,
           expectedValuesByEntityId: { 'host:host-1': expectedScore.calculated_score_norm },
@@ -226,7 +226,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(persistedServiceScores[0]).to.eql(expectedScore);
         expect(persistedServiceScores[1]).to.eql(expectedScore);
 
-        const entities = await assertRiskScoresPropagatedToEntityStore({
+        const entities = await assertRiskScoresWrittenToEntityStore({
           es,
           log,
           expectedValuesByEntityId: { 'service:service-1': expectedScore.calculated_score_norm },

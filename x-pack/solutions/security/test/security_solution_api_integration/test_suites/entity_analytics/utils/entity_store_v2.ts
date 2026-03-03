@@ -308,7 +308,7 @@ export const teardownEntityStoreV2 = async ({
   await disableEntityStore();
 };
 
-export const assertRiskScoresPropagatedToEntityStore = async ({
+export const assertRiskScoresWrittenToEntityStore = async ({
   es,
   log,
   entityStoreRoutes,

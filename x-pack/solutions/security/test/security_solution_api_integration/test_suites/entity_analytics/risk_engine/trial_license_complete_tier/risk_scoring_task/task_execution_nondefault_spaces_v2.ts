@@ -11,7 +11,7 @@ import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/s
 import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
 import {
-  assertRiskScoresPropagatedToEntityStore,
+  assertRiskScoresWrittenToEntityStore,
   buildDocument,
   cleanupRiskEngineV2,
   createAndSyncRuleAndAlertsFactory,
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
             .sort()
         ).to.eql(expectedIds);
 
-        const entities = await assertRiskScoresPropagatedToEntityStore({
+        const entities = await assertRiskScoresWrittenToEntityStore({
           es,
           log,
           expectedValuesByEntityId: normalizeScores(scores).reduce<Record<string, number>>(
@@ -329,7 +329,7 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         const riskScores = await readRiskScores(es, index);
         expect(riskScores.length).to.be.greaterThan(0);
 
-        const entities = await assertRiskScoresPropagatedToEntityStore({
+        const entities = await assertRiskScoresWrittenToEntityStore({
           es,
           log,
           expectedValuesByEntityId: normalizeScores(riskScores).reduce<Record<string, number>>(
