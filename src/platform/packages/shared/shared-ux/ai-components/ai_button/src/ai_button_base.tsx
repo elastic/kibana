@@ -20,32 +20,21 @@ import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
 const resolvedIconType = (iconType: AiButtonIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
+// Per design: only xs uses small icon; s and m both use medium icon.
 const getSyncedIconSize = (size?: string): 's' | 'm' => (size === 'xs' ? 's' : 'm');
 
 export const AiButtonBase = (props: AiButtonProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
-  const isFilled = variant === 'accent';
 
   const euiButtonXsSizeCss = useAiButtonXsSizeCss();
   const { buttonCss, labelCss } = useAiButtonGradientStyles({
-    isFilled,
     variant,
+    iconOnly: props.iconOnly,
   });
-  const { gradientId, iconGradientCss, stops } = useSvgAiGradient({
-    isFilled,
-    variant,
-  });
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant });
 
-  // Render local SVG <defs> so icon paths can reference url(#gradientId).
-  // Defs are rendered before each button/icon to guarantee the id exists in the same DOM tree.
   const svgGradientDefs = iconGradientCss ? (
-    <SvgAiGradientDefs
-      gradientId={gradientId}
-      startColor={stops.startColor}
-      endColor={stops.endColor}
-      startOffsetPercent={stops.startOffsetPercent}
-      endOffsetPercent={stops.endOffsetPercent}
-    />
+    <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
   ) : null;
 
   if (props.iconOnly === true) {
