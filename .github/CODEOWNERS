@@ -2167,6 +2167,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/config* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
+/**/scout/.meta/** @kibanamachine @elastic/appex-qa
+/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
