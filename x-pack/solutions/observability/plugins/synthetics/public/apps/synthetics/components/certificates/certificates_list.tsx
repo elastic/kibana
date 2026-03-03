@@ -18,7 +18,12 @@ import { useSyntheticsSettingsContext } from '../../contexts';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
 import { FingerprintCol } from './fingerprint_col';
-import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
+import {
+  LOADING_CERTIFICATES,
+  NO_CERTS_AVAILABLE,
+  COMPUTED_STATUS_OK_TOOLTIP,
+  computedStatusRiskTooltip,
+} from './translations';
 
 interface Page {
   index: number;
@@ -49,6 +54,8 @@ interface Props {
   onChange: (page: Page, sort: CertSort) => void;
   certificates: CertResult & { isLoading?: boolean };
   alertsByCert?: Map<string, CertAlertInfo>;
+  certExpirationThreshold: number;
+  certAgeThreshold: number;
 }
 
 const useCertAlertsUrl = (sha256: string) => {
@@ -69,29 +76,70 @@ const ALERT_STATUS_DISPLAY: Record<string, { label: string; color: 'danger' | 'w
   unknown: { label: labels.EXPIRES_SOON, color: 'warning' },
 };
 
+type ComputedCertStatus = 'ok' | 'expired' | 'expiring' | 'aging';
+
+const computeCertStatus = (
+  cert: Cert,
+  expirationThreshold: number,
+  ageThreshold: number
+): ComputedCertStatus => {
+  const { not_after: notAfter, not_before: notBefore } = cert;
+  if (!notAfter) return 'ok';
+
+  const now = moment();
+  if (moment(notAfter).isBefore(now)) return 'expired';
+  if (moment(notAfter).diff(now, 'days') < expirationThreshold) return 'expiring';
+  if (notBefore && now.diff(moment(notBefore), 'days') > ageThreshold) return 'aging';
+  return 'ok';
+};
+
+const COMPUTED_STATUS_DISPLAY: Record<
+  ComputedCertStatus,
+  { label: string; color: 'success' | 'danger' | 'warning' }
+> = {
+  ok: { label: labels.OK, color: 'success' },
+  expired: { label: labels.EXPIRED, color: 'danger' },
+  expiring: { label: labels.EXPIRES_SOON, color: 'warning' },
+  aging: { label: labels.TOO_OLD, color: 'warning' },
+};
+
 const CertAlertsBadge: React.FC<{
-  sha256: string;
+  cert: Cert;
   alertsByCert?: Map<string, CertAlertInfo>;
-}> = ({ sha256, alertsByCert }) => {
-  const alertsUrl = useCertAlertsUrl(sha256);
-  const alertInfo = alertsByCert?.get(sha256);
+  certExpirationThreshold: number;
+  certAgeThreshold: number;
+}> = ({ cert, alertsByCert, certExpirationThreshold, certAgeThreshold }) => {
+  const alertsUrl = useCertAlertsUrl(cert.sha256);
+  const alertInfo = alertsByCert?.get(cert.sha256);
 
-  if (!alertInfo) return null;
+  if (alertInfo) {
+    const { count, status } = alertInfo;
+    const display = ALERT_STATUS_DISPLAY[status];
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.synthetics.certs.list.activeAlertsTooltip', {
+          defaultMessage:
+            '{count, plural, one {# active TLS alert} other {# active TLS alerts}} for this certificate',
+          values: { count },
+        })}
+      >
+        <EuiLink href={alertsUrl}>
+          <EuiHealth color={display.color}>{display.label}</EuiHealth>
+        </EuiLink>
+      </EuiToolTip>
+    );
+  }
 
-  const { count, status } = alertInfo;
-  const display = ALERT_STATUS_DISPLAY[status];
+  const computed = computeCertStatus(cert, certExpirationThreshold, certAgeThreshold);
+  const display = COMPUTED_STATUS_DISPLAY[computed];
+  const tooltip =
+    computed === 'ok'
+      ? COMPUTED_STATUS_OK_TOOLTIP
+      : computedStatusRiskTooltip(certExpirationThreshold, certAgeThreshold);
 
   return (
-    <EuiToolTip
-      content={i18n.translate('xpack.synthetics.certs.list.activeAlertsTooltip', {
-        defaultMessage:
-          '{count, plural, one {# active TLS alert} other {# active TLS alerts}} for this certificate',
-        values: { count },
-      })}
-    >
-      <EuiLink href={alertsUrl}>
-        <EuiHealth color={display.color}>{display.label}</EuiHealth>
-      </EuiLink>
+    <EuiToolTip content={tooltip}>
+      <EuiHealth color={display.color}>{display.label}</EuiHealth>
     </EuiToolTip>
   );
 };
@@ -102,6 +150,8 @@ export const CertificateList: React.FC<Props> = ({
   sort,
   onChange,
   alertsByCert,
+  certExpirationThreshold,
+  certAgeThreshold,
 }) => {
   const dateFormatter = useDateFormat();
   const pagination = {
@@ -143,8 +193,13 @@ export const CertificateList: React.FC<Props> = ({
     {
       name: labels.ALERTS_COL,
       field: 'sha256',
-      render: (sha256: string) => (
-        <CertAlertsBadge sha256={sha256} alertsByCert={alertsByCert} />
+      render: (_sha256: string, cert: Cert) => (
+        <CertAlertsBadge
+          cert={cert}
+          alertsByCert={alertsByCert}
+          certExpirationThreshold={certExpirationThreshold}
+          certAgeThreshold={certAgeThreshold}
+        />
       ),
     },
     {

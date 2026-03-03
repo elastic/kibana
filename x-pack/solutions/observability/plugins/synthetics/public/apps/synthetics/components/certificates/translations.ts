@@ -72,6 +72,20 @@ export const NO_ACTIVE_ALERTS = i18n.translate('xpack.synthetics.certs.list.noAc
   defaultMessage: 'No active alerts',
 });
 
+export const COMPUTED_STATUS_OK_TOOLTIP = i18n.translate(
+  'xpack.synthetics.certs.list.computedStatusOkTooltip',
+  {
+    defaultMessage: 'No active alerts. Status computed from settings thresholds.',
+  }
+);
+
+export const computedStatusRiskTooltip = (expiryDays: number, ageDays: number) =>
+  i18n.translate('xpack.synthetics.certs.list.computedStatusRiskTooltip', {
+    defaultMessage:
+      'No TLS alert rule covers this certificate. Status computed from settings thresholds (expiry: {expiryDays}d, age: {ageDays}d).',
+    values: { expiryDays, ageDays },
+  });
+
 export const FINGERPRINTS_COL = i18n.translate('xpack.synthetics.certs.list.expirationDate', {
   defaultMessage: 'Fingerprints',
 });
