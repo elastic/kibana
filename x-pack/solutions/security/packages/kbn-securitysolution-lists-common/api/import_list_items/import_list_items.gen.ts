@@ -36,23 +36,6 @@ Required when importing a new list whose list `id` is not specified.
       */
   type: ListType.optional(),
   /**
-      * Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-- `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-- `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-
-      */
-  serializer: z.string().optional(),
-  /**
-      * Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-- `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-- `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-- `{{{gte}}},{{{lte}}}` - Date range values.
-
-      */
-  deserializer: z.string().optional(),
-  /**
    * Determines when changes made by the request are made visible to search.
    */
   refresh: z.enum(['true', 'false', 'wait_for']).optional(),

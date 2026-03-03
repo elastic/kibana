@@ -35,10 +35,10 @@ export interface AboutSectionProps {
 }
 
 /**
- * This component is a placeholder for the new alert/event Overview tab content.
- * It will be rendered only when the discover.securitySolutionFlyout feature flag is enabled.
- * The intention keep implementing its content as we're extracting flyout code from the Security Solution plugin to a set of package.
- * The feature flag will remain disabled until we're ready to ship some of the content. The target is to release an MVP by 9.4 then have it fully functional by 9.5.
+ * Most top section of the overview tab.
+ * For alerts (event.kind is signal), it contains the description, reason and mitre attack information.
+ * For generic events (event.kind is event), it shows the event category description and event renderer.
+ * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
   const isAlert = useMemo(() => (getFieldValue(hit, 'event.kind') as string) === 'signal', [hit]);

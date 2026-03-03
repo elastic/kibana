@@ -59,7 +59,7 @@ export function TopErrors() {
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && transactionType) {
+      if (start && end && transactionType && transactionName) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
           {
