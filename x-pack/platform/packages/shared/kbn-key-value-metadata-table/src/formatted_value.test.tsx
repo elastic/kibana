@@ -69,26 +69,24 @@ describe('FormattedValue', () => {
     expect(container.textContent).toBe('hello world');
   });
 
-  describe('timestamp formatting', () => {
-    it('formats @timestamp values in UTC', () => {
-      const { container } = renderWithTheme(
-        <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="@timestamp" />
-      );
-      expect(container.textContent).toBe('Jun 15, 2024 @ 14:30:45.123');
-    });
+  it('formats @timestamp values in UTC', () => {
+    const { container } = renderWithTheme(
+      <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="@timestamp" />
+    );
+    expect(container.textContent).toBe('Jun 15, 2024 @ 14:30:45.123');
+  });
 
-    it('formats non-@timestamp date values in local time', () => {
-      const { container } = renderWithTheme(
-        <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="event.created" />
-      );
-      expect(container.textContent).toMatch(/Jun 15, 2024 @ \d{2}:\d{2}:45\.123/);
-    });
+  it('formats non-@timestamp date values in local time', () => {
+    const { container } = renderWithTheme(
+      <FormattedValue value="2024-06-15T14:30:45.123Z" keyName="event.created" />
+    );
+    expect(container.textContent).toMatch(/Jun 15, 2024 @ \d{2}:\d{2}:45\.123/);
+  });
 
-    it('does not format invalid date strings', () => {
-      const { container } = renderWithTheme(
-        <FormattedValue value="not-a-date" keyName="@timestamp" />
-      );
-      expect(container.textContent).toBe('not-a-date');
-    });
+  it('does not format invalid date strings', () => {
+    const { container } = renderWithTheme(
+      <FormattedValue value="not-a-date" keyName="@timestamp" />
+    );
+    expect(container.textContent).toBe('not-a-date');
   });
 });
