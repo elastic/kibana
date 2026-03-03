@@ -173,6 +173,25 @@ describe('PublicStepRegistry', () => {
       expect(registry.get('custom.async')).toEqual(asyncDef);
       expect(registry.getAll()).toHaveLength(2);
     });
+
+    it('should throw when loader resolves with undefined', async () => {
+      registry.register(() => Promise.resolve(undefined as unknown as PublicStepDefinition));
+
+      await expect(registry.whenReady()).rejects.toThrow('Step definition is not loaded correctly');
+    });
+
+    it('should throw when loader resolves with null', async () => {
+      registry.register(() => Promise.resolve(null as unknown as PublicStepDefinition));
+
+      await expect(registry.whenReady()).rejects.toThrow('Step definition is not loaded correctly');
+    });
+
+    it('should reject whenReady() when loader rejects', async () => {
+      const loadError = new Error('Failed to load step module');
+      registry.register(() => Promise.reject(loadError));
+
+      await expect(registry.whenReady()).rejects.toThrow('Failed to load step module');
+    });
   });
 
   describe('whenReady', () => {
