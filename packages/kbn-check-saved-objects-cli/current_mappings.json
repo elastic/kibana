@@ -345,17 +345,22 @@
           }
         }
       },
-      "apiKey": {
-        "type": "binary"
-      },
-      "uiamApiKey": {
-        "type": "binary"
-      },
-      "apiKeyOwner": {
-        "type": "keyword"
-      },
-      "apiKeyCreatedByUser": {
-        "type": "boolean"
+      "auth": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
