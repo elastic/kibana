@@ -1505,6 +1505,10 @@
         "dynamic": false,
         "properties": {}
       },
+      "pending_upgrade_review": {
+        "enabled": false,
+        "type": "object"
+      },
       "previous_version": {
         "type": "keyword"
       },
@@ -3046,8 +3050,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text",
-        "index": false
+        "index": false,
+        "type": "text"
       },
       "description": {
         "type": "text"
