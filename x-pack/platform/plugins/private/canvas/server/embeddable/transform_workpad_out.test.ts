@@ -9,10 +9,11 @@ import type { SavedObjectReference } from '@kbn/core/server';
 
 import { encode } from '../../common/lib/embeddable_dataurl';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
-import { embeddableService, logger } from '../kibana_services';
+import { embeddableService, expressionsService, logger } from '../kibana_services';
 
 import { transformWorkpadOut } from './transform_workpad_out';
 import { makeWorkpad, getDecodedConfig, getExpressionFunctionName } from './fixtures';
+import { fromExpression } from '@kbn/interpreter';
 
 jest.mock('../kibana_services', () => ({
   embeddableService: {
@@ -33,7 +34,16 @@ jest.mock('../kibana_services', () => ({
     error: jest.fn(),
   },
   expressionsService: {
-    inject: jest.fn().mockImplementation((ast, references) => ast),
+    inject: jest.fn().mockImplementation((ast, references) => {
+      return {
+        ...ast,
+        chain: ast.chain.map((fn) => {
+          if (fn.function === 'savedLens') {
+            return { ...fn, arguments: { ...fn.arguments, id: references[0].id } };
+          }
+        }),
+      };
+    }),
   },
 }));
 
@@ -135,6 +145,21 @@ describe('transformWorkpadOut', () => {
         savedObjectId: 'map-id',
       });
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('map');
+    });
+  });
+
+  it('uses expressions service to inject references for by-reference embeddables', () => {
+    const expression = 'savedLens id="savedLens.id" title="My Lens"';
+    const references = [{ id: 'lens-id', name: 'element-id:savedLens.id', type: 'lens' }];
+
+    const transformedWorkpad = transformWorkpadOut(makeWorkpad(expression), references);
+
+    expect(expressionsService.inject).toHaveBeenCalledWith(fromExpression(expression), references);
+    expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
+    expect(getDecodedConfig(transformedWorkpad)).toEqual({
+      timeRange: DEFAULT_TIME_RANGE,
+      title: 'My Lens',
+      savedObjectId: 'lens-id',
     });
   });
 
