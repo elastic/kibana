@@ -17,7 +17,10 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-common-2",
     "@kbn/dashboard-markdown",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/es-query",
+    "@kbn/unified-search-plugin"
   ],
   "exclude": ["target/**/*"]
 }

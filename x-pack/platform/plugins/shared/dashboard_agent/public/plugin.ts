@@ -13,6 +13,7 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import { setKibanaServices } from './kibana_services';
 
 export class DashboardAgentPlugin
   implements
@@ -35,9 +36,10 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
+    setKibanaServices(core, plugins);
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({

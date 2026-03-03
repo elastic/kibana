@@ -31,6 +31,7 @@ import {
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import { unifiedSearch } from '../kibana_services';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 const DEFAULT_PANEL_HEIGHT = 9;
@@ -250,7 +251,7 @@ export const normalizePanels = (
 };
 
 export interface DashboardCanvasInitialInput {
-  timeRange: {
+  time_range: {
     from: string;
     to: string;
   };
@@ -263,7 +264,7 @@ export interface DashboardCanvasInitialInput {
 export const createDashboardRendererInitialInput = (
   data: DashboardAttachmentData
 ): DashboardCanvasInitialInput => ({
-  timeRange: { from: 'now-24h', to: 'now' },
+  time_range: { from: 'now-24h', to: 'now' },
   viewMode: 'view',
   panels: normalizePanels(data.panels ?? []) as DashboardState['panels'],
   title: data.title,
@@ -279,6 +280,7 @@ export const getDashboardRendererCreationOptions = async ({
 }): Promise<DashboardCreationOptions> => {
   if (savedObjectId) {
     return {
+      useUnifiedSearchIntegration: true,
       getInitialInput: () => ({
         viewMode: 'view',
       }),
@@ -286,6 +288,7 @@ export const getDashboardRendererCreationOptions = async ({
   }
 
   return {
+    useUnifiedSearchIntegration: true,
     getInitialInput: () => ({
       ...initialDashboardInput,
     }),
@@ -322,6 +325,9 @@ const getDashboardCanvasContentStyles = ({
     flex: 1,
     minHeight: 0,
     display: 'flex',
+  }),
+  searchBar: css({
+    flexShrink: 0,
   }),
 });
 
@@ -368,7 +374,7 @@ export const DashboardCanvasContent = ({
             title: initialDashboardInput.title,
             description: initialDashboardInput.description,
             panels: initialDashboardInput.panels,
-            time_range: initialDashboardInput.timeRange,
+            time_range: initialDashboardInput.time_range,
             viewMode: 'edit',
           });
         },
@@ -390,13 +396,32 @@ export const DashboardCanvasContent = ({
     data.savedObjectId,
     initialDashboardInput.description,
     initialDashboardInput.panels,
-    initialDashboardInput.timeRange,
+    initialDashboardInput.time_range,
     initialDashboardInput.title,
     registerActionButtons,
   ]);
 
+  const { SearchBar } = unifiedSearch.ui;
+
   return (
     <div css={styles.root}>
+      <div css={styles.searchBar}>
+        <SearchBar
+          appName="dashboardAgent"
+          showQueryInput={false}
+          showDatePicker={true}
+          showFilterBar={false}
+          useDefaultBehaviors={true}
+          isDisabled={!dashboardApi}
+          onQuerySubmit={({ dateRange }) => {
+            dashboardApi?.setTimeRange({ from: dateRange.from, to: dateRange.to });
+          }}
+          onRefresh={() => {
+            dashboardApi?.forceRefresh();
+          }}
+          data-test-subj="dashboardCanvasSearchBar"
+        />
+      </div>
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
@@ -405,6 +430,10 @@ export const DashboardCanvasContent = ({
           savedObjectId={data.savedObjectId}
           onApiAvailable={(api) => {
             api.setViewMode('view');
+            const initialTimeRange = api.timeRange$.value;
+            if (initialTimeRange) {
+              api.setTimeRange(initialTimeRange);
+            }
             setDashboardApi(api);
           }}
         />

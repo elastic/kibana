@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "dashboardAgent"],
-    "requiredPlugins": ["agentBuilder", "dashboard", "dashboardMarkdown", "data", "share"],
+    "requiredPlugins": ["agentBuilder", "dashboard", "dashboardMarkdown", "data", "share", "unifiedSearch"],
     "requiredBundles": ["lens"]
   }
 }
