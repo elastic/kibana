@@ -29,7 +29,12 @@ const SingleOverviewCustomSchema = schema.object({
       meta: { description: 'The name of the remote SLO' },
     })
   ),
-  overview_mode: schema.literal('single'),
+  overview_mode: schema.oneOf([schema.literal('single'), schema.literal('groups')], {
+    defaultValue: 'single',
+    meta: {
+      description: 'The mode of the overview is "single" when slo_id is provided.',
+    },
+  }),
 });
 
 const groupBySchema = schema.oneOf([
@@ -49,7 +54,13 @@ const GroupOverviewCustomSchema = schema.object({
       kql_query: schema.maybe(schema.string()),
     })
   ),
-  overview_mode: schema.literal('groups'),
+  overview_mode: schema.oneOf([schema.literal('single'), schema.literal('groups')], {
+    defaultValue: 'groups',
+    meta: {
+      description:
+        'Overview mode. Defaults to "groups" when omitted (use "single" with slo_id for a single SLO).',
+    },
+  }),
 });
 
 function getSingleOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
@@ -84,9 +95,13 @@ function getGroupOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSche
   );
 }
 
+/**
+ * SLO Overview embeddable schema. overview_mode defaults to 'groups' when omitted, unless slo_id
+ * is provided (then it defaults to 'single'). Uses oneOf: single branch is tried first; if slo_id
+ * is missing that fails and the group branch is used with overview_mode default 'groups'.
+ */
 export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-  return schema.discriminatedUnion(
-    'overview_mode',
+  return schema.oneOf(
     [
       getSingleOverviewEmbeddableSchema(getDrilldownsSchema),
       getGroupOverviewEmbeddableSchema(getDrilldownsSchema),

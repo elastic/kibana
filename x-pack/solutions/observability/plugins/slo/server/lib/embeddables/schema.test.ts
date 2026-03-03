@@ -47,17 +47,23 @@ describe('schema validation', () => {
         overview_mode: 'invalid-mode',
       };
 
-      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow(
-        /expected "overview_mode" to be one of \["single", "groups"\]/
-      );
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow();
+      const err = (() => {
+        try {
+          overviewEmbeddableSchema.validate(invalidState);
+        } catch (e) {
+          return e;
+        }
+      })();
+      expect(String(err)).toMatch(/single|groups/);
     });
 
-    it('should report missing overview_mode without cross-variant noise', () => {
+    it('should default overview_mode to "single" when slo_id is provided and overview_mode is missing', () => {
       const missingMode = { slo_id: 'test-slo-id' };
 
-      expect(() => overviewEmbeddableSchema.validate(missingMode)).toThrow(
-        /"overview_mode" property is required/
-      );
+      expect(() => overviewEmbeddableSchema.validate(missingMode)).not.toThrow();
+      const result = overviewEmbeddableSchema.validate(missingMode);
+      expect(result.overview_mode).toBe('single');
     });
   });
 
@@ -145,6 +151,18 @@ describe('schema validation', () => {
       };
 
       expect(() => overviewEmbeddableSchema.validate(minimalState)).not.toThrow();
+    });
+
+    it('should default overview_mode to "groups" when slo_id is not provided and overview_mode is missing', () => {
+      const missingMode = {
+        group_filters: {
+          group_by: 'status' as const,
+        },
+      };
+
+      expect(() => overviewEmbeddableSchema.validate(missingMode)).not.toThrow();
+      const result = overviewEmbeddableSchema.validate(missingMode);
+      expect(result.overview_mode).toBe('groups');
     });
 
     it('should validate group overview state with empty group_filters or missing group_by', () => {
