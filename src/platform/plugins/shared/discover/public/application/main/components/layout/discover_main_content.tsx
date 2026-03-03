@@ -121,7 +121,6 @@ export const DiscoverMainContent = ({
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
-          stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
           dataView={dataView}
@@ -133,15 +132,7 @@ export const DiscoverMainContent = ({
         />
       );
     },
-    [
-      viewMode,
-      isEsqlMode,
-      stateContainer,
-      setDiscoverViewMode,
-      dataView,
-      panelsToggle,
-      isChartAvailable,
-    ]
+    [viewMode, isEsqlMode, setDiscoverViewMode, dataView, panelsToggle, isChartAvailable]
   );
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
@@ -169,7 +160,6 @@ export const DiscoverMainContent = ({
               viewModeToggle={viewModeToggle}
               dataView={dataView}
               onAddFilter={onAddFilter}
-              stateContainer={stateContainer}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : null}
@@ -189,7 +179,6 @@ export const DiscoverMainContent = ({
           {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
             <PatternAnalysisTab
               dataView={dataView}
-              runtimeStateManager={stateContainer.runtimeStateManager}
               switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
               trackUiMetric={trackUiMetric}
               renderViewModeToggle={renderViewModeToggle}

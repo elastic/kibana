@@ -69,6 +69,8 @@ export {
   useCurrentTabRuntimeState,
   useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';

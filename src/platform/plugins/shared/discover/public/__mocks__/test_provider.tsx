@@ -13,6 +13,7 @@ import {
   type CombinedRuntimeState,
   InternalStateProvider,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
   CurrentTabProvider,
   selectTabRuntimeState,
   useRuntimeState,
@@ -157,7 +158,11 @@ export const DiscoverTestProvider = ({
 
   if (stateContainer) {
     children = (
-      <InternalStateProvider store={stateContainer.internalState}>{children}</InternalStateProvider>
+      <RuntimeStateManagerProvider value={stateContainer.runtimeStateManager}>
+        <InternalStateProvider store={stateContainer.internalState}>
+          {children}
+        </InternalStateProvider>
+      </RuntimeStateManagerProvider>
     );
   }
 

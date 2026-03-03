@@ -17,11 +17,13 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
-import { getDiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getDataStateContainer } from '../../state_management/discover_data_state_container';
 import {
   RuntimeStateProvider,
   internalStateActions,
+  createTabActionInjector,
+  selectTab,
   useInternalStateDispatch,
   useInternalStateSelector,
   useRuntimeState,
@@ -71,26 +73,11 @@ export const SingleTabView = ({
   const appInitializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const currentTabInitializationState = useCurrentTabSelector((tab) => tab.initializationState);
-  const currentStateContainer = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.stateContainer$
-  );
-  const currentCustomizationService = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.customizationService$
-  );
-  const scopedProfilesManager = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.scopedProfilesManager$
-  );
-  const scopedEbtManager = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.scopedEbtManager$
-  );
-  const currentDataView = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.currentDataView$
-  );
+  const currentStateContainer = useCurrentTabRuntimeState((tab) => tab.stateContainer$);
+  const currentCustomizationService = useCurrentTabRuntimeState((tab) => tab.customizationService$);
+  const scopedProfilesManager = useCurrentTabRuntimeState((tab) => tab.scopedProfilesManager$);
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
@@ -104,15 +91,17 @@ export const SingleTabView = ({
       defaultUrlState?: DiscoverAppState;
       esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
     } = {}) => {
-      const stateContainer = getDiscoverStateContainer({
-        tabId: currentTabId,
-        services,
-        customizationContext,
-        stateStorageContainer: urlStateStorage,
+      const injectCurrentTab = createTabActionInjector(currentTabId);
+      const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
+      const stateContainer: DiscoverStateContainer = {
         internalState,
+        injectCurrentTab,
+        getCurrentTab,
         runtimeStateManager,
+        stateStorage: urlStateStorage,
         searchSessionManager,
-      });
+        customizationContext,
+      };
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks,

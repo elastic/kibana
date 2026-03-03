@@ -38,7 +38,7 @@ const renderUseFetchMoreRecords = async ({
   totalRecordsCount: number;
 }) => {
   const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
-  const { stateContainer, dataStateContainer } = await toolkit.initializeSingleTab({
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
@@ -51,11 +51,10 @@ const renderUseFetchMoreRecords = async ({
     result: totalRecordsCount,
   });
 
-  const { result } = renderHook((props) => useFetchMoreRecords(props), {
+  const { result } = renderHook(() => useFetchMoreRecords(), {
     wrapper: ({ children }) => (
       <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
     ),
-    initialProps: { stateContainer },
   });
 
   return { result };

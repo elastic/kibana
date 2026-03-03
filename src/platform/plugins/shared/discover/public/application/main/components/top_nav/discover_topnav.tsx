@@ -20,7 +20,10 @@ import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { useDiscoverCustomization } from '../../../../customizations';
+import {
+  useDiscoverCustomization,
+  useDiscoverCustomizationContext,
+} from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -68,6 +71,7 @@ export const DiscoverTopNav = ({
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
+  const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
@@ -176,21 +180,22 @@ export const DiscoverTopNav = ({
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const setAppState = useCurrentTabAction(internalStateActions.setAppState);
 
+  const appState = useCurrentTabSelector((tab) => tab.appState);
   const updateSavedQueryId = useCallback(
     (newSavedQueryId: string | undefined) => {
       if (newSavedQueryId) {
         dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
       } else {
         // remove savedQueryId from state
-        const newState = { ...stateContainer.getCurrentTab().appState };
+        const newState = { ...appState };
         delete newState.savedQuery;
         dispatch(setAppState({ appState: newState }));
       }
     },
-    [dispatch, setAppState, stateContainer, updateAppState]
+    [dispatch, setAppState, appState, updateAppState]
   );
 
-  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const esqlQueryStats = useESQLQueryStats(
     isEsqlMode,
     dataStateContainer.inspectorAdapters.requests
@@ -335,7 +340,7 @@ export const DiscoverTopNav = ({
       <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
-          stateContainer.customizationContext.displayMode !== 'embedded' &&
+          customizationContext.displayMode !== 'embedded' &&
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
         }

@@ -17,14 +17,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
   viewMode,
   isEsqlMode,
   prepend,
-  stateContainer,
   setDiscoverViewMode,
   patternCount,
   dataView,
@@ -35,7 +33,6 @@ export const DocumentViewModeToggle = ({
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
   prepend?: ReactElement;
-  stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
@@ -138,7 +135,6 @@ export const DocumentViewModeToggle = ({
         {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
           <HitsCounter
             mode={HitsCounterMode.standalone}
-            stateContainer={stateContainer}
             hitCounterLabel={hitCounterLabel}
             hitCounterPluralLabel={hitCounterPluralLabel}
             hitsTotalToDisplay={hitsTotalToDisplay}
@@ -160,7 +156,6 @@ export const DocumentViewModeToggle = ({
               )}
               <HitsCounter
                 mode={HitsCounterMode.appended}
-                stateContainer={stateContainer}
                 hitCounterLabel={hitCounterLabel}
                 hitCounterPluralLabel={hitCounterPluralLabel}
                 hitsTotalToDisplay={hitsTotalToDisplay}

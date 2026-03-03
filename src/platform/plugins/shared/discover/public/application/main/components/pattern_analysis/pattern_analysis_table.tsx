@@ -15,14 +15,10 @@ import { pick } from 'lodash';
 import type { LogCategorizationEmbeddableProps } from '@kbn/aiops-plugin/public/components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover';
 import type { AiopsAppContextValue } from '@kbn/aiops-plugin/public/hooks/use_aiops_app_context';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  type RuntimeStateManager,
-  useCurrentTabDataStateContainer,
-} from '../../state_management/redux';
+import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
 
 export type PatternAnalysisTableProps = EmbeddablePatternAnalysisInput & {
-  runtimeStateManager: RuntimeStateManager;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   renderViewModeToggle: (patternCount?: number) => React.ReactElement;
 };
@@ -32,8 +28,8 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
 
   const services = useDiscoverServices();
   const aiopsService = services.aiops;
-  const { runtimeStateManager, trackUiMetric } = props;
-  const dataStateContainer = useCurrentTabDataStateContainer(runtimeStateManager);
+  const { trackUiMetric } = props;
+  const dataStateContainer = useCurrentTabDataStateContainer();
 
   useEffect(() => {
     const refetch = dataStateContainer.refetch$.subscribe(() => {

@@ -83,7 +83,7 @@ export const useTopNavLinks = ({
       http: services.http,
       toasts: services.notifications.toasts,
     });
-  const dataStateContainer = useCurrentTabDataStateContainer(state.runtimeStateManager);
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
 

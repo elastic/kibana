@@ -41,7 +41,6 @@ describe('PatternAnalysisTab', () => {
   const getComponent = (toolkit: ReturnType<typeof getDiscoverInternalStateMock>) => {
     const props = {
       dataView,
-      runtimeStateManager: toolkit.runtimeStateManager,
       switchToDocumentView: jest.fn(),
       trackUiMetric: jest.fn(),
       renderViewModeToggle: jest.fn(() => <div data-test-subj="viewModeToggle">Toggle</div>),

@@ -66,7 +66,7 @@ describe('Document view mode toggle component', () => {
 
     await toolkit.initializeTabs();
 
-    const { stateContainer, dataStateContainer } = await toolkit.initializeSingleTab({
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
@@ -80,7 +80,6 @@ describe('Document view mode toggle component', () => {
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
-          stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
           dataView={useDataViewWithTextFields ? dataViewWithTextFields : dataViewWithoutTextFields}
         />

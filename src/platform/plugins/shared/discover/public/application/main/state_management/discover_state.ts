@@ -8,53 +8,15 @@
  */
 
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { DiscoverServices } from '../../..';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
-import { createTabActionInjector, internalStateActions, selectTab } from './redux';
-
-export interface DiscoverStateContainerParams {
-  /**
-   * The ID of the tab associated with this state container
-   */
-  tabId: string;
-  /**
-   * core ui settings service
-   */
-  services: DiscoverServices;
-  /**
-   * Context object for customization related properties
-   */
-  customizationContext: DiscoverCustomizationContext;
-  /**
-   * URL state storage
-   */
-  stateStorageContainer: IKbnUrlStateStorage;
-  /**
-   * Internal shared state that's used at several places in the UI
-   */
-  internalState: InternalStateStore;
-  /**
-   * State manager for runtime state that can't be stored in Redux
-   */
-  runtimeStateManager: RuntimeStateManager;
-  /**
-   * Manages search sessions and search session URL state
-   */
-  searchSessionManager: DiscoverSearchSessionManager;
-}
 
 export interface DiscoverStateContainer {
   /**
    * Internal shared state that's used at several places in the UI
    */
   internalState: InternalStateStore;
-  /**
-   * @deprecated Do not use, this only exists to support
-   * Timeline which accesses the internal state directly
-   */
-  internalStateActions: typeof internalStateActions;
   /**
    * Injects the current tab into a given internalState action
    */
@@ -79,32 +41,4 @@ export interface DiscoverStateContainer {
    * Context object for customization related properties
    */
   customizationContext: DiscoverCustomizationContext;
-}
-
-/**
- * Builds and returns appState and globalState containers and helper functions
- * Used to sync URL with UI state
- */
-export function getDiscoverStateContainer({
-  tabId,
-  services,
-  customizationContext,
-  stateStorageContainer: stateStorage,
-  internalState,
-  runtimeStateManager,
-  searchSessionManager,
-}: DiscoverStateContainerParams): DiscoverStateContainer {
-  const injectCurrentTab = createTabActionInjector(tabId);
-  const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-
-  return {
-    internalState,
-    internalStateActions,
-    injectCurrentTab,
-    getCurrentTab,
-    runtimeStateManager,
-    stateStorage,
-    searchSessionManager,
-    customizationContext,
-  };
 }

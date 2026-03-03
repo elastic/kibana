@@ -13,12 +13,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings';
 import { NoResultsSuggestions } from './no_results_suggestions';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 
 export interface DiscoverNoResultsProps {
-  stateContainer: DiscoverStateContainer;
   isTimeBased?: boolean;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
@@ -27,14 +25,13 @@ export interface DiscoverNoResultsProps {
 }
 
 export function DiscoverNoResults({
-  stateContainer,
   isTimeBased,
   query,
   filters,
   dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
-  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const { documents$ } = dataStateContainer.data$;
   const interceptedWarnings = useDataState(documents$).interceptedWarnings;
 

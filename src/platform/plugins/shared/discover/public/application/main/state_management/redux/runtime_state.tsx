@@ -181,15 +181,26 @@ export const selectInitialUnifiedHistogramLayoutPropsMap = (
 };
 
 export const useCurrentTabRuntimeState = <T,>(
-  runtimeStateManager: RuntimeStateManager,
   selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
 ) => {
+  const runtimeStateManager = useContext(runtimeStateManagerContext);
   const { currentTabId } = useCurrentTabContext();
+
+  if (!runtimeStateManager) {
+    throw new Error('useCurrentTabRuntimeState requires RuntimeStateManagerProvider');
+  }
+
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-export const useCurrentTabDataStateContainer = (runtimeStateManager: RuntimeStateManager) => {
+export const useCurrentTabDataStateContainer = () => {
+  const runtimeStateManager = useContext(runtimeStateManagerContext);
   const { currentTabId } = useCurrentTabContext();
+
+  if (!runtimeStateManager) {
+    throw new Error('useCurrentTabDataStateContainer requires RuntimeStateManagerProvider');
+  }
+
   const dataStateContainer = useRuntimeState(
     selectTabRuntimeState(runtimeStateManager, currentTabId).dataStateContainer$
   );
@@ -232,3 +243,17 @@ const useRuntimeStateContext = () => {
 
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;
+
+const runtimeStateManagerContext = createContext<RuntimeStateManager | undefined>(undefined);
+
+export const RuntimeStateManagerProvider = runtimeStateManagerContext.Provider;
+
+export const useRuntimeStateManager = () => {
+  const context = useContext(runtimeStateManagerContext);
+
+  if (!context) {
+    throw new Error('useRuntimeStateManager must be used within a RuntimeStateManagerProvider');
+  }
+
+  return context;
+};

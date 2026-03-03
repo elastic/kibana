@@ -41,11 +41,17 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
   getSavedSearchFromCurrentTab: () => Promise<SavedSearch>;
 
   /**
-   * A selection of prodived Redux actions from the internal state
+   * A selection of provided Redux actions from the internal state
    */
   internalActions: {
     fetchData: typeof internalStateActions.fetchData;
     openDiscoverSession: typeof internalStateActions.openDiscoverSession;
+    updateGlobalState: typeof internalStateActions.updateGlobalState;
+    setAppState: typeof internalStateActions.setAppState;
+    updateAppStateAndReplaceUrl: typeof internalStateActions.updateAppStateAndReplaceUrl;
+    resetAppState: typeof internalStateActions.resetAppState;
+    initializeAndSync: typeof internalStateActions.initializeAndSync;
+    stopSyncing: typeof internalStateActions.stopSyncing;
   };
 }
 

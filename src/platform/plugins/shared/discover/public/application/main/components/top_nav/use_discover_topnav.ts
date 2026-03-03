@@ -47,10 +47,7 @@ export const useDiscoverTopNav = ({
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
-  const onOpenInspector = useInspector({
-    inspector: services.inspector,
-    stateContainer,
-  });
+  const onOpenInspector = useInspector({ inspector: services.inspector });
   const hasShareIntegration = useHasShareIntegration(services);
 
   const topNavMenu = useTopNavLinks({

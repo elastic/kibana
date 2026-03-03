@@ -12,7 +12,6 @@ import type {
   InspectorSession,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import {
   internalStateActions,
@@ -24,13 +23,7 @@ import {
 } from '../state_management/redux';
 import { useActiveContexts } from '../../../context_awareness/hooks';
 
-export function useInspector({
-  inspector,
-  stateContainer,
-}: {
-  inspector: InspectorPublicPluginStart;
-  stateContainer: DiscoverStateContainer;
-}) {
+export function useInspector({ inspector }: { inspector: InspectorPublicPluginStart }) {
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -41,11 +34,10 @@ export function useInspector({
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
-    stateContainer.runtimeStateManager,
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
 
-  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const dataStateContainer = useCurrentTabDataStateContainer();
 
   const getContextsAdapter = useActiveContexts({
     dataDocuments$: dataStateContainer.data$.documents$,

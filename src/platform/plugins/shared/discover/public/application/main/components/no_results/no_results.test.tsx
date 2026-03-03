@@ -55,7 +55,7 @@ async function mountAndFindSubjects(
 
   await toolkit.initializeTabs();
 
-  const { stateContainer } = await toolkit.initializeSingleTab({
+  await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
@@ -64,12 +64,7 @@ async function mountAndFindSubjects(
   act(() => {
     component = mountWithIntl(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
-        <DiscoverNoResults
-          stateContainer={stateContainer}
-          isTimeBased={isTimeBased}
-          onDisableFilters={() => {}}
-          {...props}
-        />
+        <DiscoverNoResults isTimeBased={isTimeBased} onDisableFilters={() => {}} {...props} />
       </DiscoverToolkitTestProvider>
     );
   });

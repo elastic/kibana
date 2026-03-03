@@ -39,9 +39,7 @@ export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo(
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const isEsql = useIsEsqlMode();
   const hideAggregatedPreview = useAppStateSelector((state) => state.hideAggregatedPreview);
-  const dataStateContainer = useCurrentTabDataStateContainer(
-    props.stateContainer.runtimeStateManager
-  );
+  const dataStateContainer = useCurrentTabDataStateContainer();
 
   const lastReloadRequestTime$ = useMemo(() => {
     return dataStateContainer.refetch$.pipe(map(() => Date.now()));

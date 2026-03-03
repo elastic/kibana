@@ -13,7 +13,11 @@ import { isFunction } from 'lodash';
 import { from } from 'rxjs';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { CustomizationCallback, ExtendedDiscoverStateContainer } from './types';
+import type {
+  CustomizationCallback,
+  DiscoverCustomizationContext,
+  ExtendedDiscoverStateContainer,
+} from './types';
 import type {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
@@ -28,8 +32,18 @@ import {
   internalStateActions,
   selectTabSavedSearch,
 } from '../application/main/state_management/redux';
+import { defaultCustomizationContext } from './defaults';
 
 const customizationContext = createContext(createCustomizationService());
+
+const discoverCustomizationContextContext = createContext<DiscoverCustomizationContext>(
+  defaultCustomizationContext
+);
+
+export const DiscoverCustomizationContextProvider = discoverCustomizationContextContext.Provider;
+
+export const useDiscoverCustomizationContext = () =>
+  useContext(discoverCustomizationContextContext);
 
 export const DiscoverCustomizationProvider = customizationContext.Provider;
 
@@ -88,6 +102,12 @@ export const getExtendedDiscoverStateContainer = (
   internalActions: {
     fetchData: internalStateActions.fetchData,
     openDiscoverSession: internalStateActions.openDiscoverSession,
+    updateGlobalState: internalStateActions.updateGlobalState,
+    setAppState: internalStateActions.setAppState,
+    updateAppStateAndReplaceUrl: internalStateActions.updateAppStateAndReplaceUrl,
+    resetAppState: internalStateActions.resetAppState,
+    initializeAndSync: internalStateActions.initializeAndSync,
+    stopSyncing: internalStateActions.stopSyncing,
   },
 });
 

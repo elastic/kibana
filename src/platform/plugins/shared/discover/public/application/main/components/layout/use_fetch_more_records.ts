@@ -11,15 +11,7 @@ import { useMemo } from 'react';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useCurrentTabDataStateContainer } from '../../state_management/redux';
-
-/**
- * Params for the hook
- */
-export interface UseFetchMoreRecordsParams {
-  stateContainer: DiscoverStateContainer;
-}
 
 /**
  * Return type for the hook
@@ -32,12 +24,9 @@ export interface UseFetchMoreRecordsResult {
 
 /**
  * Checks if more records can be loaded and returns a handler for it
- * @param stateContainer
  */
-export const useFetchMoreRecords = ({
-  stateContainer,
-}: UseFetchMoreRecordsParams): UseFetchMoreRecordsResult => {
-  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+export const useFetchMoreRecords = (): UseFetchMoreRecordsResult => {
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const documents$ = dataStateContainer.data$.documents$;
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const documentState = useDataState(documents$);

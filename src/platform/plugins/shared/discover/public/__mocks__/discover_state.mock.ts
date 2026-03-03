@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getDiscoverStateContainer,
-  type DiscoverStateContainer,
-} from '../application/main/state_management/discover_state';
+import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import {
   getDataStateContainer,
   type DiscoverDataStateContainer,
@@ -25,6 +22,7 @@ import {
   internalStateActions,
   createInternalStateStore,
   createRuntimeStateManager,
+  createTabActionInjector,
   fromSavedSearchToSavedObjectTab,
   selectAllTabs,
   selectTab,
@@ -246,15 +244,17 @@ export function getDiscoverInternalStateMock({
           throw new Error(`Tab with ID "${tabId}" has already been initialized`);
         }
 
-        const stateContainer = getDiscoverStateContainer({
-          tabId: internalState.getState().tabs.unsafeCurrentId,
-          services,
-          customizationContext,
-          stateStorageContainer,
+        const injectCurrentTab = createTabActionInjector(tabId);
+        const getCurrentTab = () => selectTab(internalState.getState(), tabId);
+        const stateContainer: DiscoverStateContainer = {
           internalState,
+          injectCurrentTab,
+          getCurrentTab,
           runtimeStateManager,
+          stateStorage: stateStorageContainer,
           searchSessionManager,
-        });
+          customizationContext,
+        };
         const customizationService = await getConnectedCustomizationService({
           stateContainer,
           customizationCallbacks: [],
@@ -495,15 +495,17 @@ export function getDiscoverStateMock({
     })
   );
 
-  const container = getDiscoverStateContainer({
-    tabId: internalState.getState().tabs.unsafeCurrentId,
-    services,
-    customizationContext,
-    stateStorageContainer,
+  const injectCurrentTab = createTabActionInjector(currentTabId);
+  const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
+  const container: DiscoverStateContainer = {
     internalState,
+    injectCurrentTab,
+    getCurrentTab,
     runtimeStateManager,
+    stateStorage: stateStorageContainer,
     searchSessionManager,
-  });
+    customizationContext,
+  };
   const tabRuntimeState = selectTabRuntimeState(
     runtimeStateManager,
     internalState.getState().tabs.unsafeCurrentId

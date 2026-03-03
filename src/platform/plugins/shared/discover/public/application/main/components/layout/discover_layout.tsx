@@ -108,7 +108,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
   const globalQueryState = data.query.getState();
-  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
@@ -539,7 +539,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                       />
                     ) : (
                       <DiscoverNoResults
-                        stateContainer={stateContainer}
                         isTimeBased={isTimeBased}
                         query={globalQueryState.query}
                         filters={globalQueryState.filters}

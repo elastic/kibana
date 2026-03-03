@@ -124,19 +124,19 @@ export const useDiscoverInTimelineActions = (
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
           const discoverDispatch = discoverStateContainer.current?.internalState.dispatch;
           const injectCurrentTab = discoverStateContainer.current?.injectCurrentTab;
-          const internalStateActions = discoverStateContainer.current?.internalStateActions;
+          const internalActions = discoverStateContainer.current?.internalActions;
 
-          discoverDispatch(injectCurrentTab(internalStateActions.stopSyncing)());
-          discoverDispatch(injectCurrentTab(internalStateActions.initializeAndSync)());
+          discoverDispatch(injectCurrentTab(internalActions.stopSyncing)());
+          discoverDispatch(injectCurrentTab(internalActions.initializeAndSync)());
 
           await discoverDispatch(
-            injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+            injectCurrentTab(internalActions.updateAppStateAndReplaceUrl)({
               appState: savedSearchState?.appState ?? {},
             })
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
           discoverDispatch(
-            injectCurrentTab(internalStateActions.updateGlobalState)({
+            injectCurrentTab(internalActions.updateGlobalState)({
               globalState: {
                 timeRange: savedSearch.timeRange ?? defaultDiscoverTimeRange,
               },
@@ -149,14 +149,14 @@ export const useDiscoverInTimelineActions = (
         const defaultState = defaultDiscoverAppState();
         discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current.injectCurrentTab(
-            discoverStateContainer.current.internalStateActions.resetAppState
+            discoverStateContainer.current.internalActions.resetAppState
           )({
             appState: defaultState,
           })
         );
         await discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current?.injectCurrentTab(
-            discoverStateContainer.current?.internalStateActions.updateAppStateAndReplaceUrl
+            discoverStateContainer.current?.internalActions.updateAppStateAndReplaceUrl
           )({
             appState: {},
           })
@@ -164,7 +164,7 @@ export const useDiscoverInTimelineActions = (
         setDiscoverAppState(defaultState);
         const discoverState = discoverStateContainer.current;
         discoverState?.internalState.dispatch(
-          discoverState.injectCurrentTab(discoverState.internalStateActions.updateGlobalState)({
+          discoverState.injectCurrentTab(discoverState.internalActions.updateGlobalState)({
             globalState: {
               timeRange: defaultDiscoverTimeRange,
             },

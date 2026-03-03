@@ -71,7 +71,7 @@ export const useDiscoverHistogram = (
   options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
-  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const {
     data$: { main$, documents$, totalHits$ },
     inspectorAdapters,
