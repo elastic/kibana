@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
@@ -94,7 +95,11 @@ const renderFlyout = (
     );
   };
 
-  const { unmount } = render(<Wrapper />);
+  const { unmount } = render(
+    <I18nProvider>
+      <Wrapper />
+    </I18nProvider>
+  );
 
   return {
     onClose,

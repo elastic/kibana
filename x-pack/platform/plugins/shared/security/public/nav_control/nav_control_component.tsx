@@ -87,7 +87,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 
   const button = (
     <EuiHeaderSectionItemButton
-      aria-controls="headerUserMenu"
       aria-expanded={isPopoverOpen}
       aria-haspopup="true"
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
@@ -168,7 +167,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 
   return (
     <EuiPopover
-      id="headerUserMenu"
       ownFocus
       button={button}
       isOpen={isPopoverOpen}

@@ -39,7 +39,7 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
-import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
 export interface GetWorkflowsParams {
@@ -265,32 +265,15 @@ export class WorkflowsManagementApi {
       throw new Error('Either workflowId or workflowYaml must be provided');
     }
 
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: false },
-      spaceId,
-      request
-    );
-    const parsedYaml = parseWorkflowYamlToJSON(resolvedYaml, zodSchema);
-
-    if (parsedYaml.error) {
-      // TODO: handle error properly
-      // It should throw BadRequestError in the API
-      throw parsedYaml.error;
+    const validation = await this.workflowsService.validateWorkflow(resolvedYaml, spaceId, request);
+    if (!validation.valid || !validation.parsedWorkflow) {
+      const errorMessages = validation.diagnostics
+        .filter((d) => d.severity === 'error')
+        .map((d) => d.message);
+      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
     }
 
-    // Validate step name uniqueness
-    const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
-    if (!stepValidation.isValid) {
-      const errorMessages = stepValidation.errors.map((error) => error.message);
-      throw new WorkflowValidationError(
-        'Workflow validation failed: Step names must be unique throughout the workflow.',
-        errorMessages
-      );
-    }
-
-    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(
-      parsedYaml.data as unknown as WorkflowYaml
-    );
+    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -320,18 +303,15 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    const parsedYaml = parseWorkflowYamlToJSON(
-      workflowYaml,
-      await this.workflowsService.getWorkflowZodSchema({ loose: false }, spaceId, request)
-    );
-
-    if (parsedYaml.error) {
-      throw parsedYaml.error;
+    const validation = await this.workflowsService.validateWorkflow(workflowYaml, spaceId, request);
+    if (!validation.valid || !validation.parsedWorkflow) {
+      const errorMessages = validation.diagnostics
+        .filter((d) => d.severity === 'error')
+        .map((d) => d.message);
+      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
     }
 
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
-      parsedYaml.data as unknown as WorkflowYaml
-    );
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
       {
@@ -457,6 +437,14 @@ export class WorkflowsManagementApi {
       request
     );
     return getWorkflowJsonSchema(zodSchema);
+  }
+
+  public async validateWorkflow(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ValidateWorkflowResponse> {
+    return this.workflowsService.validateWorkflow(yaml, spaceId, request);
   }
 
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {

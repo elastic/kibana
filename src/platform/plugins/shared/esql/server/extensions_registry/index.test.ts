@@ -560,4 +560,52 @@ describe('ESQLExtensionsRegistry', () => {
       expect(result).toEqual([commonField]); // Should only return one instance of the field
     });
   });
+
+  describe('isStandalone flag', () => {
+    it('should return standalone queries regardless of the current query index pattern', () => {
+      availableDatasources = {
+        indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
+        data_streams: [],
+        aliases: [],
+      };
+
+      const staticQuery: RecommendedQuery = {
+        name: 'Search all metrics',
+        query: 'TS metrics-*',
+        isStandalone: true,
+      };
+      const dynamicQuery: RecommendedQuery = {
+        name: 'Logs Query',
+        query: 'FROM logs-2023 | STATS count()',
+      };
+
+      registry.setRecommendedQueries([staticQuery, dynamicQuery], 'oblt');
+
+      const logsResult = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        'oblt'
+      );
+      expect(logsResult).toEqual([dynamicQuery, staticQuery]);
+    });
+
+    it('should not return standalone queries for a different solution ID', () => {
+      availableDatasources = {
+        indices: [{ name: 'logs-2023' }],
+        data_streams: [],
+        aliases: [],
+      };
+
+      const staticQuery: RecommendedQuery = {
+        name: 'Search all metrics',
+        query: 'TS metrics-*',
+        isStandalone: true,
+      };
+
+      registry.setRecommendedQueries([staticQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries('FROM logs-2023', availableDatasources, 'es');
+      expect(result).toEqual([]);
+    });
+  });
 });

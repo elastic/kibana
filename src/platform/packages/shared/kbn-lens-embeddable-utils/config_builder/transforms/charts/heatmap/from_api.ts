@@ -73,6 +73,8 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
         xTitle: layer.axes?.x?.title?.value,
         yTitle: layer.axes?.y?.title?.value,
         xAxisLabelRotation,
+        xSortPredicate: layer.axes?.x?.sort,
+        ySortPredicate: layer.axes?.y?.sort,
       }),
     },
     legend: {
@@ -82,6 +84,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: layer.legend?.size as LegendSize,
+        shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
     },
     ...(basePalette && {

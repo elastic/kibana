@@ -39,24 +39,31 @@ components:
           type: object
           additionalProperties: false
           properties:
-            privileged:
-              type: boolean
+            watchlists:
+              type: array
+              items:
+                type: string
+              description: Watchlist identifiers the entity belongs to (v2).
             asset:
               type: boolean
             managed:
               type: boolean
             mfa_enabled:
               type: boolean
-        behaviors: 
+        behaviors:
           type: object
           additionalProperties: false
           properties:
-            brute_force_victim:
-              type: boolean
-            new_country_login:
-              type: boolean
-            used_usb_device:
-              type: boolean
+            rule_names:
+              type: array
+              items:
+                type: string
+              description: Detection rule names that flagged this entity (v2).
+            anomaly_job_ids:
+              type: array
+              items:
+                type: string
+              description: ML anomaly job identifiers (v2).
         lifecycle:
           type: object
           additionalProperties: false
@@ -79,15 +86,7 @@ components:
               type: array
               items:
                 type: string
-            dependent_of:
-              type: array
-              items:
-                type: string
             owns:
-              type: array
-              items:
-                type: string
-            owned_by:
               type: array
               items:
                 type: string
@@ -95,15 +94,7 @@ components:
               type: array
               items:
                 type: string
-            accessed_frequently_by:
-              type: array
-              items:
-                type: string
             supervises:
-              type: array
-              items:
-                type: string
-            supervised_by:
               type: array
               items:
                 type: string

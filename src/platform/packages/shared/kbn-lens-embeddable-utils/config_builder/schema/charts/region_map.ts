@@ -43,7 +43,7 @@ export const regionMapStateSchemaNoESQL = schema.object(
      */
     region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
   },
-  { meta: { id: 'regionMapNoESQL' } }
+  { meta: { id: 'regionMapNoESQL', title: 'Region Map (DSL)' } }
 );
 
 export const regionMapStateSchemaESQL = schema.object(
@@ -61,12 +61,12 @@ export const regionMapStateSchemaESQL = schema.object(
      */
     region: esqlColumnSchema.extends(regionMapStateRegionOptionsSchema),
   },
-  { meta: { id: 'regionMapESQL' } }
+  { meta: { id: 'regionMapESQL', title: 'Region Map (ES|QL)' } }
 );
 
 export const regionMapStateSchema = schema.oneOf(
   [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
-  { meta: { id: 'regionMapChartSchema' } }
+  { meta: { id: 'regionMapChart', title: 'Region Map' } }
 );
 
 export type RegionMapState = TypeOf<typeof regionMapStateSchema>;

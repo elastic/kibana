@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { conditionSchema } from '@kbn/streamlang';
 import {
   getStreamTypeFromDefinition,
   systemSchema,
@@ -36,14 +35,7 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
-        feature: z
-          .object({
-            name: z.string(),
-            filter: conditionSchema,
-            type: z.literal('system'),
-          })
-          .optional(),
-        kql: z.object({
+        esql: z.object({
           query: z.string(),
         }),
       }),
@@ -81,15 +73,14 @@ const previewSignificantEventsRoute = createServerRoute({
       query: { bucketSize, from, to },
     } = params;
 
-    const definition = await streamsClient.getStream(name);
+    await streamsClient.ensureStream(name);
 
     return await previewSignificantEvents(
       {
-        definition,
+        esqlQuery: query.esql.query,
         bucketSize,
         from,
         to,
-        query,
       },
       {
         scopedClusterClient,
@@ -156,6 +147,9 @@ const readStreamSignificantEventsRoute = createServerRoute({
   },
 });
 
+/**
+ * This should be @deprecated and removed since it is no longer used.
+ */
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
@@ -232,11 +226,9 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body?.system,
           connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
-          sampleDocsSize: params.query.sampleDocsSize,
           systemPrompt: significantEventsPromptOverride,
         },
         {
@@ -251,7 +243,7 @@ const generateSignificantEventsRoute = createServerRoute({
       map(({ queries, tokensUsed, toolUsage }) => {
         telemetry.trackSignificantEventsQueriesGenerated({
           count: queries.length,
-          systems_count: params.body?.system ? 1 : 0,
+          systems_count: 0,
           stream_name: definition.name,
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,
