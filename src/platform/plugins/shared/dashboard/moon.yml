@@ -118,6 +118,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/scout'
   - '@kbn/cps-utils'
+  - '@kbn/core-saved-objects-api-server-mocks'
 tags:
   - plugin
   - prod
