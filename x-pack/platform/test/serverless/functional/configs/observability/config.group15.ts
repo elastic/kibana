@@ -13,9 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseTestConfig.getAll(),
     testFiles: [
-      require.resolve(
-        '../../test_suites/visualizations/group9/open_in_lens/agg_based/oblt_part1'
-      ),
+      require.resolve('../../test_suites/visualizations/group9/open_in_lens/agg_based/oblt_part1'),
     ],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Common Group 15',

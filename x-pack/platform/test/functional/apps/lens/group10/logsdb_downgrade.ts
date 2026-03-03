@@ -6,14 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
   getDataMapping,
   getDocsGenerator,
   setupScenarioRunner,
-  TIME_PICKER_FORMAT,
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
