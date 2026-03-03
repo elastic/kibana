@@ -39,7 +39,7 @@ const VIEW_IN_APP = i18n.translate(
  * Contains up to three buttons: expand row, view in app (when available), and a kebab menu with common actions.
  */
 export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props) => {
-  const { rowIndex, alert, getAlertFormatter, openLinksInNewTab } = props;
+  const { rowIndex, alert, getAlertFormatter, openLinksInNewTab, alertDetailsNavigation } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const viewInAppUrl = useViewInAppUrl(alert, getAlertFormatter);
 
@@ -62,7 +62,8 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
       key="defaultRowActions"
       onActionExecuted={closeActionsPopover}
       onExpandedAlertIndexChange={onExpandedAlertIndexChange}
-      isAlertDetailsEnabled={false}
+      isAlertDetailsEnabled={Boolean(alertDetailsNavigation)}
+      alertDetailsNavigation={alertDetailsNavigation}
       resolveRulePagePath={(alertRuleId) =>
         alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
       }

@@ -13,6 +13,7 @@ import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
+import type { AlertDetailsNavigation } from '@kbn/response-ops-alerts-table/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
@@ -137,6 +138,14 @@ export function RuleComponent({
     executionStatusTranslations: rulesStatusesTranslationsMapping,
   });
 
+  const alertDetailsNavigation = useMemo<AlertDetailsNavigation>(
+    () => ({
+      appId: 'observability',
+      getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+    }),
+    []
+  );
+
   const renderRuleAlertList = useCallback(() => {
     if (ruleType.hasAlertsMappings) {
       return (
@@ -150,6 +159,11 @@ export function RuleComponent({
           actionsColumnWidth={120}
           lastReloadRequestTime={lastReloadRequestTime}
           getAlertFormatter={getAlertFormatter}
+          alertDetailsNavigation={alertDetailsNavigation}
+          casesConfiguration={{
+            featureId: 'management',
+            owner: ['cases'],
+          }}
           services={{
             data,
             http,
@@ -163,6 +177,7 @@ export function RuleComponent({
       );
     }
   }, [
+    alertDetailsNavigation,
     application,
     data,
     fieldFormats,

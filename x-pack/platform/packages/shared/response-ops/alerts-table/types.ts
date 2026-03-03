@@ -338,6 +338,13 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
   /**
+   * SPA navigation config for the alert details page.
+   * When provided, the "View alert details" action and flyout footer use
+   * `navigateToApp` for client-side routing instead of opening the flyout
+   * or using full-page `href` navigation.
+   */
+  alertDetailsNavigation?: AlertDetailsNavigation;
+  /**
    * Additional toolbar controls render function
    */
   renderAdditionalToolbarControls?: ComponentRenderer<AC>;
@@ -510,6 +517,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'
     | 'getAlertFormatter'
+    | 'alertDetailsNavigation'
   >,
   | 'columns'
   | 'pageIndex'
@@ -615,6 +623,13 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   alertsQuerySnapshot?: EsQuerySnapshot;
 }
 
+export interface AlertDetailsNavigation {
+  /** The Kibana app ID to navigate to (e.g. 'observability') */
+  appId: string;
+  /** Returns the in-app path for a given alert ID (e.g. `/alerts/${alertId}`) */
+  getPath: (alertId: string) => string;
+}
+
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
   RenderContext<AC> &
     EuiDataGridCellValueElementProps & {
@@ -630,6 +645,12 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
        * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
        */
       resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+      /**
+       * SPA navigation config for the alert details page.
+       * When provided, the "View alert details" action uses `navigateToApp` for
+       * client-side routing instead of a full-page `href` navigation.
+       */
+      alertDetailsNavigation?: AlertDetailsNavigation;
       /**
        * Get the alert formatter for a specific rule type.
        * Used to generate "View in App" links for individual alerts.
