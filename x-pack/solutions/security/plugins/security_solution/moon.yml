@@ -276,6 +276,7 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/esql-language'
 tags:
   - plugin
   - prod

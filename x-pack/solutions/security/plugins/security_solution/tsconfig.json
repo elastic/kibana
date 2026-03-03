@@ -275,6 +275,7 @@
     "@kbn/entity-store",
     "@kbn/as-code-filters-transforms",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/esql-language"
   ]
 }
