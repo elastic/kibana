@@ -17,7 +17,6 @@ import { withLicenseCheck } from '../lib/with_license_check';
 export function registerPostResumeWorkflowExecutionRoute({
   router,
   api,
-  logger,
   spaces,
 }: RouteDependencies) {
   router.post(
