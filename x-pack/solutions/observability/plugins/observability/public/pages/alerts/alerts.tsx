@@ -54,7 +54,7 @@ import { getColumns } from '../../components/alerts_table/common/get_columns';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';
-// import { getObservabilityAlertsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
+import { getObservabilityAlertsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
@@ -127,6 +127,7 @@ function InternalAlertsPage() {
     cases,
     settings,
     charts,
+    chrome,
     dataViews,
     observabilityAIAssistant,
     share: {
@@ -318,17 +319,16 @@ function InternalAlertsPage() {
 
   const manageRulesHref = useRulesLink().href;
 
-  // Header "Manage rules" button commented out; button is shown in-page on the metrics row instead.
-  // useEffect(() => {
-  //   if (chrome?.setHeaderAppActionsConfig && manageRulesHref) {
-  //     chrome.setHeaderAppActionsConfig(
-  //       getObservabilityAlertsHeaderAppActionsConfig(manageRulesHref)
-  //     );
-  //     return () => {
-  //       chrome.setHeaderAppActionsConfig(undefined);
-  //     };
-  //   }
-  // }, [chrome, manageRulesHref]);
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig && manageRulesHref) {
+      chrome.setHeaderAppActionsConfig(
+        getObservabilityAlertsHeaderAppActionsConfig(manageRulesHref)
+      );
+      return () => {
+        chrome.setHeaderAppActionsConfig(undefined);
+      };
+    }
+  }, [chrome, manageRulesHref]);
 
   return (
     <Provider value={alertSearchBarStateContainer}>

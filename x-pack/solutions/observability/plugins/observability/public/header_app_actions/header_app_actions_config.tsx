@@ -42,18 +42,48 @@ const ObservabilityAlertsManageRulesButton: React.FC<{ href: string }> = ({ href
 
 /**
  * Header app actions config for Observability > Alerts.
- * Single primary action "Manage rules"; no overflow menu.
+ * Primary action "Manage rules"; secondary overflow (•••) with Manage rules, Docs, and Feedback.
  * Set when the Alerts page is active; cleared when navigating away (handled by platform on app change).
+ * POC: overflow items are dumb (noop).
  */
 export const getObservabilityAlertsHeaderAppActionsConfig = (
   manageRulesHref: string
 ): ChromeHeaderAppActionsConfig => ({
-  primaryActions: [
-    <ObservabilityAlertsManageRulesButton
-      key="observability-alerts-manage-rules"
-      href={manageRulesHref}
-    />,
+  overflowPanels: [
+    {
+      id: 0,
+      title: '',
+      items: [
+        {
+          name: i18n.translate('xpack.observability.alerts.headerAppActions.overflowManageRules', {
+            defaultMessage: 'Manage rules',
+          }),
+          icon: 'gear',
+          onClick: noop,
+        },
+        {
+          name: i18n.translate('xpack.observability.alerts.headerAppActions.overflowDocs', {
+            defaultMessage: 'Docs',
+          }),
+          icon: 'documentation',
+          onClick: noop,
+        },
+        {
+          name: i18n.translate('xpack.observability.alerts.headerAppActions.overflowFeedback', {
+            defaultMessage: 'Feedback',
+          }),
+          icon: 'editorComment',
+          onClick: noop,
+        },
+      ],
+    },
   ],
+  // primaryActions: [
+  //   <ObservabilityAlertsManageRulesButton
+  //     key="observability-alerts-manage-rules"
+  //     href={manageRulesHref}
+  //   />,
+  // ],
 });
 
 /**
