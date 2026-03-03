@@ -260,6 +260,7 @@ export const initUiSettings = (
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
+        technicalPreview: true,
       },
     }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
