@@ -36,12 +36,16 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
   const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
   const sourceField = allColumns.find((f) => f.columnId === source.id || f.variable === source.id);
   const targetField = allColumns.find((f) => f.columnId === target.columnId);
+  const sourceLayerColumn = layer.columns.find((c) => c.columnId === source.id);
   const newColumn = {
     columnId: target.columnId,
     fieldName: sourceField?.variable ? `??${sourceField.variable}` : sourceField?.fieldName ?? '',
     meta: sourceField?.meta,
     variable: sourceField?.variable,
     ...(target.isMetricDimension && { inMetricDimension: true }),
+    ...(sourceLayerColumn?.customLabel && sourceLayerColumn.label != null
+      ? { label: sourceLayerColumn.label, customLabel: true }
+      : {}),
   };
   let columns: TextBasedLayerColumn[] | undefined;
 
@@ -59,6 +63,7 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
       columns = [...layer.columns, newColumn];
       break;
     case 'swap_compatible':
+      const targetLayerColumn = layer.columns.find((c) => c.columnId === target.columnId);
       const swapTwoColumns = (c: TextBasedLayerColumn) =>
         c.columnId === target.columnId
           ? newColumn
@@ -67,6 +72,9 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
               columnId: source.columnId,
               fieldName: targetField?.fieldName ?? '',
               meta: targetField?.meta,
+              ...(targetLayerColumn?.customLabel && targetLayerColumn.label != null
+                ? { label: targetLayerColumn.label, customLabel: true }
+                : {}),
             }
           : c;
       columns = layer.columns.map(swapTwoColumns);

@@ -42,6 +42,27 @@ describe('Metric Operations Schemas', () => {
       const validated = esqlColumnSchema.validate(input);
       expect(validated).toEqual(input);
     });
+
+    it('validates with an optional label', () => {
+      const input = {
+        operation: 'value',
+        column: 'sum' as const,
+        label: 'My custom label',
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates without a label', () => {
+      const input = {
+        operation: 'value',
+        column: 'sum' as const,
+      };
+
+      const validated = esqlColumnSchema.validate(input);
+      expect(validated).not.toHaveProperty('label');
+    });
   });
 
   describe('staticOperationDefinition', () => {

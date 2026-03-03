@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -161,15 +161,12 @@ const mosaicStateSchemaESQL = schema.object(
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(
-        partitionStatePrimaryMetricOptionsSchema,
-        {
-          meta: {
-            description:
-              'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
-          },
-        }
-      ),
+      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+        meta: {
+          description:
+            'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+        },
+      }),
       {
         minSize: 1,
         maxSize: 1,

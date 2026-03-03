@@ -180,8 +180,8 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
 
 function getValueColumns(layer: TagcloudStateESQL) {
   return [
-    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    getValueColumn(getAccessorName('tag'), layer.tag_by.column),
+    getValueColumn(getAccessorName('metric'), layer.metric, 'number'),
+    getValueColumn(getAccessorName('tag'), layer.tag_by),
   ];
 }
 

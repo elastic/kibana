@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -424,7 +424,7 @@ export const datatableStateSchemaESQL = schema.object(
      */
     metrics: schema.maybe(
       schema.arrayOf(
-        esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        esqlColumnWithFormatSchema.extends(datatableStateMetricsOptionsSchema, {
           meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {

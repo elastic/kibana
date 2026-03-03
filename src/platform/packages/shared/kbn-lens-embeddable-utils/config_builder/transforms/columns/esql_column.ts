@@ -12,21 +12,24 @@ import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 export const getValueColumn = (
   id: string,
-  fieldName?: string,
+  apiColumn: { column: string; label?: string },
   fieldType: DatatableColumnType = 'string',
   inMetricDimension?: boolean
 ): TextBasedLayerColumn => {
   return {
     columnId: id,
-    fieldName: fieldName || id,
+    fieldName: apiColumn.column || id,
     ...(fieldType ? { meta: { type: fieldType } } : {}),
+    ...(apiColumn.label != null ? { label: apiColumn.label, customLabel: true } : {}),
     ...(inMetricDimension != null ? { inMetricDimension } : {}),
   };
 };
 
 export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
+  const col = layer.columns.find((c) => c.columnId === accessor)!;
   return {
     operation: 'value' as const,
-    column: layer.columns.find((c) => c.columnId === accessor)!.fieldName,
+    column: col.fieldName,
+    ...(col.customLabel && col.label != null ? { label: col.label } : {}),
   };
 };

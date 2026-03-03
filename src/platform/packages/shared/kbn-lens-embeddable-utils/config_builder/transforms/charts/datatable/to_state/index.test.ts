@@ -106,5 +106,31 @@ describe('Datatable ES|QL column ordering', () => {
         },
       ]);
     });
+
+    test('passes label and customLabel through when label is provided', () => {
+      const config = {
+        type: 'datatable',
+        metrics: [{ operation: 'value', column: 'bytes', label: 'Total Bytes' }],
+        rows: [{ operation: 'value', column: 'host' }],
+      } as unknown as DatatableStateESQL;
+
+      const result = getValueColumns(config);
+
+      expect(result).toEqual([
+        {
+          columnId: 'datatable_accessor_row_0',
+          fieldName: 'host',
+          meta: { type: 'string' },
+        },
+        {
+          columnId: 'datatable_accessor_metric_0',
+          fieldName: 'bytes',
+          inMetricDimension: true,
+          meta: { type: 'number' },
+          label: 'Total Bytes',
+          customLabel: true,
+        },
+      ]);
+    });
   });
 });

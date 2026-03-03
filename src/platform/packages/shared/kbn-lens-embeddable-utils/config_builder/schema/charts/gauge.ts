@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
@@ -154,7 +154,7 @@ export const gaugeStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends({
+    metric: esqlColumnWithFormatSchema.extends({
       ...gaugeStateMetricOptionsSchema,
       ...gaugeStateMetricInnerESQLOpsSchema,
     }),

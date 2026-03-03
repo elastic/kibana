@@ -27,7 +27,7 @@ describe('extendedDataLayerConfig', () => {
     palette: mockPaletteOutput,
   };
 
-  test('produces the correct arguments', async () => {
+  test('produces the correct arguments for a line chart with a date x-axis accessor', async () => {
     const { data } = sampleArgs();
     const fullArgs: ExtendedDataLayerArgs = {
       ...args,
@@ -43,9 +43,35 @@ describe('extendedDataLayerConfig', () => {
       type: 'extendedDataLayer',
       layerType: LayerTypes.DATA,
       ...fullArgs,
+      xScaleType: 'time',
+      isHistogram: true,
       table: data,
       showLines: true,
     });
+  });
+
+  test('preserves ordinal xScaleType when x-axis column is a string', async () => {
+    const { data } = sampleArgs();
+    const result = await extendedDataLayerFunction.fn(
+      data,
+      { ...args, xAccessor: 'd', xScaleType: 'ordinal' },
+      createMockExecutionContext()
+    );
+
+    expect(result.xScaleType).toBe('ordinal');
+    expect(result.isHistogram).toBe(false);
+  });
+
+  test('preserves linear xScaleType when x-axis column is numeric', async () => {
+    const { data } = sampleArgs();
+    const result = await extendedDataLayerFunction.fn(
+      data,
+      { ...args, xAccessor: 'a', xScaleType: 'linear' },
+      createMockExecutionContext()
+    );
+
+    expect(result.xScaleType).toBe('linear');
+    expect(result.isHistogram).toBe(false);
   });
 
   test('throws the error if markSizeAccessor is provided to the not line/area chart', async () => {
