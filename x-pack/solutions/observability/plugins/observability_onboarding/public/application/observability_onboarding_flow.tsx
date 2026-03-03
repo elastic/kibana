@@ -19,6 +19,7 @@ import {
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
+  IngestHubPage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
@@ -72,6 +73,9 @@ export function ObservabilityOnboardingFlow() {
             <CloudForwarderPage />
           </Route>
         )}
+        <Route path="/ingest-hub/:section?">
+          <IngestHubPage />
+        </Route>
         <Route>
           <LandingPage />
         </Route>
