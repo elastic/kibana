@@ -28,9 +28,10 @@ export const performRemoveReferencesTo = async <T>(
   { type, id, options }: PerformRemoveReferencesToParams,
   { registry, helpers, client, mappings, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsRemoveReferencesToResponse> => {
-  const { common: commonHelper } = helpers;
+  const { common: commonHelper, validation: validationHelper } = helpers;
   const { securityExtension } = extensions;
 
+  validationHelper.validateId(id);
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const { refresh = true } = options;
 

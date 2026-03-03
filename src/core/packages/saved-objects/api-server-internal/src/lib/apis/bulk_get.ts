@@ -90,6 +90,7 @@ export const performBulkGet = async <T>(
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       } else {
         try {
+          validationHelper.validateId(id);
           validationHelper.validateObjectNamespaces(type, id, object.namespaces);
         } catch (e) {
           error = e;

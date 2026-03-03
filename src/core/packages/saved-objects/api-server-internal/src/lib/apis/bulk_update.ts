@@ -111,6 +111,7 @@ export const performBulkUpdate = async <T>(
       error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     } else {
       try {
+        helpers.validation.validateId(id);
         if (objectNamespace === ALL_NAMESPACES_STRING) {
           error = SavedObjectsErrorHelpers.createBadRequestError('"namespace" cannot be "*"');
         }

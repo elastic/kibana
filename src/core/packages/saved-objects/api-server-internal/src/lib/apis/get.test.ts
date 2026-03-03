@@ -191,6 +191,13 @@ describe('#get', () => {
         expect(client.get).not.toHaveBeenCalled();
       });
 
+      it(`throws a BadRequestError when the id contains a forward slash (path traversal)`, async () => {
+        await expect(repository.get(type, '../../../attack')).rejects.toThrowError(
+          createBadRequestErrorPayload("Invalid saved object ID: IDs cannot contain '/'")
+        );
+        expect(client.get).not.toHaveBeenCalled();
+      });
+
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({

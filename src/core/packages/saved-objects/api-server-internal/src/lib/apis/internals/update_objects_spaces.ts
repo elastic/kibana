@@ -40,6 +40,7 @@ import {
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
 } from '../utils';
+import { assertValidId } from '../helpers/id_utils';
 import { DEFAULT_REFRESH_SETTING } from '../../constants';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import {
@@ -121,6 +122,11 @@ export async function updateObjectsSpaces({
     if (!allowedTypes.includes(type)) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
       return left({ id, type, spaces: [], error });
+    }
+    try {
+      assertValidId(id);
+    } catch (e) {
+      return left({ id, type, spaces: [], error: errorContent(e) });
     }
     if (!registry.isShareable(type)) {
       const error = errorContent(

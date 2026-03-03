@@ -24,9 +24,10 @@ export const performCollectMultiNamespaceReferences = async <T>(
   { objects, options }: PerformCreateParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> => {
-  const { common: commonHelper } = helpers;
+  const { common: commonHelper, validation: validationHelper } = helpers;
   const { securityExtension } = extensions;
 
+  objects.forEach(({ id }) => validationHelper.validateId(id));
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   return collectMultiNamespaceReferences({
     registry,

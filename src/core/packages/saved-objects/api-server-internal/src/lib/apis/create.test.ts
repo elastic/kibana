@@ -638,6 +638,16 @@ describe('#create', () => {
         expect(client.create).not.toHaveBeenCalled();
       });
 
+      it(`throws a BadRequestError when id contains a forward slash (path traversal)`, async () => {
+        const type = 'index-pattern';
+        await expect(
+          repository.create(type, attributes, { id: '../../../attack' })
+        ).rejects.toThrowError(
+          createBadRequestErrorPayload("Invalid saved object ID: IDs cannot contain '/'")
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
       it(`throws when type is hidden`, async () => {
         await expect(repository.create(HIDDEN_TYPE, attributes)).rejects.toThrowError(
           createUnsupportedTypeErrorPayload(HIDDEN_TYPE)

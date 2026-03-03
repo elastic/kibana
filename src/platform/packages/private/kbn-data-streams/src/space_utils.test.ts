@@ -12,6 +12,8 @@ import {
   SYSTEM_SPACE_PROPERTY,
   containsSpaceSeparator,
   throwOnIdWithSeparator,
+  throwOnIdWithPathTraversal,
+  FORBIDDEN_ID_CHARS,
   generateSpacePrefixedId,
   decorateDocumentWithSpace,
   buildSpaceFilter,
@@ -53,6 +55,38 @@ describe('space_utils', () => {
       expect(() => throwOnIdWithSeparator('doc123')).not.toThrow();
       expect(() => throwOnIdWithSeparator('uuid-with-dashes')).not.toThrow();
       expect(() => throwOnIdWithSeparator('single:colon')).not.toThrow();
+    });
+  });
+
+  describe('FORBIDDEN_ID_CHARS', () => {
+    it('should contain forward slash', () => {
+      expect(FORBIDDEN_ID_CHARS).toContain('/');
+    });
+  });
+
+  describe('throwOnIdWithPathTraversal', () => {
+    it('should throw if ID contains a forward slash', () => {
+      expect(() => throwOnIdWithPathTraversal('../../../attack')).toThrow(
+        /IDs cannot contain '\/'/
+      );
+    });
+
+    it('should throw if ID starts with a slash', () => {
+      expect(() => throwOnIdWithPathTraversal('/leading')).toThrow(/IDs cannot contain '\/'/);
+    });
+
+    it('should throw if ID contains a slash in the middle', () => {
+      expect(() => throwOnIdWithPathTraversal('some/path')).toThrow(/IDs cannot contain '\/'/);
+    });
+
+    it('should not throw for valid IDs', () => {
+      expect(() => throwOnIdWithPathTraversal('valid-id-123')).not.toThrow();
+      expect(() => throwOnIdWithPathTraversal('uuid-4a5b-c6d7')).not.toThrow();
+      expect(() => throwOnIdWithPathTraversal('space::doc-id')).not.toThrow();
+    });
+
+    it('should mention path traversal in the error message', () => {
+      expect(() => throwOnIdWithPathTraversal('a/b')).toThrow(/path traversal/);
     });
   });
 

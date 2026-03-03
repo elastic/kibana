@@ -18,6 +18,7 @@ import type { UserHelper } from './user';
 export { CommonHelper, type ICommonHelper } from './common';
 export { EncryptionHelper, type IEncryptionHelper } from './encryption';
 export { ValidationHelper, type IValidationHelper } from './validation';
+export { assertValidId, FORBIDDEN_ID_CHARS } from './id_utils';
 export { SerializerHelper, type ISerializerHelper } from './serializer';
 export { MigrationHelper, type IMigrationHelper } from './migration';
 export { UserHelper } from './user';

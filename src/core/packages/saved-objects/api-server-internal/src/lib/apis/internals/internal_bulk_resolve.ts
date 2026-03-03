@@ -48,6 +48,7 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
 } from '../utils';
+import { assertValidId } from '../helpers/id_utils';
 import type { ApiExecutionContext } from '../types';
 import type { RepositoryEsClient } from '../../repository_es_client';
 
@@ -281,6 +282,11 @@ function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTy
         id,
         error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type),
       });
+    }
+    try {
+      assertValidId(id);
+    } catch (e) {
+      return left({ type, id, error: e });
     }
     return right(object);
   });

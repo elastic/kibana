@@ -19,6 +19,7 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { assertValidId } from './id_utils';
 
 export type IValidationHelper = PublicMethodsOf<ValidationHelper>;
 
@@ -40,6 +41,14 @@ export class ValidationHelper {
     this.registry = registry;
     this.logger = logger;
     this.kibanaVersion = kibanaVersion;
+  }
+
+  /**
+   * Validates that a saved object ID does not contain characters that could enable
+   * path traversal attacks against the Elasticsearch REST API.
+   */
+  public validateId(id: string): void {
+    assertValidId(id);
   }
 
   /** The `initialNamespaces` field (create, bulkCreate) is used to create an object in an initial set of spaces. */

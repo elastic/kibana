@@ -50,6 +50,7 @@ export const performUpdate = async <T>(
   if (!validRequest && error) {
     throw error;
   }
+  helpers.validation.validateId(id);
 
   const maxAttempts = options.version ? 1 : 1 + DEFAULT_RETRY_COUNT;
 

@@ -21,6 +21,7 @@ import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
   throwOnIdWithSeparator,
+  throwOnIdWithPathTraversal,
   decorateDocumentWithSpace,
   buildSpaceFilter,
   buildSpaceAgnosticFilter,
@@ -91,6 +92,7 @@ export class DataStreamClient<
       // Validate _id if provided
       if (typeof _id !== 'undefined') {
         throwOnIdWithSeparator(_id);
+        throwOnIdWithPathTraversal(_id);
       }
 
       // Process ID and document based on space

@@ -33,7 +33,7 @@ export const performCheckConflicts = async <T>(
   { objects, options }: PerformCheckConflictsParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsCheckConflictsResponse> => {
-  const { common: commonHelper } = helpers;
+  const { common: commonHelper, validation: validationHelper } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -56,6 +56,11 @@ export const performCheckConflicts = async <T>(
         type,
         error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
       });
+    }
+    try {
+      validationHelper.validateId(id);
+    } catch (e) {
+      return left({ id, type, error: errorContent(e) });
     }
 
     return right({

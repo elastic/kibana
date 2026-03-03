@@ -48,6 +48,7 @@ export const performIncrementCounter = async <T>(
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
   }
+  apiExecutionContext.helpers.validation.validateId(id);
 
   return incrementCounterInternal<T>({ type, id, counterFields, options }, apiExecutionContext);
 };

@@ -53,6 +53,46 @@ describe('Saved Objects type validation helper', () => {
     jest.resetAllMocks();
   });
 
+  describe('validateId', () => {
+    beforeEach(() => {
+      helper = new ValidationHelper({
+        logger,
+        registry: typeRegistry,
+        kibanaVersion: defaultVersion,
+      });
+    });
+
+    it('accepts a valid UUID', () => {
+      expect(() => helper.validateId('550e8400-e29b-41d4-a716-446655440000')).not.toThrow();
+    });
+
+    it('accepts a regular alphanumeric ID', () => {
+      expect(() => helper.validateId('my-dashboard-123')).not.toThrow();
+    });
+
+    it('accepts an ID with colons (namespace separators)', () => {
+      expect(() => helper.validateId('some:valid:id')).not.toThrow();
+    });
+
+    it('throws a BadRequestError when ID contains a forward slash', () => {
+      expect(() => helper.validateId('../traversal/attack')).toThrowError(
+        "Invalid saved object ID: IDs cannot contain '/'"
+      );
+    });
+
+    it('throws a BadRequestError when ID starts with a slash', () => {
+      expect(() => helper.validateId('/leading-slash')).toThrowError(
+        "Invalid saved object ID: IDs cannot contain '/'"
+      );
+    });
+
+    it('throws a BadRequestError when ID contains a slash in the middle', () => {
+      expect(() => helper.validateId('some/path')).toThrowError(
+        "Invalid saved object ID: IDs cannot contain '/'"
+      );
+    });
+  });
+
   describe('validation helper', () => {
     beforeEach(() => {
       registerType(typeA, typedef);

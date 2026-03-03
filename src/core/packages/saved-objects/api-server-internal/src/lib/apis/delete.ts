@@ -38,13 +38,18 @@ export const performDelete = async <T>(
     mappings,
   }: ApiExecutionContext
 ): Promise<{}> => {
-  const { common: commonHelper, preflight: preflightHelper } = helpers;
+  const {
+    common: commonHelper,
+    preflight: preflightHelper,
+    validation: validationHelper,
+  } = helpers;
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
   if (!allowedTypes.includes(type)) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
+  validationHelper.validateId(id);
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 

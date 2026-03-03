@@ -26,7 +26,8 @@ export const performResolve = async <T>(
   { type, id, options }: PerformCreateParams<T>,
   apiExecutionContext: ApiExecutionContext
 ): Promise<SavedObjectsResolveResponse<T>> => {
-  const { common: commonHelper } = apiExecutionContext.helpers;
+  const { common: commonHelper, validation: validationHelper } = apiExecutionContext.helpers;
+  validationHelper.validateId(id);
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const { resolved_objects: bulkResults } = await internalBulkResolve<T>(
     {

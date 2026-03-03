@@ -34,6 +34,7 @@ import {
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
 } from '../utils';
+import { assertValidId } from '../helpers/id_utils';
 import type { ApiExecutionContext } from '../types';
 import { type GetBulkOperationErrorRawResponse, isMgetError } from '../utils/internal_utils';
 
@@ -187,6 +188,11 @@ export const changeObjectAccessControl = async (
     if (!allowedTypes.includes(type)) {
       const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       return left({ id, type, error });
+    }
+    try {
+      assertValidId(id);
+    } catch (e) {
+      return left({ id, type, error: e });
     }
     if (!registry.supportsAccessControl(type)) {
       const error = SavedObjectsErrorHelpers.createBadRequestError(

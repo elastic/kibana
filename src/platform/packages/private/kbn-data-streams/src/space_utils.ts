@@ -32,6 +32,27 @@ export function throwOnIdWithSeparator(id: string): void {
   }
 }
 
+/**
+ * Characters forbidden in user-provided document IDs to prevent path traversal attacks
+ * against the Elasticsearch REST API.
+ */
+export const FORBIDDEN_ID_CHARS = ['/'] as const;
+
+/**
+ * Validate that a user-provided ID does NOT contain characters that could enable
+ * path traversal attacks against the Elasticsearch REST API.
+ * Forward slashes in document IDs can be interpreted as URL path separators.
+ */
+export function throwOnIdWithPathTraversal(id: string): void {
+  const forbidden = FORBIDDEN_ID_CHARS.filter((char) => id.includes(char));
+  if (forbidden.length > 0) {
+    throw new Error(
+      `Invalid document ID: IDs cannot contain '${forbidden.join("', '")}'. ` +
+        `These characters can enable path traversal attacks.`
+    );
+  }
+}
+
 /** Generate a space-prefixed ID. Only called when space is defined. */
 export function generateSpacePrefixedId(space: string, id?: string): string {
   const docId = id ?? uuidv4();

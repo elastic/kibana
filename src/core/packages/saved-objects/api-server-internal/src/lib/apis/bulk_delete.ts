@@ -32,6 +32,7 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
 } from './utils';
+import { assertValidId } from './helpers/id_utils';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import type {
@@ -269,6 +270,11 @@ function presortObjectsByNamespaceType(
         type,
         error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
       });
+    }
+    try {
+      assertValidId(id);
+    } catch (e) {
+      return left({ id, type, error: errorContent(e) });
     }
     const requiresNamespacesCheck = registry.isMultiNamespace(type);
 
