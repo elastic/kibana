@@ -8,5 +8,28 @@
  */
 
 import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
+import {
+  getAffectedMoonProjects,
+  normalizeRepoRelativePath,
+  resolveMoonAffectedComparison,
+  resolveMoonAffectedBase,
+  ROOT_MOON_PROJECT_ID,
+  summarizeAffectedMoonProjects,
+} from './query_projects';
 
-export { regenerateMoonProjects };
+export {
+  regenerateMoonProjects,
+  getAffectedMoonProjects,
+  normalizeRepoRelativePath,
+  resolveMoonAffectedComparison,
+  resolveMoonAffectedBase,
+  ROOT_MOON_PROJECT_ID,
+  summarizeAffectedMoonProjects,
+};
+export type {
+  MoonProject,
+  MoonDownstreamMode,
+  MoonAffectedBase,
+  MoonAffectedComparison,
+  MoonAffectedProjectSummary,
+} from './query_projects';

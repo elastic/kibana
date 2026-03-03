@@ -18,12 +18,16 @@ const splitLines = (value: string): string[] =>
     .filter((line) => line.length > 0);
 
 export const getRemoteDefaultBranchRefs = async (): Promise<string[]> => {
-  const { stdout } = await execa('git', ['for-each-ref', '--format=%(refname)', 'refs/remotes'], {
-    cwd: REPO_ROOT,
-    stdin: 'ignore',
-  });
+  const { stdout } = await execa(
+    'git',
+    ['for-each-ref', '--format=%(refname)', 'refs/remotes/*/HEAD'],
+    {
+      cwd: REPO_ROOT,
+      stdin: 'ignore',
+    }
+  );
 
-  const remoteHeadRefs = splitLines(stdout).filter((ref) => ref.endsWith('/HEAD'));
+  const remoteHeadRefs = splitLines(stdout);
   const resolvedRefs = await Promise.all(
     remoteHeadRefs.map(async (remoteHeadRef) => {
       try {
