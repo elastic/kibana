@@ -21525,18 +21525,7 @@ fetch-blob@^3.1.2, fetch-blob@^3.1.4:
     node-domexception "^1.0.0"
     web-streams-polyfill "^3.0.3"
 
-fetch-mock@*:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-10.1.0.tgz#b2cabb4f587eca747e395e97de28c62364f301fc"
-  integrity sha512-/2DFdUrn2afOifgXuq3ppTGOg/S8YAvjeEOlBJ4QgWiT24pYGozju3Hz5UQm1ynumY9hlzBHE2z0jd0PHD+fRg==
-  dependencies:
-    debug "^4.1.1"
-    dequal "^2.0.3"
-    globrex "^0.1.2"
-    is-subset "^0.1.1"
-    regexparam "^3.0.0"
-
-fetch-mock@12.6.0:
+fetch-mock@*, fetch-mock@12.6.0:
   version "12.6.0"
   resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-12.6.0.tgz#e5ed5d471eeeb29478260ce48385dca6773b105e"
   integrity sha512-oAy0OqAvjAvduqCeWveBix7LLuDbARPqZZ8ERYtBcCURA3gy7EALA3XWq0tCNxsSg+RmmJqyaeeZlOCV9abv6w==
@@ -22517,11 +22506,6 @@ globjoin@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/globjoin/-/globjoin-0.1.4.tgz#2f4494ac8919e3767c5cbb691e9f463324285d43"
   integrity sha1-L0SUrIkZ43Z8XLtpHp9GMyQoXUM=
-
-globrex@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
-  integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
 gonzales-pe@^4.3.0:
   version "4.3.0"
