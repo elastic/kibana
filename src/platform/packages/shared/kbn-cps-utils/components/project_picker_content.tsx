@@ -55,26 +55,7 @@ export const ProjectPickerContent = ({
   isReadonly = false,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
-  const { originProject, linkedProjects, isLoading, error } = projects;
-
-  if (isLoading) {
-    return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" css={styles.loadingContainer}>
-        <EuiLoadingSpinner size="m" />
-      </EuiFlexGroup>
-    );
-  }
-
-  if (error) {
-    return (
-      <EuiCallOut
-        size="s"
-        color="danger"
-        title={strings.getProjectPickerFetchError()}
-        css={styles.errorCallout}
-      />
-    );
-  }
+  const { originProject, linkedProjects, error, isLoading } = projects;
 
   if (!originProject) {
     return null;
@@ -113,15 +94,29 @@ export const ProjectPickerContent = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem css={styles.listContainer} className="eui-yScroll">
+        {isLoading && (
+          <div css={styles.loadingOverlay}>
+            <EuiLoadingSpinner size="m" />
+          </div>
+        )}
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-          {projectsList.map((project, index) => (
-            <ProjectListItem
-              key={project._id}
-              project={project}
-              index={index}
-              isOriginProject={project._id === originProject._id}
+          {error ? (
+            <EuiCallOut
+              size="s"
+              color="danger"
+              title={strings.getProjectPickerFetchError()}
+              css={styles.errorCallout}
             />
-          ))}
+          ) : (
+            projectsList.map((project, index) => (
+              <ProjectListItem
+                key={project._id}
+                project={project}
+                index={index}
+                isOriginProject={project._id === originProject._id}
+              />
+            ))
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -129,10 +124,6 @@ export const ProjectPickerContent = ({
 };
 
 const projectPickerContentStyles = {
-  loadingContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.xl,
-    }),
   errorCallout: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: euiTheme.size.m,
@@ -158,5 +149,23 @@ const projectPickerContentStyles = {
   listContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      position: 'relative',
+    }),
+  loadingOverlay: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1,
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        opacity: 0.8,
+        borderRadius: euiTheme.border.radius.small,
+      },
     }),
 };

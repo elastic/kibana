@@ -159,6 +159,60 @@ export class RulesClientFactory {
     });
   }
 
+  /**
+   * Attempts to create a UIAM API key when shouldGrantUiam is true and the request has UIAM credentials.
+   * Logs errors and returns undefined if grant fails or credentials are missing/invalid.
+   */
+  private async createUiamApiKey(
+    request: KibanaRequest,
+    name: string
+  ): Promise<GrantAPIKeyResult | undefined> {
+    if (!this.shouldGrantUiam) {
+      return;
+    }
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      this.logger.error(
+        `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`
+      );
+      return;
+    }
+    try {
+      const result = await this.securityService.authc.apiKeys.uiam?.grant(request, {
+        name: `uiam-${name}`,
+      });
+      if (!result) {
+        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
+        return;
+      }
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      this.logger.error(
+        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`
+      );
+      return;
+    }
+  }
+
+  /**
+   * Invalidates a UIAM API key by id. Logs an error if invalidation fails.
+   */
+  private async invalidateUiamApiKey(
+    request: KibanaRequest,
+    ruleName: string,
+    id: string
+  ): Promise<void> {
+    const result = await this.securityService.authc.apiKeys.uiam?.invalidate(request, { id });
+    if (result && result.error_count > 0) {
+      this.logger.error(
+        `Failed to invalidate UIAM API key for alerting rule : ${ruleName}: ${result.error_details
+          ?.map((error) => error.reason)
+          .join(', ')}  `
+      );
+    }
+  }
+
   private async createInternal({
     request,
     savedObjects,
@@ -171,6 +225,7 @@ export class RulesClientFactory {
     isExplicitSpaceOverride: boolean;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
+    const factory = this;
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
@@ -226,35 +281,7 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        let createUiamApiKeyResult: GrantAPIKeyResult | null | undefined;
-        const shouldCreateUiamApiKey = this.shouldGrantUiam;
-
-        const invalidateUiamApiKey = async (id?: string) => {
-          if (!id) return;
-          const invalidateUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.invalidate(
-            request,
-            { id }
-          );
-          if (invalidateUiamApiKeyResult && invalidateUiamApiKeyResult.error_count > 0) {
-            this.logger.error(
-              `Failed to invalidate UIAM API key for alerting rule : ${name}: ${invalidateUiamApiKeyResult.error_details
-                ?.map((error) => error.reason)
-                .join(', ')}  `
-            );
-          }
-        };
-
-        if (shouldCreateUiamApiKey) {
-          // if this throws we return bad request where this function is called from
-          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
-            name: `uiam-${name}`,
-          });
-
-          if (!createUiamApiKeyResult) {
-            this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
-            return { apiKeysEnabled: false };
-          }
-        }
+        const createUiamApiKeyResult = await factory.createUiamApiKey(request, name);
 
         let createEsAPIKeyResult;
         try {
@@ -265,14 +292,18 @@ export class RulesClientFactory {
           });
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
-          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          if (createUiamApiKeyResult?.id) {
+            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+          }
           // rethrow the error to be handled by the caller
           throw err;
         }
 
         // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
         if (!createEsAPIKeyResult) {
-          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          if (createUiamApiKeyResult?.id) {
+            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+          }
           return { apiKeysEnabled: false };
         }
 

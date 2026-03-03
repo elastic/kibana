@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { PublicStepRegistry } from './step_registry';
 import type { PublicStepDefinition } from './types';
@@ -14,6 +15,7 @@ import type { PublicStepDefinition } from './types';
 const stepId = 'custom.myStep';
 const defaultDefinition: PublicStepDefinition = {
   id: stepId,
+  category: StepCategory.Kibana,
   label: 'My Custom Step',
   description: 'A custom step implementation',
   icon: jest.fn(),
