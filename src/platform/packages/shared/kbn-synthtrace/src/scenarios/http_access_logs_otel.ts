@@ -42,6 +42,7 @@ import { estimateDataGeneration } from './helpers/http_generation_estimator';
 import { convertEcsToOtel } from './helpers/ecs_to_otel';
 import { getInfraPool } from './helpers/http_infra_pool';
 import { initSessionPool } from './helpers/http_session_pool';
+import { initRandom } from './helpers/http_random';
 
 const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   const parsedOpts = parseHttpAccessLogsOpts(runOptions.scenarioOpts);
@@ -53,6 +54,13 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
     ...parsedOpts,
     scale,
   };
+
+  // Deterministic seed from run parameters so every run with the same
+  // --from / --scale / --mode produces identical data.
+  const seed =
+    Math.floor(runOptions.from / 1000) + scale * 7919 + finalOpts.mode.charCodeAt(0) * 31;
+  initRandom(seed);
+  logger.info(`Seeded PRNG with seed=${seed} for deterministic generation`);
 
   // Deterministic provider index derived from the start time so all worker
   // threads in a multi-worker run pick the same cloud provider.

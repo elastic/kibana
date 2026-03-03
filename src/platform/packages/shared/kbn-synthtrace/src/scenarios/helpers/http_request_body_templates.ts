@@ -13,6 +13,7 @@
  */
 
 import { getRandomItem } from './http_field_generators';
+import { random, randomId } from './http_random';
 
 /**
  * User registration request template.
@@ -55,22 +56,22 @@ export function generateUserRegistrationBody() {
       firstName,
       lastName,
       email,
-      username: `${firstName.toLowerCase()}${Math.floor(Math.random() * 1000)}`,
-      password: '********', // Always masked
-      dateOfBirth: `${1970 + Math.floor(Math.random() * 30)}-${String(
-        Math.floor(Math.random() * 12) + 1
-      ).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-      phoneNumber: `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+      username: `${firstName.toLowerCase()}${Math.floor(random() * 1000)}`,
+      password: '********',
+      dateOfBirth: `${1970 + Math.floor(random() * 30)}-${String(
+        Math.floor(random() * 12) + 1
+      ).padStart(2, '0')}-${String(Math.floor(random() * 28) + 1).padStart(2, '0')}`,
+      phoneNumber: `+1${Math.floor(random() * 9000000000) + 1000000000}`,
       address: {
-        street: `${Math.floor(Math.random() * 9999) + 1} Main St`,
+        street: `${Math.floor(random() * 9999) + 1} Main St`,
         city: getRandomItem(['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']),
         state: getRandomItem(['NY', 'CA', 'IL', 'TX', 'AZ']),
-        zipCode: `${Math.floor(Math.random() * 90000) + 10000}`,
+        zipCode: `${Math.floor(random() * 90000) + 10000}`,
         country: 'US',
       },
       preferences: {
-        newsletter: Math.random() > 0.5,
-        notifications: Math.random() > 0.3,
+        newsletter: random() > 0.5,
+        notifications: random() > 0.3,
         theme: getRandomItem(['light', 'dark', 'auto']),
       },
     },
@@ -90,37 +91,37 @@ export function generateProductUpdateBody() {
 
   return {
     product: {
-      id: `prod_${Math.random().toString(36).substring(2, 15)}`,
-      name: `Product ${Math.floor(Math.random() * 10000)}`,
+      id: randomId('prod_', 13),
+      name: `Product ${Math.floor(random() * 10000)}`,
       description: 'High-quality product with excellent features and durability',
       category: getRandomItem(categories),
       brand: getRandomItem(brands),
       price: {
-        amount: parseFloat((Math.random() * 1000 + 10).toFixed(2)),
+        amount: parseFloat((random() * 1000 + 10).toFixed(2)),
         currency: 'USD',
-        discount: Math.random() > 0.7 ? parseFloat((Math.random() * 30).toFixed(0)) : 0,
+        discount: random() > 0.7 ? parseFloat((random() * 30).toFixed(0)) : 0,
       },
       inventory: {
-        quantity: Math.floor(Math.random() * 1000),
-        warehouse: `WH-${Math.floor(Math.random() * 10) + 1}`,
-        reserved: Math.floor(Math.random() * 50),
+        quantity: Math.floor(random() * 1000),
+        warehouse: `WH-${Math.floor(random() * 10) + 1}`,
+        reserved: Math.floor(random() * 50),
       },
       attributes: {
         color: getRandomItem(['Red', 'Blue', 'Green', 'Black', 'White']),
         size: getRandomItem(['S', 'M', 'L', 'XL', 'XXL']),
-        weight: parseFloat((Math.random() * 10).toFixed(2)),
+        weight: parseFloat((random() * 10).toFixed(2)),
         dimensions: {
-          length: parseFloat((Math.random() * 100).toFixed(1)),
-          width: parseFloat((Math.random() * 100).toFixed(1)),
-          height: parseFloat((Math.random() * 100).toFixed(1)),
+          length: parseFloat((random() * 100).toFixed(1)),
+          width: parseFloat((random() * 100).toFixed(1)),
+          height: parseFloat((random() * 100).toFixed(1)),
           unit: 'cm',
         },
       },
       ratings: {
-        average: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0-5.0
-        count: Math.floor(Math.random() * 1000),
+        average: parseFloat((random() * 2 + 3).toFixed(1)),
+        count: Math.floor(random() * 1000),
       },
-      tags: ['featured', 'bestseller', 'new-arrival'].filter(() => Math.random() > 0.5),
+      tags: ['featured', 'bestseller', 'new-arrival'].filter(() => random() > 0.5),
     },
     timestamp: new Date().toISOString(),
   };
@@ -130,19 +131,19 @@ export function generateProductUpdateBody() {
  * Order submission request template.
  */
 export function generateOrderSubmissionBody() {
-  const items = Math.floor(Math.random() * 5) + 1;
+  const items = Math.floor(random() * 5) + 1;
   const orderItems = [];
   let subtotal = 0;
 
   for (let i = 0; i < items; i++) {
-    const quantity = Math.floor(Math.random() * 3) + 1;
-    const price = parseFloat((Math.random() * 100 + 10).toFixed(2));
+    const quantity = Math.floor(random() * 3) + 1;
+    const price = parseFloat((random() * 100 + 10).toFixed(2));
     const itemTotal = quantity * price;
     subtotal += itemTotal;
 
     orderItems.push({
-      productId: `prod_${Math.random().toString(36).substring(2, 15)}`,
-      name: `Product ${Math.floor(Math.random() * 1000)}`,
+      productId: randomId('prod_', 13),
+      name: `Product ${Math.floor(random() * 1000)}`,
       quantity,
       price,
       total: parseFloat(itemTotal.toFixed(2)),
@@ -150,13 +151,13 @@ export function generateOrderSubmissionBody() {
   }
 
   const tax = parseFloat((subtotal * 0.08).toFixed(2));
-  const shipping = parseFloat((Math.random() * 20 + 5).toFixed(2));
+  const shipping = parseFloat((random() * 20 + 5).toFixed(2));
   const total = parseFloat((subtotal + tax + shipping).toFixed(2));
 
   return {
     order: {
-      orderId: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      customerId: `cust_${Math.random().toString(36).substring(2, 15)}`,
+      orderId: `ORD-${Date.now()}-${Math.floor(random() * 1000)}`,
+      customerId: randomId('cust_', 13),
       items: orderItems,
       pricing: {
         subtotal,
@@ -183,7 +184,7 @@ export function generateOrderSubmissionBody() {
       },
       payment: {
         method: getRandomItem(['credit_card', 'debit_card', 'paypal', 'apple_pay']),
-        last4: `${Math.floor(Math.random() * 9000) + 1000}`,
+        last4: `${Math.floor(random() * 9000) + 1000}`,
         status: 'pending',
       },
       shippingMethod: getRandomItem(['standard', 'express', 'overnight']),
@@ -192,9 +193,9 @@ export function generateOrderSubmissionBody() {
     metadata: {
       source: 'web',
       userAgent: 'Mozilla/5.0',
-      ipAddress: `${Math.floor(Math.random() * 256)}.${Math.floor(
-        Math.random() * 256
-      )}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`,
+      ipAddress: `${Math.floor(random() * 256)}.${Math.floor(random() * 256)}.${Math.floor(
+        random() * 256
+      )}.${Math.floor(random() * 256)}`,
     },
   };
 }
@@ -205,9 +206,9 @@ export function generateOrderSubmissionBody() {
 export function generateReviewSubmissionBody() {
   return {
     review: {
-      productId: `prod_${Math.random().toString(36).substring(2, 15)}`,
-      userId: `user_${Math.random().toString(36).substring(2, 15)}`,
-      rating: Math.floor(Math.random() * 5) + 1, // 1-5
+      productId: randomId('prod_', 13),
+      userId: randomId('user_', 13),
+      rating: Math.floor(random() * 5) + 1,
       title: getRandomItem([
         'Great product!',
         'Exceeded expectations',
@@ -217,9 +218,9 @@ export function generateReviewSubmissionBody() {
       ]),
       content:
         'This is a detailed review of the product. It covers various aspects including quality, durability, and value for money.',
-      verified: Math.random() > 0.3,
-      helpful: Math.floor(Math.random() * 100),
-      images: Array(Math.floor(Math.random() * 4))
+      verified: random() > 0.3,
+      helpful: Math.floor(random() * 100),
+      images: Array(Math.floor(random() * 4))
         .fill(0)
         .map((_, i) => `https://example.com/reviews/img${i}.jpg`),
       pros: ['Good quality', 'Fast shipping'],
@@ -245,14 +246,14 @@ export function generateAnalyticsEventBody() {
       ]),
       category: getRandomItem(['engagement', 'conversion', 'navigation', 'interaction']),
       action: getRandomItem(['click', 'view', 'submit', 'scroll', 'hover']),
-      label: `Event ${Math.floor(Math.random() * 1000)}`,
-      value: Math.floor(Math.random() * 100),
-      nonInteraction: Math.random() > 0.8,
+      label: `Event ${Math.floor(random() * 1000)}`,
+      value: Math.floor(random() * 100),
+      nonInteraction: random() > 0.8,
     },
     user: {
-      id: `user_${Math.random().toString(36).substring(2, 15)}`,
-      sessionId: `sess_${Math.random().toString(36).substring(2, 15)}`,
-      anonymous: Math.random() > 0.6,
+      id: randomId('user_', 13),
+      sessionId: randomId('sess_', 13),
+      anonymous: random() > 0.6,
     },
     page: {
       url: 'https://example.com/page',
@@ -280,12 +281,12 @@ export function generateAnalyticsEventBody() {
 export function generateOAuthTokenRequestBody() {
   return {
     grant_type: getRandomItem(['authorization_code', 'refresh_token', 'client_credentials']),
-    client_id: `client_${Math.random().toString(36).substring(2, 15)}`,
-    client_secret: '********', // Always masked
-    code: Math.random().toString(36).substring(2, 25),
+    client_id: randomId('client_', 13),
+    client_secret: '********',
+    code: randomId('', 23),
     redirect_uri: 'https://example.com/callback',
     scope: getRandomItem(['read', 'write', 'admin', 'read write', 'openid profile email']),
-    state: Math.random().toString(36).substring(2, 15),
+    state: randomId('', 13),
   };
 }
 
@@ -311,23 +312,23 @@ export function generateSearchQueryBody() {
         category: getRandomItem(['all', 'electronics', 'clothing', 'books']),
         priceRange: {
           min: 0,
-          max: Math.floor(Math.random() * 1000) + 100,
+          max: Math.floor(random() * 1000) + 100,
         },
-        brand: Math.random() > 0.7 ? getRandomItem(['BrandA', 'BrandB', 'BrandC']) : undefined,
-        rating: Math.random() > 0.5 ? Math.floor(Math.random() * 2) + 3 : undefined, // 3-5
+        brand: random() > 0.7 ? getRandomItem(['BrandA', 'BrandB', 'BrandC']) : undefined,
+        rating: random() > 0.5 ? Math.floor(random() * 2) + 3 : undefined,
       },
       sort: {
         field: getRandomItem(['relevance', 'price', 'rating', 'newest']),
         order: getRandomItem(['asc', 'desc']),
       },
       pagination: {
-        page: Math.floor(Math.random() * 10) + 1,
+        page: Math.floor(random() * 10) + 1,
         pageSize: getRandomItem([10, 25, 50, 100]),
       },
     },
     context: {
-      userId: `user_${Math.random().toString(36).substring(2, 15)}`,
-      sessionId: `sess_${Math.random().toString(36).substring(2, 15)}`,
+      userId: randomId('user_', 13),
+      sessionId: randomId('sess_', 13),
       source: getRandomItem(['web', 'mobile', 'voice']),
     },
   };
@@ -341,15 +342,15 @@ export function generateWebhookPayloadBody() {
     event: getRandomItem(['order.created', 'user.registered', 'payment.completed', 'item.shipped']),
     timestamp: new Date().toISOString(),
     data: {
-      id: Math.random().toString(36).substring(2, 15),
+      id: randomId('', 13),
       status: getRandomItem(['pending', 'processing', 'completed', 'failed']),
-      amount: parseFloat((Math.random() * 1000).toFixed(2)),
+      amount: parseFloat((random() * 1000).toFixed(2)),
       currency: 'USD',
     },
     metadata: {
       version: '1.0',
-      signature: Math.random().toString(36).substring(2, 35),
-      attempt: Math.floor(Math.random() * 3) + 1,
+      signature: randomId('', 33),
+      attempt: Math.floor(random() * 3) + 1,
     },
   };
 }
@@ -361,10 +362,10 @@ export function generateConfigUpdateBody() {
   return {
     config: {
       features: {
-        darkMode: Math.random() > 0.5,
-        notifications: Math.random() > 0.3,
-        analytics: Math.random() > 0.7,
-        betaFeatures: Math.random() > 0.8,
+        darkMode: random() > 0.5,
+        notifications: random() > 0.3,
+        analytics: random() > 0.7,
+        betaFeatures: random() > 0.8,
       },
       settings: {
         language: getRandomItem(['en', 'es', 'fr', 'de', 'ja']),
@@ -378,12 +379,12 @@ export function generateConfigUpdateBody() {
         theme: getRandomItem(['light', 'dark', 'auto']),
       },
       security: {
-        twoFactorAuth: Math.random() > 0.7,
+        twoFactorAuth: random() > 0.7,
         sessionTimeout: getRandomItem([15, 30, 60, 120]),
         ipWhitelist: [],
       },
     },
-    updatedBy: `user_${Math.random().toString(36).substring(2, 15)}`,
+    updatedBy: randomId('user_', 13),
     timestamp: new Date().toISOString(),
   };
 }
