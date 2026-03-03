@@ -46,6 +46,7 @@ test.each([
   expect(ctx.getSharedSchemas()).toEqual({
     [refId]: {
       type: 'object',
+      title: refId,
       additionalProperties: false,
       properties: {
         a: {

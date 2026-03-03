@@ -19,30 +19,68 @@ import {
   scaleUpPercentage,
   useInfrastructureNodeMetrics,
 } from '../shared';
+import {
+  SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
+  SEMCONV_SYSTEM_CPU_UTILIZATION,
+  SEMCONV_SYSTEM_MEMORY_LIMIT,
+  SEMCONV_SYSTEM_MEMORY_UTILIZATION,
+  SYSTEM_CPU_CORES,
+  SYSTEM_CPU_TOTAL_NORM_PCT,
+  SYSTEM_MEMORY_TOTAL,
+  SYSTEM_MEMORY_USED_PCT,
+} from '../shared/constants';
 
 type HostMetricsField =
-  | 'system.cpu.cores'
-  | 'system.cpu.total.norm.pct'
-  | 'system.memory.total'
-  | 'system.memory.used.pct';
+  | typeof SYSTEM_CPU_CORES
+  | typeof SYSTEM_CPU_TOTAL_NORM_PCT
+  | typeof SYSTEM_MEMORY_TOTAL
+  | typeof SYSTEM_MEMORY_USED_PCT;
 
 const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
-  sourceFilter: `event.module: "system"`,
+  sourceFilter: 'event.module: "system"',
   groupByField: 'host.name',
   metricsMap: {
-    'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
-    'system.cpu.total.norm.pct': {
+    [SYSTEM_CPU_CORES]: { aggregation: 'max', field: SYSTEM_CPU_CORES },
+    [SYSTEM_CPU_TOTAL_NORM_PCT]: {
       aggregation: 'avg',
-      field: 'system.cpu.total.norm.pct',
+      field: SYSTEM_CPU_TOTAL_NORM_PCT,
     },
-    'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
-    'system.memory.used.pct': {
+    [SYSTEM_MEMORY_TOTAL]: { aggregation: 'max', field: SYSTEM_MEMORY_TOTAL },
+    [SYSTEM_MEMORY_USED_PCT]: {
       aggregation: 'avg',
-      field: 'system.memory.used.pct',
+      field: SYSTEM_MEMORY_USED_PCT,
     },
   },
 };
 
+type HostMetricsFieldsOtel =
+  | typeof SEMCONV_SYSTEM_CPU_LOGICAL_COUNT
+  | typeof SEMCONV_SYSTEM_CPU_UTILIZATION
+  | typeof SEMCONV_SYSTEM_MEMORY_LIMIT
+  | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
+
+const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
+  sourceFilter: 'event.dataset: "hostmetricsreceiver.otel"',
+  groupByField: 'host.name',
+  metricsMap: {
+    [SEMCONV_SYSTEM_CPU_LOGICAL_COUNT]: {
+      aggregation: 'max',
+      field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
+    },
+    [SEMCONV_SYSTEM_CPU_UTILIZATION]: {
+      aggregation: 'avg',
+      field: SEMCONV_SYSTEM_CPU_UTILIZATION,
+    },
+    [SEMCONV_SYSTEM_MEMORY_LIMIT]: {
+      aggregation: 'max',
+      field: SEMCONV_SYSTEM_MEMORY_LIMIT,
+    },
+    [SEMCONV_SYSTEM_MEMORY_UTILIZATION]: {
+      aggregation: 'avg',
+      field: SEMCONV_SYSTEM_MEMORY_UTILIZATION,
+    },
+  },
+};
 export const metricByField = createMetricByFieldLookup(hostsMetricsQueryConfig.metricsMap);
 const unpackMetric = makeUnpackMetric(metricByField);
 
@@ -58,6 +96,7 @@ export function useHostMetricsTable({
   timerange,
   kuery,
   metricsClient,
+  isOtel,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<HostNodeMetricsRow>>({
@@ -70,8 +109,12 @@ export function useHostMetricsTable({
     [kuery]
   );
 
-  const { data, isLoading } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
-    metricsExplorerOptions: hostMetricsOptions,
+  const { options: hostMetricsOptionsOtel } = useMemo(
+    () => metricsToApiOptions(hostsMetricsQueryConfigOtel, kuery),
+    [kuery]
+  );
+  const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
+    metricsExplorerOptions: isOtel ? hostMetricsOptionsOtel : hostMetricsOptions,
     timerange,
     transform: seriesToHostNodeMetricsRow,
     sortState,
@@ -82,6 +125,7 @@ export function useHostMetricsTable({
   return {
     data,
     isLoading,
+    metricIndices,
     setCurrentPageIndex,
     setSortState,
     sortState,
@@ -185,9 +229,9 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
 
 function unpackMetrics(row: MetricsExplorerRow): Omit<HostNodeMetricsRow, 'name'> {
   return {
-    cpuCount: unpackMetric(row, 'system.cpu.cores'),
-    averageCpuUsagePercent: unpackMetric(row, 'system.cpu.total.norm.pct'),
-    totalMemoryMegabytes: unpackMetric(row, 'system.memory.total'),
-    averageMemoryUsagePercent: unpackMetric(row, 'system.memory.used.pct'),
+    cpuCount: unpackMetric(row, SYSTEM_CPU_CORES),
+    averageCpuUsagePercent: unpackMetric(row, SYSTEM_CPU_TOTAL_NORM_PCT),
+    totalMemoryMegabytes: unpackMetric(row, SYSTEM_MEMORY_TOTAL),
+    averageMemoryUsagePercent: unpackMetric(row, SYSTEM_MEMORY_USED_PCT),
   };
 }

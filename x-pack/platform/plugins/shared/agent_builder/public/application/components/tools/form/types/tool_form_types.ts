@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { EsqlToolFieldTypes, ToolType } from '@kbn/agent-builder-common';
+import type { EsqlToolFieldTypes, EsqlToolParamValue, ToolType } from '@kbn/agent-builder-common';
 
 export interface EsqlParam {
   name: string;
   type: EsqlToolFieldTypes;
   description: string;
   optional: boolean;
+  defaultValue?: EsqlToolParamValue;
 }
 
 export enum EsqlParamSource {

@@ -6,6 +6,7 @@
  */
 
 import type { EngineStatus } from './definitions/saved_objects';
+import type { EntityStoreStatus } from './types';
 
 export const ENTITY_LATEST = 'latest' as const;
 export const ENTITY_UPDATES = 'updates' as const;
@@ -15,6 +16,10 @@ export const ENTITY_BASE_PREFIX = 'entities';
 export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 
 export const ECS_MAPPINGS_COMPONENT_TEMPLATE = 'ecs@mappings';
+
+export const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];
+export const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage'];
+export const ENTITY_STORE_CLUSTER_PRIVILEGES = ['manage_index_templates'];
 
 type SchemaVersion = `v${number}`;
 type Dataset = typeof ENTITY_LATEST | typeof ENTITY_UPDATES;
@@ -45,5 +50,13 @@ export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   STARTED: 'started',
   STOPPED: 'stopped',
   UPDATING: 'updating',
+  ERROR: 'error',
+};
+
+export const ENTITY_STORE_STATUS: Record<Uppercase<EntityStoreStatus>, EntityStoreStatus> = {
+  RUNNING: 'running',
+  STOPPED: 'stopped',
+  INSTALLING: 'installing',
+  NOT_INSTALLED: 'not_installed',
   ERROR: 'error',
 };

@@ -8,7 +8,8 @@
 import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { BaseFeature, Feature } from '@kbn/streams-schema';
+import { isDuplicateFeature } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   STREAM_NAME,
@@ -76,7 +77,7 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { type?: string[]; id?: string[] }
+    filters?: { type?: string[]; id?: string[]; minConfidence?: number; limit?: number }
   ): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termQuery(STREAM_NAME, stream),
@@ -101,14 +102,25 @@ export class FeatureClient {
       });
     }
 
+    if (typeof filters?.minConfidence === 'number') {
+      filterClauses.push({
+        range: {
+          [FEATURE_CONFIDENCE]: {
+            gte: filters.minConfidence,
+          },
+        },
+      });
+    }
+
     const featuresResponse = await this.clients.storageClient.search({
-      size: 10_000,
+      size: filters?.limit ?? 10_000,
       track_total_hits: true,
       query: {
         bool: {
           filter: filterClauses,
         },
       },
+      sort: [{ [FEATURE_CONFIDENCE]: { order: 'desc' } }],
     });
 
     return {
@@ -146,6 +158,40 @@ export class FeatureClient {
     });
   }
 
+  async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
+    if (streams.length === 0) {
+      return { hits: [], total: 0 };
+    }
+
+    const filterClauses: QueryDslQueryContainer[] = [
+      ...termsQuery(STREAM_NAME, streams),
+      {
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
+            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
+    const featuresResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+    });
+
+    return {
+      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
+      total: featuresResponse.hits.total.value,
+    };
+  }
+
   private async filterValidOperations(
     stream: string,
     operations: FeatureBulkOperation[]
@@ -173,6 +219,16 @@ export class FeatureClient {
       (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
     );
   }
+
+  findDuplicateFeature({
+    existingFeatures,
+    feature,
+  }: {
+    existingFeatures: Feature[];
+    feature: BaseFeature;
+  }): Feature | undefined {
+    return existingFeatures.find((existing) => isDuplicateFeature(existing, feature));
+  }
 }
 
 function toStorage(stream: string, feature: Feature): StoredFeature {
@@ -199,6 +255,7 @@ function fromStorage(feature: StoredFeature): Feature {
   return {
     uuid: feature[FEATURE_UUID],
     id: feature[FEATURE_ID],
+    stream_name: feature[STREAM_NAME],
     type: feature[FEATURE_TYPE],
     subtype: feature[FEATURE_SUBTYPE],
     description: feature[FEATURE_DESCRIPTION],

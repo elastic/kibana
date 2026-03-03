@@ -12,6 +12,10 @@ export * from './spec/lib/get_workflow_json_schema';
 export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export * from './spec/schema';
+export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
+export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
+export { StepCategory } from './spec/step_definition_types';
+export type { BaseStepDefinition, StepDocumentation } from './spec/step_definition_types';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
@@ -23,4 +27,5 @@ export * from './server/constants';
 export * from './server/repositories/workflow_repository';
 
 // Export specific types that are commonly used
-export type { BuiltInStepType, TriggerType } from './spec/schema';
+export type { BuiltInStepType } from './spec/schema';
+export type { TriggerType } from './spec/schema/triggers/trigger_schema';

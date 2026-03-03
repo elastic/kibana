@@ -56,6 +56,7 @@ export function validateProcessorValues(
     case 'convert':
     case 'append':
     case 'replace':
+    case 'redact':
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -64,6 +65,9 @@ export function validateProcessorValues(
     case 'trim':
     case 'join':
     case 'concat':
+    case 'split':
+    case 'sort':
+    case 'network_direction':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

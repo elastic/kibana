@@ -42,6 +42,7 @@ const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: stri
   );
 
   await screen.findByTestId('pipelineForm');
+  await screen.findByTestId('descriptionField');
 };
 
 describe('<PipelinesCreate />', () => {

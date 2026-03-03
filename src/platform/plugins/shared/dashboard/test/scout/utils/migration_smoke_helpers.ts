@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
 import type { KbnClient } from '@kbn/test';
 
