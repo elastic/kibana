@@ -287,7 +287,7 @@ evaluate.describe(
           await executorClient.runExperiment(
             {
               dataset: {
-                name: 'sigevents: empty datastream',
+                name: 'sigevents: query generation: empty datastream',
                 description: 'Significant events query generation with empty stream data',
                 examples: [
                   {
@@ -320,7 +320,7 @@ evaluate.describe(
             [
               createScenarioCriteriaLlmEvaluator({
                 criteriaFn: evaluators.criteria.bind(evaluators),
-                criteria: ['Assert the KQL queries are generated following the user intent'],
+                criteria: ['Assert the ES|QL queries are generated following the user intent'],
               }),
             ]
           );

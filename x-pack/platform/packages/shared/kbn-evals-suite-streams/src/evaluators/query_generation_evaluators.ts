@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -31,12 +30,12 @@ const createQueryGenerationCodeEvaluator = (
   esClient: ElasticsearchClient,
   logger?: Logger
 ): Evaluator => ({
-  name: 'significant_events_code_evaluator',
+  name: 'query_generation_code_evaluator',
   kind: 'CODE' as const,
-  evaluate: async ({ output, input, metadata }) => {
+  evaluate: async ({ output, input }) => {
     const queries = Array.isArray(output) ? output : [output];
 
-    if (queries.length === 0 || !queries[0] || !queries[0].kql) {
+    if (queries.length === 0 || !queries[0] || !queries[0].esql) {
       return {
         score: 0,
         reasoning: 'No queries generated',
@@ -50,57 +49,40 @@ const createQueryGenerationCodeEvaluator = (
     let validSyntaxCount = 0;
     let executionHitCount = 0;
     const validationDetails: Array<{
-      kql: string;
+      esql: string;
       isSyntaxValid: boolean;
       isExecutionHit: boolean;
-      executionError?: string;
       isCategoryCompliant: boolean;
       isSeverityCompliant: boolean;
       evidenceValidation: { allEvidenceFound: boolean; missingEvidence: string[] };
     }> = [];
 
     for (const query of queries) {
-      const { kql, category, severity_score, evidence } = query;
+      const { esql, category, severity_score, evidence } = query;
       const { sample_logs } = input;
 
-      // 1. KQL Syntax Validation
       let isSyntaxValid = false;
+      let isExecutionHit = false;
       try {
-        fromKueryExpression(kql);
+        const result = await esClient.esql.query({ query: esql });
         isSyntaxValid = true;
         validSyntaxCount++;
-      } catch (e) {
-        // KQL is invalid
-      }
-
-      // 2. Execution Verification
-      let isExecutionHit = false;
-      let executionError: string | undefined;
-      if (isSyntaxValid) {
-        try {
-          const searchResult = await esClient.search({
-            index: metadata?.test_index as string,
-            q: kql,
-          });
-          const total = searchResult.hits.total;
-          const hits = typeof total === 'number' ? total : total?.value ?? 0;
-          if (hits > 0) {
-            isExecutionHit = true;
-            executionHitCount++;
-          }
-        } catch (e) {
-          executionError = e instanceof Error ? e.message : String(e);
-          logger?.warn(`Execution verification failed for KQL "${kql}": ${executionError}`);
+        if (result.values && result.values.length > 0) {
+          isExecutionHit = true;
+          executionHitCount++;
         }
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        logger?.warn(`ES|QL validation failed for "${esql}": ${errorMessage}`);
       }
 
-      // 3. Category Compliance
+      // Category Compliance
       const isCategoryCompliant = ALLOWED_CATEGORIES.includes(category);
 
-      // 4. Severity Score Compliance
+      // Severity Score Compliance
       const isSeverityCompliant = severity_score >= 0 && severity_score <= 100;
 
-      // 5. Evidence Validation
+      // Evidence Validation
       const evidenceValidation: {
         allEvidenceFound: boolean;
         missingEvidence: string[];
@@ -118,10 +100,9 @@ const createQueryGenerationCodeEvaluator = (
       }
 
       validationDetails.push({
-        kql,
+        esql,
         isSyntaxValid,
         isExecutionHit,
-        ...(executionError ? { executionError } : {}),
         isCategoryCompliant,
         isSeverityCompliant,
         evidenceValidation,
@@ -131,7 +112,6 @@ const createQueryGenerationCodeEvaluator = (
     const syntaxValidityRate = validSyntaxCount / queries.length;
     const executionHitRate = executionHitCount / queries.length;
 
-    // The final score is a simple average of the two main metrics.
     const score = (syntaxValidityRate + executionHitRate) / 2;
 
     return {

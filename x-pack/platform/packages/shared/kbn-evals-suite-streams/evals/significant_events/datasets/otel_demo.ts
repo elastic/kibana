@@ -420,7 +420,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'payment-error-query',
-            text: 'Must generate a KQL query that catches payment-unreachable errors (e.g., failed to charge card, transport: Error while dialing, dial tcp, i/o timeout, deadline exceeded)',
+            text: 'Must generate an ES|QL query that catches payment-unreachable errors (e.g., failed to charge card, transport: Error while dialing, dial tcp, i/o timeout, deadline exceeded)',
             score: 3,
           },
           {
@@ -429,13 +429,13 @@ export const otelDemoDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'valid-kql-syntax',
-            text: 'All generated queries must have valid KQL syntax that can be parsed without errors',
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax that can be parsed without errors',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
-        kql_substrings: ['failed to charge card', 'dial tcp', 'i/o timeout', 'deadline exceeded'],
+        esql_substrings: ['failed to charge card', 'dial tcp', 'i/o timeout', 'deadline exceeded'],
         expected_ground_truth:
           'queries=[error detection for dial tcp/i/o timeout/deadline exceeded gRPC dialing errors for payment unreachability, upstream impact in frontend/checkout]',
       },
@@ -456,7 +456,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'cache-error-query',
-            text: 'Must generate a KQL query that catches Valkey/Redis connection failures (ECONNREFUSED, connection timeout)',
+            text: 'Must generate an ES|QL query that catches Valkey/Redis connection failures (ECONNREFUSED, connection timeout)',
             score: 3,
           },
           {
@@ -465,13 +465,13 @@ export const otelDemoDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'valid-kql-syntax',
-            text: 'All generated queries must have valid KQL syntax',
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
-        kql_substrings: ['cart'],
+        esql_substrings: ['cart'],
         expected_ground_truth:
           'queries=[error detection for Valkey/Redis connection failures from cart, cart service errors]',
       },
@@ -492,7 +492,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'currency-error-query',
-            text: 'Must generate a KQL query that catches currency service connection errors',
+            text: 'Must generate an ES|QL query that catches currency service connection errors',
             score: 3,
           },
           {
@@ -501,8 +501,8 @@ export const otelDemoDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'valid-kql-syntax',
-            text: 'All generated queries must have valid KQL syntax',
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
             score: 2,
           },
         ],
@@ -527,7 +527,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'resource-exhaustion-query',
-            text: 'Must generate a KQL query that catches resource exhaustion signals (OOMKilled, memory, GC pressure, container restart)',
+            text: 'Must generate an ES|QL query that catches resource exhaustion signals (OOMKilled, memory, GC pressure, container restart)',
             score: 3,
           },
           {
@@ -536,8 +536,8 @@ export const otelDemoDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'valid-kql-syntax',
-            text: 'All generated queries must have valid KQL syntax',
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
             score: 2,
           },
         ],
@@ -562,7 +562,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'flag-evaluation-query',
-            text: 'Must generate a KQL query that catches flag evaluation failures or flagd connection errors',
+            text: 'Must generate an ES|QL query that catches flag evaluation failures or flagd connection errors',
             score: 3,
           },
           {
@@ -571,8 +571,8 @@ export const otelDemoDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'valid-kql-syntax',
-            text: 'All generated queries must have valid KQL syntax',
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
             score: 2,
           },
         ],
@@ -597,7 +597,7 @@ export const otelDemoDataset: DatasetConfig = {
         criteria: [
           {
             id: 'latency-spike-query',
-            text: 'Must generate KQL queries that catch elevated latency or increased error rates',
+            text: 'Must generate ES|QL queries that catch elevated latency or increased error rates',
             score: 2,
           },
           {
@@ -606,8 +606,8 @@ export const otelDemoDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'valid-kql-syntax',
-            text: 'All generated queries must have valid KQL syntax',
+            id: 'valid-esql-syntax',
+            text: 'All generated queries must have valid ES|QL syntax',
             score: 2,
           },
         ],

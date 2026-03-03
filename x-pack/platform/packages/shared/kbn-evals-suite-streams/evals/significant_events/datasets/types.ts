@@ -31,7 +31,7 @@ export interface QueryGenerationScenario {
   output: {
     criteria: EvaluationCriterion[];
     expected_categories: string[];
-    kql_substrings?: string[];
+    esql_substrings?: string[];
     expected_ground_truth: string;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
