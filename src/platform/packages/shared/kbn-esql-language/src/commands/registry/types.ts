@@ -297,6 +297,11 @@ export enum Location {
   COMPLETION = 'completion',
 
   /**
+   * In the MMR command
+   */
+  MMR = 'mmr',
+
+  /**
    * In the PROMQL command (PromQL query expression)
    */
   PROMQL = 'promql',

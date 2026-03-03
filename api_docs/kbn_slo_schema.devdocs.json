@@ -956,7 +956,7 @@
         "label": "GetSLOGroupedStatsResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-        "lineNumber": 42,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -979,7 +979,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-            "lineNumber": 43,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -995,7 +995,7 @@
         "label": "GroupedStatsResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-        "lineNumber": 37,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1008,7 +1008,7 @@
             "label": "entity",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-            "lineNumber": 38,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1024,7 +1024,7 @@
               "{ violated: number; degrading: number; healthy: number; noData: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-            "lineNumber": 39,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2358,10 +2358,10 @@
         "label": "GetSLOGroupedStatsParams",
         "description": [],
         "signature": [
-          "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }"
+          "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; kqlQuery?: string | undefined; statusFilters?: string[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-        "lineNumber": 46,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -11199,10 +11199,16 @@
           "StringC",
           ">; environment: ",
           "StringC",
-          "; }>]>; }>"
+          "; kqlQuery: ",
+          "StringC",
+          "; statusFilters: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>]>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_grouped_stats.ts",
-        "lineNumber": 33,
+        "lineNumber": 41,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,

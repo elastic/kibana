@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializerOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   EsDataTypeGeoPoint,
@@ -26,38 +26,33 @@ export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+),(?<lon>.+)');
 export const DEFAULT_SINGLE_REGEX = RegExp('(?<value>.+)');
 
 export const transformListItemToElasticQuery = ({
-  serializer,
   type,
   value,
 }: {
   type: Type;
   value: string;
-  serializer: SerializerOrUndefined;
 }): EsDataTypeUnion | null => {
   switch (type) {
     case 'shape':
     case 'geo_shape': {
       return serializeGeoShape({
         defaultSerializer: DEFAULT_GEO_REGEX,
-        serializer,
         type,
         value,
       });
     }
     case 'geo_point': {
-      return serializeGeoPoint({ defaultSerializer: DEFAULT_GEO_REGEX, serializer, value });
+      return serializeGeoPoint({ defaultSerializer: DEFAULT_GEO_REGEX, value });
     }
     case 'ip_range': {
       return serializeIpRange({
         defaultSerializer: DEFAULT_LTE_GTE_REGEX,
-        serializer,
         value,
       });
     }
     case 'date_range': {
       return serializeRanges({
         defaultSerializer: DEFAULT_DATE_REGEX,
-        serializer,
         type,
         value,
       });
@@ -68,7 +63,6 @@ export const transformListItemToElasticQuery = ({
     case 'long_range': {
       return serializeRanges({
         defaultSerializer: DEFAULT_LTE_GTE_REGEX,
-        serializer,
         type,
         value,
       });
@@ -76,7 +70,6 @@ export const transformListItemToElasticQuery = ({
     default: {
       return serializeSingleValue({
         defaultSerializer: DEFAULT_SINGLE_REGEX,
-        serializer,
         type,
         value,
       });
@@ -86,17 +79,14 @@ export const transformListItemToElasticQuery = ({
 
 export const serializeGeoShape = ({
   defaultSerializer,
-  serializer,
   value,
   type,
 }: {
   value: string;
-  serializer: SerializerOrUndefined;
   defaultSerializer: RegExp;
   type: 'geo_shape' | 'shape';
 }): EsDataTypeGeoShape | null => {
-  const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value.trim());
+  const parsed = defaultSerializer.exec(value.trim());
 
   // we only support lat/lon for point and represent it as Well Known Text (WKT)
   if (parsed?.groups?.lat != null && parsed?.groups?.lon != null) {
@@ -119,15 +109,12 @@ export const serializeGeoShape = ({
 
 export const serializeGeoPoint = ({
   defaultSerializer,
-  serializer,
   value,
 }: {
   value: string;
-  serializer: SerializerOrUndefined;
   defaultSerializer: RegExp;
 }): EsDataTypeGeoPoint | null => {
-  const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value.trim());
+  const parsed = defaultSerializer.exec(value.trim());
 
   if (parsed?.groups?.lat != null && parsed?.groups?.lon != null) {
     return {
@@ -141,22 +128,19 @@ export const serializeGeoPoint = ({
 
 export const serializeIpRange = ({
   defaultSerializer,
-  serializer,
   value,
 }: {
   value: string;
-  serializer: SerializerOrUndefined;
   defaultSerializer: RegExp;
 }): EsDataTypeRangeTerm | null => {
-  const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value.trim());
+  const parsed = defaultSerializer.exec(value.trim());
 
   if (parsed?.groups?.lte != null && parsed?.groups?.gte != null) {
     return {
       ip_range: { gte: parsed.groups.gte.trim(), lte: parsed.groups.lte.trim() },
     };
   } else if (parsed?.groups?.value != null) {
-    // This is a CIDR string based on the serializer involving value such as (?<value>.+)
+    // This is a CIDR string based on the default serializer involving value such as (?<value>.+)
     if (parsed.groups.value.includes('/')) {
       return {
         ip_range: parsed.groups.value.trim(),
@@ -173,17 +157,14 @@ export const serializeIpRange = ({
 
 export const serializeRanges = ({
   type,
-  serializer,
   value,
   defaultSerializer,
 }: {
   type: 'long_range' | 'date_range' | 'double_range' | 'float_range' | 'integer_range';
   value: string;
-  serializer: SerializerOrUndefined;
   defaultSerializer: RegExp;
 }): EsDataTypeRangeTerm | null => {
-  const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value.trim());
+  const parsed = defaultSerializer.exec(value.trim());
 
   if (parsed?.groups?.lte != null && parsed?.groups?.gte != null) {
     const unionType = {
@@ -209,13 +190,11 @@ export const serializeRanges = ({
 };
 
 export const serializeSingleValue = ({
-  serializer,
   value,
   defaultSerializer,
   type,
 }: {
   value: string;
-  serializer: SerializerOrUndefined;
   type:
     | 'binary'
     | 'boolean'
@@ -234,8 +213,7 @@ export const serializeSingleValue = ({
     | 'keyword';
   defaultSerializer: RegExp;
 }): EsDataTypeSingle | null => {
-  const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value.trim());
+  const parsed = defaultSerializer.exec(value.trim());
 
   if (parsed?.groups?.value != null) {
     const unionType = { [type]: `${parsed.groups.value.trim()}` };

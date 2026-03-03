@@ -20,6 +20,6 @@
     "@kbn/tinymath",
     "@kbn/datemath",
     "@kbn/tinymath",
-    "@kbn/grok-ui"
+    "@kbn/grok-ui",
   ]
 }
