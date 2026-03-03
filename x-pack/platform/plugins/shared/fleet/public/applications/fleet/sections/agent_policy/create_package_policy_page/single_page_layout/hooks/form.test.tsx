@@ -13,7 +13,6 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 
 import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { SelectedPolicyTab } from '../../components';
 
@@ -229,9 +228,6 @@ describe('useOnSubmit', () => {
   describe('input deployment mode filtering', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
-      } as any);
     });
 
     it('should disable inputs that are not allowed for agentless deployment mode', async () => {

@@ -49,7 +49,6 @@ import {
 import {
   isVerificationError,
   packageToPackagePolicy,
-  ExperimentalFeaturesService,
 } from '../../../../../services';
 import type { CreatePackagePolicyResponse } from '../../../../../../../../common';
 import {
@@ -318,9 +317,7 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
@@ -533,9 +530,11 @@ export function useOnSubmit({
         isAgentlessSelected ? 'agentless' : 'default',
         packageInfo
       );
-      const visibleForVarGroup =
-        !enableVarGroups ||
-        isInputVisibleForVarGroupSelections(input, packageInfo, varGroupSelections);
+      const visibleForVarGroup = isInputVisibleForVarGroupSelections(
+        input,
+        packageInfo,
+        varGroupSelections
+      );
       if (allowedForDeploymentMode && visibleForVarGroup) {
         return input;
       }
@@ -546,7 +545,6 @@ export function useOnSubmit({
     packagePolicy.var_group_selections,
     isAgentlessSelected,
     packageInfo,
-    enableVarGroups,
   ]);
 
   // Compare current vs desired input enabled states so the effect below only fires

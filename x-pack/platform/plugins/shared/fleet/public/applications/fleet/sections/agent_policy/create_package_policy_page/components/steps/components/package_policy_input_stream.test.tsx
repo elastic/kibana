@@ -19,8 +19,6 @@ import type {
   RegistryVarGroup,
 } from '../../../../../../types';
 
-import { ExperimentalFeaturesService } from '../../../../../../services';
-
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
 jest.mock('../../../../../../../../hooks', () => ({
@@ -181,9 +179,6 @@ describe('PackagePolicyInputStreamConfig', () => {
   let mockUpdatePackagePolicyInputStream: jest.Mock;
 
   beforeEach(() => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-      enableVarGroups: true,
-    } as any);
     testRenderer = createFleetTestRendererMock();
     mockUpdatePackagePolicyInputStream = jest.fn();
 
