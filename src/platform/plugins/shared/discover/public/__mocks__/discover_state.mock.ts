@@ -92,6 +92,8 @@ function createInternalStateStoreMock({
   };
 }
 
+export type InternalStateMockToolkit = ReturnType<typeof getDiscoverInternalStateMock>;
+
 export function getDiscoverInternalStateMock({
   persistedDataViews,
   ...options
@@ -150,6 +152,7 @@ export function getDiscoverInternalStateMock({
   const toolkit = {
     internalState,
     runtimeStateManager,
+    services,
     initializeTabs: async ({
       persistedDiscoverSession,
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
@@ -205,6 +208,9 @@ export function getDiscoverInternalStateMock({
           },
         })
       );
+    }),
+    getCurrentTab: assertTabsAreInitialized(() => {
+      return selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
     }),
     addNewTab: assertTabsAreInitialized(async ({ tab }: { tab: TabState }) => {
       const currentState = internalState.getState();

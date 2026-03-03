@@ -153,11 +153,11 @@ export const buildDataViewMock = ({
 
 export const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
 });
 
 export const dataViewMockWithTimeField = buildDataViewMock({
   name: 'the-data-view',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
   timeFieldName: '@timestamp',
 });
