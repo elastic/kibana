@@ -742,143 +742,135 @@ steps:
 
                         ---
                         Error: No classification returned.
-              # TODO: Replace this with a proper workflow exit/abort step
-              #       once the workflow engine supports one.
-              - name: fail_workflow
-                type: http
+            else:
+
+              # -------------------------------------------------------------------
+              # Write the verdict note to the alert timeline
+              # -------------------------------------------------------------------
+              - name: add_verdict_note_to_alert
+                type: kibana.request
                 with:
-                  method: GET
-                  url: "---exit-workflow---"
+                  method: PATCH
+                  path: /api/note
+                  body:
+                    noteId: "{{variables.note_id}}"
+                    note:
+                      eventId: '{{ foreach.item._id }}'
+                      note: |
+                        ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
 
-          # -------------------------------------------------------------------
-          # Write the verdict note to the alert timeline
-          # -------------------------------------------------------------------
-          - name: add_verdict_note_to_alert
-            type: kibana.request
-            with:
-              method: PATCH
-              path: /api/note
-              body:
-                noteId: "{{variables.note_id}}"
-                note:
-                  eventId: '{{ foreach.item._id }}'
-                  note: |
-                    ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+                        ---
+                        ## Automated Alert Analysis
+                        ### Classification
+                        **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
 
-                    ---
-                    ## Automated Alert Analysis
-                    ### Classification
-                    **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
+                        ### Confidence Score
+                        {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }} / 100
 
-                    ### Confidence Score
-                    {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }} / 100
+                        ### Rationale
+                        {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
 
-                    ### Rationale
-                    {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
+                        ### Contributing Factors
+                        {% for factor in steps.onechat_runAgent_step.output.structured_output.contributing_factors %}
+                        - {{ factor }}
+                        {%- endfor %}
 
-                    ### Contributing Factors
-                    {% for factor in steps.onechat_runAgent_step.output.structured_output.contributing_factors %}
-                    - {{ factor }}
-                    {%- endfor %}
-
-                    ### Related Alert IDs
-                    {% for alert in steps.onechat_runAgent_step.output.structured_output.related_alert_ids %}
-                    - [{{ alert.alert_id }}](/app/security/alerts/redirect/{{ alert.alert_id }})
-                    {%- endfor %}
+                        ### Related Alert IDs
+                        {% for alert in steps.onechat_runAgent_step.output.structured_output.related_alert_ids %}
+                        - [{{ alert.alert_id }}](/app/security/alerts/redirect/{{ alert.alert_id }})
+                        {%- endfor %}
 
 
-                    ### Timestamp
-                    {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
+                        ### Timestamp
+                        {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
 
-                    {% if steps.onechat_runAgent_step.output.conversation_id -%}
-                    [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
-                    {%- endif %}
+                        {% if steps.onechat_runAgent_step.output.conversation_id -%}
+                        [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
+                        {%- endif %}
 
-                  timelineId: ''
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
+                      timelineId: ''
+                  headers:
+                    kbn-xsrf: string
+                    Content-Type: application/json
 
-          # -------------------------------------------------------------------
-          # Apply workflow tags to the seed alert
-          # -------------------------------------------------------------------
-          # Tags follow the convention:
-          #   workflow.<name>                              — marks the alert as processed
-          #   workflow.<name>.version.<ver>                — tracks the workflow version
-          #   workflow.<name>.output.classification.<cls>  — records the verdict
+              # -------------------------------------------------------------------
+              # Apply workflow tags to the seed alert
+              # -------------------------------------------------------------------
+              # Tags follow the convention:
+              #   workflow.<name>                              — marks the alert as processed
+              #   workflow.<name>.version.<ver>                — tracks the workflow version
+              #   workflow.<name>.output.classification.<cls>  — records the verdict
 
-          # Build a filter expression to find any existing workflow tags
-          # (used for tag replacement on re-runs).
-          - name: build_tags_filter_expr
-            type: data.set
-            with:
-              tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
-
-          - name: set_tags
-            type: data.set
-            with:
-              tags_to_add:
-                - "{{ variables.tag_prefix }}"
-                - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                - "{{ variables.tag_prefix }}.output.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}"
-              tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
-
-          # Remove stale tags first (if any) to avoid conflicts with the add.
-          - name: has_tags_to_remove
-            type: if
-            condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
-            steps:
-              - name: remove_stale_tags
-                type: kibana.SetAlertTags
+              # Build a filter expression to find any existing workflow tags
+              # (used for tag replacement on re-runs).
+              - name: build_tags_filter_expr
+                type: data.set
                 with:
-                  ids:
-                    - '{{ foreach.item._id }}'
-                  tags:
-                    tags_to_remove: "${{ variables.tags_to_remove }}"
-                    tags_to_add: []
+                  tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
 
-          # Add the new tags for this execution.
-          - name: add_result_tags
-            type: kibana.SetAlertTags
-            with:
-              ids:
-                - '{{ foreach.item._id }}'
-              tags:
-                tags_to_remove: []
-                tags_to_add: "${{ variables.tags_to_add }}"
+              - name: set_tags
+                type: data.set
+                with:
+                  tags_to_add:
+                    - "{{ variables.tag_prefix }}"
+                    - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
+                    - "{{ variables.tag_prefix }}.output.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}"
+                  tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
 
-          # -------------------------------------------------------------------
-          # Auto-close: close the alert if it meets FP thresholds
-          # -------------------------------------------------------------------
-          # When auto_close_enabled is true and the alert is classified as
-          # false_positive with a confidence score within the configured
-          # thresholds, the alert is tagged and closed automatically.
-          # TODO: Also check auto_close_confidence_score_min/max_threshold once
-          #       the AI agent output includes a normalised confidence value.
-          - name: check_auto_close_conditions
-            type: if
-            condition: >-
-              consts.auto_close_enabled: true
-              and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
-              and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ consts.auto_close_confidence_score_min_threshold }}
-              and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ consts.auto_close_confidence_score_max_threshold }}
-            steps:
-              # Tag the alert so it can be identified as auto-closed.
-              - name: set_close_tags
+              # Remove stale tags first (if any) to avoid conflicts with the add.
+              - name: has_tags_to_remove
+                type: if
+                condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                steps:
+                  - name: remove_stale_tags
+                    type: kibana.SetAlertTags
+                    with:
+                      ids:
+                        - '{{ foreach.item._id }}'
+                      tags:
+                        tags_to_remove: "${{ variables.tags_to_remove }}"
+                        tags_to_add: []
+
+              # Add the new tags for this execution.
+              - name: add_result_tags
                 type: kibana.SetAlertTags
                 with:
                   ids:
                     - '{{ foreach.item._id }}'
                   tags:
                     tags_to_remove: []
-                    tags_to_add:
-                      - "{{variables.tag_prefix}}.{{consts.closed_tag_suffix}}"
+                    tags_to_add: "${{ variables.tags_to_add }}"
 
-              # Close the alert with reason "false_positive".
-              - name: close_alert_as_false_positive
-                type: kibana.SetAlertsStatus
-                with:
-                  status: 'closed'
-                  signal_ids:
-                    - '{{ foreach.item._id }}'
-                  reason: 'false_positive'
+              # -------------------------------------------------------------------
+              # Auto-close: close the alert if it meets FP thresholds
+              # -------------------------------------------------------------------
+              # When auto_close_enabled is true and the alert is classified as
+              # false_positive with a confidence score within the configured
+              # thresholds, the alert is tagged and closed automatically.
+              - name: check_auto_close_conditions
+                type: if
+                condition: >-
+                  consts.auto_close_enabled: true
+                  and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
+                  and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ consts.auto_close_confidence_score_min_threshold }}
+                  and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ consts.auto_close_confidence_score_max_threshold }}
+                steps:
+                  # Tag the alert so it can be identified as auto-closed.
+                  - name: set_close_tags
+                    type: kibana.SetAlertTags
+                    with:
+                      ids:
+                        - '{{ foreach.item._id }}'
+                      tags:
+                        tags_to_remove: []
+                        tags_to_add:
+                          - "{{variables.tag_prefix}}.{{consts.closed_tag_suffix}}"
+
+                  # Close the alert with reason "false_positive".
+                  - name: close_alert_as_false_positive
+                    type: kibana.SetAlertsStatus
+                    with:
+                      status: 'closed'
+                      signal_ids:
+                        - '{{ foreach.item._id }}'
+                      reason: 'false_positive'
