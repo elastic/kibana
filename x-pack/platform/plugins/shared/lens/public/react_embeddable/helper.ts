@@ -254,7 +254,7 @@ type IncludedPanelStateKeys =
   | 'savedObjectId'
   | 'attributes'
   | 'references'
-  | 'timeRange'
+  | 'time_range'
   | keyof SerializedTitles
   | keyof SerializedDrilldowns;
 
@@ -271,8 +271,8 @@ export function stripInheritedContext(state: LensSerializedState): StrippedLensS
     attributes,
     // LensWithReferences
     references,
-    // LensUnifiedSearchContext (only timeRange is panel-level)
-    timeRange,
+    // LensUnifiedSearchContext (only time_range is panel-level)
+    time_range,
     // SerializedTitles
     title,
     description,
@@ -286,7 +286,7 @@ export function stripInheritedContext(state: LensSerializedState): StrippedLensS
     savedObjectId,
     attributes,
     references,
-    timeRange,
+    time_range,
     title,
     description,
     hide_title,

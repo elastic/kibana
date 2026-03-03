@@ -11,8 +11,10 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
 import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { timeRangeSchema } from '@kbn/es-query-server';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { referencesSchema } from '@kbn/content-management-utils';
 import {
   ON_CLICK_VALUE,
@@ -76,7 +78,7 @@ const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
 
 const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ({
   references: schema.maybe(referencesSchema),
-  timeRange: schema.maybe(timeRangeSchema),
+  ...serializedTimeRangeSchema.getPropSchemas(),
   ...serializedTitlesSchema.getPropSchemas(),
   ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).getPropSchemas(),
 });

@@ -120,7 +120,7 @@ export function initializeSearchContext(
     }),
     reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       const timeRange =
-        lastSaved && 'timeRange' in lastSaved ? { timeRange: lastSaved.timeRange } : undefined;
+        lastSaved && 'time_range' in lastSaved ? { time_range: lastSaved.time_range } : undefined;
       timeRangeManager.reinitializeState(timeRange);
     },
   };
