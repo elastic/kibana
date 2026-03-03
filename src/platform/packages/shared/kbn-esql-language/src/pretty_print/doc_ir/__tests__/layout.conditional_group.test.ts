@@ -24,7 +24,6 @@ describe('conditionalGroup', () => {
       }),
     ]);
 
-    // Fits flat at width 20 (18 ≤ 20)
     expect(layout(doc, { printWidth: 20 })).toBe('alpha, beta, gamma');
   });
 
@@ -42,7 +41,6 @@ describe('conditionalGroup', () => {
       }),
     ]);
 
-    // Phase 1 = 18 > 17, Phase 2 = 16 ≤ 17 → use Phase 2
     expect(layout(doc, { printWidth: 17 })).toBe('alpha,beta,gamma');
   });
 
@@ -60,7 +58,6 @@ describe('conditionalGroup', () => {
       }),
     ]);
 
-    // Both 18 and 16 > 8, falls to Phase 3 in break mode
     expect(layout(doc, { printWidth: 8 })).toBe('\n  alpha,\n  beta,\n  gamma\n');
   });
 

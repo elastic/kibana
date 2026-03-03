@@ -13,6 +13,7 @@ describe('fill (wrapping layout)', () => {
   it('renders all items on one line when they fit', () => {
     const items = ['one', 'two', 'three'].map(text);
     const doc = fill(join(line, items));
+
     expect(layout(doc, { printWidth: 80 })).toBe('one two three');
   });
 
@@ -26,34 +27,40 @@ describe('fill (wrapping layout)', () => {
   it('wraps with softline (no spaces)', () => {
     const items = ['aaa', 'bbb', 'ccc', 'ddd'].map(text);
     const doc = fill(join(softline, items));
+
     expect(layout(doc, { printWidth: 10 })).toBe('aaabbbccc\nddd');
   });
 
   it('handles single item', () => {
     const doc = fill([text('hello')]);
+
     expect(layout(doc, { printWidth: 80 })).toBe('hello');
   });
 
   it('handles two items', () => {
     const doc = fill([text('hello'), line, text('world')]);
+
     expect(layout(doc, { printWidth: 80 })).toBe('hello world');
     expect(layout(doc, { printWidth: 5 })).toBe('hello\nworld');
   });
 
   it('handles empty parts', () => {
     const doc = fill([]);
+
     expect(layout(doc, { printWidth: 80 })).toBe('');
   });
 
   it('wraps words example', () => {
     const words = 'the quick brown fox jumps over the lazy dog'.split(' ').map(text);
     const doc = fill(join(line, words));
+
     expect(layout(doc, { printWidth: 20 })).toBe('the quick brown fox\njumps over the lazy\ndog');
   });
 
   it('fill with width 15', () => {
     const items = ['one', 'two', 'three', 'four', 'five'].map(text);
     const doc = fill(join(line, items));
+
     expect(layout(doc, { printWidth: 15 })).toBe('one two three\nfour five');
   });
 

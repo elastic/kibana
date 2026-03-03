@@ -23,16 +23,17 @@ import {
   layout,
 } from '..';
 
-describe('layoutDoc', () => {
+describe('layout()', () => {
   it('hardline forces parent group to break', () => {
     const doc = group([text('a'), hardline, text('b')]);
+
     expect(layout(doc, { printWidth: 80 })).toBe('a\nb');
   });
 
   it('hardline propagates through nested groups', () => {
     const inner = group([text('x'), hardline, text('y')]);
     const outer = group([text('('), line, inner, line, text(')')]);
-    // breakParent from hardline propagates to outer, so outer's `line` commands break too
+
     expect(layout(outer, { printWidth: 80 })).toBe('(\nx\ny\n)');
   });
 
@@ -40,20 +41,21 @@ describe('layoutDoc', () => {
     const innermost = group([text('a'), hardline, text('b')]);
     const middle = group([text('['), line, innermost, line, text(']')]);
     const outer = group([text('('), line, middle, line, text(')')]);
+
     expect(layout(outer, { printWidth: 80 })).toBe('(\n[\na\nb\n]\n)');
   });
 
   it('does not break sibling groups', () => {
-    // Two separate groups; one has hardline, the other doesn't.
     const broken = group([text('a'), hardline, text('b')]);
     const intact = group([text('c'), line, text('d')]);
     const doc = [broken, text(' | '), intact];
-    // The intact group should still be able to render flat.
+
     expect(layout(doc, { printWidth: 80 })).toBe('a\nb | c d');
   });
 
   it('handles indent inside group with hardline', () => {
     const doc = group([text('start'), indent([hardline, text('body')]), hardline, text('end')]);
+
     expect(layout(doc, { printWidth: 80 })).toBe('start\n  body\nend');
   });
 
@@ -74,8 +76,6 @@ describe('layoutDoc', () => {
       expect(layout([])).toBe('');
     });
   });
-
-  // ─── group + indent ───────────────────────────────────────────────────
 
   describe('group', () => {
     it('renders flat when content fits', () => {
@@ -101,8 +101,6 @@ describe('layoutDoc', () => {
     });
   });
 
-  // ─── indent ───────────────────────────────────────────────────────────
-
   describe('indent', () => {
     it('indents content after line break', () => {
       const doc = group([text('start'), indent([line, text('indented')])], { shouldBreak: true });
@@ -121,8 +119,6 @@ describe('layoutDoc', () => {
       expect(layout(doc, { printWidth: 80 })).toBe('a\n  b\n    c');
     });
   });
-
-  // ─── line variants ────────────────────────────────────────────────────
 
   describe('line variants', () => {
     it('line renders as space in flat mode', () => {
@@ -150,8 +146,6 @@ describe('layoutDoc', () => {
       expect(layout(doc, { printWidth: 80 })).toBe('a\nb');
     });
   });
-
-  // ─── ifBreak ──────────────────────────────────────────────────────────
 
   describe('ifBreak', () => {
     it('uses flatContents when group is flat', () => {
@@ -196,8 +190,6 @@ describe('layoutDoc', () => {
     });
   });
 
-  // ─── indentIfBreak ────────────────────────────────────────────────────
-
   describe('indentIfBreak', () => {
     it('applies indent when referenced group breaks', () => {
       const gid = Symbol('g');
@@ -226,8 +218,6 @@ describe('layoutDoc', () => {
     });
   });
 
-  // ─── align ────────────────────────────────────────────────────────────
-
   describe('align', () => {
     it('aligns by fixed number of spaces', () => {
       const doc = group([text('fn('), align(3, [text('a,'), line, text('b')])], {
@@ -237,16 +227,12 @@ describe('layoutDoc', () => {
     });
   });
 
-  // ─── trim ─────────────────────────────────────────────────────────────
-
   describe('trim', () => {
     it('removes trailing whitespace', () => {
       const doc = [text('hello   '), trim, text('world')];
       expect(layout(doc, { printWidth: 80 })).toBe('helloworld');
     });
   });
-
-  // ─── bracketedList ────────────────────────────────────────────────────
 
   describe('bracketedList', () => {
     it('renders flat when it fits', () => {
@@ -264,8 +250,6 @@ describe('layoutDoc', () => {
     });
   });
 
-  // ─── Nested structures ────────────────────────────────────────────────
-
   describe('nested structures', () => {
     it('nested bracketed lists', () => {
       const inner = bracketedList('{', '}', ',', [text('a'), text('b')]);
@@ -280,8 +264,6 @@ describe('layoutDoc', () => {
       expect(layout(doc, { printWidth: 20 })).toBe('left_operand\n  + right_operand');
     });
   });
-
-  // ─── End-of-line options ──────────────────────────────────────────────
 
   describe('end-of-line', () => {
     it('uses \\r\\n when configured', () => {
