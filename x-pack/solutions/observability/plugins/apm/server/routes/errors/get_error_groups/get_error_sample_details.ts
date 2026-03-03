@@ -161,7 +161,7 @@ export async function getErrorSampleDetails({
   const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
   const traceId = errorFromFields.trace?.id;
 
-  let transaction: Transaction | undefined;
+  let transaction: Transaction | undefined = undefined;
   if (transactionId && traceId) {
     try {
       transaction = await getTransaction({
