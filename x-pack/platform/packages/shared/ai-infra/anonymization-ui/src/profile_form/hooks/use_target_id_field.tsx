@@ -9,6 +9,7 @@ import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FieldRule } from '@kbn/anonymization-common';
+import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import type { AnonymizationUiServices } from '../../contracts';
 import { TARGET_TYPE_DATA_VIEW } from '../../common/target_types';
@@ -32,6 +33,7 @@ interface UseTargetIdFieldParams {
   fetch: AnonymizationUiServices['http']['fetch'];
   onFieldRulesChange: (rules: FieldRule[]) => void;
   onTargetIdChange: (targetId: string) => void;
+  unavailableTargetIds?: string[];
 }
 
 export interface UseTargetIdFieldResult {
@@ -56,11 +58,17 @@ export const useTargetIdField = ({
   fetch,
   onFieldRulesChange,
   onTargetIdChange,
+  unavailableTargetIds = [],
 }: UseTargetIdFieldParams): UseTargetIdFieldResult => {
   const queryClient = useQueryClient();
   const targetLookupClient = useMemo(() => createTargetLookupClient({ fetch }), [fetch]);
   const expandWildcards: ExpandWildcardsMode = includeHiddenAndSystemIndices ? 'all' : 'open';
   const [shouldLoadTargetOptions, setShouldLoadTargetOptions] = useState(false);
+  const unavailableTargetIdSet = useMemo(
+    () => new Set(unavailableTargetIds),
+    [unavailableTargetIds]
+  );
+  const [reservedTargetError, setReservedTargetError] = useState<string | undefined>();
   const { targetIdSearchValue, debouncedTargetSearchValue, setTargetIdSearchValue } =
     useTargetIdSearchState({ targetId });
   const { targetIdOptions, isTargetIdLoading } = useTargetIdOptions({
@@ -70,6 +78,7 @@ export const useTargetIdField = ({
     targetLookupClient,
     shouldLoadTargetOptions,
     includeHiddenAndSystemIndices,
+    unavailableTargetIds,
   });
   const { targetIdAsyncError, isValidatingTargetId, applyTargetIdSelection } =
     useTargetIdSelectionActions({
@@ -81,15 +90,34 @@ export const useTargetIdField = ({
       targetLookupClient,
     });
 
+  const getReservedTargetMessage = useCallback(
+    (nextValue: string) =>
+      i18n.translate('anonymizationUi.profiles.basics.targetIdAlreadyHasProfile', {
+        defaultMessage: 'Target "{targetId}" already has an anonymization profile',
+        values: { targetId: nextValue },
+      }),
+    []
+  );
+
+  const hasReservedTarget = useCallback(
+    (nextValue: string) => unavailableTargetIdSet.has(nextValue),
+    [unavailableTargetIdSet]
+  );
+
   const handleTargetIdCreateOption = useCallback(
     (searchValue: string) => {
       const nextValue = searchValue.trim();
+      if (hasReservedTarget(nextValue)) {
+        setReservedTargetError(getReservedTargetMessage(nextValue));
+        return;
+      }
+      setReservedTargetError(undefined);
       onTargetIdChange(nextValue);
       if (nextValue) {
         void applyTargetIdSelection(nextValue);
       }
     },
-    [onTargetIdChange, applyTargetIdSelection]
+    [applyTargetIdSelection, getReservedTargetMessage, hasReservedTarget, onTargetIdChange]
   );
 
   const handleTargetIdFocus = useCallback(() => {
@@ -107,12 +135,17 @@ export const useTargetIdField = ({
   const handleTargetIdSelectChange = useCallback(
     (options: EuiComboBoxOptionOption<string>[]) => {
       const nextValue = (options[0]?.value ?? options[0]?.label ?? '').trim();
+      if (hasReservedTarget(nextValue)) {
+        setReservedTargetError(getReservedTargetMessage(nextValue));
+        return;
+      }
+      setReservedTargetError(undefined);
       onTargetIdChange(nextValue);
       if (nextValue) {
         void applyTargetIdSelection(nextValue);
       }
     },
-    [onTargetIdChange, applyTargetIdSelection]
+    [applyTargetIdSelection, getReservedTargetMessage, hasReservedTarget, onTargetIdChange]
   );
 
   const validateAndHydrateTargetId = useCallback(async (): Promise<boolean> => {
@@ -120,9 +153,14 @@ export const useTargetIdField = ({
     if (!nextValue) {
       return true;
     }
+    if (hasReservedTarget(nextValue)) {
+      setReservedTargetError(getReservedTargetMessage(nextValue));
+      return false;
+    }
+    setReservedTargetError(undefined);
     // Submit-time validation should not overwrite user-edited field rules.
     return applyTargetIdSelection(nextValue, { hydrate: false });
-  }, [applyTargetIdSelection, targetId]);
+  }, [applyTargetIdSelection, getReservedTargetMessage, hasReservedTarget, targetId]);
 
   const selectedTarget = useMemo(() => {
     if (!targetId) {
@@ -153,7 +191,7 @@ export const useTargetIdField = ({
     selectedTargetIdOptions,
     selectedTargetDisplayName: selectedTarget?.label,
     targetIdHelpText,
-    targetIdAsyncError,
+    targetIdAsyncError: reservedTargetError ?? targetIdAsyncError,
     isTargetIdValidating: isValidatingTargetId,
     isTargetIdLoading,
     onTargetIdSearchChange: setTargetIdSearchValue,

@@ -19,6 +19,8 @@ import { ProfileFlyout } from '../profile_flyout/profile_flyout';
 import { ProfilesTable } from '../profiles_table/profiles_table';
 import { ProfilesToolbar } from '../profiles_toolbar/profiles_toolbar';
 import { TARGET_TYPE_DATA_VIEW } from '../common/target_types';
+import { createAnonymizationProfilesClient } from '../common/services/profiles/client';
+import { useFindProfiles } from '../common/services/profiles/hooks/use_find_profiles';
 import { createTargetLookupClient } from '../common/services/target_lookup/client';
 import { useDataViewsList } from '../common/services/target_lookup/hooks/use_data_views_list';
 import {
@@ -65,6 +67,8 @@ export const AnonymizationProfilesSection = ({
   onCreateConflict,
   onOpenConflictError,
 }: AnonymizationProfilesSectionProps) => {
+  const profilesClient = useMemo(() => createAnonymizationProfilesClient({ fetch }), [fetch]);
+  const profilesQueryContext = useMemo(() => ({ spaceId }), [spaceId]);
   const {
     listView,
     deleteFlow,
@@ -94,6 +98,16 @@ export const AnonymizationProfilesSection = ({
     onCreateConflict,
     onOpenConflictError,
   });
+  const unavailableProfilesQuery = useFindProfiles({
+    client: profilesClient,
+    context: profilesQueryContext,
+    query: {
+      targetType: form.values.targetType,
+      page: 1,
+      perPage: 1000,
+    },
+    enabled: Boolean(flyoutState),
+  });
   const targetLookupClient = useMemo(() => createTargetLookupClient({ fetch }), [fetch]);
   const hasDataViewProfiles = listView.profiles.some(
     (profile) => profile.targetType === TARGET_TYPE_DATA_VIEW
@@ -113,6 +127,22 @@ export const AnonymizationProfilesSection = ({
       ),
     [dataViewsQuery.data]
   );
+  const unavailableTargetIds = useMemo(() => {
+    if (!flyoutState) {
+      return [];
+    }
+
+    const ids = (unavailableProfilesQuery.data?.data ?? [])
+      .filter((profile) => profile.targetType === form.values.targetType)
+      .map((profile) => profile.targetId);
+
+    // Keep current target selectable while editing this profile.
+    if (flyoutState.mode === 'edit') {
+      return ids.filter((targetId) => targetId !== flyoutState.profile.targetId);
+    }
+
+    return ids;
+  }, [flyoutState, form.values.targetType, unavailableProfilesQuery.data?.data]);
 
   if (effectiveMode === 'hidden') {
     return null;
@@ -215,6 +245,7 @@ export const AnonymizationProfilesSection = ({
           onNerRulesChange={form.setNerRules}
           listTrustedNerModels={listTrustedNerModels}
           fetchPreviewDocument={fetchPreviewDocument}
+          unavailableTargetIds={unavailableTargetIds}
           fetch={fetch}
           onOpenConflictProfile={openProfileById}
           onCancel={closeFlyout}

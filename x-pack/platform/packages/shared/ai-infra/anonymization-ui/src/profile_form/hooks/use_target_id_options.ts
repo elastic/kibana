@@ -24,6 +24,7 @@ interface UseTargetIdOptionsParams {
   targetLookupClient: TargetLookupClient;
   shouldLoadTargetOptions: boolean;
   includeHiddenAndSystemIndices: boolean;
+  unavailableTargetIds?: string[];
 }
 
 export const useTargetIdOptions = ({
@@ -33,6 +34,7 @@ export const useTargetIdOptions = ({
   targetLookupClient,
   shouldLoadTargetOptions,
   includeHiddenAndSystemIndices,
+  unavailableTargetIds = [],
 }: UseTargetIdOptionsParams) => {
   const isDataViewTarget = targetType === TARGET_TYPE_DATA_VIEW;
   const expandWildcards: ExpandWildcardsMode = includeHiddenAndSystemIndices ? 'all' : 'open';
@@ -68,15 +70,22 @@ export const useTargetIdOptions = ({
     enabled: shouldResolveIndexSuggestions,
   });
 
+  const unavailableTargetIdSet = useMemo(
+    () => new Set(unavailableTargetIds),
+    [unavailableTargetIds]
+  );
+
   const targetIdOptions = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
     if (isDataViewTarget) {
-      return (dataViewsListQuery.data?.data_view ?? []).map((dataView) => {
-        const displayName = dataView.name ?? dataView.title;
-        return {
-          label: displayName,
-          value: dataView.id,
-        };
-      });
+      return (dataViewsListQuery.data?.data_view ?? [])
+        .map((dataView) => {
+          const displayName = dataView.name ?? dataView.title;
+          return {
+            label: displayName,
+            value: dataView.id,
+          };
+        })
+        .filter((option) => !unavailableTargetIdSet.has(option.value ?? option.label ?? ''));
     }
 
     if (!resolveIndexQuery.data) {
@@ -85,12 +94,12 @@ export const useTargetIdOptions = ({
 
     const queryValue = targetIdSearchValue.trim();
     const normalizedQueryValue = queryValue.toLowerCase();
-    const options: Array<EuiComboBoxOptionOption<string>> = (
-      resolveIndexQuery.data.indices ?? []
-    ).map((index) => ({
-      label: index.name,
-      value: index.name,
-    }));
+    const options: Array<EuiComboBoxOptionOption<string>> = (resolveIndexQuery.data.indices ?? [])
+      .map((index) => ({
+        label: index.name,
+        value: index.name,
+      }))
+      .filter((option) => !unavailableTargetIdSet.has(option.value ?? option.label ?? ''));
 
     const rankOption = ({ value }: EuiComboBoxOptionOption<string>): number => {
       if (!normalizedQueryValue) {
@@ -120,13 +129,23 @@ export const useTargetIdOptions = ({
       })
       .slice(0, TARGET_ID_OPTIONS_LIMIT);
 
-    if (queryValue && sortedOptions.every((option) => option.value !== queryValue)) {
+    if (
+      queryValue &&
+      !unavailableTargetIdSet.has(queryValue) &&
+      sortedOptions.every((option) => option.value !== queryValue)
+    ) {
       sortedOptions.unshift({ label: queryValue, value: queryValue });
       return sortedOptions.slice(0, TARGET_ID_OPTIONS_LIMIT);
     }
 
     return sortedOptions;
-  }, [dataViewsListQuery.data, isDataViewTarget, resolveIndexQuery.data, targetIdSearchValue]);
+  }, [
+    dataViewsListQuery.data,
+    isDataViewTarget,
+    resolveIndexQuery.data,
+    targetIdSearchValue,
+    unavailableTargetIdSet,
+  ]);
 
   const isTargetIdLoading = isDataViewTarget
     ? dataViewsListQuery.isFetching

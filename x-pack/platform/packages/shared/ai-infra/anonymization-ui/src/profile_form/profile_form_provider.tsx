@@ -15,7 +15,14 @@ interface ProfileFormProviderProps extends ProfileFormProps {
 }
 
 export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderProps) => {
-  const { fetch, onFieldRulesChange, onTargetIdChange, targetId, targetType } = props;
+  const {
+    fetch,
+    onFieldRulesChange,
+    onTargetIdChange,
+    targetId,
+    targetType,
+    unavailableTargetIds,
+  } = props;
   const [includeHiddenAndSystemIndices, setIncludeHiddenAndSystemIndices] = useState(false);
   const [submitAttemptCount, setSubmitAttemptCount] = useState(0);
 
@@ -26,6 +33,7 @@ export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderP
     fetch,
     onFieldRulesChange,
     onTargetIdChange,
+    unavailableTargetIds,
   });
 
   const onSubmitWithTargetValidation = async () => {

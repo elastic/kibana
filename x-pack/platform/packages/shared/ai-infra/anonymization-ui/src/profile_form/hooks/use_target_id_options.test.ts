@@ -302,4 +302,57 @@ describe('useTargetIdOptions', () => {
       })
     );
   });
+
+  it('filters out unavailable index options and custom fallback', () => {
+    jest.mocked(useResolveIndex).mockReturnValue({
+      data: {
+        data_streams: [],
+        aliases: [],
+        indices: [{ name: 'logs-index' }, { name: 'metrics-index' }],
+      },
+      isFetching: false,
+    } as unknown as ReturnType<typeof useResolveIndex>);
+
+    const { result } = renderHook(() =>
+      useTargetIdOptions({
+        targetType: TARGET_TYPE_INDEX_PATTERN,
+        targetIdSearchValue: 'logs-index',
+        debouncedTargetSearchValue: 'logs-index',
+        targetLookupClient,
+        shouldLoadTargetOptions: true,
+        includeHiddenAndSystemIndices: false,
+        unavailableTargetIds: ['logs-index'],
+      })
+    );
+
+    expect(result.current.targetIdOptions).toEqual([
+      { label: 'metrics-index', value: 'metrics-index' },
+    ]);
+  });
+
+  it('filters out unavailable data view options', () => {
+    jest.mocked(useDataViewsList).mockReturnValue({
+      data: {
+        data_view: [
+          { id: 'dv-1', title: 'logs-*', name: 'Logs' },
+          { id: 'dv-2', title: 'metrics-*', name: 'Metrics' },
+        ],
+      },
+      isFetching: false,
+    } as unknown as ReturnType<typeof useDataViewsList>);
+
+    const { result } = renderHook(() =>
+      useTargetIdOptions({
+        targetType: TARGET_TYPE_DATA_VIEW,
+        targetIdSearchValue: '',
+        debouncedTargetSearchValue: '',
+        targetLookupClient,
+        shouldLoadTargetOptions: true,
+        includeHiddenAndSystemIndices: false,
+        unavailableTargetIds: ['dv-1'],
+      })
+    );
+
+    expect(result.current.targetIdOptions).toEqual([{ label: 'Metrics', value: 'dv-2' }]);
+  });
 });

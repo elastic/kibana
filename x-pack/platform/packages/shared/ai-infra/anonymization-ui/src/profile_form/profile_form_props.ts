@@ -44,6 +44,7 @@ export interface ProfileFormProps {
   onNerRulesChange: (rules: NerRule[]) => void;
   listTrustedNerModels?: () => Promise<TrustedNerModelOption[]>;
   fetchPreviewDocument?: FetchPreviewDocument;
+  unavailableTargetIds?: string[];
   replacementsId?: string;
   inlineDeanonymizations?: InlineDeanonymizationEntry[];
   fetch: AnonymizationUiServices['http']['fetch'];

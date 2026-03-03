@@ -321,4 +321,26 @@ describe('useTargetIdField', () => {
       ])
     );
   });
+
+  it('blocks selecting a target that already has a profile', () => {
+    const onTargetIdChange = jest.fn();
+    const { result } = renderHook(() =>
+      useTargetIdField({
+        targetType: TARGET_TYPE_INDEX_PATTERN,
+        targetId: '',
+        includeHiddenAndSystemIndices: false,
+        fetch: jest.fn(),
+        onFieldRulesChange: jest.fn(),
+        onTargetIdChange,
+        unavailableTargetIds: ['logs-index'],
+      })
+    );
+
+    act(() => {
+      result.current.onTargetIdCreateOption?.('logs-index');
+    });
+
+    expect(onTargetIdChange).not.toHaveBeenCalled();
+    expect(result.current.targetIdAsyncError).toContain('already has an anonymization profile');
+  });
 });
