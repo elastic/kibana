@@ -18,6 +18,11 @@ export const connectorSchema = schema.object({
   isSystemAction: schema.boolean(),
   isConnectorTypeDeprecated: schema.boolean({ defaultValue: false }),
   authMode: schema.maybe(schema.oneOf([schema.literal('shared'), schema.literal('per-user')])),
+  currentUserConnectionStatus: schema.oneOf([
+    schema.literal('connected'),
+    schema.literal('not_connected'),
+    schema.literal('not_applicable'),
+  ]),
 });
 
 export const connectorWithExtraFindDataSchema = connectorSchema.extends({
