@@ -52,7 +52,7 @@ spaceTest.describe(
 
     spaceTest('should display trace-specific columns in ESQL mode', async ({ pageObjects }) => {
       await spaceTest.step('switch to ESQL mode with a different index pattern', async () => {
-        await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
+        await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {

@@ -65,7 +65,7 @@ spaceTest.describe(
           await pageObjects.discover.goto();
 
           await spaceTest.step('run ESQL query for traces', async () => {
-            await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
+            await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
           });
 
           await spaceTest.step('verify RED metrics grid is not visible', async () => {

@@ -283,7 +283,7 @@ export class DiscoverApp {
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
   }
 
-  async writeSearchQuery(query: string) {
+  async writeAndSubmitKqlQuery(query: string) {
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.page.testSubj.click('querySubmitButton');
@@ -341,7 +341,7 @@ export class DiscoverApp {
     }
   }
 
-  async writeEsqlQuery(query: string) {
+  async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
     await this.page.testSubj.click('querySubmitButton');

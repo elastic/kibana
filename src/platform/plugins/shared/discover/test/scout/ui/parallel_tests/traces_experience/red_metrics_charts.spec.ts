@@ -37,7 +37,7 @@ spaceTest.describe(
 
     spaceTest('should render RED metrics charts in ESQL mode', async ({ pageObjects }) => {
       await spaceTest.step('run ESQL query for traces', async () => {
-        await pageObjects.discover.writeEsqlQuery(TRACES.ESQL_QUERY);
+        await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
       });
 
       await spaceTest.step('verify RED metrics charts are visible', async () => {
@@ -53,7 +53,7 @@ spaceTest.describe(
 
     spaceTest('should render RED metrics charts with WHERE filter', async ({ pageObjects }) => {
       await spaceTest.step('run ESQL query with WHERE filter', async () => {
-        await pageObjects.discover.writeEsqlQuery(
+        await pageObjects.discover.writeAndSubmitEsqlQuery(
           `${TRACES.ESQL_QUERY} | WHERE service.name == "synth-traces-service"`
         );
       });
@@ -73,7 +73,9 @@ spaceTest.describe(
       'should not render RED metrics charts with transformative ESQL query',
       async ({ pageObjects }) => {
         await spaceTest.step('run transformative ESQL query', async () => {
-          await pageObjects.discover.writeEsqlQuery(`${TRACES.ESQL_QUERY} | STATS count()`);
+          await pageObjects.discover.writeAndSubmitEsqlQuery(
+            `${TRACES.ESQL_QUERY} | STATS count()`
+          );
         });
 
         await spaceTest.step('verify RED metrics charts are not visible', async () => {
