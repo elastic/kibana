@@ -67,8 +67,9 @@ async function mountComponent({
     toolkit.runtimeStateManager,
     toolkit.getCurrentTab().id
   ).stateContainer$.getValue()!;
+  const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
 
-  stateContainer.dataState.data$.documents$.next({
+  dataStateContainer.data$.documents$.next({
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   });

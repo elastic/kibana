@@ -31,6 +31,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useDataViewsForPicker,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -189,9 +190,10 @@ export const DiscoverTopNav = ({
     [dispatch, setAppState, stateContainer, updateAppState]
   );
 
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
   const esqlQueryStats = useESQLQueryStats(
     isEsqlMode,
-    stateContainer.dataState.inspectorAdapters.requests
+    dataStateContainer.inspectorAdapters.requests
   );
 
   const transitionFromESQLToDataView = useCurrentTabAction(

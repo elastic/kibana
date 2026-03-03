@@ -26,16 +26,17 @@ const getDeps = async (): Promise<CommonFetchParams> => {
   const services = createDiscoverServicesMock();
   const toolkit = getDiscoverInternalStateMock({ services });
   await toolkit.initializeTabs();
-  const { stateContainer } = await toolkit.initializeSingleTab({
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
-  const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
+  const tabRuntimeState = selectTabRuntimeState(
     toolkit.runtimeStateManager,
     toolkit.getCurrentTab().id
   );
+  const { scopedProfilesManager$, scopedEbtManager$ } = tabRuntimeState;
   return {
-    dataSubjects: stateContainer.dataState.data$,
-    initialFetchStatus: stateContainer.dataState.getInitialFetchStatus(),
+    dataSubjects: dataStateContainer.data$,
+    initialFetchStatus: dataStateContainer.getInitialFetchStatus(),
     abortController: new AbortController(),
     inspectorAdapters: { requests: new RequestAdapter() },
     searchSessionId: '123',

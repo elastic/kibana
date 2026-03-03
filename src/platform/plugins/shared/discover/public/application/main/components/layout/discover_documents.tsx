@@ -82,6 +82,7 @@ import {
   internalStateActions,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -154,7 +155,8 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const documentState = useDataState(dataStateContainer.data$.documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;

@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { FetchStatus } from '../../application/types';
 import { useDataState } from '../../application/main/hooks/use_data_state';
+import { useCurrentTabDataStateContainer } from '../../application/main/state_management/redux';
 
 export enum HitsCounterMode {
   standalone = 'standalone',
@@ -36,12 +37,13 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
   hitCounterLabel,
   hitCounterPluralLabel,
 }) => {
-  const totalHits$ = stateContainer.dataState.data$.totalHits$;
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
   let hitsTotal = hitsTotalToDisplay || totalHitsState.result;
   const hitsStatus = totalHitsState.fetchStatus;
 
-  const documents$ = stateContainer.dataState.data$.documents$;
+  const documents$ = dataStateContainer.data$.documents$;
   const documentsState = useDataState(documents$);
   const documentsCount = documentsState.result?.length || 0;
 

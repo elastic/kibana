@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
+import {
+  getDiscoverStateContainer,
+  type DiscoverStateContainer,
+} from '../application/main/state_management/discover_state';
+import {
+  getDataStateContainer,
+  type DiscoverDataStateContainer,
+} from '../application/main/state_management/discover_data_state_container';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
-import { createDiscoverServicesMock } from './services';
+import { createDiscoverServicesMock, discoverServiceMock } from './services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import type { RuntimeStateManager, TabState } from '../application/main/state_management/redux';
@@ -271,13 +278,15 @@ export function getDiscoverInternalStateMock({
           await toolkit.waitForDataFetching({ tabId });
         }
 
-        return { stateContainer, customizationService };
+        const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue()!;
+
+        return { stateContainer, customizationService, dataStateContainer };
       }
     ),
     waitForDataFetching: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-      const stateContainer = tabRuntimeState.stateContainer$.getValue();
-      const dataMain$ = stateContainer?.dataState.data$.main$;
+      const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue();
+      const dataMain$ = dataStateContainer?.data$.main$;
 
       if (!dataMain$) {
         throw new Error(`Tab with ID "${tabId}" has not been initialized yet`);
@@ -314,6 +323,11 @@ export function getDiscoverInternalStateMock({
     }),
     getCurrentTab: assertTabsAreInitialized(() => {
       return selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
+    }),
+    getCurrentTabDataStateContainer: assertTabsAreInitialized(() => {
+      const tabId = internalState.getState().tabs.unsafeCurrentId;
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+      return tabRuntimeState.dataStateContainer$.getValue()!;
     }),
     addNewTab: assertTabsAreInitialized(async ({ tab }: { tab: TabState }) => {
       const currentState = internalState.getState();
@@ -506,4 +520,40 @@ export function getDiscoverStateMock({
   }
 
   return container;
+}
+
+/**
+ * @deprecated Use `InternalStateMockToolkit.initializeSingleTab()` instead, which returns
+ * `dataStateContainer` as part of its result. This helper exists only for backward compatibility
+ * with tests that use `getDiscoverStateMock` directly without calling `initializeSingleTab`.
+ *
+ * Returns an existing `dataStateContainer` from the runtime state, or creates and stores a new one
+ * if it doesn't exist. This is useful for tests that need `dataStateContainer` without going through
+ * the full `initializeSingleTab` flow.
+ */
+export function getOrCreateDataStateFromMock(
+  stateContainer: DiscoverStateContainer,
+  services: DiscoverServices = discoverServiceMock
+): DiscoverDataStateContainer {
+  const { runtimeStateManager, internalState } = stateContainer;
+  const tabId = internalState.getState().tabs.unsafeCurrentId;
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+
+  // Return existing dataStateContainer if already initialized
+  const existing = tabRuntimeState.dataStateContainer$.getValue();
+  if (existing) {
+    return existing;
+  }
+
+  const dataStateContainer = getDataStateContainer({
+    internalState,
+    services,
+    searchSessionManager: stateContainer.searchSessionManager,
+    runtimeStateManager,
+    injectCurrentTab: stateContainer.injectCurrentTab,
+    getCurrentTab: stateContainer.getCurrentTab,
+  });
+  tabRuntimeState.dataStateContainer$.next(dataStateContainer);
+
+  return dataStateContainer;
 }

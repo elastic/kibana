@@ -189,7 +189,7 @@ export const DiscoverMainContent = ({
           {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
             <PatternAnalysisTab
               dataView={dataView}
-              stateContainer={stateContainer}
+              runtimeStateManager={stateContainer.runtimeStateManager}
               switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
               trackUiMetric={trackUiMetric}
               renderViewModeToggle={renderViewModeToggle}

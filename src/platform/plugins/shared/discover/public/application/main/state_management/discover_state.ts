@@ -9,8 +9,6 @@
 
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '../../..';
-import type { DiscoverDataStateContainer } from './discover_data_state_container';
-import { getDataStateContainer } from './discover_data_state_container';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
@@ -48,10 +46,6 @@ export interface DiscoverStateContainerParams {
 }
 
 export interface DiscoverStateContainer {
-  /**
-   * Data fetching related state
-   **/
-  dataState: DiscoverDataStateContainer;
   /**
    * Internal shared state that's used at several places in the UI
    */
@@ -103,22 +97,12 @@ export function getDiscoverStateContainer({
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
-  const dataStateContainer = getDataStateContainer({
-    services,
-    searchSessionManager,
-    internalState,
-    runtimeStateManager,
-    injectCurrentTab,
-    getCurrentTab,
-  });
-
   return {
     internalState,
     internalStateActions,
     injectCurrentTab,
     getCurrentTab,
     runtimeStateManager,
-    dataState: dataStateContainer,
     stateStorage,
     searchSessionManager,
     customizationContext,

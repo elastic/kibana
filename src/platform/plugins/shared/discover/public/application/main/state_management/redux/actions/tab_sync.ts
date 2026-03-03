@@ -43,9 +43,14 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
   ) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const stateContainer = tabRuntimeState.stateContainer$.getValue();
+    const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue();
 
     if (!stateContainer) {
       throw new Error('State container is not initialized');
+    }
+
+    if (!dataStateContainer) {
+      throw new Error('Data state container is not initialized');
     }
 
     dispatch(stopSyncing({ tabId }));
@@ -209,7 +214,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
-        dataState: stateContainer.dataState,
+        dataState: dataStateContainer,
         internalState: stateContainer.internalState,
         runtimeStateManager,
         services,
@@ -240,7 +245,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     });
 
     // start subscribing to dataStateContainer, triggering data fetching
-    const unsubscribeData = stateContainer.dataState.subscribe();
+    const unsubscribeData = dataStateContainer.subscribe();
 
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({

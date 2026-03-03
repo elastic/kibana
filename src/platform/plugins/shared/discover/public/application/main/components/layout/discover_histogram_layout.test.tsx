@@ -58,7 +58,7 @@ const setup = async ({
     })
   );
 
-  const { stateContainer } = await toolkit.initializeSingleTab({
+  const { stateContainer, dataStateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
@@ -80,15 +80,15 @@ const setup = async ({
     })
   );
 
-  stateContainer.dataState.data$.documents$.next({
+  dataStateContainer.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   });
-  stateContainer.dataState.data$.totalHits$.next({
+  dataStateContainer.data$.totalHits$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
   });
-  stateContainer.dataState.data$.main$.next({
+  dataStateContainer.data$.main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
   });

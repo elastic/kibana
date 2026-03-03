@@ -42,6 +42,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -82,7 +83,8 @@ export const useTopNavLinks = ({
       http: services.http,
       toasts: services.notifications.toasts,
     });
-  const totalHits$ = state.dataState.data$.totalHits$;
+  const dataStateContainer = useCurrentTabDataStateContainer(state.runtimeStateManager);
+  const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>

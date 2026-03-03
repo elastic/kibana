@@ -49,6 +49,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
@@ -70,11 +71,12 @@ export const useDiscoverHistogram = (
   options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
   const {
     data$: { main$, documents$, totalHits$ },
     inspectorAdapters,
     getAbortController,
-  } = stateContainer.dataState;
+  } = dataStateContainer;
   const isEsqlMode = useIsEsqlMode();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -279,7 +281,7 @@ export const useDiscoverHistogram = (
       return;
     }
 
-    const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
+    const subscription = dataStateContainer.fetchChart$.subscribe((latestFetchDetails) => {
       if (latestFetchDetails) {
         triggerUnifiedHistogramFetch.current(latestFetchDetails);
       }
@@ -288,7 +290,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription.unsubscribe();
     };
-  }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+  }, [dataStateContainer.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
     const previousFetchParams = previousFetchParamsRef.current;

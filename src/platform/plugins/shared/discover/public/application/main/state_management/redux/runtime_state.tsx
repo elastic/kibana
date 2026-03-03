@@ -14,6 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
+import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
@@ -37,6 +38,7 @@ export interface UnifiedHistogramConfig {
 
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
+  dataStateContainer?: DiscoverDataStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
   scopedProfilesManager: ScopedProfilesManager;
@@ -52,7 +54,10 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
+export type ReactiveTabRuntimeState = ReactiveRuntimeState<
+  TabRuntimeState,
+  'currentDataView' | 'stateContainer' | 'dataStateContainer'
+>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -97,6 +102,7 @@ export const createTabRuntimeState = ({
 
   return {
     stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+    dataStateContainer$: new BehaviorSubject<DiscoverDataStateContainer | undefined>(undefined),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
@@ -180,6 +186,19 @@ export const useCurrentTabRuntimeState = <T,>(
 ) => {
   const { currentTabId } = useCurrentTabContext();
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
+};
+
+export const useCurrentTabDataStateContainer = (runtimeStateManager: RuntimeStateManager) => {
+  const { currentTabId } = useCurrentTabContext();
+  const dataStateContainer = useRuntimeState(
+    selectTabRuntimeState(runtimeStateManager, currentTabId).dataStateContainer$
+  );
+
+  if (!dataStateContainer) {
+    throw new Error('dataStateContainer not initialized');
+  }
+
+  return dataStateContainer;
 };
 
 export type CombinedRuntimeState = DiscoverRuntimeState & Pick<TabRuntimeState, 'currentDataView'>;

@@ -560,10 +560,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { runtimeStateManager } = listenerApi.extra;
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
-      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
 
-      if (tabStateContainer?.dataState.cleanupEsql) {
-        tabStateContainer.dataState.cleanupEsql();
+      if (dataStateContainer?.cleanupEsql) {
+        dataStateContainer.cleanupEsql();
       }
     },
   });

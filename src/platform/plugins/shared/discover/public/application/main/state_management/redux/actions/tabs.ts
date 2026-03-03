@@ -283,7 +283,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         dispatch(initializeAndSync({ tabId: nextTab.id }));
 
         if (nextTab.forceFetchOnSelect) {
-          nextTabStateContainer.dataState.reset();
+          nextTabRuntimeState.dataStateContainer$.getValue()?.reset();
           dispatch(fetchData({ tabId: nextTab.id }));
         }
       } else {
@@ -557,8 +557,7 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function disconnectTabThunkFn(dispatch, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const stateContainer = tabRuntimeState.stateContainer$.getValue();
-    stateContainer?.dataState.cancel();
+    tabRuntimeState.dataStateContainer$.getValue()?.cancel();
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
   };

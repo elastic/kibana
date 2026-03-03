@@ -18,6 +18,7 @@ import {
   internalStateActions,
   useInternalStateSelector,
   useCurrentTabAction,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useCurrentTabRuntimeState,
 } from '../state_management/redux';
@@ -44,8 +45,10 @@ export function useInspector({
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
 
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+
   const getContextsAdapter = useActiveContexts({
-    dataDocuments$: stateContainer.dataState.data$.documents$,
+    dataDocuments$: dataStateContainer.data$.documents$,
   });
 
   const onOpenInspector = useCallback(
@@ -53,7 +56,7 @@ export function useInspector({
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
-      const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
+      const inspectorAdapters = dataStateContainer.inspectorAdapters;
 
       const requestAdapters = [
         inspectorAdapters.requests,
@@ -86,7 +89,7 @@ export function useInspector({
       dispatch,
       setExpandedDoc,
       cascadedDocumentsFetcher,
-      stateContainer.dataState.inspectorAdapters,
+      dataStateContainer.inspectorAdapters,
       inspector,
       getContextsAdapter,
       persistedDiscoverSession?.title,

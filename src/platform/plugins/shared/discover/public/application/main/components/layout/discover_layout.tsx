@@ -66,6 +66,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -107,7 +108,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
   const globalQueryState = data.query.getState();
-  const { main$ } = stateContainer.dataState.data$;
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -336,9 +338,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           })
         );
       }
-      stateContainer.dataState.refetch$.next('reset');
+      dataStateContainer.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
+    [dataView, dataStateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -349,7 +351,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [filterManager]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+  const documentState = useDataState(dataStateContainer.data$.documents$);
 
   const esqlModeWarning = useMemo(() => {
     if (isEsqlMode) {
@@ -391,7 +393,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
-      return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
+      return <DiscoverUninitialized onRefresh={() => dataStateContainer.fetch()} />;
     }
 
     return (
@@ -419,6 +421,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     onFieldEdited,
     onDropFieldToTable,
     panelsToggle,
+    dataStateContainer,
   ]);
 
   const isLoading =
@@ -426,8 +429,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
   const onCancelClick = useCallback(() => {
-    stateContainer.dataState.cancel();
-  }, [stateContainer.dataState]);
+    dataStateContainer.cancel();
+  }, [dataStateContainer]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
@@ -498,7 +501,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarPanel={
               <SidebarMemoized
                 columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
+                documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}

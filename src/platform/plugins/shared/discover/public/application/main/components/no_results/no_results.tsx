@@ -15,6 +15,7 @@ import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings
 import { NoResultsSuggestions } from './no_results_suggestions';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
+import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 
 export interface DiscoverNoResultsProps {
   stateContainer: DiscoverStateContainer;
@@ -33,7 +34,8 @@ export function DiscoverNoResults({
   dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
-  const { documents$ } = stateContainer.dataState.data$;
+  const dataStateContainer = useCurrentTabDataStateContainer(stateContainer.runtimeStateManager);
+  const { documents$ } = dataStateContainer.data$;
   const interceptedWarnings = useDataState(documents$).interceptedWarnings;
 
   if (interceptedWarnings?.length) {

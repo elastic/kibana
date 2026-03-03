@@ -17,6 +17,7 @@ import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
+import { getDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews } from './data_views';
 import { setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
@@ -67,8 +68,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
-    const { currentDataView$, stateContainer$, customizationService$, scopedEbtManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId);
+    const {
+      currentDataView$,
+      stateContainer$,
+      dataStateContainer$,
+      customizationService$,
+      scopedEbtManager$,
+    } = selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
      * New tab initialization with the restored data if available
@@ -294,6 +300,17 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Set runtime state
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
+
+    // Create and set dataStateContainer (lazy initialization)
+    const dataStateContainer = getDataStateContainer({
+      services,
+      searchSessionManager,
+      internalState: stateContainer.internalState,
+      runtimeStateManager,
+      injectCurrentTab: stateContainer.injectCurrentTab,
+      getCurrentTab: stateContainer.getCurrentTab,
+    });
+    dataStateContainer$.next(dataStateContainer);
 
     // Begin syncing the state and trigger the initial fetch
     // if this is still the current tab, otherwise mark the
