@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLFunction } from '@elastic/esql/types';
 import type {
   SupportedDataType,
   FunctionParameterType,
@@ -16,7 +17,6 @@ import type {
 import { argMatchesParamType } from '../../expressions';
 import type { FunctionParameterContext } from './types';
 import { getValidSignaturesAndTypesToSuggestNext } from '../helpers';
-import type { ESQLFunction } from '../../../../../types';
 import type { ICommandContext } from '../../../../registry/types';
 import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';

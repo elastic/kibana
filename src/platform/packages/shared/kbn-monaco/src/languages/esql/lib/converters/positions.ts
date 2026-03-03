@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EditorError, ESQLMessage } from '@kbn/esql-language';
+import type { EditorError, ESQLMessage } from '@elastic/esql/types';
 import type { MonacoEditorError } from '../../../../types';
 import { monaco } from '../../../../monaco_imports';
 

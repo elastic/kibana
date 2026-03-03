@@ -9,9 +9,9 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isEqual, uniqWith } from 'lodash';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { walk } from '@elastic/esql';
 import type { ParameterHint } from '../../..';
-import { walk } from '../../..';
-import type { ESQLAstAllCommands } from '../../types';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { parametersFromHintsResolvers } from '../../commands/definitions/utils/autocomplete/parameters_from_hints';
 import type { ICommandContext } from '../../commands/registry/types';

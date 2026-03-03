@@ -1010,6 +1010,14 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
               },
@@ -1172,6 +1180,34 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "apm",
@@ -1962,6 +1998,14 @@
                 "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
               },
               {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
@@ -2380,6 +2424,34 @@
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.test.ts"
               },
               {
                 "plugin": "agentBuilder",

@@ -56,31 +56,8 @@ When complete, mark task 1 as `completed`.
 
 Mark task 2 as `in_progress`.
 
-Read all the files generated in Task 1 and review them for:
-
-### Connector Spec
-- If MCP-based: the generated spec export in `all_specs.ts` has been **removed** (MCP connectors with empty `actions: {}` crash Kibana)
-- If MCP-based: `minimumLicense` is `'enterprise'` (not `'basic'`)
-- If non-MCP: valid structure with required fields, correct auth type
-- Look at existing specs for patterns: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
-
-### Workflows
-- Valid workflow YAML with correct step types
-- Proper Liquid templating syntax (no malformed `{{ }}` expressions)
-- **MCP tool names use underscores** (e.g., `tavily_search`), NOT hyphens — verify against MCP server docs or `listTools`
-- Only pass parameters that the MCP tool actually accepts (check the tool's `inputSchema` — some params in third-party docs may be outdated or unavailable via MCP)
-- Look at existing workflows for patterns in `x-pack/platform/plugins/shared/data_sources/server/sources/`
-
-### Data Source Definition
-- Correct references to the connector spec and workflows
-- `importedTools` array uses correct MCP tool names (underscores, not hyphens)
-- All workflows referenced actually exist
-- Look at existing data sources for patterns in `x-pack/platform/plugins/shared/data_sources/server/sources/`
-
-### Documentation
-- Generator scaffold docs are filled in (no remaining `TODO:` placeholders)
-- `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md` description filled in
-- `docs/reference/toc.yml` entry exists in the correct section
+Review the files generated in Task 1 using the **review-data-source** skill. Apply its checklist to the connector spec, workflows,
+data source definition, and docs. 
 
 List all issues found. If no issues are found, note that the code looks good.
 
@@ -248,17 +225,7 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review pass over all generated/modified files:
-- Connector spec
-- All workflow YAML files
-- Data source definition YAML
-
-Verify:
-- No leftover TODOs or placeholder values
-- Consistent naming conventions
-- Clean code with no debugging artifacts
-
-Make any final minor fixes if needed.
+Do one final review using the **review-data-source** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Make any final minor fixes if needed.
 
 Mark task 10 as `completed`.
 
