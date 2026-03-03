@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const esClient = getService('es');
   const retry = getService('retry');
-  const queryBar = getService('queryBar');
+  const browser = getService('browser');
   const to = new Date().toISOString();
   const type = 'logs';
   const degradedDatasetName = 'synth.degraded';
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.datasetQuality.closeFlyout();
       });
 
-      it('should go to discover page when the open in discover button is clicked', async () => {
+      it('should go to discover page in ES|QL mode with field-specific filter when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
           expandedDegradedField: 'test_field',
@@ -121,9 +121,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await testSubjects.click('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover');
 
         await retry.tryForTime(5000, async () => {
-          const queryText = await queryBar.getQueryString();
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
 
-          expect(queryText).to.be('_ignored: test_field');
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${degradedDataStreamName}`);
+          expect(decodedUrl).to.contain('MV_CONTAINS(_ignored');
+          expect(decodedUrl).to.contain('test_field');
         });
       });
     });
