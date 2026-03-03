@@ -31,4 +31,5 @@ export * from './src/plugin_list';
 export * from './src/streams';
 export * from './src/extract';
 export * from './src/diff_strings';
+export * from './src/git';
 export * from './src/worker';
