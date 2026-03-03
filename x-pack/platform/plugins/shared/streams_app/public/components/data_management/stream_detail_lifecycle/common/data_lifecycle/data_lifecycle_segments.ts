@@ -67,6 +67,27 @@ const filterStepStartsBeforeRetention = (
   });
 };
 
+const filterDownsampleStepsBeforeRetention = (
+  downsampleSteps: DownsampleStep[],
+  retentionMs: number | undefined
+): Array<{ step: DownsampleStep; index: number }> => {
+  if (retentionMs === undefined) {
+    return downsampleSteps.map((step, index) => ({ step, index }));
+  }
+
+  return downsampleSteps
+    .map((step, index) => ({ step, index }))
+    .filter(({ step }) => {
+      const startMs = toMillis(step.after);
+      return startMs === undefined || startMs < retentionMs;
+    });
+};
+
+interface DslBoundary {
+  label: string;
+  stepIndex?: number;
+}
+
 const partitionPhases = (phases: SegmentPhase[]) => {
   const deletePhase = phases.find((phase) => phase.isDelete);
   const nonDeletePhases = phases.filter((phase) => !phase.isDelete);
@@ -127,28 +148,37 @@ export const buildDslSegments = (
     downsampleSteps.map((step) => step.after),
     retentionMs
   );
+  const stepsBeforeRetention = filterDownsampleStepsBeforeRetention(downsampleSteps, retentionMs);
 
   // Build time boundaries: [start, ...stepStarts, retention?]
   const startLabel = basePhase?.min_age ?? getZeroLabel(retentionLabel ?? stepStarts[0]);
-  // Filter out step starts that equal the start label to avoid duplicates
-  const filteredStepStarts = stepStarts.filter((step) => step !== startLabel);
-  const boundaries = [
-    startLabel,
-    ...filteredStepStarts,
-    ...(retentionLabel ? [retentionLabel] : []),
+  const startStepIndex =
+    stepsBeforeRetention.length > 0 && stepsBeforeRetention[0].step.after === startLabel
+      ? stepsBeforeRetention[0].index
+      : undefined;
+
+  const stepBoundaries: DslBoundary[] = stepsBeforeRetention
+    .filter(({ index }) => index !== startStepIndex)
+    .map(({ step, index }) => ({ label: step.after, stepIndex: index }));
+
+  const boundaries: DslBoundary[] = [
+    { label: startLabel, stepIndex: startStepIndex },
+    ...stepBoundaries,
+    ...(retentionLabel ? [{ label: retentionLabel }] : []),
   ];
   const segmentCount = retentionLabel ? boundaries.length - 1 : boundaries.length;
 
   // Calculate proportional grow values based on durations
-  const growValues = calculateGrowValues(boundaries, segmentCount, Boolean(retentionLabel));
-
-  // Map step starts to their indices
-  const stepStartToIndex = new Map(stepStarts.map((value, index) => [value, index]));
+  const growValues = calculateGrowValues(
+    boundaries.map((b) => b.label),
+    segmentCount,
+    Boolean(retentionLabel)
+  );
 
   // Build timeline segments
   const timelineSegments: TimelineSegment[] = growValues.map((grow, index) => {
-    const leftValue = boundaries[index];
-    const stepIndex = stepStartToIndex.get(leftValue);
+    const leftValue = boundaries[index].label;
+    const stepIndex = boundaries[index].stepIndex;
     return {
       grow,
       leftValue,
@@ -158,8 +188,7 @@ export const buildDslSegments = (
 
   // Build downsampling segments
   const downsamplingSegments: DownsamplingSegment[] = growValues.map((grow, index) => {
-    const boundaryLabel = boundaries[index];
-    const stepIndex = stepStartToIndex.get(boundaryLabel);
+    const stepIndex = boundaries[index].stepIndex;
     return {
       grow,
       stepIndex,
