@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { text, line, hardline, propagateBreaks } from '..';
+import { text, line, hardline } from '../builders';
+import { propagateBreaks } from '../prepare';
 import type { GroupNode } from '../types';
 
 describe('propagateBreaks', () => {

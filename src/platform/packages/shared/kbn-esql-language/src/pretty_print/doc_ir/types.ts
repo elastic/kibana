@@ -52,9 +52,9 @@ export type AnyNode =
 export interface GroupNode {
   readonly type: 'group';
   readonly contents: Doc;
-  readonly shouldBreak?: boolean;
   readonly id?: symbol;
   readonly expandedStates?: readonly Doc[];
+  shouldBreak?: boolean;
 }
 
 /**
