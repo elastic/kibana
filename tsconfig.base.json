@@ -30,6 +30,8 @@
       "@kbn/agent-builder-plugin/*": ["x-pack/platform/plugins/shared/agent_builder/*"],
       "@kbn/agent-builder-server": ["x-pack/platform/packages/shared/agent-builder/agent-builder-server"],
       "@kbn/agent-builder-server/*": ["x-pack/platform/packages/shared/agent-builder/agent-builder-server/*"],
+      "@kbn/agent-builder-skill-cli": ["x-pack/platform/packages/shared/kbn-agent-builder-skill-cli"],
+      "@kbn/agent-builder-skill-cli/*": ["x-pack/platform/packages/shared/kbn-agent-builder-skill-cli/*"],
       "@kbn/ai-agent-confirmation-modal": ["x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal"],
       "@kbn/ai-agent-confirmation-modal/*": ["x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/*"],
       "@kbn/ai-assistant": ["x-pack/platform/packages/shared/kbn-ai-assistant"],

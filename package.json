@@ -182,6 +182,7 @@
     "@kbn/agent-builder-platform-plugin": "link:x-pack/platform/plugins/shared/agent_builder_platform",
     "@kbn/agent-builder-plugin": "link:x-pack/platform/plugins/shared/agent_builder",
     "@kbn/agent-builder-server": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-server",
+    "@kbn/agent-builder-skill-cli": "link:x-pack/platform/packages/shared/kbn-agent-builder-skill-cli",
     "@kbn/ai-agent-confirmation-modal": "link:x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal",
     "@kbn/ai-assistant": "link:x-pack/platform/packages/shared/kbn-ai-assistant",
     "@kbn/ai-assistant-common": "link:x-pack/platform/packages/shared/ai-assistant/common",
