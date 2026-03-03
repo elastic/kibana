@@ -10,12 +10,12 @@
 import React, { useMemo } from 'react';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import type { Observable } from 'rxjs';
-import { combineLatest, EMPTY } from 'rxjs';
 import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -35,26 +35,25 @@ export interface ChromeNavigationProps {
   application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
 
   // nav state
-  navigationTree$: Observable<NavigationTreeDefinitionUI>;
+  navigation$: Observable<{
+    solutionId: SolutionId;
+    navigationTree: NavigationTreeDefinitionUI;
+    activeNodes: ChromeProjectNavigationNode[][];
+  }>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
-  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
   // collapse toggle callback
   onToggleCollapsed: (isCollapsed: boolean) => void;
-
-  // other
-  dataTestSubj$?: Observable<string | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
-  const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId } = state;
+  const { navItems, logoItem, activeItemId, solutionId } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
@@ -65,7 +64,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
-        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+        data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
   );
@@ -76,21 +75,19 @@ export const Navigation = (props: ChromeNavigationProps) => {
 export default Navigation;
 
 const useNavigationItems = (
-  props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$' | 'basePath'>
-): NavigationItems | null => {
-  const state$ = useMemo(
-    () => combineLatest([props.navigationTree$, props.activeNodes$]),
-    [props.navigationTree$, props.activeNodes$]
-  );
-  const state = useObservable(state$);
+  props: Pick<ChromeNavigationProps, 'navigation$' | 'navLinks$' | 'basePath'>
+): (NavigationItems & { solutionId: SolutionId }) | null => {
+  const state = useObservable(props.navigation$);
 
   const basePath = props.basePath.get();
   const panelStateManager = useMemo(() => new PanelStateManager(basePath), [basePath]);
 
   const memoizedItems = useMemo(() => {
     if (!state) return null;
-    const [navigationTree, activeNodes] = state;
-    return toNavigationItems(navigationTree, activeNodes, panelStateManager);
+    return {
+      ...toNavigationItems(state.navigationTree, state.activeNodes, panelStateManager),
+      solutionId: state.solutionId,
+    };
   }, [state, panelStateManager]);
 
   return memoizedItems;
