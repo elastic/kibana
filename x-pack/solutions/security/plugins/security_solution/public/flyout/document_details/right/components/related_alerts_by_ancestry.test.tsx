@@ -25,7 +25,6 @@ jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const documentId = 'documentId';
 const indices = ['indices'];
-const scopeId = 'scopeId';
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
@@ -36,7 +35,7 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
 const renderRelatedAlertsByAncestry = () =>
   render(
     <IntlProvider locale="en">
-      <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+      <RelatedAlertsByAncestry documentId={documentId} indices={indices} />
     </IntlProvider>
   );
 
