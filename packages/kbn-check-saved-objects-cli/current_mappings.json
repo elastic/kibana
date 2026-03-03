@@ -1417,23 +1417,9 @@
       }
     }
   },
-  "entity-store-global-state-v1": {
+  "entity-store-global": {
     "dynamic": false,
     "properties": {
-      "entityMaintainers": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "interval": {
-            "type": "keyword"
-          },
-          "taskStatus": {
-            "type": "keyword"
-          }
-        },
-        "type": "nested"
-      },
       "historySnapshot": {
         "properties": {
           "frequency": {

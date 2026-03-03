@@ -421,10 +421,6 @@
     "type"
   ],
   "entity-store-global-state": [
-    "entityMaintainers",
-    "entityMaintainers.id",
-    "entityMaintainers.interval",
-    "entityMaintainers.taskStatus",
     "historySnapshot",
     "historySnapshot.frequency",
     "historySnapshot.lastError",

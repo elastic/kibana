@@ -14,14 +14,6 @@ export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
-    entityMaintainers: {
-      type: 'nested',
-      properties: {
-        id: { type: 'keyword' },
-        interval: { type: 'keyword' },
-        taskStatus: { type: 'keyword' },
-      },
-    },
     historySnapshot: {
       properties: {
         status: { type: 'keyword' },
@@ -51,16 +43,6 @@ export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = 
   },
 };
 
-const entityMaintainerSchema = schema.object({
-  id: schema.string(),
-  interval: schema.string(),
-  taskStatus: schema.oneOf([
-    schema.literal('not_started'),
-    schema.literal('started'),
-    schema.literal('stopped'),
-  ]),
-});
-
 const historySnapshotSchema = schema.object({
   status: schema.oneOf([schema.literal('started'), schema.literal('stopped')]),
   frequency: schema.string(),
@@ -86,7 +68,6 @@ const logExtractionSchema = schema.object({
 });
 
 const globalStateSchemaV1 = schema.object({
-  entityMaintainers: schema.arrayOf(entityMaintainerSchema),
   historySnapshot: historySnapshotSchema,
   logsExtraction: logExtractionSchema,
 });

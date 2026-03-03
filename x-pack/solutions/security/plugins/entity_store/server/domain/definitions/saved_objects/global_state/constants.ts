@@ -39,16 +39,6 @@ export const LogExtractionConfig = z.object({
     .default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
 });
 
-export type EntityMaintainerTaskStatus = z.infer<typeof EntityMaintainerTaskStatus>;
-export const EntityMaintainerTaskStatus = z.enum(['not_started', 'started', 'stopped']);
-
-export type EntityMaintainer = z.infer<typeof EntityMaintainer>;
-export const EntityMaintainer = z.object({
-  id: z.string(),
-  interval: z.string().regex(/[smdh]$/),
-  taskStatus: EntityMaintainerTaskStatus,
-});
-
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 
@@ -70,7 +60,6 @@ export const HistorySnapshotState = z.object({
 
 export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
 export const EntityStoreGlobalState = z.object({
-  entityMaintainers: z.array(EntityMaintainer).default([]),
   historySnapshot: HistorySnapshotState,
   logsExtraction: LogExtractionConfig,
 });

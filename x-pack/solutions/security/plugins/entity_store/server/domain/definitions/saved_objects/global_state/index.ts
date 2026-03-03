@@ -48,10 +48,8 @@ export class EntityStoreGlobalStateClient {
     this.logger.debug(`Creating global state with id ${id}`);
 
     const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
-    const entityMaintainers = initialState?.entityMaintainers ?? [];
     const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
     const defaultState: EntityStoreGlobalState = {
-      entityMaintainers,
       historySnapshot,
       logsExtraction,
     };

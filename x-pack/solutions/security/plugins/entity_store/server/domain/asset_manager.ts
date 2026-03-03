@@ -213,13 +213,11 @@ export class AssetManager {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [
-        engines,
-        { historySnapshot, logsExtraction: logsExtractionConfig, entityMaintainers },
-      ] = await Promise.all([
-        this.engineDescriptorClient.getAll(),
-        this.globalStateClient.findOrThrow(),
-      ]);
+      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }] =
+        await Promise.all([
+          this.engineDescriptorClient.getAll(),
+          this.globalStateClient.findOrThrow(),
+        ]);
 
       const status = this.calculateEntityStoreStatus(engines);
 
@@ -232,11 +230,10 @@ export class AssetManager {
           engines: enginesWithComponents,
           historySnapshot,
           logsExtractionConfig,
-          entityMaintainers,
         };
       }
 
-      return { status, engines, historySnapshot, logsExtractionConfig, entityMaintainers };
+      return { status, engines, historySnapshot, logsExtractionConfig };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return { status: ENTITY_STORE_STATUS.NOT_INSTALLED, engines: [] };

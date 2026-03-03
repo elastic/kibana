@@ -10,7 +10,6 @@ import type {
   EngineDescriptor,
   LogExtractionConfig,
   HistorySnapshotState,
-  EntityMaintainer,
 } from './definitions/saved_objects';
 import type { EntityStoreStatus } from '../../common';
 import type { ENTITY_STORE_STATUS } from './constants';
@@ -51,7 +50,6 @@ export interface GetStatusSuccessResult {
   engines: Array<EngineDescriptor | (EngineDescriptor & { components: EngineComponentStatus[] })>;
   historySnapshot: HistorySnapshotState;
   logsExtractionConfig: LogExtractionConfig;
-  entityMaintainers: EntityMaintainer[];
 }
 
 export interface GetStatusNotInstalledResult {
