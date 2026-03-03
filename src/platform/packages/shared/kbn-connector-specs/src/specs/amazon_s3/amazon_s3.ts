@@ -140,11 +140,11 @@ export const AmazonS3: ConnectorSpec = {
           }> = [];
           let continuationToken: string | undefined;
 
-          // Recursively list all buckets using pagination
           do {
             const command = new ListBucketsCommand({
               ContinuationToken: continuationToken,
               Prefix: typedInput.prefix,
+              BucketRegion: typedInput.region,
             });
             const response = await s3Client.send(command);
             if (response.Buckets) {
@@ -173,6 +173,8 @@ export const AmazonS3: ConnectorSpec = {
       input: z.object({
         bucket: z.string().min(1).describe('The name of the S3 bucket'),
         prefix: z.string().optional().describe('The prefix to filter objects by'),
+        continuationToken: z.string().optional().describe('Continuation token for paginated listing'),
+        maxKeys: z.number().int().positive().optional().describe('Maximum number of keys to return in a single page').default(1000),
       }),
       handler: async (ctx, input) => {
         const config = ctx.config as {
@@ -183,47 +185,35 @@ export const AmazonS3: ConnectorSpec = {
         const typedInput = input as {
           bucket: string;
           prefix?: string;
+          continuationToken?: string;
+          maxKeys?: number;
         };
 
         try {
           const s3Client = createS3Client(config);
-          const objects: Array<{
-            key?: string;
-            size?: number;
-            lastModified?: string;
-            storageClass?: string;
-          }> = [];
-          let continuationToken: string | undefined;
-          let isTruncated = true;
 
-          // list all objects using pagination
-          while (isTruncated) {
-            const command = new ListObjectsV2Command({
-              Bucket: typedInput.bucket,
-              ContinuationToken: continuationToken,
-              Prefix: typedInput.prefix,
-            });
-            const response = await s3Client.send(command);
+          const command = new ListObjectsV2Command({
+            Bucket: typedInput.bucket,
+            ContinuationToken: typedInput.continuationToken,
+            Prefix: typedInput.prefix,
+            MaxKeys: typedInput.maxKeys,
+          });
 
-            if (response.Contents) {
-              objects.push(
-                ...response.Contents.map((obj) => ({
-                  key: obj.Key,
-                  size: obj.Size,
-                  lastModified: obj.LastModified?.toISOString(),
-                  storageClass: obj.StorageClass,
-                }))
-              );
-            }
+          const response = await s3Client.send(command);
 
-            isTruncated = response.IsTruncated || false;
-            continuationToken = response.NextContinuationToken;
-          }
+          const pageObjects = (response.Contents || []).map((obj) => ({
+            key: obj.Key,
+            size: obj.Size,
+            lastModified: obj.LastModified?.toISOString(),
+            storageClass: obj.StorageClass,
+          }));
 
           return {
             bucket: typedInput.bucket,
-            objectCount: objects.length,
-            objects,
+            objectCount: pageObjects.length,
+            objects: pageObjects,
+            nextContinuationToken: response.NextContinuationToken,
+            isTruncated: response.IsTruncated || false,
           };
         } catch (error: unknown) {
           ctx.log.error(`Failed to list objects in S3 bucket (${typedInput.bucket}): ${error}`);
