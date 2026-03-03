@@ -71,6 +71,7 @@ export const TimeFieldSelect: React.FC = () => {
             })}
             isInvalid={!!error}
             error={error?.message}
+            fullWidth
           >
             <EuiSelect
               options={timeFieldOptions}
@@ -82,6 +83,7 @@ export const TimeFieldSelect: React.FC = () => {
               inputRef={ref}
               isInvalid={!!error}
               isLoading={isLoading}
+              fullWidth
             />
           </EuiFormRow>
         );

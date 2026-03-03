@@ -48,7 +48,7 @@ export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
   return (
     <FieldGroup
       title={i18n.translate('xpack.alertingV2.ruleForm.condition', {
-        defaultMessage: 'Condition',
+        defaultMessage: 'Rule evaluation',
       })}
     >
       <EuiText size="s" color="subdued">

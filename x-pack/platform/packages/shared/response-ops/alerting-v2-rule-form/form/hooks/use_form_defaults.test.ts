@@ -28,6 +28,9 @@ describe('useFormDefaults', () => {
         },
       },
       grouping: undefined,
+      recoveryPolicy: {
+        type: 'no_breach',
+      },
     });
   });
 

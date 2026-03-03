@@ -52,6 +52,9 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
             fields: defaultGroupBy,
           }
         : undefined,
+      recoveryPolicy: {
+        type: 'no_breach',
+      },
     }),
     [baseQuery, condition, defaultGroupBy]
   );

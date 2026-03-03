@@ -33,8 +33,9 @@ export const NameField: React.FC = () => {
           })}
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
-          <EuiFieldText {...field} inputRef={ref} isInvalid={!!error} />
+          <EuiFieldText {...field} inputRef={ref} isInvalid={!!error} fullWidth />
         </EuiFormRow>
       )}
     />

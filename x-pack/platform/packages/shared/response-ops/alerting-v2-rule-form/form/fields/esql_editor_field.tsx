@@ -17,7 +17,7 @@ const EDITOR_HEIGHT_INLINE = 140; // For inline editing/flyouts
 const EDITOR_HEIGHT_DEFAULT = 80; // Minimal editor
 
 /** Allowed field paths for ES|QL query fields */
-type EsqlQueryFieldPath = 'evaluation.query.base'; // | 'recovery_policy.query.base' in the future
+type EsqlQueryFieldPath = 'evaluation.query.base' | 'recoveryPolicy.query.base';
 
 export interface EsqlEditorFieldProps {
   /** The field path in the form - constrained to valid ES|QL query field paths */

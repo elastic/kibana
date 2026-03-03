@@ -63,6 +63,7 @@ export const DescriptionField: React.FC = () => {
           })}
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <EuiTextArea
             {...field}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// Import and re-export RuleKind from schema
-import type { RuleKind } from '@kbn/alerting-v2-schemas';
+// Import and re-export RuleKind and RecoveryPolicyType from schema
+import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 
 /**
  * Rule metadata containing identification and categorization info.
@@ -23,19 +23,22 @@ export interface RuleSchedule {
   every: string;
   lookback: string;
 }
-
-export interface EvaluationQuery {
-  base: string;
-  condition: string;
-}
-
 export interface RuleEvaluation {
-  query: EvaluationQuery;
-  condition?: string;
+  query: {
+    base: string;
+    condition?: string;
+  };
 }
 
 export interface RuleGrouping {
   fields: string[];
+}
+
+export interface RecoveryPolicy {
+  type: RecoveryPolicyType;
+  query?: {
+    base?: string;
+  };
 }
 
 /**
@@ -50,4 +53,5 @@ export interface FormValues {
   schedule: RuleSchedule;
   evaluation: RuleEvaluation;
   grouping?: RuleGrouping;
+  recoveryPolicy?: RecoveryPolicy;
 }

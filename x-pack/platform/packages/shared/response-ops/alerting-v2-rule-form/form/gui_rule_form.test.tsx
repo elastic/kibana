@@ -32,6 +32,12 @@ jest.mock('./field_groups/rule_execution_field_group', () => ({
   ),
 }));
 
+jest.mock('./field_groups/alert_conditions_field_group', () => ({
+  AlertConditionsFieldGroup: () => (
+    <div data-test-subj="mockAlertConditionsFieldGroup">Alert Conditions Field Group</div>
+  ),
+}));
+
 jest.mock('../flyout/error_callout', () => ({
   ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
 }));
@@ -107,7 +113,7 @@ describe('GuiRuleForm', () => {
   });
 
   describe('field group ordering', () => {
-    it('renders field groups in correct order: ErrorCallOut, Condition, Details, Execution', () => {
+    it('renders field groups in correct order: ErrorCallOut, Details, Condition, Execution, AlertConditions', () => {
       const { container } = render(<GuiRuleForm {...defaultProps} includeQueryEditor />, {
         wrapper: createFormWrapper(),
       });
@@ -117,9 +123,10 @@ describe('GuiRuleForm', () => {
 
       expect(order).toEqual([
         'mockErrorCallOut',
-        'mockConditionFieldGroup',
         'mockRuleDetailsFieldGroup',
+        'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
+        'mockAlertConditionsFieldGroup',
       ]);
     });
 
@@ -133,9 +140,10 @@ describe('GuiRuleForm', () => {
 
       expect(order).toEqual([
         'mockErrorCallOut',
-        'mockConditionFieldGroup',
         'mockRuleDetailsFieldGroup',
+        'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
+        'mockAlertConditionsFieldGroup',
       ]);
     });
   });

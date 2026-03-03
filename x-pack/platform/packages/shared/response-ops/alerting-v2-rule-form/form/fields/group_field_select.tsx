@@ -60,6 +60,7 @@ export const GroupFieldSelect: React.FC = () => {
             })}
             isInvalid={!!error}
             error={error?.message}
+            fullWidth
           >
             <EuiComboBox
               id={groupByRowId}
@@ -72,6 +73,7 @@ export const GroupFieldSelect: React.FC = () => {
               isClearable={true}
               isInvalid={!!error}
               isLoading={isLoading}
+              fullWidth
             />
           </EuiFormRow>
         );

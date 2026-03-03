@@ -71,6 +71,9 @@ export const defaultTestFormValues: FormValues = {
       base: '',
     },
   },
+  recoveryPolicy: {
+    type: 'no_breach',
+  },
 };
 
 /**

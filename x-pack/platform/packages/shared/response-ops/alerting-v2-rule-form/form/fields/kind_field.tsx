@@ -43,6 +43,7 @@ export const KindField: React.FC = () => {
           })}
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <div ref={ref}>
             <EuiButtonGroup

@@ -12,6 +12,7 @@ import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
 import { ConditionFieldGroup } from './field_groups/condition_field_group';
+import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RULE_FORM_ID } from './constants';
 import { useRuleFormServices } from './contexts';
@@ -26,9 +27,10 @@ export interface GuiRuleFormProps {
  * GUI-based rule form with standard form fields.
  *
  * This component renders the visual form interface with field groups for:
- * - Condition (ES|QL query + WHERE clause trigger condition)
  * - Rule details (name, description, tags, etc.)
+ * - Rule evaluation (ES|QL query + WHERE clause trigger condition)
  * - Rule execution settings (schedule, time field, grouping)
+ * - Alert conditions (recovery policy)
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
  */
@@ -42,11 +44,13 @@ export const GuiRuleForm: React.FC<GuiRuleFormProps> = ({
   return (
     <EuiForm id={RULE_FORM_ID} component="form" onSubmit={handleSubmit(onSubmit)}>
       <ErrorCallOut />
-      <ConditionFieldGroup includeBase={includeQueryEditor} search={data.search.search} />
-      <EuiSpacer size="m" />
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
+      <ConditionFieldGroup includeBase={includeQueryEditor} search={data.search.search} />
+      <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
+      <EuiSpacer size="m" />
+      <AlertConditionsFieldGroup />
     </EuiForm>
   );
 };
