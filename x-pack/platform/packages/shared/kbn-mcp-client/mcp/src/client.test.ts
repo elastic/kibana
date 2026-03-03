@@ -198,6 +198,25 @@ describe('McpClient', () => {
       );
     });
 
+    it('creates transport with custom fetch when provided', () => {
+      const customFetch = jest.fn();
+      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'https://example.com/mcp' }),
+        expect.objectContaining({
+          fetch: customFetch,
+        })
+      );
+    });
+
+    it('does not include fetch in transport options when not provided', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
+      expect(transportCallArgs).not.toHaveProperty('fetch');
+    });
+
     it('creates client with correct name and version', () => {
       new McpClient(mockLogger, clientDetails);
 

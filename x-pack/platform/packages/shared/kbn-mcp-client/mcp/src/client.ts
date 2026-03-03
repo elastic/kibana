@@ -43,6 +43,7 @@ export class McpClient {
     clientDetails: ClientDetails,
     {
       headers = {},
+      fetch: customFetch,
       maxRetries = 3,
       reconnectionDelayGrowFactor = 1.5,
       initialReconnectionDelay = 1000,
@@ -53,6 +54,7 @@ export class McpClient {
       requestInit: {
         headers,
       },
+      ...(customFetch ? { fetch: customFetch } : {}),
       reconnectionOptions: {
         maxRetries,
         reconnectionDelayGrowFactor,
