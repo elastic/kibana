@@ -70,14 +70,9 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const [activeDocId, setActiveDocId] = useRestorableState('activeDocId', null);
   const [activeDocIndex, setActiveDocIndex] = useRestorableState('activeDocIndex', undefined);
 
-  // When restoring state (e.g., returning from another Discover tab), defer mounting
-  // FullScreenWaterfall by one render cycle so the parent doc viewer flyout's EUI
-  // managed session registers first. Both flyouts use session="start", which creates
-  // a LEVEL_MAIN managed session. EUI's useLayoutEffect runs bottom-up, so without
-  // deferral the child session registers before the parent, pushing the trace timeline
-  // into the session history stack instead of the current session.
-  // Using useEffect (not useLayoutEffect) ensures the parent's layout effects have
-  // already completed by the time we trigger the deferred mount.
+  // Defer mounting FullScreenWaterfall by one render cycle when restoring state so the
+  // parent flyout's EUI managed session (session="start") registers before the child's.
+  // Without this, the child session pushes the trace timeline into the history stack.
   const isRestoringRef = useRef(showFullScreenWaterfall);
   const [renderReady, setRenderReady] = useState(!isRestoringRef.current);
 
