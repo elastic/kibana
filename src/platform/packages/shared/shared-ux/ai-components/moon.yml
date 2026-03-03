@@ -17,8 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/ai-components
-dependsOn:
-  - '@kbn/react-kibana-context-theme'
+dependsOn: []
 tags:
   - shared-common
   - package
