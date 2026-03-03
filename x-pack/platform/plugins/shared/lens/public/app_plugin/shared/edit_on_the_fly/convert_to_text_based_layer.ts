@@ -114,18 +114,27 @@ function buildTextBasedState(
           column.customLabel = sourceColumn.customLabel;
         }
 
-        // Determine format: user-configured first, then data view field format as fallback
-        let format = sourceColumn.format;
-        if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
-          const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
-          if (fieldFormat?.id) {
-            format = fieldFormat as typeof sourceColumn.format;
-          }
-        }
+        // Only set format when the user had explicitly configured it on the form-based column.
+        // If it was default (no user override), leave column.params.format unset so it stays default.
+        const originalCol = layer.columns[sourceColumn.id] as
+          | { params?: { format?: ValueFormatConfig } }
+          | undefined;
+        const hadUserFormat =
+          originalCol?.params &&
+          'format' in originalCol.params &&
+          originalCol.params.format !== undefined;
 
-        // Only include params if format has a valid id
-        if (format?.id !== undefined) {
-          column.params = { format: format as ValueFormatConfig };
+        if (hadUserFormat) {
+          let format = sourceColumn.format;
+          if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
+            const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
+            if (fieldFormat?.id) {
+              format = fieldFormat as typeof sourceColumn.format;
+            }
+          }
+          if (format?.id !== undefined) {
+            column.params = { format: format as ValueFormatConfig };
+          }
         }
 
         return column;
