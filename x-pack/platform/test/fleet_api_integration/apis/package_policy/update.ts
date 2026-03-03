@@ -981,23 +981,23 @@ export default function (providerContext: FtrProviderContext) {
 
         const installation = await getInstallationInfo(supertest, 'integration_to_input', '2.0.0');
 
-          expectIdArraysEqual(
-            installation.installed_es.filter((item: any) => item.type !== 'knowledge_base'),
-            [
-              // assets from version 1.0.0
-              { id: 'logs-integration_to_input.log', type: 'index_template' },
-              { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
-              { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
-              { id: 'logs-integration_to_input.log@package', type: 'component_template' },
-              // assets from version 2.0.0 for new package policy
-              { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
-              { id: 'logs-somedataset', type: 'index_template' },
-              { id: 'logs-somedataset@package', type: 'component_template' },
-              { id: 'logs-somedataset@custom', type: 'component_template' },
-              { id: 'logs@custom', type: 'component_template' },
-              { id: 'integration_to_input@custom', type: 'component_template' },
-            ]
-          );
+        expectIdArraysEqual(
+          installation.installed_es.filter((item: any) => item.type !== 'knowledge_base'),
+          [
+            // assets from version 1.0.0
+            { id: 'logs-integration_to_input.log', type: 'index_template' },
+            { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
+            { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
+            { id: 'logs-integration_to_input.log@package', type: 'component_template' },
+            // assets from version 2.0.0 for new package policy
+            { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
+            { id: 'logs-somedataset', type: 'index_template' },
+            { id: 'logs-somedataset@package', type: 'component_template' },
+            { id: 'logs-somedataset@custom', type: 'component_template' },
+            { id: 'logs@custom', type: 'component_template' },
+            { id: 'integration_to_input@custom', type: 'component_template' },
+          ]
+        );
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');
         expect(dataset3PkgComponentTemplate).not.to.be(null);
