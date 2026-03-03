@@ -33,6 +33,9 @@ jest.mock('./kibana_services', () => ({
       }),
     }),
   },
+  logger: {
+    error: jest.fn(),
+  },
 }));
 
 const runtimeExpression = `embeddable type="lens" 
@@ -73,7 +76,7 @@ const storedWorkpad = {
 };
 
 const references: SavedObjectReference[] = [
-  { id: 'test-id', name: 'savedObjectRef', type: 'lens' },
+  { id: 'test-id', name: 'element-id:savedObjectRef', type: 'lens' },
 ];
 
 const savedObjectsClient = savedObjectsClientMock.create();
