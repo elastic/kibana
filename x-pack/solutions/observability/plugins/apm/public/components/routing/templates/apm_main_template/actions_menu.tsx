@@ -201,7 +201,7 @@ export function ActionsMenu() {
           <EuiButton
             fill
             size="s"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             data-test-subj="apmActionsMenuButton"
           >

@@ -28,7 +28,7 @@ export function GotoDashboardLink({
       data-test-subj="infraGotoDashboardGoToDashboardButton"
       color="text"
       size="s"
-      iconType="visGauge"
+      iconType="chartGauge"
       href={url}
     >
       {i18n.translate('xpack.infra.customDashboards.contextMenu.goToDashboard', {

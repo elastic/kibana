@@ -182,7 +182,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     return (
       <TimelineContainer>
         <EuiEmptyPrompt
-          iconType="visArea"
+          iconType="chartArea"
           title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
           actions={
             <EuiButton data-test-subj="infraTimelineButton" color="primary" fill onClick={reload}>

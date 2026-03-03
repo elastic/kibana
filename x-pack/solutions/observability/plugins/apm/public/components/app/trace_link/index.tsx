@@ -57,7 +57,7 @@ export function TraceLink() {
   return (
     <CentralizedContainer>
       <EuiEmptyPrompt
-        iconType="apmTrace"
+        iconType="chartWaterfall"
         title={
           <h2>
             {i18n.translate('xpack.apm.traceLink.fetchingTraceLabel', {

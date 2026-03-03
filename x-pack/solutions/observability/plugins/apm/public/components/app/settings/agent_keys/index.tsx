@@ -86,7 +86,7 @@ export function AgentKeys() {
               data-test-subj="apmAgentKeysCreateApmAgentKeyButton"
               onClick={() => setIsFlyoutVisible(true)}
               fill={true}
-              iconType="plusInCircle"
+              iconType="plusCircle"
             >
               {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
                 defaultMessage: 'Create APM agent key',
@@ -240,7 +240,7 @@ function AgentKeysContent({
               data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
               onClick={onCreateAgentClick}
               fill={true}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               isDisabled={!canManage}
             >
               {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {

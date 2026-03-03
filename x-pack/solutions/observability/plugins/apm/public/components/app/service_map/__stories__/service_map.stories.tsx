@@ -197,7 +197,7 @@ export const GenerateMap: StoryFn = () => {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="getJsonButton" onClick={handleGetJson} iconType="exportAction">
+          <EuiButton data-test-subj="getJsonButton" onClick={handleGetJson} iconType="upload">
             Get JSON
           </EuiButton>
         </EuiFlexItem>

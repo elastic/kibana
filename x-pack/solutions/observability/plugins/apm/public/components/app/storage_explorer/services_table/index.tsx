@@ -242,7 +242,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={itemIdToExpandedRowMap[serviceName] ? 'arrowUp' : 'arrowDown'}
+            iconType={itemIdToExpandedRowMap[serviceName] ? 'chevronSingleUp' : 'chevronSingleDown'}
           />
         );
       },
