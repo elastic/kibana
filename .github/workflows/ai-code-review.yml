@@ -43,8 +43,10 @@ jobs:
       - name: Run Claude PR Review
         uses: anthropics/claude-code-action@64c7a0ef71df67b14cb4471f4d9c8565c61042bf # v1.0.66
         with:
-          anthropic_api_base: ${{ secrets.LITELLM_BASE_URL }}
           anthropic_api_key: ${{ secrets.LITELLM_API_KEY }}
-          anthropic_model: 'llm-gateway/claude-opus-4-5'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: '/review'
           claude_args: '--max-turns 5'
+        env:
+          ANTHROPIC_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          ANTHROPIC_MODEL: 'llm-gateway/claude-opus-4-5'
