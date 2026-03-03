@@ -86,7 +86,7 @@ export const DashboardListingPage = ({
     if (serverlessService) {
       // if serverless breadcrumbs available,
       // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
-      serverlessService.setBreadcrumbs([]);
+      serverlessService.setBreadcrumbs(activeTabTitle ? [{ text: activeTabTitle }] : []);
     }
   }, [activeTabTitle]);
 
