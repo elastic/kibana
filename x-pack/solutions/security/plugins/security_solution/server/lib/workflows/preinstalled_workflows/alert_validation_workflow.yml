@@ -248,112 +248,166 @@ steps:
                 for same rule in the last 30d.
                 {% if steps.get_close_history_false_positive_count.output.hits.total.value > 0 %}{{ steps.get_close_history_false_positive_count.output.hits.total.value }} were marked as false positive.{% endif %}
 
-          # Global prevalence: total alert count, unique hosts, unique users,
-          # and top-N hosts for this rule across the environment.
+          # Global prevalence: total alert count, unique sources (host,
+          # cloud account, or IP), and unique actors (user or cloud
+          # principal) for this rule across the environment.
+          # Uses a regular ES search with runtime/scripted aggregations
+          # so that vendor-specific fields (aws.cloudtrail.*, azure.*,
+          # gcp.*) can be referenced even if they are not in the mapping.
           # Uses the alert timestamp as the anchor so prevalence reflects
           # the state of the environment at the time the alert was raised.
           - name: get_global_prevalence_stats
-            type: elasticsearch.esql.query
+            type: elasticsearch.search
             with:
-              query: |-
-                FROM .alerts-security.alerts-*
-                | WHERE `kibana.alert.rule.uuid` == ?1
-                | STATS total_alerts = COUNT(*), unique_hosts = COUNT_DISTINCT(`host.name`), unique_users = COUNT_DISTINCT(`user.name`)
-              params:
-                - "{{event.rule.id}}"
-              filter:
+              index: ".alerts-security.alerts-*"
+              size: 0
+              track_total_hits: true
+              runtime_mappings:
+                effective_source:
+                  type: keyword
+                  script:
+                    source: |-
+                      def v = params._source?.host?.name;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.host?.id;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.cloud?.account?.id;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.source?.ip;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                effective_actor:
+                  type: keyword
+                  script:
+                    source: |-
+                      def v = params._source?.user?.name;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.user?.id;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.aws?.cloudtrail?.user_identity?.arn;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.azure?.auditlogs?.properties?.initiated_by?.user?.user_principal_name;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.gcp?.audit?.authentication_info?.principal_email;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+              query:
                 bool:
                   filter:
+                    - term:
+                        kibana.alert.rule.uuid: "{{event.rule.id}}"
                     - range:
                         "@timestamp":
                           gte: '{{foreach.item["@timestamp"]}}||-24h'
                           lte: '{{foreach.item["@timestamp"]}}||+24h'
-
-          - name: get_global_prevalence_top_hosts
-            type: elasticsearch.esql.query
-            with:
-              query: |-
-                FROM .alerts-security.alerts-*
-                | WHERE `kibana.alert.rule.uuid` == ?1
-                | WHERE `host.name` IS NOT NULL
-                | STATS alert_count = COUNT(*) BY `host.name`
-                | SORT alert_count DESC
-                | LIMIT 10
-              params:
-                - "{{event.rule.id}}"
-              filter:
-                bool:
-                  filter:
-                    - range:
-                        "@timestamp":
-                          gte: '{{foreach.item["@timestamp"]}}||-24h'
-                          lte: '{{foreach.item["@timestamp"]}}||+24h'
+              aggs:
+                unique_sources:
+                  cardinality:
+                    field: effective_source
+                unique_actors:
+                  cardinality:
+                    field: effective_actor
+                top_sources:
+                  terms:
+                    field: effective_source
+                    size: 10
 
           - name: set_global_prevalence_values
             type: data.set
             with:
-              global_prevalence_total_alerts: "${{ steps.get_global_prevalence_stats.output.values[0][0] | default: 0 }}"
-              global_prevalence_unique_hosts: "${{ steps.get_global_prevalence_stats.output.values[0][1] | default: 0 }}"
-              global_prevalence_unique_users: "${{ steps.get_global_prevalence_stats.output.values[0][2] | default: 0 }}"
-              global_prevalence_top_hosts: "${{ steps.get_global_prevalence_top_hosts.output.values }}"
+              global_prevalence_total_alerts: "${{ steps.get_global_prevalence_stats.output.hits.total.value | default: 0 }}"
+              global_prevalence_unique_sources: "${{ steps.get_global_prevalence_stats.output.aggregations.unique_sources.value | default: 0 }}"
+              global_prevalence_unique_actors: "${{ steps.get_global_prevalence_stats.output.aggregations.unique_actors.value | default: 0 }}"
+              global_prevalence_top_sources: "${{ steps.get_global_prevalence_stats.output.aggregations.top_sources.buckets }}"
 
           - name: get_global_prevalence
             type: data.set
             with:
               total_alerts: "${{ variables.global_prevalence_total_alerts }}"
-              unique_hosts: "${{ variables.global_prevalence_unique_hosts }}"
-              unique_users: "${{ variables.global_prevalence_unique_users }}"
-              top_hosts: "${{ variables.global_prevalence_top_hosts }}"
+              unique_sources: "${{ variables.global_prevalence_unique_sources }}"
+              unique_actors: "${{ variables.global_prevalence_unique_actors }}"
+              top_sources: "${{ variables.global_prevalence_top_sources }}"
               message: >-
-                {% if variables.global_prevalence_unique_hosts >= 50 -%}
-                Very high prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique hosts during +- 24h. This suggests widespread activity.
-                {% elsif variables.global_prevalence_unique_hosts >= 20 -%}
-                High prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique hosts during +- 24h. This suggests significant spread.
-                {% elsif variables.global_prevalence_unique_hosts >= 5 -%}
-                Medium prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique hosts during +- 24h.
+                {% if variables.global_prevalence_unique_sources >= 50 -%}
+                Very high prevalence: Rule is triggering across {{ variables.global_prevalence_unique_sources }} unique sources (host, cloud account, or IP) during +- 24h. This suggests widespread activity.
+                {% elsif variables.global_prevalence_unique_sources >= 20 -%}
+                High prevalence: Rule is triggering across {{ variables.global_prevalence_unique_sources }} unique sources (host, cloud account, or IP) during +- 24h. This suggests significant spread.
+                {% elsif variables.global_prevalence_unique_sources >= 5 -%}
+                Medium prevalence: Rule is triggering across {{ variables.global_prevalence_unique_sources }} unique sources (host, cloud account, or IP) during +- 24h.
                 {% else -%}
-                Low prevalence: Rule is triggering across {{ variables.global_prevalence_unique_hosts }} unique host(s) during +- 24h.
+                Low prevalence: Rule is triggering across {{ variables.global_prevalence_unique_sources }} unique source(s) (host, cloud account, or IP) during +- 24h.
                 {% endif -%}
 
           - name: get_noise_signal_stats
-            type: elasticsearch.esql.query
+            type: elasticsearch.search
             with:
-              query: |-
-                FROM .alerts-security.alerts-*
-                | WHERE `kibana.alert.rule.uuid` == ?1
-                | STATS total_alerts = COUNT(*), unique_hosts = COUNT_DISTINCT(`host.name`), unique_users = COUNT_DISTINCT(`user.name`)
-              params:
-                - "{{event.rule.id}}"
-              filter:
+              index: ".alerts-security.alerts-*"
+              size: 0
+              track_total_hits: true
+              runtime_mappings:
+                effective_source:
+                  type: keyword
+                  script:
+                    source: |-
+                      def v = params._source?.host?.name;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.host?.id;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.cloud?.account?.id;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.source?.ip;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                effective_actor:
+                  type: keyword
+                  script:
+                    source: |-
+                      def v = params._source?.user?.name;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.user?.id;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.aws?.cloudtrail?.user_identity?.arn;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.azure?.auditlogs?.properties?.initiated_by?.user?.user_principal_name;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+                      v = params._source?.gcp?.audit?.authentication_info?.principal_email;
+                      if (v != null && v != '') { emit(v.toString()); return; }
+              query:
                 bool:
                   filter:
+                    - term:
+                        kibana.alert.rule.uuid: "{{event.rule.id}}"
                     - range:
                         "@timestamp":
                           gte: '{{foreach.item["@timestamp"]}}||-7d'
                           lte: '{{foreach.item["@timestamp"]}}||+7d'
+              aggs:
+                unique_sources:
+                  cardinality:
+                    field: effective_source
+                unique_actors:
+                  cardinality:
+                    field: effective_actor
 
           - name: set_noise_signal_values
             type: data.set
             with:
-              noise_signal_total_alerts: "${{ steps.get_noise_signal_stats.output.values[0][0] | default: 0 }}"
-              noise_signal_unique_hosts: "${{ steps.get_noise_signal_stats.output.values[0][1] | default: 0 }}"
-              noise_signal_unique_users: "${{ steps.get_noise_signal_stats.output.values[0][2] | default: 0 }}"
+              noise_signal_total_alerts: "${{ steps.get_noise_signal_stats.output.hits.total.value | default: 0 }}"
+              noise_signal_unique_sources: "${{ steps.get_noise_signal_stats.output.aggregations.unique_sources.value | default: 0 }}"
+              noise_signal_unique_actors: "${{ steps.get_noise_signal_stats.output.aggregations.unique_actors.value | default: 0 }}"
 
           - name: get_noise_signal
             type: data.set
             with:
               total_alerts: "${{ variables.noise_signal_total_alerts }}"
-              unique_hosts: "${{ variables.noise_signal_unique_hosts }}"
-              unique_users: "${{ variables.noise_signal_unique_users }}"
+              unique_sources: "${{ variables.noise_signal_unique_sources }}"
+              unique_actors: "${{ variables.noise_signal_unique_actors }}"
               message: >-
-                {% if variables.noise_signal_unique_hosts >= 50 -%}
-                Very high prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique hosts during +- 7d. This suggests widespread activity.
-                {% elsif variables.noise_signal_unique_hosts >= 20 -%}
-                High prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique hosts during +- 7d. This suggests significant spread.
-                {% elsif variables.noise_signal_unique_hosts >= 5 -%}
-                Medium prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique hosts during +- 7d.
+                {% if variables.noise_signal_unique_sources >= 50 -%}
+                Very high prevalence: Rule is triggering across {{ variables.noise_signal_unique_sources }} unique sources (host, cloud account, or IP) during +- 7d. This suggests widespread activity.
+                {% elsif variables.noise_signal_unique_sources >= 20 -%}
+                High prevalence: Rule is triggering across {{ variables.noise_signal_unique_sources }} unique sources (host, cloud account, or IP) during +- 7d. This suggests significant spread.
+                {% elsif variables.noise_signal_unique_sources >= 5 -%}
+                Medium prevalence: Rule is triggering across {{ variables.noise_signal_unique_sources }} unique sources (host, cloud account, or IP) during +- 7d.
                 {% else -%}
-                Low prevalence: Rule is triggering across {{ variables.noise_signal_unique_hosts }} unique host(s) during +- 7d.
+                Low prevalence: Rule is triggering across {{ variables.noise_signal_unique_sources }} unique source(s) (host, cloud account, or IP) during +- 7d.
                 {% endif -%}
 
           # Alert history: how many times the rule fired in a symmetric
@@ -604,13 +658,13 @@ steps:
                 {{steps.get_global_prevalence.output.message}}
 
                 Total alerts: {{steps.get_global_prevalence.output.total_alerts}}
-                Unique hosts: {{steps.get_global_prevalence.output.unique_hosts}}
-                Unique users: {{steps.get_global_prevalence.output.unique_users}}
+                Unique sources: {{steps.get_global_prevalence.output.unique_sources}}
+                Unique actors: {{steps.get_global_prevalence.output.unique_actors}}
 
-                {% if steps.get_global_prevalence.output.top_hosts and steps.get_global_prevalence.output.top_hosts.size > 0 -%}
-                ##### Top Hosts
-                {%- for host in steps.get_global_prevalence.output.top_hosts %}
-                - {{ host[1] }}: {{host[0]}} alerts
+                {% if steps.get_global_prevalence.output.top_sources and steps.get_global_prevalence.output.top_sources.size > 0 -%}
+                ##### Top Sources
+                {%- for source in steps.get_global_prevalence.output.top_sources %}
+                - {{ source.key }}: {{source.doc_count}} alerts
                 {%- endfor %}
                 {%- endif %}
 
@@ -618,8 +672,8 @@ steps:
                 {{steps.get_noise_signal.output.message}}
 
                 Total alerts: {{steps.get_noise_signal.output.total_alerts}}
-                Unique hosts: {{steps.get_noise_signal.output.unique_hosts}}
-                Unique users: {{steps.get_noise_signal.output.unique_users}}
+                Unique sources: {{steps.get_noise_signal.output.unique_sources}}
+                Unique actors: {{steps.get_noise_signal.output.unique_actors}}
 
                 ### Related Alerts
                 Graph nodes: {{steps.get_related_alerts.output.stats.nodes}}
@@ -631,32 +685,39 @@ steps:
                 {%- endfor %}
                 {%- endif %}
                 ### Rule: {{steps.get_rule_metadata.output.metadata.rule_name}}
-                {{steps.get_rule_metadata.output.metadata.rule_description}}
-                {% capture metadata %}
-                {% if steps.get_rule_metadata.output.metadata.severity -%}
-                Severity: {{ steps.get_rule_metadata.output.metadata.severity }}
-                {%- endif %}
-                {% if steps.get_rule_metadata.output.metadata.rule_type -%}
-                Type: {{ steps.get_rule_metadata.output.metadata.rule_type }}
-                {%- endif %}
-                {% if steps.get_rule_metadata.output.metadata.rule_id -%}
-                Id: {{ steps.get_rule_metadata.output.metadata.rule_id }}
-                {%- endif %}
-                {% if steps.get_rule_metadata.output.metadata.rule_uuid -%}
-                UUID: {{ steps.get_rule_metadata.output.metadata.rule_uuid }}
-                {%- endif %}
-                {% if steps.get_rule_metadata.output.metadata.threat_framework -%}
+                {% assign rule_description = steps.get_rule_metadata.output.metadata.rule_description -%}
+                {% if rule_description != blank %}
+                {{ rule_description }}
+                {% endif -%}
 
-                Threat framework: {{ steps.get_rule_metadata.output.metadata.threat_framework }}
-                {%- endif %}
-                {% if variables.threat_technique_lines and variables.threat_technique_lines.size > 0 -%}
+                {% capture metadata -%}
+                {% if steps.get_rule_metadata.output.metadata.severity != blank %}
+                - Severity: {{ steps.get_rule_metadata.output.metadata.severity }}
+                {% endif -%}
+                {% if steps.get_rule_metadata.output.metadata.rule_type != blank %}
+                - Type: {{ steps.get_rule_metadata.output.metadata.rule_type }}
+                {% endif -%}
+                {% if steps.get_rule_metadata.output.metadata.rule_id != blank %}
+                - Id: {{ steps.get_rule_metadata.output.metadata.rule_id }}
+                {% endif -%}
+                {% if steps.get_rule_metadata.output.metadata.rule_uuid != blank %}
+                - UUID: {{ steps.get_rule_metadata.output.metadata.rule_uuid }}
+                {% endif -%}
+                {% if steps.get_rule_metadata.output.metadata.threat_framework != blank %}
+                - Threat framework: {{ steps.get_rule_metadata.output.metadata.threat_framework }}
+                {% endif -%}
+                {% endcapture -%}
+                {% assign metadata = metadata | strip -%}
+                {% if metadata != blank %}
+                {{ metadata }}
+                {% endif -%}
+
+                {% if variables.threat_technique_lines and variables.threat_technique_lines.size > 0 %}
                 ##### Threat Mapping
                 {%- for line in variables.threat_technique_lines limit: 5 %}
                 - {{ line }}
                 {%- endfor %}
-                {%- endif %}
-                {% endcapture %}
-                {{ metadata | strip }}
+                {% endif -%}
 
                 ### Alert Close History
                 {{steps.get_close_history.output.message}}
@@ -669,7 +730,7 @@ steps:
                 {% for reason in steps.get_close_history.output.close_reasons_summary -%}
                 - {{ reason[1] }}: {{ reason[0] }}
                 {% endfor %}
-                {%- endif %} 
+                {%- endif %}
 
           - name: onechat_runAgent_step
             type: ai.agent
