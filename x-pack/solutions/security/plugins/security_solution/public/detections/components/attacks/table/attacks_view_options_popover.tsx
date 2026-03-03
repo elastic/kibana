@@ -6,7 +6,14 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiPopover, EuiButtonIcon, EuiSwitch, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiSwitch,
+  EuiFormRow,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from './translations';
 import { TABLE_SECTION_TEST_ID } from './table_section';
 
@@ -23,6 +30,7 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
   showAttacksOnly,
   onToggleShowAttacksOnly,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -48,30 +56,29 @@ export const AttacksViewOptionsPopover: React.FC<AttacksViewOptionsPopoverProps>
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="s"
+      panelPaddingSize="m"
       anchorPosition="downRight"
+      panelStyle={{ minWidth: euiTheme.base * 18 }}
     >
-      <div style={{ width: 300 }}>
-        <EuiFormRow hasEmptyLabelSpace display="rowCompressed">
-          <EuiSwitch
-            label={i18n.SHOW_ANONYMIZED_LABEL}
-            checked={showAnonymized}
-            onChange={onToggleShowAnonymized}
-            data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized-switch`}
-            compressed
-          />
-        </EuiFormRow>
-        <EuiSpacer size="s" />
-        <EuiFormRow hasEmptyLabelSpace display="rowCompressed">
-          <EuiSwitch
-            label={i18n.SHOW_ATTACKS_ONLY_LABEL}
-            checked={showAttacksOnly}
-            onChange={onToggleShowAttacksOnly}
-            data-test-subj={`${TABLE_SECTION_TEST_ID}-show-attacks-only-switch`}
-            compressed
-          />
-        </EuiFormRow>
-      </div>
+      <EuiFormRow display="rowCompressed">
+        <EuiSwitch
+          label={i18n.SHOW_ANONYMIZED_LABEL}
+          checked={showAnonymized}
+          onChange={onToggleShowAnonymized}
+          data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized-switch`}
+          compressed
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow display="rowCompressed">
+        <EuiSwitch
+          label={i18n.SHOW_ATTACKS_ONLY_LABEL}
+          checked={showAttacksOnly}
+          onChange={onToggleShowAttacksOnly}
+          data-test-subj={`${TABLE_SECTION_TEST_ID}-show-attacks-only-switch`}
+          compressed
+        />
+      </EuiFormRow>
     </EuiPopover>
   );
 };
