@@ -42,7 +42,7 @@ import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
@@ -70,6 +70,7 @@ import {
 } from '../../../../../common/slo_indicator_types';
 import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -376,18 +377,14 @@ export function ApmServicesTable({
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
   const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
-  const { slo, apmSourcesAccess } = useKibana<ApmPluginStartDeps>().services;
+  const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const { indexSettings = [] } = useApmIndexSettingsContext();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
   const { kuery, environment } = query;
-
-  const { data: indexSettingsData = { apmIndexSettings: [] } } = useFetcher(
-    (_callApmApi, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
-    [apmSourcesAccess]
-  );
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -535,7 +532,7 @@ export function ApmServicesTable({
           transactionType: indexType === 'traces' ? item.transactionType : undefined,
           environment,
         },
-        indexSettings: indexSettingsData.apmIndexSettings,
+        indexSettings,
       });
 
       if (!esqlQuery) return undefined;
@@ -545,14 +542,7 @@ export function ApmServicesTable({
         query: { esql: esqlQuery },
       });
     },
-    [
-      kuery,
-      environment,
-      indexSettingsData.apmIndexSettings,
-      query.rangeFrom,
-      query.rangeTo,
-      discoverLocator,
-    ]
+    [kuery, environment, indexSettings, query.rangeFrom, query.rangeTo, discoverLocator]
   );
 
   const serviceActions = useServiceActions({
