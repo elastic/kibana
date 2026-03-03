@@ -18,9 +18,8 @@ spaceTest.describe(
       await apiServices.timeline.deleteAll();
     });
 
-    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.afterAll(async ({ apiServices }) => {
       await apiServices.timeline.deleteAll();
-      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(
@@ -81,7 +80,6 @@ spaceTest.describe(
 
         await spaceTest.step('Hover save button and verify read-only tooltip', async () => {
           await timelinePage.hoverSaveButton();
-          await expect(timelinePage.saveTooltip).toBeVisible();
           await expect(timelinePage.saveTooltip).toContainText(
             'you do not have the required permissions to save timelines'
           );
@@ -97,14 +95,12 @@ spaceTest.describe(
       await timelinePage.open();
 
       await spaceTest.step('Verify unsaved state on new timeline', async () => {
-        await expect(timelinePage.saveStatus).toBeVisible();
         await expect(timelinePage.saveStatus).toHaveText(/^Unsaved/);
       });
 
       await spaceTest.step('Save timeline', async () => {
         await timelinePage.saveWithName('Test');
         await expect(timelinePage.saveStatus).toBeHidden();
-        await timelinePage.waitForSaveComplete();
       });
 
       await spaceTest.step('Modify query and verify unsaved changes state', async () => {
@@ -129,7 +125,7 @@ spaceTest.describe(
       await spaceTest.step('Create and save first timeline', async () => {
         await timelinePage.open();
         await timelinePage.saveWithName('First');
-        await timelinePage.waitForSaveComplete();
+        await expect(timelinePage.saveStatus).toBeHidden();
       });
 
       await spaceTest.step('Save as new timeline with different name', async () => {

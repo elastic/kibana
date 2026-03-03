@@ -29,7 +29,6 @@ export class TimelinePage {
   readonly collapsedActionsButton: Locator;
   readonly createFromTemplateButton: Locator;
   readonly customTemplatesTab: Locator;
-  readonly loadingIndicator: Locator;
   readonly kqlTextarea: Locator;
   readonly saveButtonTooltipAnchor: Locator;
   readonly timelineRows: Locator;
@@ -55,7 +54,6 @@ export class TimelinePage {
     this.collapsedActionsButton = this.page.testSubj.locator('euiCollapsedItemActionsButton');
     this.createFromTemplateButton = this.page.testSubj.locator('create-from-template');
     this.customTemplatesTab = this.page.testSubj.locator('Custom templates');
-    this.loadingIndicator = this.page.testSubj.locator('globalLoadingIndicator');
     this.kqlTextarea = this.page.testSubj
       .locator('timeline-search-or-filter-search-container')
       .locator('textarea');
@@ -67,7 +65,7 @@ export class TimelinePage {
 
   async navigateToTimelines() {
     await this.page.gotoApp(TIMELINES_URL);
-    await this.timelinesTable.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.timelinesTable.waitFor({ timeout: 30_000 });
   }
 
   async navigateToTemplates() {
@@ -76,7 +74,7 @@ export class TimelinePage {
 
   async open() {
     await this.bottomBarToggle.click();
-    await this.panel.waitFor({ state: 'visible', timeout: 10_000 });
+    await this.panel.waitFor();
   }
 
   async close() {
@@ -86,7 +84,6 @@ export class TimelinePage {
 
   async createNew() {
     await this.newTimelineDropdownButton.click();
-    await this.createNewTimelineOption.waitFor({ state: 'visible' });
     await this.createNewTimelineOption.click();
   }
 
@@ -109,7 +106,6 @@ export class TimelinePage {
 
   private async openSaveModalAndSetTitle(name: string) {
     await this.saveButton.click();
-    await this.titleInput.waitFor({ state: 'visible' });
     await this.titleInput.clear();
     await this.titleInput.fill(name);
     await this.titleInput.press('Enter');
@@ -130,20 +126,14 @@ export class TimelinePage {
     await this.kqlTextarea.press('Enter');
   }
 
-  async waitForSaveComplete() {
-    await this.loadingIndicator.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-    await this.loadingIndicator.waitFor({ state: 'hidden', timeout: 30_000 });
-  }
-
   async selectCustomTemplates() {
-    await this.timelinesTable.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.timelinesTable.waitFor({ timeout: 30_000 });
     await this.customTemplatesTab.click();
-    await this.collapsedActionsButton.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.collapsedActionsButton.waitFor({ timeout: 30_000 });
   }
 
   async createTimelineFromTemplate() {
     await this.collapsedActionsButton.click();
-    await this.createFromTemplateButton.waitFor({ state: 'visible', timeout: 3_000 });
     await this.createFromTemplateButton.click();
   }
 
