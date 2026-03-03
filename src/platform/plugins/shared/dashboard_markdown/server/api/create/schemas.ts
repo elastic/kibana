@@ -15,7 +15,7 @@ export const createRequestParamsSchema = schema.maybe(
   schema.object({ id: schema.maybe(schema.string()) }, { unknowns: 'forbid' })
 );
 
-export const createRequestBodySchema = schema.allOf([markdownAttributesSchema]);
+export const createRequestBodySchema = markdownAttributesSchema;
 
 export const createResponseBodySchema = schema.object({
   id: schema.string(),
