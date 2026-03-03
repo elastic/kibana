@@ -227,9 +227,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const agentSkills = watch('configuration.skills') as SkillSelection[] | undefined;
   const activeSkillsCount = useMemo(() => {
-    const effectiveSelection = agentSkills && agentSkills.length > 0
-      ? agentSkills
-      : [{ skill_ids: ['*'] }];
+    const effectiveSelection =
+      agentSkills && agentSkills.length > 0 ? agentSkills : [{ skill_ids: ['*'] }];
     const hasWildcard = effectiveSelection.some((s) => s.skill_ids.includes('*'));
     if (hasWildcard) {
       const builtinCount = skills.filter((s) => s.readonly).length;
