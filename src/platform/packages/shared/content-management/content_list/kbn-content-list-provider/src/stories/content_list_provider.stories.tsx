@@ -193,7 +193,7 @@ const SortControls = () => {
 };
 
 const meta: Meta<StoryArgs> = {
-  title: 'Content Management/Content List',
+  title: 'Content List/Components',
   parameters: { layout: 'padded' },
   argTypes: {
     entityName: { control: 'text', description: 'Singular entity name' },
