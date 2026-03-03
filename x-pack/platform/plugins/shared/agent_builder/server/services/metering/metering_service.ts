@@ -96,7 +96,7 @@ class MeteringServiceImpl implements MeteringService {
     const usageQuantity = Math.max(1, Math.ceil(round.model_usage.input_tokens / 50_000));
 
     const record: UsageRecord = {
-      id: `agent-builder-execution-${executionId ?? 'unknown'}`,
+      id: `agent-builder-execution-${executionId}`,
       usage_timestamp: new Date().toISOString(),
       creation_timestamp: new Date().toISOString(),
       usage: {
