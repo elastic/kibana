@@ -7,11 +7,8 @@
 
 import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_NAME } from '../../../common/constants';
 import { useRunningQueriesAppContext } from '../app_context';
-
-const PLUGIN_NAME = i18n.translate('xpack.runningQueries.breadcrumb', {
-  defaultMessage: 'Running queries',
-});
 
 export const useBreadcrumbs = () => {
   const { chrome } = useRunningQueriesAppContext();

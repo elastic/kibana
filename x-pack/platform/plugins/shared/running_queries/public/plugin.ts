@@ -7,7 +7,7 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { PLUGIN_NAME } from '../common/constants';
 import type {
   RunningQueriesSetupDependencies,
   RunningQueriesStartDependencies,
@@ -30,9 +30,7 @@ export class RunningQueriesPlugin
   ): RunningQueriesPluginSetup {
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: 'running_queries',
-      title: i18n.translate('xpack.runningQueries.management.title', {
-        defaultMessage: 'Running Queries',
-      }),
+      title: PLUGIN_NAME,
       order: 99,
       async mount(params: ManagementAppMountParams) {
         const { renderApp } = await import('./application/mount_plugin');

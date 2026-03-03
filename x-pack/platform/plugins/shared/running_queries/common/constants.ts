@@ -5,4 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const API_BASE_PATH = '/internal/running_queries';
+export const PLUGIN_NAME = i18n.translate('xpack.runningQueries.pluginName', {
+  defaultMessage: 'Running queries',
+});

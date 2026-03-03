@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -18,60 +17,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_NAME } from '../../common/constants';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useRunningQueriesAppContext } from './app_context';
 import { RunningQueriesTable } from './components/running_queries_table';
-
-const RunningQueriesNoAccessPrompt: React.FC<{ missingClusterPrivileges: string[] }> = ({
-  missingClusterPrivileges,
-}) => {
-  return (
-    <EuiPageTemplate
-      minHeight="0"
-      style={{ minHeight: 420 }}
-      restrictWidth={false}
-      data-test-subj="runningQueriesNoAccessPrompt"
-    >
-      <EuiPageTemplate.Section alignment="center">
-        <EuiEmptyPrompt
-          iconType="lock"
-          color="plain"
-          layout="vertical"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.runningQueries.noAccess.title"
-                defaultMessage="Contact your administrator for access"
-              />
-            </h2>
-          }
-          body={
-            <>
-              <p>
-                <FormattedMessage
-                  id="xpack.runningQueries.noAccess.description"
-                  defaultMessage="To view running queries in this space, you need additional privileges."
-                />
-              </p>
-              {missingClusterPrivileges.length > 0 && (
-                <p>
-                  <FormattedMessage
-                    id="xpack.runningQueries.noAccess.missingClusterPrivileges"
-                    defaultMessage="Missing Elasticsearch cluster {privilegesCount, plural, one {privilege} other {privileges}}: {missingPrivileges}."
-                    values={{
-                      missingPrivileges: missingClusterPrivileges.join(', '),
-                      privilegesCount: missingClusterPrivileges.length,
-                    }}
-                  />
-                </p>
-              )}
-            </>
-          }
-        />
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
-  );
-};
+import { RunningQueriesNoAccessPrompt } from './no_access_prompt';
 
 const RunningQueriesAppWithData: React.FC = () => {
   const { apiService, notifications } = useRunningQueriesAppContext();
@@ -138,9 +88,7 @@ const RunningQueriesAppWithData: React.FC = () => {
   return (
     <EuiPageTemplate restrictWidth={false}>
       <EuiPageTemplate.Header
-        pageTitle={i18n.translate('xpack.runningQueries.title', {
-          defaultMessage: 'Running queries',
-        })}
+        pageTitle={PLUGIN_NAME}
         description={
           <FormattedMessage
             id="xpack.runningQueries.subtitle"
@@ -209,9 +157,7 @@ export const RunningQueriesApp: React.FC = () => {
     return (
       <EuiPageTemplate restrictWidth={false}>
         <EuiPageTemplate.Header
-          pageTitle={i18n.translate('xpack.runningQueries.title', {
-            defaultMessage: 'Running queries',
-          })}
+          pageTitle={PLUGIN_NAME}
         />
         <EuiPageTemplate.Section>
           <EuiLoadingSpinner size="l" />
