@@ -150,6 +150,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           dataView={props.dataView}
           query={isOfAggregateQueryType(query) ? query : undefined}
           showTimeCol={props.showTimeCol}
+          isPlainRecord={props.isPlainRecord}
+          showColumnTokens
           sort={props.sort}
           onSort={props.onSort}
           isSortEnabled={props.isSortEnabled}
@@ -163,6 +165,13 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           onFilter={props.onFilter}
           getRowIndicator={getRowIndicator}
           rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+          dataGridDensityState={props.dataGridDensityState}
+          onUpdateDataGridDensity={props.onUpdateDataGridDensity}
+          rowHeightState={props.rowHeightState}
+          onUpdateRowHeight={props.onUpdateRowHeight}
+          headerRowHeightState={props.headerRowHeightState}
+          onUpdateHeaderRowHeight={props.onUpdateHeaderRowHeight}
+          externalAdditionalControls={externalAdditionalControls}
         />
       );
     }

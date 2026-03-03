@@ -583,9 +583,13 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await expect(selectionBar).toBeVisible({ timeout: 5_000 });
     await expect(selectionBar).toContainText('selected');
 
-    // Click "Copy" in selection bar
-    const copyBtn = selectionBar.getByText('Copy');
-    await expect(copyBtn).toBeVisible();
+    // Copy buttons should be visible (TSV, JSON, Markdown)
+    const copyTsvBtn = selectionBar.getByText('Copy as TSV');
+    await expect(copyTsvBtn).toBeVisible();
+    const copyJsonBtn = selectionBar.getByText('Copy as JSON');
+    await expect(copyJsonBtn).toBeVisible();
+    const copyMdBtn = selectionBar.getByText('Copy as Markdown');
+    await expect(copyMdBtn).toBeVisible();
 
     // Click "Clear"
     const clearBtn = selectionBar.getByText('Clear');

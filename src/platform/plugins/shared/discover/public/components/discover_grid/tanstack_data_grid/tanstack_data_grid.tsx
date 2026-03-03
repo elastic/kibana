@@ -27,6 +27,7 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCheckbox,
+  EuiContextMenu,
   EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldSearch,
@@ -36,6 +37,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -44,7 +46,8 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler, formatFieldValue } from '@kbn/discover-utils';
+import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import {
   SourceDocument,
   DataLoadingState,
@@ -79,6 +82,8 @@ export interface TanStackDataGridProps {
   dataView: DataView;
   query?: AggregateQuery;
   showTimeCol: boolean;
+  isPlainRecord?: boolean;
+  showColumnTokens?: boolean;
 
   sort?: SortOrder[];
   onSort?: (sort: SortOrder[]) => void;
@@ -96,6 +101,14 @@ export interface TanStackDataGridProps {
   onFilter?: UnifiedDataTableProps['onFilter'];
   getRowIndicator?: UnifiedDataTableProps['getRowIndicator'];
   rowAdditionalLeadingControls?: UnifiedDataTableProps['rowAdditionalLeadingControls'];
+
+  dataGridDensityState?: UnifiedDataTableProps['dataGridDensityState'];
+  onUpdateDataGridDensity?: UnifiedDataTableProps['onUpdateDataGridDensity'];
+  rowHeightState?: number;
+  onUpdateRowHeight?: UnifiedDataTableProps['onUpdateRowHeight'];
+  headerRowHeightState?: number;
+  onUpdateHeaderRowHeight?: UnifiedDataTableProps['onUpdateHeaderRowHeight'];
+  externalAdditionalControls?: React.ReactNode;
 }
 
 type GridDensity = 'compact' | 'normal' | 'expanded';
@@ -982,6 +995,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     dataView,
     query,
     showTimeCol,
+    isPlainRecord,
+    showColumnTokens,
     sort = [],
     onSort,
     isSortEnabled = true,
@@ -995,6 +1010,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     onFilter,
     getRowIndicator,
     rowAdditionalLeadingControls,
+    dataGridDensityState,
+    onUpdateDataGridDensity,
+    rowHeightState,
+    onUpdateRowHeight,
+    headerRowHeightState,
+    onUpdateHeaderRowHeight,
+    externalAdditionalControls,
   }) => {
     const { euiTheme } = useEuiTheme();
     const { fieldFormats } = useDiscoverServices();
@@ -1108,16 +1130,42 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const [isFullScreen, setIsFullScreen] = useState(false);
     const toggleFullScreen = useCallback(() => setIsFullScreen((prev) => !prev), []);
 
-    // ── Grid density ──
-    const [density, setDensity] = useState<GridDensity>('compact');
+    // ── Grid density (sync with app state if provided) ──
+    const [localDensity, setLocalDensity] = useState<GridDensity>(
+      (dataGridDensityState as GridDensity) || 'compact'
+    );
+    const density = (dataGridDensityState as GridDensity) || localDensity;
+    const setDensity = useCallback(
+      (d: GridDensity) => {
+        setLocalDensity(d);
+        onUpdateDataGridDensity?.(d as any);
+      },
+      [onUpdateDataGridDensity]
+    );
     const [isDensityPopoverOpen, setIsDensityPopoverOpen] = useState(false);
     const densityCfg = DENSITY_CONFIG[density];
 
-    // ── Max header cell lines ──
-    const [headerMaxLines, setHeaderMaxLines] = useState(1);
+    // ── Max header cell lines (sync with app state) ──
+    const [localHeaderMaxLines, setLocalHeaderMaxLines] = useState(headerRowHeightState ?? 1);
+    const headerMaxLines = headerRowHeightState ?? localHeaderMaxLines;
+    const setHeaderMaxLines = useCallback(
+      (val: number) => {
+        setLocalHeaderMaxLines(val);
+        onUpdateHeaderRowHeight?.(val);
+      },
+      [onUpdateHeaderRowHeight]
+    );
 
-    // ── Body cell lines (0 = auto/no clamp) ──
-    const [bodyMaxLines, setBodyMaxLines] = useState(1);
+    // ── Body cell lines (sync with app state) ──
+    const [localBodyMaxLines, setLocalBodyMaxLines] = useState(rowHeightState ?? 1);
+    const bodyMaxLines = rowHeightState ?? localBodyMaxLines;
+    const setBodyMaxLines = useCallback(
+      (val: number) => {
+        setLocalBodyMaxLines(val);
+        onUpdateRowHeight?.(val);
+      },
+      [onUpdateRowHeight]
+    );
 
     // ── Cell popover ──
     const [popoverState, setPopoverState] = useState<{
@@ -1243,6 +1291,101 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const stopPropagation = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
 
+    // ── Column header context menu ──
+    const [headerMenuState, setHeaderMenuState] = useState<{
+      colId: string;
+      anchorPosition: { top: number; left: number };
+    } | null>(null);
+
+    const handleHeaderContextMenu = useCallback(
+      (e: React.MouseEvent, colId: string) => {
+        e.preventDefault();
+        setHeaderMenuState({ colId, anchorPosition: { top: e.clientY, left: e.clientX } });
+      },
+      []
+    );
+
+    const closeHeaderMenu = useCallback(() => setHeaderMenuState(null), []);
+
+    const headerMenuItems = useMemo(() => {
+      if (!headerMenuState) return [];
+      const { colId } = headerMenuState;
+      const colIndex = effectiveColumns.indexOf(colId);
+      const items: Array<{ name: string; icon: string; onClick: () => void }> = [];
+
+      if (colIndex > 0 && onSetColumns) {
+        items.push({
+          name: 'Move left',
+          icon: 'sortLeft',
+          onClick: () => {
+            const newCols = [...effectiveColumns];
+            [newCols[colIndex - 1], newCols[colIndex]] = [newCols[colIndex], newCols[colIndex - 1]];
+            onSetColumns(newCols, false);
+            closeHeaderMenu();
+          },
+        });
+      }
+
+      if (colIndex < effectiveColumns.length - 1 && colIndex >= 0 && onSetColumns) {
+        items.push({
+          name: 'Move right',
+          icon: 'sortRight',
+          onClick: () => {
+            const newCols = [...effectiveColumns];
+            [newCols[colIndex], newCols[colIndex + 1]] = [newCols[colIndex + 1], newCols[colIndex]];
+            onSetColumns(newCols, false);
+            closeHeaderMenu();
+          },
+        });
+      }
+
+      items.push({
+        name: 'Copy column name',
+        icon: 'copyClipboard',
+        onClick: () => {
+          navigator.clipboard.writeText(colId);
+          closeHeaderMenu();
+        },
+      });
+
+      items.push({
+        name: 'Copy column values',
+        icon: 'copyClipboard',
+        onClick: () => {
+          const values = rows.map((r) => formatCellValue(r.flattened[colId])).join('\n');
+          navigator.clipboard.writeText(values);
+          closeHeaderMenu();
+        },
+      });
+
+      if (onResize) {
+        items.push({
+          name: 'Reset width',
+          icon: 'empty',
+          onClick: () => {
+            onResize({ columnId: colId, width: undefined });
+            closeHeaderMenu();
+          },
+        });
+      }
+
+      if (onSetColumns && colId !== dataView.timeFieldName) {
+        items.push({
+          name: 'Remove column',
+          icon: 'cross',
+          onClick: () => {
+            onSetColumns(
+              effectiveColumns.filter((c) => c !== colId),
+              false
+            );
+            closeHeaderMenu();
+          },
+        });
+      }
+
+      return items;
+    }, [headerMenuState, effectiveColumns, onSetColumns, onResize, rows, dataView.timeFieldName, closeHeaderMenu]);
+
     // ── Build TanStack column defs ──
     const tanstackColumns: ColumnDef<DataTableRecord>[] = useMemo(() => {
       const defs: ColumnDef<DataTableRecord>[] = [];
@@ -1353,9 +1496,19 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             minSize: MIN_COL_WIDTH,
             enableSorting: isSortEnabled,
             meta: { isTimestamp: isTimeField, fieldName: colId },
-            cell: function DataCell({ getValue }) {
+            cell: function DataCell({ getValue, row }) {
               const val = getValue();
-              const formatted = isTimeField ? formatTimestamp(val) : formatCellValue(val);
+              let formatted: string;
+              if (isTimeField) {
+                formatted = formatTimestamp(val);
+              } else {
+                const dvField = dataView.getFieldByName(colId);
+                if (dvField && fieldFormats) {
+                  formatted = formatFieldValue(val, row.original.raw, fieldFormats, dataView, dvField, 'text');
+                } else {
+                  formatted = formatCellValue(val);
+                }
+              }
               return (
                 <div css={isTimeField ? styles.timestampCell : undefined} title={formatted}>
                   {formatted}
@@ -1586,6 +1739,25 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       navigator.clipboard.writeText(`${header}\n${body}`);
     }, [rows, selectedRows, effectiveColumns]);
 
+    const copySelectedAsJson = useCallback(() => {
+      const selectedRecords = rows.filter((r) => selectedRows.has(r.id));
+      const json = JSON.stringify(selectedRecords.map((r) => r.flattened), null, 2);
+      navigator.clipboard.writeText(json);
+    }, [rows, selectedRows]);
+
+    const copySelectedAsMarkdown = useCallback(() => {
+      const selectedRecords = rows.filter((r) => selectedRows.has(r.id));
+      const cols = effectiveColumns.filter((c) => c !== SOURCE_COLUMN_ID);
+      const header = `| ${cols.join(' | ')} |`;
+      const sep = `| ${cols.map(() => '---').join(' | ')} |`;
+      const body = selectedRecords
+        .map((r) => `| ${cols.map((c) => formatCellValue(r.flattened[c])).join(' | ')} |`)
+        .join('\n');
+      navigator.clipboard.writeText(`${header}\n${sep}\n${body}`);
+    }, [rows, selectedRows, effectiveColumns]);
+
+    const isLoadingMore = loadingState === DataLoadingState.loadingMore;
+
     return (
       <div ref={wrapperRef} css={[styles.wrapper, isFullScreen && styles.fullScreen]} style={densityVars} data-test-subj="tanstackGridWrapper">
         {/* Find in table bar */}
@@ -1602,17 +1774,15 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         )}
         {/* Toolbar */}
         <div css={styles.toolbar}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiBadge color="accent">TanStack Grid</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                {rows.length.toLocaleString()} rows &middot; rendered{' '}
-                {virtualItems.length}
+                {rows.length.toLocaleString()} rows
                 {isSummaryMode ? ' · Summary' : ` · ${effectiveColumns.length} columns`}
                 {isGroupedMode ? ' · Grouped' : ''}
-                {statsByInfo && !isGroupedMode ? ' · STATS/BY' : ''}
               </EuiText>
             </EuiFlexItem>
             {isGroupedMode && (
@@ -1621,6 +1791,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   Grouped by: {statsByInfo!.byFields.join(', ')}
                 </EuiBadge>
               </EuiFlexItem>
+            )}
+            {externalAdditionalControls && (
+              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
             )}
           </EuiFlexGroup>
           <div css={styles.toolbarRight}>
@@ -1726,7 +1899,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               <strong>{selectedRows.size}</strong> row{selectedRows.size !== 1 ? 's' : ''} selected
             </EuiText>
             <EuiButtonEmpty size="xs" onClick={copySelectedAsText} iconType="copyClipboard">
-              Copy
+              Copy as TSV
+            </EuiButtonEmpty>
+            <EuiButtonEmpty size="xs" onClick={copySelectedAsJson} iconType="copyClipboard">
+              Copy as JSON
+            </EuiButtonEmpty>
+            <EuiButtonEmpty size="xs" onClick={copySelectedAsMarkdown} iconType="copyClipboard">
+              Copy as Markdown
             </EuiButtonEmpty>
             <EuiButtonEmpty size="xs" onClick={clearSelection} iconType="cross" color="text">
               Clear
@@ -1827,9 +2006,30 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                           }
                           onDrop={isDraggable ? handleDragEnd : undefined}
                           onDragEnd={handleDragEnd}
+                          onContextMenu={
+                            !isControl && !isSelect && !isSummary
+                              ? (e: React.MouseEvent) => handleHeaderContextMenu(e, colId)
+                              : undefined
+                          }
                         >
                           {!isControl && (
                             <>
+                              {showColumnTokens && !isSummary && (() => {
+                                const fieldName = header.column.columnDef.meta?.fieldName;
+                                if (!fieldName) return null;
+                                if (columnsMeta) {
+                                  const iconType = getTextBasedColumnIconType(columnsMeta[fieldName]);
+                                  if (iconType && iconType !== 'unknown') {
+                                    return <FieldIcon type={iconType} css={{ marginRight: 4, flexShrink: 0 }} />;
+                                  }
+                                } else {
+                                  const dvField = dataView.getFieldByName(fieldName);
+                                  if (dvField) {
+                                    return <FieldIcon {...getFieldIconProps(dvField)} css={{ marginRight: 4, flexShrink: 0 }} />;
+                                  }
+                                }
+                                return null;
+                              })()}
                               <span css={styles.headerCellText}>
                                 {flexRender(
                                   header.column.columnDef.header,
@@ -1945,6 +2145,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   <EuiLoadingSpinner size="xl" />
                 </div>
               )}
+              {isLoadingMore && (
+                <EuiProgress size="xs" color="accent" position="absolute" css={{ bottom: 0, left: 0, right: 0, top: 'auto' }} />
+              )}
             </div>
           )}
 
@@ -1971,6 +2174,56 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             onFilter={onFilterRef.current}
             styles={styles}
           />
+        )}
+
+        {/* Column header context menu */}
+        {headerMenuState && (
+          <>
+            <div
+              css={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+              onClick={closeHeaderMenu}
+            />
+            <div
+              css={{
+                position: 'fixed',
+                top: headerMenuState.anchorPosition.top,
+                left: headerMenuState.anchorPosition.left,
+                zIndex: 9999,
+                backgroundColor: euiTheme.colors.backgroundBasePlain,
+                borderRadius: euiTheme.border.radius.medium,
+                boxShadow: euiTheme.levels.menu === 1000 ? '0 1px 5px rgba(0,0,0,.1), 0 3px 15px rgba(0,0,0,.1)' : undefined,
+                border: euiTheme.border.thin,
+                padding: `${euiTheme.size.xs} 0`,
+                minWidth: 200,
+              }}
+              data-test-subj="columnHeaderMenu"
+            >
+              {headerMenuItems.map((item) => (
+                <button
+                  key={item.name}
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.s,
+                    width: '100%',
+                    padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                    fontSize: euiTheme.size.m,
+                    textAlign: 'left',
+                    '&:hover': {
+                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                    },
+                  }}
+                  onClick={item.onClick}
+                >
+                  <EuiIcon type={item.icon} size="s" />
+                  {item.name}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
     );
