@@ -34,3 +34,5 @@ simple-statistics
 monaco-promql
 json-stable-stringify
 apache-arrow
+oxlint
+react-element-to-jsx-string

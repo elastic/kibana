@@ -73,6 +73,8 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
         xTitle: layer.axes?.x?.title?.value,
         yTitle: layer.axes?.y?.title?.value,
         xAxisLabelRotation,
+        xSortPredicate: layer.axes?.x?.sort,
+        ySortPredicate: layer.axes?.y?.sort,
       }),
     },
     legend: {

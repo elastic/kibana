@@ -95,7 +95,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/apm-sources-access-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/esql-language",
     "@kbn/discover-shared-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/shared-ux-page-analytics-no-data-types",
@@ -129,9 +128,8 @@
     "@kbn/as-code-filters-schema",
     "@kbn/scout",
     "@kbn/synthtrace-client",
-    "@kbn/alerting-v2-rule-form"
+    "@kbn/alerting-v2-rule-form",
+    "@kbn/cps-utils"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
