@@ -29,3 +29,11 @@ yaml-language-server
 lightningcss
 tar-fs
 browserslist
+@atlaskit/pragmatic-drag-and-drop
+@atlaskit/pragmatic-drag-and-drop-hitbox
+@opentelemetry/exporter-metrics-otlp-proto
+@opentelemetry/instrumentation-hapi
+simple-statistics
+monaco-promql
+oxlint
+react-element-to-jsx-string
