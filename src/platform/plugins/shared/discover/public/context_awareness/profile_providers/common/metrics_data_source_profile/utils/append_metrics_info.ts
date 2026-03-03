@@ -12,6 +12,8 @@ import { hasTransformationalCommand } from '@kbn/esql-utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
+// TODO: This should be moved to the esql-utils package
+
 /**
  * Appends "| METRICS_INFO" to an ES|QL query if it has no transformational commands.
  * @param esql the ES|QL query.
