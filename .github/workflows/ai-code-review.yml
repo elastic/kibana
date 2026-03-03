@@ -36,7 +36,6 @@ jobs:
   gate:
     runs-on: ubuntu-latest
     if: >-
-      github.event.pull_request.draft == false &&
       github.event.pull_request.user.type != 'Bot' &&
       contains(fromJSON('["MEMBER","COLLABORATOR","CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
       !contains(github.event.pull_request.labels.*.name, 'ai:skip-review')
