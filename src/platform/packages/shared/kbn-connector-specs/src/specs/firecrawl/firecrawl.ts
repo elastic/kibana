@@ -36,7 +36,7 @@ export const FirecrawlConnector: ConnectorSpec = {
       description: i18n.translate(
         'core.kibanaConnectorSpecs.firecrawl.actions.scrape.description',
         {
-          defaultMessage: 'Scrape a single URL and extract content (e.g. markdown)',
+          defaultMessage: 'Scrape a single URL and extract content (for example, markdown)',
         }
       ),
       input: z.object({
