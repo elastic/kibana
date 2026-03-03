@@ -8,8 +8,7 @@
  */
 
 import Path from 'path';
-
-import loadJsonFile from 'load-json-file';
+import { readFileSync } from 'fs';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Plugin } from './load_kibana_platform_plugin';
@@ -25,7 +24,7 @@ const isArrayOfStrings = (v: any): v is string[] =>
 export async function loadConfig(log: ToolingLog, plugin: Plugin): Promise<Config> {
   try {
     const path = Path.resolve(plugin.directory, '.kibana-plugin-helpers.json');
-    const file = await loadJsonFile(path);
+    const file = JSON.parse(readFileSync(path, 'utf-8'));
 
     if (!(typeof file === 'object' && file && !Array.isArray(file))) {
       throw new TypeError(`expected config at [${path}] to be an object`);

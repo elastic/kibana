@@ -16,7 +16,6 @@ import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-se
 import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
-import loadJsonFile from 'load-json-file';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
@@ -106,7 +105,7 @@ describe('scripts/generate_plugin', () => {
     ]
   `);
 
-    expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
+    expect(JSON.parse(Fs.readFileSync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'), 'utf-8')))
       .toMatchInlineSnapshot(`
     Object {
       "description": "",
