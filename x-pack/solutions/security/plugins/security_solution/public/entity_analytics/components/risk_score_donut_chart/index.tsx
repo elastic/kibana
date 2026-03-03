@@ -29,17 +29,23 @@ const StyledLegendItems = styled(EuiFlexItem)`
 
 interface RiskScoreDonutChartProps {
   severityCount: SeverityCount;
+  showLegend?: boolean;
 }
 
-export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps) => {
+export const RiskScoreDonutChart = ({
+  severityCount,
+  showLegend = true,
+}: RiskScoreDonutChartProps) => {
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
   const fillColor = useRiskScoreFillColor();
 
   return (
     <EuiFlexGroup responsive={false} data-test-subj="risk-score-donut-chart">
-      <StyledLegendItems grow={false}>
-        {legendItems.length > 0 && <Legend legendItems={legendItems} />}
-      </StyledLegendItems>
+      {showLegend && (
+        <StyledLegendItems grow={false}>
+          {legendItems.length > 0 && <Legend legendItems={legendItems} />}
+        </StyledLegendItems>
+      )}
       <DonutContainer grow={false} className="eui-textCenter">
         <DonutChart
           data={donutChartData ?? null}
@@ -47,7 +53,7 @@ export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps)
           height={DONUT_HEIGHT}
           label={i18n.translate(
             'xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel',
-            { defaultMessage: 'Total' }
+            { defaultMessage: 'entities' }
           )}
           title={<ChartLabel count={total} />}
           totalCount={total}

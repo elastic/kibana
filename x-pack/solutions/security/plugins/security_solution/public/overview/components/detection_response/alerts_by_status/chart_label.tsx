@@ -21,7 +21,7 @@ const PlaceHolder = styled.div`
 const ChartLabelComponent: React.FC<ChartLabelProps> = ({ count, onClick }) => {
   const onLabelClick = useCallback(() => onClick && onClick(), [onClick]);
 
-  if (count) {
+  if (count != null) {
     return onClick ? (
       <EuiLink onClick={onLabelClick}>
         <b>

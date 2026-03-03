@@ -71,7 +71,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
           />
         ),
         render: (level: RiskSeverity) => (
-          <EuiText size="s">
+          <EuiText className="eui-textTruncate" size="s">
             <RiskScoreLevel hideBackgroundColor severity={level} />
           </EuiText>
         ),
@@ -112,6 +112,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
   return (
     <EuiBasicTable
       items={tableItems}
+      compressed={true}
       columns={columns}
       loading={loading}
       tableCaption="Risk level breakdown by entity count"

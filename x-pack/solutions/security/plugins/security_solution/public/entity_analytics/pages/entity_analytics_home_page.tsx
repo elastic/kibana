@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiToolTip,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -211,6 +212,7 @@ export const EntityAnalyticsHomePage = () => {
     [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
   );
 
+  const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
   if (newDataViewPickerEnabled && status === 'pristine') {
@@ -248,7 +250,11 @@ export const EntityAnalyticsHomePage = () => {
           <EuiFlexGroup direction="column" gutterSize="l">
             <EuiFlexItem>
               <EuiPanel hasBorder>
-                <EuiFlexGroup responsive={false} gutterSize="l">
+                <EuiFlexGroup
+                  direction={isXlScreen ? 'row' : 'column'}
+                  responsive={false}
+                  gutterSize="l"
+                >
                   <EuiFlexItem grow={1}>
                     <CombinedRiskDonutChart />
                   </EuiFlexItem>
