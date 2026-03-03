@@ -25,13 +25,13 @@ const createPresentationContainer = (children: unknown[]) =>
 
 const createControlState = (variableName: string): OptionsListESQLControlState => ({
   title: 'Control title',
-  selectedOptions: ['option-1'],
-  variableName,
-  variableType: ESQLVariableType.VALUES,
-  esqlQuery: 'FROM index',
-  controlType: EsqlControlType.STATIC_VALUES,
-  singleSelect: true,
-  availableOptions: ['option-1', 'option-2'],
+  selected_options: ['option-1'],
+  variable_name: variableName,
+  variable_type: ESQLVariableType.VALUES,
+  esql_query: 'FROM index',
+  control_type: EsqlControlType.STATIC_VALUES,
+  single_select: true,
+  available_options: ['option-1', 'option-2'],
 });
 
 const createControlApi = (

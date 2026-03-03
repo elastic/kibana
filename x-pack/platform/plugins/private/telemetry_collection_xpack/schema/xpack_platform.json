@@ -7239,6 +7239,108 @@
         },
         "total_filled_gap_duration_ms": {
           "type": "long"
+        },
+        "gap_auto_fill_scheduler_runs_per_day": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of gap auto-fill scheduler runs per day"
+          }
+        },
+        "gap_auto_fill_scheduler_runs_by_status_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of gap auto-fill scheduler runs by dynamic status key per day"
+              }
+            },
+            "success": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of successful gap auto-fill scheduler runs per day"
+              }
+            },
+            "error": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of errored gap auto-fill scheduler runs per day"
+              }
+            },
+            "skipped": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of skipped gap auto-fill scheduler runs per day"
+              }
+            },
+            "no_gaps": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of gap auto-fill scheduler runs with no gaps found per day"
+              }
+            }
+          }
+        },
+        "gap_auto_fill_scheduler_duration_ms_per_day": {
+          "properties": {
+            "min": {
+              "type": "long",
+              "_meta": {
+                "description": "The minimum duration in milliseconds of gap auto-fill scheduler runs per day"
+              }
+            },
+            "max": {
+              "type": "long",
+              "_meta": {
+                "description": "The maximum duration in milliseconds of gap auto-fill scheduler runs per day"
+              }
+            },
+            "avg": {
+              "type": "float",
+              "_meta": {
+                "description": "The average duration in milliseconds of gap auto-fill scheduler runs per day"
+              }
+            },
+            "sum": {
+              "type": "float",
+              "_meta": {
+                "description": "The total duration in milliseconds of gap auto-fill scheduler runs per day"
+              }
+            }
+          }
+        },
+        "gap_auto_fill_scheduler_unique_rule_count_per_day": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of unique rules processed by the gap auto-fill scheduler per day"
+          }
+        },
+        "gap_auto_fill_scheduler_processed_gaps_total_per_day": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of gaps processed by the gap auto-fill scheduler per day"
+          }
+        },
+        "gap_auto_fill_scheduler_results_by_status_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of gap auto-fill scheduler results by dynamic status key per day"
+              }
+            },
+            "success": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of successful gap auto-fill scheduler results per day"
+              }
+            },
+            "error": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of errored gap auto-fill scheduler results per day"
+              }
+            }
+          }
         }
       }
     },

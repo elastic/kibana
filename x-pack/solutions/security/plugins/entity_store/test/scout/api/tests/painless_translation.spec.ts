@@ -14,17 +14,9 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getEuidPainlessEvaluation } from '../../../../common/domain/euid/painless';
+import { getEuidPainlessRuntimeMapping } from '../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../common/domain/euid/memory';
 import { EntityType } from '../../../../common/domain/definitions/entity_schema';
-
-function toRuntimeFieldEmitScript(painless: string): string {
-  return `String euid_eval(def doc) { ${painless} } 
-    def result = euid_eval(doc); 
-    if (result != null) {
-       emit(result);
-    }`;
-}
 
 apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -63,22 +55,14 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
 
   for (const entityType of Object.values(EntityType.Values)) {
     apiTest(
-      `${entityType}: runtime field from getEuidPainlessEvaluation matches expected euid for all documents`,
+      `${entityType}: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents`,
       async ({ esClient }) => {
-        const returnScript = getEuidPainlessEvaluation(entityType);
-        const emitScript = toRuntimeFieldEmitScript(returnScript);
-
         const result = await esClient.search({
           index: UPDATES_INDEX,
           body: {
             query: { match_all: {} },
             runtime_mappings: {
-              entity_id: {
-                type: 'keyword',
-                script: {
-                  source: emitScript,
-                },
-              },
+              entity_id: getEuidPainlessRuntimeMapping(entityType),
             },
             size: 1000,
             fields: ['entity_id'],

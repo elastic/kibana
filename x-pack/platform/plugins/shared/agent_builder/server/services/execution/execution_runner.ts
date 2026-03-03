@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { merge, of, filter, EMPTY } from 'rxjs';
+import { merge, of, filter, tap, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -51,6 +52,7 @@ export interface AgentExecutionDeps {
   inference: InferenceServerStart;
   conversationService: ConversationService;
   agentService: AgentsServiceStart;
+  runAgent: RunAgentFn;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
@@ -90,7 +92,7 @@ export const handleAgentExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, agentService, trackingService, analyticsService } = deps;
+  const { logger, runAgent, trackingService, analyticsService } = deps;
 
   // Resolve scoped services
   const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
@@ -117,6 +119,7 @@ export const handleAgentExecution = async ({
   // Execute agent
   const agentEvents$ = executeAgent$({
     agentId,
+    executionId: execution.executionId,
     request,
     nextInput,
     capabilities,
@@ -125,7 +128,7 @@ export const handleAgentExecution = async ({
     abortSignal,
     conversation,
     defaultConnectorId: selectedConnectorId,
-    agentService,
+    runAgent,
     browserApiTools,
     configurationOverrides,
     action,
@@ -158,6 +161,29 @@ export const handleAgentExecution = async ({
   return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
     merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
       handleCancellation(abortSignal),
+      tap((event) => {
+        try {
+          if (isRoundCompleteEvent(event)) {
+            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+            const currentRoundCount = isReplacingRound
+              ? conversation.rounds.length
+              : (conversation.rounds?.length ?? 0) + 1;
+            if (effectiveConversationId) {
+              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+            }
+            analyticsService?.reportRoundComplete({
+              conversationId: effectiveConversationId,
+              executionId: execution.executionId,
+              roundCount: currentRoundCount,
+              agentId,
+              round: event.data.round,
+              modelProvider,
+            });
+          }
+        } catch (error) {
+          logger.error(`Failed to report round complete telemetry: ${error}`);
+        }
+      }),
       convertErrors({
         agentId,
         logger,
@@ -165,6 +191,7 @@ export const handleAgentExecution = async ({
         trackingService,
         modelProvider,
         conversationId: effectiveConversationId,
+        executionId: execution.executionId,
       })
     )
   );

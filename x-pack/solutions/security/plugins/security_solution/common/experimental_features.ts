@@ -97,11 +97,6 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
-   */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
    * Enables the storing of gaps in the event log
    */
   storeGapsInEventLogEnabled: true,
@@ -209,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
-  splunkV2DashboardsEnabled: false,
+  splunkV2DashboardsEnabled: true,
 
   /**
    * Enables Detection Engine Health UI
@@ -220,6 +215,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Rule Health UI
    */
   ruleHealthUIEnabled: false,
+
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder skill
+   */
+  automaticTroubleshootingSkill: false,
+
+  /**
+   * Enables the new flyout using the EUI flyout system
+   */
+  newFlyoutSystemEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

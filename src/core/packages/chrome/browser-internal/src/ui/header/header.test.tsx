@@ -122,11 +122,8 @@ describe('Header', () => {
     );
     component.update();
     expect(component.find('HeaderExtension').length).toBe(2);
-    expect(
-      component.find('HeaderExtension').at(0).getDOMNode().querySelector('.my-extension1')
-    ).toBeTruthy();
-    expect(
-      component.find('HeaderExtension').at(1).getDOMNode().querySelector('.my-extension2')
-    ).toBeTruthy();
+    const rootNode = component.getDOMNode();
+    expect(rootNode.querySelector('.my-extension1')).toBeTruthy();
+    expect(rootNode.querySelector('.my-extension2')).toBeTruthy();
   });
 });

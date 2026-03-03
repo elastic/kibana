@@ -9,8 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -47,6 +46,6 @@
     "@kbn/deeplinks-data-sources"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

@@ -19,6 +19,7 @@ import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
@@ -46,9 +47,11 @@ interface NavControlsObservables {
 interface ProjectNavigationObservables {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   homeHref$: Observable<string>;
-  navigationTree$: Observable<NavigationTreeDefinitionUI>;
-  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
-  activeDataTestSubj$?: Observable<string | undefined>;
+  navigation$: Observable<{
+    solutionId: SolutionId;
+    navigationTree: NavigationTreeDefinitionUI;
+    activeNodes: ChromeProjectNavigationNode[][];
+  }>;
   isEditing$: Observable<boolean>;
 }
 
@@ -140,17 +143,16 @@ export const createChromeComponents = ({
     const navProps: NavigationProps = {
       basePath,
       application,
-      navigationTree$: projectNavigation.navigationTree$,
-      activeNodes$: projectNavigation.activeNodes$,
+      navigation$: projectNavigation.navigation$,
       navLinks$,
-      dataTestSubj$: projectNavigation.activeDataTestSubj$,
       onToggleCollapsed: state.sideNav.collapsed.set,
       isEditing$: projectNavigation.isEditing$,
     };
 
     return (
       <GridLayoutProjectSideNav
-        isCollapsed$={state.sideNav.collapsed.subject$}
+        isCollapsed$={state.sideNav.collapsed.$}
+        initialIsCollapsed={state.sideNav.collapsed.get()}
         navProps={navProps}
       />
     );

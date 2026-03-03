@@ -8,6 +8,7 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
+import { isTemplateExpression } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -31,7 +32,6 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private async enterForeach(): Promise<void> {
     this.stepExecutionRuntime.startStep();
-    let foreachState = this.stepExecutionRuntime.getCurrentStepState();
     this.stepExecutionRuntime.setInput({
       foreach: this.node.configuration.foreach,
     });
@@ -45,7 +45,6 @@ export class EnterForeachNodeImpl implements NodeImplementation {
         }
       );
       this.stepExecutionRuntime.setCurrentStepState({
-        items: [],
         total: 0,
       });
       this.stepExecutionRuntime.finishStep();
@@ -60,39 +59,28 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       }
     );
 
-    // Initialize foreach state
-    foreachState = {
-      items: evaluatedItems,
-      item: evaluatedItems[0],
+    // Initialize foreach state — only store index and total to avoid
+    // persisting the entire items array on every iteration.
+    const foreachState = {
       index: 0,
       total: evaluatedItems.length,
     };
 
     this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.enterScope(foreachState.index.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private advanceIteration(): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
-    // Update items and index if they have changed
-    const items = foreachState.items;
+    const foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     const index = foreachState.index + 1;
-    const item = items[index];
-    const total = foreachState.total;
-    foreachState = {
-      items,
-      index,
-      item,
-      total,
-    };
+
+    // Only persist index and total — no need to store the full items array.
+    this.stepExecutionRuntime.setCurrentStepState({ index, total: foreachState.total });
     // Enter a new scope for the new iteration
-    this.stepExecutionRuntime.setCurrentStepState(foreachState);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.enterScope(index.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
@@ -135,11 +123,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       );
     }
 
-    if (
-      typeof expression === 'string' &&
-      expression.startsWith('{{') &&
-      expression.endsWith('}}')
-    ) {
+    if (isTemplateExpression(expression)) {
       return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
     }
 

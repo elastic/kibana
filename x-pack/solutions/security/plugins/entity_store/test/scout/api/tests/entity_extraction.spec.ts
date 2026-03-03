@@ -54,7 +54,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(response.statusCode).toBe(200);
   });
 
-  apiTest('Should extract properly generate euid for host', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
     const expectedResultCount = 22;
 
     const extractionResponse = await apiClient.post(
@@ -70,6 +70,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
@@ -81,16 +82,16 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
     expect(entities.hits.hits).toHaveLength(expectedResultCount);
-    // it's deterministic because of the MD5 id
-    // manually checking object until we have a snapshot matcher
+    // it's deterministic because of the MD5 id;
     expect(entities.hits.hits).toMatchObject(expectedHostEntities);
   });
 
-  apiTest('Should extract properly generate euid for user', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract user', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
       {
@@ -104,6 +105,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(20);
 
     const entities = await esClient.search({
@@ -115,6 +117,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -124,7 +127,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
   });
 
-  apiTest('Should extract properly generate euid for service', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract service', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
       {
@@ -138,6 +141,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
@@ -149,6 +153,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -158,7 +163,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(entities.hits.hits).toMatchObject(expectedServiceEntities);
   });
 
-  apiTest('Should extract properly generate euid for generic', async ({ apiClient, esClient }) => {
+  apiTest('Should extract properly extract generic', async ({ apiClient, esClient }) => {
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
       {
@@ -172,6 +177,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
@@ -183,6 +189,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
           },
         },
       },
+      sort: '@timestamp:asc,entity.id:asc',
       size: 1000, // a lot just to be sure we are not capping it
     });
 
@@ -213,12 +220,16 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(firstExtractionResponse.body).toMatchObject({ count: 1 });
 
     const beforeSubType = await searchDocById(esClient, 'user:latest-test');
+
     expect(beforeSubType.hits.hits).toHaveLength(1);
+    expect(beforeSubType.hits.hits[0]._version).toBe(1);
     expect(beforeSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:00:00.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+      },
     });
 
     // Add sub_type to the document
@@ -245,13 +256,16 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     const afterSubType = await searchDocById(esClient, 'user:latest-test');
     expect(afterSubType.hits.hits).toHaveLength(1);
+    expect(afterSubType.hits.hits[0]._version).toBe(2);
     expect(afterSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:01:00.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
-      'entity.sub_type': 'Sub Type 1',
-      'user.hash': ['hash-1', 'hash-2'],
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+        sub_type: 'Sub Type 1',
+      },
+      user: { hash: ['hash-1', 'hash-2'] },
     });
 
     // Update sub_type in between documents with null values
@@ -310,13 +324,16 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     const updatedSubType = await searchDocById(esClient, 'user:latest-test');
     expect(updatedSubType.hits.hits).toHaveLength(1);
+    expect(updatedSubType.hits.hits[0]._version).toBe(3);
     expect(updatedSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:02:04.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
-      'entity.sub_type': 'Sub Type 3',
-      'user.hash': ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'],
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+        sub_type: 'Sub Type 3',
+      },
+      user: { hash: ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'] },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -341,25 +358,66 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test');
     expect(updatedLatestDomain.hits.hits).toHaveLength(1);
+    expect(updatedLatestDomain.hits.hits[0]._version).toBe(4);
     expect(updatedLatestDomain.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:03:00.000Z',
-      'entity.id': 'user:latest-test',
-      'entity.type': 'Identity',
-      'entity.name': 'latest-test-name',
-      'entity.sub_type': 'Sub Type 3',
-      'user.hash': [
-        'hash-1',
-        'hash-10',
-        'hash-11',
-        'hash-3',
-        'hash-4',
-        'hash-5',
-        'hash-6',
-        'hash-7',
-        'hash-8',
-        'hash-2',
-      ],
-      'user.domain': 'example.com',
+      entity: {
+        id: 'user:latest-test',
+        type: 'Identity',
+        name: 'latest-test-name',
+        sub_type: 'Sub Type 3',
+      },
+      user: {
+        hash: [
+          'hash-1',
+          'hash-10',
+          'hash-11',
+          'hash-3',
+          'hash-4',
+          'hash-5',
+          'hash-6',
+          'hash-7',
+          'hash-8',
+          'hash-2',
+        ],
+        domain: 'example.com',
+      },
     });
   });
+
+  apiTest(
+    'Should store _source as nested objects after ingest pipeline',
+    async ({ apiClient, esClient }) => {
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: '2026-01-20T11:00:00Z',
+            toDateISO: '2026-01-20T13:00:00Z',
+          },
+        }
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body.success).toBe(true);
+
+      const entities = await esClient.search({
+        index: '.entities.v2.latest.security_default',
+        query: { bool: { filter: { term: { 'entity.EngineMetadata.Type': 'host' } } } },
+        size: 5,
+      });
+
+      expect(entities.hits.hits.length).toBeGreaterThan(0);
+      for (const hit of entities.hits.hits) {
+        const source = hit._source as Record<string, unknown>;
+        expect(source).toBeDefined();
+        expect(source.entity).toBeDefined();
+        expect(typeof source.entity).toBe('object');
+        const topLevelKeys = Object.keys(source);
+        const dottedKeys = topLevelKeys.filter((k) => k.includes('.'));
+        expect(dottedKeys).toHaveLength(0);
+      }
+    }
+  );
 });

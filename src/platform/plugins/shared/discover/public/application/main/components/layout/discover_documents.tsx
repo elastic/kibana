@@ -170,8 +170,7 @@ function DiscoverDocumentsComponent({
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
     useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
-  const isEmptyDataResult =
-    isEsqlMode || !documentState.result || documentState.result.length === 0;
+  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
@@ -550,8 +549,11 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
+    <EuiFlexItem
+      data-test-subj="discoverDocumentsTable"
+      aria-labelledby="documentsAriaLabel"
+      css={styles.container}
+    >
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />

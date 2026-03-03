@@ -107,7 +107,6 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
-    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -151,13 +150,19 @@ export class ChromeService {
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
     const projectNavigation = this.projectNavigation.start({
-      application,
-      navLinksService: navLinks,
-      http,
-      chromeBreadcrumbs$: state.breadcrumbs.classic.$,
+      history: application.history,
+      prependBasePath: http.basePath.prepend,
+      navLinks,
+      getUiSettingsHomeRoute: () => {
+        try {
+          return uiSettings.get('defaultRoute');
+        } catch (e) {
+          // In some cases, this might be fetched before the uiSettings client is fully ready (interactive setup mode)
+          return;
+        }
+      },
       logger: this.logger,
-      featureFlags,
-      uiSettings,
+      chromeBreadcrumbs$: state.breadcrumbs.classic.$,
     });
 
     const sidebar = this.sidebar.start();
@@ -172,11 +177,9 @@ export class ChromeService {
 
     // 6. Create cached observables for components
     const navLinks$ = navLinks.getNavLinks$();
-    const activeNodes$ = projectNavigation.getActiveNodes$();
-    const navigationTreeUi$ = projectNavigation.getNavigationTreeUi$();
+    const navigation$ = projectNavigation.getNavigation$();
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
-    const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
     const homeHref = http.basePath.prepend('/app/home');
     const kibanaVersion = this.params.kibanaVersion;
@@ -202,9 +205,7 @@ export class ChromeService {
       projectNavigation: {
         breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
         homeHref$: projectNavigation.getProjectHome$(),
-        navigationTree$: navigationTreeUi$,
-        activeNodes$,
-        activeDataTestSubj$,
+        navigation$,
         isEditing$: projectNavigation.getIsEditing$(),
       },
       loadingCount$,
@@ -232,8 +233,10 @@ export class ChromeService {
   }
 
   public stop() {
+    this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
+    this.sidebar.stop();
     this.stop$.next();
   }
 }

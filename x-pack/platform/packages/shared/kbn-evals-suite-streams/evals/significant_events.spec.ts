@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
-
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -16,11 +14,10 @@ import {
 } from '@kbn/streams-ai/src/significant_events/types';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
-
-import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
 import type { EvaluatorParams } from '@kbn/evals/src/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -53,7 +50,7 @@ const codeBasedEvaluator = {
   }) => {
     const queries = Array.isArray(output) ? output : [output];
 
-    if (queries.length === 0 || !queries[0] || !queries[0].kql) {
+    if (queries.length === 0 || !queries[0] || !queries[0].esql) {
       return {
         score: 0,
         reasoning: 'No queries generated',
@@ -69,32 +66,22 @@ const codeBasedEvaluator = {
     const validationDetails = [];
 
     for (const query of queries) {
-      const { kql, category, severity_score, evidence } = query;
+      const { esql, category, severity_score, evidence } = query;
       const { sample_logs } = input;
 
-      // 1. KQL Syntax Validation
+      // 1. ES|QL Syntax Validation & 2. Execution Verification
       let isSyntaxValid = false;
+      let isExecutionHit = false;
       try {
-        fromKueryExpression(kql);
+        const result = await esClient.esql.query({ query: esql });
         isSyntaxValid = true;
         validSyntaxCount++;
-      } catch (e) {
-        // KQL is invalid
-      }
-
-      // 2. Execution Verification
-      let isExecutionHit = false;
-      if (isSyntaxValid) {
-        const searchResult = await esClient.search({
-          index: metadata.test_index,
-          q: kql,
-        });
-        const total = searchResult.hits.total;
-        const hits = typeof total === 'number' ? total : total?.value ?? 0;
-        if (hits > 0) {
+        if (result.values && result.values.length > 0) {
           isExecutionHit = true;
           executionHitCount++;
         }
+      } catch (e) {
+        // ES|QL query is invalid or returned no results
       }
 
       // 3. Category Compliance
@@ -121,7 +108,7 @@ const codeBasedEvaluator = {
       }
 
       validationDetails.push({
-        kql,
+        esql,
         isSyntaxValid,
         isExecutionHit,
         isCategoryCompliant,
@@ -216,14 +203,14 @@ evaluate.describe(
                     const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
                     const { queries } = await generateSignificantEvents({
                       stream,
+                      esClient,
                       start: kbnDatemath.parse('now-24h')!.valueOf(),
                       end: kbnDatemath.parse('now')!.valueOf(),
-                      esClient,
                       inferenceClient,
                       logger,
                       signal: new AbortController().signal,
                       systemPrompt: significantEventsPrompt,
-                      features: example.input.features,
+                      getFeatures: async () => example.input.features,
                     });
 
                     // The task should return the array of generated queries
@@ -285,14 +272,14 @@ evaluate.describe(
               const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
               const { queries } = await generateSignificantEvents({
                 stream,
+                esClient,
                 start: kbnDatemath.parse('now-24h')!.valueOf(),
                 end: kbnDatemath.parse('now')!.valueOf(),
-                esClient,
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
                 systemPrompt: significantEventsPrompt,
-                features: [],
+                getFeatures: async () => [],
               });
 
               return queries;

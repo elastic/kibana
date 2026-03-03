@@ -6,10 +6,12 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
+import { Agent } from 'undici';
 
 import {
   createSAMLResponse,
   MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
@@ -21,7 +23,7 @@ import { COMMON_HEADERS, COMMON_UNSAFE_HEADERS, extractAttributeValue } from '..
 
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
 apiTest.describe(
-  '[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests',
+  '[NON-MKI] Use UIAM credentials for various purposes in real and fake requests',
   { tag: [...tags.serverless.security.complete] },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
@@ -171,6 +173,27 @@ apiTest.describe(
         expect(response.body._total.num_docs).toBeGreaterThan(0);
       }
     );
+
+    apiTest(
+      'should be able to use non-internal/global UIAM API key against Kibana APIs',
+      async ({ apiClient }) => {
+        const response = await apiClient.get('internal/security/me', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(
+          expect.objectContaining({
+            api_key: expect.objectContaining({ managed_by: 'cloud', internal: false }),
+            authentication_realm: { name: '_cloud_api_key', type: '_cloud_api_key' },
+            roles: ['admin'],
+          })
+        );
+      }
+    );
   }
 );
 
@@ -188,4 +211,6 @@ const grantUiamApiKey = async (accessToken: string) =>
       internal: true,
       role_assignments: { limit: { access: ['application'], resource: ['project'] } },
     }),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
   });

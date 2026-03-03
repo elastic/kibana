@@ -20,14 +20,12 @@ import type {
   NavigationCustomization,
   NavigationItemInfo,
   CloudURLs,
-  SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface InternalChromeSetup extends ChromeSetup {}
+export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -111,14 +109,6 @@ export interface InternalChromeStart extends ChromeStart {
    */
   project: {
     /**
-     * Sets the project home href string.
-     * @param homeHref
-     *
-     * Use {@link ServerlessPluginStart.setProjectHome} to set project home.
-     */
-    setHome(homeHref: string): void;
-
-    /**
      * Sets the cloud's URLs.
      * @param cloudUrls
      */
@@ -136,21 +126,14 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      config?: { dataTestSubj?: string }
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
-    getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
-
-    /**
-     * Returns a simplified list of primary navigation items.
-     */
-    getNavigationPrimaryItems: () => NavigationItemInfo[];
-
-    /**
-     * Returns an observable of the active nodes in the project navigation.
-     */
-    getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
+    getNavigation$(): Observable<{
+      solutionId: SolutionId;
+      navigationTree: NavigationTreeDefinitionUI;
+      activeNodes: ChromeProjectNavigationNode[][];
+    }>;
 
     /** Get an Observable of the current project breadcrumbs */
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
@@ -166,16 +149,10 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
-
     /**
-     * Update the solution navigation definitions.
-     *
-     * @param solutionNavs The solution navigation definitions to update.
-     * @param replace Flag to indicate if the previous solution navigation definitions should be replaced.
-     * If `false`, the new solution navigation definitions will be merged with the existing ones.
+     * Returns a simplified list of primary navigation items.
      */
-    updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
-
+    getNavigationPrimaryItems: () => NavigationItemInfo[];
     /**
      * Set navigation customization for a solution.
      * Pass undefined to clear the customization and revert to the original order.
@@ -203,13 +180,5 @@ export interface InternalChromeStart extends ChromeStart {
      * @internal
      */
     getIsEditing$(): Observable<boolean>;
-
-    /**
-     * Change the active solution navigation.
-     *
-     * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
-     * will be replaced with the legacy Kibana navigation.
-     */
-    changeActiveSolutionNavigation(id: SolutionId | null): void;
   };
 }

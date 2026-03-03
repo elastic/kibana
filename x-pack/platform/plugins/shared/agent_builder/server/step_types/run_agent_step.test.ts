@@ -261,4 +261,59 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(res.error).toBeInstanceOf(Error);
     expect(res.error?.message).toContain('aborted');
   });
+
+  it('propagates attachments to execution service nextInput', async () => {
+    const attachments = [
+      {
+        id: 'attachment-1',
+        type: 'security.alert',
+        data: { alertId: 'alert-123', severity: 'high' },
+      },
+      {
+        type: 'document',
+        data: { content: 'test content' },
+        hidden: true,
+      },
+    ];
+
+    const events$ = of({
+      type: ChatEventType.roundComplete,
+      data: {
+        round: {
+          id: 'r-1',
+          response: { message: 'ok' },
+        },
+      },
+    });
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: {
+        execution,
+      },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+          attachments,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          nextInput: {
+            message: 'hello',
+            attachments,
+          },
+        }),
+      })
+    );
+    expect(res.output?.message).toBe('ok');
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const areFiltersEmpty = (filters: MonitorFilters) => {
   if (!filters) {
@@ -13,10 +13,10 @@ export const areFiltersEmpty = (filters: MonitorFilters) => {
   }
 
   return (
-    !filters.monitorIds?.length &&
+    !filters.monitor_ids?.length &&
     !filters.projects?.length &&
     !filters.tags?.length &&
-    !filters.monitorTypes?.length &&
+    !filters.monitor_types?.length &&
     !filters.locations?.length
   );
 };

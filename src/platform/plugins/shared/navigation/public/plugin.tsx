@@ -44,7 +44,9 @@ export class NavigationPublicPlugin
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
-  private coreStart?: CoreStart;
+  private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
+  private chrome?: InternalChromeStart;
+  private activeSolutionId: SolutionId | null = null;
   private isSolutionNavEnabled = false;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -61,11 +63,10 @@ export class NavigationPublicPlugin
     core: CoreStart,
     depsStart: NavigationPublicStartDependencies
   ): NavigationPublicStart {
-    this.coreStart = core;
-
     const { unifiedSearch, cloud, spaces, security } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+    this.chrome = chrome;
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
@@ -170,12 +171,16 @@ export class NavigationPublicPlugin
     this.stop$.next();
   }
 
-  private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
-    if (!this.coreStart) throw new Error('coreStart is not available');
-    const { project } = this.coreStart.chrome as InternalChromeStart;
-    project.updateSolutionNavigations({
-      [solutionNavigation.id]: solutionNavigation,
-    });
+  private addSolutionNavigation(def: AddSolutionNavigationArg) {
+    this.solutionNavDefinitions.set(def.id, def);
+    this.tryInitNavigation();
+  }
+
+  private tryInitNavigation() {
+    if (!this.activeSolutionId || !this.chrome) return;
+    const def = this.solutionNavDefinitions.get(this.activeSolutionId);
+    if (!def) return;
+    this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$);
   }
 
   private initiateChromeStyleAndSideNav(
@@ -191,7 +196,8 @@ export class NavigationPublicPlugin
     }
 
     if (isProjectNav && solutionView !== 'classic') {
-      chrome.project.changeActiveSolutionNavigation(solutionView!);
+      this.activeSolutionId = solutionView as SolutionId;
+      this.tryInitNavigation();
     }
   }
 
