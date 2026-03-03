@@ -20,9 +20,10 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  useFetchContext,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
@@ -185,6 +186,12 @@ export const getOverviewEmbeddableFactory = ({
             fetchSubscription.unsubscribe();
           };
         }, []);
+        const fetchContext = useFetchContext(api);
+        const mergedFilters = useMemo(
+          () => [...(groupFilters?.filters ?? []), ...(fetchContext.filters ?? [])],
+          [groupFilters?.filters, fetchContext.filters]
+        );
+
         const renderOverview = () => {
           if (overviewMode === 'groups') {
             const groupBy = groupFilters?.groupBy ?? 'status';
@@ -213,7 +220,7 @@ export const getOverviewEmbeddableFactory = ({
                       groupBy={groupBy}
                       groups={groups}
                       kqlQuery={kqlQuery}
-                      filters={groupFilters?.filters}
+                      filters={mergedFilters}
                       reloadSubject={reload$}
                     />
                   </EuiFlexItem>

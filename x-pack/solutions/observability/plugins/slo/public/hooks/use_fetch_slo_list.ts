@@ -12,6 +12,7 @@ import type { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE, SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { rewriteFiltersForSloSummary } from '../../common/rewrite_slo_filters';
 import type { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
@@ -66,18 +67,15 @@ export function useFetchSloList({
 
   const filters = useMemo(() => {
     try {
+      const allFilters = rewriteFiltersForSloSummary([
+        ...filterDSL,
+        ...(statusFilter ? [statusFilter] : []),
+        ...(tagsFilter ? [tagsFilter] : []),
+      ]);
       return JSON.stringify(
-        buildQueryFromFilters(
-          [
-            ...filterDSL,
-            ...(statusFilter ? [statusFilter] : []),
-            ...(tagsFilter ? [tagsFilter] : []),
-          ],
-          dataView,
-          {
-            ignoreFilterIfFieldNotInIndex: true,
-          }
-        )
+        buildQueryFromFilters(allFilters, dataView, {
+          ignoreFilterIfFieldNotInIndex: false,
+        })
       );
     } catch (e) {
       return '';
