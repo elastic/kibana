@@ -74,12 +74,13 @@ export const useLayoutStyles = () => {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+          background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
           border-radius: ${euiTheme.border.radius.small};
         }
 
         & .kbnGridPanel--resizeGauge--text {
           font-weight: ${euiTheme.font.weight.medium};
+          color: ${euiTheme.colors.textAccentSecondary};
         }
       }
 
