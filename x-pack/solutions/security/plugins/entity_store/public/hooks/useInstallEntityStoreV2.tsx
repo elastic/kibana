@@ -28,6 +28,13 @@ const getStatusRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2', ...statusRequestQuery },
 };
 
+const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.INSTALL,
+  body: JSON.stringify({}),
+  query: { apiVersion: '2' },
+};
+
+// -------- v1 queries --------
 const getV1StatusRequest: HttpFetchOptionsWithPath = {
   path: '/api/entity_store/status',
   query: statusRequestQuery,
@@ -49,32 +56,6 @@ const deleteV1UninstallEngineRequest = (entityType: string): HttpFetchOptionsWit
   version: '2023-10-31',
 });
 
-const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
-  path: ENTITY_STORE_ROUTES.INSTALL,
-  body: JSON.stringify({}),
-  query: { apiVersion: '2' },
-};
-
-const stopAndUninstallV1Engines = async ({ http, logger }: Pick<Services, 'http' | 'logger'>) => {
-  const v1ListResponse = await http.get<{ engines?: Array<{ type: string }> }>(
-    getV1ListEnginesRequest
-  );
-  const v1Engines = v1ListResponse.engines ?? [];
-
-  for (const { type } of v1Engines) {
-    try {
-      await http.post(postv1StopEngineRequest(type));
-      await http.delete(deleteV1UninstallEngineRequest(type));
-    } catch (e) {
-      logger.error(
-        `Failed to uninstall Entity Store v1 engine in namespace ${
-          this.namespace
-        } for ${type}: ${getErrorMessage(e)}`
-      );
-    }
-  }
-};
-
 /**
  * Hook to install Entity Store V2. Should be called from the root Security Solution app component.
  * @param services - Kibana services required to install Entity Store V2
@@ -92,14 +73,11 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (isEntityStoreInstalled(statusResponseV2.status)) return;
 
         const space = await services.spaces.getActiveSpace();
-        const isEntityStoreV1Installed = await (async () => {
-          const statusResponseV1 = await services.http.get<{ status: EntityStoreStatus }>(
-            getV1StatusRequest
-          );
-          return isEntityStoreInstalled(statusResponseV1.status);
-        })();
+        const statusResponseV1 = await services.http.get<{ status: EntityStoreStatus }>(
+          getV1StatusRequest
+        );
 
-        if (space.id === 'default' || isEntityStoreV1Installed) {
+        if (space.id === 'default' || isEntityStoreInstalled(statusResponseV1.status)) {
           await stopAndUninstallV1Engines({ http: services.http, logger: services.logger });
           await services.http.post(installAllEntitiesRequest);
         }
@@ -114,3 +92,21 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
 const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
   status !== EntityStoreStatus.Values.not_installed;
+
+const stopAndUninstallV1Engines = async ({ http, logger }: Pick<Services, 'http' | 'logger'>) => {
+  const resp = await http.get<{ engines?: Array<{ type: string }> }>(getV1ListEnginesRequest);
+  const v1Engines = resp.engines ?? [];
+
+  for (const { engine } of v1Engines) {
+    try {
+      await http.post(postv1StopEngineRequest(engine));
+      await http.delete(deleteV1UninstallEngineRequest(engine));
+    } catch (e) {
+      logger.error(
+        `Failed to uninstall Entity Store v1 ${engine} in namespace ${
+          this.namespace
+        }: ${getErrorMessage(e)}`
+      );
+    }
+  }
+};
