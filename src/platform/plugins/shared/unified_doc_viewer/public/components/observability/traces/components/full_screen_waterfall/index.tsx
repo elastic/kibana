@@ -97,11 +97,17 @@ export const FullScreenWaterfall = ({
     };
   }, [euiTheme.levels.menu]);
 
+  // Suppress EuiFlyout's open-animation when restoring previously-open state.
+  // Uses a native <style> tag (not Emotion) to avoid cleanup races with nested flyout unmounts.
+  // Removed after 1s so subsequent open/close interactions animate normally.
   const skipAnimationOnMountRef = useRef(skipOpenAnimation);
 
   useLayoutEffect(() => {
+    // typical path
     if (!skipAnimationOnMountRef.current) return;
 
+    // suppress animation when restoring previously-open state
+    // this style applies for 1 second to block animations
     const style = document.createElement('style');
     style.id = 'flyout-skip-open-animation';
     style.textContent = `.euiFlyout { animation-duration: 0s !important; }`;
@@ -111,6 +117,7 @@ export const FullScreenWaterfall = ({
       style.remove();
     }, 1000);
 
+    // once animation is suppressed, remove the style
     return () => {
       clearTimeout(timerId);
       style.remove();
