@@ -6,7 +6,7 @@
  */
 
 import type { LensSerializedState } from '@kbn/lens-common';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
@@ -34,6 +34,7 @@ export const getTransformOut = (
   return function transformOut(storedState, panelReferences) {
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
+      transformTimeRangeOut<LensSerializedState>,
       (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
     );
     const state = transformsFlow(storedState);
