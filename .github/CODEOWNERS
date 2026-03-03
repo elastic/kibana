@@ -955,7 +955,7 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-act
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
-x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-kibana
+x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-search-kibana
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kibana
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
@@ -1108,6 +1108,8 @@ x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
+x-pack/platform/plugins/shared/inference @elastic/search-kibana
+x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
