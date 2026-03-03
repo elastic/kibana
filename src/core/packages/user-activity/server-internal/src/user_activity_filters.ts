@@ -10,16 +10,17 @@
 import type { UserActivityActionId } from '@kbn/core-user-activity-server';
 import type { UserActivityFiltersType } from './user_activity_config';
 
+/** Supported filter policies and their evaluation logic. */
 export const filterPolicies = {
   keep: (x: string, arr: readonly string[]) => arr.includes(x),
   drop: (x: string, arr: readonly string[]) => !arr.includes(x),
 } as const;
 
+/** Returns true if the action passes all configured filters. */
 export function shouldLog(action: UserActivityActionId, filters: UserActivityFiltersType): boolean {
   for (const { policy, actions } of filters) {
     const predicate = filterPolicies[policy];
     if (!predicate(action, actions)) return false;
   }
-
   return true;
 }
