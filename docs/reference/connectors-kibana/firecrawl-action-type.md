@@ -1,7 +1,5 @@
 ---
 navigation_title: "Firecrawl"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/firecrawl-action-type.html
 applies_to:
   stack: preview
   serverless: preview
