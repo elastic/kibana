@@ -8,6 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 
@@ -78,103 +79,109 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadPDFV2>) => {
-    const logger = this.logger.get('execute-job');
-    const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
-    let apmGeneratePdf: { end: () => void } | null | undefined;
+    return withActiveSpan(
+      'execute-job-pdf-v2',
+      { attributes: { 'transaction.type': REPORTING_TRANSACTION_TYPE } },
+      async () => {
+        const logger = this.logger.get('execute-job');
+        const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
+        const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
+        let apmGeneratePdf: { end: () => void } | null | undefined;
 
-    const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(async () => {
-        const uiSettingsClient = await this.getUiSettingsClient(request);
-        return getCustomLogo(uiSettingsClient);
-      }),
-      mergeMap((logo) => {
-        const { browserTimezone, layout, title, locatorParams } = payload;
+        const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
+          mergeMap(async () => {
+            const uiSettingsClient = await this.getUiSettingsClient(request);
+            return getCustomLogo(uiSettingsClient);
+          }),
+          mergeMap((logo) => {
+            const { browserTimezone, layout, title, locatorParams } = payload;
 
-        apmGetAssets?.end();
+            apmGetAssets?.end();
 
-        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
+            apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
 
-        const tracker = getTracker();
-        tracker.startScreenshots();
+            const tracker = getTracker();
+            tracker.startScreenshots();
 
-        /**
-         * For each locator we get the relative URL to the redirect app
-         */
-        const urls = locatorParams.map((locator) => [
-          getFullRedirectAppUrl(
-            this.config,
-            this.getServerInfo(),
-            payload.spaceId,
-            payload.forceNow
-          ),
-          locator,
-        ]) as unknown as UrlOrUrlWithContext[];
+            /**
+             * For each locator we get the relative URL to the redirect app
+             */
+            const urls = locatorParams.map((locator) => [
+              getFullRedirectAppUrl(
+                this.config,
+                this.getServerInfo(),
+                payload.spaceId,
+                payload.forceNow
+              ),
+              locator,
+            ]) as unknown as UrlOrUrlWithContext[];
 
-        return this.startDeps
-          .screenshotting!.getScreenshots({
-            format: 'pdf',
-            title,
-            logo,
-            request,
-            browserTimezone,
-            layout,
-            urls: urls.map((url) =>
-              typeof url === 'string'
-                ? url
-                : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-            ),
-            taskInstanceFields,
-            logger,
+            return this.startDeps
+              .screenshotting!.getScreenshots({
+                format: 'pdf',
+                title,
+                logo,
+                request,
+                browserTimezone,
+                layout,
+                urls: urls.map((url) =>
+                  typeof url === 'string'
+                    ? url
+                    : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+                ),
+                taskInstanceFields,
+                logger,
+              })
+              .pipe(
+                tap(({ metrics }) => {
+                  if (metrics.cpu) {
+                    tracker.setCpuUsage(metrics.cpu);
+                  }
+                  if (metrics.memory) {
+                    tracker.setMemoryUsage(metrics.memory);
+                  }
+                }),
+                mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
+                  tracker.endScreenshots();
+                  const warnings: string[] = [];
+                  if (errors) {
+                    warnings.push(...errors.map((error) => error.message));
+                  }
+                  if (renderErrors) {
+                    warnings.push(...renderErrors);
+                  }
+
+                  return {
+                    buffer,
+                    metrics,
+                    warnings,
+                  };
+                })
+              );
+          }),
+          tap(({ buffer }) => {
+            apmGeneratePdf?.end();
+
+            if (buffer) {
+              stream.write(buffer);
+            }
+          }),
+          map(({ metrics, warnings }) => ({
+            content_type: 'application/pdf',
+            metrics: { pdf: metrics },
+            warnings,
+          })),
+          catchError((err) => {
+            logger.debug(err, { tags: ['execute-job', jobId] });
+            return Rx.throwError(() => err);
           })
-          .pipe(
-            tap(({ metrics }) => {
-              if (metrics.cpu) {
-                tracker.setCpuUsage(metrics.cpu);
-              }
-              if (metrics.memory) {
-                tracker.setMemoryUsage(metrics.memory);
-              }
-            }),
-            mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
-              tracker.endScreenshots();
-              const warnings: string[] = [];
-              if (errors) {
-                warnings.push(...errors.map((error) => error.message));
-              }
-              if (renderErrors) {
-                warnings.push(...renderErrors);
-              }
+        );
 
-              return {
-                buffer,
-                metrics,
-                warnings,
-              };
-            })
-          );
-      }),
-      tap(({ buffer }) => {
-        apmGeneratePdf?.end();
+        const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-        if (buffer) {
-          stream.write(buffer);
-        }
-      }),
-      map(({ metrics, warnings }) => ({
-        content_type: 'application/pdf',
-        metrics: { pdf: metrics },
-        warnings,
-      })),
-      catchError((err) => {
-        logger.debug(err, { tags: ['execute-job', jobId] });
-        return Rx.throwError(() => err);
-      })
+        apmTrans.end();
+        return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
+      }
     );
-
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
-
-    apmTrans.end();
-    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

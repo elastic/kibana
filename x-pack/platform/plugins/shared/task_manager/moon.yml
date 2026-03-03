@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/plugins/shared/task_manager
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/usage-collection-plugin'
   - '@kbn/config-schema'
   - '@kbn/config'
