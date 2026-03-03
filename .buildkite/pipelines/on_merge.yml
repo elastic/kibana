@@ -36,7 +36,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c3d-standard-16-lssd
+      machineType: c4d-standard-16-lssd
       zones: us-central1-c,us-central1-b,us-central1-a
       diskType: pd-ssd
     key: build
