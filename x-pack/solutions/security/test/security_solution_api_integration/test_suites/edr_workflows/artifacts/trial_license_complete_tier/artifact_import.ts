@@ -20,11 +20,12 @@ import type {
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
-import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { SECURITY_FEATURE_ID, RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
+import type { FeaturesPrivileges } from '@kbn/security-plugin-types-common';
 import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
@@ -129,18 +130,32 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
         before(async () => {
           for (const artifact of ENDPOINT_ARTIFACTS) {
             supertest[artifact.listId] = {
-              none: await createSupertestWithCustomRole(`${artifact.listId}_none`, ['minimal_all']),
-              read: await createSupertestWithCustomRole(`${artifact.listId}_read`, [
-                'minimal_all',
-                artifact.read,
-              ]),
-              all: await createSupertestWithCustomRole(`${artifact.listId}_all`, [
-                'minimal_read',
-                artifact.all,
-              ]),
+              none: await createSupertestWithCustomRole(`${artifact.listId}_none`, {
+                // user is authorized to use _import API in general, but missing artifact-specific privileges
+                [SECURITY_FEATURE_ID]: ['minimal_all'],
+                [RULES_FEATURE_ID]: ['all'],
+              }),
+
+              read: await createSupertestWithCustomRole(`${artifact.listId}_read`, {
+                // user is authorized to use _import API in general, but missing artifact-specific privileges
+                [SECURITY_FEATURE_ID]: ['minimal_all', artifact.read],
+                [RULES_FEATURE_ID]: ['all'],
+              }),
+
+              all: await createSupertestWithCustomRole(`${artifact.listId}_all`, {
+                // user is authorized for artifact import, but not rule exceptions import
+                [SECURITY_FEATURE_ID]: ['minimal_read', artifact.all],
+              }),
+
               allWithGlobalArtifactManagementPrivilege: await createSupertestWithCustomRole(
                 `${artifact.listId}_allWithGlobal`,
-                ['minimal_read', artifact.all, 'global_artifact_management_all']
+                {
+                  [SECURITY_FEATURE_ID]: [
+                    'minimal_read',
+                    artifact.all,
+                    'global_artifact_management_all',
+                  ],
+                }
               ),
             };
           }
@@ -673,7 +688,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
 const buildRole = (
   name: string,
-  siemPrivileges: string[],
+  featurePrivileges: FeaturesPrivileges,
   spaces: string[] = ['*']
 ): CustomRole => ({
   name,
@@ -681,9 +696,7 @@ const buildRole = (
     kibana: [
       {
         base: [],
-        feature: {
-          [SECURITY_FEATURE_ID]: siemPrivileges,
-        },
+        feature: featurePrivileges,
         spaces,
       },
     ],
