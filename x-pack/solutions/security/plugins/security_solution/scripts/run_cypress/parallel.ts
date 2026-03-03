@@ -170,8 +170,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             `retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`
         );
 
+        const specsToCheck = files;
         const completionStatus = await Promise.all(
-          files.map(async (filePath) => {
+          specsToCheck.map(async (filePath) => {
             const completed = await isSpecCompleted(filePath);
             log.info(`[cypress-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${filePath}`);
             return { filePath, completed };
