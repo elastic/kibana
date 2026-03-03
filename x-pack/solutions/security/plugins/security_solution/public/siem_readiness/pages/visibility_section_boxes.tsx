@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -17,19 +17,22 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MainCategories } from '@kbn/siem-readiness';
 
 import coverage_illustration from '../assets/coverage_illustration.svg';
 import quality_illustration from '../assets/quality_illustration.svg';
 import continuity_illustration from '../assets/continuity_illustration.svg';
 import retention_illustration from '../assets/retention_illustration.svg';
+import { useVisibilityStatuses } from '../hooks/use_visibility_statuses';
+import type { VisibilityStatus } from '../hooks/use_visibility_statuses';
 
 export type VisibilityTabId = 'coverage' | 'quality' | 'continuity' | 'retention';
-export type VisibilityStatus = 'healthy' | 'actionsRequired' | 'noData';
+export type { VisibilityStatus };
 
 interface VisibilityBox {
   id: VisibilityTabId;
   title: string;
-  status: VisibilityStatus; // For now, random status - will be computed later
+  status: VisibilityStatus;
   illustration: string;
   statusDescriptions: {
     healthy: string;
@@ -41,98 +44,8 @@ interface VisibilityBox {
 interface VisibilitySectionBoxesProps {
   selectedTabId: VisibilityTabId;
   onTabSelect: (tabId: VisibilityTabId) => void;
+  activeCategories: MainCategories[];
 }
-
-const VISIBILITY_BOXES: VisibilityBox[] = [
-  {
-    id: 'coverage',
-    title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.coverage.title', {
-      defaultMessage: 'Coverage',
-    }),
-    status: 'actionsRequired', // Random for now
-    illustration: coverage_illustration,
-    statusDescriptions: {
-      healthy: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.coverage.healthy.description',
-        { defaultMessage: 'All enabled rules have required integrations.' }
-      ),
-      actionsRequired: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.coverage.actionsRequired.description',
-        { defaultMessage: 'Integrations required for some enabled rules.' }
-      ),
-      noData: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.coverage.noData.description',
-        { defaultMessage: 'You have not installed and enabled any rules yet.' }
-      ),
-    },
-  },
-  {
-    id: 'quality',
-    title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.quality.title', {
-      defaultMessage: 'Quality',
-    }),
-    status: 'healthy', // Random for now
-    illustration: quality_illustration,
-    statusDescriptions: {
-      healthy: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.quality.healthy.description',
-        { defaultMessage: 'ECS Compatibility is healthy.' }
-      ),
-      actionsRequired: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.quality.actionsRequired.description',
-        { defaultMessage: 'ECS Incompatibility Detected.' }
-      ),
-      noData: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.quality.noData.description',
-        { defaultMessage: 'No data to check yet.' }
-      ),
-    },
-  },
-  {
-    id: 'continuity',
-    title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.continuity.title', {
-      defaultMessage: 'Continuity',
-    }),
-    status: 'noData', // Random for now
-    illustration: continuity_illustration,
-    statusDescriptions: {
-      healthy: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.continuity.healthy.description',
-        { defaultMessage: 'Ingest pipeline is healthy.' }
-      ),
-      actionsRequired: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.continuity.actionsRequired.description',
-        { defaultMessage: 'Ingest pipeline failures occurred.' }
-      ),
-      noData: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.continuity.noData.description',
-        { defaultMessage: 'No data currently being ingested.' }
-      ),
-    },
-  },
-  {
-    id: 'retention',
-    title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.retention.title', {
-      defaultMessage: 'Retention',
-    }),
-    status: 'actionsRequired', // Random for now
-    illustration: retention_illustration,
-    statusDescriptions: {
-      healthy: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.retention.healthy.description',
-        { defaultMessage: 'All ILM policies meet requirements.' }
-      ),
-      actionsRequired: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.retention.actionsRequired.description',
-        { defaultMessage: 'Some ILM policies needs increasing.' }
-      ),
-      noData: i18n.translate(
-        'xpack.securitySolution.siemReadiness.visibility.retention.noData.description',
-        { defaultMessage: 'No data in ILM management.' }
-      ),
-    },
-  },
-];
 
 const getBadge = (status: VisibilityStatus): { label: string; color: string; icon: string } => {
   switch (status) {
@@ -175,12 +88,110 @@ const getBadge = (status: VisibilityStatus): { label: string; color: string; ico
 export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
   selectedTabId,
   onTabSelect,
+  activeCategories,
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  const { coverageStatus, qualityStatus, continuityStatus, retentionStatus } =
+    useVisibilityStatuses(activeCategories);
+
+  const visibilityBoxes: VisibilityBox[] = useMemo(
+    () => [
+      {
+        id: 'coverage',
+        title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.coverage.title', {
+          defaultMessage: 'Coverage',
+        }),
+        status: coverageStatus,
+        illustration: coverage_illustration,
+        statusDescriptions: {
+          healthy: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.coverage.healthy.description',
+            { defaultMessage: 'All enabled rules have required integrations.' }
+          ),
+          actionsRequired: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.coverage.actionsRequired.description',
+            { defaultMessage: 'Integrations required for some enabled rules.' }
+          ),
+          noData: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.coverage.noData.description',
+            { defaultMessage: 'You have not installed and enabled any rules yet.' }
+          ),
+        },
+      },
+      {
+        id: 'quality',
+        title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.quality.title', {
+          defaultMessage: 'Quality',
+        }),
+        status: qualityStatus,
+        illustration: quality_illustration,
+        statusDescriptions: {
+          healthy: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.quality.healthy.description',
+            { defaultMessage: 'ECS Compatibility is healthy.' }
+          ),
+          actionsRequired: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.quality.actionsRequired.description',
+            { defaultMessage: 'ECS Incompatibility Detected.' }
+          ),
+          noData: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.quality.noData.description',
+            { defaultMessage: 'No data to check yet.' }
+          ),
+        },
+      },
+      {
+        id: 'continuity',
+        title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.continuity.title', {
+          defaultMessage: 'Continuity',
+        }),
+        status: continuityStatus,
+        illustration: continuity_illustration,
+        statusDescriptions: {
+          healthy: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.continuity.healthy.description',
+            { defaultMessage: 'Ingest pipeline is healthy.' }
+          ),
+          actionsRequired: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.continuity.actionsRequired.description',
+            { defaultMessage: 'Ingest pipeline failures occurred.' }
+          ),
+          noData: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.continuity.noData.description',
+            { defaultMessage: 'No data currently being ingested.' }
+          ),
+        },
+      },
+      {
+        id: 'retention',
+        title: i18n.translate('xpack.securitySolution.siemReadiness.visibility.retention.title', {
+          defaultMessage: 'Retention',
+        }),
+        status: retentionStatus,
+        illustration: retention_illustration,
+        statusDescriptions: {
+          healthy: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.retention.healthy.description',
+            { defaultMessage: 'All ILM policies meet requirements.' }
+          ),
+          actionsRequired: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.retention.actionsRequired.description',
+            { defaultMessage: 'Some ILM policies needs increasing.' }
+          ),
+          noData: i18n.translate(
+            'xpack.securitySolution.siemReadiness.visibility.retention.noData.description',
+            { defaultMessage: 'No data in ILM management.' }
+          ),
+        },
+      },
+    ],
+    [coverageStatus, qualityStatus, continuityStatus, retentionStatus]
+  );
+
   return (
     <EuiFlexGroup gutterSize="m">
-      {VISIBILITY_BOXES.map((box) => {
+      {visibilityBoxes.map((box) => {
         const isSelected = selectedTabId === box.id;
         const badge = getBadge(box.status);
         const currentDescription = box.statusDescriptions[box.status];
@@ -225,7 +236,11 @@ export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
                       grow={false}
                       style={{ width: '50px', height: '50px', alignSelf: 'end' }}
                     >
-                      <EuiIcon type={box.illustration} css={{ width: '100%', height: '100%' }} />
+                      <EuiIcon
+                        type={box.illustration}
+                        css={{ width: '100%', height: '100%' }}
+                        aria-hidden={true}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

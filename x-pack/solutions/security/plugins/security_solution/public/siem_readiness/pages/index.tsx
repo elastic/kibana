@@ -74,7 +74,11 @@ const SiemReadinessDashboard = () => {
       />
       <EuiSpacer />
       <EuiPageSection paddingSize="none">
-        <VisibilitySectionBoxes selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
+        <VisibilitySectionBoxes
+          selectedTabId={selectedTabId}
+          onTabSelect={handleTabSelect}
+          activeCategories={activeCategories ?? ALL_CATEGORIES}
+        />
       </EuiPageSection>
       <EuiSpacer />
       <EuiPageSection paddingSize="none">
