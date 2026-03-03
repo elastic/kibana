@@ -86,6 +86,7 @@ describe('useInstallEntityStoreV2', () => {
 
     await waitFor(() => {
       expect(mockServices.http.post).toHaveBeenCalledTimes(2);
+      expect(mockServices.http.delete).toHaveBeenCalledTimes(1);
     });
 
     expect(mockServices.http.get).toHaveBeenNthCalledWith(1, {
@@ -101,7 +102,7 @@ describe('useInstallEntityStoreV2', () => {
       path: '/api/entity_store/engines',
       version: '2023-10-31',
     });
-    expect(mockServices.http.post).toHaveBeenNthCalledWith(1, {
+    expect(mockServices.http.post).toHaveBeenCalledWith({
       path: '/api/entity_store/engines/host/stop',
       version: '2023-10-31',
     });
@@ -109,7 +110,7 @@ describe('useInstallEntityStoreV2', () => {
       path: '/api/entity_store/engines/host',
       version: '2023-10-31',
     });
-    expect(mockServices.http.post).toHaveBeenNthCalledWith(2, {
+    expect(mockServices.http.post).toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.INSTALL,
       body: JSON.stringify({}),
       query: { apiVersion: '2' },
