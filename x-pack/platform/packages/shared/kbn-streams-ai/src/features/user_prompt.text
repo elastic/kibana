@@ -1,2 +1,7 @@
 `sample_documents`:
 {{{sample_documents}}}
+
+{{#deleted_features}}
+`deleted_features` (the user has permanently removed these — do NOT regenerate any feature that represents the same real-world component):
+{{{deleted_features}}}
+{{/deleted_features}}

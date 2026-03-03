@@ -82,6 +82,34 @@ const featuresSchema = {
         ],
       },
     },
+    ignored_features: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          feature_id: {
+            type: 'string',
+            description: 'ID of the feature that was not generated.',
+          },
+          feature_title: {
+            type: 'string',
+            description: 'Title of the feature that was not generated.',
+          },
+          deleted_feature_id: {
+            type: 'string',
+            description: 'ID of the deleted feature it matched against.',
+          },
+          reason: {
+            type: 'string',
+            description:
+              'One sentence why this feature was considered a duplicate of the deleted one.',
+          },
+        },
+        required: ['feature_id', 'feature_title', 'deleted_feature_id', 'reason'],
+      },
+      description:
+        'Features that were not generated because they are semantically identical to a deleted feature.',
+    },
   },
   required: ['features'],
 } as const;
@@ -91,6 +119,7 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
     name: 'identify_features',
     input: z.object({
       sample_documents: z.string(),
+      deleted_features: z.string(),
     }),
   })
     .version({

@@ -97,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    await featureClient.deleteFeature(params.path.name, params.path.uuid);
+    await featureClient.softDeleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
   },
@@ -168,7 +168,7 @@ export const listAllFeaturesRoute = createServerRoute({
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const { hits: features } = await featureClient.getAllFeatures(streamNames);
+    const { hits: features } = await featureClient.getFeatures(streamNames);
 
     return {
       features,

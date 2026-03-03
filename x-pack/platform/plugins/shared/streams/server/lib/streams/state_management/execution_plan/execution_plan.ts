@@ -294,7 +294,9 @@ export class ExecutionPlan {
     }
 
     return Promise.all(
-      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
+      actions.map((action) =>
+        this.dependencies.featureClient.hardDeleteFeatures(action.request.name)
+      )
     );
   }
 

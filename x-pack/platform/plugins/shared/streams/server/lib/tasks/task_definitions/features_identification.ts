@@ -11,6 +11,7 @@ import {
   type IdentifyFeaturesResult,
   type BaseFeature,
   isComputedFeature,
+  isDuplicateFeature,
   getStreamTypeFromDefinition,
 } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
@@ -27,6 +28,10 @@ import { cancellableTask } from '../cancellable_task';
 import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 import type { StreamsFeaturesIdentifiedProps } from '../../telemetry';
+
+// Only the N most-recently-deleted features are sent to the LLM prompt (token budget).
+// The full list is still used for the server-side isDuplicateFeature safety net.
+const MAX_DELETED_FEATURES_FOR_PROMPT = 10;
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
@@ -94,16 +99,34 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { hits: sampleDocuments } = await getSampleDocuments({
-                  esClient,
-                  index: stream.name,
-                  start,
-                  end,
-                  size: 20,
-                });
+                const [{ hits: sampleDocuments }, { hits: deletedFeatures }] = await Promise.all([
+                  getSampleDocuments({
+                    esClient,
+                    index: stream.name,
+                    start,
+                    end,
+                    size: 20,
+                  }),
+                  featureClient.getDeletedFeatures(stream.name),
+                ]);
+
+                const deletedSummaries = deletedFeatures
+                  .slice(0, MAX_DELETED_FEATURES_FOR_PROMPT)
+                  .map(({ id, type, subtype, title, description, properties }) => ({
+                    id,
+                    type,
+                    subtype,
+                    title,
+                    description,
+                    properties,
+                  }));
 
                 const identifyFeaturesStart = Date.now();
-                const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
+                const [
+                  { features: inferredBaseFeatures, ignoredFeatures },
+                  computedFeatures,
+                  { hits: existingFeatures },
+                ] = await Promise.all([
                   identifyFeatures({
                     streamName: stream.name,
                     sampleDocuments,
@@ -111,6 +134,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     logger: taskContext.logger.get('features_identification'),
                     signal: runContext.abortController.signal,
                     systemPrompt: featurePromptOverride,
+                    deletedFeatures: deletedSummaries,
                   })
                     .then((result) => {
                       telemetryProps.input_tokens_used = result.tokensUsed.prompt;
@@ -129,16 +153,36 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     esClient,
                     logger: taskContext.logger.get('computed_features'),
                   }),
+                  featureClient.getFeatures(stream.name),
                 ]);
 
+                for (const ignored of ignoredFeatures) {
+                  taskContext.logger.debug(
+                    () =>
+                      `LLM ignored feature "${ignored.feature_id}" (matched deleted "${ignored.deleted_feature_id}"): ${ignored.reason}`
+                  );
+                }
+
+                const nonDeletedInferredFeatures = inferredBaseFeatures.filter((feature) => {
+                  const matchingDeleted = deletedFeatures.find((deleted) =>
+                    isDuplicateFeature(deleted, feature)
+                  );
+                  if (matchingDeleted) {
+                    taskContext.logger.debug(
+                      () =>
+                        `Dropping feature "${feature.id}" — matches soft-deleted feature "${matchingDeleted.id}"`
+                    );
+                    return false;
+                  }
+                  return true;
+                });
+
                 const identifiedFeatures: BaseFeature[] = [
-                  ...inferredBaseFeatures,
+                  ...nonDeletedInferredFeatures,
                   ...computedFeatures,
                 ];
 
-                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name);
-
-                let newFeaturesCount = inferredBaseFeatures.length;
+                let newFeaturesCount = nonDeletedInferredFeatures.length;
                 const now = Date.now();
                 const features = identifiedFeatures.map((feature) => {
                   const existing = featureClient.findDuplicateFeature({

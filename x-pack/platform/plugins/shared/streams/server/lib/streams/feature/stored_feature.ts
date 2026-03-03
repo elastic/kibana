@@ -20,6 +20,7 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_DELETED_AT,
   FEATURE_ID,
   FEATURE_PROPERTIES,
   FEATURE_SUBTYPE,
@@ -40,6 +41,7 @@ export const storedFeatureSchema = z.object({
   [FEATURE_TAGS]: z.array(z.string()).optional(),
   [FEATURE_META]: z.record(z.string(), z.any()).optional(),
   [FEATURE_EXPIRES_AT]: z.string().optional(),
+  [FEATURE_DELETED_AT]: z.string().optional(),
   [FEATURE_TITLE]: z.string().optional(),
 });
 

@@ -46,6 +46,7 @@ export const featureSchema = baseFeatureSchema.and(
     status: featureStatusSchema,
     last_seen: z.string(),
     expires_at: z.string().optional(),
+    deleted_at: z.string().optional(),
   })
 );
 
@@ -59,7 +60,14 @@ export function isComputedFeature(feature: BaseFeature): boolean {
   return (COMPUTED_FEATURE_TYPES as unknown as string[]).includes(feature.type);
 }
 
-export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): boolean {
+type FeatureFingerprint = Pick<BaseFeature, 'type' | 'subtype' | 'properties'>;
+
+type FeatureIdentity = FeatureFingerprint & Pick<BaseFeature, 'id'>;
+
+export function hasSameFingerprint(
+  feature: FeatureFingerprint,
+  other: FeatureFingerprint
+): boolean {
   return (
     feature.type === other.type &&
     feature.subtype === other.subtype &&
@@ -67,6 +75,6 @@ export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): bo
   );
 }
 
-export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): boolean {
+export function isDuplicateFeature(feature: FeatureIdentity, other: FeatureIdentity): boolean {
   return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
 }

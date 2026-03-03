@@ -22,6 +22,7 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_DELETED_AT,
   FEATURE_ID,
 } from './fields';
 
@@ -44,6 +45,7 @@ export const featureStorageSettings = {
       [FEATURE_TAGS]: types.keyword(),
       [FEATURE_META]: types.object({ enabled: false }),
       [FEATURE_EXPIRES_AT]: types.date(),
+      [FEATURE_DELETED_AT]: types.date(),
     },
   },
 } satisfies IndexStorageSettings;
