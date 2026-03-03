@@ -45,9 +45,7 @@ describe('filterSkillsBySelection', () => {
   });
 
   it('should return built-in skills + explicit user skills when wildcard and explicit IDs are combined', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['*', 'user-skill-1'] },
-    ]);
+    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['*', 'user-skill-1'] }]);
     expect(result).toEqual(allSkills);
   });
 
@@ -65,9 +63,7 @@ describe('filterSkillsBySelection', () => {
   });
 
   it('should ignore non-existent skill IDs', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['skill-a', 'non-existent'] },
-    ]);
+    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['skill-a', 'non-existent'] }]);
     expect(result).toEqual([builtinA]);
   });
 
@@ -79,9 +75,7 @@ describe('filterSkillsBySelection', () => {
   });
 
   it('should include user skills when explicitly selected without wildcard', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['user-skill-1'] },
-    ]);
+    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['user-skill-1'] }]);
     expect(result).toEqual([userSkill]);
   });
 });

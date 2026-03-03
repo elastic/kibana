@@ -18,7 +18,9 @@ import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
 describe('skills utils', () => {
-  const createMockSkill = (overrides: Partial<InternalSkillDefinition> = {}): InternalSkillDefinition => ({
+  const createMockSkill = (
+    overrides: Partial<InternalSkillDefinition> = {}
+  ): InternalSkillDefinition => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',

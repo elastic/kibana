@@ -18,10 +18,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import type { PublicSkillDefinition, SkillSelection } from '@kbn/agent-builder-common';
-import {
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
-} from '@kbn/agent-builder-common';
+import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -140,9 +137,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       if (!skill) return;
 
       if (isAllBuiltinSelected && skill.readonly) {
-        const builtinIds = skills
-          .filter((s) => s.readonly && s.id !== skillId)
-          .map((s) => s.id);
+        const builtinIds = skills.filter((s) => s.readonly && s.id !== skillId).map((s) => s.id);
         const explicitIds = getExplicitSkillIds(selectedSkills);
         onSkillsChange([{ skill_ids: [...builtinIds, ...explicitIds] }]);
       } else if (explicitSelectedIds.has(skillId)) {
