@@ -217,7 +217,7 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: my-data-source.sources.notion.search');
+    expect(createdYaml).toContain('name: my-data-source.source.test_type.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
@@ -493,7 +493,7 @@ tags:
               hasAuth: true,
               authType: 'bearer',
             },
-            importedTools: [{ name: 'get_file_contents', description: 'Get file contents' }],
+            importedTools: [{ name: 'nonexistent_tool', description: 'Tool that does not exist' }],
           },
         ],
         workflows: { directory: '/path/to/workflows' },
