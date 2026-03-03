@@ -82,5 +82,30 @@ export function savedMap(): ExpressionFunctionDefinition<
         generatedAt: Date.now(),
       };
     },
+    extract(state) {
+      const refName = 'savedMap.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'map',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedMap.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
+    },
   };
 }

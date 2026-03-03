@@ -81,5 +81,30 @@ export function savedLens(): ExpressionFunctionDefinition<
         generatedAt: Date.now(),
       };
     },
+    extract(state) {
+      const refName = 'savedLens.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'lens',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedLens.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
+    },
   };
 }

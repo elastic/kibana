@@ -98,5 +98,30 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         generatedAt: Date.now(),
       };
     },
+    extract(state) {
+      const refName = 'savedVisualization.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'visualization',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedVisualization.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
+    },
   };
 }
