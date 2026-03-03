@@ -13,8 +13,13 @@ import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { EmbeddableError, EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type {
+  EmbeddableError,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from './i_embeddable';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {

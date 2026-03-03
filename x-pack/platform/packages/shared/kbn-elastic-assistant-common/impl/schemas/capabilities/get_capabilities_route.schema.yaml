@@ -22,14 +22,11 @@ paths:
                 properties:
                   assistantModelEvaluation:
                     type: boolean
-                  defendInsights:
-                    type: boolean
-                  assistantAttackDiscoverySchedulingEnabled:
+                  defendInsightsPolicyResponseFailure:
                     type: boolean
                 required:
                   - assistantModelEvaluation
-                  - defendInsights
-                  - assistantAttackDiscoverySchedulingEnabled
+                  - defendInsightsPolicyResponseFailure
         '400':
           description: Generic Error
           content:

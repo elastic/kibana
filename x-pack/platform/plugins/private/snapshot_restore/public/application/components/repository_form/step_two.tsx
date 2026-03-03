@@ -17,9 +17,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Repository } from '../../../../common/types';
+import type { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
-import { RepositoryValidation } from '../../services/validation';
+import type { RepositoryValidation } from '../../services/validation';
 import { TypeSettings } from './type_settings';
 import { textService } from '../../services/text';
 import { useCore } from '../../app_context';
@@ -80,7 +80,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
             flush="right"
             href={getRepositoryTypeDocUrl(docLinks, typeForDocs)}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.repositoryTypeDocLink"
@@ -171,6 +171,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
               defaultMessage="Fix errors before continuing."
             />
           }
+          role="alert"
           color="danger"
           iconType="cross"
           data-test-subj="repositoryFormError"

@@ -14,7 +14,7 @@ import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterMultiTerms } from './create_filter/multi_terms';
 import { aggMultiTermsFnName } from './multi_terms_fn';
-import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
+import type { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 import { MultiFieldKey } from './multi_field_key';
 import {

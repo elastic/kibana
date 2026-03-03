@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -8,7 +8,6 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
@@ -38,5 +37,12 @@
     "@kbn/embeddable-plugin",
     "@kbn/data-plugin",
     "@kbn/saved-search-component",
+    "@kbn/ml-plugin",
+    "@kbn/deeplinks-management",
+    "@kbn/core",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/react-hooks",
   ]
 }

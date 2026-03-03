@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   RECORDS_FIELD,
@@ -27,7 +27,6 @@ export function getAlertsKPIConfig({ spaceId }: ConfigProps): SeriesConfig {
       dataType: 'date',
       operationType: 'date_histogram',
       isBucketed: true,
-      scale: 'interval',
       sourceField: REPORT_METRIC_TIMESTAMP,
     },
     yAxisColumns: [

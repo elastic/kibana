@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 import { useAppContext } from '../../../../app_context';
 import { getEsDeprecationError } from '../../../../lib/get_es_deprecation_error';
@@ -23,12 +24,13 @@ export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
   const criticalDeprecationsCount =
-    esDeprecations?.migrationsDeprecations?.filter((deprecation) => deprecation.isCritical)
-      ?.length ?? 0;
+    esDeprecations?.migrationsDeprecations?.filter(
+      (deprecation) => deprecation.level === 'critical'
+    )?.length ?? 0;
 
   const warningDeprecationsCount =
     esDeprecations?.migrationsDeprecations?.filter(
-      (deprecation) => deprecation.isCritical === false
+      (deprecation) => deprecation.level !== 'critical'
     )?.length ?? 0;
 
   const errorMessage = error && getEsDeprecationError(error).message;

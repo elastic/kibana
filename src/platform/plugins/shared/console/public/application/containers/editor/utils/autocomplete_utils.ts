@@ -8,21 +8,19 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../lib/kb';
-import {
-  AutoCompleteContext,
-  type DataAutoCompleteRulesOneOf,
-  ResultTerm,
-} from '../../../../lib/autocomplete/types';
+import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
+import { type DataAutoCompleteRulesOneOf } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
+import { isRecord } from '../../../../../common/utils/record_utils';
 import {
   END_OF_URL_TOKEN,
   i18nTexts,
@@ -124,6 +122,10 @@ export const getUrlPathCompletionItems = (
 
   // flag to only suggest index names
   let onlyIndexNames = false;
+  // store the partial token for prefix filtering
+  let partialToken = '';
+  // store already selected indices to exclude from suggestions
+  let alreadySelectedIndices: string[] = [];
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
   // if the line ends with /, then we use all url path tokens for autocomplete suggestions
@@ -133,6 +135,14 @@ export const getUrlPathCompletionItems = (
     // if the last token contains a comma, only suggest index names
     if (lastToken?.includes(',')) {
       onlyIndexNames = true;
+      // For comma-separated indices, only filter by the part after the last comma
+      const parts = lastToken.split(',');
+      partialToken = parts.pop() || '';
+      // Track already selected indices to exclude from suggestions
+      alreadySelectedIndices = parts.filter((part) => part.length > 0);
+    } else {
+      // Store the partial token for prefix filtering
+      partialToken = lastToken || '';
     }
   }
   let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
@@ -141,25 +151,38 @@ export const getUrlPathCompletionItems = (
   if (onlyIndexNames) {
     autoCompleteSet = autoCompleteSet.filter((term) => term.meta === 'index');
   }
-  const wordUntilPosition = model.getWordUntilPosition(position);
   const range = {
     startLineNumber: lineNumber,
-    // replace the whole word with the suggestion
-    startColumn: lineContent.endsWith('.')
-      ? // if there is a dot at the end of the content, it's ignored in the wordUntilPosition
-        wordUntilPosition.startColumn - 1
-      : wordUntilPosition.startColumn,
+    // replace the partial token with the suggestion
+    startColumn: column - partialToken.length,
     endLineNumber: lineNumber,
     endColumn: column,
   };
   return (
     filterTermsWithoutName(autoCompleteSet)
-      .filter(
-        (term) =>
-          // Only keep dot-prefixed terms if the user typed in a dot
-          !(typeof term.name === 'string' && term.name.startsWith('.')) ||
-          lineContent.trim().endsWith('.')
-      )
+      .filter((term) => {
+        // Only keep dot-prefixed terms if the user typed a dot
+        const isDotPrefixed = typeof term.name === 'string' && term.name.startsWith('.');
+        if (isDotPrefixed && !partialToken.startsWith('.')) {
+          return false;
+        }
+
+        // Exclude indices that are already selected in comma-separated list
+        if (
+          alreadySelectedIndices.length > 0 &&
+          typeof term.name === 'string' &&
+          alreadySelectedIndices.includes(term.name)
+        ) {
+          return false;
+        }
+
+        // Filter by prefix: only show suggestions that start with what user typed
+        if (partialToken && typeof term.name === 'string') {
+          return term.name.toLowerCase().startsWith(partialToken.toLowerCase());
+        }
+
+        return true;
+      })
       // map autocomplete items to completion items
       .map((item) => {
         return {
@@ -195,14 +218,15 @@ export const getUrlParamsCompletionItems = (
   urlPathTokens.push(END_OF_URL_TOKEN);
   const context = populateContextForMethodAndUrl(method, urlPathTokens);
 
-  const urlParamsComponents = context.endpoint?.paramsAutocomplete.getTopLevelComponents(method);
+  const urlParamsComponents =
+    context.endpoint?.paramsAutocomplete.getTopLevelComponents(method) ?? [];
 
   const currentUrlParamToken = urlParamsTokens.pop();
   // check if we are at the param name or the param value
   const urlParamTokenPath = [];
   // if there are 2 tokens in the current url param, then we have the name and the value of the param
   if (currentUrlParamToken && currentUrlParamToken.length > 1) {
-    urlParamTokenPath.push(currentUrlParamToken![0]);
+    urlParamTokenPath.push(currentUrlParamToken[0]);
   }
 
   populateContext(urlParamTokenPath, context, undefined, true, urlParamsComponents);
@@ -265,12 +289,9 @@ export const getBodyCompletionItems = async (
   // needed for scope linking + global term resolving
   context.endpointComponentResolver = getEndpointBodyCompleteComponents;
   context.globalComponentResolver = getGlobalAutocompleteComponents;
-  let components: unknown;
-  if (context.endpoint) {
-    components = context.endpoint.bodyAutocompleteRootComponents;
-  } else {
-    components = getUnmatchedEndpointComponents();
-  }
+  const components = context.endpoint
+    ? context.endpoint.bodyAutocompleteRootComponents
+    : getUnmatchedEndpointComponents();
   context.editor = editor;
   context.requestStartRow = requestStartLineNumber;
   populateContext(bodyTokens, context, editor, true, components);
@@ -305,9 +326,10 @@ const getSuggestions = (
     endLineNumber: position.lineNumber,
     endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  // if the rest of the line is empty or there is only "
+  // if the rest of the line is empty or there is only " or ends with closing parentheses
   // then template can be inserted, otherwise only name
-  context.addTemplate = isEmptyOrDoubleQuote(lineContentAfterPosition);
+  context.addTemplate =
+    isEmptyOrDoubleQuote(lineContentAfterPosition) || /^}*$/.test(lineContentAfterPosition);
 
   // if there is " after the cursor, include it in the insert range
   let endColumn = position.column;
@@ -315,15 +337,64 @@ const getSuggestions = (
   if (lineContentAfterPosition.startsWith('"')) {
     endColumn = endColumn + 1;
   }
+  // Check if we're typing a field name with a trailing dot
+  const lineContentBeforePosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
+
+  // Check if we're typing a nested field name (contains a dot)
+  // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
+  const quotedFieldWithDotMatch = lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
+  // Also check for unquoted fields with dots (e.g., index.mode without quotes)
+  const unquotedFieldWithDotMatch = lineContentBeforePosition.match(
+    /(?:^|[\s{:,\[])([a-zA-Z_][\w]*(?:\.[\w]+)+)$/
+  );
+  const fieldBeingTyped = quotedFieldWithDotMatch
+    ? quotedFieldWithDotMatch[1]
+    : unquotedFieldWithDotMatch
+    ? unquotedFieldWithDotMatch[1]
+    : null;
+  const isQuotedField = !!quotedFieldWithDotMatch;
+
+  // Adjust the range start column if we have a field with a dot
+  let startColumn = wordUntilPosition.startColumn;
+  if (fieldBeingTyped) {
+    if (isQuotedField) {
+      // Find where the quoted field name starts
+      const fieldIndex = lineContentBeforePosition.lastIndexOf('"' + fieldBeingTyped);
+      if (fieldIndex >= 0) {
+        startColumn = fieldIndex + 2; // +2 to skip the quote and start at the field name
+      }
+    } else {
+      // Find where the unquoted field name starts
+      const fieldIndex = lineContentBeforePosition.lastIndexOf(fieldBeingTyped);
+      if (fieldIndex >= 0) {
+        startColumn = fieldIndex + 1; // +1 because column is 1-indexed
+      }
+    }
+  }
+
   const range = {
     startLineNumber: position.lineNumber,
     // replace the whole word with the suggestion
-    startColumn: wordUntilPosition.startColumn,
+    startColumn,
     endLineNumber: position.lineNumber,
     endColumn,
   };
+
   return (
     filterTermsWithoutName(autocompleteSet)
+      // Filter suggestions to only show nested fields when there's a field being typed with a dot
+      .filter((item) => {
+        if (fieldBeingTyped) {
+          // Only show fields that start with what the user has typed so far
+          return typeof item.name === 'string' && item.name.startsWith(fieldBeingTyped);
+        }
+        return true;
+      })
       // map autocomplete items to completion items
       .map((item) => {
         const suggestion = {
@@ -340,7 +411,7 @@ const getSuggestions = (
       })
   );
 };
-const getInsertText = (
+export const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
   context: AutoCompleteContext
@@ -349,10 +420,25 @@ const getInsertText = (
     return '';
   }
 
-  // Always create the insert text with the name first, check the end of the body content
-  // to decide if we need to add a double quote after the name.
-  // This is done to avoid adding a double quote if the user is typing a value after the name.
-  let insertText = bodyContent.trim().endsWith('"') ? `${name}"` : `"${name}"`;
+  let insertText = '';
+  if (typeof name === 'string') {
+    const bodyContentLines = bodyContent.split('\n');
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+    if (hasUnclosedQuote(currentContentLine)) {
+      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+      insertText = '';
+    } else {
+      // The cursor is at the beginning of a field so the insert text should start with a quote
+      insertText = '"';
+    }
+    if (insertValue && insertValue !== '{' && insertValue !== '[') {
+      insertText += `${insertValue}"`;
+    } else {
+      insertText += `${name}"`;
+    }
+  } else {
+    insertText = name + '';
+  }
 
   // check if there is template to add
   const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
@@ -360,24 +446,22 @@ const getInsertText = (
     template = conditionalTemplate;
   }
 
-  if (template) {
+  if (template && context.addTemplate) {
     let templateLines;
-    const { __raw, value: templateValue } = template;
-    if (__raw && templateValue) {
+    const templateRecord = isRecord(template) ? template : {};
+    const raw = templateRecord.__raw;
+    const templateValue = templateRecord.value;
+
+    if (raw === true && typeof templateValue === 'string') {
       templateLines = templateValue.split(newLineRegex);
     } else {
       templateLines = JSON.stringify(template, null, 2).split(newLineRegex);
     }
     insertText += ': ' + templateLines.join('\n');
   } else if (value === '{') {
-    insertText += ': {$0}';
+    insertText += ': {}';
   } else if (value === '[') {
-    insertText += ': [$0]';
-  } else if (insertValue && insertValue !== '{' && insertValue !== '[') {
-    insertText = `"${insertValue}"`;
-    insertText += ': $0';
-  } else {
-    insertText += ': $0';
+    insertText += ': []';
   }
 
   // the string $0 is used to move the cursor between empty curly/square brackets
@@ -440,4 +524,22 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
 export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
   lineContent = lineContent.trim();
   return !lineContent || lineContent === '"';
+};
+
+export const hasUnclosedQuote = (lineContent: string): boolean => {
+  let insideString = false;
+  let prevChar = '';
+  for (let i = 0; i < lineContent.length; i++) {
+    const char = lineContent[i];
+
+    if (!insideString && char === '"') {
+      insideString = true;
+    } else if (insideString && char === '"' && prevChar !== '\\') {
+      insideString = false;
+    }
+
+    prevChar = char;
+  }
+
+  return insideString;
 };

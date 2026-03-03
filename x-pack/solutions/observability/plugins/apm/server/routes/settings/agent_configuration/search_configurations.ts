@@ -6,11 +6,11 @@
  */
 
 import type { SearchHit } from '@kbn/es-types';
+import { APM_AGENT_CONFIGURATION_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 
 export async function searchConfigurations({
   service,

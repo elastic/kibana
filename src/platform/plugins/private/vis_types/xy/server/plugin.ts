@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 import type { XyConfig } from './config';
 

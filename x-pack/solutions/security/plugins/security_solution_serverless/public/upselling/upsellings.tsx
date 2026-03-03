@@ -24,12 +24,12 @@ import {
   EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
+  EndpointDeviceControlLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
-  EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
@@ -73,13 +73,6 @@ export const upsellingPages: UpsellingPages = [
     pli: ProductFeatureKey.threatIntelligence,
     component: () => (
       <ThreatIntelligencePaywallLazy requiredPLI={ProductFeatureKey.threatIntelligence} />
-    ),
-  },
-  {
-    pageName: SecurityPageName.exceptions,
-    pli: ProductFeatureKey.endpointExceptions,
-    component: () => (
-      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
     ),
   },
   {
@@ -127,6 +120,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'ruleDetailsEndpointExceptions',
     pli: ProductFeatureKey.endpointExceptions,
     component: RuleDetailsEndpointExceptionsLazy,
+  },
+  {
+    id: 'endpoint_device_control',
+    pli: ProductFeatureKey.endpointTrustedDevices,
+    component: EndpointDeviceControlLazy,
   },
   {
     id: 'endpoint_protection_updates',

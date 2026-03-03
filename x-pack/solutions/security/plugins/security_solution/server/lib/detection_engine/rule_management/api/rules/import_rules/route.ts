@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { validateRuleImportResponseActions } from '../../../../../../endpoint/services';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -26,6 +28,7 @@ import {
 } from '../../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { validateRuleActions } from '../../../logic/import/action_connectors/validate_rule_actions';
 import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
 
@@ -41,14 +44,18 @@ import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logi
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'public',
       path: DETECTION_ENGINE_RULES_IMPORT_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
       options: {
@@ -94,6 +101,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           const savedObjectsClient = ctx.core.savedObjects.client;
           const exceptionsClient = ctx.lists?.getExceptionListClient();
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { filename } = (request.body.file as HapiReadableStream).hapi;
           const fileExtension = extname(filename).toLowerCase();
@@ -123,13 +133,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             maxExceptionsImportSize: objectLimit,
           });
           // report on duplicate rules
-          const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
-            getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
-
-          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
-            parsedObjectsWithoutDuplicateErrors,
-            actionSOClient,
-            actionsClient
+          const [duplicateIdErrors, rulesToImportOrErrors] = getTupleDuplicateErrorsAndUniqueRules(
+            rules,
+            request.query.overwrite
           );
 
           // import actions-connectors
@@ -138,30 +144,48 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             success: actionConnectorSuccess,
             warnings: actionConnectorWarnings,
             errors: actionConnectorErrors,
-            rulesWithMigratedActions,
           } = await importRuleActionConnectors({
             actionConnectors,
-            actionsClient,
             actionsImporter,
-            rules: migratedParsedObjectsWithoutDuplicateErrors,
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
-          // original rules actions' ids were replaced with new destinationIds
-          const parsedRuleStream = actionConnectorErrors.length
-            ? []
-            : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
+          const migratedRulesToImportOrErrors = await migrateLegacyActionsIds(
+            rulesToImportOrErrors,
+            actionSOClient,
+            actionsClient
+          );
 
           const ruleSourceImporter = createRuleSourceImporter({
-            config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
+            logger,
           });
 
-          const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
+          const [parsedRules, parsedRuleErrors] = partition(
+            isRuleToImport,
+            migratedRulesToImportOrErrors
+          );
+
+          // After importing the actions and migrating action IDs on rules to import,
+          // validate that all actions referenced by rules exist
+          // Filter out rules that reference non-existent actions
+          const { validatedActionRules, missingActionErrors } = await validateRuleActions({
+            actionsClient,
+            rules: parsedRules,
+          });
+
+          // Validate that Response Actions are valid
+          const { valid: validatedResponseActionsRules, errors: responseActionsErrors } =
+            await validateRuleImportResponseActions({
+              endpointAuthz,
+              endpointService,
+              spaceId,
+              rulesToImport: validatedActionRules,
+            });
+
+          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
 
           const importRuleResponse = await importRules({
             ruleChunks,
@@ -180,9 +204,10 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const importErrors = importRuleResponse.filter(isBulkError);
           const errors = [
             ...parseErrors,
-            ...actionConnectorErrors,
             ...duplicateIdErrors,
             ...importErrors,
+            ...missingActionErrors,
+            ...responseActionsErrors,
           ];
 
           const successes = importRuleResponse.filter((resp) => {
@@ -209,6 +234,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
+          logger.error(`importRulesRoute: Caught error: ${err.message}`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

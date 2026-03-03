@@ -8,8 +8,8 @@
  */
 
 import { formatId } from './constants';
-import { FieldFormatEditorFactory } from '../types';
-import { NumberFormatEditorParams } from '../number/number';
+import type { FieldFormatEditorFactory } from '../types';
+import type { NumberFormatEditorParams } from '../number/number';
 
 export type { BytesFormatEditor } from './bytes';
 export const bytesFormatEditorFactory: FieldFormatEditorFactory<NumberFormatEditorParams> = () =>

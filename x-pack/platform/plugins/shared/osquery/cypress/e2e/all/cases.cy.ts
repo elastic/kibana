@@ -22,7 +22,7 @@ describe('Add to Cases', () => {
     initializeDataViews();
     loadLiveQuery({
       agent_all: true,
-      query: "SELECT * FROM os_version where name='Ubuntu';",
+      query: 'SELECT * FROM os_version;',
       kuery: '',
     }).then((liveQuery) => {
       liveQueryId = liveQuery.action_id;
@@ -46,7 +46,7 @@ describe('Add to Cases', () => {
       cleanupCase(caseId);
     });
 
-    it('should add result a case and not have add to timeline in result', () => {
+    it('should add result to a case without showing add to timeline button', () => {
       addLiveQueryToCase(liveQueryId, caseId);
       cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
@@ -78,17 +78,17 @@ describe('Add to Cases', () => {
       cleanupCase(caseId);
     });
 
-    it('should add result a case and have add to timeline in result', () => {
+    it('should add result to a case without showing add to timeline button', () => {
       addLiveQueryToCase(liveQueryId, caseId);
       cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
 
-      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      cy.contains('SELECT * FROM os_version;');
       checkActionItemsInResults({
         lens: true,
         discover: true,
         cases: false,
-        timeline: true,
+        timeline: false,
       });
     });
   });

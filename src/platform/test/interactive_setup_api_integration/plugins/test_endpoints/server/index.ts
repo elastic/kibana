@@ -20,6 +20,12 @@ export const plugin: PluginInitializer<void, never> = async (
       router.get(
         {
           path: '/test_endpoints/verification_code',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: false,
           options: { authRequired: false },
         },

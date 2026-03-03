@@ -25,7 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../../common';
+import type { ScreenshottingExpressionResponse } from '../../common';
+import { API_ENDPOINT } from '../../common';
 import { useAppContext } from './http_context';
 
 export function App() {
@@ -86,6 +87,7 @@ export function App() {
             {response?.errors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   title="Sorry, there was an error"
                   color="danger"
                   iconType="warning"

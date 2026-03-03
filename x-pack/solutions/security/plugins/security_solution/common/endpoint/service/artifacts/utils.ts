@@ -17,6 +17,8 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
   OWNER_SPACE_ID_TAG_PREFIX,
+  ADVANCED_MODE_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from './constants';
 
 export type TagFilter = (tag: string) => boolean;
@@ -27,11 +29,23 @@ export const isArtifactGlobal = (item: Partial<Pick<ExceptionListItemSchema, 'ta
   return (item.tags ?? []).includes(GLOBAL_ARTIFACT_TAG);
 };
 
-export const isArtifactByPolicy = (item: Pick<ExceptionListItemSchema, 'tags'>): boolean => {
+export const isArtifactByPolicy = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
   return !isArtifactGlobal(item);
 };
 
-export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'tags'>): string[] => {
+export const hasGlobalOrPerPolicyTag = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
+  return (item.tags ?? []).some(
+    (tag) => tag === GLOBAL_ARTIFACT_TAG || tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)
+  );
+};
+
+export const getPolicyIdsFromArtifact = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): string[] => {
   const policyIds = [];
   const tags = item.tags ?? [];
 
@@ -110,12 +124,24 @@ export const getEffectedPolicySelectionByTags = (
   };
 };
 
-export const isFilterProcessDescendantsEnabled = (
+export const isAdvancedModeEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
-): boolean => (item.tags ?? []).includes(FILTER_PROCESS_DESCENDANTS_TAG);
+): boolean => (item.tags ?? []).includes(ADVANCED_MODE_TAG);
 
+export const isAdvancedModeTag: TagFilter = (tag) => tag === ADVANCED_MODE_TAG;
+
+export const isProcessDescendantsEnabled = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+  tag: string = FILTER_PROCESS_DESCENDANTS_TAG
+): boolean => (item.tags ?? []).includes(tag);
+
+/** Checks if the given tag is for filtering process descendants in event filters */
 export const isFilterProcessDescendantsTag: TagFilter = (tag) =>
   tag === FILTER_PROCESS_DESCENDANTS_TAG;
+
+/** Checks if the given tag is for filtering process descendants in trusted apps */
+export const isTrustedProcessDescendantsTag: TagFilter = (tag) =>
+  tag === TRUSTED_PROCESS_DESCENDANTS_TAG;
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
   return {

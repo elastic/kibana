@@ -9,9 +9,9 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import type { Config, Secrets } from '../../../common/bedrock/types';
+import type { Config, Secrets } from '@kbn/connector-schemas/bedrock';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
+import { DEFAULT_MODEL } from '@kbn/connector-schemas/bedrock';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -41,7 +41,7 @@ describe('Bedrock Connector', () => {
     test('config validation passes when only required fields are provided', () => {
       const config: Config = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
-        defaultModel: DEFAULT_BEDROCK_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
 
       expect(configValidator(config, { configurationUtilities })).toEqual(config);
@@ -50,7 +50,7 @@ describe('Bedrock Connector', () => {
     test('config validation failed when a url is invalid', () => {
       const config: Config = {
         apiUrl: 'example.com/do-something',
-        defaultModel: DEFAULT_BEDROCK_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
@@ -69,7 +69,7 @@ describe('Bedrock Connector', () => {
 
       const config: Config = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
-        defaultModel: DEFAULT_BEDROCK_MODEL,
+        defaultModel: DEFAULT_MODEL,
       };
 
       expect(() => {

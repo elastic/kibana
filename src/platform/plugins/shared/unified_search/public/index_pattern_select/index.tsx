@@ -12,7 +12,10 @@ import type { IndexPatternSelectInternalProps } from './index_pattern_select';
 
 const Fallback = () => <div />;
 
-const LazyIndexPatternSelect = React.lazy(() => import('./index_pattern_select'));
+const LazyIndexPatternSelect = React.lazy(async () => {
+  const { IndexPatternSelect } = await import('../ui_module');
+  return { default: IndexPatternSelect };
+});
 export const IndexPatternSelect = (props: IndexPatternSelectInternalProps) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyIndexPatternSelect {...props} />

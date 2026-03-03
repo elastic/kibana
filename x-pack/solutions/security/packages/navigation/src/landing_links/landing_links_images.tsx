@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  mathWithUnits,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -38,6 +39,17 @@ const useStyles = () => {
     `,
     image: css`
       align-items: center;
+      overflow: hidden;
+      width: ${mathWithUnits(euiTheme.size.xxxl, (x) => x * 5)};
+      height: ${mathWithUnits(euiTheme.size.xxxl, (x) => x * 3)};
+      border-radius: ${euiTheme.border.radius.medium};
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
     `,
     content: css`
       padding-left: ${euiTheme.size.s};
@@ -67,9 +79,9 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
           const { id, title, description, landingImage, isBeta, betaOptions } = item;
           return (
             <EuiFlexItem key={id} data-test-subj="LandingItem">
-              <LinkAnchor {...linkProps} tabIndex={-1} css={styles.link}>
+              <LinkAnchor {...linkProps} css={styles.link}>
                 {/* Empty onClick is to force hover style on `EuiPanel` */}
-                <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
+                <EuiPanel element="div" hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false} css={styles.image}>
                       {landingImage && (
@@ -85,7 +97,7 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
                     <EuiFlexItem css={styles.content}>
                       <div css={styles.titleContainer}>
                         <EuiTitle size="s" css={styles.title}>
-                          <h2>{title}</h2>
+                          <span>{title}</span>
                         </EuiTitle>
                         {isBeta && <BetaBadge text={betaOptions?.text} />}
                       </div>

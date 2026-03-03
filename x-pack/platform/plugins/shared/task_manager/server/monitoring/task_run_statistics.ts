@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import { combineLatest, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { filter, startWith, map } from 'rxjs';
-import { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { AggregatedStatProvider, AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import {
-  isTaskRunEvent,
-  isTaskPollingCycleEvent,
+import type { Logger } from '@kbn/core/server';
+import type { AggregatedStatProvider, AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type {
   TaskRun,
   ErroredTask,
   RanTask,
   TaskTiming,
-  isTaskManagerStatEvent,
   TaskManagerStat,
-  TaskPersistence,
   TaskClaim,
+} from '../task_events';
+import {
+  isTaskRunEvent,
+  isTaskPollingCycleEvent,
+  isTaskManagerStatEvent,
+  TaskPersistence,
   isTaskClaimEvent,
 } from '../task_events';
-import { isOk, Ok, unwrap } from '../lib/result_type';
-import { ConcreteTaskInstance } from '../task';
+import type { Ok } from '../lib/result_type';
+import { isOk, unwrap } from '../lib/result_type';
+import type { ConcreteTaskInstance } from '../task';
 import { TaskRunResult } from '../task_running';
-import { FillPoolResult, ClaimAndFillPoolResult } from '../lib/fill_pool';
+import type { ClaimAndFillPoolResult } from '../lib/fill_pool';
+import { FillPoolResult } from '../lib/fill_pool';
+import type { AveragedStat } from './task_run_calculators';
 import {
-  AveragedStat,
   calculateRunningAverage,
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
+  filterOutliers,
 } from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
+import type { TaskPollingLifecycle } from '../polling_lifecycle';
+import type { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];
@@ -340,12 +346,9 @@ export function summarizeTaskRunStat(
   logger: Logger,
   {
     polling: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_successful_poll,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_polling_delay,
       duration: pollingDuration,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       claim_duration,
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
@@ -354,7 +357,6 @@ export function summarizeTaskRunStat(
       persistence: pollingPersistence,
     },
     drift,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     drift_by_type,
     load,
     execution: {
@@ -393,9 +395,10 @@ export function summarizeTaskRunStat(
       load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
-        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) =>
-          calculateRunningAverage(typedDurations)
-        ),
+        duration_by_persistence: mapValues(durationByPersistence, (typedDurations) => {
+          const filteredDurations = filterOutliers(typedDurations);
+          return calculateRunningAverage(filteredDurations);
+        }),
         persistence: {
           [TaskPersistence.Recurring]: 0,
           [TaskPersistence.NonRecurring]: 0,

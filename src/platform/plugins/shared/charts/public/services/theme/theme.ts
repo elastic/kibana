@@ -8,10 +8,12 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Observable, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { LIGHT_THEME, PartialTheme, Theme, getChartsTheme } from '@elastic/charts';
+import type { CoreSetup, CoreTheme } from '@kbn/core/public';
+import type { PartialTheme, Theme } from '@elastic/charts';
+import { LIGHT_THEME, getChartsTheme } from '@elastic/charts';
 
 export class ThemeService {
   /** Returns default charts theme */
@@ -23,7 +25,11 @@ export class ThemeService {
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
 
-  /** An observable boolean for dark mode of kibana */
+  /**
+   * An observable boolean for dark mode of kibana
+   *
+   * @deprecated use `useKibanaIsDarkMode`
+   */
   public get darkModeEnabled$(): Observable<CoreTheme> {
     if (!this.theme$) {
       throw new Error('ThemeService not initialized');
@@ -32,7 +38,11 @@ export class ThemeService {
     return this.theme$;
   }
 
-  /** A React hook for consuming the dark mode value */
+  /**
+   * A React hook for consuming the dark mode value
+   *
+   * @deprecated use `useKibanaIsDarkMode`
+   */
   public useDarkMode = (): boolean => {
     const [value, update] = useState(false);
 
@@ -104,6 +114,13 @@ export class ThemeService {
     this.theme$ = theme.theme$;
     this.theme$.subscribe((newTheme) => {
       this._chartsBaseTheme$.next(getChartsTheme(newTheme));
+      const chartsTheme = getChartsTheme(newTheme);
+      const { fill } = chartsTheme.axes.tickLabel;
+      chartsTheme.axes.axisTitle.fill = fill;
+      chartsTheme.axes.axisTitle.fontWeight = 500;
+      chartsTheme.axes.axisPanelTitle.fill = fill;
+      chartsTheme.axes.axisPanelTitle.fontWeight = 500;
+      this._chartsBaseTheme$.next(chartsTheme);
     });
   }
 }

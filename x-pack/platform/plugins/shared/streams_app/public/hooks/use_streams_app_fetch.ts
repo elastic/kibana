@@ -4,54 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
+import type { TimeState } from '@kbn/es-query';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { UseAbortableAsync, useAbortableAsync } from '@kbn/react-hooks';
-import { useKibana } from './use_kibana';
+import { omit } from 'lodash';
+import { useEffect, useRef } from 'react';
+import { useFetchErrorToast } from './use_fetch_error_toast';
+import { useTimefilter } from './use_timefilter';
 
-export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: boolean }> = (
-  callback,
-  deps,
-  options
-) => {
-  const {
-    core: { notifications },
-  } = useKibana();
+interface StreamsAppFetchOptions {
+  withTimeRange?: boolean;
+  withRefresh?: boolean;
+  disableToastOnError?: boolean;
+}
+
+interface DefaultStreamsAppFetchOptions {
+  withTimeRange: false;
+  withRefresh: false;
+  disableToastOnError: false;
+}
+
+type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> = {
+  signal: AbortSignal;
+} & (TOptions extends { withTimeRange: true } ? { timeState: TimeState } : {});
+
+export function useStreamsAppFetch<
+  T,
+  TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
+>(
+  callback: ({}: ParametersFromOptions<TOptions>) => T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deps: any[],
+  options?: TOptions
+): AbortableAsyncState<T> {
+  const { disableToastOnError = false, withRefresh = false, withTimeRange = false } = options || {};
+
+  const { timeState, timeState$ } = useTimefilter();
+  const showFetchErrorToast = useFetchErrorToast();
 
   const onError = (error: Error) => {
-    let requestUrl: string | undefined;
-
-    if (!options?.disableToastOnError && !isRequestAbortedError(error)) {
-      if (
-        'body' in error &&
-        typeof error.body === 'object' &&
-        !!error.body &&
-        'message' in error.body &&
-        typeof error.body.message === 'string'
-      ) {
-        error.message = error.body.message;
-      }
-
-      if (
-        'request' in error &&
-        typeof error.request === 'object' &&
-        !!error.request &&
-        'url' in error.request &&
-        typeof error.request.url === 'string'
-      ) {
-        requestUrl = error.request.url;
-      }
-
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.streams.failedToFetchError', {
-          defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
-          values: {
-            requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',
-          },
-        }),
-      });
+    if (!disableToastOnError && !isRequestAbortedError(error)) {
+      showFetchErrorToast(error);
 
       // log to console to get the actual stack trace
       // eslint-disable-next-line no-console
@@ -60,16 +54,46 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
   };
 
   const optionsForHook = {
-    ...omit(options, 'disableToastOnError'),
+    ...omit(options, 'disableToastOnError', 'withTimeRange'),
     onError,
   };
 
-  return useAbortableAsync(
-    ({ signal }) => {
-      return callback({ signal });
-    },
+  const timeStateRef = useRef<TimeState>();
 
+  timeStateRef.current = timeState;
+
+  const state = useAbortableAsync<T>(
+    ({ signal }) => {
+      const parameters = {
+        signal,
+        ...(withTimeRange ? { timeState: timeStateRef.current } : {}),
+      } as ParametersFromOptions<TOptions>;
+
+      return callback(parameters);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     deps,
     optionsForHook
   );
-};
+
+  const refreshRef = useRef(state.refresh);
+  refreshRef.current = state.refresh;
+
+  useEffect(() => {
+    const subscription = timeState$.subscribe({
+      next: ({ kind }) => {
+        const shouldRefresh =
+          (withTimeRange && kind === 'shift') || (withRefresh && kind !== 'initial');
+
+        if (shouldRefresh) {
+          refreshRef.current();
+        }
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [timeState$, withTimeRange, withRefresh]);
+
+  return state;
+}

@@ -242,6 +242,7 @@ export class BlocklistValidator extends BaseValidator {
     await this.validateBlocklistData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
+    await this.validateCanCreateGlobalArtifacts(item);
     await this.validateCreateOwnerSpaceIds(item);
 
     return item;
@@ -298,7 +299,7 @@ export class BlocklistValidator extends BaseValidator {
       }
     }
 
-    await this.validateByPolicyItem(updatedItem);
+    await this.validateByPolicyItem(updatedItem, currentItem);
     await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
     await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 

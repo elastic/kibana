@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 import { createOASDocument } from '../../create_oas_document';
 import { bundleSpecs } from '../bundle_specs';
 

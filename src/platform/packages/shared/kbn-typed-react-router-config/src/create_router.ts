@@ -8,17 +8,15 @@
  */
 
 import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
-import { isLeft } from 'fp-ts/lib/Either';
-import { Location } from 'history';
+import { isLeft } from 'fp-ts/Either';
+import type { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { compact, findLastIndex, mapValues, merge, orderBy } from 'lodash';
 import qs from 'query-string';
-import {
-  MatchedRoute,
-  matchRoutes as matchRoutesConfig,
-  RouteConfig as ReactRouterConfig,
-} from 'react-router-config';
-import { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
+import type { MatchedRoute, RouteConfig as ReactRouterConfig } from 'react-router-config';
+import { matchRoutes as matchRoutesConfig } from 'react-router-config';
+import type { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
+import { encodePath } from './encode_path';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
@@ -177,13 +175,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
 
     const paramsWithBuiltInDefaults = merge({ path: {}, query: {} }, params);
 
-    path = path
-      .split('/')
-      .map((part) => {
-        const match = part.match(/(?:{([a-zA-Z]+)})/);
-        return match ? encodeURIComponent(paramsWithBuiltInDefaults.path[match[1]]) : part;
-      })
-      .join('/');
+    path = encodePath(path, paramsWithBuiltInDefaults?.path);
 
     const matchedRoutes = getRoutesToMatch(path);
 

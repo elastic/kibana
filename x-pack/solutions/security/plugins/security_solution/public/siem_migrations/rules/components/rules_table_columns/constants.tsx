@@ -6,8 +6,8 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export type TableColumn = EuiBasicTableColumn<RuleMigration>;
+export type TableColumn = EuiBasicTableColumn<RuleMigrationRule>;
 
 export const COLUMN_EMPTY_VALUE = '-';

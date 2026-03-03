@@ -7,17 +7,16 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { RawValue } from '../../common/constants';
+import { ON_APPLY_FILTER, ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { RawValue } from '../../common/constants';
 import type { MapApi } from './types';
 import { getUiActions } from '../kibana_services';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 
 export function initializeActionHandlers(getApi: () => MapApi | undefined) {
   function getActionContext() {
-    const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
+    const trigger = getUiActions().getTrigger(ON_APPLY_FILTER);
     if (!trigger) {
       throw new Error('Unable to get context, could not locate trigger');
     }
@@ -41,23 +40,20 @@ export function initializeActionHandlers(getApi: () => MapApi | undefined) {
     },
     getActionContext,
     getFilterActions: async () => {
-      const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+      const filterActions = await getUiActions().getTriggerCompatibleActions(ON_APPLY_FILTER, {
         embeddable: getApi(),
         filters: [],
       });
-      const valueClickActions = await getUiActions().getTriggerCompatibleActions(
-        VALUE_CLICK_TRIGGER,
-        {
-          embeddable: getApi(),
-          data: {
-            // uiActions.getTriggerCompatibleActions validates action with provided context
-            // so if event.key and event.value are used in the URL template but can not be parsed from context
-            // then the action is filtered out.
-            // To prevent filtering out actions, provide dummy context when initially fetching actions.
-            data: toValueClickDataFormat('anyfield', 'anyvalue'),
-          },
-        }
-      );
+      const valueClickActions = await getUiActions().getTriggerCompatibleActions(ON_CLICK_VALUE, {
+        embeddable: getApi(),
+        data: {
+          // uiActions.getTriggerCompatibleActions validates action with provided context
+          // so if event.key and event.value are used in the URL template but can not be parsed from context
+          // then the action is filtered out.
+          // To prevent filtering out actions, provide dummy context when initially fetching actions.
+          data: toValueClickDataFormat('anyfield', 'anyvalue'),
+        },
+      });
       return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
     },
     onSingleValueTrigger: async (actionId: string, key: string, value: RawValue) => {

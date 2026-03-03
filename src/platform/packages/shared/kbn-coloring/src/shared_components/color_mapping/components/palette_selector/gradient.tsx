@@ -11,9 +11,9 @@ import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { useDispatch } from 'react-redux';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { changeAlpha } from '../../color/color_math';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 import { getGradientColorScale } from '../../color/color_handling';
 import { AddStop } from './gradient_add_stop';
 import { ColorSwatch } from '../color_picker/color_swatch';
@@ -96,7 +96,7 @@ export function Gradient({
         css={css`
           position: absolute;
           left: 0;
-          top: 6px;
+          top: 8px;
         `}
       >
         {startStepColor ? (

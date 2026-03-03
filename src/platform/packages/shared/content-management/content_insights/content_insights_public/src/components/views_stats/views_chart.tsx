@@ -10,7 +10,7 @@
 import React from 'react';
 import moment from 'moment';
 
-import { Chart, Settings, BarSeries, Axis } from '@elastic/charts';
+import { Chart, ScaleType, Settings, BarSeries, Axis } from '@elastic/charts';
 import { formatDate } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -47,32 +47,12 @@ export const ViewsChart = ({ data }: { data: Array<[week: number, views: number]
         enableHistogramMode={true}
         yNice={true}
         minBarHeight={1}
-        xScaleType="time"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
         timeZone={momentTz}
       />
 
-      <Axis
-        id="time"
-        position="bottom"
-        tickFormat={weekOfFormatter}
-        timeAxisLayerCount={2}
-        style={{
-          tickLabel: {
-            visible: true,
-            padding: 0,
-            rotation: 0,
-            alignment: {
-              vertical: 'bottom',
-              horizontal: 'left',
-            },
-          },
-          tickLine: {
-            visible: true,
-            size: 0,
-            padding: 4,
-          },
-        }}
-      />
+      <Axis id="time" position="bottom" tickFormat={weekOfFormatter} />
       <Axis id="views" position="left" maximumFractionDigits={0} />
     </Chart>
   );

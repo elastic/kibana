@@ -5,35 +5,23 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
-  RuleMigrationTranslationResult,
-  UpdateRuleMigrationData,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
-import {
-  type RuleMigration,
-  type RuleMigrationResource,
+  MigrationTranslationResult,
+  SiemMigrationResource,
+} from '../../../../common/siem_migrations/model/common.gen';
+import type {
+  RuleMigration,
+  RuleMigrationRule,
+  UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
-
-export type Stored<T extends object> = T & { id: string };
+import type { Stored } from '../types';
+import type { SiemMigrationsIndexNameProvider } from '../common/types';
 
 export type StoredRuleMigration = Stored<RuleMigration>;
-export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
-
-export interface SiemRuleMigrationsClientDependencies {
-  inferenceClient: InferenceClient;
-  rulesClient: RulesClient;
-  actionsClient: ActionsClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  packageService?: PackageService;
-  telemetry: AnalyticsServiceSetup;
-}
+export type StoredRuleMigrationRule = Stored<RuleMigrationRule>;
+export type StoredRuleMigrationResource = Stored<SiemMigrationResource>;
 
 export interface RuleMigrationIntegration {
   id: string;
@@ -53,8 +41,8 @@ export interface RuleMigrationPrebuiltRule {
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 
-export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
-  translation_result?: RuleMigrationTranslationResult;
+export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
+  translation_result?: MigrationTranslationResult;
 };
 
 /**
@@ -71,3 +59,18 @@ export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
  *
  **/
 export type SplunkSeverity = '1' | '2' | '3' | '4' | '5';
+
+export interface RuleMigrationAdapters {
+  rules: IndexPatternAdapter;
+  resources: IndexPatternAdapter;
+  integrations: IndexAdapter;
+  prebuiltrules: IndexAdapter;
+  migrations: IndexPatternAdapter;
+}
+
+export type RuleMigrationAdapterId = keyof RuleMigrationAdapters;
+
+export type RuleMigrationIndexNameProviders = Record<
+  RuleMigrationAdapterId,
+  SiemMigrationsIndexNameProvider
+>;

@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { RulesParams } from '../../../locators/rules';
+import type { RulesLocatorParams } from '@kbn/deeplinks-observability';
 
 export interface RuleStatsState {
   total: number;
@@ -62,7 +62,7 @@ export const renderRuleStats = (
   ruleStats: RuleStatsState,
   manageRulesHref: string,
   ruleStatsLoading: boolean,
-  rulesLocator?: LocatorPublic<RulesParams>
+  rulesLocator?: LocatorPublic<RulesLocatorParams>
 ) => {
   const handleNavigateToRules = async (stats: RuleStatsState, status: Status) => {
     const count = getStatCount(stats, status);

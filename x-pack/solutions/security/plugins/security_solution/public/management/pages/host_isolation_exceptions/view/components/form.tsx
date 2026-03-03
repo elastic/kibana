@@ -19,16 +19,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
-import type {
-  EffectedPolicySelection,
-  EffectedPolicySelectProps,
-} from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  getArtifactTagsByPolicySelection,
-  getEffectedPolicySelectionByTags,
-  isArtifactGlobal,
-} from '../../../../../../common/endpoint/service/artifacts';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,
@@ -41,7 +33,6 @@ import {
 } from './translations';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
-import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 
 export const testIdPrefix = 'hostIsolationExceptions-form';
 
@@ -53,7 +44,7 @@ interface ExceptionIpEntry {
 }
 
 export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
-  ({ item: exception, onChange, policies, disabled, mode, error }) => {
+  ({ item: exception, onChange, disabled, mode, error }) => {
     const ipEntry = useMemo(() => {
       return (exception.entries[0] || {
         field: 'destination.ip',
@@ -68,12 +59,6 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const [hasNameError, setHasNameError] = useState(!exception.name);
     const [hasIpError, setHasIpError] = useState(!ipEntry.value);
     const getTestId = useTestIdGenerator(testIdPrefix);
-    const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
-
-    const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isArtifactGlobal(exception),
-      selected: [],
-    });
 
     const isFormContentValid = useMemo(() => {
       return !hasNameError && !hasIpError;
@@ -129,23 +114,11 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
       [ipEntry, notifyOfChange]
     );
 
-    const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
-      (selection) => {
-        // preserve the previous selection between global and not global toggle
-        if (selection.isGlobal) {
-          setSelectedPolicies({ isGlobal: true, selected: selection.selected });
-        } else {
-          setSelectedPolicies(selection);
-        }
-
-        const tags = getTagsUpdatedBy(
-          'policySelection',
-          getArtifactTagsByPolicySelection(selection)
-        );
-
-        notifyOfChange({ tags });
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        notifyOfChange(updatedItem);
       },
-      [getTagsUpdatedBy, notifyOfChange]
+      [notifyOfChange]
     );
 
     const handleOnDescriptionChange = useCallback(
@@ -166,6 +139,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           data-test-subj="hostIsolationExceptions-form-name-input-formRow"
         >
           <EuiFieldText
+            isInvalid={hasNameError && hasBeenInputNameVisited}
             id="eventFiltersFormInputName"
             placeholder={NAME_PLACEHOLDER}
             defaultValue={exception.name ?? ''}
@@ -194,6 +168,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           data-test-subj="hostIsolationExceptions-form-ip-input-formRow"
         >
           <EuiFieldText
+            isInvalid={hasIpError && hasBeenInputIpVisited}
             id="eventFiltersFormInputName"
             placeholder={IP_PLACEHOLDER}
             defaultValue={(exception.entries?.[0] as ExceptionIpEntry)?.value ?? ''}
@@ -234,13 +209,6 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
       ),
       [disabled, exception.description, handleOnDescriptionChange]
     );
-
-    // set current policies if not previously selected
-    useEffect(() => {
-      if (selectedPolicies.selected.length === 0 && exception.tags) {
-        setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags, policies));
-      }
-    }, [exception.tags, policies, selectedPolicies.selected.length]);
 
     // Anytime the `notificyOfChange()` is re-defined, call it with current values.
     // This will happen
@@ -311,11 +279,8 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           isDisabled={disabled}
         >
           <EffectedPolicySelect
-            isGlobal={selectedPolicies.isGlobal}
-            isPlatinumPlus={true}
-            selected={selectedPolicies.selected}
-            options={policies}
-            onChange={handlePolicySelectChange}
+            item={exception}
+            onChange={handleEffectedPolicyOnChange}
             data-test-subj={getTestId('effectedPolicies')}
             disabled={disabled}
           />

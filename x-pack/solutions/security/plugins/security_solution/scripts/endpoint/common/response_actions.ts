@@ -12,6 +12,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
@@ -67,14 +68,16 @@ export const sendFleetActionResponse = async (
       delete fleetResponse.error;
     }
 
-    await esClient.index(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        body: fleetResponse,
-        refresh: 'wait_for',
-      },
-      ES_INDEX_OPTIONS
-    );
+    await esClient
+      .index(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          body: fleetResponse,
+          refresh: 'wait_for',
+        },
+        ES_INDEX_OPTIONS
+      )
+      .catch(catchAxiosErrorFormatAndThrow);
   }
 
   // @ts-expect-error
@@ -148,13 +151,23 @@ export const sendEndpointActionResponse = async (
             .content as unknown as ResponseActionRunScriptOutputContent
         ).stderr = 'runscript command timed out';
       }
+
+      if (
+        endpointResponse.EndpointActions.data.command === 'cancel' &&
+        endpointResponse.EndpointActions.data.output
+      ) {
+        (endpointResponse.EndpointActions.data.output.content as unknown as { code: string }).code =
+          'ra_cancel_error';
+      }
     }
 
-    await esClient.index({
-      index: ENDPOINT_ACTION_RESPONSES_INDEX,
-      body: endpointResponse,
-      refresh: 'wait_for',
-    });
+    await esClient
+      .index({
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        body: endpointResponse,
+        refresh: 'wait_for',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
 
     // ------------------------------------------
     // Post Action Response tasks
@@ -184,19 +197,20 @@ export const sendEndpointActionResponse = async (
 
     // For `get-file`, upload a file to ES
     if (
-      (action.command === 'execute' || action.command === 'get-file') &&
+      (action.command === 'execute' ||
+        action.command === 'get-file' ||
+        action.command === 'runscript') &&
       !endpointResponse.error
     ) {
       const filePath =
         action.command === 'execute'
           ? '/execute/file/path'
-          : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (
+          : (
               action as unknown as ActionDetails<
                 ResponseActionGetFileOutputContent,
                 ResponseActionGetFileParameters
               >
-            )?.parameters?.path!;
+            )?.parameters?.path ?? '/execute/file/path';
 
       const fileName = basename(filePath.replace(/\\/g, '/'));
       const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
@@ -230,13 +244,15 @@ export const sendEndpointActionResponse = async (
       });
 
       // Index the file's metadata
-      const fileMeta = await esClient.index({
-        index: FILE_STORAGE_METADATA_INDEX,
-        id: getFileDownloadId(action, actionAgentId),
-        op_type: 'create',
-        refresh: 'wait_for',
-        body: fileMetaDoc,
-      });
+      const fileMeta = await esClient
+        .index({
+          index: FILE_STORAGE_METADATA_INDEX,
+          id: getFileDownloadId(action, actionAgentId),
+          op_type: 'create',
+          refresh: 'wait_for',
+          body: fileMetaDoc,
+        })
+        .catch(catchAxiosErrorFormatAndThrow);
 
       // Index the file content (just one chunk)
       // call to `.index()` copied from File plugin here:
@@ -265,6 +281,7 @@ export const sendEndpointActionResponse = async (
             },
           }
         )
+        .catch(catchAxiosErrorFormatAndThrow)
         .then(() => sleep(2000));
     }
   }
@@ -317,6 +334,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as unknown as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
+    case 'runscript':
       const executeOutput: Partial<ResponseActionExecuteOutputContent> = {
         output_file_id: getFileDownloadId(action, action.agents[0]),
       };
@@ -338,6 +356,29 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         }),
       } as unknown as ResponseOutput<ResponseActionExecuteOutputContent>;
 
+    case 'cancel':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_cancel_success_done',
+          },
+        },
+      } as unknown as ResponseOutput;
+
+    case 'memory-dump':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump_success_done',
+            file_size: 2322000,
+            path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
+            disk_free_space: 123045678009,
+          },
+        },
+      } as unknown as ResponseOutput;
+
     default:
       return { output: undefined };
   }
@@ -347,21 +388,23 @@ export async function getLatestActionDoc(
   esClient: Client
 ): Promise<SearchHit<EndpointAction> | undefined> {
   return (
-    await esClient.search<EndpointAction>({
-      index: AGENT_ACTIONS_INDEX,
-      ignore_unavailable: true,
-      query: {
-        match: {
-          type: 'INPUT_ACTION',
+    await esClient
+      .search<EndpointAction>({
+        index: AGENT_ACTIONS_INDEX,
+        ignore_unavailable: true,
+        query: {
+          match: {
+            type: 'INPUT_ACTION',
+          },
         },
-      },
-      sort: {
-        '@timestamp': {
-          order: 'desc',
+        sort: {
+          '@timestamp': {
+            order: 'desc',
+          },
         },
-      },
-      size: 1,
-    })
+        size: 1,
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).hits.hits.at(0);
 }
 
@@ -386,10 +429,12 @@ export async function waitForNewActionDoc(
 }
 
 export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: T) {
-  return esClient.update({
-    index: AGENT_ACTIONS_INDEX,
-    id,
-    doc,
-    refresh: 'wait_for',
-  });
+  return esClient
+    .update({
+      index: AGENT_ACTIONS_INDEX,
+      id,
+      doc,
+      refresh: 'wait_for',
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
 }

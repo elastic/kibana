@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-import React, { FunctionComponent, memo, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,23 +17,82 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
+import type { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
-import { ProcessorsDispatch } from '../../processors_reducer';
+import type { ProcessorsDispatch } from '../../processors_reducer';
 
-import { ProcessorInfo } from '../processors_tree';
+import type { ProcessorInfo } from '../processors_tree';
 import { PipelineProcessorsItemStatus } from '../pipeline_processors_editor_item_status';
 import { useTestPipelineContext } from '../../context';
 
 import { getProcessorDescriptor } from '../shared';
 
-import './pipeline_processors_editor_item.scss';
-
 import { ContextMenu } from './context_menu';
 import { i18nTexts } from './i18n_texts';
-import { Handlers } from './types';
+import type { Handlers } from './types';
+
+const useStyles = ({
+  isSelected,
+  isDimmedStyle,
+  shouldHideDescription,
+  isCancelButton,
+}: {
+  isSelected: boolean;
+  isDimmedStyle: boolean;
+  shouldHideDescription: boolean;
+  isCancelButton: boolean;
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    panel: css`
+      transition: border-color ${euiTheme.animation.extraSlow} ${euiTheme.animation.resistance};
+      min-height: 50px;
+      ${isSelected &&
+      css`
+        border: ${euiTheme.border.thin};
+        border-color: ${euiTheme.colors.primary};
+      `}
+      ${isDimmedStyle &&
+      css`
+        box-shadow: none;
+      `}
+    `,
+    flexItemMinWidth: css`
+      min-width: 0;
+    `,
+    innerFlexGroup: css`
+      width: 100%;
+      overflow: hidden;
+    `,
+    statusContainer: css`
+      min-width: 15px;
+    `,
+    processorText: css`
+      line-height: ${euiTheme.size.l};
+    `,
+    descriptionContainer: css`
+      min-width: 0;
+      ${shouldHideDescription &&
+      css`
+        display: none;
+      `}
+    `,
+    moveButton: css`
+      &:hover {
+        transform: none !important;
+      }
+      ${isCancelButton &&
+      css`
+        z-index: ${euiTheme.levels.menu};
+      `}
+    `,
+  };
+};
 
 export interface Props {
   processor: ProcessorInternal;
@@ -57,6 +116,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     editor,
     processorsDispatch,
   }) {
+    const editButtonRef = useRef<HTMLAnchorElement>(null);
+    const contextMenuButtonRef = useRef<HTMLButtonElement>(null);
     const isEditorNotInIdleMode = editor.mode.id !== 'idle';
     const isInMoveMode = Boolean(movingProcessor);
     const isMovingThisProcessor = processor.id === movingProcessor?.id;
@@ -80,22 +141,15 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       testOutputPerProcessor && testOutputPerProcessor[selectedDocumentIndex][processor.id];
     const processorStatus = processorOutput?.status ?? 'inactive';
 
-    const panelClasses = classNames('pipelineProcessorsEditor__item', {
-      'pipelineProcessorsEditor__item--selected': isMovingThisProcessor || isEditingThisProcessor,
-      'pipelineProcessorsEditor__item--dimmed': isDimmed,
-    });
-
     const defaultDescription = processorDescriptor?.getDefaultDescription(processor.options);
-
     const hasNoDescription = !defaultDescription && !processor.options.description;
 
-    const inlineTextInputContainerClasses = classNames(
-      'pipelineProcessorsEditor__item__descriptionContainer',
-      {
-        'pipelineProcessorsEditor__item__descriptionContainer--displayNone':
-          isInMoveMode && hasNoDescription,
-      }
-    );
+    const styles = useStyles({
+      isSelected: isMovingThisProcessor || isEditingThisProcessor,
+      isDimmedStyle: isDimmed,
+      shouldHideDescription: isInMoveMode && hasNoDescription,
+      isCancelButton: isMovingThisProcessor,
+    });
 
     const onDescriptionChange = useCallback(
       (nextDescription: any) => {
@@ -128,9 +182,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         ? i18nTexts.moveButtonLabel
         : i18nTexts.cancelMoveButtonLabel;
       const dataTestSubj = !isMovingThisProcessor ? 'moveItemButton' : 'cancelMoveItemButton';
-      const moveButtonClasses = classNames('pipelineProcessorsEditor__item__moveButton', {
-        'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
-      });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
       const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
@@ -153,7 +204,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
       // did not fire.
       return (
-        <div className={moveButtonClasses}>
+        <div css={styles.moveButton}>
           {!isInMoveMode ? (
             <EuiToolTip content={i18nTexts.moveButtonLabel}>{moveButton}</EuiToolTip>
           ) : (
@@ -164,7 +215,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     };
 
     return (
-      <EuiPanel hasBorder hasShadow={false} paddingSize="s" className={panelClasses}>
+      <EuiPanel hasBorder hasShadow={false} paddingSize="s" css={styles.panel}>
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
@@ -173,15 +224,15 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           data-test-subj={selectorToDataTestSubject(selector)}
           data-processor-id={processor.id}
         >
-          <EuiFlexItem className="pipelineProcessorsEditor__item__controlsFlexItem">
+          <EuiFlexItem css={styles.flexItemMinWidth}>
             <EuiFlexGroup
-              className="pipelineProcessorsEditor__item__controlsContainer"
+              css={styles.innerFlexGroup}
               gutterSize="m"
               alignItems="center"
               responsive={false}
             >
               <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
-              <EuiFlexItem grow={false} className="pipelineProcessorsEditor__item__statusContainer">
+              <EuiFlexItem grow={false} css={styles.statusContainer}>
                 {isExecutingPipeline ? (
                   <EuiLoadingSpinner size="s" />
                 ) : (
@@ -189,17 +240,15 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText
-                  className="pipelineProcessorsEditor__item__processorTypeLabel"
-                  color={isDimmed ? 'subdued' : undefined}
-                >
+                <EuiText css={styles.processorText} color={isDimmed ? 'subdued' : undefined}>
                   <EuiLink
+                    ref={editButtonRef}
                     tabIndex={isEditorNotInIdleMode ? -1 : 0}
                     disabled={isEditorNotInIdleMode}
                     onClick={() => {
                       editor.setMode({
                         id: 'managingProcessor',
-                        arg: { processor, selector },
+                        arg: { processor, selector, buttonRef: editButtonRef },
                       });
                     }}
                     data-test-subj="manageItemButton"
@@ -210,7 +259,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               <EuiFlexItem
                 data-test-subj="pipelineProcessorItemDescriptionContainer"
-                className={inlineTextInputContainerClasses}
+                css={styles.descriptionContainer}
                 grow={false}
               >
                 <EuiInlineEditText
@@ -229,12 +278,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ContextMenu
+              ref={contextMenuButtonRef}
               data-test-subj="moreMenu"
               disabled={isEditorNotInIdleMode}
               hidden={isInMoveMode}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {
-                editor.setMode({ id: 'creatingProcessor', arg: { selector } });
+                editor.setMode({
+                  id: 'creatingProcessor',
+                  arg: { selector, buttonRef: contextMenuButtonRef },
+                });
               }}
               onDelete={() => {
                 editor.setMode({ id: 'removingProcessor', arg: { selector } });

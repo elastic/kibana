@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LegacyMetricState } from '@kbn/lens-plugin/common';
+import type { LegacyMetricState } from '@kbn/lens-plugin/common';
 import { euiPaletteForStatus } from '@elastic/eui';
 import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from '../constants/field_names/synthetics';
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 
@@ -110,6 +110,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary: *' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_successful',
@@ -122,6 +123,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary.down: 0' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_errors',
@@ -151,6 +153,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           language: 'kuery',
           query: 'summary.status: down and summary.final_attempt: true',
         },
+        emptyAsNull: false,
       },
     ],
     labels: FieldLabels,

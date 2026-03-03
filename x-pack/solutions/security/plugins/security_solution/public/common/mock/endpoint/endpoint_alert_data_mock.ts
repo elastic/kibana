@@ -70,7 +70,7 @@ const setAlertDetailsItemDataOverrides = (
   return data;
 };
 
-/** @private */
+/** @internal */
 const generateEndpointAlertDetailsItemDataMock = (
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
@@ -145,7 +145,7 @@ const generateEndpointAlertDetailsItemDataMock = (
   return data;
 };
 
-/** @private */
+/** @internal */
 const generateSentinelOneAlertDetailsItemDataMock = (
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
@@ -217,7 +217,7 @@ const generateMicrosoftDefenderEndpointAlertDetailsItemDataMock = (
   return data;
 };
 
-/** @private */
+/** @internal */
 const generateCrowdStrikeAlertDetailsItemDataMock = (
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {

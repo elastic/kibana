@@ -13,6 +13,8 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'day', value: 'd' },
       { text: 'week', value: 'w' },
+      { text: 'hour', value: 'h' },
+      { text: 'minute', value: 'm' },
     ]);
   });
 
@@ -21,6 +23,8 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
+      { text: 'hours', value: 'h' },
+      { text: 'minutes', value: 'm' },
     ]);
   });
 
@@ -29,6 +33,8 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
+      { text: 'hours', value: 'h' },
+      { text: 'minutes', value: 'm' },
     ]);
   });
 
@@ -37,6 +43,8 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
+      { text: 'hours', value: 'h' },
+      { text: 'minutes', value: 'm' },
     ]);
   });
 
@@ -45,6 +53,8 @@ describe('getTimeUnitOptions', () => {
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
+      { text: 'hours', value: 'h' },
+      { text: 'minutes', value: 'm' },
     ]);
   });
 });

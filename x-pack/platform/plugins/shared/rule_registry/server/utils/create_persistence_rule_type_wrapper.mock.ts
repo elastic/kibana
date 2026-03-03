@@ -6,7 +6,7 @@
  */
 
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { PersistenceServices } from './persistence_types';
+import type { PersistenceServices } from './persistence_types';
 
 export const createPersistenceServicesMock = (): jest.Mocked<PersistenceServices> => {
   return {
@@ -15,6 +15,9 @@ export const createPersistenceServicesMock = (): jest.Mocked<PersistenceServices
   };
 };
 
+export type PersistenceExecutorOptionsMock = ReturnType<
+  typeof createPersistenceExecutorOptionsMock
+>;
 export const createPersistenceExecutorOptionsMock = () => {
   return {
     ...alertsMock.createRuleExecutorServices(),

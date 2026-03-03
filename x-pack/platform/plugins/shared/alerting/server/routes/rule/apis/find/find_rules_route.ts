@@ -72,7 +72,6 @@ export const findRulesRoute = (
         const options = transformFindRulesBodyV1({
           ...query,
           has_reference: query.has_reference || undefined,
-          search_fields: searchFieldsAsArray(query.search_fields),
         });
 
         if (req.query.fields) {
@@ -90,7 +89,7 @@ export const findRulesRoute = (
         });
 
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, false);
 
         return res.ok({
           body: responseBody,
@@ -99,10 +98,3 @@ export const findRulesRoute = (
     )
   );
 };
-
-function searchFieldsAsArray(searchFields: string | string[] | undefined): string[] | undefined {
-  if (!searchFields) {
-    return;
-  }
-  return Array.isArray(searchFields) ? searchFields : [searchFields];
-}

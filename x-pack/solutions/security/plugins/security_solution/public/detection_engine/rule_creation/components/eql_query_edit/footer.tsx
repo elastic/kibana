@@ -247,7 +247,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                     ownFocus={false}
                   >
                     <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
-                    <div style={{ width: '300px' }}>
+                    <div css={{ width: '300px' }}>
                       {!isSizeOptionDisabled && (
                         <EuiFormRow
                           data-test-subj="eql-size-field"

@@ -6,26 +6,30 @@
  */
 
 import React from 'react';
-import { PieLayerState, PieVisualizationState } from '../..';
 import { LayerSettings } from './layer_settings';
-import { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
+import type {
+  FramePublicAPI,
+  VisualizationLayerSettingsProps,
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+} from '@kbn/lens-common';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('layer settings', () => {
   describe('multiple metrics switch', () => {
-    const getState = (allowMultipleMetrics: boolean): PieVisualizationState => ({
+    const getState = (allowMultipleMetrics: boolean): LensPartitionVisualizationState => ({
       shape: 'pie',
       layers: [
         {
           layerId,
           allowMultipleMetrics,
-        } as PieLayerState,
+        } as LensPartitionLayerState,
       ],
     });
 
     const layerId = 'layer-id';
-    const props: VisualizationLayerSettingsProps<PieVisualizationState> & {
+    const props: VisualizationLayerSettingsProps<LensPartitionVisualizationState> & {
       section: 'data' | 'appearance';
     } = {
       setState: jest.fn(),
@@ -38,7 +42,7 @@ describe('layer settings', () => {
 
     const renderLayerSettings = (
       propsOverrides?: Partial<
-        VisualizationLayerSettingsProps<PieVisualizationState> & {
+        VisualizationLayerSettingsProps<LensPartitionVisualizationState> & {
           section: 'data' | 'appearance';
         }
       >

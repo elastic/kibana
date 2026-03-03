@@ -13,11 +13,21 @@ export const RangeSliderStrings = {
   control: {
     getDisplayName: () =>
       i18n.translate('controls.rangeSliderControl.displayName', {
-        defaultMessage: 'Range slider',
+        defaultMessage: 'range slider',
       }),
     getInvalidSelectionWarningLabel: () =>
       i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {
         defaultMessage: 'Selected range returns no results.',
+      }),
+    getLowerBoundAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.rangeSlider.control.lowerBoundAriaLabel', {
+        defaultMessage: 'Range slider lower bound for {fieldName}',
+        values: { fieldName },
+      }),
+    getUpperBoundAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.rangeSlider.control.lowerBoundAriaLabel', {
+        defaultMessage: 'Range slider upper bound for {fieldName}',
+        values: { fieldName },
       }),
   },
   editor: {

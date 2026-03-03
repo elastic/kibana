@@ -53,8 +53,8 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 
     if (currentPolicy.is_managed) {
       return (
-        <EuiCallOut>
-          <p>{EDIT_IN_SYNTHETICS_DESC}</p>
+        <EuiCallOut announceOnMount>
+          <p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>
           <EuiButton
             isLoading={!url}
             href={url + `?packagePolicyId=${currentPolicy.id}`}

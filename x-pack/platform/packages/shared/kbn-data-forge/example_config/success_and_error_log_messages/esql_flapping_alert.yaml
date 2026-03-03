@@ -1,0 +1,54 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: true
+
+indexing:
+  eventsPerCycle: 1
+  dataset: "database_logs"
+
+schedule:
+  - template: "bad"
+    start: "now-2m"
+    end: "now+2m"
+    eventsPerCycle: 15
+    randomness: 0.1
+  - template: "good"
+    start: "now+2m"
+    end: "now+5m"
+    randomness: 0.1
+  - template: "bad"
+    start: "now+5m"
+    end: "now+8m"
+    eventsPerCycle: 5
+    randomness: 0.1
+  - template: "good"
+    start: "now+8m"
+    end: "now+10m"
+    randomness: 0.1
+  - template: "bad"
+    start: "now+10m"
+    end: "now+14m"
+    eventsPerCycle: 15
+    randomness: 0.1
+  - template: "good"
+    start: "now+14m"
+    end: "now+17m"
+    randomness: 0.1
+  - template: "bad"
+    start: "now+17m"
+    end: "now+20m"
+    eventsPerCycle: 10
+    randomness: 0.1
+  - template: "good"
+    start: "now+20m"
+    end: "now+25m"
+    randomness: 0.1
+  - template: "bad"
+    start: "now+25m"
+    end: "now+30m"
+    eventsPerCycle: 20
+    randomness: 0.1
+  

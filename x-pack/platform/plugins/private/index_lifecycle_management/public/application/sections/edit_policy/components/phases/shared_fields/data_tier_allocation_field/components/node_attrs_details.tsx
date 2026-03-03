@@ -19,6 +19,7 @@ import {
   EuiSkeletonText,
   EuiCallOut,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useLoadNodeDetails } from '../../../../../../../services/api';
@@ -29,6 +30,8 @@ interface Props {
 }
 
 export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, selectedNodeAttrs }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { data, isLoading, error, resendRequest } = useLoadNodeDetails(selectedNodeAttrs);
   let content;
   if (isLoading) {
@@ -37,6 +40,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
     const { statusCode, message } = error;
     content = (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsLoadingFailedTitle"
@@ -82,15 +86,19 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         ]}
         pagination={true}
         sorting={true}
+        tableCaption={i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.tableCaption', {
+          defaultMessage: 'Nodes that contain the attribute {selectedNodeAttrs}',
+          values: { selectedNodeAttrs },
+        })}
       />
     );
   }
   return (
     <EuiPortal>
-      <EuiFlyout ownFocus onClose={close}>
+      <EuiFlyout ownFocus onClose={close} aria-labelledby={modalTitleId}>
         <EuiFlyoutBody>
           <EuiTitle>
-            <h2>
+            <h2 id={modalTitleId}>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.nodeAttrDetails.title"
                 defaultMessage="Nodes that contain the attribute {selectedNodeAttrs}"

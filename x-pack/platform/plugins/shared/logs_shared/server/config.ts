@@ -6,8 +6,8 @@
  */
 
 import { schema, offeringBasedSchema } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { LogsSharedConfig } from '../common/plugin_config';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+import type { LogsSharedConfig } from '../common/plugin_config';
 
 export const configSchema = schema.object({
   savedObjects: schema.object({

@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { Writable } from '@kbn/utility-types';
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer, GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import {
@@ -19,9 +20,10 @@ import {
   WIZARD_ID,
 } from '../../../../common/constants';
 import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
-import {
+import type {
   ESSearchSourceDescriptor,
   VectorLayerDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
 
 export function createDefaultLayerDescriptor(
@@ -58,8 +60,10 @@ export const esDocumentsLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = createDefaultLayerDescriptor(sourceConfig, mapColors);
-      if (isPointsOnly) {
-        layerDescriptor.style.properties[VECTOR_STYLES.LINE_WIDTH] = {
+      if (isPointsOnly && layerDescriptor.style) {
+        (layerDescriptor.style.properties as Writable<VectorStylePropertiesDescriptor>)[
+          VECTOR_STYLES.LINE_WIDTH
+        ] = {
           type: STYLE_TYPE.STATIC,
           options: {
             size: 0,

@@ -45,7 +45,11 @@ import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 
-const { socTrends: socTrendsUnused, ...timeRangeSettings } = getTimeRangeSettings(false);
+const {
+  socTrends: socTrendsUnused,
+  valueReport: valueReportSettings,
+  ...timeRangeSettings
+} = getTimeRangeSettings(false);
 
 export const initialInputsState: InputsState = {
   global: {
@@ -78,10 +82,15 @@ export const initialInputsState: InputsState = {
     filters: [],
     fullScreen: false,
   },
+  valueReport: {
+    timerange: valueReportSettings,
+    policy: getIntervalSettings(false),
+    linkTo: [],
+  },
 };
 
 export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState => {
-  const { from, fromStr, to, toStr, socTrends } = getTimeRangeSettings();
+  const { from, fromStr, to, toStr, valueReport, socTrends } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
   return {
     global: {
@@ -125,6 +134,14 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
       },
       filters: [],
       fullScreen: false,
+    },
+    valueReport: {
+      timerange: valueReport,
+      linkTo: [],
+      policy: {
+        kind,
+        duration,
+      },
     },
     ...(socTrendsEnabled
       ? {
@@ -196,8 +213,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       queries: state.global.queries.slice(state.global.queries.length),
     },
   }))
-  .case(setQuery, (state, { inputId, id, inspect, loading, refetch, searchSessionId }) =>
-    upsertQuery({ inputId, id, inspect, loading, refetch, state, searchSessionId })
+  .case(setQuery, (state, { inputId, id, inspect, loading, refetch, searchSessionId, tables }) =>
+    upsertQuery({ inputId, id, inspect, loading, refetch, state, searchSessionId, tables })
   )
   .case(deleteOneQuery, (state, { inputId, id }) => helperDeleteOneQuery({ inputId, id, state }))
   .case(setDuration, (state, { id, duration }) => ({

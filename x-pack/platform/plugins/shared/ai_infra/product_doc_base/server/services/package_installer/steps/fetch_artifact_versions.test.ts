@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import fetch, { Response } from 'node-fetch';
+import * as fs from 'fs';
 import { fetchArtifactVersions } from './fetch_artifact_versions';
-import { getArtifactName, DocumentationProduct, ProductName } from '@kbn/product-doc-common';
+import type { ProductName } from '@kbn/product-doc-common';
+import { getArtifactName, DocumentationProduct } from '@kbn/product-doc-common';
 
-jest.mock('node-fetch');
-const fetchMock = fetch as jest.MockedFn<typeof fetch>;
+jest.mock('fs');
+
+const fetchMock = jest.spyOn(global, 'fetch');
 
 const createResponse = ({
   artifactNames,
@@ -41,14 +43,16 @@ const createResponse = ({
 };
 
 const artifactRepositoryUrl = 'https://lost.com';
+const localArtifactRepositoryUrl = 'file://usr/local/local_artifacts';
 
 const expectVersions = (
-  versions: Partial<Record<ProductName, string[]>>
-): Record<ProductName, string[]> => {
-  const response = {} as Record<ProductName, string[]>;
+  versions: Partial<Record<ProductName | 'openapi', string[]>>
+): Record<ProductName | 'openapi', string[]> => {
+  const response = {} as Record<ProductName | 'openapi', string[]>;
   Object.values(DocumentationProduct).forEach((productName) => {
     response[productName] = [];
   });
+  response.openapi = [];
   return {
     ...response,
     ...versions,
@@ -58,13 +62,21 @@ const expectVersions = (
 describe('fetchArtifactVersions', () => {
   beforeEach(() => {
     fetchMock.mockReset();
+    jest.clearAllMocks();
   });
 
   const mockResponse = (responseText: string) => {
     const response = {
       text: () => Promise.resolve(responseText),
     };
-    fetchMock.mockResolvedValue(response as Response);
+    fetchMock.mockResolvedValue(response as unknown as Response);
+  };
+
+  const mockFileResponse = (responseText: string) => {
+    const mockData = Buffer.from(responseText);
+    (fs.readFile as unknown as jest.Mock).mockImplementation((path, callback) => {
+      callback(null, mockData);
+    });
   };
 
   it('calls fetch with the right parameters', async () => {
@@ -73,7 +85,58 @@ describe('fetchArtifactVersions', () => {
     await fetchArtifactVersions({ artifactRepositoryUrl });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`);
+    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`, {});
+  });
+
+  it('parses the local file', async () => {
+    const artifactNames = [
+      getArtifactName({ productName: 'kibana', productVersion: '8.16' }),
+      getArtifactName({ productName: 'elasticsearch', productVersion: '8.16' }),
+    ];
+    mockFileResponse(createResponse({ artifactNames }));
+
+    const result = await fetchArtifactVersions({
+      artifactRepositoryUrl: localArtifactRepositoryUrl,
+    });
+
+    expect(fs.readFile as unknown as jest.Mock).toHaveBeenCalledWith(
+      '/local/local_artifacts/index.xml',
+      expect.any(Function)
+    );
+
+    expect(result).toEqual({
+      elasticsearch: ['8.16'],
+      kibana: ['8.16'],
+      observability: [],
+      openapi: [],
+      security: [],
+    });
+  });
+
+  it('supports win32 env', async () => {
+    const artifactNames = [
+      getArtifactName({ productName: 'kibana', productVersion: '8.16' }),
+      getArtifactName({ productName: 'elasticsearch', productVersion: '8.16' }),
+    ];
+    mockFileResponse(createResponse({ artifactNames }));
+
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, 'platform', {
+      value: 'win32',
+    });
+
+    await fetchArtifactVersions({
+      artifactRepositoryUrl: 'file:///C:/path/local_artifacts',
+    });
+
+    expect(fs.readFile as unknown as jest.Mock).toHaveBeenCalledWith(
+      'C:/path/local_artifacts/index.xml',
+      expect.any(Function)
+    );
+
+    Object.defineProperty(process, 'platform', {
+      value: originalPlatform,
+    });
   });
 
   it('returns the list of versions from the repository', async () => {
@@ -89,6 +152,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.16'],
         elasticsearch: ['8.16'],
+        openapi: [],
       })
     );
   });
@@ -109,6 +173,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.15', '8.16', '8.17'],
         elasticsearch: ['8.16', '9.0'],
+        openapi: [],
       })
     );
   });

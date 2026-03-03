@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { UseField, Field, FormDataProvider } from '../../../shared_imports';
-import { NormalizedField } from '../../../types';
+import type { NormalizedField } from '../../../types';
 import { getFieldConfig } from '../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { EditFieldFormRow } from '../fields/edit_field';
@@ -58,6 +58,7 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="warning"
                   title={i18n.translate(

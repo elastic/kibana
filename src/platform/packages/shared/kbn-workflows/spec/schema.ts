@@ -1,0 +1,845 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod/v4';
+import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
+import { JsonModelSchema } from './schema/common/json_model_schema';
+import { timezoneNames } from './schema/triggers/timezone_names';
+
+export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+
+/* -- Settings -- */
+export const RetryPolicySchema = z.object({
+  'max-attempts': z.number().int().min(1).optional(),
+  'timeout-seconds': z.number().int().min(1).optional(),
+});
+
+export const WorkflowRetrySchema = z.object({
+  'max-attempts': z.number().min(1),
+  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+});
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
+
+// Base step schema, with recursive steps property
+export const BaseStepSchema = z.object({
+  name: z.string().min(1),
+  type: z.string(),
+});
+export type BaseStep = z.infer<typeof BaseStepSchema>;
+
+export const WorkflowOnFailureSchema = z.object({
+  retry: WorkflowRetrySchema.optional(),
+  fallback: z.array(BaseStepSchema).min(1).optional(),
+  continue: z.union([z.boolean(), z.string()]).optional(),
+});
+
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
+export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowOnFailureSchema.extend({
+    fallback: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
+
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
+export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
+
+export const ConcurrencySettingsSchema = z.object({
+  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
+  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
+  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+});
+export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
+
+export const WorkflowSettingsSchema = z.object({
+  'on-failure': WorkflowOnFailureSchema.optional(),
+  timezone: z.string().optional(), // Should follow IANA TZ format
+  timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
+  concurrency: ConcurrencySettingsSchema.optional(),
+});
+export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
+
+export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowSettingsSchema.extend({
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
+
+/* --- Triggers --- */
+export const AlertRuleTriggerSchema = z.object({
+  type: z.literal('alert'),
+  with: z
+    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
+    .optional(),
+});
+
+export const ScheduledTriggerSchema = z.object({
+  type: z.literal('scheduled'),
+  with: z.union([
+    // New format: every: "5m", "2h", "1d", "30s"
+    z.object({
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
+    }),
+    z.object({
+      rrule: z.object({
+        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+        interval: z.number().int().positive(),
+        tzid: z
+          .enum(timezoneNames as [string, ...string[]])
+          .optional()
+          .default('UTC'),
+        dtstart: z.string().optional(),
+        byhour: z.array(z.number().int().min(0).max(23)).optional(),
+        byminute: z.array(z.number().int().min(0).max(59)).optional(),
+        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+      }),
+    }),
+  ]),
+});
+
+export const ManualTriggerSchema = z.object({
+  type: z.literal('manual'),
+});
+
+export const TriggerSchema = z.discriminatedUnion('type', [
+  AlertRuleTriggerSchema,
+  ScheduledTriggerSchema,
+  ManualTriggerSchema,
+]);
+
+/** Schema for the `with` block of custom triggers (KQL condition to filter when the workflow runs). */
+const CustomTriggerWithSchema = z
+  .object({
+    condition: z.string().optional(),
+  })
+  .optional();
+
+/**
+ * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
+ * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
+ * Custom triggers allow a `with.condition` clause for KQL filtering.
+ */
+export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
+  if (customTriggerIds.length === 0) {
+    return TriggerSchema;
+  }
+  const customSchemas = customTriggerIds.map((id) =>
+    z.object({
+      type: z.literal(id),
+      with: CustomTriggerWithSchema,
+    })
+  );
+  return z.discriminatedUnion('type', [
+    AlertRuleTriggerSchema,
+    ScheduledTriggerSchema,
+    ManualTriggerSchema,
+    ...customSchemas,
+  ]);
+}
+
+export const TriggerTypes = [
+  AlertRuleTriggerSchema.shape.type.value,
+  ScheduledTriggerSchema.shape.type.value,
+  ManualTriggerSchema.shape.type.value,
+];
+export type TriggerType = (typeof TriggerTypes)[number];
+
+/* --- Steps --- */
+export const TimeoutPropSchema = z.object({
+  timeout: DurationSchema.optional(),
+});
+export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
+
+const StepWithForEachSchema = z.object({
+  foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
+});
+export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
+
+export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
+
+const StepWithIfConditionSchema = z.object({
+  if: z.string().optional(),
+});
+export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
+
+export const StepWithOnFailureSchema = z.object({
+  'on-failure': WorkflowOnFailureSchema.optional(),
+});
+
+export const BaseConnectorStepSchema = BaseStepSchema.extend({
+  type: z.string().min(1),
+  with: z.record(z.string(), z.any()).optional(),
+})
+  .merge(StepWithIfConditionSchema)
+  .merge(StepWithForEachSchema)
+  .merge(TimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
+export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
+
+export const BuiltInStepProperties = [
+  'name',
+  'type',
+  'with',
+  'if',
+  'foreach',
+  'timeout',
+  'on-failure',
+];
+export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
+
+export const WaitStepInputSchema = z.object({
+  duration: DurationSchema.describe(
+    'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+  ),
+});
+export const WaitStepSchema = BaseStepSchema.extend({
+  type: z.literal('wait').describe('Pause execution for a specified duration'),
+  with: WaitStepInputSchema,
+});
+export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const DataSetStepInputSchema = z
+  .record(z.string(), z.unknown())
+  .describe(
+    'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
+  );
+export const DataSetStepSchema = BaseStepSchema.extend({
+  type: z.literal('data.set').describe('Set variables in the workflow context'),
+  with: DataSetStepInputSchema,
+});
+export type DataSetStep = z.infer<typeof DataSetStepSchema>;
+
+// Fetcher configuration for HTTP request customization (shared across formats)
+export const FetcherConfigSchema = z
+  .object({
+    skip_ssl_verification: z
+      .boolean()
+      .optional()
+      .describe('Skip SSL/TLS certificate verification for the request'),
+    follow_redirects: z
+      .boolean()
+      .optional()
+      .describe('Whether to follow HTTP redirects. Defaults to true'),
+    max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
+    keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
+  })
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
+  .optional();
+
+export const ElasticsearchStepInputSchema = z.union([
+  // Raw API format - like Dev Console
+  z.object({
+    request: z.object({
+      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      path: z.string().min(1),
+      body: z.any().optional(),
+    }),
+  }),
+  // Sugar syntax for common operations
+  z
+    .object({
+      index: z.string().optional(),
+      id: z.string().optional(),
+      query: z.record(z.string(), z.any()).optional(),
+      body: z.record(z.string(), z.any()).optional(),
+      size: z.number().optional(),
+      from: z.number().optional(),
+      sort: z.array(z.any()).optional(),
+      _source: z.union([z.boolean(), z.array(z.string()), z.string()]).optional(),
+      aggs: z.record(z.string(), z.any()).optional(),
+      aggregations: z.record(z.string(), z.any()).optional(),
+    })
+    .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+]);
+// Generic Elasticsearch step schema for backend validation
+export const ElasticsearchStepSchema = BaseStepSchema.extend({
+  type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
+    message: 'Elasticsearch step type must start with "elasticsearch."',
+  }),
+  with: ElasticsearchStepInputSchema,
+});
+export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
+
+// Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
+export const KibanaStepMetaSchema = {
+  use_server_info: z
+    .boolean()
+    .optional()
+    .describe('Use the server info URL (internal host:port) instead of the public URL'),
+  use_localhost: z
+    .boolean()
+    .optional()
+    .describe('Use localhost:5601 instead of the configured URL'),
+  debug: z
+    .boolean()
+    .optional()
+    .describe('Include the resolved full URL in the step output for debugging'),
+};
+
+// Generic Kibana step schema for backend validation
+export const KibanaStepInputSchema = z.union([
+  // Raw API format - direct HTTP API calls
+  z.object({
+    request: z.object({
+      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      path: z.string().min(1),
+      body: z.any().optional(),
+      headers: z.record(z.string(), z.string()).optional(),
+    }),
+    fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
+  }),
+  // Sugar syntax for common Kibana operations
+  z
+    .object({
+      // Cases API
+      title: z.string().optional(),
+      description: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+      assignees: z.array(z.string()).optional(),
+      owner: z.string().optional(),
+      connector: z.record(z.string(), z.any()).optional(),
+      settings: z.record(z.string(), z.any()).optional(),
+      // Generic parameters
+      id: z.string().optional(),
+      case_id: z.string().optional(),
+      space_id: z.string().optional(),
+      page: z.number().optional(),
+      perPage: z.number().optional(),
+      status: z.string().optional(),
+      fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
+    })
+    .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+]);
+export const KibanaStepSchema = BaseStepSchema.extend({
+  type: z.string().refine((val) => val.startsWith('kibana.'), {
+    message: 'Kibana step type must start with "kibana."',
+  }),
+  with: KibanaStepInputSchema,
+});
+export type KibanaStep = z.infer<typeof KibanaStepSchema>;
+
+export const ForEachStepConfigSchema = z.object({
+  foreach: z
+    .union([z.string(), z.array(z.unknown())])
+    .describe(
+      'Liquid expression evaluating to an array, e.g. "{{ steps.search.output.hits.hits | json }}"'
+    ),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute for each item'),
+});
+export const ForEachStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('foreach')
+    .describe(
+      'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}'
+    ),
+  ...ForEachStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
+});
+export type ForEachStep = z.infer<typeof ForEachStepSchema>;
+
+export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = ForEachStepSchema.extend({
+    steps: z.array(stepSchema).min(1),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
+export const IfStepConfigSchema = z.object({
+  condition: z
+    .string()
+    .describe(
+      'Condition expression in KQL format that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
+    ),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
+  else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
+});
+export const IfStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('if')
+    .describe(
+      'Conditional execution. Runs steps when condition is true, with optional else block for the false branch'
+    ),
+  ...IfStepConfigSchema.shape,
+});
+export type IfStep = z.infer<typeof IfStepSchema>;
+
+export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = IfStepSchema.extend({
+    steps: z.array(stepSchema).min(1),
+    else: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
+export const ParallelStepConfigSchema = z.object({
+  branches: z
+    .array(
+      z.object({
+        name: z.string().describe('Unique name for this branch'),
+        steps: z.array(BaseStepSchema).describe('Steps to execute in this branch'),
+      })
+    )
+    .describe('Array of named branches to execute in parallel'),
+});
+export const ParallelStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('parallel')
+    .describe(
+      'Execute multiple branches of steps concurrently. Each branch runs independently and results are available after all branches complete'
+    ),
+  ...ParallelStepConfigSchema.shape,
+});
+export type ParallelStep = z.infer<typeof ParallelStepSchema>;
+
+export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = ParallelStepSchema.extend({
+    branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
+export const MergeStepConfigSchema = z.object({
+  sources: z
+    .array(z.string())
+    .describe('References to branch or step names whose results to merge'),
+  steps: z.array(BaseStepSchema).describe('Steps to execute after merging'),
+});
+export const MergeStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('merge')
+    .describe('Merge results from parallel branches and continue with subsequent steps'),
+  ...MergeStepConfigSchema.shape,
+});
+export type MergeStep = z.infer<typeof MergeStepSchema>;
+
+export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = MergeStepSchema.extend({
+    steps: z.array(stepSchema), // steps to run after merge
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
+export const ConsoleStepInputSchema = z.object({
+  message: z.unknown().optional(),
+});
+
+// Base schema shared by both workflow.execute and workflow.executeAsync
+export const WorkflowExecuteStepInputSchema = z.object({
+  'workflow-id': z.string().min(1),
+  inputs: z.record(z.string(), z.unknown()).optional(),
+});
+
+const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
+  with: WorkflowExecuteStepInputSchema,
+});
+
+export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.execute'),
+});
+export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
+
+export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+  type: z.literal('workflow.executeAsync'),
+});
+export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
+
+export const WorkflowExecuteAsyncStepOutputSchema = z.object({
+  workflowId: z.string(),
+  executionId: z.string(),
+  awaited: z.boolean(),
+  status: z.string(),
+  startedAt: z.string().optional(),
+});
+
+/* --- Inputs --- */
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
+
+const WorkflowInputBaseSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  default: z.any().optional(),
+  required: z.boolean().optional(),
+});
+
+export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('string'),
+  default: z.string().optional(),
+});
+
+export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('number'),
+  default: z.number().optional(),
+});
+
+export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('boolean'),
+  default: z.boolean().optional(),
+});
+
+export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('choice'),
+  default: z.string().optional(),
+  options: z.array(z.string()),
+});
+
+export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
+});
+
+export const WorkflowInputSchema = z.union([
+  WorkflowInputStringSchema,
+  WorkflowInputNumberSchema,
+  WorkflowInputBooleanSchema,
+  WorkflowInputChoiceSchema,
+  WorkflowInputArraySchema,
+]);
+export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
+
+/* --- Consts --- */
+export const WorkflowConstsSchema = z.record(
+  z.string(),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.record(z.string(), z.any()),
+    z.object({}),
+    z.array(z.any()),
+  ])
+);
+
+const StepSchema = z.lazy(() =>
+  z.union([
+    ForEachStepSchema,
+    IfStepSchema,
+    WaitStepSchema,
+    DataSetStepSchema,
+    ElasticsearchStepSchema,
+    KibanaStepSchema,
+    ParallelStepSchema,
+    MergeStepSchema,
+    WorkflowExecuteStepSchema,
+    WorkflowExecuteAsyncStepSchema,
+    BaseConnectorStepSchema,
+  ])
+);
+export type Step = z.infer<typeof StepSchema>;
+
+export const BuiltInStepTypes = [
+  ForEachStepSchema.shape.type.value,
+  IfStepSchema.shape.type.value,
+  ParallelStepSchema.shape.type.value,
+  MergeStepSchema.shape.type.value,
+  DataSetStepSchema.shape.type.value,
+  WaitStepSchema.shape.type.value,
+  WorkflowExecuteStepSchema.shape.type.value,
+  WorkflowExecuteAsyncStepSchema.shape.type.value,
+];
+export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
+
+/* --- Workflow --- */
+// Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
+const WorkflowSchemaBase = z.object({
+  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  settings: WorkflowSettingsSchema.optional(),
+  enabled: z.boolean().default(true),
+  tags: z.array(z.string()).optional(),
+  inputs: z
+    .union([
+      // New JSON Schema format
+      JsonModelSchema,
+      // Legacy array format (for backward compatibility)
+      z.array(WorkflowInputSchema),
+    ])
+    .optional(),
+  consts: WorkflowConstsSchema.optional(),
+  steps: z.array(StepSchema).min(1),
+});
+
+export const WorkflowSchema = WorkflowSchemaBase.extend({
+  triggers: z.array(TriggerSchema).min(1),
+}).transform((data) => {
+  // Transform inputs from legacy array format to JSON Schema format
+  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+  if (data.inputs) {
+    if (
+      'properties' in data.inputs &&
+      typeof data.inputs === 'object' &&
+      !Array.isArray(data.inputs)
+    ) {
+      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+    } else if (Array.isArray(data.inputs)) {
+      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+    }
+  }
+
+  // Return the data with normalized inputs, preserving all other fields as-is
+  // This preserves the optionality of fields since we're not explicitly listing them all
+  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
+  const { inputs: _, ...rest } = data;
+  return {
+    ...rest,
+    ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+  };
+});
+
+// Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
+export { WorkflowSchemaBase };
+
+export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
+
+// Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
+// The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
+// We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
+// Base schema without transform - can be extended
+const WorkflowSchemaForAutocompleteBase = z
+  .object({
+    version: z.literal('1').optional(),
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true).optional(),
+    tags: z.array(z.string()).optional(),
+    triggers: z
+      .array(z.object({ type: z.string().catch('') }).passthrough())
+      .catch([])
+      .default([]),
+    inputs: z
+      .union([
+        // New JSON Schema format
+        JsonModelSchema,
+        // Legacy array format (for backward compatibility during parsing)
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
+      .optional()
+      .catch(undefined),
+    consts: WorkflowConstsSchema.optional(),
+    steps: z
+      .array(
+        z
+          .object({
+            type: z.string().catch(''),
+            name: z.string().catch(''),
+          })
+          .passthrough()
+      )
+      .catch([])
+      .default([]),
+  })
+  .passthrough();
+
+// Final schema with transform - ensure version default is applied
+export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(
+  (data) => ({
+    ...data,
+    version: data.version ?? '1',
+  })
+);
+
+// Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
+export { WorkflowSchemaForAutocompleteBase };
+
+export const WorkflowExecutionContextSchema = z.object({
+  id: z.string(),
+  isTestRun: z.boolean(),
+  startedAt: z.date(),
+  url: z.string(),
+  executedBy: z.string().optional(),
+  triggeredBy: z.string().optional(),
+});
+export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
+
+export const WorkflowDataContextSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  spaceId: z.string(),
+});
+export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
+
+// Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
+// Once a Zod-compatible version is available, we should import and use it instead.
+export const AlertSchema = z.object({
+  _id: z.string(),
+  _index: z.string(),
+  kibana: z.object({
+    alert: z.any(),
+  }),
+  '@timestamp': z.string(),
+});
+
+export const RuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  tags: z.array(z.string()),
+  consumer: z.string(),
+  producer: z.string(),
+  ruleTypeId: z.string(),
+});
+
+/**
+ * Alert-specific event properties. Only present when the workflow has an alert trigger.
+ */
+export const AlertEventPropsSchema = z.object({
+  alerts: z.array(z.union([AlertSchema, z.any()])),
+  rule: RuleSchema,
+  params: z.any(),
+});
+
+/**
+ * Base event properties that are always present regardless of trigger type.
+ */
+export const BaseEventSchema = z.object({
+  spaceId: z.string(),
+});
+
+/**
+ * Full event schema (used for runtime validation of alert-triggered workflows).
+ * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
+ */
+export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
+
+// Recursive type for workflow inputs that supports nested objects from JSON Schema
+const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.string()),
+    z.array(z.number()),
+    z.array(z.boolean()),
+    z.record(z.string(), WorkflowInputValueSchema),
+  ])
+);
+
+export const WorkflowContextSchema = z.object({
+  event: EventSchema.optional(),
+  execution: WorkflowExecutionContextSchema,
+  workflow: WorkflowDataContextSchema,
+  kibanaUrl: z.string(),
+  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  consts: z.record(z.string(), z.any()).optional(),
+  now: z.date().optional(),
+  parent: z
+    .object({
+      workflowId: z.string(),
+      executionId: z.string(),
+      depth: z.number().optional(),
+    })
+    .optional(),
+});
+export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
+
+export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual inputs and consts of different types
+  inputs: z.object({}),
+  consts: z.object({}),
+  // overriding event with base event schema (spaceId only) so it can be
+  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+  event: BaseEventSchema.optional(),
+});
+export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
+
+export const StepDataSchema = z.object({
+  output: z.any().optional(),
+  error: z.any().optional(),
+});
+export type StepData = z.infer<typeof StepDataSchema>;
+
+const ForEachContextItemSchema = z.unknown();
+export const ForEachContextSchema = z.object({
+  items: z.array(ForEachContextItemSchema),
+  index: z.number().int(),
+  item: ForEachContextItemSchema,
+  total: z.number().int(),
+});
+export type ForEachContext = z.infer<typeof ForEachContextSchema>;
+
+export const StepContextSchema = WorkflowContextSchema.extend({
+  steps: z.record(z.string(), StepDataSchema),
+  foreach: ForEachContextSchema.optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
+});
+export type StepContext = z.infer<typeof StepContextSchema>;
+
+export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual step ids and different output types
+  steps: z.object({}),
+});
+export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
+
+export const BaseSerializedErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.record(z.string(), z.unknown()).optional(),
+});
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

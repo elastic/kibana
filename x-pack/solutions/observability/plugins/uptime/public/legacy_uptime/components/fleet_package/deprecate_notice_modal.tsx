@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiConfirmModal, EuiIcon, EuiLink, useGeneratedHtmlId } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => {
   const { application } = useKibana().services;
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         <>
           {HEADER_TEXT} <EuiIcon type="cheer" />

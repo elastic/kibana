@@ -10,13 +10,16 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
 import './welcome.test.mocks';
 import { Welcome } from './welcome';
 
 test('should render a Welcome screen', () => {
   const { getByText } = render(
     <I18nProvider>
-      <Welcome urlBasePath="/" onSkip={() => {}} />
+      <EuiThemeProvider>
+        <Welcome urlBasePath="" onSkip={() => {}} />
+      </EuiThemeProvider>
     </I18nProvider>
   );
   expect(getByText('Welcome to Elastic')).toBeInTheDocument();

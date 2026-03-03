@@ -7,16 +7,20 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
-import { DecoratedError } from './task_running';
+import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 
 export enum TaskPriority {
   Low = 1,
+  NormalLongRunning = 40,
   Normal = 50,
 }
 
@@ -52,6 +56,13 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
+
+  /**
+   * If an API key is associated with the task, a fake KibanaRequest object
+   * is generated using the API key and passed as part of the run context.
+   */
+  fakeRequest?: KibanaRequest;
+  abortController: AbortController;
 }
 
 /**
@@ -67,6 +78,7 @@ export type SuccessfulRunResult = {
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -84,7 +96,7 @@ export type SuccessfulRunResult = {
        * continue to use which ever schedule it already has, and if no there is
        * no previous schedule then it will be treated as a single-run task.
        */
-      schedule?: IntervalSchedule;
+      schedule?: IntervalSchedule | RruleSchedule;
       runAt?: never;
     }
 );
@@ -111,8 +123,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type AnyRunResult = RunResult | undefined | void;
+export type RunFunction = () => Promise<AnyRunResult>;
+export type CancelFunction = () => Promise<AnyRunResult>;
 export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;
@@ -241,11 +254,13 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
-export interface IntervalSchedule {
-  /**
-   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
-   * */
-  interval: Interval;
+
+export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
+
+export interface TaskUserScope {
+  apiKeyId: string;
+  spaceId?: string;
+  apiKeyCreatedByUser: boolean;
 }
 
 /*
@@ -296,7 +311,7 @@ export interface TaskInstance {
    *
    * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
    */
-  schedule?: IntervalSchedule;
+  schedule?: IntervalSchedule | RruleSchedule;
 
   /**
    * A task-specific set of parameters, used by the task's run function to tailor
@@ -353,6 +368,16 @@ export interface TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their API key
+   */
+  apiKey?: string;
+
+  /**
+   * Meta data related to the API key associated with this task
+   */
+  userScope?: TaskUserScope;
 
   /*
    * Optionally override the priority defined in the task type for this specific task instance
@@ -490,8 +515,17 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+  apiKey?: string;
+  userScope?: TaskUserScope;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
   id: SerializedConcreteTaskInstance['id'];
 };
+
+export interface ApiKeyOptions {
+  request?: KibanaRequest;
+  regenerateApiKey?: boolean;
+}
+
+export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

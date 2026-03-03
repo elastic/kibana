@@ -26,7 +26,7 @@ export async function validateCustomComponentTemplate({
     });
 
     return indexTemplates.some((template) =>
-      template.index_template.composed_of.includes(componentTemplateName + '@custom')
+      template.index_template.composed_of?.includes(componentTemplateName + '@custom')
     );
   } catch (error) {
     return false;

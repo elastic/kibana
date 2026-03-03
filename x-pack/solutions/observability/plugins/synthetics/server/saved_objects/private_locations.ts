@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { modelVersion1 } from './migrations/private_locations/model_version_1';
 import {
   legacyPrivateLocationsSavedObjectName,
@@ -26,7 +26,7 @@ export const PRIVATE_LOCATION_SAVED_OBJECT_TYPE: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
   },
 };
 
@@ -46,7 +46,7 @@ export const LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
   },
   modelVersions: {
     1: modelVersion1,

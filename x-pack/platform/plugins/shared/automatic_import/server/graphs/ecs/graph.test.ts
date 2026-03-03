@@ -19,14 +19,11 @@ import { handleEcsMapping } from './mapping';
 import { handleDuplicates } from './duplicates';
 import { handleMissingKeys } from './missing';
 import { handleInvalidEcs } from './invalid';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 jest.mock('./mapping');
 jest.mock('./duplicates');

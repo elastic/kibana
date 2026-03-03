@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * as spaceV1 from './space/v1';
+export type * as spaceV1 from './space/v1';

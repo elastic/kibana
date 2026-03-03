@@ -8,16 +8,23 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import { AggBasedColumn, PercentageModeConfig, SchemaConfig, VisParams } from '../../common';
+import type { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
+import type { VisParams } from '@kbn/visualizations-common';
+import type {
+  AnyMetricColumnAndMeta,
+  AnyMetricColumnWithSourceFieldWithMeta,
+  PercentageModeConfig,
+} from '../../common/convert_to_lens';
+import type { SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import {
   getAggIdAndValue,
   getCustomBucketsFromSiblingAggs,
 } from '../../common/convert_to_lens/lib/utils';
-import { BucketColumn } from '../../common/convert_to_lens/lib';
+import type { BucketColumn } from '../../common/convert_to_lens/lib';
 import type { Vis } from '../types';
-import { getVisSchemas, Schemas } from '../vis_schemas';
+import type { Schemas } from '../vis_schemas';
+import { getVisSchemas } from '../vis_schemas';
 import {
   getBucketCollapseFn,
   getBucketColumns,
@@ -56,13 +63,15 @@ const createLayer = (
   percentageModeConfig: PercentageModeConfig,
   dropEmptyRowsInDateHistogram?: boolean
 ) => {
-  const metricColumns = metricsForLayer.flatMap((m) =>
+  const metricColumns: (AnyMetricColumnAndMeta | null)[] = metricsForLayer.flatMap((m) =>
     convertMetricToColumns({ agg: m, dataView, aggs: allMetrics, visType }, percentageModeConfig)
   );
   if (metricColumns.includes(null)) {
     return null;
   }
-  const metricColumnsWithoutNull = metricColumns as AggBasedColumn[];
+  const metricColumnsWithoutNull = metricColumns as NonNullable<
+    AnyMetricColumnWithSourceFieldWithMeta[]
+  >;
 
   const { customBucketColumns, customBucketsMap } = getCustomBucketColumns(
     visType,
@@ -83,7 +92,7 @@ const createLayer = (
     buckets,
     dataView,
     false,
-    metricColumns as AggBasedColumn[],
+    metricColumns as AnyMetricColumnWithSourceFieldWithMeta[],
     dropEmptyRowsInDateHistogram
   );
   if (!bucketColumns) {
@@ -96,7 +105,7 @@ const createLayer = (
     splits,
     dataView,
     true,
-    metricColumns as AggBasedColumn[],
+    metricColumns as AnyMetricColumnWithSourceFieldWithMeta[],
     dropEmptyRowsInDateHistogram
   );
   if (!splitBucketColumns) {

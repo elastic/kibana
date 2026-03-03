@@ -13,19 +13,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { MachineLearningRuleParams } from '../../rule_schema';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { mlExecutor } from './ml';
-import type { CreateRuleOptions, SecurityAlertType, WrapSuppressedHits } from '../types';
+import type { SecurityAlertType, WrapSuppressedHits } from '../types';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import type { SetupPlugins } from '../../../../plugin';
 
 export const createMlAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<
-  MachineLearningRuleParams,
-  { isLoggedRequestsEnabled?: boolean },
-  {},
-  'default'
-> => {
-  const { experimentalFeatures, ml, licensing, scheduleNotificationResponseActionsService } =
-    createOptions;
+  ml: SetupPlugins['ml']
+): SecurityAlertType<MachineLearningRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -59,7 +53,7 @@ export const createMlAlertType = (
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
-        licensing,
+        licensing: sharedParams.licensing,
       });
       const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
 
@@ -76,8 +70,8 @@ export const createMlAlertType = (
         services,
         wrapSuppressedHits,
         isAlertSuppressionActive,
-        experimentalFeatures,
-        scheduleNotificationResponseActionsService,
+        scheduleNotificationResponseActionsService:
+          sharedParams.scheduleNotificationResponseActionsService,
         isLoggedRequestsEnabled,
       });
       return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };

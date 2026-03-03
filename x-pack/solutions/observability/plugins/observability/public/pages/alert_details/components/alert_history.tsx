@@ -21,7 +21,7 @@ import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { convertTo } from '../../../../common/utils/formatters';
 import { useKibana } from '../../../utils/kibana_react';
-import { TopAlert } from '../../..';
+import type { TopAlert } from '../../..';
 import { getDefaultAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
 
 interface Props {

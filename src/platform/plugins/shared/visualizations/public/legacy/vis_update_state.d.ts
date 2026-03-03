@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedVisState } from '../../common';
+import type { SavedVisState } from '../../common';
 
 declare function updateOldState(oldState: unknown): SavedVisState;
 

@@ -4,7 +4,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
@@ -18,16 +18,16 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
     .get({
       access: 'internal',
       path: GET_TOTAL_IO_BYTES_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
-          },
-        },
         validate: {
           request: {
             query: schema.object({

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 
 import { NeedLicenseUpgrade as Component } from '../need_license_upgrade';
 
@@ -14,7 +14,7 @@ export default {
   title: 'Layout/Call to Action/Types',
   component: Component,
   argTypes: {
-    onManageSubscription: { action: 'onManageSubscription' },
+    onManageLicense: { action: 'onManageLicense' },
   },
 } as Meta<typeof Component>;
 

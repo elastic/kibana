@@ -8,16 +8,22 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RulesSettingsModal } from './rules_settings_modal';
+import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
+import { RulesSettingsFlyout } from './rules_settings_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 
-export const RulesSettingsLink = () => {
+export interface RuleSettingsLinkProps {
+  alertDeleteCategoryIds?: AlertDeleteCategoryIds[];
+}
+export const RulesSettingsLink = ({ alertDeleteCategoryIds }: RuleSettingsLinkProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {
-    application: { capabilities },
+    application: {
+      capabilities: { rulesSettings = {} },
+    },
   } = useKibana().services;
 
-  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = capabilities.rulesSettings;
+  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
 
   if (!show || (!readFlappingSettingsUI && !readQueryDelaySettingsUI)) {
     return null;
@@ -35,7 +41,11 @@ export const RulesSettingsLink = () => {
           defaultMessage="Settings"
         />
       </EuiButtonEmpty>
-      <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
+      <RulesSettingsFlyout
+        isVisible={isVisible}
+        onClose={() => setIsVisible(false)}
+        alertDeleteCategoryIds={alertDeleteCategoryIds}
+      />
     </>
   );
 };

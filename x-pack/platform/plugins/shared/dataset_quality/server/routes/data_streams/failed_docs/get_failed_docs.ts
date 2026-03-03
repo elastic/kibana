@@ -6,8 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DataStreamDocsStat } from '../../../../common/api_types';
-import { DataStreamType } from '../../../../common/types';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
+import type { DataStreamDocsStat } from '../../../../common/api_types';
+import type { DataStreamType } from '../../../../common/types';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
 import { getAggregatedDatasetPaginatedResults } from '../get_dataset_aggregated_paginated_results';
 
@@ -21,11 +22,11 @@ export async function getFailedDocsPaginated(options: {
   const { esClient, types, datasetQuery, start, end } = options;
 
   const datasetNames = datasetQuery
-    ? [datasetQuery]
+    ? [`${datasetQuery}${FAILURE_STORE_SELECTOR}`]
     : types.map((type) =>
         streamPartsToIndexPattern({
           typePattern: type,
-          datasetPattern: '*-*',
+          datasetPattern: `*-*${FAILURE_STORE_SELECTOR}`,
         })
       );
 

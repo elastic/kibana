@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 
@@ -13,10 +14,12 @@ export function ChatBanner({
   title,
   description,
   button = null,
+  icon = 'users',
 }: {
   title: string;
   description: string;
   button?: ReactNode;
+  icon?: string;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -33,7 +36,7 @@ export function ChatBanner({
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type="users" />
+          <EuiIcon size="l" type={icon} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiText size="xs">

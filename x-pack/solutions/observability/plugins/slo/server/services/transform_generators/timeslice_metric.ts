@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   timesliceMetricComparatorMapping,
-  TimesliceMetricIndicator,
   timesliceMetricIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
@@ -20,7 +20,7 @@ import {
   SLI_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
 import { getFilterRange } from './common';
@@ -43,7 +43,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
-      this.buildAggregations(slo, slo.indicator),
+      await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo
     );
@@ -77,7 +77,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
+  private async buildAggregations(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
     if (indicator.params.metric.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.metric.equation}`);
     }
@@ -86,7 +86,8 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       throw new Error('The sli.metric.timeslice indicator MUST have a timeslice budgeting method.');
     }
 
-    const getIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(indicator);
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+    const getIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(indicator, dataView);
     const comparator = timesliceMetricComparatorMapping[indicator.params.metric.comparator];
     return {
       ...getIndicatorAggregation.execute('_metric'),

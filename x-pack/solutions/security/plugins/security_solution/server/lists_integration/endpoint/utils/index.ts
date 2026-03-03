@@ -6,3 +6,4 @@
  */
 
 export * from './set_find_request_filter_scope_to_active_space';
+export * from './build_space_data_filter';

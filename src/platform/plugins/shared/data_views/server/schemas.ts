@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../common/constants';
-import { RuntimeType } from '../common';
+import type { RuntimeType } from '../common';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),

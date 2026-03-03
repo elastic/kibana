@@ -14,6 +14,9 @@ export { DEFAULT_GROUPS, TIME_SERIES_BUCKET_SELECTOR_FIELD } from './data';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
+    rules: {
+      enabled: true,
+    },
     enableGeoTrackingThresholdAlert: true,
     enableExperimental: true,
   },

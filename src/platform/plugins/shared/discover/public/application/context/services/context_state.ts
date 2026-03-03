@@ -17,7 +17,6 @@ import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
-  withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
@@ -26,6 +25,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import { APP_STATE_URL_KEY } from '../../../../common';
 
 export interface AppState {
   /**
@@ -135,8 +135,8 @@ export interface GetStateReturn {
    */
   flushToUrl: (replace?: boolean) => void;
 }
+
 const GLOBAL_STATE_URL_KEY = '_g';
-const APP_STATE_URL_KEY = '_a';
 
 /**
  * Builds and returns appState and globalState containers
@@ -154,7 +154,7 @@ export function getState({
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
-    ...(toasts && withNotifyOnErrors(toasts)),
+    ...toasts,
   });
 
   const globalStateFromUrl = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) as GlobalState;

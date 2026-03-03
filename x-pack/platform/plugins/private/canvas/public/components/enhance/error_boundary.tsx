@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ErrorInfo, FC, ReactElement } from 'react';
+import type { ErrorInfo, FC, ReactElement } from 'react';
+import React from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'react-recompose';
 import PropTypes from 'prop-types';
 import { omit } from 'lodash';
@@ -29,6 +30,7 @@ const ErrorBoundaryComponent: FC<ComponentProps> = (props) => {
 
 ErrorBoundaryComponent.propTypes = {
   children: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   error: PropTypes.object,
   errorInfo: PropTypes.object,
   resetErrorState: PropTypes.func.isRequired,

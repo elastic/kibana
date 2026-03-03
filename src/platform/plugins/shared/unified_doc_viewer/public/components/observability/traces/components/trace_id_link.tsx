@@ -15,9 +15,15 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 interface TraceIdLinkProps {
   traceId: string;
+  formattedTraceId: React.ReactNode;
+  'data-test-subj': string;
 }
 
-export function TraceIdLink({ traceId }: TraceIdLinkProps) {
+export function TraceIdLink({
+  traceId,
+  formattedTraceId,
+  'data-test-subj': dataTestSubj,
+}: TraceIdLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -43,7 +49,6 @@ export function TraceIdLink({ traceId }: TraceIdLinkProps) {
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToTransactionByTraceIdLocator?.navigate({
             traceId,
             rangeFrom: timeRangeFrom,
@@ -53,19 +58,14 @@ export function TraceIdLink({ traceId }: TraceIdLinkProps) {
       })
     : undefined;
 
-  const content = <EuiText size="xs">{traceId}</EuiText>;
-
   return (
     <>
       {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          data-test-subj="unifiedDocViewerObservabilityTracesTraceIdLink"
-        >
-          {content}
+        <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
+          {formattedTraceId}
         </EuiLink>
       ) : (
-        content
+        <EuiText size="xs">{traceId}</EuiText>
       )}
     </>
   );

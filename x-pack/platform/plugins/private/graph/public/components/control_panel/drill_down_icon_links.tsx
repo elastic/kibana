@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
-import { UrlTemplate } from '../../types';
+import { css } from '@emotion/react';
+import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 
 interface UrlTemplateButtonsProps {
@@ -34,12 +41,13 @@ export const DrillDownIconLinks = ({
 
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={cur.description}>
+        <EuiToolTip content={cur.description} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType={cur.icon ? () => <IconRenderer icon={cur.icon} /> : ''}
             size="xs"
             isDisabled={hasNodes}
             onClick={onUrlTemplateClick}
+            aria-label={cur.description}
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -48,11 +56,16 @@ export const DrillDownIconLinks = ({
 
   return (
     <EuiFlexGroup
-      className="gphDrillDownIconLinks"
       justifyContent="flexStart"
       alignItems="center"
       gutterSize="xs"
       responsive={false}
+      css={({ euiTheme }: UseEuiTheme) =>
+        css({
+          marginTop: `calc(0.5 * ${euiTheme.size.xs})`,
+          marginBottom: `calc(0.5 * ${euiTheme.size.xs})`,
+        })
+      }
     >
       {drillDowns}
     </EuiFlexGroup>

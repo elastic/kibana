@@ -164,7 +164,7 @@ export const bulkCreateArtifacts = async (
       nonConflictErrors.push(
         ...res.items.reduce<Error[]>((acc, item) => {
           // 409's (conflict - record already exists) are ignored since the artifact already exists
-          if (item.create && item.create.status !== 409) {
+          if (item.create && item.create.status !== 409 && item.create.error) {
             acc.push(
               new Error(
                 `Create of artifact id [${item.create._id}] returned: result [${
@@ -227,7 +227,7 @@ export const bulkDeleteArtifacts = async (
     if (res.errors) {
       errors = res.items.reduce<Error[]>((acc, item) => {
         if (item.delete?.error) {
-          acc.push(new Error(item.delete.error.reason));
+          acc.push(new Error(item.delete.error.reason ?? undefined)); // reason can be null and it's not a valid parameter for Error
         }
         return acc;
       }, []);

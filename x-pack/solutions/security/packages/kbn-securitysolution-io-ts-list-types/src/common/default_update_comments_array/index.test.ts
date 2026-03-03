@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { UpdateCommentsArray } from '../update_comment';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
+import type { UpdateCommentsArray } from '../update_comment';
 import { DefaultUpdateCommentsArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getUpdateCommentsArrayMock } from '../update_comment/index.mock';

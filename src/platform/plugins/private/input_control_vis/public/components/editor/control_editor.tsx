@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent, ChangeEvent } from 'react';
-import { injectI18n, FormattedMessage, WrappedComponentProps } from '@kbn/i18n-react';
+import type { ChangeEvent } from 'react';
+import React, { PureComponent } from 'react';
+import type { WrappedComponentProps } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -20,13 +24,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
-import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
-import { InputControlVisDependencies } from '../../plugin';
-
-import './control_editor.scss';
+import type { ControlParams, ControlParamsOptions } from '../../editor_utils';
+import { getTitle, CONTROL_TYPES } from '../../editor_utils';
+import type { InputControlVisDependencies } from '../../plugin';
 
 interface ControlEditorUiProps {
   controlIndex: number;
@@ -169,7 +172,15 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & WrappedCompon
 
   render() {
     return (
-      <EuiPanel grow={false} className="icvControlEditor__panel">
+      <EuiPanel
+        grow={false}
+        css={({ euiTheme }: UseEuiTheme) =>
+          css({
+            zIndex: 1,
+            marginBottom: euiTheme.size.base,
+          })
+        }
+      >
         <EuiAccordion
           id="controlEditorAccordion"
           buttonContent={getTitle(this.props.controlParams, this.props.controlIndex)}

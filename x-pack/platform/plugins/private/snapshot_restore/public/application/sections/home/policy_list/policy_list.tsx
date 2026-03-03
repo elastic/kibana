@@ -7,22 +7,22 @@
 
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate, EuiLink } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import type { Error } from '../../../../shared_imports';
 import {
   PageLoading,
   PageError,
-  Error,
   WithPrivileges,
   NotAuthorizedSection,
   useExecutionContext,
 } from '../../../../shared_imports';
 
-import { SlmPolicy } from '../../../../../common/types';
+import type { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
 import { BASE_PATH, SLM_STATE, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
@@ -170,6 +170,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         {!isSlmRunning ? (
           <Fragment>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.slmWarningTitle"

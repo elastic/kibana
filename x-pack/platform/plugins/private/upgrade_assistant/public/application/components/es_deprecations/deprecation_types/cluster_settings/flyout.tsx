@@ -23,7 +23,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   ClusterSettingAction,
   ResponseError,
@@ -106,10 +106,7 @@ export const RemoveClusterSettingsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge
-          isCritical={deprecation.isCritical}
-          isResolved={statusType === 'complete'}
-        />
+        <DeprecationBadge level={deprecation.level} isResolved={statusType === 'complete'} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="removeClusterSettingsDetailsFlyoutTitle">{message}</h2>
@@ -119,6 +116,7 @@ export const RemoveClusterSettingsFlyout = ({
         {statusType === 'error' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.errorTitle}
               color="danger"
               iconType="warning"

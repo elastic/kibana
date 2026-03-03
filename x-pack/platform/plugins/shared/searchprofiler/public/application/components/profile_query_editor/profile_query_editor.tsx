@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, memo, useCallback, useState } from 'react';
+import React, { useRef, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -33,6 +33,15 @@ const INITIAL_EDITOR_VALUE = `{
   }
 }`;
 
+const styles = {
+  container: css`
+    height: 100%;
+  `,
+  editorContainer: css`
+    overflow: hidden;
+  `,
+};
+
 /**
  * This component should only need to render once.
  *
@@ -55,9 +64,8 @@ export const ProfileQueryEditor = memo(() => {
   const searchProfilerQuery =
     searchProfilerQueryURI &&
     decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
-  const [editorValue, setEditorValue] = useState(
-    searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE
-  );
+
+  const editorValue = useRef(searchProfilerQuery || INITIAL_EDITOR_VALUE);
 
   const requestProfile = useRequestProfile();
 
@@ -65,7 +73,7 @@ export const ProfileQueryEditor = memo(() => {
     dispatch({ type: 'setProfiling', value: true });
     try {
       const { data: result, error } = await requestProfile({
-        query: editorValue,
+        query: editorValue.current,
         index: indexInputRef.current.value,
       });
       if (error) {
@@ -109,14 +117,7 @@ export const ProfileQueryEditor = memo(() => {
   const tooltipContent = isDisabled ? tooltipContentDisabled : tooltipContentEnabled;
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="none"
-      direction="column"
-      css={css`
-        height: 100%;
-      `}
-    >
+    <EuiFlexGroup responsive={false} gutterSize="none" direction="column" css={styles.container}>
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
@@ -161,16 +162,11 @@ export const ProfileQueryEditor = memo(() => {
       </EuiFlexItem>
 
       {/* Editor */}
-      <EuiFlexItem
-        grow={1}
-        css={css`
-          overflow: hidden;
-        `}
-      >
+      <EuiFlexItem grow={1} css={styles.editorContainer}>
         <Editor
           onEditorReady={onEditorReady}
-          setEditorValue={setEditorValue}
-          editorValue={editorValue}
+          setEditorValue={(val) => (editorValue.current = val)}
+          editorValue={editorValue.current}
           licenseEnabled={licenseEnabled}
         />
       </EuiFlexItem>

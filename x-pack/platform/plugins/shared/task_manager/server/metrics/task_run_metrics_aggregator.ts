@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { isUserError } from '../task_running';
-import { isOk, Ok, unwrap } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import {
-  ErroredTask,
-  isTaskManagerStatEvent,
-  isTaskRunEvent,
-  RanTask,
-  TaskManagerStat,
-  TaskRun,
-} from '../task_events';
+import type { Logger } from '@kbn/core/server';
+import { TaskRunResult, isUserError } from '../task_running';
+import type { Ok } from '../lib/result_type';
+import { isOk, unwrap } from '../lib/result_type';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { ErroredTask, RanTask, TaskManagerStat, TaskRun } from '../task_events';
+import { isTaskManagerStatEvent, isTaskRunEvent } from '../task_events';
 import type { SerializedHistogram } from './lib';
 import { getTaskTypeGroup, MetricCounterService, SimpleHistogram } from './lib';
-import { ITaskMetricsAggregator } from './types';
+import type { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
@@ -31,6 +26,7 @@ enum TaskRunKeys {
   NOT_TIMED_OUT = 'not_timed_out',
   TOTAL = 'total',
   TOTAL_ERRORS = 'total_errors',
+  RESCHEDULED_FAILURES = 'rescheduled_failures',
   USER_ERRORS = 'user_errors',
   FRAMEWORK_ERRORS = 'framework_errors',
 }
@@ -46,6 +42,7 @@ interface TaskRunCounts extends JsonObject {
   [TaskRunKeys.TOTAL]: number;
   [TaskRunKeys.USER_ERRORS]: number;
   [TaskRunKeys.FRAMEWORK_ERRORS]: number;
+  [TaskRunKeys.RESCHEDULED_FAILURES]: number;
 }
 
 export interface TaskRunMetrics extends JsonObject {
@@ -112,7 +109,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
 
   private processTaskRunEvent(taskEvent: TaskRun) {
     const taskRunResult: RanTask | ErroredTask = unwrap(taskEvent.event);
-    const { task, isExpired } = taskRunResult;
+    const { task, isExpired, result } = taskRunResult;
     const success = isOk((taskEvent as TaskRun).event);
     const taskType = task.taskType.replaceAll('.', '__');
     const taskTypeGroup = getTaskTypeGroup(taskType);
@@ -134,6 +131,11 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
       } else {
         // increment the framework error counters
         this.incrementCounters(TaskRunKeys.FRAMEWORK_ERRORS, taskType, taskTypeGroup);
+      }
+
+      if (result === TaskRunResult.RetryScheduled) {
+        // increment rescheduled failures
+        this.incrementCounters(TaskRunKeys.RESCHEDULED_FAILURES, taskType, taskTypeGroup);
       }
     }
 

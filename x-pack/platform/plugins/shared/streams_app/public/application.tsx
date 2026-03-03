@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { StreamsAppStartDependencies } from './types';
-import { StreamsAppServices } from './services/types';
+import React from 'react';
 import { AppRoot } from './components/app_root';
+import type { StreamsAppServices } from './services/types';
+import type { StreamsAppStartDependencies } from './types';
 
 export const StreamsApplication = ({
   coreStart,
@@ -23,15 +22,13 @@ export const StreamsApplication = ({
   services: StreamsAppServices;
   isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) => {
-  return (
-    <KibanaRenderContextProvider {...coreStart}>
-      <AppRoot
-        appMountParameters={appMountParameters}
-        coreStart={coreStart}
-        pluginsStart={pluginsStart}
-        services={services}
-        isServerless={isServerless}
-      />
-    </KibanaRenderContextProvider>
+  return coreStart.rendering.addContext(
+    <AppRoot
+      appMountParameters={appMountParameters}
+      coreStart={coreStart}
+      pluginsStart={pluginsStart}
+      services={services}
+      isServerless={isServerless}
+    />
   );
 };

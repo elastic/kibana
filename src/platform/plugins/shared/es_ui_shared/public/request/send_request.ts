@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup, HttpFetchQuery } from '@kbn/core/public';
+import type { HttpSetup, HttpFetchQuery } from '@kbn/core/public';
 
 export interface SendRequestConfig {
   path: string;

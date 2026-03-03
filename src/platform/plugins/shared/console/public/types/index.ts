@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './plugin_dependencies';
+export type * from './plugin_dependencies';
 export * from './core_editor';
-export * from './token';
-export * from './tokens_provider';
+export type * from './token';
+export type * from './tokens_provider';
 export * from './common';
 export * from './embeddable_console';
 export type { ClientConfigType } from './config';

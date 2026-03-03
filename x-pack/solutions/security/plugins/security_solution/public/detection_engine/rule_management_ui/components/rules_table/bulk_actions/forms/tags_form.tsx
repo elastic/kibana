@@ -12,14 +12,14 @@ import React, { useMemo } from 'react';
 import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
-import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../../common/translations';
 import { caseInsensitiveSort } from '../../helpers';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   Field,
-  fieldValidators,
   FIELD_TYPES,
+  fieldValidators,
   getUseField,
   useForm,
   useFormData,
@@ -130,7 +130,12 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsF
       ) : null}
       {overwrite && (
         <EuiFormRow>
-          <EuiCallOut color="warning" size="s" data-test-subj="bulkEditRulesTagsWarning">
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            size="s"
+            data-test-subj="bulkEditRulesTagsWarning"
+          >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setTagsWarningCallout"
               defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to

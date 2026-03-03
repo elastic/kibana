@@ -17,18 +17,16 @@ import {
   VERSION,
 } from '../../../common/constants.mock';
 
-import { IndexEsListSchema } from './index_es_list_schema';
+import type { IndexEsListSchema } from './index_es_list_schema';
 
 export const getIndexESListMock = (): IndexEsListSchema => ({
   '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
-  deserializer: undefined,
   immutable: IMMUTABLE,
   meta: META,
   name: NAME,
-  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,

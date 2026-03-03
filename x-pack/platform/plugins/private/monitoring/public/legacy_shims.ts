@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreStart,
   HttpSetup,
   IUiSettingsClient,
@@ -16,16 +16,25 @@ import {
   ChromeStart,
   I18nStart,
 } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-import { HttpRequestInit } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
+import type { Observable } from 'rxjs';
+import type { HttpRequestInit } from '@kbn/core/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import type { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UseCloudConnectStatusHook } from '@kbn/cloud-connect-plugin/public';
+import type {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
 } from './types';
+
+const defaultCloudConnectStatusHook: UseCloudConnectStatusHook = () => ({
+  isCloudConnected: false,
+  isCloudConnectEisEnabled: false,
+  isCloudConnectAutoopsEnabled: false,
+  isLoading: true,
+  error: null,
+});
 
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
@@ -69,6 +78,9 @@ export interface IShims {
     kfetchOptions?: KFetchKibanaOptions | undefined
   ) => Promise<any>;
   isCloud: boolean;
+  cloudBaseUrl?: string;
+  hasEnterpriseLicense: boolean;
+  useCloudConnectStatus: UseCloudConnectStatusHook;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
@@ -82,9 +94,12 @@ export class Legacy {
     core,
     data,
     isCloud,
+    cloudBaseUrl,
+    hasEnterpriseLicense,
     triggersActionsUi,
     usageCollection,
     appMountParameters,
+    cloudConnect,
   }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
@@ -136,6 +151,10 @@ export class Legacy {
           ...options,
         }),
       isCloud,
+      cloudBaseUrl,
+      hasEnterpriseLicense,
+      useCloudConnectStatus:
+        cloudConnect?.hooks.useCloudConnectStatus ?? defaultCloudConnectStatusHook,
       triggersActionsUi,
       usageCollection,
       kibanaServices: {

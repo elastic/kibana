@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { NormalizedField } from '../../../../types';
+import type { NormalizedField } from '../../../../types';
 import { DynamicParameter } from '../../field_parameters';
 import { BasicParametersSection } from '../edit_field';
 

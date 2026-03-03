@@ -83,8 +83,7 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
       () =>
         esClient.indices.putMapping({
           index: indexName,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          body: simulatedMapping,
+          ...simulatedMapping,
           write_index_only: writeIndexOnly,
         }),
       { logger }
@@ -215,6 +214,8 @@ export interface CreateOrUpdateSpacesIndexParams {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  /** whether to expand index names based on pattern */
+  expandIndexPattern?: boolean;
 }
 
 export async function updateIndices({
@@ -223,6 +224,7 @@ export async function updateIndices({
   name,
   totalFieldsLimit,
   writeIndexOnly,
+  expandIndexPattern = false,
 }: CreateOrUpdateSpacesIndexParams): Promise<void> {
   logger.info(`Updating indices - ${name}`);
 
@@ -240,12 +242,13 @@ export async function updateIndices({
       throw error;
     }
   }
+
   if (indices.length > 0) {
     await updateIndexMappings({
       logger,
       esClient,
       totalFieldsLimit,
-      indexNames: indices,
+      indexNames: expandIndexPattern ? indices : [name],
       writeIndexOnly,
     });
   }

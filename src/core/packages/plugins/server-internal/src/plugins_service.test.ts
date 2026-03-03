@@ -14,7 +14,8 @@ import { BehaviorSubject, from } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
-import { ConfigPath, ConfigService, Env } from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
 
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -25,10 +26,12 @@ import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
-import { config, PluginsConfigType } from './plugins_config';
+import type { PluginsConfigType } from './plugins_config';
+import { config } from './plugins_config';
 import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
@@ -135,7 +138,11 @@ async function testSetup() {
   coreId = Symbol('core');
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-  pluginsConfig = { initialize: true, paths: [] };
+  pluginsConfig = {
+    initialize: true,
+    paths: [],
+    allowlistPluginGroups: ['observability'],
+  };
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: pluginsConfig });
   const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
   configService = new ConfigService(rawConfigService, env, logger);
@@ -742,6 +749,7 @@ describe('PluginsService', () => {
       expect(mockDiscover).toHaveBeenCalledWith({
         config: {
           additionalPluginPaths: [],
+          allowlistPluginGroups: ['observability'],
           initialize: true,
           pluginSearchPaths: [
             resolve(REPO_ROOT, '..', 'kibana-extra'),
@@ -750,7 +758,7 @@ describe('PluginsService', () => {
           shouldEnableAllPlugins: false,
         },
         coreContext: { coreId, env, logger, configService },
-        instanceInfo: { uuid: 'uuid' },
+        instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
       });
 

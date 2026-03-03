@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
+module.exports = () => ({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
@@ -20,4 +20,19 @@ module.exports = {
       },
     ],
   ],
-};
+  overrides: [
+    {
+      exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
+      presets: [
+        [
+          require.resolve('@emotion/babel-preset-css-prop'),
+          {
+            autoLabel: 'always',
+            labelFormat: '[local]',
+            sourceMap: false,
+          },
+        ],
+      ],
+    },
+  ],
+});

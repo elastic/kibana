@@ -7,9 +7,6 @@
 
 import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
-  ENDPOINT_LIST_DESCRIPTION,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_LIST_NAME,
   EXCEPTION_LIST_ITEM_URL,
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -20,7 +17,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { memoize } from 'lodash';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/endpoint_exceptions/constants';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
@@ -29,7 +26,7 @@ import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../public/manag
 import type { NewTrustedApp } from '../../../common/endpoint/types';
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 
-const ensureArtifactListExists = memoize(
+export const ensureArtifactListExists = memoize(
   async (
     kbnClient: KbnClient,
     artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS | 'endpointExceptions'
@@ -54,13 +51,8 @@ const ensureArtifactListExists = memoize(
         break;
 
       case 'endpointExceptions':
-        listDefinition = {
-          name: ENDPOINT_LIST_NAME,
-          namespace_type: 'agnostic',
-          description: ENDPOINT_LIST_DESCRIPTION,
-          list_id: ENDPOINT_LIST_ID,
-          type: ExceptionListTypeEnum.ENDPOINT,
-        };
+        listDefinition = ENDPOINT_EXCEPTIONS_LIST_DEFINITION;
+        break;
 
       default:
         throw new Error(`Unknown Artifact list: ${artifactType}`);
@@ -86,12 +78,12 @@ const ensureArtifactListExists = memoize(
  * Creates an exception list item.
  * NOTE: this method does NOT create the list itself.
  *
- * @private
+ * @internal
  *
  * @param kbnClient
  * @param data
  */
-const createExceptionListItem = async (
+export const createExceptionListItem = async (
   kbnClient: KbnClient,
   data: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {

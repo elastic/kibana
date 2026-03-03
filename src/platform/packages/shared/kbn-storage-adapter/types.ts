@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { Required } from 'utility-types';
+import type { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { Required } from 'utility-types';
 
 type AllMappingPropertyType = Required<MappingProperty>['type'];
 
@@ -82,7 +82,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     ? TEnums extends Array<infer TEnum>
       ? TEnum
       : never
-    : string;
+    : string | string[];
   match_only_text: string;
   text: string;
   boolean: boolean;

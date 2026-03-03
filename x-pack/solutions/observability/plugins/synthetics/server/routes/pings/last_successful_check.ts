@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { getJourneyScreenshot } from '../../queries/get_journey_screenshot';
 import { getLastSuccessfulCheck } from '../../queries/get_last_successful_check';
-import { isFullScreenshot, isRefResult, Ping } from '../../../common/runtime_types';
+import type { Ping } from '../../../common/runtime_types';
+import { isFullScreenshot, isRefResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
 export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

@@ -7,8 +7,8 @@
 
 import { SOURCE_DATA_REQUEST_ID } from '../../../common/constants';
 import { findLayerById, setLayer } from './layer_utils';
-import { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
-import { MapState } from './types';
+import type { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
+import type { MapState } from './types';
 
 export function startDataRequest(
   state: MapState,

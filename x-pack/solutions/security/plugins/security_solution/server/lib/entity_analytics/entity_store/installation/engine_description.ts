@@ -6,6 +6,7 @@
  */
 
 import { assign, concat } from 'lodash/fp';
+import { EntityStoreCapability } from '@kbn/entities-schema';
 import type {
   EntityType,
   InitEntityEngineRequestBody,
@@ -15,18 +16,20 @@ import {
   hostEntityEngineDescription,
   userEntityEngineDescription,
   serviceEntityEngineDescription,
+  genericEntityEngineDescription,
 } from '../entity_definitions/entity_descriptions';
 import type { EntityStoreConfig } from '../types';
-import { buildEntityDefinitionId } from '../utils';
+import { buildEntityDefinitionId, mergeEntityStoreIndices } from '../utils';
 import type { EntityDescription } from '../entity_definitions/types';
 import type { EntityEngineInstallationDescriptor } from './types';
 import { merge } from '../../../../../common/utils/objects/merge';
 import { defaultOptions } from '../constants';
 
-const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
+export const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
   service: serviceEntityEngineDescription,
+  generic: genericEntityEngineDescription,
 };
 
 interface EngineDescriptionParams {
@@ -37,6 +40,8 @@ interface EngineDescriptionParams {
   defaultIndexPatterns: string[];
 }
 
+const ENABLED_CAPABILITIES: EntityStoreCapability[] = [EntityStoreCapability.CRUD_API];
+
 export const createEngineDescription = (params: EngineDescriptionParams) => {
   const { entityType, namespace, config, requestParams = {}, defaultIndexPatterns } = params;
 
@@ -46,9 +51,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
   };
   const options = merge(defaultOptions, merge(fileConfig, requestParams));
 
-  const indexPatterns = options.indexPattern
-    ? defaultIndexPatterns.concat(options.indexPattern.split(','))
-    : defaultIndexPatterns;
+  const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, options.indexPattern);
 
   const description = engineDescriptionRegistry[entityType];
 
@@ -59,6 +62,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
     docsPerSecond: options.docsPerSecond,
     lookbackPeriod: options.lookbackPeriod,
     timestampField: options.timestampField,
+    maxPageSearchSize: options.maxPageSearchSize,
   };
 
   const defaults = {
@@ -73,6 +77,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
       })
     ),
     dynamic: description.dynamic || false,
+    capabilities: ENABLED_CAPABILITIES,
   };
 
   const updatedDescription: EntityEngineInstallationDescriptor = {

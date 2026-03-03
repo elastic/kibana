@@ -5,36 +5,135 @@
  * 2.0.
  */
 
-import {
-  DissectProcessorConfig,
-  FieldDefinitionType,
-  GrokProcessorConfig,
-  ProcessorDefinition,
-  ProcessorTypeOf,
-} from '@kbn/streams-schema';
+import type {
+  ConvertProcessor,
+  DateProcessor,
+  DissectProcessor,
+  DropDocumentProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+  MathProcessor,
+  ReplaceProcessor,
+  RedactProcessor,
+  SetProcessor,
+  StreamlangConditionBlockWithUIAttributes,
+  UppercaseProcessor,
+  LowercaseProcessor,
+  TrimProcessor,
+  JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
+  ConcatProcessor,
+  NetworkDirectionProcessor,
+} from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
 
-export type WithUIAttributes<T extends ProcessorDefinition> = T & {
-  id: string;
-  type: ProcessorTypeOf<T>;
+/**
+ * Processors' types
+ */
+
+// GrokFormState uses wrapped patterns for useFieldArray compatibility
+export interface GrokPatternField {
+  value: string;
+}
+
+export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
+  patterns: GrokPatternField[];
 };
 
-export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
-
-export interface DetectedField {
-  name: string;
-  type?: FieldDefinitionType | 'system';
+export interface InternalNetworksValue {
+  value: string;
 }
 
-interface BaseFormState {
-  detected_fields?: DetectedField[];
+export type DissectFormState = DissectProcessor;
+export type DateFormState = DateProcessor;
+export type DropFormState = DropDocumentProcessor;
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
+export type ConvertFormState = ConvertProcessor;
+export type ReplaceFormState = ReplaceProcessor;
+
+/**
+ * Wrapper for for useFieldArray compatibility
+ */
+export interface RedactPatternField {
+  value: string;
 }
 
-export type GrokFormState = BaseFormState &
-  Omit<GrokProcessorConfig, 'patterns'> & {
-    type: 'grok';
-    patterns: Array<{ value: string }>;
-  };
+export type RedactFormState = Omit<RedactProcessor, 'patterns'> & {
+  patterns: RedactPatternField[];
+};
+export type SetFormState = SetProcessor;
+export type MathFormState = MathProcessor;
+export type UppercaseFormState = UppercaseProcessor;
+export type LowercaseFormState = LowercaseProcessor;
+export type TrimFormState = TrimProcessor;
+export type JoinFormState = JoinProcessor;
+export type SplitFormState = SplitProcessor;
+export type SortFormState = SortProcessor;
+export type ConcatFormState = ConcatProcessor;
+export type NetworkDirectionFormState = Omit<
+  NetworkDirectionProcessor,
+  'internal_networks' | 'internal_networks_field'
+> & {
+  internal_networks?: InternalNetworksValue[];
+  internal_networks_field?: string;
+};
 
-export type DissectFormState = BaseFormState & DissectProcessorConfig & { type: 'dissect' };
+export type SpecialisedFormState =
+  | GrokFormState
+  | DissectFormState
+  | DateFormState
+  | DropFormState
+  | ManualIngestPipelineFormState
+  | ConvertFormState
+  | ReplaceFormState
+  | RedactFormState
+  | SetFormState
+  | MathFormState
+  | UppercaseFormState
+  | LowercaseFormState
+  | TrimFormState
+  | JoinFormState
+  | SplitFormState
+  | SortFormState
+  | ConcatFormState
+  | NetworkDirectionFormState;
 
-export type ProcessorFormState = GrokFormState | DissectFormState;
+export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;
+
+export type ExtractBooleanFields<TInput> = NonNullable<
+  TInput extends Record<string, unknown>
+    ? {
+        [K in keyof TInput]: boolean extends TInput[K] ? K : never;
+      }[keyof TInput]
+    : never
+>;
+
+/**
+ * Data sources types
+ */
+export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
+  id: string;
+};
+
+export type RandomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'latest-samples' }
+>;
+
+export type KqlSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'kql-samples' }
+>;
+
+export type CustomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'custom-samples' }
+>;
+
+export type FailureStoreDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'failure-store' }
+>;

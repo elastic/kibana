@@ -13,8 +13,11 @@ export const getNextRun = ({
   interval,
 }: {
   startDate?: Date | null;
-  interval: string;
+  interval?: string;
 }) => {
+  if (!interval) {
+    throw new Error('Interval is required to calculate next run');
+  }
   return moment(startDate || new Date())
     .add(parseDuration(interval), 'ms')
     .toISOString();

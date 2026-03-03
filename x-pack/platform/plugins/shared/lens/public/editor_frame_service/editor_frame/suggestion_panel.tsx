@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './suggestion_panel.scss';
-
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,30 +20,35 @@ import {
   EuiAccordion,
   EuiText,
   EuiNotificationBadge,
+  type UseEuiTheme,
+  useEuiTheme,
+  euiFocusRing,
+  useEuiFontSize,
+  euiTextTruncate,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import {
+import type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { CoreStart } from '@kbn/core/public';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import chroma from 'chroma-js';
+import type {
   Datasource,
   Visualization,
   FramePublicAPI,
   DatasourceMap,
-  VisualizationMap,
-  DatasourceLayers,
   UserMessagesGetter,
-} from '../../types';
+  DatasourceLayers,
+  DatasourceStates,
+} from '@kbn/lens-common';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
@@ -58,7 +61,6 @@ import {
   useLensSelector,
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
-  DatasourceStates,
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
@@ -69,6 +71,7 @@ import {
   selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { useEditorFrameService } from '../editor_frame_service_context';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -100,8 +103,6 @@ const configurationsValid = (
 };
 
 export interface SuggestionPanelProps {
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   getUserMessages?: UserMessagesGetter;
@@ -126,8 +127,10 @@ const PreviewRenderer = ({
   hasError: boolean;
   onRender: () => void;
 }) => {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div className="lnsSuggestionPanel__suggestionIcon">
+    <div css={suggestionStyles.icon(euiThemeContext)} data-test-subj="lnsSuggestionPanel__error">
       <EuiIconTip
         size="xl"
         color="danger"
@@ -143,9 +146,13 @@ const PreviewRenderer = ({
   );
   return (
     <div
-      className={classNames('lnsSuggestionPanel__chartWrapper', {
-        'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
-      })}
+      css={css`
+        display: flex;
+        height: 100%;
+        width: 100%;
+        pointer-events: none;
+        ${withLabel ? `height: calc(100% - ${euiTheme.size.l});` : ''}
+      `}
     >
       {!expression || hasError ? (
         onErrorMessage
@@ -188,6 +195,9 @@ const SuggestionPreview = ({
   onRender: () => void;
   wrapSuggestions?: boolean;
 }) => {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const xsFontSize = useEuiFontSize('xs');
   return (
     <EuiToolTip
       content={preview.title}
@@ -207,10 +217,48 @@ const SuggestionPreview = ({
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
-          className={classNames('lnsSuggestionPanel__button', {
-            'lnsSuggestionPanel__button-isSelected': selected,
-            'lnsSuggestionPanel__button-fixedWidth': !wrapSuggestions,
-          })}
+          css={css`
+            position: relative; // Let the expression progress indicator position itself against the button
+            flex: 0 0 auto;
+            height: 100px;
+            margin-right: ${euiTheme.size.s};
+            margin-left: ${euiTheme.size.xxs};
+            margin-bottom: ${euiTheme.size.xxs};
+            padding: 0 ${euiTheme.size.s};
+            box-shadow: none !important; // sass-lint:disable-line no-important
+
+            &:focus {
+              transform: none !important; // sass-lint:disable-line no-important
+              ${euiFocusRing(euiThemeContext)};
+            }
+            ${selected
+              ? `
+              background-color: ${
+                euiTheme.colors.lightestShade
+              } !important; // sass-lint:disable-line no-important
+              border-color: ${
+                euiTheme.colors.mediumShade
+              } !important; // sass-lint:disable-line no-important
+
+              &:not(:focus) {
+                box-shadow: none !important; // sass-lint:disable-line no-important
+              }
+
+              &:focus {
+                ${euiFocusRing(euiThemeContext)};
+              }
+
+              &:hover {
+                transform: none !important; // sass-lint:disable-line no-important
+              }
+              `
+              : ''}
+            ${!wrapSuggestions
+              ? `
+                  width: 150px !important; // sass-lint:disable-line no-important
+                `
+              : ''}
+          `}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
@@ -228,12 +276,23 @@ const SuggestionPreview = ({
               onRender={onRender}
             />
           ) : (
-            <span className="lnsSuggestionPanel__suggestionIcon">
+            <span css={suggestionStyles.icon(euiThemeContext)}>
               <EuiIcon size="xxl" type={preview.icon} />
             </span>
           )}
           {showTitleAsLabel && (
-            <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
+            <span
+              css={css`
+                ${euiTextTruncate()}
+                ${xsFontSize};
+                font-weight: ${euiTheme.font.weight.bold};
+                display: block;
+                text-align: center;
+                flex-grow: 0;
+              `}
+            >
+              {preview.title}
+            </span>
           )}
         </EuiPanel>
       </div>
@@ -247,8 +306,6 @@ export const SuggestionPanelWrapper = (props: SuggestionPanelProps) => {
 };
 
 export function SuggestionPanel({
-  datasourceMap,
-  visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
@@ -259,6 +316,7 @@ export function SuggestionPanel({
   toggleAccordionCb,
   isAccordionOpen,
 }: SuggestionPanelProps) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const activeData = useLensSelector(selectStagedActiveData);
@@ -266,6 +324,8 @@ export function SuggestionPanel({
   const existsStagedPreview = useLensSelector((state) => Boolean(state.lens.stagedPreview));
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const changesApplied = useLensSelector(selectChangesApplied);
@@ -438,7 +498,19 @@ export function SuggestionPanel({
   }
 
   const renderApplyChangesPrompt = () => (
-    <EuiPanel hasShadow={false} className="lnsSuggestionPanel__applyChangesPrompt" paddingSize="m">
+    <EuiPanel
+      hasShadow={false}
+      className="lnsSuggestionPanel__applyChangesPrompt"
+      paddingSize="m"
+      css={css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        background-color: ${euiTheme.colors.lightestShade} !important;
+      `}
+    >
       <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
         <p>
           <FormattedMessage
@@ -533,6 +605,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
+  const dangerAlpha10 = chroma(euiTheme.colors.danger).alpha(0.1).css();
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -540,9 +613,11 @@ export function SuggestionPanel({
         'data-test-subj': 'lensSuggestionsPanelToggleButton',
         paddingSize: wrapSuggestions ? 'm' : 's',
       }}
-      className="lnsSuggestionPanel"
       css={css`
-        padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
+        padding-bottom: ${wrapSuggestions ? 0 : euiTheme.size.s};
+        .euiAccordion__buttonContent {
+          width: 100%;
+        }
       `}
       buttonContent={title}
       forceState={hideSuggestions ? 'closed' : 'open'}
@@ -582,13 +657,24 @@ export function SuggestionPanel({
       }
     >
       <div
-        className="lnsSuggestionPanel__suggestions"
+        className="eui-scrollBar"
         data-test-subj="lnsSuggestionsPanel"
         role="list"
         tabIndex={0}
         css={css`
           flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
-          gap: ${wrapSuggestions ? euiThemeVars.euiSize : 0};
+          gap: ${wrapSuggestions ? euiTheme.size.base : 0};
+          overflow-x: scroll;
+          overflow-y: hidden;
+          display: flex;
+          padding-top: ${euiTheme.size.xs};
+          mask-image: linear-gradient(
+            to right,
+            ${dangerAlpha10} 0%,
+            ${euiTheme.colors.danger} 5px,
+            ${euiTheme.colors.danger} calc(100% - 5px),
+            ${dangerAlpha10} 100%
+          );
         `}
       >
         {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
@@ -641,9 +727,9 @@ function getPreviewExpression(
             indexPatterns: frame.dataViews.indexPatterns,
           });
         }
+        suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];
       });
     }
-
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,
@@ -655,7 +741,7 @@ function getPreviewExpression(
     return visualization.toPreviewExpression(
       visualizableState.visualizationState,
       suggestionFrameApi.datasourceLayers,
-      datasourceExpressionsByLayers ?? undefined
+      datasourceExpressionsByLayers
     );
   } catch (error) {
     showMemoizedErrorNotification(error);
@@ -699,3 +785,18 @@ function preparePreviewExpression(
 
   return typeof expression === 'string' ? fromExpression(expression) : expression;
 }
+
+const suggestionStyles = {
+  icon: ({ euiTheme }: UseEuiTheme) => css`
+    color: ${euiTheme.colors.darkShade};
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: ${euiTheme.size.s};
+    &:not(:only-child) {
+      height: calc(100% - ${euiTheme.size.l});
+    }
+  `,
+};

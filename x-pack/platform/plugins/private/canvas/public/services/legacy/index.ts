@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { CoreSetup, CoreStart, AppUpdater } from '@kbn/core/public';
-import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
+import type { BehaviorSubject } from 'rxjs';
+import type { CoreSetup, CoreStart, AppUpdater } from '@kbn/core/public';
+import type { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
 import { searchServiceFactory } from './search';
 
 export type { SearchService } from './search';

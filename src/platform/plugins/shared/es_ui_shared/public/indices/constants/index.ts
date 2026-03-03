@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-view-validation';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...ILLEGAL_CHARACTERS_VISIBLE, '*'];
 

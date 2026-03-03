@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
+import type { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 
@@ -27,7 +27,6 @@ import { getControlGroupMock } from './control_group';
  *const TestComponent = () => (
  *  <TestProviders>
  *    <AlertFilterControls
- *      chainingSystem="NONE"
  *      dataViewId=""
  *      initialControls={[]}
  *      onFilterChange={onFilterchangeMock}

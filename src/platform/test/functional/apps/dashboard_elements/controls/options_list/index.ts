@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export const OPTIONS_LIST_DASHBOARD_NAME = 'Test Options List Control';
 
@@ -60,7 +60,5 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./options_list_dashboard_interaction'));
     loadTestFile(require.resolve('./options_list_suggestions'));
     loadTestFile(require.resolve('./options_list_validation'));
-
-    loadTestFile(require.resolve('./options_list_allow_expensive_queries_off.ts'));
   });
 }

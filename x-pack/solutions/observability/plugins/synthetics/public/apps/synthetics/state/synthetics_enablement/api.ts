@@ -6,10 +6,8 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import {
-  MonitorManagementEnablementResult,
-  MonitorManagementEnablementResultCodec,
-} from '../../../../../common/runtime_types';
+import type { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
+import { MonitorManagementEnablementResultCodec } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export const fetchGetSyntheticsEnablement =

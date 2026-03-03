@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '../models/ingest/base';
-import {
-  isInheritLifecycle,
+import type { Streams } from '../models/streams';
+import type {
+  IngestStreamEffectiveLifecycle,
+  IngestStreamLifecycleAll,
   WiredIngestStreamEffectiveLifecycle,
 } from '../models/ingest/lifecycle';
-import { isDescendantOf, isChildOf, getSegments } from './hierarchy';
+import { isInheritLifecycle } from '../models/ingest/lifecycle';
+import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 
 export function findInheritedLifecycle(
-  definition: WiredStreamDefinition,
-  ancestors: WiredStreamDefinition[]
+  definition: Streams.WiredStream.Definition,
+  ancestors: Streams.WiredStream.Definition[]
 ): WiredIngestStreamEffectiveLifecycle {
   const originDefinition = [...ancestors, definition]
     .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
@@ -24,12 +26,16 @@ export function findInheritedLifecycle(
     throw new Error('Unable to find inherited lifecycle');
   }
 
+  if (isInheritLifecycle(originDefinition.ingest.lifecycle)) {
+    throw new Error('Wired streams can only inherit DSL or ILM');
+  }
+
   return { ...originDefinition.ingest.lifecycle, from: originDefinition.name };
 }
 
 export function findInheritingStreams(
-  root: WiredStreamDefinition,
-  descendants: WiredStreamDefinition[]
+  root: Streams.WiredStream.Definition,
+  descendants: Streams.WiredStream.Definition[]
 ): string[] {
   const inheriting = [];
   const queue = [root];
@@ -50,4 +56,14 @@ export function findInheritingStreams(
   }
 
   return inheriting;
+}
+
+export function effectiveToIngestLifecycle(
+  effectiveLifecycle: IngestStreamEffectiveLifecycle
+): IngestStreamLifecycleAll {
+  if ('from' in effectiveLifecycle) {
+    const { from, ...lifecycle } = effectiveLifecycle;
+    return lifecycle;
+  }
+  return effectiveLifecycle;
 }

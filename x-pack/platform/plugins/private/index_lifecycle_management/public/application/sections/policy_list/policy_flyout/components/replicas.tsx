@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PhaseWithAllocation } from '../../../../../../common/types';
+import type { PhaseWithAllocation } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 
 import type { ActionComponentProps } from './types';

@@ -13,6 +13,10 @@
     "server": true,
     "requiredBundles": [
       "kibanaUtils"
+    ],
+    "optionalPlugins": [
+      "licensing",
+      "taskManager"
     ]
   }
 }

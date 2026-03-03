@@ -6,10 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import alertTimelineImageSrc from './images/alert_timeline.png';
-import sessionViewImageSrc from './images/session_view.png';
-import alertListImageSrc from './images/alert_list.png';
-import eventAnalyzerImageSrc from './images/event_analyzer.png';
 import { AlertsCardItemId } from './types';
 import type { CardSelectorAssetListItem } from '../types';
 import { CardAssetType } from '../types';
@@ -27,8 +23,8 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.image,
-      source: alertListImageSrc,
+      type: CardAssetType.video,
+      source: '//play.vidyard.com/evxFZ8dqfjH6SGPtRriyE6',
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.details.description', {
         defaultMessage: 'Sort through alerts and drill down into its details',
       }),
@@ -46,8 +42,8 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.image,
-      source: alertTimelineImageSrc,
+      type: CardAssetType.video,
+      source: '//play.vidyard.com/nXC8MSkzDBWajoXWJ3QeQp',
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.timeline.description', {
         defaultMessage: 'Streamline alert investigation with real-time visualization',
       }),
@@ -65,8 +61,8 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.image,
-      source: eventAnalyzerImageSrc,
+      type: CardAssetType.video,
+      source: '//play.vidyard.com/VSvxJeSQzrFN9K6hdeLz58',
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.analyzer.description', {
         defaultMessage: 'Simplify alert analysis by visualizing threat detection processes',
       }),
@@ -84,8 +80,8 @@ export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.image,
-      source: sessionViewImageSrc,
+      type: CardAssetType.video,
+      source: '//play.vidyard.com/3TNBvcisQWFKTcmbyprmrU',
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.sessionView.description', {
         defaultMessage: 'Centralized threat analysis and response with real-time data insights',
       }),

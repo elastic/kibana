@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/cases-components",
   "owner": [
-    "@elastic/response-ops"
+    "@elastic/kibana-cases"
   ],
   "group": "platform",
   "visibility": "shared"

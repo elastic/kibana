@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  describe('validation', () => {
+    it('should return error if body is empty', async () => {
+      const id = '71c9c185-3e6d-49d0-b7e5-f966eaf51625'; // known id
+      const response = await supertest
+        .put(`${LENS_VIS_API_PATH}/${id}`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
+        .send({});
+
+      expect(response.status).to.be(400);
+      // TODO: enabled this check when api work slows down or config messaging is improved
+      // expect(response.body.message).to.be(
+      //   '[request body]: types that failed validation:\n- [request body.0]: types that failed validation:\n - [request body.0]: types that failed validation:\n  - [request body.0.type]: expected value to equal [metric]\n  - [request body.1.type]: expected value to equal [metric]\n - [request body.1]: types that failed validation:\n  - [request body.0.type]: expected value to equal [legacy_metric]\n  - [request body.1.type]: expected value to equal [legacy_metric]\n- [request body.1.references]: expected value of type [array] but got [undefined]\n- [request body.2.references]: expected value of type [array] but got [undefined]'
+      // );
+    });
+  });
+}

@@ -7,10 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { cloneDeep } from 'lodash';
-import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
-import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
-import {
+import { cloneDeep, isEmpty } from 'lodash';
+import type { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type {
   ChildFieldName,
   ComboBoxOption,
   DataType,
@@ -39,8 +41,9 @@ import {
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
 } from '../constants';
 
-import { TreeItem } from '../components/tree';
-import { FieldConfig } from '../shared_imports';
+import type { TreeItem } from '../components/tree';
+import type { FieldConfig } from '../shared_imports';
+import type { MappingsOptionData } from '../../../sections/home/index_list/details_page/update_elser_mappings/update_elser_mappings_modal';
 
 export const getUniqueId = () => uuidv4();
 
@@ -702,7 +705,7 @@ export function getStateWithCopyToFields(state: State): State {
   // Make sure we don't accidentally modify existing state
   let updatedState = cloneDeep(state);
   for (const field of Object.values(updatedState.fields.byId)) {
-    if (field.source.type === 'semantic_text' && field.source.reference_field) {
+    if (field.source.type === 'semantic_text') {
       // Check fields already added to the list of to-update fields first
       // API will not accept reference_field so removing it now
       const { reference_field: referenceField, ...source } = field.source;
@@ -711,6 +714,14 @@ export function getStateWithCopyToFields(state: State): State {
         throw new Error('Reference field is not a string');
       }
       field.source = source;
+
+      /*
+        If no reference field is associated,
+        no further processing is needed, so we can skip to the next one.
+      */
+      if (isEmpty(referenceField)) {
+        continue;
+      }
       const existingTextField =
         getFieldByPathName(updatedState.fields, referenceField) ||
         getFieldByPathName(updatedState.mappingViewFields || { byId: {} }, referenceField);
@@ -797,3 +808,74 @@ export function isLocalModel(
 ): model is LocalInferenceServiceSettings {
   return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
 }
+
+export const isElserOnMlNodeSemanticField = (field: NormalizedField) =>
+  field.source.inference_id === defaultInferenceEndpoints.ELSER;
+
+export function hasElserOnMlNodeSemanticTextField(fields: NormalizedFields): boolean {
+  return Object.values(fields.byId).some(isElserOnMlNodeSemanticField);
+}
+
+export function hasSemanticTextField(fields: NormalizedFields): boolean {
+  return Object.values(fields.byId).some((field) => field.source.type === 'semantic_text');
+}
+
+export const prepareFieldsForEisUpdate = (
+  selectedMappings: EuiSelectableOption<MappingsOptionData>[],
+  fullNormalized: NormalizedFields
+): NormalizedFields => {
+  const selectedIds = selectedMappings.flatMap((item) => item.key ?? []);
+
+  const { byId } = fullNormalized;
+
+  const resultById: NormalizedFields['byId'] = {};
+  const resultRootLevel: string[] = [];
+
+  function getSelectedFieldData(id: string) {
+    // Prevent duplicate processing - if already in resultById, skip
+    if (resultById[id]) {
+      return;
+    }
+    const field = byId[id];
+    if (!field) return;
+
+    const clonedField = { ...field };
+
+    // Only update inference_id if it exists in source
+    if (clonedField.source?.inference_id !== undefined) {
+      clonedField.source = {
+        ...clonedField.source,
+        inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+      };
+    }
+    resultById[id] = clonedField;
+
+    // Include parent if it exists and hasn't been processed yet
+    if (field.parentId) {
+      if (!resultById[field.parentId]) {
+        getSelectedFieldData(field.parentId);
+      }
+    } else {
+      resultRootLevel.push(id);
+    }
+  }
+
+  selectedIds.forEach((id) => getSelectedFieldData(id));
+
+  // Prune childFields arrays so they only include selected field IDs
+  Object.values(resultById).forEach((field) => {
+    if (field.childFields) {
+      field.childFields = field.childFields.filter((id) => !!resultById[id]);
+      if (field.childFields.length === 0) {
+        delete field.childFields;
+      }
+    }
+  });
+
+  return {
+    byId: resultById,
+    aliases: {},
+    rootLevelFields: resultRootLevel,
+    maxNestedDepth: fullNormalized.maxNestedDepth,
+  };
+};

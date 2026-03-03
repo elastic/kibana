@@ -62,7 +62,7 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: jest.fn().mockReturnValue({
       services: {
         sessionView: {
-          getSessionView: jest.fn().mockReturnValue(<div />),
+          getSessionView: jest.fn(() => <div />),
         },
       },
     }),

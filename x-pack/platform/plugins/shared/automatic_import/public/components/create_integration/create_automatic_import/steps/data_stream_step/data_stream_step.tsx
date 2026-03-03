@@ -198,7 +198,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     data-test-subj="nameInput"
                     value={name}
                     onChange={onChange.name}
-                    isInvalid={invalidFields.name}
+                    isInvalid={!!nameInputError || invalidFields.name}
                     isLoading={isLoadingPackageNames}
                     disabled={isLoadingPackageNames}
                   />

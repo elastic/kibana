@@ -10,28 +10,24 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-} from '@kbn/core-saved-objects-api-browser';
 import type {
   TutorialType,
   InstructionSetType,
   StatusCheckType,
   InstructionsType,
 } from '../../../services/tutorials/types';
-import { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
+import type { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
 import type { CustomStatusCheckCallback } from '../../../services/tutorials/tutorial_service';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { SavedObjectsInstaller } from './saved_objects_installer';
 import * as StatusCheckStates from './status_check_states';
-import { getServices, HomeKibanaServices } from '../../kibana_services';
+import type { HomeKibanaServices } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -49,10 +45,6 @@ interface TutorialProps {
   getTutorial: (id: string) => Promise<TutorialType>;
   replaceTemplateStrings: (text: string) => string;
   tutorialId: string;
-  bulkCreate: (
-    objects: Array<SavedObjectsBulkCreateObject<unknown>>,
-    options?: SavedObjectsBulkCreateOptions | undefined
-  ) => Promise<SavedObjectsBatchResponse<unknown>>;
   intl: InjectedIntl;
 }
 
@@ -103,7 +95,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       this.setState({ notFound: true });
     }
 
-    getServices().chrome.setBreadcrumbs([
+    const breadcrumbs = [
       {
         text: integrationsTitle,
         href: this.props.addBasePath('/app/integrations/browse'),
@@ -111,7 +103,12 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
       },
-    ]);
+    ];
+    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+      project: {
+        value: breadcrumbs,
+      },
+    });
   }
 
   getInstructions = () => {
@@ -316,25 +313,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     });
   };
 
-  renderSavedObjectsInstaller = () => {
-    if (!this.state.tutorial?.savedObjects) {
-      return;
-    }
-
-    return (
-      <>
-        <EuiSpacer />
-        <EuiPanel paddingSize="l">
-          <SavedObjectsInstaller
-            bulkCreate={this.props.bulkCreate}
-            savedObjects={this.state.tutorial.savedObjects}
-            installMsg={this.state.tutorial.savedObjectsInstallMsg}
-          />
-        </EuiPanel>
-      </>
-    );
-  };
-
   renderFooter = () => {
     let label;
     let url;
@@ -446,7 +424,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
 
           <EuiSpacer />
           {instructions && this.renderInstructionSets(instructions)}
-          {this.renderSavedObjectsInstaller()}
           {this.renderFooter()}
         </div>
       );

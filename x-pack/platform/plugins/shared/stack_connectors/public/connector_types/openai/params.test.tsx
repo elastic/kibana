@@ -8,8 +8,9 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '@kbn/connector-schemas/openai/constants';
 import { DEFAULT_URL, getDefaultBody } from './constants';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const messageVariables = [
   {
@@ -46,21 +47,18 @@ describe('Gen AI Params Fields renders', () => {
       };
       const editAction = jest.fn();
       const errors = {};
-      const actionConnector = {
+      const actionConnector = createMockActionConnector({
         secrets: {
           apiKey: 'apiKey',
         },
         id: 'test',
         actionTypeId: '.gen-ai',
-        isPreconfigured: false,
-        isSystemAction: false as const,
-        isDeprecated: false,
         name: 'My OpenAI Connector',
         config: {
           apiProvider,
           apiUrl: DEFAULT_URL,
         },
-      };
+      });
       render(
         <ParamsFields
           actionParams={actionParams}
@@ -132,5 +130,24 @@ describe('Gen AI Params Fields renders', () => {
       { body: '{"new_key": "new_value"}' },
       0
     );
+  });
+});
+
+describe('getDefaultBody', () => {
+  it('returns Azure body without model when Azure config has no defaultModel', () => {
+    const body = getDefaultBody({
+      apiProvider: OpenAiProviderType.AzureAi,
+      apiUrl: 'https://my-resource.openai.azure.com',
+    });
+    expect(body).not.toContain('"model"');
+  });
+
+  it('returns body with model when Azure config has defaultModel', () => {
+    const body = getDefaultBody({
+      apiProvider: OpenAiProviderType.AzureAi,
+      apiUrl: 'https://my-resource.openai.azure.com',
+      defaultModel: 'gpt-4o',
+    });
+    expect(body).toContain('"model": "gpt-4o"');
   });
 });

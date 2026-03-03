@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useEffect, useState } from 'react';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
-import { Duration } from '../../../typings';
+import type { Duration } from '../../../typings';
 
 export interface BurnRateWindow {
   name: string;

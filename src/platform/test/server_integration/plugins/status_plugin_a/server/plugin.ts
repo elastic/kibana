@@ -9,7 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
-import { Plugin, CoreSetup, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import type { Plugin, CoreSetup, ServiceStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 
 export class StatusPluginAPlugin implements Plugin {
   private status$ = new Subject<ServiceStatus>();
@@ -23,6 +24,12 @@ export class StatusPluginAPlugin implements Plugin {
     router.post(
       {
         path: '/internal/status_plugin_a/status/set',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             level: schema.oneOf([

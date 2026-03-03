@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { InstallKnowledgeBase, type InstallKnowledgeBaseProps } from './install_knowledge_base';
+export {
+  InstallKnowledgeBase,
+  type InstallKnowledgeBaseProps,
+  DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON,
+} from './install_knowledge_base';

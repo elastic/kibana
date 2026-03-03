@@ -8,10 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment, { unitOfTime, Duration } from 'moment';
+import type { unitOfTime, Duration } from 'moment';
+import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,
@@ -66,6 +68,11 @@ export class DurationFormat extends FieldFormat {
   }
 
   textConvert: TextContextTypeConvert = (val: number) => {
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
+    }
+
     const inputFormat = this.param('inputFormat');
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');
@@ -104,6 +111,15 @@ export class DurationFormat extends FieldFormat {
     const suffix = showSuffix && unitText && !human ? `${includeSpace}${unitText}` : '';
 
     return humanPrecise ? precise : prefix + precise + suffix;
+  };
+
+  htmlConvert: HtmlContextTypeConvert = (val, options) => {
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
+    }
+
+    return this.textConvert(val, options);
   };
 }
 

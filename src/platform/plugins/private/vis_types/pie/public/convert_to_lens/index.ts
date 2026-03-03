@@ -15,7 +15,7 @@ import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert
 import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
-import { ConvertPieToLensVisualization } from './types';
+import type { ConvertPieToLensVisualization } from './types';
 
 export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   readLog,
   clearLog,
@@ -18,14 +18,16 @@ import {
   defaultKibanaIndex,
   startElasticsearch,
   getAggregatedTypesCount,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
   getReindexingMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+  getUpToDateBaselineTypes,
+  getCompatibleBaselineTypes,
+} from '@kbn/migrator-test-kit/fixtures';
 
 describe('when upgrading to a new stack version', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -49,7 +51,8 @@ describe('when upgrading to a new stack version', () => {
         await clearLog();
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
         const { client, runMigrations } = await getUpToDateMigratorTestKit({
-          filterDeprecated: true,
+          removedTypes: ['server'],
+          types: getUpToDateBaselineTypes(['deprecated', 'server']),
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -172,7 +175,8 @@ describe('when upgrading to a new stack version', () => {
 
         await clearLog();
         const { client, runMigrations } = await getCompatibleMigratorTestKit({
-          filterDeprecated: true, // remove the 'deprecated' type from the mappings, so that it is considered unknown
+          removedTypes: ['server'],
+          types: getCompatibleBaselineTypes(['deprecated', 'server']),
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -285,7 +289,6 @@ describe('when upgrading to a new stack version', () => {
         expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-
         expect(indexContents.hits.hits.length).toEqual(25);
       });
     });
@@ -311,9 +314,9 @@ describe('when upgrading to a new stack version', () => {
       expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
       expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
       expect(logs).toMatch(
-        'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_CLUSTER_ROUTING_ALLOCATION.'
+        'UPDATE_SOURCE_MAPPINGS_PROPERTIES -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.'
       );
-      expect(logs).toMatch('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.');
+      expect(logs).toMatch('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.');
       expect(logs).toMatch('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.');
       expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.');
       expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
@@ -322,14 +325,12 @@ describe('when upgrading to a new stack version', () => {
 
       const counts = await getAggregatedTypesCount(client);
       // for 'complex' objects, we discard second half and also multiples of 100
-      expect(counts).toMatchInlineSnapshot(`
-        Object {
-          "basic": 10,
-          "complex": 4,
-          "deprecated": 10,
-          "task": 10,
-        }
-      `);
+      expect(counts).toEqual({
+        basic: 10,
+        complex: 4,
+        old: 10,
+        task: 10,
+      });
     });
   });
 });

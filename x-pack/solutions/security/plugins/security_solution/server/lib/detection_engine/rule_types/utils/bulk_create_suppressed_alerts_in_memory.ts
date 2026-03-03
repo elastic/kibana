@@ -9,12 +9,12 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
-  SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
   SignalSourceHit,
   SignalSource,
   SecuritySharedParams,
+  SecurityRuleServices,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 import { addToSearchAfterReturn, buildShellAlertSuppressionTermsAndFields } from './utils';
@@ -22,48 +22,38 @@ import type { AlertSuppressionCamel } from '../../../../../common/api/detection_
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { createEnrichEventsFunction } from './enrichments';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 import type {
-  BaseFieldsLatest,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 import type { EqlRuleParams } from '../../rule_schema';
-import { wrapHits } from '../factories';
+import { bulkCreate, wrapHits } from '../factories';
+import type { BuildReasonMessage } from './reason_formatters';
 
-interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
+export interface BulkCreateSuppressedAlertsParams {
+  sharedParams: SecuritySharedParams;
+  services: SecurityRuleServices;
+  buildReasonMessage: BuildReasonMessage;
+  alertSuppression: AlertSuppressionCamel;
   wrapSuppressedHits: WrapSuppressedHits;
-  alertSuppression?: AlertSuppressionCamel;
-}
-export interface BulkCreateSuppressedAlertsParams
-  extends Pick<
-    SearchAfterAndBulkCreateSuppressedAlertsParams,
-    'services' | 'buildReasonMessage' | 'alertSuppression' | 'wrapSuppressedHits' | 'sharedParams'
-  > {
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures: ExperimentalFeatures;
   mergeSourceAndFields?: boolean;
   maxNumberOfAlertsMultiplier?: number;
 }
 
-export interface BulkCreateSuppressedSequencesParams
-  extends Pick<
-    SearchAfterAndBulkCreateSuppressedAlertsParams,
-    'services' | 'buildReasonMessage' | 'alertSuppression'
-  > {
+export interface BulkCreateSuppressedSequencesParams {
+  services: SecurityRuleServices;
+  buildReasonMessage: BuildReasonMessage;
   sharedParams: SecuritySharedParams<EqlRuleParams>;
   sequences: Array<EqlHitsSequence<SignalSource>>;
-  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures: ExperimentalFeatures;
-  maxNumberOfAlertsMultiplier?: number;
   alertSuppression: AlertSuppressionCamel;
 }
 /**
@@ -79,7 +69,6 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   buildReasonMessage,
   alertSuppression,
   wrapSuppressedHits,
-  experimentalFeatures,
   mergeSourceAndFields = false,
   maxNumberOfAlertsMultiplier,
 }: BulkCreateSuppressedAlertsParams) => {
@@ -88,7 +77,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleEvents = enrichedEvents;
-  let unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
+  let unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
@@ -111,7 +100,6 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     toReturn,
     services,
     alertSuppression,
-    experimentalFeatures,
     maxNumberOfAlertsMultiplier,
   });
 };
@@ -128,19 +116,17 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   services,
   alertSuppression,
   buildReasonMessage,
-  experimentalFeatures,
-  maxNumberOfAlertsMultiplier,
 }: BulkCreateSuppressedSequencesParams) => {
   const suppressOnMissingFields =
     (alertSuppression.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   const suppressibleWrappedSequences: Array<
-    WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
-      subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+    WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+      subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
     }
   > = [];
-  const unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
+  const unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   sequences.forEach((sequence) => {
     const alertGroupFromSequence = buildAlertGroupFromSequence({
@@ -186,20 +172,18 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     toReturn,
     services,
     alertSuppression,
-    experimentalFeatures,
-    maxNumberOfAlertsMultiplier,
   });
 };
 
-export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest & BaseFieldsLatest>
-  extends Pick<
-    SearchAfterAndBulkCreateSuppressedAlertsParams,
-    'services' | 'sharedParams' | 'alertSuppression'
-  > {
-  unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
-  suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
+export interface ExecuteBulkCreateAlertsParams<
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
+> {
+  sharedParams: SecuritySharedParams;
+  services: SecurityRuleServices;
+  alertSuppression: AlertSuppressionCamel;
+  unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>>;
+  suppressibleWrappedDocs: Array<WrappedAlert<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures: ExperimentalFeatures;
   maxNumberOfAlertsMultiplier?: number;
 }
 
@@ -207,7 +191,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
  * creates alerts in ES, both suppressed and unsuppressed
  */
 export const executeBulkCreateAlerts = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
 >({
   sharedParams,
   unsuppressibleWrappedDocs,
@@ -215,10 +199,9 @@ export const executeBulkCreateAlerts = async <
   toReturn,
   services,
   alertSuppression,
-  experimentalFeatures,
   maxNumberOfAlertsMultiplier = MAX_SIGNALS_SUPPRESSION_MULTIPLIER,
 }: ExecuteBulkCreateAlertsParams<T>) => {
-  const { tuple, bulkCreate, ruleExecutionLogger } = sharedParams;
+  const { tuple } = sharedParams;
   // max signals for suppression includes suppressed and created alerts
   // this allows to lift max signals limitation to higher value
   // and can detects events beyond default max_signals value
@@ -230,14 +213,12 @@ export const executeBulkCreateAlerts = async <
     : tuple.from.toISOString();
 
   if (unsuppressibleWrappedDocs.length) {
-    const unsuppressedResult = await bulkCreate(
-      unsuppressibleWrappedDocs,
-      tuple.maxSignals - toReturn.createdSignalsCount,
-      createEnrichEventsFunction({
-        services,
-        logger: ruleExecutionLogger,
-      })
-    );
+    const unsuppressedResult = await bulkCreate({
+      wrappedAlerts: unsuppressibleWrappedDocs,
+      sharedParams,
+      services,
+      maxAlerts: tuple.maxSignals - toReturn.createdSignalsCount,
+    });
 
     addToSearchAfterReturn({ current: toReturn, next: unsuppressedResult });
   }
@@ -249,7 +230,6 @@ export const executeBulkCreateAlerts = async <
     suppressionWindow,
     isSuppressionPerRuleExecution: !suppressionDuration,
     maxAlerts: tuple.maxSignals - toReturn.createdSignalsCount,
-    experimentalFeatures,
   });
 
   addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });

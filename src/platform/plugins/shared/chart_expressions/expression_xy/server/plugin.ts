@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
-import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
+import type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
   legendConfigFunction,
@@ -25,7 +25,7 @@ import {
   layeredXyVisFunction,
   extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
-import { SetupDeps } from './types';
+import type { SetupDeps } from './types';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export class ExpressionXyPlugin

@@ -9,48 +9,51 @@
 
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import {
-  DiscoverCustomizationProvider,
+  type ConnectedCustomizationService,
+  getConnectedCustomizationService,
   useDiscoverCustomization,
   useDiscoverCustomization$,
-  useDiscoverCustomizationService,
 } from './customization_provider';
-import type {
-  DiscoverCustomization,
-  DiscoverCustomizationId,
-  DiscoverCustomizationService,
-} from './customization_service';
+import type { DiscoverCustomization, DiscoverCustomizationId } from './customization_service';
 import { createCustomizationService } from './customization_service';
+import type { CustomizationCallback } from './types';
+import { DiscoverTestProvider } from '../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../__mocks__/services';
 
-describe('useDiscoverCustomizationService', () => {
+describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
     let resolveCallback = (_: () => void) => {};
     const promise = new Promise<() => void>((resolve) => {
       resolveCallback = resolve;
     });
-    let service: DiscoverCustomizationService | undefined;
-    const callback = jest.fn(({ customizations }) => {
-      service = customizations;
+    const callback = jest.fn(({}) => {
       return promise;
     });
-    const wrapper = renderHook(() =>
-      useDiscoverCustomizationService({
-        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
-        customizationCallbacks: [callback],
-      })
-    );
-    expect(wrapper.result.current).toBeUndefined();
+    const customizationCallbacks: CustomizationCallback[] = [callback];
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+    const servicePromise = getConnectedCustomizationService({
+      stateContainer,
+      customizationCallbacks,
+      services,
+    });
+    let service: ConnectedCustomizationService | undefined;
     expect(callback).toHaveBeenCalledTimes(1);
     const cleanup = jest.fn();
     await act(async () => {
       resolveCallback(cleanup);
       await promise;
+      service = await servicePromise;
     });
-    expect(wrapper.result.current).toBe(service);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
-    wrapper.unmount();
+    await service?.cleanup();
     await act(async () => {
       await promise;
     });
@@ -61,13 +64,13 @@ describe('useDiscoverCustomizationService', () => {
 
 describe('useDiscoverCustomization', () => {
   it('should provide customization', () => {
-    const customization: DiscoverCustomization = { id: 'top_nav' };
-    const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
+    const customization: DiscoverCustomization = { id: 'search_bar' };
+    const service = createCustomizationService();
+    service.set(customization);
+    const wrapper = renderHook(() => useDiscoverCustomization('search_bar'), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
-        const service = createCustomizationService();
-        service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -75,16 +78,16 @@ describe('useDiscoverCustomization', () => {
   });
 
   it('should allow changing the customization', () => {
-    const customization: DiscoverCustomization = { id: 'top_nav' };
+    const customization: DiscoverCustomization = { id: 'search_bar' };
     const service = createCustomizationService();
+    service.set(customization);
     const wrapper = renderHook(({ id }) => useDiscoverCustomization(id), {
       initialProps: { id: customization.id } as React.PropsWithChildren<{
         id: DiscoverCustomizationId;
       }>,
       wrapper: ({ children }) => {
-        service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -96,11 +99,11 @@ describe('useDiscoverCustomization', () => {
   });
 
   it('should provide undefined if customization is not found', () => {
-    const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
+    const service = createCustomizationService();
+    const wrapper = renderHook(() => useDiscoverCustomization('search_bar'), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
-        const service = createCustomizationService();
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -110,13 +113,13 @@ describe('useDiscoverCustomization', () => {
 
 describe('useDiscoverCustomization$', () => {
   it('should provide customization$', () => {
-    const customization: DiscoverCustomization = { id: 'top_nav' };
-    const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
+    const customization: DiscoverCustomization = { id: 'search_bar' };
+    const service = createCustomizationService();
+    service.set(customization);
+    const wrapper = renderHook(() => useDiscoverCustomization$('search_bar'), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
-        const service = createCustomizationService();
-        service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -128,16 +131,16 @@ describe('useDiscoverCustomization$', () => {
   });
 
   it('should allow changing the customization', () => {
-    const customization: DiscoverCustomization = { id: 'top_nav' };
+    const customization: DiscoverCustomization = { id: 'search_bar' };
     const service = createCustomizationService();
+    service.set(customization);
     const wrapper = renderHook(({ id }) => useDiscoverCustomization$(id), {
       initialProps: { id: customization.id } as React.PropsWithChildren<{
         id: DiscoverCustomizationId;
       }>,
       wrapper: ({ children }) => {
-        service.set(customization);
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });
@@ -156,11 +159,11 @@ describe('useDiscoverCustomization$', () => {
   });
 
   it('should provide undefined if customization is not found', () => {
-    const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
+    const service = createCustomizationService();
+    const wrapper = renderHook(() => useDiscoverCustomization$('search_bar'), {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
-        const service = createCustomizationService();
         return (
-          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
+          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
         );
       },
     });

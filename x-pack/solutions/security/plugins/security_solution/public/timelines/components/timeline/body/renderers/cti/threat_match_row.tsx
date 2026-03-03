@@ -72,6 +72,7 @@ export const ThreatMatchRowView = ({
       data-test-subj="threat-match-row"
       gutterSize="s"
       justifyContent="center"
+      wrap={true}
     >
       <EuiFlexItem grow={false}>
         <MatchDetails

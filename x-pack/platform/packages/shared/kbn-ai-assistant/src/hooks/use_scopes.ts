@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useObservable } from 'react-use/lib';
+import useObservable from 'react-use/lib/useObservable';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export const useScopes = () => {

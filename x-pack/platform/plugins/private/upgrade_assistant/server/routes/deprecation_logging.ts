@@ -7,6 +7,7 @@
 
 import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import {
   API_BASE_PATH,
   APPS_WITH_DEPRECATION_LOGS,
@@ -17,13 +18,13 @@ import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
 export function registerDeprecationLoggingRoutes({
   router,
   lib: { handleEsError },
+  current,
 }: RouteDependencies) {
   router.get(
     {
@@ -36,7 +37,7 @@ export function registerDeprecationLoggingRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },
@@ -64,7 +65,7 @@ export function registerDeprecationLoggingRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },
@@ -94,7 +95,7 @@ export function registerDeprecationLoggingRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },
@@ -148,7 +149,7 @@ export function registerDeprecationLoggingRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },

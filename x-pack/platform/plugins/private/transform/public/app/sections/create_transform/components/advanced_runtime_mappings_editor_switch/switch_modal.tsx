@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -39,16 +39,22 @@ const modalMessage = i18n.translate(
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm }) => (
-  <EuiConfirmModal
-    title={modalTitle}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={cancelButtonText}
-    confirmButtonText={applyChangesText}
-    buttonColor="danger"
-    defaultFocusedButton="confirm"
-  >
-    <p>{modalMessage}</p>
-  </EuiConfirmModal>
-);
+export const SwitchModal: FC<Props> = ({ onCancel, onConfirm }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={modalTitle}
+      titleProps={{ id: modalTitleId }}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={cancelButtonText}
+      confirmButtonText={applyChangesText}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>{modalMessage}</p>
+    </EuiConfirmModal>
+  );
+};

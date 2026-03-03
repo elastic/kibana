@@ -18,7 +18,7 @@ import { Section } from '../../components/section';
 import { ServicesSectionTitle } from './section_titles';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
-import { APM_HOST_FILTER_FIELD, APM_HOST_TROUBLESHOOTING_LINK } from '../../constants';
+import { APM_HOST_TROUBLESHOOTING_LINK } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 import { useRequestObservable } from '../../hooks/use_request_observable';
@@ -86,10 +86,11 @@ export const ServicesContent = ({
       collapsible
       data-test-subj="infraAssetDetailsServicesCollapsible"
       id="services"
-      extraAction={<LinkToApmServices assetId={hostName} apmField={APM_HOST_FILTER_FIELD} />}
+      extraAction={<LinkToApmServices entityId={hostName} />}
     >
       {error ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.infra.assetDetails.services.getServicesRequestErrorTitle', {
             defaultMessage: 'Error',
           })}
@@ -123,10 +124,14 @@ export const ServicesContent = ({
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.services.noServicesMsg"
-            defaultMessage="No services found on this host. Click {apmTutorialLink} to instrument your services with APM."
+            defaultMessage="We were unable to find services running on this host. Click {apmTutorialLink} to instrument your services with APM."
             values={{
               apmTutorialLink: (
                 <EuiLink
+                  aria-label={i18n.translate(
+                    'xpack.infra.servicesContent.euiLink.apmTutorialLinkLabel',
+                    { defaultMessage: 'APM Instrumentation Tutorial' }
+                  )}
                   data-test-subj="assetDetailsTooltipAPMTutorialLink"
                   href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
                 >

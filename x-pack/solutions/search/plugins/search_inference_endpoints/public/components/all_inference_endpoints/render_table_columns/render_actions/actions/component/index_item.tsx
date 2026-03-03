@@ -22,7 +22,7 @@ import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
 import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
-import { InferenceUsageInfo } from '../../../../types';
+import type { InferenceUsageInfo } from '../../../../types';
 import { SERVERLESS_INDEX_MANAGEMENT_URL } from '../../../../constants';
 
 interface UsageProps {

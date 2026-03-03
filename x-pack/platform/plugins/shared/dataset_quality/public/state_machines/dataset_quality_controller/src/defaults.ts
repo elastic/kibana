@@ -10,7 +10,7 @@ import {
   DEFAULT_SORT_DIRECTION,
   DEFAULT_SORT_FIELD,
 } from '../../../../common/constants';
-import { DefaultDatasetQualityControllerState } from './types';
+import type { DefaultDatasetQualityControllerState } from './types';
 
 const ONE_MINUTE_IN_MS = 60000;
 
@@ -32,14 +32,15 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     },
   },
   datasetUserPrivileges: {
-    canRead: true,
-    canMonitor: true,
+    datasetsPrivilages: {},
     canViewIntegrations: true,
   },
+  authorizedDatasetTypes: [],
   dataStreamStats: [],
   degradedDocStats: [],
   failedDocStats: [],
   totalDocsStats: DEFAULT_DICTIONARY_TYPE,
+  loadedTotalDocsTypes: [],
   filters: {
     inactive: true,
     fullNames: false,

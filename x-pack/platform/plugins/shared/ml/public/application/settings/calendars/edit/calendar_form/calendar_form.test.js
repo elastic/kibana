@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
 import { CalendarForm } from './calendar_form';
 
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToMlLink: jest.fn(),
+  useCreateAndNavigateToManagementMlLink: jest.fn(),
 }));
 jest.mock('../../../../capabilities/check_capabilities', () => ({
   usePermissionCheck: () => [true, true],
@@ -44,9 +45,9 @@ const testProps = {
 
 describe('CalendarForm', () => {
   test('Renders calendar form', () => {
-    const wrapper = shallowWithIntl(<CalendarForm {...testProps} />);
+    const { container } = renderWithI18n(<CalendarForm {...testProps} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('CalendarId shown as title when editing', () => {
@@ -56,9 +57,12 @@ describe('CalendarForm', () => {
       calendarId: 'test-calendar',
       description: 'test description',
     };
-    const wrapper = mountWithIntl(<CalendarForm {...editProps} />);
-    const calendarId = wrapper.find('EuiTitle');
 
-    expect(calendarId).toMatchSnapshot();
+    const { getByTestId } = renderWithI18n(<CalendarForm {...editProps} />);
+
+    const calendarForm = getByTestId('mlCalendarFormEdit');
+    expect(calendarForm).toBeInTheDocument();
+
+    expect(calendarForm).toMatchSnapshot();
   });
 });

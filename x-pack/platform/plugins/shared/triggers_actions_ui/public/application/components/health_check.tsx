@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
-import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+import type { Option } from 'fp-ts/Option';
+import { none, some, fold, isSome } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiLink, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { DocLinksStart, HttpSetup } from '@kbn/core/public';
-import { AlertingFrameworkHealth } from '@kbn/alerting-types';
-import './health_check.scss';
+import type { DocLinksStart, HttpSetup } from '@kbn/core/public';
+import type { AlertingFrameworkHealth } from '@kbn/alerting-types';
 import { fetchUiHealthStatus as triggersActionsUiHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status';
 import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
 import { useHealthContext } from '../context/health_context';
@@ -34,6 +37,19 @@ interface HealthStatus {
   hasPermanentEncryptionKey: boolean;
 }
 
+const alertingHealthCheckCss = (euiTheme: EuiThemeComputed) => css`
+  .alertingHealthCheck__body {
+    padding-left: calc(${euiTheme.size.base} * 2);
+    padding-right: calc(${euiTheme.size.base} * 2);
+  }
+
+  .alertingFlyoutHealthCheck__body {
+    padding-left: calc(${euiTheme.size.base} * 2);
+    padding-right: calc(${euiTheme.size.base} * 2);
+    margin-top: ${euiTheme.size.base};
+  }
+`;
+
 export const HealthCheck: FC<PropsWithChildren<Props>> = ({
   children,
   waitForCheck,
@@ -42,6 +58,7 @@ export const HealthCheck: FC<PropsWithChildren<Props>> = ({
   const { http, docLinks } = useKibana().services;
   const { setLoadingHealthCheck } = useHealthContext();
   const [alertingHealth, setAlertingHealth] = React.useState<Option<HealthStatus>>(none);
+  const { euiTheme } = useEuiTheme();
 
   React.useEffect(() => {
     (async function () {
@@ -91,13 +108,17 @@ export const HealthCheck: FC<PropsWithChildren<Props>> = ({
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <>{children}</>
         ) : !healthCheck.isRulesAvailable ? (
-          <AlertsError docLinks={docLinks} className={className} />
+          <AlertsError docLinks={docLinks} className={className} euiTheme={euiTheme} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
-          <ApiKeysAndEncryptionError docLinks={docLinks} className={className} />
+          <ApiKeysAndEncryptionError
+            docLinks={docLinks}
+            className={className}
+            euiTheme={euiTheme}
+          />
         ) : !healthCheck.hasPermanentEncryptionKey ? (
-          <EncryptionError docLinks={docLinks} className={className} />
+          <EncryptionError docLinks={docLinks} className={className} euiTheme={euiTheme} />
         ) : (
-          <ApiKeysDisabledError docLinks={docLinks} className={className} />
+          <ApiKeysDisabledError docLinks={docLinks} className={className} euiTheme={euiTheme} />
         );
       }
     )
@@ -120,13 +141,15 @@ async function getAlertingFrameworkHealth(
 interface PromptErrorProps {
   docLinks: DocLinksStart;
   className?: string;
+  euiTheme: EuiThemeComputed;
 }
 
-const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
+const EncryptionError = ({ docLinks, className, euiTheme }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
     className={className}
+    css={alertingHealthCheckCss(euiTheme)}
     titleSize="xs"
     title={
       <h2>
@@ -159,11 +182,12 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
+const ApiKeysDisabledError = ({ docLinks, className, euiTheme }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
     className={className}
+    css={alertingHealthCheckCss(euiTheme)}
     titleSize="xs"
     title={
       <h2>
@@ -197,11 +221,12 @@ const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
+const AlertsError = ({ docLinks, className, euiTheme }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="alertsNeededEmptyPrompt"
     className={className}
+    css={alertingHealthCheckCss(euiTheme)}
     titleSize="xs"
     title={
       <h2>
@@ -228,11 +253,12 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const ApiKeysAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
+const ApiKeysAndEncryptionError = ({ docLinks, className, euiTheme }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
     className={className}
+    css={alertingHealthCheckCss(euiTheme)}
     titleSize="xs"
     title={
       <h2>

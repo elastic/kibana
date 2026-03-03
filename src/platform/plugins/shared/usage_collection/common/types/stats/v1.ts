@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as OpsMetricsCopy from './core_metrics';
+import type * as OpsMetricsCopy from './core_metrics';
 
 /** v1 types Start */
 /**

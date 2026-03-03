@@ -49,7 +49,7 @@ describe('kibana.yml configured with map.tilemap.url', () => {
       __dataRequests: [],
       id: '12345',
       includeInFitToBounds: true,
-      label: null,
+      label: undefined,
       maxZoom: 24,
       minZoom: 0,
       sourceDescriptor: {
@@ -82,7 +82,7 @@ describe('EMS is enabled', () => {
       __dataRequests: [],
       id: '12345',
       includeInFitToBounds: true,
-      label: null,
+      label: undefined,
       locale: 'autoselect',
       maxZoom: 24,
       minZoom: 0,

@@ -11,10 +11,10 @@ import type {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
-import type { UnifiedHistogramContainerProps } from '@kbn/unified-histogram-plugin/public';
+import type { UseUnifiedHistogramProps } from '@kbn/unified-histogram';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { useCallback } from 'react';
-import { EsqlInTimelineTrigger } from '../../../../../../app/actions/constants';
+import { SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 export type WithPreventableEvent<T> = T & {
@@ -42,7 +42,7 @@ export const useHistogramCustomization = () => {
     services: { customDataService: discoverDataService, uiActions },
   } = useKibana();
 
-  const onFilterCallback: UnifiedHistogramContainerProps['onFilter'] = useCallback(
+  const onFilterCallback: UseUnifiedHistogramProps['onFilter'] = useCallback(
     async (eventData: WithPreventableEvent<CustomClickTriggerEvent>) => {
       if (eventData.preventDefault) eventData.preventDefault();
       let filters;
@@ -67,9 +67,7 @@ export const useHistogramCustomization = () => {
       }
 
       if (filters && filters.length > 0) {
-        const applyFilterTrigger = uiActions.getTrigger(EsqlInTimelineTrigger.HISTOGRAM_TRIGGER);
-
-        await applyFilterTrigger.exec({
+        await uiActions.executeTriggerActions(SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER, {
           filters,
           timeFieldName: eventData.timeFieldName,
         });
@@ -78,7 +76,7 @@ export const useHistogramCustomization = () => {
     [uiActions, discoverDataService.actions]
   );
 
-  const onBrushEndCallback: UnifiedHistogramContainerProps['onBrushEnd'] = useCallback(
+  const onBrushEndCallback: UseUnifiedHistogramProps['onBrushEnd'] = useCallback(
     (data: WithPreventableEvent<BrushTriggerEvent['data']>) => {
       discoverDataService.query.timefilter.timefilter.setTime({
         from: new Date(data.range[0]).toISOString(),

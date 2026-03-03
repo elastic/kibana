@@ -21,19 +21,11 @@ import { login, ROLE } from '../../tasks/login';
 
 export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/248743
+describe.skip(
   'Form',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automatedProcessActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('User with no access can not create an endpoint response action', () => {

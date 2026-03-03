@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatternRollup } from '../../types';
+import type { PatternRollup } from '../../types';
 
 /**
  * This `PatternRollup` containing (just) the
@@ -21,6 +21,7 @@ export const alertIndexNoResults: PatternRollup = {
       managed: true,
       policy: '.alerts-ilm-policy',
       phase: 'hot',
+      skip: false,
     },
   },
   ilmExplainPhaseCounts: {
@@ -57,6 +58,7 @@ export const alertIndexWithAllResults: PatternRollup = {
       managed: true,
       policy: '.alerts-ilm-policy',
       phase: 'hot',
+      skip: false,
     },
   },
   ilmExplainPhaseCounts: {

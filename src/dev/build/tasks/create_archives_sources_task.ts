@@ -8,13 +8,43 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { resolve } from 'path';
-import { scanCopy, Task, deleteAll, copyAll } from '../lib';
+import { removePackagesFromPackageMap } from '@kbn/repo-packages';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+import { resolve, join } from 'path';
+import { scanCopy, deleteAll, copyAll } from '../lib';
+import type { Task, Platform } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
+    async function removeSolutions(solutionsToRemove: KibanaSolution[], platform: Platform) {
+      const solutionPluginNames: string[] = [];
+
+      for (const solution of solutionsToRemove) {
+        if (!solution) continue;
+        const solutionPlugins = config.getPrivateSolutionPackagesFromRepo(solution);
+        solutionPluginNames.push(...solutionPlugins.map((p) => p.name));
+      }
+      if (!solutionPluginNames.length) return;
+
+      log.debug(
+        `Removing ${solutionPluginNames.length} unused plugins from [${platform.toString()}]`
+      );
+      await deleteAll(
+        solutionPluginNames.map((name) =>
+          build.resolvePathForPlatform(platform, join('node_modules', name))
+        ),
+        log
+      );
+
+      removePackagesFromPackageMap(
+        solutionPluginNames,
+        build.resolvePathForPlatform(platform, 'node_modules/@kbn/repo-packages/package-map.json')
+      );
+    }
+
     await Promise.all(
       config.getTargetPlatforms().map(async (platform) => {
         // copy all files from generic build source directory into platform-specific build directory
@@ -42,23 +72,69 @@ export const CreateArchivesSources: Task = {
         log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');
 
         if (platform.isServerless()) {
+          // Remove chromium assets
           await deleteAll(
-            [
-              'x-pack/platform/plugins/private/canvas/shareable_runtime/build',
-              'node_modules/@kbn/screenshotting-plugin/server/assets',
-            ].map((path) => build.resolvePathForPlatform(platform, path)),
+            ['node_modules/@kbn/screenshotting-plugin/server/assets'].map((path) =>
+              build.resolvePathForPlatform(platform, path)
+            ),
             log
           );
+
+          // Copy solution config.yml
+          const WORKPLACE_AI_CONFIGS = ['serverless.workplaceai.yml'];
+          const ELASTICSEARCH_CONFIGS = ['serverless.es.yml'];
+          const OBSERVABILITY_CONFIGS = [
+            'serverless.oblt.yml',
+            'serverless.oblt.{logs_essentials,complete}.yml',
+          ];
+          const SECURITY_CONFIGS = [
+            'serverless.security.yml',
+            'serverless.security.{search_ai_lake,essentials,complete}.yml',
+          ];
+          const configFiles = ['serverless.yml'];
+          const solutionId = platform.getSolutionId();
+          switch (solutionId) {
+            case 'workplaceai':
+              configFiles.push(...WORKPLACE_AI_CONFIGS);
+              break;
+            case 'search':
+              configFiles.push(...ELASTICSEARCH_CONFIGS);
+              break;
+            case 'observability':
+              configFiles.push(...OBSERVABILITY_CONFIGS);
+              break;
+            case 'security':
+              configFiles.push(...SECURITY_CONFIGS);
+              break;
+            default:
+              // we push all of the solution config files for non-solution specific serverless builds
+              configFiles.push(
+                ...WORKPLACE_AI_CONFIGS,
+                ...ELASTICSEARCH_CONFIGS,
+                ...OBSERVABILITY_CONFIGS,
+                ...SECURITY_CONFIGS
+              );
+              break;
+          }
           await copyAll(
             resolve(REPO_ROOT, 'config'),
             build.resolvePathForPlatform(platform, 'config'),
             {
-              select: ['serverless.yml', 'serverless.{es,oblt,security}.yml'],
+              select: configFiles,
             }
           );
-          log.debug(
-            `Serverless adjustments made in serverless-${platform.getNodeArch()} specific build directory`
-          );
+
+          // Remove non-target solutions
+          if (solutionId && KIBANA_SOLUTIONS.includes(solutionId)) {
+            const solutionsToRemove: KibanaSolution[] = KIBANA_SOLUTIONS.filter(
+              (s) => s !== solutionId
+            );
+            await removeSolutions(solutionsToRemove, platform);
+          }
+        } else if (config.isRelease) {
+          // For stateful release builds, remove the workplaceai solution.
+          // Snapshot builds support all solutions to faciliate functional testing
+          await removeSolutions(['workplaceai'], platform);
         }
       })
     );

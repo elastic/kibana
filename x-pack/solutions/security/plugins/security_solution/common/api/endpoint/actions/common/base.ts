@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { SUPPORTED_HOST_OS_TYPE } from '../../../../endpoint/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
 
 export const AgentTypeSchemaLiteral = RESPONSE_ACTION_AGENT_TYPE.map((agentType) =>
@@ -23,6 +24,10 @@ export const agentTypesSchema = {
     maxSize: RESPONSE_ACTION_AGENT_TYPE.length,
   },
 };
+
+export const HostOsTypeSchemaLiteral = SUPPORTED_HOST_OS_TYPE.map((osType) =>
+  schema.literal(osType)
+);
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */

@@ -6,8 +6,10 @@
  */
 
 import { keys } from 'lodash';
+import type { Logger } from '@kbn/logging';
 import type { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
+import { optimizeTaskStateForFlapping } from './flapping/optimize_task_state_for_flapping';
 
 export function toRawAlertInstances<
   State extends AlertInstanceState,
@@ -15,8 +17,11 @@ export function toRawAlertInstances<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
+  logger: Logger,
+  maxAlerts: number,
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  shouldOptimizeTaskState: boolean = false
 ): {
   rawActiveAlerts: Record<string, RawAlertInstance>;
   rawRecoveredAlerts: Record<string, RawAlertInstance>;
@@ -28,9 +33,12 @@ export function toRawAlertInstances<
     rawActiveAlerts[id] = activeAlerts[id].toRaw();
   }
 
-  for (const id of keys(recoveredAlerts)) {
-    const alert = recoveredAlerts[id];
-    rawRecoveredAlerts[id] = alert.toRaw(true);
+  if (shouldOptimizeTaskState) {
+    recoveredAlerts = optimizeTaskStateForFlapping(logger, recoveredAlerts, maxAlerts);
   }
+  for (const id of keys(recoveredAlerts)) {
+    rawRecoveredAlerts[id] = recoveredAlerts[id].toRaw(true);
+  }
+
   return { rawActiveAlerts, rawRecoveredAlerts };
 }

@@ -8,6 +8,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
   <EuiToolTip
     content="At least one server isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -15,7 +16,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for apm 
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -31,6 +31,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
   <EuiToolTip
     content="At least one instance isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -38,7 +39,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for beat
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -54,6 +54,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
   <EuiToolTip
     content="At least one node isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -61,7 +62,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for elas
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -77,6 +77,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
   <EuiToolTip
     content="At least one instance isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -84,7 +85,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for kiba
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -100,6 +100,7 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
   <EuiToolTip
     content="At least one node isn’t monitored using Metricbeat. Click to view status."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -107,7 +108,6 @@ exports[`setupMode SetupModeTooltip allInternalCollection should render for logs
       color="danger"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring"
     >
       Self monitoring
     </EuiBadge>
@@ -123,6 +123,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
   <EuiToolTip
     content="Metricbeat is monitoring all servers."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -130,7 +131,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for a
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -146,6 +146,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
   <EuiToolTip
     content="Metricbeat is monitoring all instances."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -153,7 +154,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for b
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -169,6 +169,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
   <EuiToolTip
     content="Metricbeat is monitoring all nodes."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -176,7 +177,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for e
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -192,6 +192,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
   <EuiToolTip
     content="Metricbeat is monitoring all instances."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -199,7 +200,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for k
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -215,6 +215,7 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
   <EuiToolTip
     content="Metricbeat is monitoring all nodes."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -222,7 +223,6 @@ exports[`setupMode SetupModeTooltip allMonitoredByMetricbeat should render for l
       color="success"
       href=""
       iconType="flag"
-      onClickAriaLabel="Metricbeat monitoring"
     >
       Metricbeat monitoring
     </EuiBadge>
@@ -238,6 +238,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
   <EuiToolTip
     content="Metricbeat is monitoring all servers. Click to view servers and disable self monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -245,7 +246,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for apm 1
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -261,6 +261,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
   <EuiToolTip
     content="Metricbeat is monitoring all instances. Click to view instances and disable self monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -268,7 +269,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for beats
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -284,6 +284,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
   <EuiToolTip
     content="Metricbeat is monitoring all nodes. Click to view nodes and disable self monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -291,7 +292,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for elast
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -307,6 +307,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
   <EuiToolTip
     content="Metricbeat is monitoring all instances. Click to view instances and disable self monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -314,7 +315,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for kiban
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -330,6 +330,7 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
   <EuiToolTip
     content="Metricbeat is monitoring all nodes. Click to view nodes and disable self monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -337,7 +338,6 @@ exports[`setupMode SetupModeTooltip internalCollectionOn should render for logst
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="Self monitoring is on"
     >
       Self monitoring is on
     </EuiBadge>
@@ -353,6 +353,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
   <EuiToolTip
     content="We did not detect any usage. Click to view servers."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -360,7 +361,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ap
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -376,6 +376,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
   <EuiToolTip
     content="We did not detect any usage. Click to view instances."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -383,7 +384,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for be
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -399,6 +399,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
   <EuiToolTip
     content="We did not detect any usage. Click to view nodes."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -406,7 +407,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for el
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -422,6 +422,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
   <EuiToolTip
     content="We did not detect any usage. Click to view instances."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -429,7 +430,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for ki
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -445,6 +445,7 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
   <EuiToolTip
     content="We did not detect any usage. Click to view nodes."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -452,7 +453,6 @@ exports[`setupMode SetupModeTooltip no detectable instances should render for lo
       color="hollow"
       href=""
       iconType="flag"
-      onClickAriaLabel="No usage"
     >
       No usage
     </EuiBadge>
@@ -468,6 +468,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -475,7 +476,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -491,6 +491,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -498,7 +499,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -514,6 +514,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -521,7 +522,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -537,6 +537,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -544,7 +545,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>
@@ -560,6 +560,7 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
   <EuiToolTip
     content="We detected usage of this product. Click to start monitoring."
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >
@@ -567,7 +568,6 @@ exports[`setupMode SetupModeTooltip only detectable instances should render for 
       color="warning"
       href=""
       iconType="flag"
-      onClickAriaLabel="No monitoring"
     >
       No monitoring
     </EuiBadge>

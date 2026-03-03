@@ -39,6 +39,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
 
     & .euiTreeView__nodeLabel {
       width: 100%;
+      user-select: text;
+      cursor: text;
     }
   }
 
@@ -67,6 +69,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
     & .euiTreeView__nodeLabel {
       & .euiText {
         font-size: ${({ theme }) => theme.eui.euiFontSize};
+        user-select: text;
+        cursor: text;
       }
     }
   }
@@ -179,7 +183,7 @@ export const PolicyResponse = memo(
           | 'global'
           | 'user']['identifiers']
       ) => {
-        return artifactIdentifiers.map((artifact) => {
+        return (artifactIdentifiers ?? []).map((artifact) => {
           return {
             label: <PolicyResponseArtifactItem artifact={artifact} key={artifact.sha256} />,
             id: artifact.name,
@@ -244,7 +248,7 @@ export const PolicyResponse = memo(
                 size="s"
                 data-test-subj={`endpointPolicyResponseArtifact${capitalize(key)}`}
               >
-                {`${capitalize(key)} (v${val.version})`}
+                {`${capitalize(key)}${val.version ? ` (v${val.version})` : ''}`}
               </EuiText>
             ),
             id: key,

@@ -12,6 +12,7 @@ import {
   ReadExceptionListRequestQuery,
   ReadExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -24,7 +25,7 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [EXCEPTIONS_API_READ],
         },
       },
     })

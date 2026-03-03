@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { chain, fromEither, map, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { chain, fromEither, map, tryCatch } from 'fp-ts/TaskEither';
+import { flow } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   AcknowledgeSchema,
   DeleteListSchemaEncoded,
   ExportListItemQuerySchemaEncoded,
@@ -20,6 +20,9 @@ import {
   ListItemIndexExistSchema,
   ListSchema,
   ReadListSchema,
+  FoundListsBySizeSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   acknowledgeSchema,
   deleteListSchema,
   readListSchema,
@@ -31,7 +34,6 @@ import {
   listItemIndexExistSchema,
   listSchema,
   foundListsBySizeSchema,
-  FoundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
@@ -42,7 +44,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
 
-import {
+import type {
   ApiParams,
   DeleteListParams,
   ExportListParams,
@@ -65,12 +67,9 @@ const findLists = async ({
   http,
   cursor,
   page,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_field,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_order,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
   return http.fetch(`${LIST_URL}/_find`, {
@@ -116,7 +115,7 @@ const findListsBySize = async ({
   http,
   cursor,
   page,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
@@ -156,7 +155,7 @@ export { findListsBySizeWithValidation as findListsBySize };
 const importList = async ({
   file,
   http,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   list_id,
   type,
   signal,
@@ -238,7 +237,7 @@ export { deleteListWithValidation as deleteList };
 
 const exportList = async ({
   http,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   list_id,
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
-import { ColorPalette } from '../../../../common/lib';
+import type { ColorPalette } from '../../../../common/lib';
 import { astToPalette } from './utils';
-import { ColorPaletteName, getPaletteType } from './palette_types';
-import { CustomColorPalette } from '../../../../public/components/palette_picker';
+import type { ColorPaletteName } from './palette_types';
+import { getPaletteType } from './palette_types';
+import type { CustomColorPalette } from '../../../../public/components/palette_picker';
 
 const { Palette: strings, StopsPalette: stopsPaletteStrings } = ArgumentStrings;
 
@@ -96,6 +98,7 @@ PaletteArgInput.propTypes = {
   argId: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   renderError: PropTypes.func,
 };
 

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import { RenderingMetadata } from '../types';
+import type { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
@@ -27,7 +28,7 @@ interface FontFace {
 }
 
 /**
- * `Inter` is the latest version of `Inter UI` and used specifically in v8 of Kibana from EUI Amsterdam
+ * `Inter` is the latest version of `Inter UI`
  */
 const getInter = (url: string): FontFace => {
   return {

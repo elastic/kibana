@@ -9,9 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { pluck } from 'rxjs';
-import { CoreSetup, Plugin, HttpResponsePayload } from '@kbn/core/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { ExpressionsServerStart } from '@kbn/expressions-plugin/server';
+import type { CoreSetup, Plugin, HttpResponsePayload } from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { ExpressionsServerStart } from '@kbn/expressions-plugin/server';
 
 export interface TestStartDeps {
   data: DataPluginStart;
@@ -25,6 +25,12 @@ export class TestPlugin implements Plugin<TestPluginSetup, TestPluginStart, {}, 
     router.post(
       {
         path: '/api/interpreter_functional/run_expression',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.object({
             input: schema.maybe(schema.nullable(schema.object({}, { unknowns: 'allow' }))),

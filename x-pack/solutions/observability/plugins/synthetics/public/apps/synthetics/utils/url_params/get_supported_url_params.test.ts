@@ -70,6 +70,7 @@ describe('getSupportedUrlParams', () => {
       projects: [],
       schedules: [],
       tags: [],
+      useLogicalAndFor: [],
     });
   });
 

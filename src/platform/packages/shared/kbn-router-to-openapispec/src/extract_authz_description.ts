@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AuthzEnabled, AuthzDisabled, InternalRouteSecurity } from '@kbn/core-http-server';
+import type {
+  AuthzEnabled,
+  AuthzDisabled,
+  InternalRouteSecurity,
+  AllRequiredCondition,
+  AnyRequiredCondition,
+} from '@kbn/core-http-server';
 
 interface PrivilegeGroupValue {
-  allRequired: string[];
-  anyRequired: string[];
+  allRequired: AllRequiredCondition;
+  anyRequired: AnyRequiredCondition;
 }
 
 export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | undefined) => {
@@ -42,11 +48,28 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
     }
   );
 
-  const getPrivilegesDescription = (allRequired: string[], anyRequired: string[]) => {
-    const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
-    const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+  const getPrivilegesDescription = (
+    allRequired: AllRequiredCondition,
+    anyRequired: AnyRequiredCondition
+  ) => {
+    const allPrivileges = allRequired
+      .map((privilege) =>
+        typeof privilege === 'string' ? privilege : `(${privilege.anyOf?.join(' OR ')})`
+      )
+      .join(' AND ');
+    const anyPrivileges = anyRequired
+      .map((privilege) =>
+        typeof privilege === 'string' ? privilege : `(${privilege.allOf?.join(' AND ')})`
+      )
+      .join(' OR ');
+    const allDescription = allRequired.length ? allPrivileges : '';
+    const anyDescription = anyRequired.length ? anyPrivileges : '';
 
-    return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
+    if (allDescription && anyDescription) {
+      return `(${allDescription}) AND (${anyDescription})`;
+    }
+
+    return `${allDescription}${anyDescription}`;
   };
 
   const getDescriptionForRoute = () => {

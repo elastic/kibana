@@ -9,8 +9,8 @@
 
 import expect from '@kbn/expect';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -50,8 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/213461
-    describe.skip('top nav menu buttons', () => {
+    describe('top nav menu buttons', () => {
       const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
         const button =
           typeof buttonTestSubject === 'string'
@@ -62,25 +61,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       const expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed = async (
-        menuButtonTestSubject: string
+        menuButtonTestSubject: string,
+        isInOverflowMenu: boolean = false,
+        hasPopoverItems: boolean = false
       ) => {
-        await focusAndPressButton(menuButtonTestSubject);
-        expect(await hasFocus(menuButtonTestSubject)).to.be(false);
+        if (isInOverflowMenu) {
+          await focusAndPressButton('app-menu-overflow-button');
+        }
+        if (!hasPopoverItems) {
+          await focusAndPressButton(menuButtonTestSubject);
+        }
+
+        await retry.try(async () => {
+          expect(await hasFocus(menuButtonTestSubject)).to.be(false);
+        });
+        // Small delay to allow the overlay to open fully
+        await new Promise((resolve) => setTimeout(resolve, 500));
         await browser.pressKeys(browser.keys.ESCAPE);
-        expect(await hasFocus(menuButtonTestSubject)).to.be(true);
+        await retry.try(async () => {
+          expect(
+            await hasFocus(isInOverflowMenu ? 'app-menu-overflow-button' : menuButtonTestSubject)
+          ).to.be(true);
+        });
       };
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
 
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverAlertsButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed(
+          'discoverAlertsButton',
+          true,
+          true
+        ));
 
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
-        await focusAndPressButton('discoverAlertsButton');
-        expect(await hasFocus('discoverAlertsButton')).to.be(false);
-        await focusAndPressButton('discoverCreateAlertButton');
-        expect(await testSubjects.exists('addRuleFlyoutTitle')).to.be(true);
+        await testSubjects.click('app-menu-overflow-button');
+        await testSubjects.existOrFail('discoverAlertsButton');
+        await testSubjects.click('discoverAlertsButton');
+        await testSubjects.existOrFail('discoverCreateAlertButton');
+        await testSubjects.click('discoverCreateAlertButton');
+        await testSubjects.existOrFail('addRuleFlyoutTitle');
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
           // A bug exists with the create rule flyout where sometimes the confirm modal
@@ -93,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             );
           }
-          expect(await hasFocus('discoverAlertsButton')).to.be(true);
+          expect(await hasFocus('app-menu-overflow-button')).to.be(true);
         });
       });
 
@@ -101,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
 
       it('should return focus to the inspect button when dismissing the inspector flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton', true));
 
       it('should return focus to the save button when dismissing the save modal', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));

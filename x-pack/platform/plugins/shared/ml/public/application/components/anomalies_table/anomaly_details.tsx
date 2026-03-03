@@ -17,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
   EuiIcon,
   EuiIconTip,
   EuiLink,
@@ -24,6 +25,7 @@ import {
   EuiTabbedContent,
   EuiText,
   useEuiTheme,
+  EuiTitle,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
@@ -40,20 +42,22 @@ import {
 
 interface Props {
   anomaly: MlAnomaliesTableRecordExtended;
-  examples: string[];
-  definition: CategoryDefinition;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
   tabIndex: number;
   job: ExplorerJob;
+  definition?: CategoryDefinition;
+  examples?: string[];
+  categoryDefinitionError?: string;
+  filter?: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }
 
 export const AnomalyDetails: FC<Props> = ({
   anomaly,
   examples,
   definition,
+  categoryDefinitionError,
   isAggregatedData,
   filter,
   influencersLimit,
@@ -84,7 +88,13 @@ export const AnomalyDetails: FC<Props> = ({
         name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
           defaultMessage: 'Category examples',
         }),
-        content: <CategoryExamples examples={examples} definition={definition} />,
+        content: (
+          <CategoryExamples
+            examples={examples}
+            definition={definition}
+            error={categoryDefinitionError}
+          />
+        ),
       },
     ];
 
@@ -117,25 +127,28 @@ export const AnomalyDetails: FC<Props> = ({
 const Contents: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
   job: ExplorerJob;
+  filter?: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const dividerStyle = useMemo(() => {
     return isPopulatedObject(anomaly.source.anomaly_score_explanation)
-      ? { borderRight: `1px solid ${colors.lightShade}` }
+      ? { borderRight: `1px solid ${euiTheme.colors.lightShade}` }
       : {};
-  }, [colors, anomaly]);
+  }, [euiTheme.colors, anomaly]);
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
+        <div
+          css={{
+            padding: euiTheme.size.m,
+          }}
+          data-test-subj="mlAnomaliesListRowDetails"
+        >
           <Description anomaly={anomaly} />
           <EuiSpacer size="m" />
 
@@ -168,15 +181,17 @@ const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly 
 
   return (
     <>
-      <EuiText size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle"
-            defaultMessage="Description"
-          />
-        </h4>
-        {anomalyDescription}
-      </EuiText>
+      <EuiTitle size="xxs">
+        <h3>
+          <strong>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle"
+              defaultMessage="Description"
+            />
+          </strong>
+        </h3>
+      </EuiTitle>
+      <EuiText size="xs">{anomalyDescription}</EuiText>
       {mvDescription !== undefined && <EuiText size="xs">{mvDescription}</EuiText>}
     </>
   );
@@ -185,32 +200,38 @@ const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly 
 const Details: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
+  filter?: EntityCellFilter;
   job: ExplorerJob;
 }> = ({ anomaly, isAggregatedData, filter, job }) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
   return (
     <>
+      <EuiTitle size="xxs">
+        <h3>
+          <strong>
+            {isAggregatedData === true ? (
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
+                defaultMessage="Details on highest severity anomaly"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDetailsTitle"
+                defaultMessage="Anomaly details"
+              />
+            )}
+          </strong>
+        </h3>
+      </EuiTitle>
       <EuiText size="xs">
-        {isAggregatedData === true ? (
-          <h4>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
-              defaultMessage="Details on highest severity anomaly"
-            />
-          </h4>
-        ) : (
-          <h4>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDetailsTitle"
-              defaultMessage="Anomaly details"
-            />
-          </h4>
-        )}
         {isInterimResult === true && (
           <>
             <EuiIcon type="warning" />
-            <span className="interim-result">
+            <span
+              css={{
+                fontStyle: 'italic',
+              }}
+            >
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel"
                 defaultMessage="Interim result"
@@ -230,7 +251,7 @@ const Details: FC<{
 const Influencers: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, influencersLimit, influencerFilter }) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
@@ -239,7 +260,7 @@ const Influencers: FC<{
   let listItems: Array<{ title: string; description: React.ReactElement }> = [];
   let othersCount = 0;
   let numToDisplay = 0;
-  if (anomalyInfluencers !== undefined) {
+  if (anomalyInfluencers !== undefined && influencerFilter !== undefined) {
     numToDisplay =
       showAllInfluencers === true
         ? anomalyInfluencers.length
@@ -259,17 +280,18 @@ const Influencers: FC<{
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiText size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.anomalyDetails.influencersTitle"
-              defaultMessage="Influencers"
-            />
-          </h4>
-        </EuiText>
-
-        {listItems.map(({ title, description }) => (
-          <>
+        <EuiTitle size="xxs">
+          <h3>
+            <strong>
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.anomalyDetails.influencersTitle"
+                defaultMessage="Influencers"
+              />
+            </strong>
+          </h3>
+        </EuiTitle>
+        {listItems.map(({ title, description }, index) => (
+          <React.Fragment key={`influencer-${index}-${title}`}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem style={{ width: '180px' }} grow={false}>
                 {title}
@@ -277,7 +299,7 @@ const Influencers: FC<{
               <EuiFlexItem>{description}</EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="xs" />
-          </>
+          </React.Fragment>
         ))}
         {othersCount > 0 && (
           <EuiLink onClick={() => toggleAllInfluencers()}>
@@ -302,47 +324,77 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
-  definition,
-  examples,
-}) => {
+const CategoryExamples: FC<{
+  definition?: CategoryDefinition;
+  examples: string[];
+  error?: string;
+}> = ({ definition, examples, error }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       direction="column"
       justifyContent="center"
       gutterSize="xs"
-      className="mlAnomalyCategoryExamples"
+      css={{
+        padding: euiTheme.size.l,
+      }}
     >
+      {error && (
+        <EuiFlexItem>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="danger"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.ml.anomaliesTable.anomalyDetails.categoryDefinitionErrorTitle',
+              { defaultMessage: 'An error occurred loading category definition:' }
+            )}
+            data-test-subj="mlAnomaliesTableCategoryDefinitionError"
+          >
+            <EuiText size="xs">{error}</EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      )}
       {definition !== undefined && definition.terms && (
         <>
           <EuiFlexItem key={`example-terms`}>
-            <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
-                {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
-                  defaultMessage: 'Terms',
-                })}
-              </h4>
-              &nbsp;
-              <EuiIconTip
-                aria-label={i18n.translate(
-                  'xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionAriaLabel',
-                  {
-                    defaultMessage: 'Description',
-                  }
-                )}
-                type="questionInCircle"
-                color="subdued"
-                size="s"
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
-                    defaultMessage="A space separated list of the common tokens that are matched in values of the category
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h3>
+                    <strong>
+                      {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
+                        defaultMessage: 'Terms',
+                      })}
+                    </strong>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  aria-label={i18n.translate(
+                    'xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionAriaLabel',
+                    {
+                      defaultMessage: 'Description',
+                    }
+                  )}
+                  type="question"
+                  color="subdued"
+                  size="s"
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                      defaultMessage="A space separated list of the common tokens that are matched in values of the category
                   (may have been truncated to a max character limit of {maxChars})"
-                    values={{ maxChars: MAX_CHARS }}
-                  />
-                }
-              />
-            </EuiText>
+                      values={{ maxChars: MAX_CHARS }}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiText size="xs">{definition.terms}</EuiText>
           </EuiFlexItem>
           <EuiSpacer size="xs" />
@@ -351,33 +403,40 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
       {definition !== undefined && definition.regex && (
         <>
           <EuiFlexItem key={`example-regex`}>
-            <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
-                {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
-                  defaultMessage: 'Regex',
-                })}
-              </h4>
-              &nbsp;
-              <EuiIconTip
-                aria-label={i18n.translate(
-                  'xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionAriaLabel',
-                  {
-                    defaultMessage: 'Description',
-                  }
-                )}
-                type="questionInCircle"
-                color="subdued"
-                size="s"
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
-                    defaultMessage="The regular expression that is used to search for values that match the category
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h3>
+                    <strong>
+                      {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
+                        defaultMessage: 'Regex',
+                      })}
+                    </strong>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  aria-label={i18n.translate(
+                    'xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionAriaLabel',
+                    {
+                      defaultMessage: 'Description',
+                    }
+                  )}
+                  type="question"
+                  color="subdued"
+                  size="s"
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                      defaultMessage="The regular expression that is used to search for values that match the category
                     (may have been truncated to a max character limit of {maxChars})"
-                    values={{ maxChars: MAX_CHARS }}
-                  />
-                }
-              />
-            </EuiText>
+                      values={{ maxChars: MAX_CHARS }}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiText size="xs">{definition.regex}</EuiText>
           </EuiFlexItem>
           <EuiSpacer size="xs" />
@@ -388,15 +447,25 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
         return (
           <EuiFlexItem key={`example${i}`}>
             {i === 0 && definition !== undefined && (
-              <EuiText size="s">
-                <h4>
-                  {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.examplesTitle', {
-                    defaultMessage: 'Examples',
-                  })}
-                </h4>
-              </EuiText>
+              <EuiTitle size="xxs">
+                <h3>
+                  <strong>
+                    {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.examplesTitle', {
+                      defaultMessage: 'Examples',
+                    })}
+                  </strong>
+                </h3>
+              </EuiTitle>
             )}
-            <span className="mlAnomalyCategoryExamples__item">{example}</span>
+            <EuiText size="xs">
+              <span
+                css={{
+                  fontFamily: euiTheme.font.familyCode,
+                }}
+              >
+                {example}
+              </span>
+            </EuiText>
           </EuiFlexItem>
         );
       })}

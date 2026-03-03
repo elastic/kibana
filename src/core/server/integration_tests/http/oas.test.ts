@@ -10,34 +10,43 @@
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
 import type {
   InternalContextPreboot,
   InternalContextSetup,
 } from '@kbn/core-http-context-server-internal';
-import { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { IRouter } from '@kbn/core-http-server';
+import type { DocLinksServicePreboot } from '@kbn/core-doc-links-server';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { IRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
+import { createInternalHttpService } from '../utilities';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 
 let prebootDeps: {
   context: jest.Mocked<InternalContextPreboot>;
+  docLinks: jest.Mocked<DocLinksServicePreboot>;
 };
 let setupDeps: {
   context: jest.Mocked<InternalContextSetup>;
   executionContext: jest.Mocked<InternalExecutionContextSetup>;
+  userActivity: jest.Mocked<InternalUserActivityServiceSetup>;
 };
 beforeEach(async () => {
   prebootDeps = {
     context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
   };
   const contextSetup = contextServiceMock.createSetupContract();
   setupDeps = {
     context: contextSetup,
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
   };
 });
 
-let httpService: ReturnType<typeof createHttpService>;
+let httpService: ReturnType<typeof createInternalHttpService>;
 type ConfigServiceArgs = Parameters<typeof createConfigService>[0];
 async function startService(
   args: {
@@ -45,7 +54,7 @@ async function startService(
     createRoutes?: (getRouter: (pluginId?: symbol) => IRouter) => void;
   } = {}
 ) {
-  httpService = createHttpService({
+  httpService = createInternalHttpService({
     configService: createConfigService(args.config),
   });
   await httpService.preboot(prebootDeps);
@@ -177,8 +186,7 @@ it.each([
             ],
             requestBody: {
               content: {
-                'application/json; Elastic-Api-Version=1': {}, // Multiple body types
-                'application/json; Elastic-Api-Version=2': {},
+                'application/json; Elastic-Api-Version=2': {}, // Only the latest version
               },
             },
           },
@@ -195,20 +203,36 @@ it.each([
       createRoutes: (getRouter) => {
         const router1 = getRouter(Symbol('myPlugin'));
         router1.get(
-          { path: '/api/public-test', validate: false, options: { access: 'public' } },
+          {
+            path: '/api/public-test',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { access: 'public' },
+          },
           (_, __, res) => res.ok()
         );
         router1.post(
-          { path: '/api/public-test', validate: false, options: { access: 'public' } },
+          {
+            path: '/api/public-test',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { access: 'public' },
+          },
           (_, __, res) => res.ok()
         );
         router1.get(
-          { path: '/api/public-test/{id}', validate: false, options: { access: 'public' } },
+          {
+            path: '/api/public-test/{id}',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { access: 'public' },
+          },
           (_, __, res) => res.ok()
         );
         router1.get(
           {
             path: '/api/internal-test',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: {
               /* empty */
@@ -218,11 +242,19 @@ it.each([
         );
 
         router1.versioned
-          .get({ path: '/api/versioned', access: 'public' })
+          .get({
+            path: '/api/versioned',
+            security: { authz: { enabled: false, reason: '' } },
+            access: 'public',
+          })
           .addVersion({ version: '2023-10-31', validate: false }, (_, __, res) => res.ok());
 
         router1.versioned
-          .get({ path: '/api/versioned-internal', access: 'internal' })
+          .get({
+            path: '/api/versioned-internal',
+            security: { authz: { enabled: false, reason: '' } },
+            access: 'internal',
+          })
           .addVersion(
             {
               version: '1',
@@ -239,9 +271,30 @@ it.each([
           );
 
         const router2 = getRouter(Symbol('myOtherPlugin'));
-        router2.get({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
-        router2.post({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
-        router2.put({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
+        router2.get(
+          {
+            path: '/api/my-other-plugin',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
+          (_, __, res) => res.ok()
+        );
+        router2.post(
+          {
+            path: '/api/my-other-plugin',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
+          (_, __, res) => res.ok()
+        );
+        router2.put(
+          {
+            path: '/api/my-other-plugin',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
+          (_, __, res) => res.ok()
+        );
       },
     });
     const result = await supertest(server.listener).get('/api/oas').query(queryParam);

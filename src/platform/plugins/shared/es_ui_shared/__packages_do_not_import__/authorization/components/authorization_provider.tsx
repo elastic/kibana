@@ -13,7 +13,7 @@ import React, { createContext, useContext } from 'react';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { useRequest } from '../../../public/request';
 
-import { Privileges, Error as CustomError } from '../types';
+import type { Privileges, Error as CustomError } from '../types';
 
 export interface Authorization {
   isLoading: boolean;

@@ -8,17 +8,19 @@
  */
 
 import * as Rx from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import type { CaptureResult } from '@kbn/screenshotting-plugin/server/screenshots';
 import { PngExportType } from '.';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPngExportType: PngExportType;
@@ -33,6 +35,14 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+};
+
 let encryptedHeaders: string;
 
 const screenshottingMock = createMockScreenshottingStart();
@@ -61,6 +71,7 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: screenshottingMock,
+    licensing: licensingMock.createStart(),
   });
 
   getScreenshotsSpy.mockImplementation((opts) => {
@@ -75,9 +86,10 @@ beforeEach(async () => {
 
 test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
       forceNow: 'test',
       layout: { dimensions: {} },
       locatorParams: [],
@@ -86,8 +98,8 @@ test(`passes browserTimezone to getScreenshots`, async () => {
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(getScreenshotsSpy).toHaveBeenCalledWith(
     expect.objectContaining({ browserTimezone: 'UTC' })
@@ -95,32 +107,34 @@ test(`passes browserTimezone to getScreenshots`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const { content_type: contentType } = await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  const { content_type: contentType } = await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
   expect(contentType).toBe('image/png');
 });
 
 test(`returns buffer content base64 encoded`, async () => {
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(content).toEqual(testContent);
 });
@@ -128,17 +142,18 @@ test(`returns buffer content base64 encoded`, async () => {
 test(`screenshotting plugin uses the logger provided by the PNG export-type`, async () => {
   const logSpy = jest.spyOn(mockLogger, 'get');
 
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });

@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
-import {
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type {
   FieldFormat,
   FormatFactory,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
-import {
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
+import type {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   ReferenceLineLayerConfig,
 } from '../../common/types';
-import { GroupsConfiguration } from './axes_configuration';
+import type { GroupsConfiguration } from './axes_configuration';
 import { getFormat } from './format';
 import { isDataLayer, isReferenceLayer } from './visualization';
 
@@ -70,40 +67,8 @@ export type LayersAccessorsTitles = Record<string, LayerAccessorsTitles>;
 export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
   return layers.filter<ReferenceLineLayerConfig | CommonXYDataLayerConfig>(
     (layer): layer is ReferenceLineLayerConfig | CommonXYDataLayerConfig => {
-      let table: Datatable | undefined;
-      let accessors: Array<ExpressionValueVisDimension | string> = [];
-      let xAccessor: undefined | string | number;
-      let splitAccessors: string[] = [];
-
-      if (isDataLayer(layer) || isReferenceLayer(layer)) {
-        table = layer.table;
-        accessors = layer.accessors;
-      }
-
-      if (isDataLayer(layer)) {
-        xAccessor =
-          layer.xAccessor !== undefined && table
-            ? getAccessorByDimension(layer.xAccessor, table.columns)
-            : undefined;
-        splitAccessors = table
-          ? layer.splitAccessors?.map((splitAccessor) =>
-              getAccessorByDimension(splitAccessor, table!.columns)
-            ) || []
-          : [];
-      }
-
-      return !(
-        !accessors.length ||
-        !table ||
-        table.rows.length === 0 ||
-        (xAccessor && table.rows.every((row) => xAccessor && row[xAccessor] === undefined)) ||
-        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-        (!xAccessor &&
-          splitAccessors.length &&
-          table.rows.every((row) =>
-            splitAccessors.every((splitAccessor) => row[splitAccessor] === undefined)
-          ))
-      );
+      if (!isDataLayer(layer) && !isReferenceLayer(layer)) return false;
+      return layer.accessors.length > 0 && layer.table?.rows.length > 0;
     }
   );
 }

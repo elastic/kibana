@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticLogo, resolveFromArgs } from '@kbn/expression-utils';
+import { elasticLogo, resolveFromArgs } from '../../../public/lib';
 import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;

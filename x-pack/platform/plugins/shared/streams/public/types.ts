@@ -6,16 +6,53 @@
  */
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { StreamsRepositoryClient } from './api';
+import type { StreamsPublicConfig } from '../common/config';
+import type { EnableStreamsResponse, DisableStreamsResponse } from '../server/lib/streams/client';
 
-export interface StreamsPluginSetup {
-  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+export interface StreamsNavigationStatus {
+  status: 'enabled' | 'disabled';
 }
+
+export interface WiredStreamsStatus {
+  logs: boolean | 'conflict' | 'unknown';
+  'logs.otel': boolean | 'conflict' | 'unknown';
+  'logs.ecs': boolean | 'conflict' | 'unknown';
+  can_manage: boolean;
+}
+
+export interface ClassicStreamsStatus {
+  can_manage: boolean;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPluginSetup {}
 
 export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
-  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+  navigationStatus$: Observable<StreamsNavigationStatus>;
+  getWiredStatus: () => Promise<WiredStreamsStatus>;
+  getClassicStatus: () => Promise<ClassicStreamsStatus>;
+  enableWiredMode: (signal: AbortSignal) => Promise<EnableStreamsResponse>;
+  disableWiredMode: (signal: AbortSignal) => Promise<DisableStreamsResponse>;
+  config$: Observable<StreamsPublicConfig>;
 }
 
-export type StreamsPluginClass = PluginClass<StreamsPluginSetup, StreamsPluginStart, {}, {}>;
+export interface StreamsPluginSetupDependencies {
+  cloud?: CloudSetup;
+}
+
+export interface StreamsPluginStartDependencies {
+  cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
+}
+
+export type StreamsPluginClass = PluginClass<
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsPluginSetupDependencies,
+  StreamsPluginStartDependencies
+>;

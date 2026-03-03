@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import './dimension_editor.scss';
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiListGroup,
   EuiFormRow,
   EuiSpacer,
-  EuiListGroupItemProps,
   EuiToolTip,
   EuiText,
   EuiIconTip,
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiPanel,
-  EuiBasicTable,
-  EuiButtonIcon,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
+import type {
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  LensLayerType as LayerType,
+  IndexPattern,
+  IndexPatternField,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -39,23 +41,23 @@ import {
   updateColumnParam,
   updateDefaultLabels,
   resetIncomplete,
-  FieldBasedIndexPatternColumn,
   canTransition,
   adjustColumnReferencesForChangedColumn,
+  deleteColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { FormBasedLayer } from '../types';
-import { FormatSelector, FormatSelectorProps } from './format_selector';
+import type { FormatSelectorProps } from './format_selector';
+import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling, TimeScalingProps } from './time_scaling';
+import type { TimeScalingProps } from './time_scaling';
+import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
-import type { LayerType } from '../../../../common/types';
 import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
   quickFunctionsName,
@@ -65,17 +67,16 @@ import {
   formulaOperationName,
   DimensionEditorButtonGroups,
   CalloutWarning,
-  DimensionEditorGroupsOptions,
   isLayerChangingDueToDecimalsPercentile,
   isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
-import type { TemporaryState } from './dimensions_editor_helpers';
+import type { TemporaryState, DimensionEditorGroupsOptions } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { ParamEditorProps } from '../operations/definitions';
+import type { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
-import type { IndexPattern, IndexPatternField } from '../../../types';
+import { operationsButtonStyles } from './shared_styles';
 import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends FormBasedDimensionEditorProps {
@@ -118,6 +119,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
     dataViews: props.dataViews,
+    kql: props.kql,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -125,7 +127,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
@@ -136,12 +137,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [hasOtherBucketToastFired, setHasOtherBucketToastFired] = useState(false);
 
-  const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
-  const closeHelp = () => setIsHelpOpen(false);
-
   const temporaryQuickFunction = Boolean(temporaryState === quickFunctionsName);
   const temporaryStaticValue = Boolean(temporaryState === staticValueOperationName);
-  const { euiTheme } = useEuiTheme();
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const updateLayer = useCallback(
     (newLayer: Partial<FormBasedLayer>) =>
@@ -418,6 +418,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       compatibleWithSampling:
         getSamplingValue(state.layers[layerId]) === 1 ||
         (definition.getUnsupportedSettings?.()?.sampling ?? true),
+      documentation: definition.quickFunctionDocumentation,
     };
   });
 
@@ -431,7 +432,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
-    ({ operationType, compatibleWithCurrentField, disabledStatus, compatibleWithSampling }) => {
+    ({
+      operationType,
+      compatibleWithCurrentField,
+      disabledStatus,
+      compatibleWithSampling,
+      documentation,
+    }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
@@ -465,7 +472,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <EuiText color="danger" size="s">
+            <EuiText color="danger" size="s" tabIndex={0}>
               <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
@@ -473,13 +480,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <span>{operationDisplay[operationType].displayName}</span>
+            <span tabIndex={0}>{operationDisplay[operationType].displayName}</span>
           </EuiToolTip>
         );
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
               <span
                 css={css`
                   overflow: hidden;
@@ -509,7 +516,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithSampling) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs }}>
               {label}
             </EuiFlexItem>
             {shouldDisplayDots && (
@@ -534,7 +541,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
-        className: 'lnsIndexPatternDimensionEditor__operation',
+        css: operationsButtonStyles(euiThemeContext),
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
@@ -579,6 +586,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }),
             }
           : undefined,
+        showToolTip: !disabledStatus,
+        toolTipProps: {
+          position: 'left',
+        },
+        toolTipText: documentation,
         onClick() {
           if (
             ['none', 'fullReference', 'managedReference'].includes(
@@ -619,7 +631,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
+                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value!),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
@@ -720,43 +732,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...services,
   };
 
-  const helpButton = (
-    <EuiButtonIcon
-      onClick={onHelpClick}
-      iconType="documentation"
-      aria-label={i18n.translate('xpack.lens.indexPattern.quickFunctions.tableTitle', {
-        defaultMessage: 'Description of functions',
-      })}
-    />
-  );
-
-  const columnsSidebar = [
-    {
-      field: 'function',
-      name: i18n.translate('xpack.lens.indexPattern.functionTable.functionHeader', {
-        defaultMessage: 'Function',
-      }),
-      width: '150px',
-    },
-    {
-      field: 'description',
-      name: i18n.translate('xpack.lens.indexPattern.functionTable.descriptionHeader', {
-        defaultMessage: 'Description',
-      }),
-    },
-  ];
-
-  const items = sideNavItems
-    .filter((item) => operationDefinitionMap[item.id!].quickFunctionDocumentation)
-    .map((item) => {
-      const operationDefinition = operationDefinitionMap[item.id!]!;
-      return {
-        id: item.id!,
-        function: operationDefinition.displayName,
-        description: operationDefinition.quickFunctionDocumentation!,
-      };
-    });
-
   const quickFunctions = (
     <>
       <EuiFormRow
@@ -767,51 +742,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 defaultMessage: 'Functions',
               })}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                anchorPosition="rightUp"
-                button={helpButton}
-                isOpen={isHelpOpen}
-                display="inlineBlock"
-                panelPaddingSize="none"
-                closePopover={closeHelp}
-                initialFocus="#functionsHelpBasicTableId"
-              >
-                <EuiPopoverTitle paddingSize="s">
-                  {i18n.translate('xpack.lens.indexPattern.quickFunctions.popoverTitle', {
-                    defaultMessage: 'Quick functions',
-                  })}
-                </EuiPopoverTitle>
-                <EuiPanel
-                  className="eui-yScroll"
-                  style={{ maxHeight: '40vh' }}
-                  color="transparent"
-                  paddingSize="s"
-                >
-                  <EuiBasicTable
-                    id="functionsHelpBasicTableId"
-                    style={{ width: 350 }}
-                    tableCaption={i18n.translate(
-                      'xpack.lens.indexPattern.quickFunctions.tableTitle',
-                      {
-                        defaultMessage: 'Description of functions',
-                      }
-                    )}
-                    items={items}
-                    compressed={true}
-                    rowHeader="firstName"
-                    columns={columnsSidebar}
-                    responsiveBreakpoint={false}
-                  />
-                </EuiPanel>
-              </EuiPopover>
-            </EuiFlexItem>
           </EuiFlexGroup>
         }
         fullWidth
       >
         <EuiListGroup
-          className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
+          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1226,9 +1162,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 />
               ) : null,
             },
-            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
-              paramEditorProps
-            ) || []),
+            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.({
+              ...paramEditorProps,
+              euiTheme,
+            }) || []),
           ]}
         />
       )}
@@ -1290,3 +1227,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
     </div>
   );
 }
+
+const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
+  return css`
+    display: block;
+    column-count: 2;
+    column-gap: ${euiTheme.size.m};
+  `;
+};

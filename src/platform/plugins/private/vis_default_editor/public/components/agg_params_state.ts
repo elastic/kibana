@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParamInstance } from './agg_params_helper';
+import type { ParamInstance } from './agg_params_helper';
 
 export enum AGG_TYPE_ACTION_KEYS {
   TOUCHED = 'aggTypeTouched',

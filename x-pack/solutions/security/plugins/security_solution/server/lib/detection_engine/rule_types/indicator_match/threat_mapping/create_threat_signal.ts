@@ -18,6 +18,7 @@ import type {
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
 export const createThreatSignal = async ({
   sharedParams,
   currentResult,
@@ -34,7 +35,6 @@ export const createThreatSignal = async ({
   threatIndexFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
-  experimentalFeatures,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
     exceptionFilter,
@@ -47,7 +47,7 @@ export const createThreatSignal = async ({
   const threatIndicatorPath =
     sharedParams.completeRule.ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH;
   const threatFilter = buildThreatMappingFilter({
-    threatMapping,
+    threatMappings: threatMapping,
     threatList: currentThreatList,
     entryKey: 'value',
     allowedFieldsForTermsQuery,
@@ -56,7 +56,7 @@ export const createThreatSignal = async ({
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    ruleExecutionLogger.debug(
+    ruleExecutionLogger.trace(
       'Indicator items are empty after filtering for missing data, returning without attempting a match'
     );
     return currentResult;
@@ -74,7 +74,7 @@ export const createThreatSignal = async ({
       loadFields: true,
     });
 
-    ruleExecutionLogger.debug(
+    ruleExecutionLogger.trace(
       `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );
 
@@ -84,8 +84,10 @@ export const createThreatSignal = async ({
       threatFilters,
       threatIndicatorPath,
       pitId: threatPitId,
-      reassignPitId: reassignThreatPitId,
+      reassignThreatPitId,
       threatIndexFields,
+      allowedFieldsForTermsQuery,
+      threatMapping,
     });
 
     let result: SearchAfterAndBulkCreateReturnType;
@@ -100,23 +102,25 @@ export const createThreatSignal = async ({
       trackTotalHits: false,
     };
 
-    if (isAlertSuppressionActive) {
+    if (
+      isAlertSuppressionActive &&
+      alertSuppressionTypeGuard(sharedParams.completeRule.ruleParams.alertSuppression)
+    ) {
       result = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
         alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
-        experimentalFeatures,
       });
     } else {
       result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
     }
 
-    ruleExecutionLogger.debug(
-      `${
+    ruleExecutionLogger.trace(
+      `Match checks completed\n${
         threatFilter.query?.bool.should.length
-      } items have completed match checks and the total times to search were ${
+      } items have completed match checks. Search times (ms): ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
-      }ms`
+      }.`
     );
     return result;
   }

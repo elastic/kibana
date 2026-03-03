@@ -9,7 +9,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { KeyValuePairsField, Pair } from './key_value_field';
+import type { Pair } from './key_value_field';
+import { KeyValuePairsField } from './key_value_field';
 
 describe('<KeyValuePairsField />', () => {
   const onChange = jest.fn();

@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import './dimension_editor.scss';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { EuiFormRowProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiSpacer, EuiComboBox } from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common/types';
-import type { OperationSupportMatrix } from './operation_support';
-import type { GenericIndexPatternColumn, OperationType } from '../form_based';
-import {
-  getOperationDisplay,
-  isOperationAllowedAsReference,
-  FieldBasedIndexPatternColumn,
-  RequiredReference,
+import type {
+  FormBasedLayer,
+  IndexPattern,
+  IndexPatternField,
+  ParamEditorCustomProps,
   IncompleteColumn,
-  GenericOperationDefinition,
-} from '../operations';
-import { FieldChoiceWithOperationType, FieldSelect } from './field_select';
+  GenericIndexPatternColumn,
+  DateRange,
+  FieldBasedIndexPatternColumn,
+} from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { OperationSupportMatrix } from './operation_support';
+import type { OperationType } from '../form_based';
+import type { RequiredReference, GenericOperationDefinition } from '../operations';
+import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
+import type { FieldChoiceWithOperationType } from './field_select';
+import { FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
-import type { FormBasedLayer } from '../types';
-import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
+import { operationsButtonStyles } from './shared_styles';
 
 const operationDisplay = getOperationDisplay();
 
@@ -56,7 +59,7 @@ const getFunctionOptions = (
     return {
       label,
       value: operationType,
-      className: 'lnsIndexPatternDimensionEditor__operation',
+      css: operationsButtonStyles,
       'data-test-subj': `lns-indexPatternDimension-${operationType}${
         isCompatible ? '' : ' incompatible'
       }`,
@@ -100,7 +103,7 @@ export interface ReferenceEditorProps {
   http: HttpSetup;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
 }
 
@@ -204,7 +207,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     const brokenFunctionOption = {
       label: selectedOperationType && operationDisplay[selectedOperationType].displayName,
       value: selectedOperationType,
-      className: 'lnsIndexPatternDimensionEditor__operation',
+      css: operationsButtonStyles,
       'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
     } as EuiComboBoxOptionOption<string>;
     functionOptions?.push(brokenFunctionOption);
@@ -223,6 +226,11 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   );
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
+  const functionPlaceholder =
+    functionLabel ||
+    i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
+      defaultMessage: 'Sub-function',
+    });
 
   return (
     <div>
@@ -245,16 +253,12 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
               compressed
               isClearable={false}
               data-test-subj="indexPattern-reference-function"
-              placeholder={
-                functionLabel ||
-                i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
-                  defaultMessage: 'Sub-function',
-                })
-              }
+              placeholder={functionPlaceholder}
               options={functionOptions}
               isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
               selectedOptions={selectedOption}
               singleSelection={{ asPlainText: true }}
+              aria-label={functionPlaceholder}
               onChange={(choices: Array<EuiComboBoxOptionOption<string>>) => {
                 if (choices.length === 0) {
                   return onDeleteColumn();
@@ -274,7 +278,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 const field =
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
                     ? currentIndexPattern.getFieldByName(column.sourceField)
-                    : possibleFieldNames?.size === 1
+                    : possibleFieldNames?.size === 1 // @ts-expect-error upgrade typescript v5.9.3
                     ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
                     : undefined;
 

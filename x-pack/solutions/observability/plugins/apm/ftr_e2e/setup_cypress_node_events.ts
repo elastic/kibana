@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApmSynthtraceEsClient,
-  OtelSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { SynthtraceClientsManager, createLogger, LogLevel } from '@kbn/synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import { Readable } from 'stream';
+import type { ApmSynthtracePipelines } from '@kbn/synthtrace-client';
 
 export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   const logger = createLogger(LogLevel.info);
@@ -24,26 +20,16 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const synthtraceEsClient = new ApmSynthtraceEsClient({
-    client,
-    logger,
-    refreshAfterIndex: true,
-    version: config.env.APM_PACKAGE_VERSION,
-  });
-
-  const synthtraceOtelEsClient = new OtelSynthtraceEsClient({
+  const clientsManager = new SynthtraceClientsManager({
     client,
     logger,
     refreshAfterIndex: true,
   });
 
-  synthtraceEsClient.pipeline(
-    synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
-  synthtraceOtelEsClient.pipeline(
-    synthtraceOtelEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
+  const { apmEsClient } = clientsManager.getClients({
+    clients: ['apmEsClient'],
+    packageVersion: config.env.APM_PACKAGE_VERSION,
+  });
 
   initPlugin(on, config);
 
@@ -55,20 +41,21 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       return null;
     },
 
-    async 'synthtrace:index'(events: Array<Record<string, any>>) {
-      await synthtraceEsClient.index(Readable.from(events));
+    async 'synthtrace:index'({
+      events,
+      pipeline,
+    }: {
+      events: Array<Record<string, any>>;
+      pipeline: ApmSynthtracePipelines;
+    }) {
+      await apmEsClient.index(
+        Readable.from(events),
+        apmEsClient.resolvePipelineType(pipeline, { includePipelineSerialization: false })
+      );
       return null;
     },
     async 'synthtrace:clean'() {
-      await synthtraceEsClient.clean();
-      return null;
-    },
-    async 'synthtraceOtel:index'(events: Array<Record<string, any>>) {
-      await synthtraceOtelEsClient.index(Readable.from(events));
-      return null;
-    },
-    async 'synthtraceOtel:clean'() {
-      await synthtraceOtelEsClient.clean();
+      await apmEsClient.clean();
       return null;
     },
   });

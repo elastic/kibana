@@ -8,7 +8,7 @@
  */
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await panelActions.clickEdit();
       const editorValue = await monacoEditor.getCodeEditorValue();
-      expect(editorValue).to.eql(`FROM logs* | LIMIT 10`);
+      expect(editorValue).to.eql(`FROM logs*`);
     });
   });
 }

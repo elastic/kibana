@@ -8,8 +8,11 @@
  */
 
 import moment from 'moment';
-import { Config } from '../../config';
-import { tagsByMode } from '../tags';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import { testTargets, type ScoutTestTarget } from '@kbn/scout-info';
+
+export const execPromise = promisify(exec);
 
 export const isValidUTCDate = (date: string): boolean => {
   return !isNaN(Date.parse(date)) && new Date(date).toISOString() === date;
@@ -19,23 +22,14 @@ export function formatTime(date: string, fmt: string = 'MMM D, YYYY @ HH:mm:ss.S
   return moment.utc(date, fmt).format();
 }
 
-export const getPlaywrightGrepTag = (config: Config): string => {
-  const serversConfig = config.getScoutTestConfig();
+export const getPlaywrightGrepTag = (testTarget: ScoutTestTarget): string => {
+  const matchingTarget = testTargets.all.find(
+    (potentiallyMatchingTarget) => potentiallyMatchingTarget.tag === testTarget.tag
+  );
 
-  if (serversConfig.serverless) {
-    const { projectType } = serversConfig;
-
-    if (!projectType) {
-      throw new Error(`'projectType' is required to determine tags for 'serverless' mode.`);
-    }
-
-    const tag = tagsByMode.serverless[projectType];
-    if (!tag) {
-      throw new Error(`No tags found for projectType: '${projectType}'.`);
-    }
-
-    return tag;
+  if (!matchingTarget) {
+    throw new Error(`No Playwright tags found for test target '${testTarget.tag}'`);
   }
 
-  return tagsByMode.stateful;
+  return matchingTarget.playwrightTag;
 };

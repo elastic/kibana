@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getListItemIndexExistSchemaResponseMock } from './index.mock';
-import { ListItemIndexExistSchema, listItemIndexExistSchema } from '.';
+import type { ListItemIndexExistSchema } from '.';
+import { listItemIndexExistSchema } from '.';
 
 describe('list_item_index_exist_schema', () => {
   test('it should validate a typical list item request', () => {

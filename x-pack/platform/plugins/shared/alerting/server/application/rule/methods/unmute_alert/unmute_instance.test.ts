@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -25,6 +26,7 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import type { AlertsService } from '../../../../alerts_service';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -36,6 +38,10 @@ const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
+const alertsService = {
+  muteAlertInstance: jest.fn(),
+  unmuteAlertInstance: jest.fn(),
+};
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -57,16 +63,21 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
+  getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+  alertsService: alertsService as unknown as AlertsService,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
+  alertsService.muteAlertInstance.mockClear();
+  alertsService.unmuteAlertInstance.mockClear();
+  (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
 });
 
 setGlobalDate();
@@ -90,6 +101,14 @@ describe('unmuteInstance()', () => {
     });
 
     await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+    expect(alertsService.unmuteAlertInstance).toHaveBeenCalledWith({
+      ruleId: '1',
+      alertInstanceId: '2',
+      indices: ['.alerts-default'],
+      logger: rulesClientParams.logger,
+    });
+
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -119,6 +138,7 @@ describe('unmuteInstance()', () => {
     });
 
     await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+    expect(alertsService.unmuteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -140,6 +160,7 @@ describe('unmuteInstance()', () => {
     });
 
     await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+    expect(alertsService.unmuteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -290,6 +311,58 @@ describe('unmuteInstance()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('elasticsearch operations', () => {
+    test('does not call ES updateByQuery when no alert indices exist', async () => {
+      (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+      const rulesClient = new RulesClient(rulesClientParams);
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: ['2'],
+        },
+        version: '123',
+        references: [],
+      });
+
+      await rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
+
+      expect(alertsService.unmuteAlertInstance).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    });
+
+    test('throws error but still updates rule when alertsService fails', async () => {
+      const loggerMock = loggingSystemMock.create().get();
+      const rulesClient = new RulesClient({ ...rulesClientParams, logger: loggerMock });
+      alertsService.unmuteAlertInstance.mockRejectedValueOnce(new Error('ES connection failed'));
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          actions: [],
+          schedule: { interval: '10s' },
+          alertTypeId: '2',
+          enabled: true,
+          scheduledTaskId: 'task-123',
+          mutedInstanceIds: ['2'],
+        },
+        version: '123',
+        references: [],
+      });
+
+      await expect(
+        rulesClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toThrow('ES connection failed');
+
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     });
   });
 });

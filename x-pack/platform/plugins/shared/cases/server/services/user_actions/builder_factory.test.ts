@@ -671,6 +671,7 @@ describe('UserActionBuilder', () => {
               "description": "testing sir",
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -765,6 +766,43 @@ describe('UserActionBuilder', () => {
               "category": null,
             },
             "type": "category",
+          },
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "associated-cases",
+              "type": "cases",
+            },
+          ],
+        }
+      `);
+    });
+
+    it('builds an add observables user action correctly', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.observables)!;
+      const userAction = builder.build({
+        payload: { observables: { count: 1, actionType: 'add' } },
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "action": "create",
+            "created_at": "2022-01-09T22:00:00.000Z",
+            "created_by": Object {
+              "email": "elastic@elastic.co",
+              "full_name": "Elastic User",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "payload": Object {
+              "observables": Object {
+                "actionType": "add",
+                "count": 1,
+              },
+            },
+            "type": "observables",
           },
           "references": Array [
             Object {
@@ -1236,6 +1274,27 @@ describe('UserActionBuilder', () => {
       `);
       expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the category for case id: 123 - user action id: 123"`
+      );
+    });
+
+    it('builds an update observables user action correctly', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.observables)!;
+      const userAction = builder.build({
+        payload: { observables: { count: 1, actionType: 'update' } },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "create",
+          "descriptiveAction": "case_user_action_observables",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
+      `);
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User added observables to case id: 123 - user action id: 123"`
       );
     });
   });

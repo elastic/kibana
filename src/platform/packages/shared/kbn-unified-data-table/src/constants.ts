@@ -8,6 +8,7 @@
  */
 
 import type { EuiDataGridStyle } from '@elastic/eui';
+export { DataGridDensity } from '@kbn/discover-utils';
 
 export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
 
@@ -25,6 +26,7 @@ export const DEFAULT_PAGINATION_MODE = 'multiPage';
  */
 export const ROWS_HEIGHT_OPTIONS = {
   auto: -1,
+  single: 1,
   default: 3,
 } as const;
 export const defaultRowLineHeight = '1.6em';
@@ -61,9 +63,3 @@ export const toolbarVisibility = {
     allowReorder: true,
   },
 };
-
-export enum DataGridDensity {
-  COMPACT = 'compact',
-  NORMAL = 'normal',
-  EXPANDED = 'expanded',
-}

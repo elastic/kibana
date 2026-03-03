@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewSpec } from '../../../common/types';
-import { DataViewsService } from '../../../common/data_views';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewSpec } from '../../../common/types';
+import type { DataViewsService } from '../../../common/data_views';
 import { handleErrors } from './util/handle_errors';
 import { dataViewSpecSchema } from '../schema';
 import type {
@@ -26,7 +26,8 @@ import {
   INITIAL_REST_VERSION,
   CREATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
-import { DataViewSpecRestResponse } from '../route_types';
+import type { DataViewSpecRestResponse } from '../route_types';
+import { toApiSpec } from './util/to_api_spec';
 
 interface CreateDataViewArgs {
   dataViewsService: DataViewsService;
@@ -58,78 +59,84 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            body: schema.object({
-              override: schema.maybe(schema.boolean({ defaultValue: false })),
-              refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-              data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
-              index_pattern:
-                serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
-            }),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              body: schema.object({
+                override: schema.maybe(schema.boolean({ defaultValue: false })),
+                refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+                data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
+                index_pattern:
+                  serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
+              }),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
+              },
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const body = req.body;
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const body = req.body;
 
-          const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
+            const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
 
-          const dataView = await createDataView({
-            dataViewsService,
-            usageCollection,
-            spec: { ...spec, name: spec.name || spec.title } as DataViewSpec,
-            override: body.override,
-            refreshFields: body.refresh_fields,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataView = await createDataView({
+              dataViewsService,
+              usageCollection,
+              spec: { ...spec, name: spec.name || spec.title } as DataViewSpec,
+              override: body.override,
+              refreshFields: body.refresh_fields,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const toSpecParams =
-            body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
+            const toSpecParams =
+              body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
 
-          const responseBody: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: {
-              ...(await dataView.toSpec(toSpecParams)),
-              namespaces: dataView.namespaces,
-            },
-          };
+            const responseBody: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: {
+                ...toApiSpec(await dataView.toSpec(toSpecParams)),
+                namespaces: dataView.namespaces,
+              },
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: responseBody,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: responseBody,
+            });
+          })
+        )
+      );
   };
 
 export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(

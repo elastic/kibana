@@ -7,20 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { IconIntegrations } from '../../../../../common/icons/integrations';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
-import type { IntegrationCardMetadata } from './types';
-import integrationsIcon from './images/integrations_icon.png';
-import integrationsDarkIcon from './images/integrations_icon_dark.png';
+import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
+import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 
 export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.integrations,
   title: i18n.translate('xpack.securitySolution.onboarding.integrationsCard.title', {
     defaultMessage: 'Add data with integrations',
   }),
-  icon: integrationsIcon,
-  iconDark: integrationsDarkIcon,
+  icon: IconIntegrations,
   Component: React.lazy(
     () =>
       import(
@@ -29,5 +29,8 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilitiesRequired: 'fleet.read',
+  capabilitiesRequired: [
+    ['fleet.read', `${SECURITY_FEATURE_ID}.detections`],
+    ['fleet.read', RULES_UI_DETECTIONS_PRIVILEGE],
+  ],
 };

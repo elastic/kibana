@@ -35,6 +35,7 @@ exports[`Table should render normally 1`] = `
         <EuiToolTip
           data-test-subj="deleteSOToolTip"
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
@@ -52,7 +53,7 @@ exports[`Table should render normally 1`] = `
           </EuiButton>
         </EuiToolTip>,
         <EuiPopover
-          anchorPosition="downCenter"
+          anchorPosition="downLeft"
           button={
             <EuiButton
               iconSide="right"
@@ -68,7 +69,7 @@ exports[`Table should render normally 1`] = `
           }
           closePopover={[Function]}
           display="inline-block"
-          hasArrow={true}
+          hasArrow={false}
           isOpen={false}
           ownFocus={true}
           panelPaddingSize="m"
@@ -222,6 +223,7 @@ exports[`Table should render normally 1`] = `
           },
         }
       }
+      tableCaption="Saved objects list"
       tableLayout="fixed"
     />
   </div>

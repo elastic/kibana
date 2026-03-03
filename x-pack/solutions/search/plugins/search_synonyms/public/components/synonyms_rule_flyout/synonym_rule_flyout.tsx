@@ -22,17 +22,21 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiHealth,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { synonymsOptionToString } from '../../utils/synonyms_utils';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
 import { useSynonymRuleFlyoutState } from './use_flyout_state';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 interface SynonymRuleFlyoutProps {
   onClose: () => void;
@@ -51,7 +55,10 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const [backendError, setBackendError] = React.useState<string | null>(null);
+  const usageTracker = useUsageTracker();
   const { mutate: putSynonymsRule } = usePutSynonymsRule(
     () => onClose(),
     (error) => {
@@ -70,6 +77,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
     isMapToTermsInvalid,
     mapToTermErrors,
     mapToTerms,
+    announcement,
     clearFromTerms,
     onCreateOption,
     onMapToChange,
@@ -84,9 +92,14 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} size={'33%'} outsideClickCloses={false}>
+    <EuiFlyout
+      onClose={onClose}
+      size={'33%'}
+      outsideClickCloses={false}
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
-        <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutRuleIdText">
+        <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutRuleIdText" id={modalTitleId}>
           <b>
             {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.title.ruleId', {
               defaultMessage: 'Rule ID: {ruleId}',
@@ -104,6 +117,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         banner={
           backendError && (
             <EuiCallOut
+              announceOnMount
               data-test-subj="searchSynonymsSynonymsRuleFlyoutErrorBanner"
               color="danger"
               title={i18n.translate(
@@ -186,6 +200,21 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                           color="text"
                           onClick={() => onSortTerms()}
                           iconType={currentSortDirection === 'ascending' ? 'sortUp' : 'sortDown'}
+                          aria-label={
+                            currentSortDirection === 'ascending'
+                              ? i18n.translate(
+                                  'xpack.searchSynonyms.synonymsSetRuleFlyout.sortAscendingAriaLabel',
+                                  {
+                                    defaultMessage: 'Sort terms A to Z',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.searchSynonyms.synonymsSetRuleFlyout.sortDescendingAriaLabel',
+                                  {
+                                    defaultMessage: 'Sort terms Z to A',
+                                  }
+                                )
+                          }
                         >
                           {currentSortDirection === 'ascending' ? (
                             <FormattedMessage
@@ -208,6 +237,12 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                       color="danger"
                       size="s"
                       onClick={clearFromTerms}
+                      aria-label={i18n.translate(
+                        'xpack.searchSynonyms.synonymsSetRuleFlyout.clearAllAriaLabel',
+                        {
+                          defaultMessage: 'Remove all terms',
+                        }
+                      )}
                     >
                       <FormattedMessage
                         id="xpack.searchSynonyms.synonymsSetRuleFlyout.clearAll"
@@ -282,6 +317,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                 error={mapToTermErrors || null}
               >
                 <EuiFieldText
+                  prepend={'=>'}
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutMapToTermsInput"
                   fullWidth
                   value={mapToTerms}
@@ -314,6 +350,12 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutResetChangesButton"
+                  aria-label={i18n.translate(
+                    'xpack.searchSynonyms.synonymsSetRuleFlyout.resetAriaLabel',
+                    {
+                      defaultMessage: 'Reset all changes',
+                    }
+                  )}
                   iconType="refresh"
                   disabled={!hasChanges}
                   onClick={resetChanges}
@@ -323,6 +365,11 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+              {/* Shared live region for action voiceover announcements*/}
+              <EuiScreenReaderOnly>
+                <span aria-live="polite">{announcement}</span>
+              </EuiScreenReaderOnly>
+
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutSaveButton"
@@ -331,6 +378,11 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                   onClick={() => {
                     if (!synonymsRule.id) {
                       return;
+                    }
+                    if (flyoutMode === 'create') {
+                      usageTracker?.click(AnalyticsEvents.new_rule_created);
+                    } else {
+                      usageTracker?.click(AnalyticsEvents.rule_updated);
                     }
                     putSynonymsRule({
                       synonymsSetId,

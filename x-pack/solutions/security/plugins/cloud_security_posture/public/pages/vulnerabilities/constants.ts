@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { GroupOption } from '@kbn/grouping';
-import { FindingsBaseURLQuery } from '../../common/types';
-import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
+import type { GroupOption } from '@kbn/grouping';
+import type { FindingsBaseURLQuery } from '../../common/types';
+import type { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
 import { GROUPING_LABELS } from './translations';
 import { VULNERABILITY_GROUPING_OPTIONS, VULNERABILITY_FIELDS } from '../../common/constants';
 
 export const defaultGroupingOptions: GroupOption[] = [
   {
-    label: GROUPING_LABELS.RESOURCE_NAME,
-    key: VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME,
+    label: GROUPING_LABELS.RESOURCE,
+    key: VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID,
   },
   {
-    label: GROUPING_LABELS.CLOUD_ACCOUNT_NAME,
-    key: VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
+    label: GROUPING_LABELS.CLOUD_ACCOUNT,
+    key: VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID,
   },
   {
     label: 'CVE',
@@ -41,8 +41,9 @@ export const getDefaultQuery = ({
 });
 
 export const defaultColumns: CloudSecurityDefaultColumn[] = [
-  { id: VULNERABILITY_FIELDS.VULNERABILITY_ID, width: 130 },
   { id: VULNERABILITY_FIELDS.SCORE_BASE, width: 80 },
+  { id: VULNERABILITY_FIELDS.VULNERABILITY_TITLE, width: 160 },
+  { id: VULNERABILITY_FIELDS.VULNERABILITY_ID, width: 180 },
   { id: VULNERABILITY_FIELDS.RESOURCE_NAME },
   { id: VULNERABILITY_FIELDS.RESOURCE_ID },
   { id: VULNERABILITY_FIELDS.SEVERITY, width: 100 },

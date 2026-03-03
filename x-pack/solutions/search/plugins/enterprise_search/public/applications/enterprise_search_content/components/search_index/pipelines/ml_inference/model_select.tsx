@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -18,7 +19,6 @@ import {
   EuiPanel,
   EuiScreenReaderLive,
   EuiSelectable,
-  EuiSelectableOption,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -28,7 +28,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import type { MlModel } from '../../../../../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { LicenseBadge } from './license_badge';
 import { ModelSelectLogic } from './model_select_logic';

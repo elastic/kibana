@@ -12,14 +12,20 @@ import { INDICES_APP_BASE, SEARCH_INDICES_DETAILS_PATH } from '../routes';
 
 const INDEX_DETAILS_FULL_PATH = `${INDICES_APP_BASE}${SEARCH_INDICES_DETAILS_PATH}`;
 
-function getIndexDetailsPath(http: HttpSetup, indexName: string) {
-  return http.basePath.prepend(generatePath(INDEX_DETAILS_FULL_PATH, { indexName }));
+function getIndexDetailsPath(http: HttpSetup, indexName: string, query?: string) {
+  let path = http.basePath.prepend(generatePath(INDEX_DETAILS_FULL_PATH, { indexName }));
+  if (query) {
+    path += query;
+  }
+  return path;
 }
 
 export const navigateToIndexDetails = (
   application: ApplicationStart,
   http: HttpSetup,
-  indexName: string
+  indexName: string,
+  query?: string
 ) => {
-  application.navigateToUrl(getIndexDetailsPath(http, indexName));
+  const path = getIndexDetailsPath(http, indexName, query);
+  application.navigateToUrl(path);
 };

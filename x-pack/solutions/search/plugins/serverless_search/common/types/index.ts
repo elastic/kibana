@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
-import { Connector } from '@kbn/search-connectors/types/connectors';
+import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { Connector } from '@kbn/search-connectors/types/connectors';
 
 export interface CreateAPIKeyArgs {
   expiration?: string;

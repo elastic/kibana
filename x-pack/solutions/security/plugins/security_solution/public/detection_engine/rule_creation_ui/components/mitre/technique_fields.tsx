@@ -7,23 +7,26 @@
 
 import {
   EuiButtonIcon,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as Rulei18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type { MitreTechnique, MitreSubTechnique } from '../../../../detections/mitre/types';
+import type {
+  MitreSubTechnique,
+  MitreTechnique,
+} from '../../../../../common/detection_engine/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -32,7 +35,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 
@@ -75,6 +78,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       setTechniquesOptions(mitreConfig.techniques);
       setSubtechniquesOptions(mitreConfig.subtechniques);
     }
+
     getMitre();
   }, []);
 

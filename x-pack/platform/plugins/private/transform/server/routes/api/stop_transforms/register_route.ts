@@ -29,17 +29,17 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .post({
       path: addInternalBasePath('stop_transforms'),
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion<undefined, undefined, StopTransformsRequestSchema>(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: stopTransformsRequestSchema,

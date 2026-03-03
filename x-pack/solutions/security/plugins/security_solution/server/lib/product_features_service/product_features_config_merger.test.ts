@@ -352,6 +352,92 @@ describe('ProductFeaturesConfigMerger', () => {
     });
   });
 
+  it('should call featureConfigModifiers() for all product features', () => {
+    const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
+      {
+        subFeatureIds: ['subFeature3', 'subFeature1'],
+        featureConfigModifiers: [
+          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+            baseConfig.name = 'NEW NAME';
+          }),
+        ],
+      },
+      {
+        featureConfigModifiers: [
+          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+            baseConfig.order = 666;
+          }),
+        ],
+      },
+    ];
+
+    const merged = merger.mergeProductFeatureConfigs(
+      baseKibanaFeature,
+      [],
+      enabledProductFeaturesConfigs
+    );
+
+    expect(merged).toEqual({
+      ...baseKibanaFeature,
+
+      // modifications:
+      name: 'NEW NAME',
+      order: 666,
+
+      subFeatures: [subFeature1, subFeature3],
+    });
+    expect(enabledProductFeaturesConfigs[0].featureConfigModifiers![0]).toHaveBeenCalledTimes(1);
+    expect(enabledProductFeaturesConfigs[1].featureConfigModifiers![0]).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call all featureConfigModifiers() for all product features in order', () => {
+    const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
+      {
+        subFeatureIds: ['subFeature3', 'subFeature1'],
+        featureConfigModifiers: [
+          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+            baseConfig.name = 'NEW NAME'; // overwritten by another featureConfigModifier in the same product feature
+          }),
+          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+            baseConfig.name = 'EVEN NEWER NAME';
+            baseConfig.minimumLicense = 'trial'; // overwritten by a second product feature
+          }),
+        ],
+      },
+      {
+        featureConfigModifiers: [
+          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+            baseConfig.order = 666;
+          }),
+          jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+            baseConfig.minimumLicense = 'standard';
+          }),
+        ],
+      },
+    ];
+
+    const merged = merger.mergeProductFeatureConfigs(
+      baseKibanaFeature,
+      [],
+      enabledProductFeaturesConfigs
+    );
+
+    expect(merged).toEqual({
+      ...baseKibanaFeature,
+
+      // modifications:
+      name: 'EVEN NEWER NAME',
+      order: 666,
+      minimumLicense: 'standard',
+
+      subFeatures: [subFeature1, subFeature3],
+    });
+    expect(enabledProductFeaturesConfigs[0].featureConfigModifiers![0]).toHaveBeenCalledTimes(1);
+    expect(enabledProductFeaturesConfigs[0].featureConfigModifiers![1]).toHaveBeenCalledTimes(1);
+    expect(enabledProductFeaturesConfigs[1].featureConfigModifiers![0]).toHaveBeenCalledTimes(1);
+    expect(enabledProductFeaturesConfigs[1].featureConfigModifiers![1]).toHaveBeenCalledTimes(1);
+  });
+
   it('should merge everything at the same time', () => {
     const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
       {

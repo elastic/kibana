@@ -8,11 +8,11 @@
  */
 
 import moment from 'moment';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import Fsp from 'fs/promises';
 import Path from 'path';
-import {
+import type {
   ApiDeclaration,
   ApiReference,
   PluginOrPackage,
@@ -75,7 +75,8 @@ export async function writeDeprecationDueByTeam(
           api.parentPluginId
         )}" section="${api.id}" text="${api.label}"/>`;
 
-        const firstTen = refs.splice(0, 10);
+        const firstTen = refs.slice(0, 10);
+        const remainingCount = refs.length - 10;
         const referencedLocations =
           firstTen
             .map(
@@ -86,7 +87,7 @@ export async function writeDeprecationDueByTeam(
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
-            .join(', ') + (refs.length > 0 ? `+ ${refs.length} more` : '');
+            .join(', ') + (remainingCount > 0 ? `+ ${remainingCount} more` : '');
 
         const removeBy = api.removeBy ? api.removeBy : '-';
 

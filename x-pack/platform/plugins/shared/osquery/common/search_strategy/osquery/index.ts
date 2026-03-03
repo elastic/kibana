@@ -18,8 +18,8 @@ import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
 import type { SortField, PaginationInputPaginated } from '../common';
 
-export * from './actions';
-export * from './results';
+export type * from './actions';
+export type * from './results';
 
 export enum OsqueryQueries {
   actions = 'actions',

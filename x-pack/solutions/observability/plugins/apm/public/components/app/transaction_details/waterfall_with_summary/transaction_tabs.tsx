@@ -7,12 +7,16 @@
 
 import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
+import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
 import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { type UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 
 export enum TransactionTab {
   timeline = 'timeline',
@@ -30,6 +34,11 @@ interface Props {
   onTabClick: (tab: TransactionTab) => void;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  logsTableConfig?: SavedSearchTableConfig;
+  onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  useUnified: boolean;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }
 
 export function TransactionTabs({
@@ -42,6 +51,11 @@ export function TransactionTabs({
   onTabClick,
   showCriticalPath,
   onShowCriticalPathChange,
+  logsTableConfig,
+  onLogsTableConfigChange,
+  useUnified,
+  unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: Props) {
   const tabs: Record<TransactionTab, { label: string; component: React.ReactNode }> = useMemo(
     () => ({
@@ -56,6 +70,9 @@ export function TransactionTabs({
             waterfall={waterfall}
             showCriticalPath={showCriticalPath}
             onShowCriticalPathChange={onShowCriticalPathChange}
+            useUnified={useUnified}
+            unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+            entryTransactionId={entryTransactionId}
           />
         ),
       },
@@ -76,6 +93,8 @@ export function TransactionTabs({
                 timestamp={transaction.timestamp.us}
                 duration={transaction.transaction.duration.us}
                 traceId={transaction.trace.id}
+                logsTableConfig={logsTableConfig}
+                onLogsTableConfigChange={onLogsTableConfigChange}
               />
             )}
           </>
@@ -83,10 +102,15 @@ export function TransactionTabs({
       },
     }),
     [
+      entryTransactionId,
+      logsTableConfig,
+      onLogsTableConfigChange,
       onShowCriticalPathChange,
       serviceName,
       showCriticalPath,
       transaction,
+      unifiedWaterfallFetchResult,
+      useUnified,
       waterfall,
       waterfallItemId,
     ]
@@ -130,13 +154,34 @@ function TimelineTabContent({
   serviceName,
   showCriticalPath,
   onShowCriticalPathChange,
+  useUnified,
+  unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  useUnified: boolean;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }) {
+  if (useUnified) {
+    return (
+      <UnifiedWaterfallContainer
+        traceItems={unifiedWaterfallFetchResult.traceItems}
+        errors={unifiedWaterfallFetchResult.errors}
+        agentMarks={unifiedWaterfallFetchResult.agentMarks}
+        waterfallItemId={waterfallItemId}
+        serviceName={serviceName}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+        entryTransactionId={entryTransactionId}
+      />
+    );
+  }
+
   return (
     <WaterfallContainer
       waterfallItemId={waterfallItemId}
@@ -156,34 +201,71 @@ function LogsTabContent({
   timestamp,
   duration,
   traceId,
+  logsTableConfig,
+  onLogsTableConfigChange,
 }: {
   timestamp: number;
   duration: number;
   traceId: string;
+  logsTableConfig?: SavedSearchTableConfig;
+  onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
 }) {
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibana();
+
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
   const startTimestamp = Math.floor(timestamp / 1000);
   const endTimestamp = Math.ceil(startTimestamp + duration / 1000);
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
-  return (
-    <LogStream
-      logView={{ type: 'log-view-reference', logViewId: 'default' }}
-      startTimestamp={startTimestamp - framePaddingMs}
-      endTimestamp={endTimestamp + framePaddingMs}
-      query={`trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`}
-      height={640}
-      columns={[
-        { type: 'timestamp' },
-        {
-          type: 'field',
-          field: 'service.name',
-          header: i18n.translate('xpack.apm.propertiesTable.tabs.logs.serviceName', {
-            defaultMessage: 'Service Name',
-          }),
-          width: 200,
-        },
-        { type: 'message' },
-      ]}
-      showFlyoutAction
-    />
+
+  const rangeFrom = new Date(startTimestamp - framePaddingMs).toISOString();
+  const rangeTo = new Date(endTimestamp + framePaddingMs).toISOString();
+
+  const timeRange = useMemo(() => {
+    return {
+      from: rangeFrom,
+      to: rangeTo,
+    };
+  }, [rangeFrom, rangeTo]);
+
+  const query = useMemo(
+    () => ({
+      language: 'kuery',
+      query: `trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`,
+    }),
+    [traceId]
   );
+
+  return logSources.value ? (
+    <LazySavedSearchComponent
+      dependencies={{ embeddable, searchSource, dataViews }}
+      index={logSources.value}
+      timeRange={timeRange}
+      query={query}
+      columns={logsTableConfig?.columns}
+      sort={logsTableConfig?.sort}
+      grid={logsTableConfig?.grid}
+      rowHeight={logsTableConfig?.rowHeight}
+      rowsPerPage={logsTableConfig?.rowsPerPage}
+      density={logsTableConfig?.density}
+      height="60vh"
+      displayOptions={{
+        solutionNavIdOverride: 'oblt',
+        enableDocumentViewer: true,
+        enableFilters: false,
+      }}
+      onTableConfigChange={onLogsTableConfigChange}
+    />
+  ) : null;
 }

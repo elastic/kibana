@@ -13,8 +13,8 @@ import {
   convertMathToFormulaColumn,
   convertOtherAggsToFormulaColumn,
 } from './formula';
-import { FormulaColumn } from './types';
-import { Metric } from '../../../../common/types';
+import type { FormulaColumn } from './types';
+import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import {
   createStubDataView,

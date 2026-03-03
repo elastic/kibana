@@ -9,6 +9,7 @@
 
 import { isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
 import moment from 'moment';
+import { ScoutTestTarget } from '@kbn/scout-info';
 jest.mock('moment', () => {
   const actualMoment = jest.requireActual('moment');
   return {
@@ -57,52 +58,15 @@ describe('formatTime', () => {
 });
 
 describe('getPlaywrightGrepTag', () => {
-  const mockConfig = {
-    getScoutTestConfig: jest.fn(),
-  };
-
   it('should return the correct tag for serverless mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: true,
-      projectType: 'oblt',
-    });
-
-    const result = getPlaywrightGrepTag(mockConfig as any);
-
-    expect(mockConfig.getScoutTestConfig).toHaveBeenCalled();
-    expect(result).toBe('@svlOblt');
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'observability_complete');
+    const result = getPlaywrightGrepTag(testTarget);
+    expect(result).toBe('@local-serverless-observability_complete');
   });
 
   it('should return the correct tag for stateful mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: false,
-    });
-
-    const result = getPlaywrightGrepTag(mockConfig as any);
-
-    expect(mockConfig.getScoutTestConfig).toHaveBeenCalled();
-    expect(result).toBe('@ess');
-  });
-
-  it('should throw an error if projectType is missing in serverless mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: true,
-      projectType: undefined,
-    });
-
-    expect(() => getPlaywrightGrepTag(mockConfig as any)).toThrow(
-      `'projectType' is required to determine tags for 'serverless' mode.`
-    );
-  });
-
-  it('should throw an error if unknown projectType is set in serverless mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: true,
-      projectType: 'a',
-    });
-
-    expect(() => getPlaywrightGrepTag(mockConfig as any)).toThrow(
-      `No tags found for projectType: 'a'.`
-    );
+    const testTarget = new ScoutTestTarget('cloud', 'stateful', 'classic');
+    const result = getPlaywrightGrepTag(testTarget);
+    expect(result).toBe('@cloud-stateful-classic');
   });
 });

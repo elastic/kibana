@@ -8,15 +8,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SpanIcon } from '@kbn/apm-ui-shared';
 import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 import { BetaBadge } from '../../shared/beta_badge';
 import { SearchBar } from '../../shared/search_bar/search_bar';
-import { SpanIcon } from '../../shared/span_icon';
 import { ApmMainTemplate } from './apm_main_template';
 
 interface Props {
@@ -81,29 +82,31 @@ export function DependencyDetailTemplate({ children }: Props) {
   ];
 
   return (
-    <ApmMainTemplate
-      pageHeader={{
-        tabs,
-        pageTitle: (
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>{dependencyName}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SpanIcon
-                type={metadata?.spanType}
-                subtype={metadata?.spanSubtype}
-                role="presentation"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      }}
-    >
-      <SearchBar showTimeComparison searchBarPlaceholder={unifiedSearchBarPlaceholder} />
-      {children}
-    </ApmMainTemplate>
+    <ApmIndexSettingsContextProvider>
+      <ApmMainTemplate
+        pageHeader={{
+          tabs,
+          pageTitle: (
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>{dependencyName}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SpanIcon
+                  type={metadata?.spanType}
+                  subtype={metadata?.spanSubtype}
+                  role="presentation"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }}
+      >
+        <SearchBar showTimeComparison searchBarPlaceholder={unifiedSearchBarPlaceholder} />
+        {children}
+      </ApmMainTemplate>
+    </ApmIndexSettingsContextProvider>
   );
 }

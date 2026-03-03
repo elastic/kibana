@@ -12,7 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { ManagementSettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
+
+import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant/impl/assistant/use_space_aware_context';
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 export const ManagementSettings = React.memo(() => {
   const {
@@ -26,6 +29,7 @@ export const ManagementSettings = React.memo(() => {
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
+  const spaceId = useSpaceId();
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
@@ -38,7 +42,7 @@ export const ManagementSettings = React.memo(() => {
   const handleTabChange = useCallback(
     (tab: string) => {
       navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=${tab}`,
+        path: `ai/securityAiAssistantManagement?tab=${tab}`,
       });
     },
     [navigateToApp]
@@ -51,7 +55,7 @@ export const ManagementSettings = React.memo(() => {
           text: i18n.translate(
             'xpack.securitySolution.assistant.settings.breadcrumb.serverless.security',
             {
-              defaultMessage: 'AI Assistant for Security Settings',
+              defaultMessage: 'AI Assistant',
             }
           ),
         },
@@ -76,7 +80,7 @@ export const ManagementSettings = React.memo(() => {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {
@@ -92,13 +96,15 @@ export const ManagementSettings = React.memo(() => {
     navigateToApp('home');
   }
 
-  return (
-    <AssistantSettingsManagement
-      dataViews={dataViews}
-      onTabChange={handleTabChange}
-      currentTab={currentTab}
-    />
-  );
+  return spaceId ? (
+    <AssistantSpaceIdProvider spaceId={spaceId}>
+      <AssistantSettingsManagement
+        dataViews={dataViews}
+        onTabChange={handleTabChange}
+        currentTab={currentTab}
+      />
+    </AssistantSpaceIdProvider>
+  ) : null;
 });
 
 ManagementSettings.displayName = 'ManagementSettings';

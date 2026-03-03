@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggConfig } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 type AggTypeFieldFilter = (field: DataViewField, aggConfig: IAggConfig) => boolean;
 

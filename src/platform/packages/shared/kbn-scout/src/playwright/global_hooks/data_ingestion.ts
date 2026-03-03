@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FullConfig } from 'playwright/test';
+import type { FullConfig } from 'playwright/test';
 import {
-  getLogger,
   getEsArchiver,
   createScoutConfig,
   measurePerformanceAsync,
   getEsClient,
-  getKbnClient,
 } from '../../common';
-import { ScoutTestOptions } from '../types';
+import { ScoutLogger } from '../../common/services/logger';
+import type { ScoutTestOptions } from '../types';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
-  const log = getLogger();
+  const log = new ScoutLogger('scout: global hook');
 
   if (archives.length === 0) {
     log.debug('[setup] no test data to ingest');
@@ -33,8 +32,7 @@ export async function ingestTestDataHook(config: FullConfig, archives: string[])
     const serversConfigDir = projectUse.serversConfigDir;
     const scoutConfig = createScoutConfig(serversConfigDir, configName, log);
     const esClient = getEsClient(scoutConfig, log);
-    const kbnClient = getKbnClient(scoutConfig, log);
-    const esArchiver = getEsArchiver(esClient, kbnClient, log);
+    const esArchiver = getEsArchiver(esClient, log);
 
     log.debug('[setup] loading test data (only if indexes do not exist)...');
     for (const archive of archives) {

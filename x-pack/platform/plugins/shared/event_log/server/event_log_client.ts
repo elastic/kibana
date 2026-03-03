@@ -6,21 +6,21 @@
  */
 
 import { omit } from 'lodash';
-import { Observable } from 'rxjs';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { KueryNode } from '@kbn/es-query';
-import { EsContext } from './es';
-import { IEventLogClient } from './types';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import type { EsContext } from './es';
+import type { IEventLogClient } from './types';
+import type {
   QueryEventsBySavedObjectResult,
   QueryEventsBySavedObjectSearchAfterResult,
 } from './es/cluster_client_adapter';
-import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
-
+import type { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -100,6 +100,7 @@ interface EventLogServiceCtorParams {
   savedObjectGetter: SavedObjectBulkGetterResult;
   spacesService?: SpacesServiceStart;
   request: KibanaRequest;
+  spaceId?: string;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -108,12 +109,20 @@ export class EventLogClient implements IEventLogClient {
   private savedObjectGetter: SavedObjectBulkGetterResult;
   private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
+  private spaceId?: string;
 
-  constructor({ esContext, savedObjectGetter, spacesService, request }: EventLogServiceCtorParams) {
+  constructor({
+    esContext,
+    savedObjectGetter,
+    spacesService,
+    request,
+    spaceId,
+  }: EventLogServiceCtorParams) {
     this.esContext = esContext;
     this.savedObjectGetter = savedObjectGetter;
     this.spacesService = spacesService;
     this.request = request;
+    this.spaceId = spaceId;
   }
 
   public async findEventsBySavedObjectIds(
@@ -255,6 +264,9 @@ export class EventLogClient implements IEventLogClient {
   }
 
   private async getNamespace() {
+    if (this.spaceId) {
+      return this.spacesService?.spaceIdToNamespace(this.spaceId);
+    }
     const space = await this.spacesService?.getActiveSpace(this.request);
     return space && this.spacesService?.spaceIdToNamespace(space.id);
   }

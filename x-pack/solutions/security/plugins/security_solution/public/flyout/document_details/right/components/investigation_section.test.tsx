@@ -6,28 +6,45 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import {
   INVESTIGATION_SECTION_CONTENT_TEST_ID,
   INVESTIGATION_SECTION_HEADER_TEST_ID,
-  INVESTIGATION_GUIDE_TEST_ID,
-  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
 } from './test_ids';
+import { INVESTIGATION_GUIDE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { DocumentDetailsContext } from '../../shared/context';
 import { InvestigationSection } from './investigation_section';
-import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { useExpandSection } from '../hooks/use_expand_section';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
+import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
-jest.mock('../hooks/use_expand_section');
+jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
+  useExpandSection: jest.fn(),
+}));
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../rule_details/hooks/use_rule_details');
+jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
+jest.mock('../../shared/hooks/use_basic_data_from_details_data');
+jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({
+  useNavigateToLeftPanel: () => jest.fn(),
+}));
+
+const mockAddSuccess = jest.fn();
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({
+    addSuccess: mockAddSuccess,
+  }),
+}));
 
 const panelContextValue = {
   ...mockContextValue,
@@ -36,70 +53,105 @@ const panelContextValue = {
   ),
 };
 
+const mockBasicAlertData: UseBasicDataFromDetailsDataResult = {
+  agentId: '',
+  alertId: '',
+  alertUrl: '',
+  data: null,
+  hostName: '',
+  indexName: '',
+  isAlert: true,
+  ruleDescription: '',
+  ruleId: 'ruleId',
+  ruleName: '',
+  timestamp: '',
+  userName: '',
+};
+
 const renderInvestigationSection = (contextValue = panelContextValue) =>
   render(
-    <IntlProvider locale="en">
-      <TestProvider>
-        <DocumentDetailsContext.Provider value={contextValue}>
-          <InvestigationSection />
-        </DocumentDetailsContext.Provider>
-      </TestProvider>
-    </IntlProvider>
+    <TestProvider>
+      <DocumentDetailsContext.Provider value={contextValue}>
+        <InvestigationSection />
+      </DocumentDetailsContext.Provider>
+    </TestProvider>
   );
 
 describe('<InvestigationSection />', () => {
+  const mockUseExpandSection = jest.mocked(useExpandSection);
+
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRuleWithFallback as jest.Mock).mockReturnValue({ rule: { note: 'test note' } });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-  });
-
-  it('should render investigation component', () => {
-    const { getByTestId } = renderInvestigationSection();
-    expect(getByTestId(INVESTIGATION_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(INVESTIGATION_SECTION_HEADER_TEST_ID)).toHaveTextContent('Investigation');
-    expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render the component collapsed if value is false in local storage', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(false);
-
-    const { getByTestId } = renderInvestigationSection();
-    expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
-  });
-
-  it('should render the component expanded if value is true in local storage', () => {
+    mockUseExpandSection.mockReturnValue(true);
     (useExpandSection as jest.Mock).mockReturnValue(true);
     (useHighlightedFields as jest.Mock).mockReturnValue([]);
-
-    const { getByTestId } = renderInvestigationSection();
-    expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).toBeVisible();
+    (useRuleDetails as jest.Mock).mockReturnValue({
+      rule: { id: '123' } as RuleResponse,
+      isExistingRule: true,
+      loading: false,
+    });
+    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
+      isDisabled: false,
+      tooltipContent: 'tooltip content',
+    });
+    (useBasicDataFromDetailsData as jest.Mock).mockReturnValue(mockBasicAlertData);
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      rule: { note: 'test note' },
+    });
   });
 
-  it('should render investigation guide and highlighted fields when document is signal', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-    (useHighlightedFields as jest.Mock).mockReturnValue([]);
-
+  it('should render investigation component top level items', async () => {
     const { getByTestId } = renderInvestigationSection();
-    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
+
+    await act(async () => {
+      expect(getByTestId(INVESTIGATION_SECTION_HEADER_TEST_ID)).toHaveTextContent('Investigation');
+      expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
+    });
   });
 
-  it('should not render investigation guide when document is not signal', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
-    (useHighlightedFields as jest.Mock).mockReturnValue([]);
+  it('should render the component collapsed if value is false in local storage', async () => {
+    mockUseExpandSection.mockReturnValue(false);
 
+    const { getByTestId } = renderInvestigationSection();
+
+    await act(async () => {
+      expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
+    });
+  });
+
+  it('should render the component expanded if value is true in local storage', async () => {
+    const { getByTestId } = renderInvestigationSection();
+
+    await act(async () => {
+      expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).toBeVisible();
+    });
+  });
+
+  it('should render investigation guide and highlighted fields when document is signal', async () => {
+    const { getByTestId } = renderInvestigationSection();
+
+    await act(async () => {
+      expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('should not render investigation guide when document is not signal', async () => {
     const mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':
           return 'alert';
       }
     };
-    const { getByTestId, queryByTestId } = renderInvestigationSection({
+
+    const { queryByTestId } = renderInvestigationSection({
       ...panelContextValue,
       getFieldsData: mockGetFieldsData,
     });
-    expect(queryByTestId(INVESTIGATION_GUIDE_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
+
+    await act(async () => {
+      expect(queryByTestId(INVESTIGATION_GUIDE_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 });

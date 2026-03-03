@@ -7,7 +7,7 @@
 
 import { FILTER } from '../../constants/index.mock';
 
-import { FindEndpointListItemSchema, FindEndpointListItemSchemaDecoded } from '.';
+import type { FindEndpointListItemSchema, FindEndpointListItemSchemaDecoded } from '.';
 
 export const getFindEndpointListItemSchemaMock = (): FindEndpointListItemSchema => ({
   filter: FILTER,

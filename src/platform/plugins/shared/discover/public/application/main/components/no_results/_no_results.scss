@@ -1,8 +1,0 @@
-.dscNoResults {
-  padding: $euiSizeL;
-}
-
-.dscPageContent--emptyPrompt {
-  // override EUI specificity
-  max-width: $euiSizeXXL * 19 !important; // sass-lint:disable-line no-important
-}

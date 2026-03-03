@@ -13,14 +13,18 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiSuperSelect,
+  EuiButtonEmpty,
   type EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
+import { useManagementLink } from '../../hooks/use_management_link';
+import { ElasticLLMCostTour } from '../elastic_llm_cost_tour';
 
 interface SummarizationModelProps {
   selectedModel?: LLMModel;
@@ -36,6 +40,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   onSelect,
 }) => {
   const usageTracker = useUsageTracker();
+  const managementLink = useManagementLink(selectedModel?.connectorId || '');
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
@@ -77,7 +82,11 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
             <EuiFlexItem grow={false}>
               <EuiIcon type={model.icon} />
             </EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="column"
+              data-test-subj={`summarization_model_select_${model.connectorName}_${model.value}`}
+            >
               <EuiText size="s">{model.name}</EuiText>
               {model.showConnectorName && model.connectorName && (
                 <EuiText size="xs" color="subdued">
@@ -89,6 +98,14 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         ),
       })),
     [models]
+  );
+  const currentModel = useMemo(
+    () =>
+      // find the model from the list to ensure all values present vs. what is saved in the form and loaded in local storage.
+      selectedModel !== undefined
+        ? models.find((model) => model.id === selectedModel.id)
+        : undefined,
+    [selectedModel, models]
   );
 
   useEffect(() => {
@@ -102,23 +119,55 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   return (
     <EuiFormRow
       css={{ '.euiFormLabel': { display: 'flex', alignItems: 'center' } }}
+      data-test-subj="aiConnectorTitle"
       label={
         <>
           <FormattedMessage
             id="xpack.searchPlayground.sidebar.summarizationModel.label"
-            defaultMessage="Model"
+            defaultMessage="AI Connector"
           />{' '}
         </>
       }
       fullWidth
     >
-      <EuiSuperSelect
-        data-test-subj="summarizationModelSelect"
-        options={modelsOption}
-        valueOfSelected={selectedModel && getOptionValue(selectedModel)}
-        onChange={onChange}
-        fullWidth
-      />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem>
+          {currentModel && currentModel.isElasticConnector ? (
+            <ElasticLLMCostTour connectorName={currentModel.connectorName}>
+              <EuiSuperSelect
+                data-test-subj="summarizationModelSelect"
+                options={modelsOption}
+                valueOfSelected={selectedModel && getOptionValue(selectedModel)}
+                onChange={onChange}
+                fullWidth
+              />
+            </ElasticLLMCostTour>
+          ) : (
+            <EuiSuperSelect
+              data-test-subj="summarizationModelSelect"
+              options={modelsOption}
+              valueOfSelected={selectedModel && getOptionValue(selectedModel)}
+              onChange={onChange}
+              fullWidth
+            />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            target="_blank"
+            href={managementLink}
+            data-test-subj="manageConnectorsLink"
+            iconType="wrench"
+            size="s"
+            aria-label={i18n.translate(
+              'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
+              {
+                defaultMessage: 'Manage connector',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };

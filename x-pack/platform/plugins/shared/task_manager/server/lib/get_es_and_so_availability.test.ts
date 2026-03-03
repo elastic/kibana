@@ -8,11 +8,10 @@
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
-import {
-  getElasticsearchAndSOAvailability,
-  GetElasticsearchAndSOAvailabilityOpts,
-} from './get_es_and_so_availability';
+import type { CoreStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import type { GetElasticsearchAndSOAvailabilityOpts } from './get_es_and_so_availability';
+import { getElasticsearchAndSOAvailability } from './get_es_and_so_availability';
 import type { ClusterHealthHealthResponseBody } from '@elastic/elasticsearch/lib/api/types';
 
 const logger = loggingSystemMock.createLogger();

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsEvent } from '@elastic/ecs';
-import { AuditEvent } from '@kbn/security-plugin/server';
+import type { EcsEvent } from '@elastic/ecs';
+import type { AuditEvent } from '@kbn/security-plugin/server';
 
 export type AuditAction = 'create' | 'delete';
 
@@ -18,6 +18,13 @@ interface CreateAuditEventArgs {
   error?: Error;
   outcome?: EcsEvent['outcome'];
 }
+
+const getOutcome = (error?: Error, outcome?: EcsEvent['outcome']) => {
+  if (outcome) {
+    return outcome;
+  }
+  return error ? 'failure' : 'success';
+};
 
 export function createAuditEvent({
   message,
@@ -29,7 +36,7 @@ export function createAuditEvent({
     message,
     event: {
       action,
-      outcome: outcome ?? error ? 'failure' : 'success',
+      outcome: getOutcome(error, outcome),
     },
     error: error && {
       message: error?.message,

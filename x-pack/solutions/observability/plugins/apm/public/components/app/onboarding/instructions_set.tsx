@@ -16,11 +16,8 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import type {
-  INSTRUCTION_VARIANT,
-  InstructionVariant,
-  InstructionSet,
-} from './instruction_variants';
+import { css } from '@emotion/react';
+import type { INSTRUCTION_VARIANT, Instruction } from './instruction_variants';
 import { getDisplayText } from './instruction_variants';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { push } from '../../shared/links/url_helpers';
@@ -30,7 +27,7 @@ interface AgentTab {
   text: string;
 }
 
-function getTabs(variants: InstructionVariant[]): AgentTab[] {
+function getTabs(variants: Instruction[]): AgentTab[] {
   return variants.map((variant) => ({
     id: variant.id,
     text: getDisplayText(variant.id),
@@ -52,7 +49,11 @@ function InstructionTabs({
   };
 
   return (
-    <EuiTabs style={{ padding: `0 ${euiTheme.size.l}` }}>
+    <EuiTabs
+      css={css`
+        padding: 0 ${euiTheme.size.l};
+      `}
+    >
       {agentTabs.map((tab) => (
         <EuiTab
           key={tab.id}
@@ -67,13 +68,13 @@ function InstructionTabs({
 }
 
 function InstructionSteps({
-  instructionVariants,
+  instructions,
   selectedTab,
 }: {
-  instructionVariants: InstructionVariant[];
+  instructions: Instruction[];
   selectedTab: string;
 }) {
-  const selectInstructionSteps = instructionVariants.find((variant) => {
+  const selectInstructionSteps = instructions.find((variant) => {
     return variant.id === selectedTab;
   });
 
@@ -81,11 +82,21 @@ function InstructionSteps({
     return <></>;
   }
 
-  return <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />;
+  return (
+    <>
+      {selectInstructionSteps.title && (
+        <EuiTitle size="m">
+          <h2>{selectInstructionSteps.title}</h2>
+        </EuiTitle>
+      )}
+      <EuiSpacer />
+      <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />
+    </>
+  );
 }
 
-export function InstructionsSet({ instructions }: { instructions: InstructionSet }) {
-  const tabs = useMemo(() => getTabs(instructions.instructionVariants), [instructions]);
+export function InstructionsSet({ instructions }: { instructions: Instruction[] }) {
+  const tabs = useMemo(() => getTabs(instructions), [instructions]);
 
   const {
     query: { agent: agentQuery },
@@ -98,14 +109,7 @@ export function InstructionsSet({ instructions }: { instructions: InstructionSet
         <InstructionTabs agentTabs={tabs} selectedTab={selectedTab} />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="l">
-        <EuiTitle size="m">
-          <h2>{instructions.title}</h2>
-        </EuiTitle>
-        <EuiSpacer />
-        <InstructionSteps
-          instructionVariants={instructions.instructionVariants}
-          selectedTab={selectedTab}
-        />
+        <InstructionSteps instructions={instructions} selectedTab={selectedTab} />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

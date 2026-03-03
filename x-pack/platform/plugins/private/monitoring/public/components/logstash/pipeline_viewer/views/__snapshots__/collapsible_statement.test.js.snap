@@ -3,7 +3,7 @@
 exports[`CollapsibleStatement component renders child components 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  css={[Function]}
+  css="unknown styles"
   gutterSize="none"
   responsive={false}
 >

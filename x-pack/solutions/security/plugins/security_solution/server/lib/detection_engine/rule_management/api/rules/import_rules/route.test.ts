@@ -31,6 +31,7 @@ import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -48,9 +49,11 @@ describe.skip('Import rules route', () => {
   let config: ReturnType<typeof configMock.createDefault>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
+  let context: ReturnType<typeof requestContextMock.createTools>['context'];
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     config = configMock.createDefault();
@@ -65,8 +68,18 @@ describe.skip('Import rules route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
     mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
-    importRulesRoute(server.router, config);
+    importRulesRoute(server.router, config, clients.logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    // Reset mock prebuilt rule assets client to release references
+    mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
   });
 
   describe('status codes', () => {
@@ -202,7 +215,6 @@ describe.skip('Import rules route', () => {
               message: `Unexpected token 'h', "this is not"... is not valid JSON`,
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -222,7 +234,7 @@ describe.skip('Import rules route', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         clients.detectionRulesClient.importRule.mockRejectedValue({
-          message: 'rule_id: "rule-1" already exists',
+          message: 'Rule with this rule_id already exists',
           statusCode: 409,
         });
         const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -232,7 +244,7 @@ describe.skip('Import rules route', () => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',
@@ -350,14 +362,12 @@ describe.skip('Import rules route', () => {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
           {
             error: {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -440,7 +450,7 @@ describe.skip('Import rules route', () => {
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.detectionRulesClient.importRule.mockRejectedValueOnce({
-          message: 'rule_id: "rule-1" already exists',
+          message: 'Rule with this rule_id already exists',
           statusCode: 409,
         });
         const multiRequest = getImportRulesRequest(
@@ -455,7 +465,7 @@ describe.skip('Import rules route', () => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',

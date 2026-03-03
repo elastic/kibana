@@ -72,6 +72,6 @@ export const registerListsPluginEndpointExtensionPoints = (
   // PRE-IMPORT
   registerListsExtensionPoint({
     type: 'exceptionsListPreImport',
-    callback: getExceptionsPreImportHandler(),
+    callback: getExceptionsPreImportHandler(endpointAppContextService),
   });
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestTransform } from './transform/generate_latest_transform';
 
@@ -22,7 +22,10 @@ export async function createAndInstallTransforms(
     });
     return [{ type: 'transform', id: latestTransform.transform_id }];
   } catch (e) {
-    logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
+    logger.error(
+      `Cannot create entity history transform for [${definition.id}] entity definition`,
+      { error: e }
+    );
     throw e;
   }
 }

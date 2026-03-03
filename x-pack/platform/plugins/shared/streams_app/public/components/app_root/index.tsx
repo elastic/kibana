@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
@@ -13,12 +12,17 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
-import { StreamsAppStartDependencies } from '../../types';
-import { StreamsAppServices } from '../../services/types';
-import { HeaderMenuPortal } from '../header_menu';
+import type { StreamsAppStartDependencies } from '../../types';
+import type { StreamsAppServices } from '../../services/types';
+import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
+import { DateRangeRedirect } from '../date_range_redirect';
+
+const queryClient = new QueryClient();
 
 export function AppRoot({
   coreStart,
@@ -46,32 +50,22 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <RedirectAppLinks coreStart={coreStart}>
-        <RouterProvider history={history} router={streamsAppRouter}>
-          <BreadcrumbsContextProvider>
-            <RouteRenderer />
-          </BreadcrumbsContextProvider>
-          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
-        </RouterProvider>
-      </RedirectAppLinks>
+      <StreamsTourProvider>
+        <QueryClientProvider client={queryClient}>
+          {/* @ts-expect-error upgrade typescript v5.4.5 */}
+          <RouterProvider history={history} router={streamsAppRouter}>
+            <DateRangeRedirect>
+              <PerformanceContextProvider>
+                <KbnUrlStateStorageFromRouterProvider>
+                  <BreadcrumbsContextProvider>
+                    <RouteRenderer />
+                  </BreadcrumbsContextProvider>
+                </KbnUrlStateStorageFromRouterProvider>
+              </PerformanceContextProvider>
+            </DateRangeRedirect>
+          </RouterProvider>
+        </QueryClientProvider>
+      </StreamsTourProvider>
     </StreamsAppContextProvider>
-  );
-}
-
-export function StreamsAppHeaderActionMenu({
-  appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
-  const { setHeaderActionMenu, theme$ } = appMountParameters;
-
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <></>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </HeaderMenuPortal>
   );
 }

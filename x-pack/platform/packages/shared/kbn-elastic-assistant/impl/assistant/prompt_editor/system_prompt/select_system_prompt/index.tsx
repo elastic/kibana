@@ -18,10 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';
@@ -38,7 +36,7 @@ export interface Props {
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
   selectedPrompt: PromptResponse | undefined;
-  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSettingsModalVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onSystemPromptSelectionChange: (promptId: string | undefined) => void;
 }
 
@@ -94,7 +92,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const onChange = useCallback(
     async (selectedSystemPromptId: string) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
-        setIsSettingsModalVisible(true);
+        setIsSettingsModalVisible?.(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
         return;
       }
@@ -145,6 +143,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
             css={css`
               padding-right: 56px !important;
+              ${compressed ? 'font-size: 0.9rem;' : ''}
             `}
           />
         </EuiFormRow>
@@ -158,7 +157,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         `}
       >
         {isClearable && selectedPrompt && (
-          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
+          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"

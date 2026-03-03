@@ -5,83 +5,70 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { EdgeDataDefinition } from 'cytoscape';
-import type { ContentsProps } from '.';
+import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { isEdge } from './utils';
+import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { TraceSearchType } from '../../../../../common/trace_explorer';
-import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../../common/es_fields/apm';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { StatsList } from './stats_list';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-export function EdgeContents({ elementData }: ContentsProps) {
-  const edgeData = elementData as EdgeDataDefinition;
+type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
+const INITIAL_STATE: Partial<EdgeReturn> = {
+  currentPeriod: undefined,
+  previousPeriod: undefined,
+};
+
+export function EdgeContents({ selection, environment, start, end }: ContentsProps) {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
+  const { offset, comparisonEnabled } = query;
 
-  const apmRouter = useApmRouter();
+  const isEdgeSelection = isEdge(selection);
+  const sourceData = isEdgeSelection
+    ? selection.data?.sourceData ?? { id: selection.source }
+    : null;
+  const resources = isEdgeSelection ? selection.data?.resources ?? [] : [];
+  const sourceServiceName =
+    sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
+  const dependencies = resources;
 
-  const sourceService = edgeData.sourceData['service.name'];
-
-  const trackEvent = useUiTracker();
-
-  let traceQuery: string;
-
-  if (SERVICE_NAME in edgeData.targetData) {
-    traceQuery =
-      `sequence by trace.id\n` +
-      ` [ span where service.name == "${sourceService}" and span.destination.service.resource != null ] by span.id\n` +
-      ` [ transaction where service.name == "${edgeData.targetData[SERVICE_NAME]}" ] by parent.id`;
-  } else {
-    traceQuery =
-      `sequence by trace.id\n` +
-      ` [ transaction where service.name == "${sourceService}" ]\n` +
-      ` [ span where service.name == "${sourceService}" and span.destination.service.resource == "${edgeData.targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}" ]`;
-  }
-
-  const url = apmRouter.link('/traces/explorer/waterfall', {
-    query: {
-      ...query,
-      type: TraceSearchType.eql,
-      query: traceQuery,
-      waterfallItemId: '',
-      traceId: '',
-      transactionId: '',
-      detailTab: TransactionTab.timeline,
-      showCriticalPath: false,
+  const { data = INITIAL_STATE, status } = useFetcher(
+    (callApmApi) => {
+      if (sourceServiceName && dependencies.length > 0) {
+        return callApmApi('GET /internal/apm/service-map/dependency', {
+          params: {
+            query: {
+              sourceServiceName,
+              dependencies,
+              environment,
+              start,
+              end,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+            },
+          },
+        });
+      }
     },
-  });
+    [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled]
+  );
+
+  const isLoading = status === FETCH_STATUS.LOADING;
+
+  if (!isEdgeSelection) {
+    return null;
+  }
 
   return (
     <EuiFlexItem>
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
-      <EuiButton
-        data-test-subj="apmEdgeContentsExploreTracesButton"
-        href={url}
-        fill={true}
-        onClick={() => {
-          trackEvent({
-            app: 'apm',
-            metricType: METRIC_TYPE.CLICK,
-            metric: 'service_map_to_trace_explorer',
-          });
-        }}
-      >
-        {i18n.translate('xpack.apm.serviceMap.viewInTraceExplorer', {
-          defaultMessage: 'Explore traces',
-        })}
-      </EuiButton>
+      <StatsList data={data} isLoading={isLoading} />
     </EuiFlexItem>
   );
 }

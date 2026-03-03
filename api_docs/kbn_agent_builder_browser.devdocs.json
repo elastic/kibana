@@ -1,0 +1,1345 @@
+{
+  "id": "@kbn/agent-builder-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.formatAgentBuilderErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "formatAgentBuilderErrorMessage",
+        "description": [],
+        "signature": [
+          "(error: any) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/base/errors.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.formatAgentBuilderErrorMessage.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/base/errors.ts",
+            "lineNumber": 13,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowComboBox",
+        "type": "Function",
+        "tags": [],
+        "label": "WorkflowComboBox",
+        "description": [],
+        "signature": [
+          "({ workflows, value, onChange, singleSelection, \"data-test-subj\": dataTestSubj, ...comboBoxProps }: ",
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.WorkflowComboBoxProps",
+            "text": "WorkflowComboBoxProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBox.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  workflows,\n  value,\n  onChange,\n  singleSelection = false,\n  'data-test-subj': dataTestSubj = 'workflowComboBox',\n  ...comboBoxProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.WorkflowComboBoxProps",
+                "text": "WorkflowComboBoxProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 28,
+            "columnNumber": 67,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AgentsServiceStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentsServiceStartContract",
+        "description": [
+          "\nPublic-faving contract for AgentBuilder's agents service."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/agents/contract.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AgentsServiceStartContract.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList all agents available."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentDefinition",
+                "text": "AgentDefinition"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/agents/contract.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AttachmentServiceStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "AttachmentServiceStartContract",
+        "description": [
+          "\nPublic-facing contract for the attachment service."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentServiceStartContract.addAttachmentType",
+            "type": "Function",
+            "tags": [],
+            "label": "addAttachmentType",
+            "description": [
+              "\nRegisters a UI definition for a specific attachment type.\n"
+            ],
+            "signature": [
+              "<TAttachment extends ",
+              "UnknownAttachment",
+              " = ",
+              "UnknownAttachment",
+              ">(attachmentType: string, definition: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AttachmentUIDefinition",
+                "text": "AttachmentUIDefinition"
+              },
+              "<TAttachment>) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentServiceStartContract.addAttachmentType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "attachmentType",
+                "description": [
+                  "- The unique identifier for the attachment type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 114,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentServiceStartContract.addAttachmentType.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "definition",
+                "description": [
+                  "- The UI definition for rendering this attachment type"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.AttachmentUIDefinition",
+                    "text": "AttachmentUIDefinition"
+                  },
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 115,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentServiceStartContract.getAttachmentUiDefinition",
+            "type": "Function",
+            "tags": [],
+            "label": "getAttachmentUiDefinition",
+            "description": [
+              "\nRetrieves the UI definition for a specific attachment type.\n"
+            ],
+            "signature": [
+              "<TAttachment extends ",
+              "UnknownAttachment",
+              " = ",
+              "UnknownAttachment",
+              ">(attachmentType: string) => ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AttachmentUIDefinition",
+                "text": "AttachmentUIDefinition"
+              },
+              "<TAttachment> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentServiceStartContract.getAttachmentUiDefinition.$1",
+                "type": "string",
+                "tags": [],
+                "label": "attachmentType",
+                "description": [
+                  "- The type identifier to look up"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 125,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The UI definition if registered, undefined otherwise"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.AttachmentUIDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "AttachmentUIDefinition",
+        "description": [
+          "\nUI definition for rendering attachments of a specific type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.AttachmentUIDefinition",
+            "text": "AttachmentUIDefinition"
+          },
+          "<TAttachment>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.getLabel",
+            "type": "Function",
+            "tags": [],
+            "label": "getLabel",
+            "description": [
+              "\nReturns a human-readable label for the attachment."
+            ],
+            "signature": [
+              "(attachment: TAttachment) => string"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.getLabel.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "attachment",
+                "description": [],
+                "signature": [
+                  "TAttachment"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 68,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.getIcon",
+            "type": "Function",
+            "tags": [],
+            "label": "getIcon",
+            "description": [
+              "\nReturns the icon type to display for the attachment."
+            ],
+            "signature": [
+              "(() => ",
+              "IconType",
+              ") | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nOptional custom click handler for attachment pills.\nWhen provided, pills will invoke this instead of the default behavior."
+            ],
+            "signature": [
+              "((args: { attachment: TAttachment; version?: ",
+              "AttachmentVersion",
+              "<unknown> | undefined; }) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 77,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-browser",
+                    "id": "def-common.AttachmentUIDefinition.onClick.$1.attachment",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "attachment",
+                    "description": [],
+                    "signature": [
+                      "TAttachment"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                    "lineNumber": 77,
+                    "columnNumber": 22,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/agent-builder-browser",
+                    "id": "def-common.AttachmentUIDefinition.onClick.$1.version",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "version",
+                    "description": [],
+                    "signature": [
+                      "AttachmentVersion",
+                      "<unknown> | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                    "lineNumber": 77,
+                    "columnNumber": 47,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.renderInlineContent",
+            "type": "Function",
+            "tags": [],
+            "label": "renderInlineContent",
+            "description": [
+              "\nOptional custom content renderer for inline attachment display.\nWhen provided, attachments can be rendered inline in the conversation\nusing the <render_attachment> tag."
+            ],
+            "signature": [
+              "((props: ",
+              "AttachmentRenderProps",
+              "<TAttachment>) => React.ReactNode) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.renderInlineContent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "AttachmentRenderProps",
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 83,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.renderCanvasContent",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCanvasContent",
+            "description": [
+              "\nOptional custom content renderer for canvas mode (expanded flyout view).\nWhen provided, attachments can be opened in an expanded view via action buttons.\n\nThe optional `registerActionButtons` callback allows the rendered content to\ndynamically register action buttons that appear in the canvas header. This is\nuseful when buttons depend on state only available at runtime."
+            ],
+            "signature": [
+              "((props: ",
+              "AttachmentRenderProps",
+              "<TAttachment>, registerActionButtons: (buttons: ",
+              "ActionButton",
+              "[]) => void) => React.ReactNode) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.renderCanvasContent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "AttachmentRenderProps",
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 93,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.renderCanvasContent.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "registerActionButtons",
+                "description": [],
+                "signature": [
+                  "(buttons: ",
+                  "ActionButton",
+                  "[]) => void"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 94,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.AttachmentUIDefinition.getActionButtons",
+            "type": "Function",
+            "tags": [],
+            "label": "getActionButtons",
+            "description": [
+              "\nOptional function to provide action buttons for inline-rendered attachments.\nButtons will appear alongside or below the rendered content."
+            ],
+            "signature": [
+              "((params: ",
+              "GetActionButtonsParams",
+              "<TAttachment>) => ",
+              "ActionButton",
+              "[]) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.getActionButtons.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "GetActionButtonsParams",
+                  "<TAttachment>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 100,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.EventsServiceStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventsServiceStartContract",
+        "description": [
+          "\nPublic-facing contract for AgentBuilder's events service."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EventsServiceStartContract.chat$",
+            "type": "Object",
+            "tags": [],
+            "label": "chat$",
+            "description": [
+              "\n(hot) observable of all chat events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ChatEvent",
+                "text": "ChatEvent"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ExecuteToolParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecuteToolParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ExecuteToolParams.toolId",
+            "type": "string",
+            "tags": [],
+            "label": "toolId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ExecuteToolParams.toolParams",
+            "type": "Object",
+            "tags": [],
+            "label": "toolParams",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ExecuteToolParams.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ExecuteToolReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecuteToolReturn",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ExecuteToolReturn.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ListWorkflowsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListWorkflowsParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ListWorkflowsParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ListWorkflowsParams.limit",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ListWorkflowsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListWorkflowsResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ListWorkflowsResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.WorkflowListItem",
+                "text": "WorkflowListItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ToolServiceStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolServiceStartContract",
+        "description": [
+          "\nPublic-facing contract for AgentBuilder's tool service."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ToolServiceStartContract.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nRetrieve a tool based on its ID."
+            ],
+            "signature": [
+              "(toolId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolDefinitionWithSchema",
+                "text": "ToolDefinitionWithSchema"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolType",
+                "text": "ToolType"
+              },
+              ", Record<string, unknown>>>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.ToolServiceStartContract.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "toolId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+                "lineNumber": 43,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ToolServiceStartContract.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList all tools available in the current context."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolDefinition",
+                "text": "ToolDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolType",
+                "text": "ToolType"
+              },
+              ", Record<string, unknown>>[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ToolServiceStartContract.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [
+              "\nExecute a tool and returns the results."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ExecuteToolParams",
+                "text": "ExecuteToolParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ExecuteToolReturn",
+                "text": "ExecuteToolReturn"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.ToolServiceStartContract.execute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.ExecuteToolParams",
+                    "text": "ExecuteToolParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+                "lineNumber": 51,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ToolServiceStartContract.listWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "listWorkflows",
+            "description": [
+              "\nList available workflows for pre-execution selection."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ListWorkflowsParams",
+                "text": "ListWorkflowsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ListWorkflowsResponse",
+                "text": "ListWorkflowsResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.ToolServiceStartContract.listWorkflows.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.ListWorkflowsParams",
+                    "text": "ListWorkflowsParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+                "lineNumber": 55,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowComboBoxOption",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowComboBoxOption",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxOption.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxOption.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowComboBoxProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowComboBoxProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.WorkflowComboBoxProps",
+            "text": "WorkflowComboBoxProps"
+          },
+          " extends Omit<",
+          "EuiComboBoxProps",
+          "<string>, \"options\" | \"onChange\" | \"selectedOptions\" | \"singleSelection\">"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.workflows",
+            "type": "Array",
+            "tags": [],
+            "label": "workflows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.WorkflowComboBoxOption",
+                "text": "WorkflowComboBoxOption"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.value",
+            "type": "Array",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(workflowIds: string[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.WorkflowComboBoxProps.onChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "workflowIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+                "lineNumber": 24,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.singleSelection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "singleSelection",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowListItem",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowListItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowListItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowListItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.BrowserChatEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "BrowserChatEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ChatAgentEvent",
+            "text": "ChatAgentEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ConversationCreatedEvent",
+            "text": "ConversationCreatedEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ConversationUpdatedEvent",
+            "text": "ConversationUpdatedEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ConversationIdSetEvent",
+            "text": "ConversationIdSetEvent"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/events.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

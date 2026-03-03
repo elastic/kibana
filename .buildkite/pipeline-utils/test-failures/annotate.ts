@@ -11,7 +11,7 @@ import { execSync } from 'child_process';
 import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { BuildkiteClient } from '..';
-import { Artifact } from '../buildkite/types/artifact';
+import type { Artifact } from '../buildkite/types/artifact';
 
 const buildkite = new BuildkiteClient();
 

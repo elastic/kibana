@@ -27,6 +27,7 @@ import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {
+  DeprecationInfo,
   EpmPackageInstallStatus,
   InstallFailedAttempt,
   IntegrationCardReleaseLabel,
@@ -45,6 +46,7 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
   installStatus?: EpmPackageInstallStatus;
@@ -54,18 +56,28 @@ export interface IntegrationCardItem {
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  isDeprecated?: boolean;
+  deprecationInfo?: DeprecationInfo;
   maxCardHeight?: number;
+  minCardHeight?: number;
   name: string;
   onCardClick?: () => void;
   release?: IntegrationCardReleaseLabel;
+  showDescription?: boolean;
   showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
   showLabels?: boolean;
+  showReleaseBadge?: boolean;
   title: string;
   // Security Solution uses this prop to determine how many lines the card title should be truncated
   titleLineClamp?: number;
+  titleBadge?: React.ReactNode;
+  titleSize?: 'xs' | 's';
   url: string;
   version: string;
   type?: string;
+  supportsAgentless?: boolean;
+  signalTypes?: string[];
 }
 
 export const mapToCard = ({
@@ -91,6 +103,9 @@ export const mapToCard = ({
 
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
+  let isDeprecated = false;
+  let deprecationInfo: DeprecationInfo | undefined;
+
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -102,6 +117,12 @@ export const mapToCard = ({
       isUpdateAvailable = isPackageUpdatable(item);
 
       isReauthorizationRequired = hasDeferredInstallations(item);
+    }
+
+    // Extract deprecation information
+    if ('deprecated' in item && item.deprecated) {
+      isDeprecated = true;
+      deprecationInfo = item.deprecated;
     }
 
     const url = getHref('integration_details_overview', {
@@ -135,11 +156,24 @@ export const mapToCard = ({
     isReauthorizationRequired,
     isUnverified,
     isUpdateAvailable,
+    isDeprecated,
+    deprecationInfo,
     extraLabelsBadges,
   };
 
   if (item.type === 'integration') {
     cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  if ('supportsAgentless' in item && item.supportsAgentless) {
+    cardResult.supportsAgentless = true;
+  }
+
+  if ('data_streams' in item && Array.isArray(item.data_streams)) {
+    const types = [...new Set(item.data_streams.map((ds) => ds.type))];
+    if (types.length > 0) {
+      cardResult.signalTypes = types;
+    }
   }
 
   return cardResult;
@@ -171,7 +205,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={updateFailedAttempt ? formatAttempt(updateFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.updateFailed"
                 defaultMessage="Update failed"
@@ -201,7 +235,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={installFailedAttempt ? formatAttempt(installFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.installFailed"
                 defaultMessage="Install failed"

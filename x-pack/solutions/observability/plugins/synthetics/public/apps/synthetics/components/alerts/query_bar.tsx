@@ -8,23 +8,23 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { EuiFormRow, EuiSkeletonText } from '@elastic/eui';
 import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export function AlertSearchBar({
   kqlQuery,
   onChange,
+  filtersForSuggestions,
 }: {
   kqlQuery: string;
   onChange: (val: { kqlQuery?: string; filters?: Filter[] }) => void;
+  filtersForSuggestions?: Filter[];
 }) {
   const {
     data: { query },
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useKibana<ClientPluginsStart>().services;
 
   const dataView = useSyntheticsDataView();
@@ -71,6 +71,7 @@ export function AlertSearchBar({
         query={{ query: String(kqlQuery), language: 'kuery' }}
         autoSubmit={true}
         disableLanguageSwitcher={true}
+        filtersForSuggestions={filtersForSuggestions}
       />
     </EuiFormRow>
   );

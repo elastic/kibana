@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import {
+import type {
   FindListItemSchema,
   ListItemSchema,
+  FoundListItemSchema,
+  DeleteListItemSchema,
+  PatchListItemSchema,
+  CreateListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   deleteListItemSchema,
   patchListItemSchema,
   createListItemSchema,
   findListItemSchema,
   foundListItemSchema,
   listItemSchema,
-  FoundListItemSchema,
-  DeleteListItemSchema,
-  PatchListItemSchema,
-  CreateListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { chain, fromEither, tryCatch } from 'fp-ts/TaskEither';
+import { flow } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import {
+import type {
   ApiParams,
   FindListItemsParams,
   DeleteListItemParams,
@@ -43,14 +45,10 @@ const findListItems = async ({
   http,
   cursor,
   page,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_field,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_order,
   filter,
 }: ApiParams & FindListItemSchema): Promise<FoundListItemSchema> => {
@@ -186,7 +184,7 @@ const createListItem = async ({
   http,
   signal,
   value,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   list_id,
   refresh,
 }: ApiParams & CreateListItemSchema): Promise<ListItemSchema> =>

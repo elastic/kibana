@@ -3,28 +3,76 @@
 exports[`AutoScale withAutoScale renders 1`] = `
 <Component>
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "1l2vzaf",
-        "next": undefined,
-        "styles": "display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
-    <div
-      style={
+    <Insertion
+      cache={
         Object {
-          "transform": "scale(0)",
+          "insert": [Function],
+          "inserted": Object {
+            "4vd3s2-autoScaleWrapperStyle": true,
+          },
+          "key": "css",
+          "nonce": undefined,
+          "registered": Object {},
+          "sheet": StyleSheet {
+            "_alreadyInsertedOrderInsensitiveRule": true,
+            "_insertTag": [Function],
+            "before": null,
+            "container": <head>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                .css-4vd3s2-autoScaleWrapperStyle{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;}
+              </style>
+            </head>,
+            "ctr": 1,
+            "insertionPoint": undefined,
+            "isSpeedy": false,
+            "key": "css",
+            "nonce": undefined,
+            "prepend": undefined,
+            "tags": Array [
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                .css-4vd3s2-autoScaleWrapperStyle{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;}
+              </style>,
+            ],
+          },
         }
       }
+      isStringTag={true}
+      serialized={
+        Object {
+          "map": undefined,
+          "name": "4vd3s2-autoScaleWrapperStyle",
+          "next": undefined,
+          "styles": "display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;;label:autoScaleWrapperStyle;",
+          "toString": [Function],
+        }
+      }
+    />
+    <div
+      className="css-4vd3s2-autoScaleWrapperStyle"
     >
-      <Component>
-        <h1>
-          Hoi!
-        </h1>
-      </Component>
+      <div
+        style={
+          Object {
+            "transform": "scale(0)",
+          }
+        }
+      >
+        <Component>
+          <h1>
+            Hoi!
+          </h1>
+        </Component>
+      </div>
     </div>
   </div>
 </Component>

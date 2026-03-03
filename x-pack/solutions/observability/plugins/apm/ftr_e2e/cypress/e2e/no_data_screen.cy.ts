@@ -24,7 +24,7 @@ describe('No data screen', () => {
 
     it('shows no data screen instead of service inventory', () => {
       cy.visitKibana('/app/apm/');
-      cy.contains('Welcome to Elastic Observability!');
+      cy.contains('Add data');
     });
 
     it('shows settings page', () => {
@@ -48,7 +48,7 @@ describe('No data screen', () => {
 
 function setApmIndices(body: Record<string, string>) {
   cy.request({
-    url: '/internal/apm/settings/apm-indices/save',
+    url: '/internal/apm-sources/settings/apm-indices/save',
     method: 'POST',
     body,
     headers: { 'kbn-xsrf': true },

@@ -44,21 +44,6 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
       sortField: undefined,
       sortOrder: undefined,
     };
-
-    // @ts-expect-error updating a readonly field
-    endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-  });
-
-  it('should nothing if feature flag is disabled', async () => {
-    // @ts-expect-error updating a readonly field
-    endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-    await setFindRequestFilterScopeToActiveSpace(
-      endpointAppContextServices,
-      kibanaRequest,
-      findOptionsMock
-    );
-
-    expect(findOptionsMock.filter).toBeUndefined();
   });
 
   it('should inject additional filtering into find request', async () => {
@@ -104,6 +89,36 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
           exception-list-agnostic.attributes.tags:"ownerSpaceId:default"
         )
       ) AND (somevalue:match-this)`);
+  });
+
+  it('should inject additional filtering when there is no visible policies in active space', async () => {
+    (
+      endpointAppContextServices.getInternalFleetServices()
+        .packagePolicy as jest.Mocked<PackagePolicyClient>
+    ).listIds.mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      perPage: 20,
+    });
+    await setFindRequestFilterScopeToActiveSpace(
+      endpointAppContextServices,
+      kibanaRequest,
+      findOptionsMock
+    );
+
+    expect(findOptionsMock.filter).toEqual(`
+      (
+        (
+          exception-list-agnostic.attributes.tags:("policy:all")
+        )
+        OR
+        (
+          NOT exception-list-agnostic.attributes.tags:"policy:*"
+          AND
+          exception-list-agnostic.attributes.tags:"ownerSpaceId:default"
+        )
+      )`);
   });
 
   it('should inject additional filtering when using multi-list search format', async () => {

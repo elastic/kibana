@@ -8,16 +8,16 @@
  */
 
 import { identity } from 'lodash';
-import { SavedObjectReference } from '@kbn/core/types';
-import {
+import type { SavedObjectReference } from '@kbn/core/types';
+import type {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import { AnyExpressionFunctionDefinition } from './types';
+import type { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
-import { ExpressionValue } from '../expression_types/types';
-import { ExpressionAstFunction } from '../ast';
+import type { ExpressionValue } from '../expression_types/types';
+import type { ExpressionAstFunction } from '../ast';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**
@@ -42,7 +42,9 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   /**
    * Opt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.
    */
-  allowCache: boolean;
+  allowCache:
+    | boolean
+    | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void };
 
   /**
    * Function to run function (context, args)
@@ -116,7 +118,10 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.fn = fn as ExpressionFunction['fn'];
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
-    this.allowCache = !!allowCache;
+    this.allowCache =
+      allowCache && typeof allowCache !== 'boolean'
+        ? (allowCache as ExpressionFunction['allowCache'])
+        : Boolean(allowCache);
     this.disabled = disabled || false;
     this.deprecated = !!deprecated;
     this.telemetry = telemetry || ((s, c) => c);

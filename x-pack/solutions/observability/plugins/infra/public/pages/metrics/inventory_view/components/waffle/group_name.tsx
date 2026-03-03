@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiLink, EuiToolTip, useEuiFontSize } from '@elastic/eui';
-import React from 'react';
+import { EuiButtonEmpty, EuiScreenReaderOnly, EuiToolTip, useEuiFontSize } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type {
   InfraWaffleMapGroup,
   InfraWaffleMapOptions,
@@ -18,45 +20,85 @@ interface Props {
   group: InfraWaffleMapGroup;
   isChild?: boolean;
   options: InfraWaffleMapOptions;
+  nodeType: InventoryItemType;
 }
 
-export class GroupName extends React.PureComponent<Props, {}> {
-  public render() {
-    const { group, isChild } = this.props;
-    const linkStyle = {
-      fontSize: isChild ? '0.85em' : '1em',
-    };
-    return (
+export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, options, nodeType }) => {
+  const [a11yAnnouncement, setA11yAnnouncement] = useState('');
+
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+
+      if (options.groupBy.length === 0) {
+        setA11yAnnouncement(
+          i18n.translate('xpack.infra.inventory.groupBy.noChangeMessage', {
+            defaultMessage: 'No changes were made when selecting {group}.',
+            values: { group: group.name },
+          })
+        );
+        return;
+      }
+
+      setA11yAnnouncement(
+        i18n.translate('xpack.infra.inventory.groupBy.groupingByMessage', {
+          defaultMessage: 'Grouping by {group}...',
+          values: { group: group.name },
+        })
+      );
+
+      const currentPath =
+        isChild && options.groupBy.length > 1 ? options.groupBy[1] : options.groupBy[0];
+      onDrilldown(`${currentPath.field}: "${group.name}"`);
+    },
+    [group.name, isChild, onDrilldown, options.groupBy]
+  );
+
+  const buttonStyle = {
+    fontSize: isChild ? '0.85em' : '1em',
+  };
+
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <div aria-live="polite" role="status">
+          {a11yAnnouncement}
+        </div>
+      </EuiScreenReaderOnly>
+
       <GroupNameContainer>
         <Inner isChild={isChild}>
           <Name>
             <EuiToolTip position="top" content={group.name}>
-              <EuiLink
-                style={linkStyle}
-                onClickCapture={this.handleClick}
-                data-test-subj="groupNameLink"
+              <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.infra.inventory.groupBySelectorButton.ariaLabel',
+                  {
+                    defaultMessage: 'Group by {group}',
+                    values: { group: group.name },
+                  }
+                )}
+                css={buttonStyle}
+                onClick={handleClick}
+                data-test-subj="groupNameButton"
               >
                 {group.name}
-              </EuiLink>
+              </EuiButtonEmpty>
             </EuiToolTip>
           </Name>
-          <Count>{group.count}</Count>
+          <Count
+            aria-label={i18n.translate('xpack.infra.inventory.groupByCount.ariaLabel', {
+              defaultMessage: '{count} {nodeType} in this group',
+              values: { nodeType, count: group.count },
+            })}
+          >
+            {group.count}
+          </Count>
         </Inner>
       </GroupNameContainer>
-    );
-  }
-
-  private handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const { groupBy } = this.props.options;
-    // When groupBy is empty that means there is nothing todo so let's just do nothing.
-    if (groupBy.length === 0) {
-      return;
-    }
-    const currentPath = this.props.isChild && groupBy.length > 1 ? groupBy[1] : groupBy[0];
-    this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
-  };
-}
+    </>
+  );
+};
 
 const GroupNameContainer = styled.div`
   position: relative;

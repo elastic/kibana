@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { initializeWorkpad } from '../../state/actions/workpad';
 import { getWorkpad, getSelectedPageIndex } from '../../state/selectors/workpad';
 import { ExportApp as Component } from './export_app.component';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
 export const ExportApp = connect(
   (state: State) => ({

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FormattedStatus } from '../lib';
 

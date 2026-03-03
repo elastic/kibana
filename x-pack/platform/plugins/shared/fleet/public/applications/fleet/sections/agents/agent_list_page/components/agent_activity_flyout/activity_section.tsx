@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiPanel } from '@elastic/eui';
+import { EuiText, EuiPanel, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -19,12 +19,22 @@ export const ActivitySection: React.FunctionComponent<{
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ title, actions, abortUpgrade, onClickViewAgents }) => {
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+}> = ({ title, actions, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
         <EuiText>
-          <b>{title}</b>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {actions.some((action) => action.status === 'IN_PROGRESS') && (
+              <EuiFlexItem grow={false}>
+                <EuiHealth color="success" />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <b>{title}</b>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiText>
       </EuiPanel>
       {actions.map((currentAction) =>
@@ -34,12 +44,14 @@ export const ActivitySection: React.FunctionComponent<{
             abortUpgrade={abortUpgrade}
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
+            onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           />
         ) : (
           <ActivityItem
             action={currentAction}
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
+            onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           />
         )
       )}

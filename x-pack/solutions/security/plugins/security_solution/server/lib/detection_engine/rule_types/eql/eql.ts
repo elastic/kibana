@@ -5,25 +5,18 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
-
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { buildEqlSearchRequest } from './build_eql_search_request';
-import { createEnrichEventsFunction } from '../utils/enrichments';
 
 import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-  CreateRuleOptions,
   WrapSuppressedHits,
   SecuritySharedParams,
+  SecurityRuleServices,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -37,14 +30,15 @@ import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
 import type { EqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   bulkCreateSuppressedAlertsInMemory,
   bulkCreateSuppressedSequencesInMemory,
 } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
@@ -53,16 +47,17 @@ import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils
 import { logShardFailures } from '../utils/log_shard_failure';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { wrapSequences } from './wrap_sequences';
-import { wrapHits } from '../factories';
+import { bulkCreate, wrapHits } from '../factories';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface EqlExecutorParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   state?: Record<string, unknown>;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export const eqlExecutor = async ({
@@ -77,7 +72,7 @@ export const eqlExecutor = async ({
   result: SearchAfterAndBulkCreateReturnType;
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
-  const { completeRule, tuple, ruleExecutionLogger, bulkCreate } = sharedParams;
+  const { completeRule, tuple, ruleExecutionLogger } = sharedParams;
   const ruleParams = completeRule.ruleParams;
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -90,6 +85,10 @@ export const eqlExecutor = async ({
       uiSettingsClient: services.uiSettingsClient,
     });
 
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
+
     const isSequenceQuery = isEqlSequenceQuery(ruleParams.query);
 
     const request = buildEqlSearchRequest({
@@ -98,13 +97,13 @@ export const eqlExecutor = async ({
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       size: ruleParams.maxSignals,
-      filters: [...(ruleParams.filters || []), ...dataTiersFilters],
+      filters: [...(ruleParams.filters || []), ...dataTiersFilters, ...dataStreamNamespaceFilters],
       eventCategoryOverride: ruleParams.eventCategoryOverride,
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
     });
 
-    ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
+    ruleExecutionLogger.trace(`EQL query to execute\n${JSON.stringify(request)}`);
     const exceptionsWarning = getUnprocessedExceptionsWarnings(sharedParams.unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
@@ -131,7 +130,7 @@ export const eqlExecutor = async ({
         loggedRequests[0].duration = Math.round(eqlSearchDuration);
       }
 
-      let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
+      let newSignals: Array<WrappedAlert<DetectionAlertLatest>> | undefined;
 
       const shardFailures = response.shard_failures;
       if (!isEmpty(shardFailures)) {
@@ -146,7 +145,11 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (events) {
-        if (isAlertSuppressionActive) {
+        result.totalEventsFound = events.length;
+        if (
+          isAlertSuppressionActive &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+        ) {
           await bulkCreateSuppressedAlertsInMemory({
             sharedParams,
             enrichedEvents: events,
@@ -155,15 +158,14 @@ export const eqlExecutor = async ({
             buildReasonMessage: buildReasonMessageForEqlAlert,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            experimentalFeatures,
           });
         } else {
           newSignals = wrapHits(sharedParams, events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
+        result.totalEventsFound = sequences.length;
         if (
           isAlertSuppressionActive &&
-          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
           await bulkCreateSuppressedSequencesInMemory({
@@ -173,7 +175,6 @@ export const eqlExecutor = async ({
             services,
             buildReasonMessage: buildReasonMessageForEqlAlert,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            experimentalFeatures,
           });
         } else {
           newSignals = wrapSequences({
@@ -189,14 +190,11 @@ export const eqlExecutor = async ({
       }
 
       if (newSignals?.length) {
-        const createResult = await bulkCreate(
-          newSignals,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
+        const createResult = await bulkCreate({
+          wrappedAlerts: newSignals,
+          sharedParams,
+          services,
+        });
         addToSearchAfterReturn({ current: result, next: createResult });
       }
 

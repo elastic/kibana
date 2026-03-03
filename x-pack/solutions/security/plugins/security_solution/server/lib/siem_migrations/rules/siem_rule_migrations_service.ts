@@ -7,30 +7,17 @@
 
 import assert from 'assert';
 import type { Subject } from 'rxjs';
-import type {
-  AuthenticatedUser,
-  LoggerFactory,
-  IClusterClient,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
+import type { LoggerFactory, IClusterClient, Logger } from '@kbn/core/server';
 import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
 import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
 import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
-import type { SiemRuleMigrationsClientDependencies } from './types';
+import type { SiemMigrationsCreateClientParams } from '../common/types';
 
 export interface SiemRulesMigrationsSetupParams {
   esClusterClient: IClusterClient;
   pluginStop$: Subject<void>;
   tasksTimeoutMs?: number;
-}
-
-export interface SiemRuleMigrationsCreateClientParams {
-  request: KibanaRequest;
-  currentUser: AuthenticatedUser | null;
-  spaceId: string;
-  dependencies: SiemRuleMigrationsClientDependencies;
 }
 
 export interface SiemRuleMigrationsClient {
@@ -44,9 +31,9 @@ export class SiemRuleMigrationsService {
   private taskService: RuleMigrationsTaskService;
   private logger: Logger;
 
-  constructor(logger: LoggerFactory, kibanaVersion: string) {
+  constructor(logger: LoggerFactory, kibanaVersion: string, elserInferenceId?: string) {
     this.logger = logger.get('siemRuleMigrations');
-    this.dataService = new RuleMigrationsDataService(this.logger, kibanaVersion);
+    this.dataService = new RuleMigrationsDataService(this.logger, kibanaVersion, elserInferenceId);
     this.taskService = new RuleMigrationsTaskService(this.logger);
   }
 
@@ -54,7 +41,7 @@ export class SiemRuleMigrationsService {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
 
-    this.dataService.install({ ...params, esClient }).catch((err) => {
+    this.dataService.setup({ ...params, esClient }).catch((err) => {
       this.logger.error('Error installing data service.', err);
     });
   }
@@ -64,7 +51,7 @@ export class SiemRuleMigrationsService {
     currentUser,
     spaceId,
     dependencies,
-  }: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
+  }: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
@@ -75,7 +62,13 @@ export class SiemRuleMigrationsService {
       esScopedClient,
       dependencies,
     });
-    const taskClient = this.taskService.createClient({ currentUser, dataClient, dependencies });
+
+    const taskClient = this.taskService.createClient({
+      request,
+      currentUser,
+      dataClient,
+      dependencies,
+    });
 
     return { data: dataClient, task: taskClient };
   }

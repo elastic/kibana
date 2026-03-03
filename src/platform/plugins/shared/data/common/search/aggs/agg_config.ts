@@ -11,17 +11,20 @@ import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { Assign, Ensure } from '@kbn/utility-types';
+import type { Assign, Ensure } from '@kbn/utility-types';
 
-import { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionAstExpression,
+  ExpressionAstArgument,
+} from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
-import { ISearchOptions } from '@kbn/search-types';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import type { ISearchSource } from '../../../public';
 
-import { IAggType } from './agg_type';
+import type { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
-import { IAggConfigs } from './agg_configs';
+import type { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
 
 /** @public **/

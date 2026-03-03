@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { useKibana } from './use_kibana';
 
@@ -18,35 +18,16 @@ export interface UseFetchApmIndex {
   isError: boolean;
 }
 
-interface ApiResponse {
-  apmIndexSettings: Array<{
-    configurationName: string;
-    defaultValue: string;
-    savedValue?: string;
-  }>;
-}
-
 export function useFetchApmIndex(): UseFetchApmIndex {
-  const { http } = useKibana().services;
+  const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchApmIndices'],
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<ApiResponse>('/internal/apm/settings/apm-index-settings', {
-          signal,
-        });
+        const response = await apmSourcesAccess.getApmIndices({ signal });
 
-        const metricSettings = response.apmIndexSettings.find(
-          (settings) => settings.configurationName === 'metric'
-        );
-
-        let index = '';
-        if (!!metricSettings) {
-          index = metricSettings.savedValue ?? metricSettings.defaultValue;
-        }
-
-        return index;
+        return response.metric ?? '';
       } catch (error) {
         // ignore error
       }

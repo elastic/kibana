@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getYearAgoIso } from './utils';
 
 type Environment = 'ENVIRONMENT_ALL' | 'ci' | 'development';
@@ -54,6 +55,7 @@ export class ApmClient {
       auth,
       baseURL,
       timeout,
+      allowAbsoluteUrls: false,
     });
 
     this.logger = logger || console;

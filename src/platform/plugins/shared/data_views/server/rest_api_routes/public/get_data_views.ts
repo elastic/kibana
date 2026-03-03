@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
 import type {
   DataViewsServerPluginStartDependencies,
@@ -22,7 +22,7 @@ import {
   INITIAL_REST_VERSION,
   GET_DATA_VIEWS_DESCRIPTION,
 } from '../../constants';
-import { DataViewListItemRestResponse } from '../route_types';
+import type { DataViewListItemRestResponse } from '../route_types';
 
 interface GetDataViewsArgs {
   dataViewsService: DataViewsService;
@@ -58,56 +58,64 @@ const getDataViewsRouteFactory =
           type: schema.maybe(schema.string()),
           typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           name: schema.maybe(schema.string()),
+          timeFieldName: schema.maybe(schema.string()),
+          managed: schema.maybe(schema.boolean()),
         })
       );
       return schema.object({ [serviceKey]: dataViewListSchema });
     };
 
-    router.versioned.get({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .get({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {},
-          response: { 200: { body: responseValidation } },
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {},
+            response: { 200: { body: responseValidation } },
+          },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
 
-          const dataViews = await getDataViews({
-            dataViewsService,
-            usageCollection,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataViews = await getDataViews({
+              dataViewsService,
+              usageCollection,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: Record<string, DataViewListItemRestResponse[]> = {
-            [serviceKey]: dataViews,
-          };
+            const body: Record<string, DataViewListItemRestResponse[]> = {
+              [serviceKey]: dataViews,
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          })
+        )
+      );
   };
 
 export const registerGetDataViewsRoute = getDataViewsRouteFactory(

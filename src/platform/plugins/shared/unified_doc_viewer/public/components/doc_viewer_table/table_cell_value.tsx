@@ -15,15 +15,16 @@ import {
   EuiIcon,
   EuiTextColor,
   EuiToolTip,
-  useEuiTheme,
   useResizeObserver,
+  euiFontSize,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import classnames from 'classnames';
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
+export const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 
 // Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
 const expandedFieldValuesSet = new Set<string>();
@@ -111,7 +112,8 @@ export const TableFieldValue = ({
   isDetails,
   isHighlighted,
 }: TableFieldValueProps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
+
   const truncationHeight = DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT;
 
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -152,11 +154,6 @@ export const TableFieldValue = ({
   const shouldTruncate = isCollapsible && isCollapsed;
   const valueElementId = `tableDocViewRow-${field}-value`;
 
-  const valueClasses = classnames('kbnDocViewer__value', {
-    'kbnDocViewer__value--truncated': shouldTruncate,
-    'kbnDocViewer__value--highlighted': isHighlighted && !isDetails,
-  });
-
   return (
     <Fragment>
       {ignoreReason && (
@@ -168,12 +165,7 @@ export const TableFieldValue = ({
       )}
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexStart">
         {isCollapsible && (
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              margin-top: -${euiTheme.size.xxs};
-            `}
-          >
+          <EuiFlexItem grow={false} css={styles.collapseButtonWrapper}>
             <EuiButtonIcon
               iconType={isCollapsed ? 'plusInSquare' : 'minusInSquare'}
               size="xs"
@@ -190,17 +182,12 @@ export const TableFieldValue = ({
         <EuiFlexItem>
           <div
             ref={setContainerRef}
-            className={valueClasses}
-            css={
-              shouldTruncate
-                ? css`
-                    &.kbnDocViewer__value--truncated {
-                      max-height: ${truncationHeight}px;
-                      overflow: hidden;
-                    }
-                  `
-                : undefined
-            }
+            className="kbnDocViewer__value"
+            css={[
+              styles.docViewerValue,
+              isHighlighted && !isDetails && styles.docViewerValueHighlighted,
+              shouldTruncate && styles.docViewerValueTruncated,
+            ]}
             id={valueElementId}
             data-test-subj={valueElementId}
             // Value returned from formatFieldValue is always sanitized
@@ -211,4 +198,35 @@ export const TableFieldValue = ({
       </EuiFlexGroup>
     </Fragment>
   );
+};
+
+const componentStyles = {
+  docViewerValue: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
+      wordBreak: 'break-all',
+      wordWrap: 'break-word',
+      whiteSpace: 'pre-wrap',
+      lineHeight: euiTheme.font.lineHeightMultiplier,
+      verticalAlign: 'top',
+
+      '.euiDataGridRowCell__popover &': {
+        fontSize,
+      },
+    });
+  },
+  docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.bold,
+    }),
+  docViewerValueTruncated: css({
+    overflow: 'hidden',
+    maxHeight: DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT,
+  }),
+  collapseButtonWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginTop: -euiTheme.size.xxs,
+    }),
 };

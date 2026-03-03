@@ -6,18 +6,16 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
-import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
+import { EuiSkeletonText, EuiTreeView } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
+import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
-import { isActiveTimeline } from '../../../../helpers';
+import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { getField } from '../../shared/utils';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -30,27 +28,31 @@ interface Cache {
   statsNodes: StatsNode[];
 }
 
+export interface AnalyzerPreviewProps {
+  /**
+   * The list of indices from the data view, used as fallback if the indices cannot be found in the document data.
+   */
+  dataViewIndices: string[];
+}
+
 /**
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
-export const AnalyzerPreview: React.FC = () => {
+export const AnalyzerPreview = ({ dataViewIndices }: AnalyzerPreviewProps) => {
   const [cache, setCache] = useState<Partial<Cache>>({});
   const {
     dataFormattedForFieldBrowser: data,
     getFieldsData,
-    scopeId,
     eventId,
-    isPreview,
+    isRulePreview,
   } = useDocumentDetailsContext();
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
-  const documentId = isPreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
+  const documentId = isRulePreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);
-  const indices = index?.values ?? selectedPatterns; // adding sourcerer indices for non-alert documents
+  const indices = index?.values ?? dataViewIndices;
 
   const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
-    isActiveTimeline: isActiveTimeline(scopeId),
     documentId,
     indices,
   });
@@ -68,17 +70,30 @@ export const AnalyzerPreview: React.FC = () => {
 
   const showAnalyzerTree = items && items.length > 0 && !error;
 
-  return loading ? (
-    <EuiSkeletonText
-      data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
-      contentAriaLabel={i18n.translate(
-        'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
-        {
-          defaultMessage: 'analyzer preview',
-        }
-      )}
-    />
-  ) : showAnalyzerTree ? (
+  if (loading) {
+    return (
+      <EuiSkeletonText
+        data-test-subj={ANALYZER_PREVIEW_LOADING_TEST_ID}
+        contentAriaLabel={i18n.translate(
+          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel',
+          {
+            defaultMessage: 'analyzer preview',
+          }
+        )}
+      />
+    );
+  }
+
+  if (!showAnalyzerTree) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+        defaultMessage="An error is preventing this alert from being analyzed."
+      />
+    );
+  }
+
+  return (
     <EuiTreeView
       items={items}
       display="compressed"
@@ -90,11 +105,6 @@ export const AnalyzerPreview: React.FC = () => {
       )}
       showExpansionArrows
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
-      defaultMessage="An error is preventing this alert from being analyzed."
     />
   );
 };

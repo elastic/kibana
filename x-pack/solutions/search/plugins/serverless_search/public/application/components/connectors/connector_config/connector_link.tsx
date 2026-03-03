@@ -98,11 +98,12 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
         ) : (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.serverlessSearch.connectors.pleaseSelectServiceType', {
                 defaultMessage: 'Please select a connector type.',
               })}
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
             />
           </EuiFlexItem>
         )}
@@ -111,11 +112,12 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
         (status === ConnectorStatus.CREATED || status === ConnectorStatus.NEEDS_CONFIGURATION) ? (
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.serverlessSearch.connectors.waitingForConnection', {
                 defaultMessage: 'Waiting for connection',
               })}
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
             />
           </EuiFlexItem>
         ) : null}

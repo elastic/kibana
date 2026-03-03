@@ -10,17 +10,17 @@
 import { relative } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 // @ts-expect-error we don't use @types/mocha so it doesn't conflict with @types/jest
 import Mocha from 'mocha';
 
-import { Suite } from '../../fake_mocha_types';
+import type { Suite } from '../../fake_mocha_types';
 import { loadTests } from './load_tests';
 import { filterSuites } from './filter_suites';
-import { Lifecycle } from '../lifecycle';
-import { Config } from '../config';
-import { ProviderCollection } from '../providers';
-import { EsVersion } from '../es_version';
+import type { Lifecycle } from '../lifecycle';
+import type { Config } from '../config';
+import type { ProviderCollection } from '../providers';
+import type { EsVersion } from '../es_version';
 
 import { MochaReporterProvider } from './reporter';
 import { validateCiGroupTags } from './validate_ci_group_tags';
@@ -31,6 +31,7 @@ interface Options {
   config: Config;
   providers: ProviderCollection;
   esVersion: EsVersion;
+  skipRootHooks?: boolean;
   reporter?: any;
   reporterOptions?: any;
 }
@@ -45,12 +46,21 @@ export async function setupMocha({
   config,
   providers,
   esVersion,
+  skipRootHooks,
   reporter,
   reporterOptions,
 }: Options) {
+  const rootHooks = config.get('mochaOpts.rootHooks');
+
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
+    rootHooks: {
+      beforeAll:
+        rootHooks?.beforeAll && !skipRootHooks ? () => rootHooks.beforeAll(providers) : undefined,
+      afterAll:
+        rootHooks?.afterAll && !skipRootHooks ? () => rootHooks.afterAll(providers) : undefined,
+    },
     reporter:
       reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),
     reporterOptions,
@@ -72,7 +82,7 @@ export async function setupMocha({
     paths: config.get('testFiles'),
   });
 
-  // valiate that there aren't any tests in multiple ciGroups
+  // validate that there aren't any tests in multiple ciGroups
   validateCiGroupTags(log, mocha);
 
   filterSuites({

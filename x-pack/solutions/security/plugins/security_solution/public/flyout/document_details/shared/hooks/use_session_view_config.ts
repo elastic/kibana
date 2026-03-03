@@ -6,7 +6,7 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
+import type { SessionViewConfig } from '../../../../../common/types/session_view';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';

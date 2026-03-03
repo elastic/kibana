@@ -7,29 +7,20 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DocumentDetailsContext } from '../../shared/context';
 import { SEVERITY_VALUE_TEST_ID } from './test_ids';
 import { DocumentSeverity } from './severity';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { TestProviders } from '../../../../common/mock';
 
-const renderDocumentSeverity = (contextValue: DocumentDetailsContext) =>
-  render(
-    <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <DocumentSeverity />
-      </DocumentDetailsContext.Provider>
-    </TestProviders>
-  );
-
 describe('<DocumentSeverity />', () => {
   it('should render severity information', () => {
-    const contextValue = {
-      getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-      scopeId: 'scopeId',
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn().mockImplementation(mockGetFieldsData);
 
-    const { getByTestId } = renderDocumentSeverity(contextValue);
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentSeverity getFieldsData={getFieldsData} />
+      </TestProviders>
+    );
 
     const severity = getByTestId(SEVERITY_VALUE_TEST_ID);
     expect(severity).toBeInTheDocument();
@@ -37,34 +28,37 @@ describe('<DocumentSeverity />', () => {
   });
 
   it('should render empty component if missing getFieldsData value', () => {
-    const contextValue = {
-      getFieldsData: jest.fn(),
-      scopeId: 'scopeId',
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn();
 
-    const { container } = renderDocumentSeverity(contextValue);
+    const { container } = render(
+      <TestProviders>
+        <DocumentSeverity getFieldsData={getFieldsData} />
+      </TestProviders>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if getFieldsData is invalid array', () => {
-    const contextValue = {
-      getFieldsData: jest.fn().mockImplementation(() => ['abc']),
-      scopeId: 'scopeId',
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn().mockImplementation(() => ['abc']);
 
-    const { container } = renderDocumentSeverity(contextValue);
+    const { container } = render(
+      <TestProviders>
+        <DocumentSeverity getFieldsData={getFieldsData} />
+      </TestProviders>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if getFieldsData is invalid string', () => {
-    const contextValue = {
-      getFieldsData: jest.fn().mockImplementation(() => 'abc'),
-      scopeId: 'scopeId',
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn().mockImplementation(() => 'abc');
 
-    const { container } = renderDocumentSeverity(contextValue);
+    const { container } = render(
+      <TestProviders>
+        <DocumentSeverity getFieldsData={getFieldsData} />
+      </TestProviders>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });

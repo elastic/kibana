@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -34,6 +34,8 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -44,11 +46,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  useAdditionalCellActions,
-  useProfileAccessor,
-} from '../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
 
 export interface ContextAppContentProps {
@@ -77,7 +75,6 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
 const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
@@ -103,6 +100,20 @@ export function ContextAppContent({
   const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+  const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
+  const docViewerRef = useRef<DocViewerApi>(null);
+
+  const setExpandedDocWithInitialTab = useCallback(
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      setExpandedDoc(doc);
+      setInitialTabId(options?.initialTabId);
+      if (options?.initialTabId) {
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
+      }
+    },
+    []
+  );
+
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -141,10 +152,12 @@ export function ContextAppContent({
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
+        initialTabId={initialTabId}
+        setExpandedDoc={setExpandedDocWithInitialTab}
+        docViewerRef={docViewerRef}
       />
     ),
-    [addFilter, dataView, onAddColumn, onRemoveColumn]
+    [addFilter, dataView, onAddColumn, onRemoveColumn, setExpandedDocWithInitialTab, initialTabId]
   );
 
   const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -204,11 +217,11 @@ export function ContextAppContent({
           isDisabled={isAnchorLoading}
         />
       </WrapperWithPadding>
-      <div className="dscDocsGrid">
+      <div css={dscDocsGridCss}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          <DiscoverGridMemoized
+          <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
-            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             columns={columns}
@@ -223,7 +236,7 @@ export function ContextAppContent({
             isPaginationEnabled={false}
             rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
             controlColumnIds={controlColumnIds}
-            setExpandedDoc={setExpandedDoc}
+            setExpandedDoc={setExpandedDocWithInitialTab}
             onFilter={addFilter}
             onSetColumns={onSetColumns}
             configRowHeight={configRowHeight}
@@ -266,3 +279,8 @@ const WrapperWithPadding: FC<React.PropsWithChildren<{}>> = ({ children }) => {
     </div>
   );
 };
+
+const dscDocsGridCss = css`
+  flex: 1 1 100%;
+  overflow: auto;
+`;

@@ -12,12 +12,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiToolTip,
   EuiLink,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable } from '../../../../services';
@@ -27,10 +28,15 @@ import type { Pagination } from '../../../../hooks';
 import { useAgentVersion } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
-import { AgentPolicySummaryLine } from '../../../../components';
+import { AgentPolicySummaryLine } from '../../../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '../../../../../../../common/services/version_specific_policies_utils';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -74,7 +80,7 @@ interface Props {
     }>
   ) => void;
   clearFilters: () => void;
-  isCurrentRequestIncremented: boolean;
+  queryHasChanged: boolean;
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -95,7 +101,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     isUsingFilter,
     setEnrollmentFlyoutState,
     clearFilters,
-    isCurrentRequestIncremented,
+    queryHasChanged,
   } = props;
 
   const authz = useAuthz();
@@ -108,7 +114,8 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       if (!agent.active) return false;
       if (!agent.policy_id) return true;
 
-      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const basePolicyId = removeVersionSuffixFromPolicyId(agent.policy_id);
+      const agentPolicy = agentPoliciesIndexedById[basePolicyId];
       const isHosted = agentPolicy?.is_managed === true;
       return !isHosted;
     },
@@ -124,7 +131,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
 
   const noItemsMessage =
-    isLoading && isCurrentRequestIncremented ? (
+    isLoading && queryHasChanged ? (
       <FormattedMessage
         id="xpack.fleet.agentList.loadingAgentsMessage"
         defaultMessage="Loading agents…"
@@ -138,7 +145,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             <EuiLink onClick={() => clearFilters()}>
               <FormattedMessage
                 id="xpack.fleet.agentList.clearFiltersLinkText"
-                defaultMessage="Clear filters"
+                defaultMessage="Reset filters"
               />
             </EuiLink>
           ),
@@ -195,31 +202,25 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
-      width: '185px',
+      width: '220px',
       render: (policyId: string, agent: Agent) => {
-        const agentPolicy = agentPoliciesIndexedById[policyId];
-        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
+        const basePolicyId = removeVersionSuffixFromPolicyId(policyId);
+        const agentPolicy = agentPoliciesIndexedById[basePolicyId];
+        const isVersionSpecific = hasVersionSuffix(policyId);
 
         return (
-          <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
-            {agentPolicy && (
-              <EuiFlexItem grow={false}>
-                <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+          agentPolicy && (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} css={{ minWidth: 0 }}>
+              <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={isVersionSpecific}
+                />
               </EuiFlexItem>
-            )}
-            {showWarning && (
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="warning" color="warning" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Outdated policy"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+            </EuiFlexGroup>
+          )
         );
       },
     },
@@ -236,10 +237,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             />
           }
         >
-          <span>
+          <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
-            <EuiIcon type="iInCircle" />
+            <EuiIcon type="info" />
           </span>
         </EuiToolTip>
       ),
@@ -247,7 +248,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (metrics: AgentMetrics | undefined, agent: Agent) =>
         formatAgentCPU(
           agent.metrics,
-          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+          agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined
         ),
     },
     {
@@ -262,10 +265,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             />
           }
         >
-          <span>
+          <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
-            <EuiIcon type="iInCircle" />
+            <EuiIcon type="info" />
           </span>
         </EuiToolTip>
       ),
@@ -273,7 +276,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (metrics: AgentMetrics | undefined, agent: Agent) =>
         formatAgentMemory(
           agent.metrics,
-          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+          agent.policy_id
+            ? agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]
+            : undefined
         ),
     },
     {
@@ -284,7 +289,33 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '100px',
       render: (lastCheckin: string) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : undefined,
+        lastCheckin ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentList.lastActivityTooltip"
+                defaultMessage="Last checked in at {lastCheckin}"
+                values={{
+                  lastCheckin: (
+                    <FormattedDate
+                      value={lastCheckin}
+                      year="numeric"
+                      month="short"
+                      day="2-digit"
+                      timeZoneName="short"
+                      hour="numeric"
+                      minute="numeric"
+                    />
+                  ),
+                }}
+              />
+            }
+          >
+            <span tabIndex={0}>
+              <FormattedRelative value={lastCheckin} />
+            </span>
+          </EuiToolTip>
+        ) : undefined,
     },
     {
       field: AGENTS_TABLE_FIELDS.VERSION,
@@ -294,7 +325,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            min-width: 0;
+          `}
+          direction="column"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
               <EuiFlexItem grow={false}>
@@ -331,6 +368,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     <EuiBasicTable<Agent>
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
+      tableCaption={i18n.translate('xpack.fleet.agentList.tableCaption', {
+        defaultMessage: 'Fleet agents',
+      })}
       loading={isLoading}
       noItemsMessage={noItemsMessage}
       items={agentsShown}

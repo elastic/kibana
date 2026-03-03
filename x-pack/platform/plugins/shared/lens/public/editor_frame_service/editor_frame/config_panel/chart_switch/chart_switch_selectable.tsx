@@ -5,13 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiSelectable,
-  EuiPopoverTitle,
-  EuiSelectableOption,
-  EuiSelectableProps,
-  IconType,
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps, IconType } from '@elastic/eui';
+import { EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -44,6 +39,9 @@ export const ChartSwitchSelectable = ({
       isPreFiltered
       data-test-subj="lnsChartSwitchList"
       className="lnsChartSwitch__options"
+      css={css`
+        width: 384px;
+      `}
       height={computeListHeight(props.options as SelectableEntry[])}
       searchProps={{
         compressed: true,
@@ -51,6 +49,9 @@ export const ChartSwitchSelectable = ({
         inputRef: (ref) => {
           ref?.focus({ preventScroll: true });
         },
+        css: css`
+          width: 400px;
+        `,
         className: 'lnsChartSwitch__search',
         'data-test-subj': 'lnsChartSwitchSearch',
         onChange: setSearchTerm,

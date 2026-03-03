@@ -32,6 +32,8 @@
           ") => Promise<string>"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+            "lineNumber": 90,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,6 +93,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,6 +115,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+            "lineNumber": 29,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +133,7 @@
         "label": "resolveProviderAndModel",
         "description": [],
         "signature": [
-          "({ providedProvider, providedModel, connectorId, actionsClient, providedConnector, }: { providedProvider?: string | undefined; providedModel?: string | undefined; connectorId: string; actionsClient: ",
+          "({ providedProvider, providedModel, connectorId, actionsClient, providedConnector, }: { providedProvider?: string | undefined; providedModel?: string | undefined; connectorId?: string | undefined; actionsClient?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -141,11 +149,19 @@
             "section": "def-server.ActionsClient",
             "text": "ActionsClient"
           },
-          ">; providedConnector?: ",
-          "Connector",
+          "> | undefined; providedConnector?: ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.Connector",
+            "text": "Connector"
+          },
           " | undefined; }) => Promise<{ provider?: string | undefined; model?: string | undefined; }>"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+        "lineNumber": 132,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +173,8 @@
             "label": "{\n  providedProvider,\n  providedModel,\n  connectorId,\n  actionsClient,\n  providedConnector,\n}",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+            "lineNumber": 138,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -171,6 +189,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "lineNumber": 139,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -185,6 +205,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "lineNumber": 140,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -195,7 +217,12 @@
                 "tags": [],
                 "label": "connectorId",
                 "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "lineNumber": 141,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -207,81 +234,26 @@
                 "label": "actionsClient",
                 "description": [],
                 "signature": [
-                  "{ execute: (connectorExecuteParams: ",
-                  "ConnectorExecuteParams",
-                  ") => Promise<",
                   {
-                    "pluginId": "actions",
+                    "pluginId": "@kbn/utility-types",
                     "scope": "common",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-common.ActionTypeExecutorResult",
-                    "text": "ActionTypeExecutorResult"
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.PublicMethodsOf",
+                    "text": "PublicMethodsOf"
                   },
-                  "<unknown>>; create: ({ action, options, }: Omit<",
-                  "ConnectorCreateParams",
-                  ", \"context\">) => Promise<",
-                  "Connector",
-                  ">; update: ({ id, action, }: Pick<",
-                  "ConnectorUpdateParams",
-                  ", \"id\" | \"action\">) => Promise<",
-                  "Connector",
-                  ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-                  "Connector",
-                  ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
+                  "<",
                   {
                     "pluginId": "actions",
                     "scope": "server",
                     "docId": "kibActionsPluginApi",
-                    "section": "def-server.ConnectorWithExtraFindData",
-                    "text": "ConnectorWithExtraFindData"
+                    "section": "def-server.ActionsClient",
+                    "text": "ActionsClient"
                   },
-                  "[]>; getAllSystemConnectors: () => Promise<",
-                  {
-                    "pluginId": "actions",
-                    "scope": "server",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-server.ConnectorWithExtraFindData",
-                    "text": "ConnectorWithExtraFindData"
-                  },
-                  "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-                  "Connector",
-                  "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
-                  "ActionsConfigurationUtilities",
-                  ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
-                  "ExecuteOptions",
-                  "[]) => Promise<",
-                  "ExecutionResponse",
-                  ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
-                  "ListTypesParams",
-                  ") => Promise<",
-                  "ConnectorType",
-                  "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
-                  {
-                    "pluginId": "actions",
-                    "scope": "common",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-common.GetGlobalExecutionLogParams",
-                    "text": "GetGlobalExecutionLogParams"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "actions",
-                    "scope": "common",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-common.IExecutionLogResult",
-                    "text": "IExecutionLogResult"
-                  },
-                  ">; getGlobalExecutionKpiWithAuth: ({ dateStart, dateEnd, filter, namespaces, }: ",
-                  {
-                    "pluginId": "actions",
-                    "scope": "common",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-common.GetGlobalExecutionKPIParams",
-                    "text": "GetGlobalExecutionKPIParams"
-                  },
-                  ") => Promise<{ success: number; unknown: number; failure: number; warning: number; }>; }"
+                  "> | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "lineNumber": 142,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -293,10 +265,18 @@
                 "label": "providedConnector",
                 "description": [],
                 "signature": [
-                  "Connector",
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.Connector",
+                    "text": "Connector"
+                  },
                   " | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "lineNumber": 143,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -316,6 +296,8 @@
         "label": "GetPromptArgs",
         "description": [],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -327,81 +309,26 @@
             "label": "actionsClient",
             "description": [],
             "signature": [
-              "{ execute: (connectorExecuteParams: ",
-              "ConnectorExecuteParams",
-              ") => Promise<",
               {
-                "pluginId": "actions",
+                "pluginId": "@kbn/utility-types",
                 "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.ActionTypeExecutorResult",
-                "text": "ActionTypeExecutorResult"
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
               },
-              "<unknown>>; create: ({ action, options, }: Omit<",
-              "ConnectorCreateParams",
-              ", \"context\">) => Promise<",
-              "Connector",
-              ">; update: ({ id, action, }: Pick<",
-              "ConnectorUpdateParams",
-              ", \"id\" | \"action\">) => Promise<",
-              "Connector",
-              ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-              "Connector",
-              ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
+              "<",
               {
                 "pluginId": "actions",
                 "scope": "server",
                 "docId": "kibActionsPluginApi",
-                "section": "def-server.ConnectorWithExtraFindData",
-                "text": "ConnectorWithExtraFindData"
+                "section": "def-server.ActionsClient",
+                "text": "ActionsClient"
               },
-              "[]>; getAllSystemConnectors: () => Promise<",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ConnectorWithExtraFindData",
-                "text": "ConnectorWithExtraFindData"
-              },
-              "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-              "Connector",
-              "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
-              "ActionsConfigurationUtilities",
-              ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
-              "ExecuteOptions",
-              "[]) => Promise<",
-              "ExecutionResponse",
-              ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
-              "ListTypesParams",
-              ") => Promise<",
-              "ConnectorType",
-              "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
-              {
-                "pluginId": "actions",
-                "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.GetGlobalExecutionLogParams",
-                "text": "GetGlobalExecutionLogParams"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "actions",
-                "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.IExecutionLogResult",
-                "text": "IExecutionLogResult"
-              },
-              ">; getGlobalExecutionKpiWithAuth: ({ dateStart, dateEnd, filter, namespaces, }: ",
-              {
-                "pluginId": "actions",
-                "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.GetGlobalExecutionKPIParams",
-                "text": "GetGlobalExecutionKPIParams"
-              },
-              ") => Promise<{ success: number; unknown: number; failure: number; warning: number; }>; }"
+              "> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -413,10 +340,18 @@
             "label": "connector",
             "description": [],
             "signature": [
-              "Connector",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.Connector",
+                "text": "Connector"
+              },
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -427,7 +362,12 @@
             "tags": [],
             "label": "connectorId",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -449,6 +389,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -463,6 +405,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -474,6 +418,8 @@
             "label": "promptId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -485,6 +431,8 @@
             "label": "promptGroupId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -499,6 +447,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -513,6 +463,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -545,6 +497,8 @@
           ", \"promptId\">"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -556,6 +510,8 @@
             "label": "promptGroupId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -570,6 +526,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -584,6 +542,8 @@
         "label": "Prompt",
         "description": [],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,6 +555,8 @@
             "label": "promptId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,6 +568,8 @@
             "label": "promptGroupId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,6 +584,8 @@
               "{ default: string; }"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,6 +600,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -648,6 +616,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,6 +632,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -682,6 +654,8 @@
           "{ promptId: string; prompt: string; }[]"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -696,6 +670,8 @@
         "label": "promptType",
         "description": [],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -707,6 +683,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -721,6 +699,8 @@
               "false"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,6 +712,8 @@
             "label": "management",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -746,6 +728,8 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -760,6 +744,8 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -776,6 +762,8 @@
               "\"agnostic\""
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -790,6 +778,8 @@
               "SavedObjectsTypeMappingDefinition"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -184,7 +184,7 @@ export class CreateSourceEditor extends Component {
     let callout;
     if (this.state.indexPattern && !this.state.indexPatternHasMultipleGeoFields) {
       callout = (
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount={false} color="warning">
           <p>
             <FormattedMessage
               id="xpack.maps.source.pewPew.noSourceAndDestDetails"

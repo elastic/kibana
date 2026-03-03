@@ -18,10 +18,13 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-
+import type {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 import type { AutomaticImportPluginSetup } from '@kbn/automatic-import-plugin/server';
+import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -42,9 +45,11 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   cloud: CloudSetup;
   actions: ActionsPluginSetupContract;
   automaticImport?: AutomaticImportPluginSetup;
+  usageApi?: UsageApiSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
+  actions: ActionsPluginStartContract;
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   features: FeaturesPluginStart;

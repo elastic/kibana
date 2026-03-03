@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisParams } from '@kbn/visualizations-common';
 import type { SerializedVis } from './vis';
-import type { VisParams } from '../common';
 
 export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   visType: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
-  // Build optimization. Move app styles from main bundle
-  // @ts-expect-error TS error, cannot find type declaration for scss
-  await import('./vis.scss');
-
   const { Vis } = await import('./vis');
   const vis = new Vis(visType, visState);
 

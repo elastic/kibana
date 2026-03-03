@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { MapAttributes } from '../../../../server';
 import { getData } from '../../../kibana_services';
-import { MapsAppState } from '../url_state';
-import { ParsedMapStateJSON } from './types';
+import type { MapsAppState } from '../url_state';
 
 export function getInitialQuery({
   mapState,
   appState = {},
 }: {
-  mapState?: ParsedMapStateJSON;
+  mapState?: MapAttributes;
   appState: MapsAppState;
 }) {
   if (appState.query) {

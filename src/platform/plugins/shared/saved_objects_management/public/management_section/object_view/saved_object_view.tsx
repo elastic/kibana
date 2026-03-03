@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   Capabilities,
   OverlayStart,
   NotificationsStart,
@@ -23,10 +23,10 @@ import {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { css } from '@emotion/react';
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkDeleteObjects, bulkGetObjects } from '../../lib';
-import { SavedObjectWithMetadata } from '../../types';
-import './saved_object_view.scss';
+import type { SavedObjectWithMetadata } from '../../types';
 
 export interface SavedObjectEditionProps {
   id: string;
@@ -103,11 +103,7 @@ export class SavedObjectEdition extends Component<
     const canView = this.canViewInApp(capabilities, object);
     return (
       <KibanaContextProvider services={{ uiSettings, settings, theme }}>
-        <EuiFlexGroup
-          direction="column"
-          data-test-subject="savedObjectsEdit"
-          className="savedObjectsManagementObjectView"
-        >
+        <EuiFlexGroup direction="column" data-test-subject="savedObjectsEdit" css={styles}>
           <EuiFlexItem grow={false}>
             <Header
               canDelete={canDelete && !object?.meta.hiddenType}
@@ -195,3 +191,7 @@ export class SavedObjectEdition extends Component<
     this.props.history.push('/');
   }
 }
+
+const styles = css({
+  height: '100%',
+});

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { schema } from '@kbn/config-schema';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -23,6 +23,12 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
           index: schema.maybe(schema.string()),
           field: schema.maybe(schema.string()),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization check to es.',
+        },
       },
     },
     async (context, request, response) => {

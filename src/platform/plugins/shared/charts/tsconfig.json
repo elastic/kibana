@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -14,7 +14,6 @@
     "@kbn/i18n-react",
     "@kbn/ui-theme",
     "@kbn/shared-ux-utility",
-    "@kbn/config-schema",
     "@kbn/data-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/palettes",

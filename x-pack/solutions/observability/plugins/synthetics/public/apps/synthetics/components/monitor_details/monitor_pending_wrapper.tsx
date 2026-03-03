@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useRef, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -70,7 +71,7 @@ export const MonitorPendingWrapper: FC<PropsWithChildren<unknown>> = ({ children
       ) : null}
       {loaded && !hasPing ? (
         <PageLoader
-          icon={<EuiLoadingChart size="xl" mono />}
+          icon={<EuiLoadingChart size="xl" />}
           title={<h3>{MONITOR_PENDING_HEADING}</h3>}
           body={<p>{MONITOR_PENDING_CONTENT}</p>}
         />

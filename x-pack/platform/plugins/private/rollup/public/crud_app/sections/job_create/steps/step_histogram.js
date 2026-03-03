@@ -25,7 +25,7 @@ import { documentationLinks } from '../../../services/documentation_links';
 
 import { FieldList } from '../../components';
 
-import { FieldChooser, StepError } from './components';
+import { FieldChooser, StepError, JobWizardStepAction } from './components';
 
 export class StepHistogram extends Component {
   static propTypes = {
@@ -93,13 +93,13 @@ export class StepHistogram extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
+          <JobWizardStepAction>
             <EuiButtonEmpty
               size="s"
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateHistogramDocsButton"
             >
               <FormattedMessage
@@ -107,7 +107,7 @@ export class StepHistogram extends Component {
                 defaultMessage="Histogram docs"
               />
             </EuiButtonEmpty>
-          </EuiFlexItem>
+          </JobWizardStepAction>
         </EuiFlexGroup>
 
         <EuiSpacer />

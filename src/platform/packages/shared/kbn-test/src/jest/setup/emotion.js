@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSerializer } from '@emotion/jest';
+import { createSerializer, matchers } from '@emotion/jest';
 import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
+
+// Add the custom matchers provided by '@emotion/jest'
+// eslint-disable-next-line no-undef
+expect.extend(matchers);
 
 module.exports = createSerializer({
   classNameReplacer: replaceEmotionPrefix,
@@ -35,6 +39,20 @@ console.error = (message, ...rest) => {
   if (
     typeof message === 'object' &&
     message?.message?.startsWith('Could not parse CSS stylesheet')
+  ) {
+    return;
+  }
+  // @see https://github.com/jsdom/jsdom/issues/3597
+  // @see https://github.com/jsdom/jsdom/issues/3858
+  // jsdom 20.0.1 (our current version) fails to parse @container queries, causing console errors.
+  // Parsing was fixed in jsdom 24.1.0+ (May 2024), but actual container query evaluation
+  // is still not implemented (issue #3858 remains open). For tests, this is acceptable since
+  // container queries are progressive enhancement and don't affect test functionality.
+  // TODO: Remove this suppression after upgrading jsdom to 24.1.0+ (eliminates parse errors)
+  if (
+    typeof message === 'string' &&
+    message.includes('There was a problem inserting the following rule') &&
+    message.includes('@container')
   ) {
     return;
   }

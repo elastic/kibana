@@ -8,14 +8,14 @@ exports[`<Toolbar /> is rendered 1`] = `
     class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary-ToolbarStandardButton"
       type="button"
     >
       <span
         class="emotion-euiButtonDisplayContent"
       >
         <span
-          class="eui-textTruncate"
+          class="eui-textTruncate css-13ifi6d-m"
         >
           Create chart
         </span>

@@ -8,14 +8,18 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ImportSummary, ImportSummaryProps } from './import_summary';
-import { FailedImport } from '../../../lib';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ImportSummaryProps } from './import_summary';
+import { ImportSummary } from './import_summary';
+import type { FailedImport } from '../../../lib';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
+  type PrependType = jest.MockInstance<string, [url: string], unknown> & ((url: string) => string);
 
   const getProps = (parts: Partial<ImportSummaryProps>): ImportSummaryProps => ({
     basePath,
@@ -44,13 +48,13 @@ describe('ImportSummary', () => {
 
   const findHeader = (wrapper: ReactWrapper) => wrapper.find('h3');
   const findCountCreated = (wrapper: ReactWrapper) =>
-    wrapper.find('h4.savedObjectsManagementImportSummary__createdCount');
+    wrapper.find('h4[data-test-subj="importSavedObjectsCreatedCount"]');
   const findCountOverwritten = (wrapper: ReactWrapper) =>
-    wrapper.find('h4.savedObjectsManagementImportSummary__overwrittenCount');
+    wrapper.find('h4[data-test-subj="importSavedObjectsOverwrittenCount"]');
   const findCountError = (wrapper: ReactWrapper) =>
-    wrapper.find('h4.savedObjectsManagementImportSummary__errorCount');
+    wrapper.find('h4[data-test-subj="importSavedObjectsErrorsCount"]');
   const findObjectRow = (wrapper: ReactWrapper) =>
-    wrapper.find('.savedObjectsManagementImportSummary__row').hostNodes();
+    wrapper.find('[data-test-subj="importSavedObjectsRow"]').hostNodes();
   const findWarnings = (wrapper: ReactWrapper) => wrapper.find('ImportWarning');
 
   it('should render as expected with no results', async () => {
@@ -173,5 +177,62 @@ describe('ImportSummary', () => {
     const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findWarnings(wrapper)).toHaveLength(2);
+  });
+
+  it('should use /app/rules actionPath when rules app is registered', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.application.isAppRegistered = jest.fn().mockReturnValue(true);
+    basePath.prepend = ((path: string) => path) as PrependType;
+
+    const props = getProps({
+      successfulImports: [successNew],
+      importWarnings: [
+        {
+          type: 'action_required',
+          message: 'Rules need to be enabled',
+          actionPath: '/app/management/insightsAndAlerting/triggersActions/rules',
+        },
+      ],
+    });
+
+    const wrapper = mountWithI18nProvider(
+      <KibanaContextProvider services={coreStart}>
+        <ImportSummary {...props} />
+      </KibanaContextProvider>
+    );
+
+    const button = wrapper.find('EuiButton[data-test-subj="warningActionButton"]');
+    expect(button).toHaveLength(1);
+    expect(button.prop('href')).toBe('/app/rules');
+    expect(coreStart.application.isAppRegistered).toHaveBeenCalledWith('rules');
+  });
+
+  it('should use original actionPath when rules app is not registered', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.application.isAppRegistered = jest.fn().mockReturnValue(false);
+    basePath.prepend = ((path: string) => path) as PrependType;
+
+    const originalActionPath = '/app/management/insightsAndAlerting/triggersActions/rules';
+    const props = getProps({
+      successfulImports: [successNew],
+      importWarnings: [
+        {
+          type: 'action_required',
+          message: 'Rules need to be enabled',
+          actionPath: originalActionPath,
+        },
+      ],
+    });
+
+    const wrapper = mountWithI18nProvider(
+      <KibanaContextProvider services={coreStart}>
+        <ImportSummary {...props} />
+      </KibanaContextProvider>
+    );
+
+    const button = wrapper.find('EuiButton[data-test-subj="warningActionButton"]');
+    expect(button).toHaveLength(1);
+    expect(button.prop('href')).toBe(originalActionPath);
+    expect(coreStart.application.isAppRegistered).toHaveBeenCalledWith('rules');
   });
 });

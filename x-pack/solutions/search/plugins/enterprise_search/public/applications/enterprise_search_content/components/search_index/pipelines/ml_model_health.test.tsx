@@ -14,7 +14,8 @@ import { shallow } from 'enzyme';
 import { EuiHealth } from '@elastic/eui';
 
 import { MlModelDeploymentState } from '../../../../../../common/types/ml';
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { TrainedModelHealth } from './ml_model_health';
 

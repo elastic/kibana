@@ -10,8 +10,8 @@ import moment from 'moment';
 import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
 import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
-import { TimeUnit } from './datetime';
-import { Maybe } from '../../typings';
+import type { TimeUnit } from './datetime';
+import type { Maybe } from '../../typings';
 import { isFiniteNumber } from '../is_finite_number';
 
 interface FormatterOptions {

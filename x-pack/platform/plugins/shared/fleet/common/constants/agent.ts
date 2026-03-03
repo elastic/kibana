@@ -10,6 +10,7 @@ export const AGENTS_PREFIX = 'fleet-agents';
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
+export const AGENT_TYPE_OPAMP = 'OPAMP';
 
 export const AGENT_POLLING_REQUEST_TIMEOUT_MS = 300000; // 5 minutes
 export const AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS = 20000; // 20s
@@ -64,3 +65,13 @@ export const ActiveAgentStatuses = [
 // Privileged is `not` because the metadata field can be undefined
 export const UNPRIVILEGED_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
 export const PRIVILEGED_AGENT_KUERY = `not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
+
+// Kuery to find fips agents
+export const FIPS_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.fips: true`;
+
+export const AGENT_STATUS_CHANGE_DATA_STREAM = {
+  type: 'logs',
+  dataset: 'elastic_agent.status_change',
+  namespace: 'default',
+};
+export const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;

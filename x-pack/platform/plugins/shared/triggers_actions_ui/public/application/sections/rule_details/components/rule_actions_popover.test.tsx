@@ -8,13 +8,16 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
 import { RuleActionsPopover } from './rule_actions_popover';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Rule } from '../../../..';
+import type { Rule } from '../../../..';
+import userEvent from '@testing-library/user-event';
 
 describe('rule_actions_popover', () => {
   const onDeleteMock = jest.fn();
   const onApiKeyUpdateMock = jest.fn();
   const onEnableDisableMock = jest.fn();
+  const onSnoozeMock = jest.fn();
   const onRunRuleMock = jest.fn();
+  const onEditMock = jest.fn();
 
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
@@ -53,9 +56,13 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -67,6 +74,7 @@ describe('rule_actions_popover', () => {
     expect(screen.getByText('Delete rule')).toBeInTheDocument();
     expect(screen.getByText('Disable')).toBeInTheDocument();
     expect(screen.getByText('Run rule')).toBeInTheDocument();
+    expect(screen.getByText('Manage snooze notifications')).toBeInTheDocument();
   });
 
   it('calls onDelete', async () => {
@@ -77,9 +85,13 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -106,9 +118,13 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -126,6 +142,7 @@ describe('rule_actions_popover', () => {
       expect(screen.queryByText('Disable')).not.toBeInTheDocument();
     });
   });
+
   it('enables the rule', async () => {
     const rule = mockRule({ enabled: false });
     render(
@@ -134,9 +151,13 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -163,9 +184,13 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -192,9 +217,13 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
@@ -213,7 +242,7 @@ describe('rule_actions_popover', () => {
     });
   });
 
-  it('disables buttons when the user does not have enough permission', async () => {
+  it('should render update API key panel item only when isInternallyManaged is true', async () => {
     const rule = mockRule();
     render(
       <IntlProvider locale="en">
@@ -221,20 +250,78 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={false}
           onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
           onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={true}
+        />
+      </IntlProvider>
+    );
+
+    const actionButton = await screen.findByTestId('ruleActionsButton');
+    userEvent.click(actionButton);
+
+    expect(await screen.findByTestId('updateAPIKeyButtonInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('snoozeRuleButtonInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('disableButtonInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('disableButton')).toBeNull();
+    expect(screen.queryByTestId('runRuleButton')).toBeNull();
+    expect(screen.queryByTestId('deleteRuleButton')).toBeNull();
+  });
+
+  it('calls onSnooze when Snooze is clicked', async () => {
+    const rule = mockRule();
+    render(
+      <IntlProvider locale="en">
+        <RuleActionsPopover
+          rule={rule}
+          onDelete={onDeleteMock}
+          onApiKeyUpdate={onApiKeyUpdateMock}
+          onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
+          onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
         />
       </IntlProvider>
     );
 
     const actionButton = screen.getByTestId('ruleActionsButton');
-    expect(actionButton).toBeInTheDocument();
     fireEvent.click(actionButton);
 
-    expect(screen.getByText('Delete rule').closest('button')).toBeDisabled();
-    expect(screen.getByText('Update API key').closest('button')).toBeDisabled();
-    expect(screen.getByText('Disable').closest('button')).toBeDisabled();
-    expect(screen.getByText('Run rule').closest('button')).toBeDisabled();
+    const snoozeButton = screen.getByText('Manage snooze notifications');
+    fireEvent.click(snoozeButton);
+
+    expect(onSnoozeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders static snooze label when rule is snoozed', async () => {
+    const rule = mockRule({ isSnoozedUntil: new Date(Date.now() + 60_000) });
+    render(
+      <IntlProvider locale="en">
+        <RuleActionsPopover
+          rule={rule}
+          onDelete={onDeleteMock}
+          onApiKeyUpdate={onApiKeyUpdateMock}
+          onEnableDisable={onEnableDisableMock}
+          onSnooze={onSnoozeMock}
+          onRunRule={onRunRuleMock}
+          onEdit={onEditMock}
+          canEdit={true}
+          isEditDisabled={false}
+          isInternallyManaged={false}
+        />
+      </IntlProvider>
+    );
+
+    const actionButton = screen.getByTestId('ruleActionsButton');
+    fireEvent.click(actionButton);
+
+    expect(screen.getByText('Manage snooze notifications')).toBeInTheDocument();
   });
 });

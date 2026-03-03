@@ -6,7 +6,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { Reducer, useEffect, useReducer, useRef } from 'react';
+import type { Reducer } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { executeAction } from '../lib/action_connector_api';
 

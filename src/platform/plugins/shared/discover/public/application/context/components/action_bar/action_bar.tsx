@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_action_bar.scss';
 import React, { useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -18,7 +18,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
@@ -69,6 +72,8 @@ export function ActionBar({
   onChangeCount,
   type,
 }: ActionBarProps) {
+  const styles = useMemoCss(componentStyles);
+
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === SurrDocType.SUCCESSORS;
   const [newDocCount, setNewDocCount] = useState(docCount);
@@ -121,7 +126,7 @@ export function ActionBar({
                     })
               }
               compressed
-              className="cxtSizePicker"
+              css={styles.cxtSizePicker}
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
               min={MIN_CONTEXT_SIZE}
@@ -161,3 +166,16 @@ export function ActionBar({
     </form>
   );
 }
+
+const componentStyles = {
+  cxtSizePicker: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      textAlign: 'center',
+      width: `calc(${euiTheme.size.base} * 5)`,
+
+      '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+        appearance: 'none', // Hide increment and decrement buttons for type="number" input.
+        margin: 0,
+      },
+    }),
+};

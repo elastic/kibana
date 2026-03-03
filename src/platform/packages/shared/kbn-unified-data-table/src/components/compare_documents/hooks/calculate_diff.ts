@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { diffChars, diffJson, diffLines, diffWords } from 'diff';
+import { diffChars, diffJson, diffLines, diffWordsWithSpace } from 'diff';
 import type { DocumentDiffMode } from '../types';
 
 export interface CalculateDiffProps {
@@ -38,11 +38,11 @@ export const calculateDiff = ({ diffMode, baseValue, comparisonValue }: Calculat
   }
 
   if (diffMode === 'words') {
-    return diffWords(formattedBaseValue, formattedComparisonValue, { ignoreWhitespace: false });
+    return diffWordsWithSpace(formattedBaseValue, formattedComparisonValue);
   }
 
   return baseValueIsJson && comparisonValueIsJson
-    ? diffJson(formattedBaseValue, formattedComparisonValue, { ignoreWhitespace: false })
+    ? diffJson(formattedBaseValue, formattedComparisonValue)
     : diffLines(formattedBaseValue, formattedComparisonValue, { ignoreWhitespace: false });
 };
 

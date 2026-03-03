@@ -7,7 +7,7 @@
 
 import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { AssetTypeRT } from '../shared/asset_type';
+import { EntityTypeRT, DataSchemaFormatRT } from '../shared';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
@@ -22,26 +22,27 @@ export const InfraMetricTypeRT = rt.keyof({
   txV2: null,
 });
 
-export const InfraAssetMetadataTypeRT = rt.keyof({
+export const InfraEntityMetadataTypeRT = rt.keyof({
   'cloud.provider': null,
   'host.ip': null,
   'host.os.name': null,
 });
 
-export const InfraAssetMetricsRT = rt.type({
+export const InfraEntityMetricsRT = rt.type({
   name: InfraMetricTypeRT,
   value: rt.union([rt.number, rt.null]),
 });
 
-export const InfraAssetMetadataRT = rt.type({
+export const InfraEntityMetadataRT = rt.type({
   // keep the actual field name from the index mappings
-  name: InfraAssetMetadataTypeRT,
+  name: InfraEntityMetadataTypeRT,
   value: rt.union([rt.number, rt.string, rt.null]),
 });
 
 export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
+    schema: DataSchemaFormatRT,
   }),
   rt.type({
     limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
@@ -51,13 +52,13 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   }),
 ]);
 
-export const GetInfraMetricsRequestParamsRT = AssetTypeRT;
+export const GetInfraMetricsRequestParamsRT = EntityTypeRT;
 
-export const InfraAssetMetricsItemRT = rt.intersection([
+export const InfraEntityMetricsItemRT = rt.intersection([
   rt.type({
     name: rt.string,
-    metrics: rt.array(InfraAssetMetricsRT),
-    metadata: rt.array(InfraAssetMetadataRT),
+    metrics: rt.array(InfraEntityMetricsRT),
+    metadata: rt.array(InfraEntityMetadataRT),
     hasSystemMetrics: rt.boolean,
   }),
   rt.partial({
@@ -66,17 +67,17 @@ export const InfraAssetMetricsItemRT = rt.intersection([
 ]);
 
 export const GetInfraMetricsResponsePayloadRT = rt.intersection([
-  AssetTypeRT,
+  EntityTypeRT,
   rt.type({
-    nodes: rt.array(InfraAssetMetricsItemRT),
+    nodes: rt.array(InfraEntityMetricsItemRT),
   }),
 ]);
 
-export type InfraAssetMetrics = rt.TypeOf<typeof InfraAssetMetricsRT>;
-export type InfraAssetMetadata = rt.TypeOf<typeof InfraAssetMetadataRT>;
-export type InfraAssetMetadataType = rt.TypeOf<typeof InfraAssetMetadataTypeRT>;
-export type InfraAssetMetricType = rt.TypeOf<typeof InfraMetricTypeRT>;
-export type InfraAssetMetricsItem = rt.TypeOf<typeof InfraAssetMetricsItemRT>;
+export type InfraEntityMetrics = rt.TypeOf<typeof InfraEntityMetricsRT>;
+export type InfraEntityMetadata = rt.TypeOf<typeof InfraEntityMetadataRT>;
+export type InfraEntityMetadataType = rt.TypeOf<typeof InfraEntityMetadataTypeRT>;
+export type InfraEntityMetricType = rt.TypeOf<typeof InfraMetricTypeRT>;
+export type InfraEntityMetricsItem = rt.TypeOf<typeof InfraEntityMetricsItemRT>;
 
 export type GetInfraMetricsRequestBodyPayload = rt.TypeOf<
   typeof GetInfraMetricsRequestBodyPayloadRT

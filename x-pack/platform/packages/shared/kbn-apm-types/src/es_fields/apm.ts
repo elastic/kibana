@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const ID = '_id';
 
 export const TIMESTAMP_US = 'timestamp.us';
 export const AT_TIMESTAMP = '@timestamp';
@@ -57,7 +58,7 @@ export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 export const PROCESSOR_NAME = 'processor.name';
 
-export const TRANSACTION_AGENT_MARKS = 'transaction.agent.marks';
+export const TRANSACTION_MARKS_AGENT = 'transaction.marks.agent';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
@@ -73,6 +74,9 @@ export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_coun
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
+
+// OTel field to link profiling and APM
+export const ELASTIC_PROFILER_STACK_TRACE_IDS = 'elastic.profiler_stack_trace_ids';
 
 export const EVENT_OUTCOME = 'event.outcome';
 
@@ -119,6 +123,7 @@ export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
 export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_TYPE = 'error.type';
+export const ERROR_CODE = 'error.code';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -160,6 +165,7 @@ export const CONTAINER_IMAGE = 'container.image.name';
 
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_POD_NAME_OTEL = 'k8s.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
@@ -180,6 +186,7 @@ export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
 export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';
 
+// OTel JVM metrics - experimental semconv (process.runtime.jvm.*)
 export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT = 'process.runtime.jvm.cpu.utilization';
 export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE = 'process.runtime.jvm.memory.usage';
 export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED = 'process.runtime.jvm.memory.committed';
@@ -187,17 +194,39 @@ export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT = 'process.runtime.jvm.memory.
 export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT = 'process.runtime.jvm.threads.count';
 export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cpu.utilization';
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
-export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
-export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+
+// OTel JVM metrics - stable semconv (jvm.*)
+// https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/
+export const METRIC_OTEL_JVM_CPU_PERCENT = 'metrics.jvm.cpu.recent_utilization';
+export const METRIC_OTEL_JVM_MEMORY_USED = 'metrics.jvm.memory.used';
+export const METRIC_OTEL_JVM_MEMORY_COMMITTED = 'metrics.jvm.memory.committed';
+export const METRIC_OTEL_JVM_MEMORY_LIMIT = 'metrics.jvm.memory.limit';
+export const METRIC_OTEL_JVM_THREAD_COUNT = 'metrics.jvm.thread.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU = 'metrics.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION_SECONDS = 'metrics.jvm.gc.duration';
+// OTel native ingest (EDOT Collector → ES) stores as attributes.*
+export const ATTRIBUTE_OTEL_JVM_MEMORY_TYPE = 'attributes.jvm.memory.type';
+// APM Server ingest (OTel SDK → APM Server → ES) stores as labels.* with dots → underscores
+// See: https://www.elastic.co/docs/solutions/observability/apm/opentelemetry/attributes
+export const LABEL_OTEL_JVM_MEMORY_TYPE = 'labels.jvm_memory_type';
+export const VALUE_OTEL_JVM_MEMORY_TYPE_HEAP = 'heap';
+export const VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP = 'non_heap';
+
 // OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
-// OpenTelemetry span links
+// OpenTelemetry semconv fields for HTTP server https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-semantic-conventions
+export const URL_PATH = 'url.path';
+export const URL_SCHEME = 'url.scheme';
+export const SERVER_ADDRESS = 'server.address';
+export const SERVER_PORT = 'server.port';
 
-export const LINKS_SPAN_ID = 'links.span_id';
-export const LINKS_TRACE_ID = 'links.trace_id';
+// OpenTelemetry span links
+export const OTEL_SPAN_LINKS = 'links';
+export const OTEL_SPAN_LINKS_SPAN_ID = 'links.span_id';
+export const OTEL_SPAN_LINKS_TRACE_ID = 'links.trace_id';
 
 // Metadata
 export const TIER = '_tier';

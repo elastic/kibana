@@ -10,9 +10,9 @@ import { ContainerMetrics } from './container_metrics';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 export const Metrics = () => {
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
 
-  switch (asset.type) {
+  switch (entity.type) {
     case 'host':
       return <HostMetrics />;
     case 'container':

@@ -158,6 +158,7 @@ export function transformRuleType(input: AsApiContract<RuleType>): RuleType {
     is_exportable: isExportable,
     authorized_consumers: authorizedConsumers,
     enabled_in_license: enabledInLicense,
+    auto_recover_alerts: autoRecoverAlerts,
     ...rest
   } = input;
 
@@ -171,6 +172,7 @@ export function transformRuleType(input: AsApiContract<RuleType>): RuleType {
     isExportable,
     authorizedConsumers,
     enabledInLicense,
+    autoRecoverAlerts,
     ...rest,
   };
 }

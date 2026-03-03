@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UnionToIntersection } from '@kbn/utility-types';
-import { KibanaRequest } from '@kbn/core/server';
+import type { UnionToIntersection } from '@kbn/utility-types';
+import type { KibanaRequest } from '@kbn/core/server';
 
-import {
+import type {
   CreateExceptionListItemOptions,
   DeleteExceptionListItemOptions,
   ExportExceptionListAndItemsOptions,
@@ -18,7 +18,7 @@ import {
   GetExceptionListSummaryOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
-import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
+import type { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
 import type { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 /**
@@ -125,7 +125,14 @@ export type ExceptionsListPreMultiListFindServerExtension = ServerExtensionPoint
  */
 export type ExceptionsListPreExportServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreExport',
-  ExportExceptionListAndItemsOptions
+  ExportExceptionListAndItemsOptions & {
+    /**
+     * Used internally only by the `ExceptionListClient.exportExceptionListAndItems` to provide registered
+     * server extension points the ability to adjust (via KQL filters) the data that can be exported.
+     * (In support of Elastic Defend support for space awareness)
+     */
+    filter?: string;
+  }
 >;
 
 /**

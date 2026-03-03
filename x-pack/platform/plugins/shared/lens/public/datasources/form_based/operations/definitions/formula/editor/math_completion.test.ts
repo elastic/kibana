@@ -8,13 +8,13 @@
 import moment from 'moment';
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { createMockedIndexPattern } from '../../../../mocks';
-import { GenericOperationDefinition } from '../..';
-import type { OperationMetadata, IndexPatternField } from '../../../../../../types';
+import type { GenericOperationDefinition } from '../..';
+import type { OperationMetadata, IndexPatternField } from '@kbn/lens-common';
 import {
   getSignatureHelp,
   getHover,
@@ -33,7 +33,6 @@ const buildGenericColumn = <T extends 'field' | 'fullReference' = 'field'>(type:
       operationType: type,
       sourceField: field?.name ?? undefined,
       isBucketed: false,
-      scale: 'ratio',
       timeScale: false,
     };
   }) as unknown as Extract<GenericOperationDefinition, { input: T }>['buildColumn'];
@@ -230,7 +229,7 @@ The total number of documents. When you provide a field, the total number of fie
         },
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        kql: kqlPluginMock.createStartContract(),
         dataViews: dataViewPluginMocks.createStartContract(),
         timefilter: {
           getTime: () => ({ from: '2022-11-01T00:00:00.000Z', to: '2022-11-03T00:00:00.000Z' }),

@@ -8,8 +8,9 @@
  */
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
-import {
+import type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
   FieldFormatInstanceType,
@@ -21,7 +22,7 @@ import {
   FieldFormatParams,
 } from './types';
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
@@ -53,13 +54,13 @@ export abstract class FieldFormat {
 
   /**
    * @property {string} - Field Format Type
-   * @private
+   * @internal
    */
   static fieldType: string | string[];
 
   /**
    * @property {FieldFormatConvert}
-   * @private
+   * @internal
    * have to remove the private because of
    * https://github.com/Microsoft/TypeScript/issues/17293
    */
@@ -83,7 +84,7 @@ export abstract class FieldFormat {
 
   /**
    * @property {Function} - ref to child class
-   * @private
+   * @internal
    */
   public type = this.constructor as typeof FieldFormat;
   public allowsNumericalAggregations?: boolean;
@@ -214,5 +215,23 @@ export abstract class FieldFormat {
 
   static isInstanceOfFieldFormat(fieldFormat: unknown): fieldFormat is FieldFormat {
     return Boolean(fieldFormat && typeof fieldFormat === 'object' && 'convert' in fieldFormat);
+  }
+
+  protected checkForMissingValueText(val: unknown): string | void {
+    if (val === '') {
+      return EMPTY_LABEL;
+    }
+    if (val == null || val === MISSING_TOKEN) {
+      return NULL_LABEL;
+    }
+  }
+
+  protected checkForMissingValueHtml(val: unknown): string | void {
+    if (val === '') {
+      return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
+    }
+    if (val == null || val === MISSING_TOKEN) {
+      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
+    }
   }
 }

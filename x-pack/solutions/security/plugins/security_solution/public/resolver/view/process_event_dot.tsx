@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -400,18 +401,18 @@ const UnstyledProcessEventDot = React.memo(
           role="img"
           aria-labelledby={labelHTMLID}
           fill="none"
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            outline: 'transparent',
-            border: 'none',
-            pointerEvents: 'none',
-            zIndex: 30,
-          }}
+          css={css`
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            outline: transparent;
+            border: none;
+            pointerevents: none;
+            z-index: 30;
+          `}
         >
           <StyledOuterGroup isNodeLoading={isNodeLoading}>
             <use
@@ -489,6 +490,8 @@ const UnstyledProcessEventDot = React.memo(
             tabIndex={-1}
             style={{
               backgroundColor: colorMap.resolverBackground,
+            }}
+            css={{
               alignSelf: 'flex-start',
               padding: 0,
               zIndex: 45,
@@ -529,9 +532,11 @@ const UnstyledProcessEventDot = React.memo(
             justifyContent="flexStart"
             gutterSize="xs"
             style={{
-              alignSelf: 'flex-start',
               background: colorMap.resolverBackground,
               display: `${isShowingEventActions ? 'flex' : 'none'}`,
+            }}
+            css={{
+              alignSelf: 'flex-start',
               margin: '2px 0 0 0',
               padding: 0,
             }}

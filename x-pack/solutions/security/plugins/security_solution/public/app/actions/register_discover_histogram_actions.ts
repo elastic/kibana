@@ -8,20 +8,22 @@
 import { createFilterAction } from '@kbn/unified-search-plugin/public';
 import type { History } from 'history';
 import type { CoreSetup } from '@kbn/core/public';
+import { SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SecurityAppStore } from '../../common/store';
 import type { StartServices } from '../../types';
-import { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
+import { EsqlInTimelineAction } from './constants';
 
-const createDiscoverHistogramCustomFilterAction = (
+const createDiscoverHistogramCustomFilterAction = async (
   _store: SecurityAppStore,
   _history: History,
   coreSetup: CoreSetup,
   services: StartServices
 ) => {
-  const histogramApplyFilter = createFilterAction(
+  const [coreStart] = await coreSetup.getStartServices();
+  const histogramApplyFilter = await createFilterAction(
     services.customDataService.query.filterManager,
     services.customDataService.query.timefilter.timefilter,
-    coreSetup,
+    coreStart,
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );
@@ -30,30 +32,21 @@ const createDiscoverHistogramCustomFilterAction = (
   return histogramApplyFilter;
 };
 
-const createDiscoverHistogramCustomTrigger = (
-  _store: SecurityAppStore,
-  _history: History,
-  services: StartServices
-) => {
-  services.uiActions.registerTrigger({
-    id: EsqlInTimelineTrigger.HISTOGRAM_TRIGGER,
-  });
-};
-
-export const registerDiscoverHistogramActions = (
+export const registerDiscoverHistogramActions = async (
   store: SecurityAppStore,
   history: History,
   coreSetup: CoreSetup,
   services: StartServices
 ) => {
-  createDiscoverHistogramCustomTrigger(store, history, services);
-
-  const histogramApplyFilter = createDiscoverHistogramCustomFilterAction(
+  const histogramApplyFilter = await createDiscoverHistogramCustomFilterAction(
     store,
     history,
     coreSetup,
     services
   );
 
-  services.uiActions.attachAction(EsqlInTimelineTrigger.HISTOGRAM_TRIGGER, histogramApplyFilter.id);
+  services.uiActions.attachAction(
+    SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER,
+    histogramApplyFilter.id
+  );
 };

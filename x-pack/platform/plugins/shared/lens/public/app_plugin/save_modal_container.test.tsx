@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { SaveProps } from './app';
+import type { SaveProps } from './app';
 import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
-
-jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(async () => false),
-}));
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -49,6 +45,7 @@ describe('runSaveLensVisualization', () => {
       returnToOrigin: false,
       dashboardId: undefined,
       newCopyOnSave: false,
+      onTitleDuplicate: jest.fn(),
       ...propsOverrides,
     };
     const options = {
@@ -65,7 +62,7 @@ describe('runSaveLensVisualization', () => {
        * and in the modal the user chooses to add the chart into a specific dashboard. Make sure to pass the "dashboardId" prop as well to simulate this scenario.
        * This is used to test indirectly the redirectToDashboard call
        */
-      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackage,
+      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackages,
       /**
        * This function will be called before reloading the editor after saving a a new document/new copy of the document
        */
@@ -260,9 +257,12 @@ describe('runSaveLensVisualization', () => {
           'dashboards',
           // make sure the new savedObject id is removed from the new input
           expect.objectContaining({
-            state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: undefined }),
-            }),
+            state: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'lens',
+                serializedState: expect.objectContaining({ savedObjectId: undefined }),
+              }),
+            ]),
           })
         );
         expect(saveToLibraryFn).not.toHaveBeenCalled();
@@ -287,9 +287,12 @@ describe('runSaveLensVisualization', () => {
           'dashboards',
           // make sure the new savedObject id is passed with the new input
           expect.objectContaining({
-            state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: '1234' }),
-            }),
+            state: expect.arrayContaining([
+              expect.objectContaining({
+                type: 'lens',
+                serializedState: expect.objectContaining({ savedObjectId: '1234' }),
+              }),
+            ]),
           })
         );
         expect(saveToLibraryFn).toHaveBeenCalled();

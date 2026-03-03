@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import SemVer from 'semver/classes/semver';
-import { CredentialStore } from './lib/reindexing/credential_store';
-import { handleEsError } from './shared_imports';
-import type { FeatureSet } from '../common/types';
+import type { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type SemVer from 'semver/classes/semver';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { handleEsError } from './shared_imports';
+import type { DataSourceExclusions, FeatureSet } from '../common/types';
 
 export interface RouteDependencies {
   router: IRouter;
-  credentialStore: CredentialStore;
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
   getSecurityPlugin: () => SecurityPluginStart | undefined;
@@ -24,9 +23,12 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
   config: {
+    dataSourceExclusions: DataSourceExclusions;
     featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };
   current: SemVer;
   defaultTarget: number;
+  version: Version;
+  cleanupReindexOperations: (indexNames: string[]) => Promise<void>;
 }

@@ -8,14 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
-import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 
 interface AlertStatusIndicatorProps {
   alertStatus: AlertStatus;
   textSize?: 'xs' | 's' | 'm' | 'inherit';
 }
-
+// TODO update these colors to a more appropriate EUI color token
 export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStatusIndicatorProps) {
   if (alertStatus === ALERT_STATUS_ACTIVE) {
     return (

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,9 +16,12 @@ import {
   EuiText,
   EuiFieldSearch,
   EuiFormRow,
+  useEuiTheme,
 } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
+import { css } from '@emotion/react';
+import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   getFields,
   builtInComparators,
@@ -27,12 +31,10 @@ import {
   GroupByExpression,
   WhenExpression,
   builtInAggregationTypes,
-  RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
-import { IndexThresholdRuleParams } from './types';
-import './expression.scss';
+import type { IndexThresholdRuleParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
 export const DEFAULT_VALUES = {
@@ -97,6 +99,8 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
     filterKuery,
   } = ruleParams;
 
+  const { euiTheme } = useEuiTheme();
+
   const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
@@ -121,6 +125,10 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       defaultMessage: 'Expression contains errors.',
     }
   );
+
+  const alertVizualizationChartCss = css`
+    height: calc(${euiTheme.size.base} * 14);
+  `;
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', {
@@ -162,7 +170,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       {hasExpressionErrors ? (
         <Fragment>
           <EuiSpacer />
-          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+          <EuiCallOut announceOnMount color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
         </Fragment>
       ) : null}
@@ -313,7 +321,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer />
-      <div className="actAlertVisualization__chart">
+      <div className="actAlertVisualization__chart" css={alertVizualizationChartCss}>
         {cannotShowVisualization ? (
           <Fragment>
             <EuiEmptyPrompt

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import {
+import type {
   AnalyticsServiceStart,
   I18nStart,
   OverlayStart,
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type {
+  ReindexServicePublicSetup,
+  ReindexServicePublicStart,
+} from '@kbn/reindex-service-plugin/public';
 
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -34,6 +39,7 @@ export interface SetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   cloud?: CloudSetup;
+  reindexService: ReindexServicePublicSetup;
 }
 
 export interface StartDependencies {
@@ -45,6 +51,8 @@ export interface StartDependencies {
   management: ManagementSetup;
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
+  streams?: StreamsPluginStart;
+  reindexService: ReindexServicePublicStart;
 }
 
 export interface ClientConfigType {
@@ -60,6 +68,7 @@ export interface ClientConfigType {
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
   enableProjectLevelRetentionChecks?: boolean;
+  enableFailureStoreRetentionDisabling?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };

@@ -22,7 +22,7 @@ export const getEventList = async ({
   eventListConfig,
   indexFields,
   sortOrder = 'desc',
-}: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
+}: EventsOptions): Promise<estypes.SearchResponse<EventDoc, unknown>> => {
   const {
     inputIndex,
     ruleExecutionLogger,
@@ -40,8 +40,8 @@ export const getEventList = async ({
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 
-  ruleExecutionLogger.debug(
-    `Querying the events items from the index: "${sharedParams.inputIndex}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+  ruleExecutionLogger.trace(
+    `Querying events\nIndex: "${sharedParams.inputIndex}", searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items.`
   );
 
   const queryFilter = getQueryFilter({
@@ -53,14 +53,13 @@ export const getEventList = async ({
     fields: indexFields,
   });
 
-  const { searchResult } = await singleSearchAfter({
+  const searchRequest = buildEventsSearchQuery({
+    aggregations: undefined,
     searchAfterSortIds: searchAfter,
     index: inputIndex,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
-    services,
-    ruleExecutionLogger,
-    pageSize: calculatedPerPage,
+    size: calculatedPerPage,
     filter: queryFilter,
     primaryTimestamp,
     secondaryTimestamp,
@@ -70,7 +69,13 @@ export const getEventList = async ({
     overrideBody: eventListConfig,
   });
 
-  ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
+  const { searchResult } = await singleSearchAfter({
+    searchRequest,
+    services,
+    ruleExecutionLogger,
+  });
+
+  ruleExecutionLogger.debug(`Events retrieved: ${searchResult.hits.hits.length}`);
   return searchResult;
 };
 
@@ -98,6 +103,7 @@ export const getEventCount = async ({
     fields: indexFields,
   });
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
+    aggregations: undefined,
     index,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),

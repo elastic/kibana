@@ -13,7 +13,7 @@ import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
-import { SearchStrategyDependencies } from '../../types';
+import type { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
 import { getMockSearchConfig } from '../../../../config.mock';
@@ -314,7 +314,9 @@ describe('ES search strategy', () => {
         expect(mockRollupSearchCaller).toHaveBeenCalledWith(
           {
             index: 'foo-程',
-            ignore_unavailable: true,
+            querystring: {
+              ignore_unavailable: true,
+            },
             max_concurrent_shard_requests: undefined,
             timeout: '100ms',
             track_total_hits: true,

@@ -8,7 +8,7 @@
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { CelAuthTypeEnum } from '../../../common/api/model/cel_input_attributes.gen';
-import { CelAuthType } from '../../../common';
+import type { CelAuthType } from '../../../common';
 import type { CelInputState } from '../../types';
 import { handleBuildProgram } from './build_program';
 import { handleAnalyzeHeaders } from './analyze_headers';
@@ -19,7 +19,7 @@ import { handleRemoveHeadersDigest } from './auth_digest';
 import { handleGetStateDetails } from './retrieve_state_details';
 import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleSummarizeQuery } from './summarize_query';
-import { CelInputBaseNodeParams, CelInputGraphParams } from './types';
+import type { CelInputBaseNodeParams, CelInputGraphParams } from './types';
 
 const graphState: StateGraphArgs<CelInputState>['channels'] = {
   lastExecutedChain: {

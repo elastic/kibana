@@ -1,13 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
-      "../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [

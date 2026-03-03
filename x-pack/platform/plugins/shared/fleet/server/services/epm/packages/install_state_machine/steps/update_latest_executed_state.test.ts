@@ -105,6 +105,7 @@ describe('updateLatestExecutedState', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
       id: 'xyz',
+      name: 'xyz',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   });
@@ -227,6 +228,7 @@ describe('updateLatestExecutedState', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
       id: 'xyz',
+      name: 'xyz',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     expect(logger.error).toHaveBeenCalledWith(

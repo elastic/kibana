@@ -8,6 +8,7 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,30 +19,31 @@ import {
   EuiText,
   EuiBadge,
   EuiErrorBoundary,
-  EuiToolTip,
+  EuiIconTip,
   EuiBetaBadge,
   EuiSplitPanel,
   EuiCallOut,
-  IconType,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import {
+import type {
   IErrorObject,
   RuleSystemAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
-  ActionConnectorMode,
 } from '../../../types';
-import { ActionAccordionFormProps } from './action_form';
+import { ActionConnectorMode } from '../../../types';
+import type { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
 
 export type SystemActionTypeFormProps = {
   actionItem: RuleSystemAction;
@@ -89,9 +91,33 @@ export const SystemActionTypeForm = ({
     errors: {},
   });
 
+  const { euiTheme } = useEuiTheme();
+
+  const actAccordionActionFormCss = css`
+    .actAccordionActionForm {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .euiCard {
+        box-shador: none;
+      }
+      .actAccordionActionForm__button {
+        padding: ${euiTheme.size.m};
+        padding-left: ${euiTheme.size.l};
+      }
+
+      .euiAccordion__arrow {
+        transform: translateX(${euiTheme.size.m}) rotate(0deg) !important;
+      }
+
+      .euiAccordion__arrow[aria-expanded='true'] {
+        transform: translateX(${euiTheme.size.m}) rotate(90deg) !important;
+      }
+    }
+  `;
+
   const [warning, setWarning] = useState<string | null>(null);
 
-  const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(http, ruleTypeId, true);
+  const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, true);
 
   const getDefaultParams = useCallback(() => {
     const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
@@ -153,11 +179,14 @@ export const SystemActionTypeForm = ({
       }
       const res: { errors: IErrorObject } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
+        ?.validateParams(
+          actionItem.params,
+          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+        );
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem, disableErrorMessages]);
+  }, [actionItem, disableErrorMessages, actionConnector]);
 
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
@@ -194,7 +223,7 @@ export const SystemActionTypeForm = ({
                       );
                       setActionParamsProperty(key, value, i);
                     }}
-                    messageVariables={aadTemplateFields}
+                    messageVariables={alertFields}
                     defaultMessage={defaultSummaryMessage}
                     useDefaultMessage={true}
                     actionConnector={actionConnector}
@@ -206,7 +235,7 @@ export const SystemActionTypeForm = ({
                   {warning ? (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut size="s" color="warning" title={warning} />
+                      <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
                     </>
                   ) : null}
                 </Suspense>
@@ -222,7 +251,7 @@ export const SystemActionTypeForm = ({
 
   return (
     <>
-      <EuiSplitPanel.Outer hasShadow={isOpen}>
+      <EuiSplitPanel.Outer hasShadow={isOpen} css={actAccordionActionFormCss}>
         <EuiAccordion
           initialIsOpen={true}
           key={index}
@@ -302,19 +331,18 @@ const ButtonContent: React.FC<{
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {showActionGroupErrorIcon ? (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
               { defaultMessage: 'Action contains errors.' }
             )}
-          >
-            <EuiIcon
-              data-test-subj="action-group-error-icon"
-              type="warning"
-              color="danger"
-              size="m"
-            />
-          </EuiToolTip>
+            type="warning"
+            color="danger"
+            size="m"
+            iconProps={{
+              'data-test-subj': 'action-group-error-icon',
+            }}
+          />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>

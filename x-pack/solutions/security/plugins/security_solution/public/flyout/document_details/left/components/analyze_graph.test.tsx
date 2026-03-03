@@ -12,12 +12,23 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
-import { AnalyzeGraph, ANALYZER_PREVIEW_BANNER } from './analyze_graph';
+import {
+  AnalyzeGraph,
+  ANALYZER_PREVIEW_BANNER,
+  DATA_VIEW_ERROR_TEST_ID,
+  DATA_VIEW_LOADING_TEST_ID,
+} from './analyze_graph';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -29,6 +40,9 @@ jest.mock('../../shared/hooks/use_which_flyout');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../../../sourcerer/containers');
 
 const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
 const FLYOUT_KEY = 'securitySolution';
@@ -46,70 +60,197 @@ jest.mock('react-redux', () => {
 const NO_ANALYZER_MESSAGE =
   'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzer(external, opens in a new tab or window) for more information.';
 
+const dataView: DataView = createStubDataView({
+  spec: { title: '.alerts-security.alerts-default' },
+});
+const dataViewSpec: DataViewSpec = createStubDataView({ spec: {} }).toSpec();
+
+const renderAnalyzer = (
+  contextValue = {
+    eventId: 'eventId',
+    scopeId: TableId.test,
+  } as unknown as DocumentDetailsContext
+) =>
+  render(
+    <TestProviders>
+      <DocumentDetailsContext.Provider value={contextValue}>
+        <AnalyzeGraph />
+      </DocumentDetailsContext.Provider>
+    </TestProviders>
+  );
+
 describe('<AnalyzeGraph />', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-  });
-
-  it('renders analyzer graph correctly', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
-    const contextValue = {
-      eventId: 'eventId',
-      scopeId: TableId.test,
-    } as unknown as DocumentDetailsContext;
-
-    const wrapper = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={contextValue}>
-          <AnalyzeGraph />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-    expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('renders no data message when analyzer is not enabled', () => {
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
-    const contextValue = {
-      eventId: 'eventId',
-      scopeId: TableId.test,
-      dataAsNestedObject: {},
-    } as unknown as DocumentDetailsContext;
-
-    const { container } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={contextValue}>
-          <AnalyzeGraph />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-    expect(container).toHaveTextContent(NO_ANALYZER_MESSAGE);
-  });
-
-  it('clicking view button should open details panel in preview', () => {
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
-    const contextValue = {
-      eventId: 'eventId',
-      scopeId: TableId.test,
-    } as unknown as DocumentDetailsContext;
-
-    const wrapper = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={contextValue}>
-          <AnalyzeGraph />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-
-    expect(wrapper.getByTestId('resolver:graph-controls:show-panel-button')).toBeInTheDocument();
-    wrapper.getByTestId('resolver:graph-controls:show-panel-button').click();
-    expect(mockFlyoutApi.openPreviewPanel).toBeCalledWith({
-      id: DocumentDetailsAnalyzerPanelKey,
-      params: {
-        resolverComponentInstanceID: `${FLYOUT_KEY}-${TableId.test}`,
-        banner: ANALYZER_PREVIEW_BANNER,
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: {
+        ...dataView,
+        hasMatchedIndices: jest.fn().mockReturnValue(true),
       },
+    });
+  });
+
+  describe('newDataViewPickerEnabled true', () => {
+    beforeEach(() => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({});
+    });
+
+    it('renders analyzer graph correctly', () => {
+      const wrapper = renderAnalyzer();
+
+      expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render no data message when analyzer is not enabled', () => {
+      (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+
+      const contextValue = {
+        eventId: 'eventId',
+        scopeId: TableId.test,
+        dataAsNestedObject: {},
+      } as unknown as DocumentDetailsContext;
+
+      const { container } = renderAnalyzer(contextValue);
+
+      expect(container).toHaveTextContent(NO_ANALYZER_MESSAGE);
+    });
+
+    it('should show loading spinner while data view is loading', () => {
+      (useDataView as jest.Mock).mockReturnValue({
+        status: 'loading',
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should show loading spinner while data view is pristine', () => {
+      (useDataView as jest.Mock).mockReturnValue({
+        status: 'pristine',
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should show error message if data view is error', () => {
+      (useDataView as jest.Mock).mockReturnValue({
+        status: 'error',
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+        'Unable to retrieve the data view for analyzer'
+      );
+    });
+
+    it('should show error message if data view is ready but no matched indices', () => {
+      (useDataView as jest.Mock).mockReturnValue({
+        status: 'ready',
+        dataView: {
+          ...dataView,
+          hasMatchedIndices: jest.fn().mockReturnValue(false),
+        },
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+        'Unable to retrieve the data view for analyzer'
+      );
+    });
+
+    it('should open details panel in preview when clicking on view button', () => {
+      const wrapper = renderAnalyzer();
+
+      expect(wrapper.getByTestId('resolver:graph-controls:show-panel-button')).toBeInTheDocument();
+      wrapper.getByTestId('resolver:graph-controls:show-panel-button').click();
+      expect(mockFlyoutApi.openPreviewPanel).toBeCalledWith({
+        id: DocumentDetailsAnalyzerPanelKey,
+        params: {
+          resolverComponentInstanceID: `${FLYOUT_KEY}-${TableId.test}`,
+          banner: ANALYZER_PREVIEW_BANNER,
+        },
+      });
+    });
+  });
+
+  describe('newDataViewPickerEnabled false', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    });
+
+    it('should show loading spinner while sourcerer data view is loading', () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        loading: true,
+        sourcererDataView: dataViewSpec,
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render an error if the dataViewSpec is undefined', () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        loading: false,
+        sourcererDataView: undefined,
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+        'Unable to retrieve the data view for analyzer'
+      );
+    });
+
+    it('should render an error if the dataViewSpec is invalid because id is undefined', () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        loading: false,
+        sourcererDataView: { ...dataViewSpec, id: undefined, title: 'title' },
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+        'Unable to retrieve the data view for analyzer'
+      );
+    });
+
+    it('should render an error if the dataViewSpec is invalid because title is empty', () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        loading: false,
+        sourcererDataView: { ...dataViewSpec, id: 'id', title: '' },
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+        'Unable to retrieve the data view for analyzer'
+      );
+    });
+
+    it('should render the content', () => {
+      (useSourcererDataView as jest.Mock).mockReturnValue({
+        loading: false,
+        sourcererDataView: { ...dataViewSpec, id: 'id', title: 'title' },
+      });
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
     });
   });
 });

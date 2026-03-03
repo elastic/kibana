@@ -11,12 +11,12 @@ import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Lifecycle } from '../lifecycle';
+import type { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
-import { DockerServer, DockerServerSpec } from './define_docker_servers_config';
+import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 const SECOND = 1000;
 
@@ -28,7 +28,8 @@ export class DockerServersService {
       [name: string]: DockerServerSpec;
     },
     private log: ToolingLog,
-    private lifecycle: Lifecycle
+    private lifecycle: Lifecycle,
+    private disabled?: boolean
   ) {
     this.servers = Object.entries(configs).map(([name, config]) => ({
       ...config,
@@ -105,8 +106,12 @@ export class DockerServersService {
     const { image, name, waitFor, waitForLogLine, waitForLogLineTimeoutMs } = server;
 
     // pull image from registry
-    log.info(`[docker:${name}] pulling docker image "${image}"`);
-    await execa('docker', ['pull', image]);
+    if (server.preferCached && (await this.isImageAvailableLocally(image))) {
+      log.info(`[docker:${name}] skipping pull of docker image "${image}"`);
+    } else {
+      log.info(`[docker:${name}] pulling docker image "${image}"`);
+      await execa('docker', ['pull', image]);
+    }
 
     // run the image that we just pulled
     const containerId = await this.dockerRun(server);
@@ -207,7 +212,20 @@ export class DockerServersService {
     ).toPromise();
   }
 
+  private async isImageAvailableLocally(imageUrl: string) {
+    try {
+      const { stdout } = await execa('docker', ['images', '-q', imageUrl]);
+      return stdout.trim().length > 0;
+    } catch {
+      return false;
+    }
+  }
+
   private async startServers() {
+    if (this.disabled) {
+      return;
+    }
+
     await Promise.all(
       this.servers.map(async (server) => {
         if (server.enabled) {

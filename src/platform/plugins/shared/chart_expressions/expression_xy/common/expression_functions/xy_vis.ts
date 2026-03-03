@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XyVisFn } from '../types';
+import type { XyVisFn } from '../types';
 import { XY_VIS, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';
@@ -54,7 +54,7 @@ export const xyVisFunction: XyVisFn = {
     },
   },
   async fn(data, args, handlers) {
-    const { xyVisFn } = await import('./xy_vis_fn');
+    const { xyVisFn } = await import('./expression_module');
     return await xyVisFn(data, args, handlers);
   },
 };

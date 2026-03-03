@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KeyMetric, Metric, EntityDefinition } from '@kbn/entities-schema';
+import type { KeyMetric, Metric, EntityDefinition } from '@kbn/entities-schema';
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
 import { InvalidTransformError } from '../errors/invalid_transform_error';
 

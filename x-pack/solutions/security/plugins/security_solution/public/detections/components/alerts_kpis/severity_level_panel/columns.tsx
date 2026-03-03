@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
@@ -18,16 +20,21 @@ import * as i18n from './translations';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 import {
   CellActionsMode,
-  SecurityCellActionsTrigger,
   SecurityCellActions,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
 
-export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => {
+/**
+ * Returns the list of columns for the severity table for the KPI charts
+ * @param showCellActions if true, add a third column for cell actions
+ */
+export const useGetSeverityTableColumns = (
+  showCellActions: boolean
+): Array<EuiBasicTableColumn<SeverityData>> => {
   const severityColors = useRiskSeverityColors();
-  return useMemo(
-    () => [
+  return useMemo(() => {
+    const baseColumns: Array<EuiBasicTableColumn<SeverityData>> = [
       {
         field: 'key',
         name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,
@@ -50,7 +57,9 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
           </EuiText>
         ),
       },
-      {
+    ];
+    if (showCellActions) {
+      baseColumns.push({
         field: 'key',
         name: '',
         'data-test-subj': 'severityTable-actions',
@@ -59,7 +68,7 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
           <SecurityCellActions
             mode={CellActionsMode.INLINE}
             visibleCellActions={0}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{ field: ALERT_SEVERITY, value: severity }}
             sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
             disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
@@ -68,8 +77,8 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
             extraActionsColor="text"
           />
         ),
-      },
-    ],
-    [severityColors]
-  );
+      });
+    }
+    return baseColumns;
+  }, [severityColors, showCellActions]);
 };

@@ -9,7 +9,18 @@ paths:
       x-codegen-enabled: true
       operationId: InstallPrebuiltRulesAndTimelines
       summary: Install prebuilt detection rules and Timelines
-      description: Install and update all Elastic prebuilt detection rules and Timelines.
+      description: |
+        Install and update all Elastic prebuilt detection rules and Timelines.
+
+        This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+        When you call this endpoint, it will:
+        - Install any new prebuilt detection rules that are not currently installed in your system.
+        - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
+        - Install any new prebuilt Timelines that are not currently installed in your system.
+        - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
+
+        This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+        providing you with the most current and effective threat detection capabilities.
       tags:
         - Prebuilt Rules API
       responses:
@@ -42,3 +53,10 @@ paths:
                   - rules_updated
                   - timelines_installed
                   - timelines_updated
+              examples:
+                example1:
+                  value: 
+                    rules_installed: 112
+                    rules_updated: 0
+                    timelines_installed: 5
+                    timelines_updated: 2

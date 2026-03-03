@@ -131,6 +131,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
@@ -153,6 +162,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -244,6 +254,16 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+            name: 'tx-name-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
@@ -266,6 +286,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo',
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -357,6 +378,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
@@ -379,6 +409,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -470,6 +501,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
+        grouping: {
+          service: {
+            environment: 'ENVIRONMENT_NOT_DEFINED',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
@@ -479,7 +519,7 @@ describe('Transaction error rate alert', () => {
         transactionType: 'type-foo',
         triggerValue: '10',
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED_type-foo',
       payload: {
@@ -492,6 +532,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'foo',
         'transaction.name': undefined,
         'transaction.type': 'type-foo',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -571,6 +612,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+          transaction: {
+            type: 'type-bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
@@ -593,6 +643,7 @@ describe('Transaction error rate alert', () => {
         'service.name': 'bar',
         'transaction.name': undefined,
         'transaction.type': 'type-bar',
+        'kibana.alert.index_pattern': 'apm-*',
       },
     });
   });
@@ -652,7 +703,14 @@ describe('Transaction error rate alert', () => {
           'kibana.alert.rule.consumer': 'alerts',
           'kibana.alert.rule.execution.uuid': '3cf39cc5-b538-492e-b45d-35b01b5f56c3',
           'kibana.alert.rule.name': 'Failed transaction rate threshold rule',
-          'kibana.alert.rule.parameters': [],
+          'kibana.alert.rule.parameters': {
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.type',
+              'transaction.name',
+            ],
+          },
           'kibana.alert.rule.producer': 'apm',
           'kibana.alert.rule.revision': 1,
           'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
@@ -697,6 +755,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Synthtrace: many_errors',
+        grouping: {
+          service: {
+            environment: 'Synthtrace: many_errors',
+            name: 'synthtrace-high-cardinality-0',
+          },
+          transaction: {
+            type: 'request',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 100% in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 30%.',

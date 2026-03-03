@@ -25,7 +25,7 @@ export const isLastTab = ({ items }: TabsState, item: TabItem): boolean => {
 export const addTab = (
   { items, selectedItem }: TabsState,
   item: TabItem,
-  maxItemsCount?: number
+  maxItemsCount: number | undefined
 ): TabsState => {
   if (maxItemsCount && items.length >= maxItemsCount) {
     return {
@@ -44,6 +44,16 @@ export const selectTab = ({ items, selectedItem }: TabsState, item: TabItem): Ta
   return {
     items,
     selectedItem: items.find((i) => i.id === item.id) || selectedItem,
+  };
+};
+
+export const selectRecentlyClosedTab = (
+  { items }: TabsState,
+  nextSelectedItem: TabItem
+): TabsState => {
+  return {
+    items: [...items, nextSelectedItem],
+    selectedItem: nextSelectedItem,
   };
 };
 
@@ -79,8 +89,16 @@ export const closeTab = ({ items, selectedItem }: TabsState, item: TabItem): Tab
 export const insertTabAfter = (
   { items, selectedItem }: TabsState,
   item: TabItem,
-  insertAfterItem: TabItem
+  insertAfterItem: TabItem,
+  maxItemsCount: number | undefined
 ): TabsState => {
+  if (maxItemsCount && items.length >= maxItemsCount) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
   const insertAfterIndex = items.findIndex((i) => i.id === insertAfterItem.id);
 
   if (insertAfterIndex === -1) {
@@ -140,6 +158,7 @@ export const closeTabsToTheRight = (
   item: TabItem
 ): TabsState => {
   const itemIndex = items.findIndex((i) => i.id === item.id);
+  const selectedTabIndex = selectedItem ? items.findIndex((i) => i.id === selectedItem.id) : -1;
 
   if (itemIndex === -1 || itemIndex === items.length - 1) {
     return {
@@ -149,9 +168,10 @@ export const closeTabsToTheRight = (
   }
 
   const nextItems = items.slice(0, itemIndex + 1);
+  const isSelectedTabClosed = selectedTabIndex > itemIndex;
 
   return {
     items: nextItems,
-    selectedItem,
+    selectedItem: isSelectedTabClosed ? item : selectedItem,
   };
 };

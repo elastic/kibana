@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KueryNode } from '..';
+import type { KueryNode } from '..';
 
 export const KQL_WILDCARD_SYMBOL = '@kuery-wildcard@';
 export const KQL_NODE_TYPE_WILDCARD = 'wildcard';

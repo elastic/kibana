@@ -78,14 +78,14 @@ describe('transformCustomScheduleToRRule', () => {
       transformCustomScheduleToRRule({
         duration: '30m',
         start: '2025-02-17T19:04:46.320Z',
-        recurring: { every: '1d', end: '2025-05-17T05:05:00.000Z', onWeekDay: ['Mo', 'FR'] },
+        recurring: { every: '1d', end: '2025-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
       })
     ).toEqual({
       duration: 1800000,
       rRule: {
         bymonth: undefined,
         bymonthday: undefined,
-        byweekday: ['Mo', 'FR'],
+        byweekday: ['MO', 'FR'],
         count: undefined,
         dtstart: '2025-02-17T19:04:46.320Z',
         freq: 3,
@@ -169,12 +169,35 @@ describe('transformCustomScheduleToRRule', () => {
     });
   });
 
+  it('transforms recurring with hourly correctly', () => {
+    expect(
+      transformCustomScheduleToRRule({
+        duration: '1m',
+        start: '2025-01-14T05:05:00.000Z',
+        recurring: { every: '1h' },
+      })
+    ).toEqual({
+      duration: 60000,
+      rRule: {
+        bymonth: undefined,
+        bymonthday: undefined,
+        byweekday: undefined,
+        count: undefined,
+        dtstart: '2025-01-14T05:05:00.000Z',
+        freq: 4,
+        interval: 1,
+        tzid: 'UTC',
+        until: undefined,
+      },
+    });
+  });
+
   it('transforms frequency and interval to undefined when incorrect', () => {
     expect(
       transformCustomScheduleToRRule({
         duration: '1m',
         start: '2025-01-14T05:05:00.000Z',
-        recurring: { every: '-1h' },
+        recurring: { every: '-100s' },
       })
     ).toEqual({
       duration: 60000,

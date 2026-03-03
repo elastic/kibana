@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { Global, css } from '@emotion/react';
 
 const globalStyles = css`
   html,
   body,
-  #root {
+  #storybook-root {
     width: 100%;
     height: 100%;
     margin: 0;

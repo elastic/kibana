@@ -8,31 +8,26 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  DragDropIdentifier,
-  useDragDropContext,
-  DropType,
-  DropTargetSwapDuplicateCombine,
-  Droppable,
-  DroppableProps,
-} from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType, DroppableProps } from '@kbn/dom-drag-drop';
+import { useDragDropContext, DropTargetSwapDuplicateCombine, Droppable } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { isDraggedField } from '../../../../utils';
-import { generateId } from '../../../../id_generator';
-
-import {
+import { useEuiTheme } from '@elastic/eui';
+import type {
   Datasource,
   VisualizationDimensionGroupConfig,
   DatasourceLayers,
-  isOperation,
   IndexPatternMap,
   DragDropOperation,
   Visualization,
-} from '../../../../types';
+} from '@kbn/lens-common';
+import { isDraggedField } from '../../../../utils';
+import { generateId } from '../../../../id_generator';
+
+import { isOperation } from '../../../../types_guards';
 
 interface EmptyButtonProps {
+  isInlineEditing: boolean;
   columnId: string;
   onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
@@ -56,12 +51,24 @@ const defaultButtonLabels = {
   ),
 };
 
-const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
+const defaultInlineButtonLabels = {
+  ariaLabel: (l: string) =>
+    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabel.inline', {
+      defaultMessage: 'Add a field to {groupLabel}',
+      values: { groupLabel: l },
+    }),
+  label: (
+    <FormattedMessage id="xpack.lens.configure.emptyConfig.inline" defaultMessage="Add a field" />
+  ),
+};
+
+const DefaultEmptyButton = ({ isInlineEditing, columnId, group, onClick }: EmptyButtonProps) => {
   const { buttonAriaLabel, buttonLabel } = group.labels || {};
+  const defaultLabels = isInlineEditing ? defaultInlineButtonLabels : defaultButtonLabels;
   return (
     <EmptyDimensionButtonInner
-      label={buttonLabel || defaultButtonLabels.label}
-      ariaLabel={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      label={buttonLabel || defaultLabels.label}
+      ariaLabel={buttonAriaLabel || defaultLabels.ariaLabel(group.groupLabel)}
       dataTestSubj="lns-empty-dimension"
       onClick={() => onClick(columnId)}
     />
@@ -98,6 +105,7 @@ export function EmptyDimensionButton({
   activeVisualization,
   order,
   target,
+  isInlineEditing,
 }: {
   order: [2, number, number, number];
   group: VisualizationDimensionGroupConfig;
@@ -116,7 +124,9 @@ export function EmptyDimensionButton({
       label: string;
     };
   };
+  isInlineEditing: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
@@ -177,6 +187,7 @@ export function EmptyDimensionButton({
     columnId: value.columnId,
     onClick,
     group,
+    isInlineEditing,
   };
 
   return (
@@ -193,7 +204,7 @@ export function EmptyDimensionButton({
       >
         <div
           css={css`
-            border-radius: ${euiThemeVars.euiBorderRadius};
+            border-radius: ${euiTheme.border.radius.medium};
           `}
         >
           {typeof group.suggestedValue?.() === 'number' ? (

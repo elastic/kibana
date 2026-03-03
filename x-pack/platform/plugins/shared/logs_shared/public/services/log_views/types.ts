@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type {
   LogView,
   LogViewAttributes,
   LogViewReference,
@@ -35,11 +37,20 @@ export interface LogViewsServiceStartDeps {
 
 export interface ILogViewsClient {
   getLogView(logViewReference: LogViewReference): Promise<LogView>;
-  getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus>;
-  getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView>;
+  getResolvedLogViewStatus(
+    resolvedLogView: ResolvedLogView<DataView>,
+    uiSettings?: IUiSettingsClient
+  ): Promise<LogViewStatus>;
+  getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView<DataView>>;
   putLogView(
     logViewReference: LogViewReference,
     logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView>;
-  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
+  resolveLogView(
+    logViewId: string,
+    logViewAttributes: LogViewAttributes
+  ): Promise<ResolvedLogView<DataView>>;
+  unwrapDataViewLazy(
+    logViewLazy: ResolvedLogView<DataViewLazy>
+  ): Promise<ResolvedLogView<DataView>>;
 }

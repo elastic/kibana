@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import React, {
-  Dispatch,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { GroupOption, isNoneGroup, useGrouping } from '@kbn/grouping';
+import type { GroupOption } from '@kbn/grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
-import type { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
+import type { AlertsGroupingLevelProps } from './alerts_grouping_level';
+import { AlertsGroupingLevel } from './alerts_grouping_level';
+import type {
+  AlertsGroupingProps,
+  AlertsGroupingState,
+  BaseAlertsGroupAggregations,
+} from '../types';
 import {
   AlertsGroupingContextProvider,
   useAlertsGroupingState,
@@ -63,12 +61,14 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
 ) => {
   const {
     groupingId,
+    initialGroupings,
     services,
     ruleTypeIds,
     defaultGroupingOptions,
     defaultFilters,
     globalFilters,
     globalQuery,
+    onGroupingsChange,
     renderGroupPanel,
     getGroupStats,
     children,
@@ -109,6 +109,13 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
           defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
         }),
     },
+    initialGroupings: initialGroupings
+      ? {
+          groupById: {
+            [groupingId]: { activeGroups: initialGroupings, options: defaultGroupingOptions },
+          },
+        }
+      : undefined,
     defaultGroupingOptions,
     fields: dataView?.fields ?? [],
     groupingId,
@@ -124,7 +131,13 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
         activeGroups: selectedGroups,
       });
     }
-  }, [selectedGroups, updateGrouping]);
+    // fire state transition if provided
+    if (onGroupingsChange) {
+      onGroupingsChange({
+        activeGroups: selectedGroups,
+      });
+    }
+  }, [selectedGroups, updateGrouping, onGroupingsChange]);
 
   useEffect(() => {
     if (!isNoneGroup(grouping.activeGroups)) {
@@ -295,8 +308,13 @@ const typedMemo: <T>(c: T) => T = memo;
  */
 export const AlertsGrouping = typedMemo(
   <T extends BaseAlertsGroupAggregations>(props: AlertsGroupingProps<T>) => {
+    const initState: AlertsGroupingState = props.initialGroupings
+      ? {
+          [props.groupingId]: { activeGroups: props.initialGroupings },
+        }
+      : {};
     return (
-      <AlertsGroupingContextProvider>
+      <AlertsGroupingContextProvider initialState={props.initialGroupings ? initState : undefined}>
         <AlertsGroupingInternal {...props} />
       </AlertsGroupingContextProvider>
     );

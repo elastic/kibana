@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import '../../../../common/mock/react_beautiful_dnd';
@@ -23,19 +23,18 @@ const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
 
 describe('EndpointOverview Component', () => {
   let endpointData: EndpointFields;
-  let wrapper: ReturnType<typeof mount>;
-  let findData: ReturnType<(typeof wrapper)['find']>;
-  const render = (data: EndpointFields | null = endpointData) => {
-    wrapper = mount(
+  let findData: HTMLElement[];
+  const renderComponent = (data: EndpointFields | null = endpointData) => {
+    const { container } = render(
       <TestProviders>
         <EndpointOverview data={data} />
       </TestProviders>
     );
-    findData = wrapper.find(
-      'dl[data-test-subj="endpoint-overview"] dd.euiDescriptionList__description'
+    findData = Array.from(
+      container.querySelectorAll(
+        'dl[data-test-subj="endpoint-overview"] dd.euiDescriptionList__description'
+      )
     );
-
-    return wrapper;
   };
 
   beforeEach(() => {
@@ -54,30 +53,30 @@ describe('EndpointOverview Component', () => {
   });
 
   test('it renders with endpoint data', () => {
-    render();
-    expect(findData.at(0).text()).toEqual(
+    renderComponent();
+    expect(findData.at(0)?.textContent).toEqual(
       endpointData?.hostInfo?.metadata.Endpoint.policy.applied.name
     );
-    expect(findData.at(1).text()).toEqual(
+    expect(findData.at(1)?.textContent).toEqual(
       endpointData?.hostInfo?.metadata.Endpoint.policy.applied.status
     );
-    expect(findData.at(2).text()).toContain(endpointData?.hostInfo?.metadata.agent.version); // contain because drag adds a space
-    expect(findData.at(3).text()).toEqual('Healthy');
+    expect(findData.at(2)?.textContent).toContain(endpointData?.hostInfo?.metadata.agent.version); // contain because drag adds a space
+    expect(findData.at(3)?.textContent).toEqual('Healthy');
   });
 
   test('it renders with null data', () => {
-    render(null);
-    expect(findData.at(0).text()).toEqual('—');
-    expect(findData.at(1).text()).toEqual('—');
-    expect(findData.at(2).text()).toContain('—'); // contain because drag adds a space
-    expect(findData.at(3).text()).toEqual('—');
+    renderComponent(null);
+    expect(findData.at(0)?.textContent).toEqual('—');
+    expect(findData.at(1)?.textContent).toEqual('—');
+    expect(findData.at(2)?.textContent).toContain('—'); // contain because drag adds a space
+    expect(findData.at(3)?.textContent).toEqual('—');
   });
 
   test('it shows isolation status', () => {
     const status = useGetAgentStatusMock(endpointData.hostInfo?.metadata.agent.id, 'endpoint');
     status.data[endpointData.hostInfo!.metadata.agent.id].isolated = true;
     useGetAgentStatusMock.mockReturnValue(status);
-    render();
-    expect(findData.at(3).text()).toEqual('HealthyIsolated');
+    renderComponent();
+    expect(findData.at(3)?.textContent).toEqual('HealthyIsolated');
   });
 });

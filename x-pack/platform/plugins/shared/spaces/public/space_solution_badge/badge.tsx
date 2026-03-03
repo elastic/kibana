@@ -25,6 +25,15 @@ const SolutionOptions: Record<
       />
     ),
   },
+  workplaceai: {
+    iconType: 'logoElasticsearch',
+    label: (
+      <FormattedMessage
+        id="xpack.spaces.spaceSolutionBadge.workplaceai"
+        defaultMessage="Workplace AI"
+      />
+    ),
+  },
   security: {
     iconType: 'logoSecurity',
     label: (

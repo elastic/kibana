@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   fixedPageSize = 10,

@@ -12,6 +12,7 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectModelVersionForwardCompatibilitySchema,
 } from '@kbn/core-saved-objects-server';
+import { pickValuesBasedOnStructure } from '../utils';
 
 function isObjectType(
   schema: SavedObjectModelVersionForwardCompatibilitySchema
@@ -26,10 +27,18 @@ export const convertModelVersionBackwardConversionSchema = (
 ): ConvertedSchema => {
   if (isObjectType(schema)) {
     return (doc) => {
-      const attrs = schema.validate(doc.attributes, {});
+      const originalAttrs = doc.attributes as object;
+      // Get the validated object, with possible stripping of unknown keys
+      const validatedAttrs = schema.validate(doc.attributes);
+      // Use the validated attrs object to pick values from the original attrs.
+      //
+      // If we reversed this, validation conversion would be returned in the
+      // converted attrs, for example: { duration: '1m' } => { duration: moment.Duration }
+      // which this "conversion" wants to avoid.
+      const convertedAttrs = pickValuesBasedOnStructure(validatedAttrs, originalAttrs);
       return {
         ...doc,
-        attributes: attrs,
+        attributes: convertedAttrs,
       };
     };
   } else {

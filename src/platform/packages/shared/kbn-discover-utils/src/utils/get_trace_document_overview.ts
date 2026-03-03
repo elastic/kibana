@@ -7,37 +7,82 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray } from 'lodash';
-import { DataTableRecord, TraceDocumentOverview, fieldConstants } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import {
+  AGENT_NAME,
+  AT_TIMESTAMP,
+  DURATION,
+  HTTP_RESPONSE_STATUS_CODE,
+  KIND,
+  LINKS_SPAN_ID,
+  LINKS_TRACE_ID,
+  PARENT_ID,
+  PROCESSOR_EVENT,
+  RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_ACTION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_ID,
+  SPAN_LINKS_SPAN_ID,
+  SPAN_LINKS_TRACE_ID,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
+} from '@kbn/apm-types';
+import type { DataTableRecord, TraceDocumentOverview } from '../types';
+import { getFormattedFields } from './get_formatted_fields';
+import { getFlattenedFields } from './get_flattened_fields';
 
-export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
-  const formatField = <T extends keyof TraceDocumentOverview>(field: T) =>
-    castArray(doc.flattened[field])[0] as TraceDocumentOverview[T];
+const fields: Array<keyof TraceDocumentOverview> = [
+  AT_TIMESTAMP,
+  PARENT_ID,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRACE_ID,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  AGENT_NAME,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_TYPE,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
+  SPAN_NAME,
+  SPAN_ID,
+  SPAN_ACTION,
+  SPAN_DURATION,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
+  PROCESSOR_EVENT,
+  DURATION,
+  KIND,
+  RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  SPAN_LINKS_SPAN_ID,
+  SPAN_LINKS_TRACE_ID,
+  LINKS_SPAN_ID,
+  LINKS_TRACE_ID,
+];
 
-  const fields: Array<keyof TraceDocumentOverview> = [
-    fieldConstants.TIMESTAMP_FIELD,
-    fieldConstants.PARENT_ID_FIELD,
-    fieldConstants.HTTP_RESPONSE_STATUS_CODE_FIELD,
-    fieldConstants.TRACE_ID_FIELD,
-    fieldConstants.SERVICE_NAME_FIELD,
-    fieldConstants.SERVICE_ENVIRONMENT_FIELD,
-    fieldConstants.AGENT_NAME_FIELD,
-    fieldConstants.TRANSACTION_ID_FIELD,
-    fieldConstants.TRANSACTION_NAME_FIELD,
-    fieldConstants.TRANSACTION_DURATION_FIELD,
-    fieldConstants.SPAN_NAME_FIELD,
-    fieldConstants.SPAN_ACTION_FIELD,
-    fieldConstants.SPAN_DURATION_FIELD,
-    fieldConstants.SPAN_TYPE_FIELD,
-    fieldConstants.SPAN_SUBTYPE_FIELD,
-    fieldConstants.SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
-    fieldConstants.USER_AGENT_NAME_FIELD,
-    fieldConstants.USER_AGENT_VERSION_FIELD,
-    fieldConstants.PROCESSOR_EVENT_FIELD,
-  ];
+export function getTraceDocumentOverview(
+  doc: DataTableRecord,
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+): TraceDocumentOverview {
+  return getFormattedFields<TraceDocumentOverview>(doc, fields, { dataView, fieldFormats });
+}
 
-  return fields.reduce((acc, field) => {
-    acc[field] = formatField(field);
-    return acc;
-  }, {} as { [key in keyof TraceDocumentOverview]?: string | number }) as TraceDocumentOverview;
+export function getFlattenedTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
+  return getFlattenedFields<TraceDocumentOverview>(doc, fields);
 }

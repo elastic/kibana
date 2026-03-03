@@ -8,6 +8,8 @@
 import { filter, some } from 'lodash';
 
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { isSavedQueryPrebuilt } from './utils';
@@ -24,6 +26,7 @@ import {
   updateSavedQueryRequestBodySchema,
   updateSavedQueryRequestParamsSchema,
 } from '../../../common/api/saved_query/update_saved_query_route';
+import { getUserInfo } from '../../lib/get_user_info';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -53,9 +56,20 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
+
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('savedQuery'),
+        });
+        const username = currentUser?.username ?? undefined;
 
         const {
           id,
@@ -67,20 +81,21 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           timeout,
           snapshot,
           removed,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           ecs_mapping,
         } = request.body;
 
         const isPrebuilt = await isSavedQueryPrebuilt(
           osqueryContext.service.getPackageService()?.asInternalUser,
-          request.params.id
+          request.params.id,
+          spaceScopedClient,
+          spaceId
         );
 
         if (isPrebuilt) {
           return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
         }
 
-        const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
+        const conflictingEntries = await spaceScopedClient.find<{ id: string }>({
           type: savedQuerySavedObjectType,
           filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
         });
@@ -97,7 +112,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Saved query with id "${id}" already exists.` });
         }
 
-        const updatedSavedQuerySO = await savedObjectsClient.update(
+        const updatedSavedQuerySO = await spaceScopedClient.update(
           savedQuerySavedObjectType,
           request.params.id,
           {
@@ -111,7 +126,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             snapshot,
             removed,
             ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            updated_by: currentUser,
+            updated_by: username,
             updated_at: new Date().toISOString(),
           },
           {

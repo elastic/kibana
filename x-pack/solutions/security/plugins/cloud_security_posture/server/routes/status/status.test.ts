@@ -8,7 +8,7 @@
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { calculateIntegrationStatus } from './status';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
-import { Installation } from '@kbn/fleet-plugin/common';
+import type { Installation } from '@kbn/fleet-plugin/common';
 
 const mockInstallation: Installation = {
   installed_kibana: [],

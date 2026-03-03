@@ -66,6 +66,40 @@ const getVersionedRoute = (router: MockServer['router']): Route => {
 
 const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
 
+const normalizeHeaders = (headers: unknown): Record<string, string> | undefined => {
+  if (headers == null) return undefined;
+
+  // WHATWG Headers (e.g. from fetch/undici in Node) are not assignable to Kibana's expected plain record.
+  if (
+    typeof headers === 'object' &&
+    typeof (headers as { entries?: unknown }).entries === 'function'
+  ) {
+    return Object.fromEntries(
+      Array.from((headers as { entries: () => IterableIterator<[string, string]> }).entries()).map(
+        ([k, v]) => [k, String(v)]
+      )
+    );
+  }
+
+  if (typeof headers === 'object') {
+    return Object.entries(headers as Record<string, unknown>).reduce<Record<string, string>>(
+      (acc, [k, v]) => {
+        if (typeof v === 'string') {
+          acc[k] = v;
+        } else if (Array.isArray(v)) {
+          acc[k] = v.map(String).join(', ');
+        } else if (v != null) {
+          acc[k] = String(v);
+        }
+        return acc;
+      },
+      {}
+    );
+  }
+
+  return undefined;
+};
+
 class MockServer {
   constructor(
     public readonly router = httpServiceMock.createRouter(),
@@ -110,6 +144,7 @@ class MockServer {
     const validatedRequest = requestMock.create({
       path: request.route.path,
       method: request.route.method,
+      headers: normalizeHeaders(request.headers),
       body: this.maybeValidate(request.body, validations.body),
       query: this.maybeValidate(request.query, validations.query),
       params: this.maybeValidate(request.params, validations.params),

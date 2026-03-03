@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import type { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { SetViewForm } from './set_view_form';
 
 export interface Props {

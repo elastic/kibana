@@ -142,7 +142,7 @@ export function SummaryStats({ data, loading, hasData }: Props) {
                 href={serviceInventoryLink}
               >
                 {i18n.translate('xpack.apm.storageExplorer.summary.serviceInventoryLink', {
-                  defaultMessage: 'Go to Service Inventory',
+                  defaultMessage: 'Go to Service inventory',
                 })}
               </EuiLink>
             </EuiFlexItem>
@@ -183,9 +183,8 @@ function SummaryMetric({
     <EuiFlexItem grow={false}>
       {tooltipContent ? (
         <EuiToolTip content={tooltipContent}>
-          <EuiText size="s" color="subdued">
-            {label}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          <EuiText size="s" color="subdued" tabIndex={0}>
+            {label} <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </EuiText>
         </EuiToolTip>
       ) : (

@@ -7,33 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelFixtures, lighthouseFixtures, globalSetup } from './fixtures';
+// Needed for Scout tests dependent on .peggy grammar files (`@kbn/tinymath`)
+import './peggy_setup';
 
-// Scout core fixtures: worker & test scope
-export const test = scoutFixtures;
-
-export const lighthouseTest = lighthouseFixtures;
-
-// Scout core 'space aware' fixtures: worker & test scope
-export const spaceTest = scoutParallelFixtures;
-
-export const globalSetupHook = globalSetup;
-
+// Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
-export { expect } from './expect';
 
+// Matchers
+export { expect } from './matchers/ui';
+
+// Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
+
+// Fixtures and Page Objects (can be extended with solution-specific logic)
+export type {
+  BrowserAuthFixture,
+  ScoutPage,
+  PageObjects, // can be extended with solution specific Page Objects
+} from './fixtures/scope/test';
+export { browserAuthFixture } from './fixtures/scope/test';
+
+// Test and worker fixtures (can be extended with solution specific fixtures)
 export type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  ScoutPage,
-  PageObjects,
-} from './fixtures';
+} from './test/ui';
 
-// use to tag tests
+// API services (can be extended with solution specific API services)
+export { apiServicesFixture } from './fixtures/scope/worker/apis';
+export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
+
+export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
+
+// Other worker types
+export type {
+  SamlAuth,
+  SynthtraceFixture,
+  RequestAuthFixture,
+  SpaceSolutionView,
+} from './fixtures/scope/worker';
+
+// Tagging utility
 export { tags } from './tags';
 
-export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';
+// Test entrypoints
+export { test, spaceTest, lighthouseTest, globalSetupHook } from './test/ui';
+export { apiTest } from './test/api';
+
+// Test helpers for EUI components
+export * from './eui_components';
+
+// Test helpers for Kibana components
+export * from './ui_components';

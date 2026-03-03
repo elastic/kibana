@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-plugin",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "description": "A manager for Streams",
   "group": "platform",
   "visibility": "shared",
@@ -11,20 +11,22 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "data",
-      "security",
-      "encryptedSavedObjects",
-      "usageCollection",
-      "licensing",
-      "taskManager",
+      "actions",
       "alerting",
-      "inference"
+      "console",
+      "data",
+      "encryptedSavedObjects",
+      "features",
+      "inference",
+      "licensing",
+      "ruleRegistry",
+      "security",
+      "taskManager",
+      "usageCollection",
+      "fieldsMetadata"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "serverless"
-    ],
-    "requiredBundles": [
-    ]
+    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

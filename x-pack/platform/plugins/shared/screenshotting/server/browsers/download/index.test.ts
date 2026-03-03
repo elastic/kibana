@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
+import type { PackageInfo } from '@kbn/screenshotting-server';
+import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
 import { access, readdir } from 'fs/promises';
 import mockFs from 'mock-fs';
 import path from 'path';
@@ -86,14 +87,14 @@ describe('ensureDownloaded', () => {
       expect(fetch).not.toHaveBeenCalled();
       await expect(readdir(path.resolve(`${paths.archivesPath}/x64`))).resolves.toEqual(
         expect.arrayContaining([
-          'chrome-mac.zip',
-          'chrome-win.zip',
+          'chrome-headless-shell-mac-x64.zip',
+          'chrome-headless-shell-win64.zip',
           expect.stringMatching(/^chromium-[0-9a-f]{7}-locales-linux_x64\.zip$/),
         ])
       );
       await expect(readdir(path.resolve(`${paths.archivesPath}/arm64`))).resolves.toEqual(
         expect.arrayContaining([
-          'chrome-mac.zip',
+          'chrome-headless-shell-mac-arm64.zip',
           expect.stringMatching(/^chromium-[0-9a-f]{7}-locales-linux_arm64\.zip$/),
         ])
       );

@@ -1,0 +1,18 @@
+title: Task health response properties
+type: object
+properties:
+  id:
+    type: string
+  last_update:
+    type: string
+  stats:
+    type: object
+    properties:
+      configuration:
+        $ref: 'configuration.yaml'
+      workload:
+        $ref: 'workload.yaml'
+  status:
+    type: string
+  timestamp:
+    type: string

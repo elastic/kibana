@@ -18,12 +18,12 @@ export const useAlertsQueryImpl = () => {
 
   const [alertStatus, setAlertStatus] = useState<AlertStatus>('all');
 
-  const assetIds = useMemo(() => hostNodes.map((n) => n.name), [hostNodes]);
+  const entityIds = useMemo(() => hostNodes.map((n) => n.name), [hostNodes]);
 
   const getAlertsEsQuery = useCallback(
     (status?: AlertStatus) =>
-      createAlertsEsQuery({ dateRange: searchCriteria.dateRange, assetIds, status }),
-    [assetIds, searchCriteria.dateRange]
+      createAlertsEsQuery({ dateRange: searchCriteria.dateRange, entityIds, status }),
+    [entityIds, searchCriteria.dateRange]
   );
 
   // Regenerate the query when status change even if is not used.

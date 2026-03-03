@@ -32,10 +32,61 @@ export const PackageInstallStatus = z.object({
   status: z.enum(['installed', 'already_installed']),
 });
 
+export type RuleBootstrapError = z.infer<typeof RuleBootstrapError>;
+export const RuleBootstrapError = z.object({
+  /**
+   * The list of rules that failed to bootstrap
+   */
+  rules: z.array(
+    z.object({
+      /**
+       * The ID of the rule that failed to bootstrap
+       */
+      rule_id: z.string(),
+    })
+  ),
+  /**
+   * The error message
+   */
+  message: z.string(),
+});
+
+export type RuleBootstrapResults = z.infer<typeof RuleBootstrapResults>;
+export const RuleBootstrapResults = z.object({
+  /**
+   * The total number of rules to be processed. This is a dynamic value and depends on the number of integrations installed that have bootstrappable rules
+   */
+  total: z.number().optional(),
+  /**
+   * The number of rules that were installed
+   */
+  installed: z.number(),
+  /**
+   * The number of rules that were updated
+   */
+  updated: z.number(),
+  /**
+   * The number of rules that were deleted
+   */
+  deleted: z.number(),
+  /**
+   * The number of rules that were skipped (already installed rules with no updates)
+   */
+  skipped: z.number().optional(),
+  /**
+   * The list of bootstrap errors
+   */
+  errors: z.array(RuleBootstrapError),
+});
+
 export type BootstrapPrebuiltRulesResponse = z.infer<typeof BootstrapPrebuiltRulesResponse>;
 export const BootstrapPrebuiltRulesResponse = z.object({
   /**
    * The list of packages that were installed or upgraded
    */
   packages: z.array(PackageInstallStatus),
+  /**
+   * The list of rules that were installed or upgraded
+   */
+  rules: RuleBootstrapResults.optional(),
 });

@@ -16,10 +16,10 @@ import { InstructionsSet } from './instructions_set';
 import { serverlessInstructions } from './serverless_instructions';
 import { Footer } from './footer';
 import { PrivilegeType } from '../../../../common/privilege_type';
-import type { AgentApiKey, InstructionSet } from './instruction_variants';
+import type { AgentApiKey, Instruction } from './instruction_variants';
 
 export function Onboarding() {
-  const [instructions, setInstructions] = useState<InstructionSet[]>([]);
+  const [instructions, setInstructions] = useState<Instruction[]>([]);
   const [agentApiKey, setAgentApiKey] = useState<AgentApiKey>({
     apiKey: null,
     error: false,
@@ -88,7 +88,7 @@ export function Onboarding() {
   useEffect(() => {
     // Here setInstructions will be called based on the condition for serverless, cloud or onPrem
     // right now we will only call the ServerlessInstruction directly
-    setInstructions([
+    setInstructions(
       serverlessInstructions(
         {
           baseUrl,
@@ -100,8 +100,8 @@ export function Onboarding() {
         apiKeyLoading,
         agentApiKey,
         createAgentKey
-      ),
-    ]);
+      )
+    );
   }, [agentApiKey, baseUrl, config, apiKeyLoading, agentStatus, agentStatusLoading]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
@@ -109,13 +109,8 @@ export function Onboarding() {
     <ObservabilityPageTemplate>
       <Introduction isBeta={false} guideLink={guideLink} />
       <EuiSpacer />
-      {instructionsExists &&
-        instructions.map((instruction) => (
-          <div key={instruction.title}>
-            <InstructionsSet instructions={instruction} />
-            <EuiSpacer />
-          </div>
-        ))}
+      {instructionsExists && <InstructionsSet instructions={instructions} />}
+      <EuiSpacer />
       <Footer />
     </ObservabilityPageTemplate>
   );

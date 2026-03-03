@@ -6,26 +6,39 @@
  */
 
 import React, { useMemo } from 'react';
-import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
+import type {
+  PartialThreeWayRuleDiff,
+  ThreeWayRuleFieldsDiff,
+} from '../../../../../common/api/detection_engine';
 import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
+import type { RuleDiffHeaderBarProps } from './diff_components';
 import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
 import { filterUnsupportedDiffOutcomes, getSectionedFieldDiffs } from './helpers';
-import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
+import type { FieldsGroupDiff, DiffLayout } from '../../model/rule_details/rule_field_diff';
 import * as i18n from './translations';
 
-interface PerFieldRuleDiffTabProps {
-  ruleDiff: PartialRuleDiff;
+interface PerFieldRuleDiffTabProps extends RuleDiffHeaderBarProps {
+  ruleDiff: PartialThreeWayRuleDiff;
   header?: React.ReactNode;
+  diffLayout?: DiffLayout;
 }
 
-export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabProps) => {
+export const PerFieldRuleDiffTab = ({
+  ruleDiff,
+  header,
+  leftDiffSideLabel,
+  rightDiffSideLabel,
+  leftDiffSideDescription,
+  rightDiffSideDescription,
+  diffLayout,
+}: PerFieldRuleDiffTabProps) => {
   const fieldsToRender = useMemo(() => {
     const fields: FieldsGroupDiff[] = [];
     // Filter out diff outcomes that we don't support displaying in the per-field diff flyout
     const filteredFieldDiffs = filterUnsupportedDiffOutcomes(ruleDiff.fields);
     for (const field of Object.keys(filteredFieldDiffs)) {
-      const typedField = field as keyof RuleFieldsDiff;
+      const typedField = field as keyof ThreeWayRuleFieldsDiff;
       const formattedDiffs = getFormattedFieldDiffGroups(typedField, filteredFieldDiffs);
       fields.push({ formattedDiffs, fieldsGroupName: typedField });
     }
@@ -44,12 +57,18 @@ export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabPro
 
   return (
     <>
-      <RuleDiffHeaderBar />
+      <RuleDiffHeaderBar
+        leftDiffSideLabel={leftDiffSideLabel}
+        rightDiffSideLabel={rightDiffSideLabel}
+        leftDiffSideDescription={leftDiffSideDescription}
+        rightDiffSideDescription={rightDiffSideDescription}
+      />
       {header}
       {aboutFields.length !== 0 && (
         <RuleDiffSection
           title={i18n.ABOUT_SECTION_LABEL}
           fieldGroups={aboutFields}
+          diffLayout={diffLayout}
           dataTestSubj="perFieldDiffAboutSection"
         />
       )}
@@ -57,6 +76,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabPro
         <RuleDiffSection
           title={i18n.DEFINITION_SECTION_LABEL}
           fieldGroups={definitionFields}
+          diffLayout={diffLayout}
           dataTestSubj="perFieldDiffDefinitionSection"
         />
       )}
@@ -64,6 +84,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabPro
         <RuleDiffSection
           title={i18n.SCHEDULE_SECTION_LABEL}
           fieldGroups={scheduleFields}
+          diffLayout={diffLayout}
           dataTestSubj="perFieldDiffScheduleSection"
         />
       )}
@@ -71,6 +92,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabPro
         <RuleDiffSection
           title={i18n.SETUP_GUIDE_SECTION_LABEL}
           fieldGroups={setupFields}
+          diffLayout={diffLayout}
           dataTestSubj="perFieldDiffSetupSection"
         />
       )}

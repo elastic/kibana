@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
@@ -58,6 +59,7 @@ const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
   caseData,
+  searchTerm,
   actionsNavigation,
   showAlertDetails,
   useFetchAlertData,
@@ -67,6 +69,7 @@ export const CaseViewActivity = ({
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
+  searchTerm?: string;
 }) => {
   const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
     LOCALSTORAGE_SORT_ORDER_KEY,
@@ -204,8 +207,18 @@ export const CaseViewActivity = ({
 
   return (
     <>
-      <EuiFlexItem grow={6}>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+      <EuiFlexItem
+        grow={6}
+        css={css`
+          max-width: 75%;
+        `}
+      >
+        <CaseViewTabs
+          caseData={caseData}
+          activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY}
+          searchTerm={searchTerm}
+        />
+        <EuiSpacer size="l" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}

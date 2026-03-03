@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { copy, Task } from '../lib';
+import type { Task } from '../lib';
+import { copy } from '../lib';
 
 export const ReplaceFavicon: Task = {
   description: 'Replacing favicons with built version',

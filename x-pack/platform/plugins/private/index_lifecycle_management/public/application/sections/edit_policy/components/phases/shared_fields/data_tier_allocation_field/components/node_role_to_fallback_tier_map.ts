@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { DataTierRole } from '../../../../../../../../../common/types';
+import type { DataTierRole } from '../../../../../../../../../common/types';
 
 export const nodeRoleToFallbackTierMap: Partial<Record<DataTierRole, string>> = {
   data_hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierHotLabel', {

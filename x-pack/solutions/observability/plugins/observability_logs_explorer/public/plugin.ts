@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityLogsExplorerConfig } from '../common';
@@ -26,7 +26,7 @@ export class ObservabilityLogsExplorerPlugin
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
     const title = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
-      defaultMessage: 'Logs Explorer',
+      defaultMessage: 'Logs explorer',
     });
 
     // App used solely to redirect from "/app/observability-logs-explorer" to "/app/discover"
@@ -35,9 +35,9 @@ export class ObservabilityLogsExplorerPlugin
       title,
       visibleIn: [],
       mount: async (appMountParams) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { discover }] = await core.getStartServices();
         const { renderDiscoverRedirect } = await import('./redirect_to_discover');
-        return renderDiscoverRedirect(coreStart, appMountParams);
+        return renderDiscoverRedirect(coreStart, discover, appMountParams);
       },
     });
 
@@ -47,9 +47,9 @@ export class ObservabilityLogsExplorerPlugin
       title,
       visibleIn: [],
       mount: async (appMountParams) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { discover }] = await core.getStartServices();
         const { renderDiscoverRedirect } = await import('./redirect_to_discover');
-        return renderDiscoverRedirect(coreStart, appMountParams);
+        return renderDiscoverRedirect(coreStart, discover, appMountParams);
       },
     });
 

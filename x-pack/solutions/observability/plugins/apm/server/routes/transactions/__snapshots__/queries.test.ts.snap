@@ -4,7 +4,7 @@ exports[`transaction queries fetches a transaction 1`] = `
 Object {
   "_source": Array [
     "span.links",
-    "transaction.agent.marks",
+    "transaction.marks.agent",
   ],
   "apm": Object {
     "sources": Array [
@@ -15,24 +15,10 @@ Object {
     ],
   },
   "fields": Array [
-    "trace.id",
-    "agent.name",
-    "processor.event",
-    "@timestamp",
-    "timestamp.us",
-    "service.name",
-    "transaction.id",
-    "transaction.duration.us",
-    "transaction.name",
-    "transaction.sampled",
-    "transaction.type",
-    "processor.name",
-    "service.language.name",
-    "url.full",
-    "transaction.page.url",
-    "http.response.status_code",
-    "http.request.method",
-    "user_agent.name",
+    Object {
+      "field": "*",
+      "include_unmapped": true,
+    },
   ],
   "query": Object {
     "bool": Object {

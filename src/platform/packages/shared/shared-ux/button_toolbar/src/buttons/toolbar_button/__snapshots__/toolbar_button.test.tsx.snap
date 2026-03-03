@@ -3,7 +3,7 @@
 exports[`<ToolbarButton /> iconButton is rendered - default 1`] = `
 <button
   as="iconButton"
-  class="euiButtonIcon emotion-EuiButtonIcon"
+  class="euiButtonIcon emotion-euiButtonIcon-m-base-text-ToolbarIconButton"
   intl="[object Object]"
   type="button"
 >
@@ -18,7 +18,7 @@ exports[`<ToolbarButton /> iconButton is rendered - default 1`] = `
 
 exports[`<ToolbarButton /> standard is rendered - default 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text-ToolbarStandardButton"
   intl="[object Object]"
   type="button"
 >
@@ -26,7 +26,7 @@ exports[`<ToolbarButton /> standard is rendered - default 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>
@@ -40,7 +40,7 @@ exports[`<ToolbarButton /> standard is rendered - default 1`] = `
 
 exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary-ToolbarStandardButton"
   intl="[object Object]"
   type="button"
 >
@@ -48,7 +48,7 @@ exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>
@@ -62,7 +62,7 @@ exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
 
 exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary-ToolbarStandardButton"
   intl="[object Object]"
   type="button"
 >
@@ -74,7 +74,7 @@ exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
       data-euiicon-type="plusInCircle"
     />
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>

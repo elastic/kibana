@@ -3,32 +3,32 @@
 
 product: Kibana
 collection: Alerting and action settings in Kibana
+id: alert-action-settings-kb
 page_description: |
   Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
-  
+
   1. [Set up {{kib}} to work with {{stack}} {{security-features}}](docs-content://deploy-manage/security/secure-your-cluster-deployment.md).
   2. [Set up TLS encryption between {{kib}} and {{es}}](docs-content://deploy-manage/security/set-up-basic-security-plus-https.  md#encrypt-kibana-http).
   3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`](#general-alert-action-settings).
-  
-  You can configure the following settings in the `kibana.yml` file.
+
+note: 'If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
 
 groups:
   - group: General settings
     id: general-alert-action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
         # id:
         description: |
           A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in Elasticsearch. Third party credentials — such as the username and password used to connect to an SMTP service — are an example of encrypted properties.
-          
+
           Kibana offers a [CLI tool](/kibana/docs/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
-          
+
           If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana.
-          
+
           Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -36,30 +36,28 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        datatype: "string"
+        datatype: string
         # default:
         # options:
         #   - option:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
   - group: Action settings
     id: action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.actions.allowedHosts
         # id:
         description: |
           A list of hostnames that Kibana is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
-          
+
           Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -74,19 +72,18 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings
         # id:
         description: |
           A list of custom host settings to override existing global settings.
-          
+
           Each entry in the list must have a `url` property, to associate a connection type (mail or https), hostname and port with the remaining options in the entry.
-          
+
           The settings in `xpack.actions.customHostSettings` can be used to override the global option `xpack.actions.ssl.verificationMode` and provide customized TLS settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the value to be used by default for all servers, then add an entry in `xpack.actions.customHostSettings` for every server that requires customized settings.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -101,13 +98,12 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           In the following example, two custom host settings are defined.  The first provides a custom host setting for mail server `mail.example.com` using port 465 that supplies server certificate authentication data from both a file and inline, and requires TLS for the connection.  The second provides a custom host setting for https server `webhook.example.com` which turns off server certificate authentication, that will allow Kibana to connect to the server if it's using a self-signed certificate.  The individual properties that can be used in the settings are documented below.
-          
+
           ```yaml
           xpack.actions.customHostSettings:
             - url: smtp://mail.example.com:465
@@ -131,9 +127,9 @@ groups:
         # id:
         description: |
           A URL associated with this custom host setting.  Should be in the form of `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the port is not provided, 443 is used for `https` and 25 is used for `smtp`.  The `smtp` URLs are used for the Email actions that use this server, and the `https` URLs are used for actions which use `https` to connect to services.
-          
+
           Entries with `https` URLs can use the `ssl` options, and entries with `smtp` URLs can use both the `ssl` and `smtp` options.
-          
+
           No other URL values should be part of this URL, including paths, query strings, and authentication information.  When an http or smtp request is made as part of running an action, only the protocol, hostname, and port of the URL for that request are used to look up these configuration values.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -148,10 +144,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.ignoreTLS
@@ -171,10 +166,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.requireTLS
@@ -194,10 +188,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
@@ -219,10 +212,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles
@@ -242,9 +234,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData
@@ -264,10 +255,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.email.domain_allowlist
@@ -286,8 +276,105 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-         - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.recipient_allowlist
+        id: action-config-email-recipient-allowlist
+        description: |
+          A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting cannot be used with `xpack.actions.email.domain_allowlist`."
+        # important: ""
+        datatype: string
+        # default:
+        applies_to:
+          stack: ga 9.2
+          deployment:
+            self: ga
+            ess: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.actions.email.recipient_allowlist:["admin-*@company.org", "sales-*@example.com"]
+          ```
+
+          Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
+
+      - setting: xpack.actions.email.services.ses.host
+        id: action-config-email-services-ses-host
+        description: |
+          {applies_to}`stack: ga 9.1` The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting"
+        # important: ""
+        datatype: string
+        default: "email-smtp.us-east-1.amazonaws.com"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          stack: ga 9.1
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.ses.port
+        id: action-config-email-services-ses-port
+        description: |
+          {applies_to}`stack: ga 9.1` The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 465
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          stack: ga 9.1
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.enabled
+        id: action-config-email-services-
+        description: |
+          {applies_to}`stack: ga 9.1` An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: enum
+        default: ["*"]
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          stack: ga 9.1
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.enableFooterInEmail
@@ -306,8 +393,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-         - cloud
+        applies_to:
+          deployment:
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.enabledActionTypes
@@ -329,10 +418,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.microsoftExchangeUrl
@@ -352,9 +440,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.microsoftGraphApiUrl
@@ -374,9 +461,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.microsoftGraphApiScope
@@ -396,9 +482,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.proxyUrl
@@ -424,13 +509,12 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the proxy in tunneling mode, and display some of the interaction between the client and the proxy.
-          
+
           ```sh
           curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
           ```
@@ -454,17 +538,16 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
           ```
-          
+
           If applicable, include the subdomain in the hostname
 
 
@@ -487,13 +570,12 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
           ```
@@ -517,10 +599,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.ssl.proxyVerificationMode
@@ -546,10 +627,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.ssl.verificationMode
@@ -575,10 +655,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.maxResponseContentLength
@@ -598,10 +677,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.responseTimeout
@@ -621,10 +699,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.run.maxAttempts
@@ -644,10 +721,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.run.connectorTypeOverrides
@@ -667,10 +743,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           For example:
 
@@ -699,10 +774,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
   - group: Preconfigured connector settings
@@ -711,14 +785,14 @@ groups:
       These settings vary depending on which type of preconfigured connector you're adding.
     example: |
       For example:
-      
+
       ```yaml
       xpack.actions.preconfigured:
         my-server-log:
           name: preconfigured-server-log-connector-type
           actionTypeId: .server-log
       ```
-      
+
       For more examples, go to [Preconfigured connectors](/kibana/docs/reference/connectors-kibana/pre-configured-connectors.md).
 
     settings:
@@ -740,10 +814,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.actions.preconfigured
@@ -763,9 +836,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.actionTypeId
@@ -791,9 +863,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config
@@ -813,9 +884,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiProvider
@@ -836,9 +906,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiUrl
@@ -868,9 +937,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.appId
@@ -892,9 +960,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.clientId
@@ -917,9 +984,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.configUrl
@@ -939,9 +1005,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentJson
@@ -961,9 +1026,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentMethod
@@ -985,9 +1049,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentUrl
@@ -1007,9 +1070,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentJson
@@ -1029,9 +1091,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod
@@ -1053,9 +1114,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl
@@ -1075,9 +1135,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey
@@ -1097,9 +1156,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.defaultModel
@@ -1107,9 +1165,16 @@ groups:
         description: |
           The default model to use for requests, which varies by connector:
 
-          * For an [{{bedrock}} connector](/kibana/docs/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-          * For a [{{gemini}} connector](/kibana/docs/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
-          * For a [OpenAI connector](/kibana/docs/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
+          * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
+            * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
+            * {applies_to}`stack: ga 9.2` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
+            * {applies_to}`stack: ga 9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+            * {applies_to}`stack: ga 9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+          * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models.
+            * {applies_to}`serverless: ga` Defaults to `gemini-2.5-pro`.
+            * {applies_to}`stack: ga 9.1` Defaults to `gemini-2.5-pro`.
+            * {applies_to}`stack: ga 9.0` Defaults to `gemini-1.5-pro-002`.
+          * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -1123,9 +1188,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.executionTimeField
@@ -1145,9 +1209,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.from
@@ -1167,9 +1230,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey
@@ -1189,9 +1251,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl
@@ -1211,9 +1272,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.hasAuth
@@ -1233,9 +1293,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.headers
@@ -1255,9 +1314,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.host
@@ -1277,9 +1335,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.index
@@ -1299,9 +1356,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.isOAuth
@@ -1321,9 +1377,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.jwtKeyId
@@ -1343,9 +1398,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings
@@ -1365,9 +1419,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig
@@ -1387,9 +1440,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig
@@ -1409,9 +1461,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig
@@ -1431,9 +1482,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig
@@ -1453,9 +1503,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig
@@ -1475,9 +1524,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig
@@ -1497,9 +1545,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig
@@ -1519,9 +1566,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.method
@@ -1542,9 +1588,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.orgId
@@ -1564,9 +1609,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.port
@@ -1586,9 +1630,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.projectKey
@@ -1608,9 +1651,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.secure
@@ -1630,9 +1672,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.service
@@ -1652,9 +1693,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.tenantId
@@ -1674,9 +1714,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson
@@ -1696,9 +1735,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod
@@ -1720,9 +1758,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl
@@ -1742,9 +1779,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.url
@@ -1768,9 +1804,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue
@@ -1790,9 +1825,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesBasic
@@ -1812,9 +1846,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesTableApi
@@ -1834,9 +1867,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl
@@ -1856,9 +1888,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl
@@ -1878,9 +1909,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.name
@@ -1900,9 +1930,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets
@@ -1922,9 +1951,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.accessKey
@@ -1944,9 +1972,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apikey
@@ -1966,9 +1993,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson
@@ -1991,9 +2017,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeyId
@@ -2013,9 +2038,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeySecret
@@ -2035,9 +2059,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiToken
@@ -2057,9 +2080,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.clientSecret
@@ -2082,9 +2104,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.email
@@ -2107,9 +2128,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.password
@@ -2133,9 +2153,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKey
@@ -2155,9 +2174,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKeyPassword
@@ -2177,9 +2195,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.routingKey
@@ -2199,9 +2216,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secret
@@ -2221,9 +2237,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl
@@ -2243,9 +2258,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.token
@@ -2270,9 +2284,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.user
@@ -2296,9 +2309,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl
@@ -2321,9 +2333,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.username
@@ -2343,9 +2354,30 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
+         # example: |
+
+      - setting: xpack.actions.webhook.ssl.pfx.enabled
+        # id:
+        description: |
+          {applies_to}`stack: ga 9.1` Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          stack: ga 9.1
+          deployment:
+            self: all
          # example: |
 
   - group: Alerting settings
@@ -2371,14 +2403,13 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
-        # id: 
+        # id:
         description: |
           Specifies the maximum number of rules to run per minute.
         # state: deprecated/hidden/tech-preview
@@ -2394,9 +2425,8 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
+            self: all
          # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.value
@@ -2416,10 +2446,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.enforce
@@ -2439,10 +2468,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.actions.max
@@ -2462,10 +2490,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.alerts.max
@@ -2485,10 +2512,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.timeout
@@ -2508,10 +2534,9 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
          # example: |
 
       - setting: xpack.alerting.rules.run.ruleTypeOverrides
@@ -2531,13 +2556,12 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.alerting.rules.run:
               timeout: '5m'
@@ -2563,13 +2587,12 @@ groups:
         #     description: ""
         # type: static/dynamic
         applies_to:
-          stack: ga
           deployment:
-            self: ga
-            ess: ga
+            self: all
+            ess: all
         example: |
           For example:
-          
+
           ```yaml
           xpack.alerting.rules.run:
               actions:
@@ -2577,4 +2600,24 @@ groups:
                   connectorTypeOverrides:
                       - id: '.server-log'
                         max: 5
+          ```
+
+      - setting: xpack.alerting.rules.apiKeyType
+        description: |
+          The API key type to use for executing alerting rules. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key. Set this to `uiam` to use UIAM API keys instead.
+        datatype: string
+        default: es
+        options:
+          - option: es
+            description: Elasticsearch API key
+          - option: uiam
+            description: UIAM api key
+        applies_to:
+          deployment:
+            ess: all
+        example: |
+          For example:
+
+          ```yaml
+          xpack.alerting.rules.apiKeyType: uiam
           ```

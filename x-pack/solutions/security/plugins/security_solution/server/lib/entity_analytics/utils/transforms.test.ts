@@ -19,6 +19,7 @@ import {
   scheduleLatestTransformNow,
   scheduleTransformNow,
   upgradeLatestTransformIfNeeded,
+  getLatestTransformId,
 } from './transforms';
 
 const transformId = 'test_transform_id';
@@ -48,6 +49,7 @@ const timeSeriesIndex = getRiskScoreTimeSeriesIndex('tests');
 const transformConfig = getTransformOptions({
   dest: latestIndex,
   source: [timeSeriesIndex],
+  namespace: 'tests',
 });
 
 const updatedTransformsMock = {
@@ -101,11 +103,17 @@ const outdatedTransformsRequiredReinstallMock = {
   ],
 } as TransformGetTransformResponse;
 
-const logger = loggingSystemMock.createLogger();
-
 describe('transforms utils', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggingSystemMock.createLogger();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('scheduleTransformNow', () => {
@@ -204,6 +212,14 @@ describe('transforms utils', () => {
       expect(esClient.transform.stopTransform).toHaveBeenCalled();
       expect(esClient.transform.deleteTransform).toHaveBeenCalled();
       expect(esClient.transform.putTransform).toHaveBeenCalled();
+    });
+  });
+
+  describe('checkTransformNameLength', () => {
+    it('should limit the length of tranformId to less than or equal 64 characters', async () => {
+      const longTransformId = 'a_a-'.repeat(1000);
+      const response = await getLatestTransformId(longTransformId);
+      expect(response.length).toBeLessThanOrEqual(36);
     });
   });
 });

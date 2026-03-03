@@ -8,7 +8,6 @@
  */
 
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { REMOVED_TYPES } from '../../core';
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
 
@@ -36,13 +35,18 @@ export const createContext = ({
     kibanaVersion,
     indexPrefix,
     types,
-    typeVirtualVersions: getVirtualVersionMap(types.map((type) => typeRegistry.getType(type)!)),
+    typeVirtualVersions: getVirtualVersionMap({
+      types: types.map((type) => typeRegistry.getType(type)!),
+      // we store this Map(type=>modelVersion) in the meta
+      // with this flag we default to 10.0.0 for types that do NOT define modelVersions
+      useModelVersionsOnly: true,
+    }),
     elasticsearchClient,
     typeRegistry,
     serializer,
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
-    deletedTypes: REMOVED_TYPES,
+    deletedTypes: typeRegistry.getLegacyTypes(),
     batchSize: migrationConfig.batchSize,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
     nodeRoles,

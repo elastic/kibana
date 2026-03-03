@@ -51,7 +51,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h3>
+          <h3 id="ml-flyout-layer-title">
             <FormattedMessage
               id="xpack.ml.embeddables.geoJobFlyout.title"
               defaultMessage="Create anomaly detection job"

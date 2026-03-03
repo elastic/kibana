@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useLayoutEffect } from 'react';
+import type { CSSProperties } from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
@@ -79,6 +81,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   if (onFilter) {
     return (
       <button
+        data-test-subj="metric_value_button"
         css={{ display: 'block' }}
         onClick={() => onFilter()}
         title={i18n.translate('expressionLegacyMetricVis.filterTitle', {

@@ -8,10 +8,12 @@
 import { useMemo } from 'react';
 import {
   ASSET_INVENTORY_ENABLE_API_PATH,
+  ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH,
   ASSET_INVENTORY_STATUS_API_PATH,
 } from '../../../common/api/asset_inventory/constants';
 import type {
   AssetInventoryEnableResponse,
+  AssetInventoryInstallDataViewResponse,
   AssetInventoryStatusResponse,
 } from '../../../common/api/asset_inventory/types';
 import { API_VERSIONS } from '../../../common/constants';
@@ -37,9 +39,20 @@ export const useAssetInventoryRoutes = () => {
       });
     };
 
+    const postInstallAssetInventoryDataView = async () => {
+      return http.fetch<AssetInventoryInstallDataViewResponse>(
+        ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH,
+        {
+          method: 'POST',
+          version: API_VERSIONS.public.v1,
+        }
+      );
+    };
+
     return {
       getAssetInventoryStatus,
       postEnableAssetInventory,
+      postInstallAssetInventoryDataView,
     };
   }, [http]);
 };

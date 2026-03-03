@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../../../schemas';
 import type {
@@ -18,6 +18,7 @@ import type {
 import { INITIAL_REST_VERSION } from '../../../constants';
 import { indexPatternsRuntimeResponseSchema } from '../../schema';
 import type { IndexPatternsRuntimeResponseType } from '../../route_types';
+import { toApiSpec } from '../util/to_api_spec';
 
 export const registerCreateScriptedFieldRoute = (
   router: IRouter,
@@ -27,15 +28,18 @@ export const registerCreateScriptedFieldRoute = (
   >
 ) => {
   router.versioned
-    .post({ path: '/api/index_patterns/index_pattern/{id}/scripted_field', access: 'public' })
+    .post({
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field',
+      access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['indexPatterns:manage'],
+        },
+      },
+    })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
-        security: {
-          authz: {
-            requiredPrivileges: ['indexPatterns:manage'],
-          },
-        },
         validate: {
           request: {
             params: schema.object(
@@ -96,7 +100,9 @@ export const registerCreateScriptedFieldRoute = (
 
           const body: IndexPatternsRuntimeResponseType = {
             field: fieldObject.toSpec(),
-            index_pattern: await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } }),
+            index_pattern: toApiSpec(
+              await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } })
+            ),
           };
 
           return res.ok({

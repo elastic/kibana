@@ -1,6 +1,6 @@
 # SIN
 
-The SIN function calculates the sine of a given angle.
+The SIN function returns the sine of a given angle, where the angle is specified in radians.
 
 ## Syntax
 
@@ -10,16 +10,13 @@ The SIN function calculates the sine of a given angle.
 
 #### angle
 
-The angle for which the sine value is to be calculated. The angle should be in radians.
+An angle in radians. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-```esql
-ROW a=1.8
-| EVAL sin = SIN(a)
-```
+Calculates the sine of the value in column `a` (which is set to 1.8 radians) and stores the result in a new column called `sin`:
 
 ```esql
-ROW angle=0.5
-| EVAL sine_value = SIN(angle)
+ROW a=1.8
+| EVAL sin=SIN(a)
 ```

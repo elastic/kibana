@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import * as t from 'io-ts';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;
@@ -394,7 +394,7 @@ type AssertAssignable<T, U extends T> = T;
 
 // Used to check that the validation schema is aligned with the type from ES
 declare type _ = AssertAssignable<
-  keyof Omit<QueryDslQueryContainer, 'script' | 'script_score'>,
+  keyof Omit<NonNullable<QueryDslQueryContainer>, 'script' | 'script_score'>,
   t.TypeOf<typeof allowedFilterKeysSchema>
 >;
 

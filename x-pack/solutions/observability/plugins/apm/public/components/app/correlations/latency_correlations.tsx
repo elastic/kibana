@@ -51,6 +51,9 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -69,6 +72,24 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   } = useApmPluginContext();
 
   const { euiTheme } = useEuiTheme();
+
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: {
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { progress, response, startFetch, cancelFetch } = useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(response, progress.isRunning);
@@ -140,7 +161,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </>
@@ -205,10 +226,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
               { defaultMessage: 'Filter' }
             ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
-              { defaultMessage: 'Filter by value' }
-            ),
+            description: ({ fieldName }) =>
+              i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
+                { defaultMessage: 'Filter by {fieldName}', values: { fieldName } }
+              ),
             icon: 'plusInCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
@@ -223,10 +245,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
               { defaultMessage: 'Exclude' }
             ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
-              { defaultMessage: 'Filter out value' }
-            ),
+            description: ({ fieldName }) =>
+              i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
+                { defaultMessage: 'Filter out {fieldName}', values: { fieldName } }
+              ),
             icon: 'minusInCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
@@ -315,6 +338,25 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <TotalDocCountLabel
             eventType={ProcessorEvent.transaction}
             totalDocCount={response.totalDocCount}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <OpenInDiscover
+            variant="button"
+            dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+              sampleRangeFrom,
+              sampleRangeTo,
+            }}
           />
         </EuiFlexItem>
 

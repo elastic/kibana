@@ -101,41 +101,75 @@ describe('Component template serialization', () => {
   });
 
   describe('serializeComponentTemplate()', () => {
+    const deserializedComponentTemplate = {
+      name: 'my_component_template',
+      version: 1,
+      _kbnMeta: {
+        usedBy: [],
+        isManaged: false,
+      },
+      _meta: {
+        serialization: {
+          id: 10,
+          class: 'MyComponentTemplate',
+        },
+        description: 'set number of shards to one',
+      },
+      template: {
+        settings: {
+          number_of_shards: 1,
+        },
+        mappings: {
+          _source: {
+            enabled: false,
+          },
+          properties: {
+            host_name: {
+              type: 'keyword',
+            },
+            created_at: {
+              type: 'date',
+              format: 'EEE MMM dd HH:mm:ss Z yyyy',
+            },
+          },
+        },
+      },
+    };
     test('serialize a component template', () => {
+      expect(serializeComponentTemplate(deserializedComponentTemplate)).toEqual({
+        version: 1,
+        _meta: {
+          serialization: {
+            id: 10,
+            class: 'MyComponentTemplate',
+          },
+          description: 'set number of shards to one',
+        },
+        template: {
+          settings: {
+            number_of_shards: 1,
+          },
+          mappings: {
+            _source: {
+              enabled: false,
+            },
+            properties: {
+              host_name: {
+                type: 'keyword',
+              },
+              created_at: {
+                type: 'date',
+                format: 'EEE MMM dd HH:mm:ss Z yyyy',
+              },
+            },
+          },
+        },
+      });
+    });
+    test('serialize a component template with data stream options', () => {
       expect(
-        serializeComponentTemplate({
-          name: 'my_component_template',
-          version: 1,
-          _kbnMeta: {
-            usedBy: [],
-            isManaged: false,
-          },
-          _meta: {
-            serialization: {
-              id: 10,
-              class: 'MyComponentTemplate',
-            },
-            description: 'set number of shards to one',
-          },
-          template: {
-            settings: {
-              number_of_shards: 1,
-            },
-            mappings: {
-              _source: {
-                enabled: false,
-              },
-              properties: {
-                host_name: {
-                  type: 'keyword',
-                },
-                created_at: {
-                  type: 'date',
-                  format: 'EEE MMM dd HH:mm:ss Z yyyy',
-                },
-              },
-            },
-          },
+        serializeComponentTemplate(deserializedComponentTemplate, {
+          failure_store: { enabled: true },
         })
       ).toEqual({
         version: 1,
@@ -163,6 +197,9 @@ describe('Component template serialization', () => {
                 format: 'EEE MMM dd HH:mm:ss Z yyyy',
               },
             },
+          },
+          data_stream_options: {
+            failure_store: { enabled: true },
           },
         },
       });

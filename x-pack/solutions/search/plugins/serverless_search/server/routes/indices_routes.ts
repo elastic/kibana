@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
 import { fetchIndex } from '../lib/indices/fetch_index';
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => {
@@ -25,6 +25,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
           search_query: schema.maybe(schema.string()),
           size: schema.number({ defaultValue: 20, min: 0 }),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -59,6 +65,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
           query: schema.maybe(schema.string()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
@@ -85,6 +97,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
         params: schema.object({
           indexName: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -119,6 +137,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
             min: 0,
           }),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {

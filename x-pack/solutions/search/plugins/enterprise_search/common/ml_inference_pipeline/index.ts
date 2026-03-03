@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IngestInferenceProcessor,
   IngestPipeline,
   MlTrainedModelConfig,
@@ -18,14 +18,14 @@ import {
   BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
 
-import { MlModel } from '../types/ml';
+import type { MlModel } from '../types/ml';
 
-import {
+import type {
   MlInferencePipeline,
   CreateMLInferencePipeline,
-  TrainedModelState,
   InferencePipelineInferenceConfig,
 } from '../types/pipelines';
+import { TrainedModelState } from '../types/pipelines';
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
@@ -166,8 +166,8 @@ export const parseMlInferenceParametersFromPipeline = (
   pipeline: IngestPipeline
 ): CreateMLInferencePipeline | null => {
   const inferenceProcessors = pipeline?.processors
-    ?.filter((p) => p.inference)
-    .map((p) => p.inference) as IngestInferenceProcessor[];
+    ?.filter((p) => p?.inference)
+    .map((p) => p!.inference) as IngestInferenceProcessor[];
   if (!inferenceProcessors || inferenceProcessors.length === 0) {
     return null;
   }

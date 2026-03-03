@@ -16,87 +16,43 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
-import type { EventNonEcsData } from '../../../common/typings';
-import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
+import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
+import { useKibana } from '../../utils/kibana_react';
 
-// eslint-disable-next-line react/function-component-definition
-export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
-  config,
-  observabilityRuleTypeRegistry,
-  alert,
-  id,
-  tableId,
-  dataGridRef,
-  refresh,
-  isLoading,
-  isLoadingAlerts,
-  alerts,
-  oldAlertsData,
-  ecsAlertsData,
-  alertsCount,
-  browserFields,
-  isLoadingMutedAlerts,
-  mutedAlerts,
-  isLoadingCases,
-  cases,
-  isLoadingMaintenanceWindows,
-  maintenanceWindows,
-  pageIndex,
-  pageSize,
-  openAlertInFlyout,
-  showAlertStatusWithFlapping,
-  bulkActionsStore,
-  columns,
-  renderCellValue,
-  renderCellPopover,
-  renderActionsCell,
-  renderFlyoutHeader,
-  renderFlyoutBody,
-  renderFlyoutFooter,
-}) => {
-  const { services } = useAlertsTableContext();
+export function AlertActions(
+  props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
+) {
+  const {
+    observabilityRuleTypeRegistry,
+    alert,
+    tableId,
+    refresh,
+    parentAlert,
+    rowIndex,
+    onExpandedAlertIndexChange,
+    services,
+  } = props;
   const {
     http: {
       basePath: { prepend },
     },
+    cases,
   } = services;
-  const {
-    helpers: { getRuleIdFromEvent, canUseCases },
-    hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
-  } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+  const { telemetryClient } = useKibana().services;
 
-  const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
-  const data = useMemo(
-    () =>
-      Object.entries(alert ?? {}).reduce<EventNonEcsData[]>(
-        (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-        []
-      ),
-    [alert]
-  );
+  const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const ecsData = useMemo<Ecs>(
-    () => ({
-      _id: alert._id,
-      _index: alert._index,
-    }),
-    [alert._id, alert._index]
-  );
-  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -125,130 +81,38 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const onAddToCase = useCallback(
+    ({ isNewCase }: { isNewCase: boolean }) => {
+      telemetryClient.reportAlertAddedToCase(
+        isNewCase,
+        tableId || 'unknown',
+        observabilityAlert.fields['kibana.alert.rule.rule_type_id']
+      );
 
-  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
-    return ecsData?._id
-      ? [
-          {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
-          },
-        ]
-      : [];
-  }, [ecsData, getRuleIdFromEvent, data]);
+      refresh?.();
+    },
+    [telemetryClient, tableId, observabilityAlert.fields, refresh]
+  );
 
-  const onSuccess = useCallback(() => {
-    refresh();
-  }, [refresh]);
+  const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
+    useCaseActions({
+      onAddToCase,
+      alerts: [alert],
+      services: {
+        cases,
+      },
+    });
 
-  const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = useCasesAddToExistingCaseModal({ onSuccess });
-
-  const closeActionsPopover = () => {
+  const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
-  };
+  }, [setIsPopoverOpen]);
 
   const toggleActionsPopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
 
-  const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: caseAttachments });
-    closeActionsPopover();
-  };
-
-  const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
-    closeActionsPopover();
-  };
-
-  const defaultRowActions = useMemo(
-    () => (
-      <DefaultAlertActions
-        key="defaultRowActions"
-        onActionExecuted={closeActionsPopover}
-        isAlertDetailsEnabled={true}
-        resolveRulePagePath={(ruleId, currentPageId) =>
-          currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
-        }
-        resolveAlertPagePath={(alertId, currentPageId) =>
-          currentPageId !== ALERT_DETAILS_PAGE_ID ? paths.observability.alertDetails(alertId) : null
-        }
-        tableId={tableId}
-        dataGridRef={dataGridRef}
-        refresh={refresh}
-        isLoading={isLoading}
-        isLoadingAlerts={isLoadingAlerts}
-        alert={alert}
-        alerts={alerts}
-        oldAlertsData={oldAlertsData}
-        ecsAlertsData={ecsAlertsData}
-        alertsCount={alertsCount}
-        browserFields={browserFields}
-        isLoadingMutedAlerts={isLoadingMutedAlerts}
-        mutedAlerts={mutedAlerts}
-        isLoadingCases={isLoadingCases}
-        cases={cases}
-        isLoadingMaintenanceWindows={isLoadingMaintenanceWindows}
-        maintenanceWindows={maintenanceWindows}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        openAlertInFlyout={openAlertInFlyout}
-        showAlertStatusWithFlapping={showAlertStatusWithFlapping}
-        bulkActionsStore={bulkActionsStore}
-        columns={columns}
-        renderCellValue={renderCellValue}
-        renderCellPopover={renderCellPopover}
-        renderActionsCell={renderActionsCell}
-        renderFlyoutHeader={renderFlyoutHeader}
-        renderFlyoutBody={renderFlyoutBody}
-        renderFlyoutFooter={renderFlyoutFooter}
-        services={services}
-        config={config}
-        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-      />
-    ),
-    [
-      alert,
-      alerts,
-      alertsCount,
-      browserFields,
-      bulkActionsStore,
-      cases,
-      columns,
-      config,
-      dataGridRef,
-      ecsAlertsData,
-      isLoading,
-      isLoadingAlerts,
-      isLoadingCases,
-      isLoadingMaintenanceWindows,
-      isLoadingMutedAlerts,
-      maintenanceWindows,
-      mutedAlerts,
-      observabilityRuleTypeRegistry,
-      oldAlertsData,
-      openAlertInFlyout,
-      pageIndex,
-      pageSize,
-      refresh,
-      renderActionsCell,
-      renderCellPopover,
-      renderCellValue,
-      renderFlyoutBody,
-      renderFlyoutFooter,
-      renderFlyoutHeader,
-      services,
-      showAlertStatusWithFlapping,
-      tableId,
-    ]
-  );
-
   const actionsMenuItems = [
-    ...(userCasesPermissions.createComment && userCasesPermissions.read
+    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
@@ -272,7 +136,25 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           </EuiContextMenuItem>,
         ]
       : []),
-    defaultRowActions,
+    useMemo(
+      () => (
+        <DefaultAlertActions<ObservabilityAlertsTableContext>
+          {...props}
+          key="defaultRowActions"
+          onActionExecuted={closeActionsPopover}
+          isAlertDetailsEnabled={true}
+          resolveRulePagePath={(ruleId, currentPageId) =>
+            currentPageId !== RULE_DETAILS_PAGE_ID ? paths.observability.ruleDetails(ruleId) : null
+          }
+          resolveAlertPagePath={(alertId, currentPageId) =>
+            currentPageId !== ALERT_DETAILS_PAGE_ID
+              ? paths.observability.alertDetails(alertId)
+              : null
+          }
+        />
+      ),
+      [closeActionsPopover, props]
+    ),
   ];
 
   const actionsToolTip =
@@ -285,30 +167,38 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         });
 
   const onExpandEvent = () => {
-    const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
-
-    openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID]);
+    onExpandedAlertIndexChange(rowIndex);
   };
+
+  const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
 
   return (
     <>
-      <EuiFlexItem>
-        <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS}>
-          <EuiButtonIcon
-            data-test-subj="expand-event"
-            iconType="expand"
-            onClick={onExpandEvent}
-            size="s"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      {viewInAppUrl !== '' && !isInApp ? (
+      {!parentAlert && (
+        <EuiFlexItem>
+          <EuiToolTip
+            data-test-subj="expand-event-tool-tip"
+            content={VIEW_DETAILS}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="expand-event"
+              iconType="expand"
+              onClick={onExpandEvent}
+              size="s"
+              color="text"
+              aria-label={VIEW_DETAILS}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {!hideViewInApp && (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
               defaultMessage: 'View in app',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
@@ -323,17 +213,18 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
             />
           </EuiToolTip>
         </EuiFlexItem>
-      ) : null}
+      )}
 
       <EuiFlexItem
         css={{
           textAlign: 'center',
         }}
+        grow={parentAlert ? false : undefined}
       >
         <EuiPopover
           anchorPosition="downLeft"
           button={
-            <EuiToolTip content={actionsToolTip}>
+            <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={actionsToolTip}
                 color="text"
@@ -358,7 +249,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       </EuiFlexItem>
     </>
   );
-};
+}
 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export

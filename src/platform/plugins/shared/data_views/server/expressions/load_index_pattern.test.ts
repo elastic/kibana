@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IndexPatternLoadStartDependencies } from '../../common/expressions';
+import type { IndexPatternLoadStartDependencies } from '../../common/expressions';
 import { getFunctionDefinition } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {

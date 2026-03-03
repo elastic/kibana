@@ -7,7 +7,7 @@
 
 import { MockRuleMigrationsDataClient } from '../../data/__mocks__/mocks';
 import { IntegrationRetriever } from './integration_retriever';
-import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
+import type { RuleMigrationsRetrieverDeps } from './rule_migrations_retriever';
 
 describe('IntegrationRetriever', () => {
   let integrationRetriever: IntegrationRetriever;
@@ -22,8 +22,8 @@ describe('IntegrationRetriever', () => {
   beforeEach(() => {
     integrationRetriever = new IntegrationRetriever({
       data: mockRuleMigrationsDataClient,
-    } as RuleMigrationsRetrieverClients);
-    mockRuleMigrationsDataClient.integrations.retrieveIntegrations.mockImplementation(
+    } as RuleMigrationsRetrieverDeps);
+    mockRuleMigrationsDataClient.integrations.semanticSearch.mockImplementation(
       async (_: string) => {
         return mockIntegrationItem;
       }
@@ -31,11 +31,9 @@ describe('IntegrationRetriever', () => {
   });
 
   it('should retrieve integrations', async () => {
-    const result = await integrationRetriever.getIntegrations('test');
+    const result = await integrationRetriever.search('test');
 
-    expect(mockRuleMigrationsDataClient.integrations.retrieveIntegrations).toHaveBeenCalledWith(
-      'test'
-    );
+    expect(mockRuleMigrationsDataClient.integrations.semanticSearch).toHaveBeenCalledWith('test');
     expect(result).toEqual(mockIntegrationItem);
   });
 });

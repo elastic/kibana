@@ -16,15 +16,15 @@ import type {
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { makeFloatString } from './utils';
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { RuleServices, SecuritySharedParams } from '../types';
-import { createEnrichEventsFunction } from './enrichments';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
+import type { EnrichEventsWrapper } from './enrichments/types';
+import { enrichEvents } from './enrichments';
 
-export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
+export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
   success: boolean;
   bulkCreateDuration: string;
   enrichmentDuration: string;
@@ -36,7 +36,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 }
 
 export const bulkCreateWithSuppression = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
 >({
   sharedParams,
   wrappedDocs,
@@ -44,19 +44,17 @@ export const bulkCreateWithSuppression = async <
   suppressionWindow,
   isSuppressionPerRuleExecution,
   maxAlerts,
-  experimentalFeatures,
   ruleType,
 }: {
   sharedParams: SecuritySharedParams;
-  wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
-  services: RuleServices;
+  wrappedDocs: Array<WrappedAlert<T> & { subAlerts?: Array<WrappedAlert<T>> }>;
+  services: SecurityRuleServices;
   suppressionWindow: string;
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
-  experimentalFeatures: ExperimentalFeatures;
   ruleType?: RuleType;
 }): Promise<GenericBulkCreateResponse<T>> => {
-  const { ruleExecutionLogger, alertWithSuppression, alertTimestampOverride } = sharedParams;
+  const { ruleExecutionLogger, alertTimestampOverride } = sharedParams;
   if (wrappedDocs.length === 0) {
     return {
       errors: [],
@@ -72,20 +70,20 @@ export const bulkCreateWithSuppression = async <
 
   const start = performance.now();
 
-  const enrichAlerts = createEnrichEventsFunction({
-    services,
-    logger: ruleExecutionLogger,
-  });
-
   let enrichmentsTimeStart = 0;
   let enrichmentsTimeFinish = 0;
-  const enrichAlertsWrapper: typeof enrichAlerts = async (alerts, params) => {
+  const enrichAlertsWrapper: EnrichEventsWrapper = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
-      const enrichedAlerts = await enrichAlerts(alerts, params, experimentalFeatures);
+      const enrichedAlerts = await enrichEvents({
+        services,
+        logger: sharedParams.ruleExecutionLogger,
+        events: alerts,
+        spaceId: params.spaceId,
+      });
       return enrichedAlerts;
     } catch (error) {
-      ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
+      ruleExecutionLogger.error(`Error enriching alerts\nError: ${error}.`);
       throw error;
     } finally {
       enrichmentsTimeFinish = performance.now();
@@ -103,7 +101,7 @@ export const bulkCreateWithSuppression = async <
   }));
 
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
-    await alertWithSuppression(
+    await services.alertWithSuppression(
       alerts,
       suppressionWindow,
       enrichAlertsWrapper,
@@ -114,7 +112,7 @@ export const bulkCreateWithSuppression = async <
 
   const end = performance.now();
 
-  ruleExecutionLogger.debug(`Alerts bulk process took ${makeFloatString(end - start)} ms`);
+  ruleExecutionLogger.debug(`Bulk processing alerts took ${makeFloatString(end - start)}ms.`);
 
   // query rule type suppression does not happen in memory, so we can't just count createdAlerts and suppressedAlerts
   // for this rule type we need to look into alerts suppression properties, extract those values and sum up
@@ -126,7 +124,7 @@ export const bulkCreateWithSuppression = async <
     : suppressedAlerts.length;
 
   if (!isEmpty(errors)) {
-    ruleExecutionLogger.warn(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    ruleExecutionLogger.warn(`Error bulk processing alerts\nError: ${JSON.stringify(errors)}.`);
     return {
       errors: Object.keys(errors),
       success: false,

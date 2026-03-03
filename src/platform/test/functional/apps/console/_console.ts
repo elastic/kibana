@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -73,20 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check that after clearing the input, the editor is empty
       expect(await PageObjects.console.getEditorText()).to.be.empty();
-    });
-
-    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
-      const expectedResponseContains = '"statusCode": 400';
-      await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('OPTIONS /');
-      await PageObjects.console.clickPlay();
-      await retry.try(async () => {
-        const actualResponse = await PageObjects.console.getOutputText();
-        log.debug(actualResponse);
-        expect(actualResponse).to.contain(expectedResponseContains);
-
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
-      });
     });
 
     describe('tabs navigation', () => {
@@ -217,14 +203,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(response).to.contain('# 3: DELETE test-index [200 OK]');
         });
       });
-
-      // not implemented for monaco yet https://github.com/elastic/kibana/issues/184010
-      it.skip('should display status badges', async () => {
-        await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await PageObjects.console.hasWarningBadge()).to.be(true);
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
-      });
     });
 
     it('should show actions menu when the first line of the request is not in the viewport', async () => {
@@ -282,6 +260,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualResponse = await PageObjects.console.getOutputText();
         log.debug(actualResponse);
         expect(actualResponse).to.contain('OK');
+      });
+    });
+
+    it('Shows error body if HTTP request to server fails', async () => {
+      await PageObjects.console.clearEditorText();
+
+      // This request will return 200 but with an empty body
+      await PageObjects.console.enterText(
+        'POST kbn:/api/alerting/rule/3603c386-9102-4c74-800d-2242e52bec98\n' +
+          '{\n' +
+          '  "name": "Alert on status change",\n' +
+          '  "rule_type_id": ".es-querya"\n' +
+          '}'
+      );
+      await PageObjects.console.clickPlay();
+
+      await retry.try(async () => {
+        const actualResponse = await PageObjects.console.getOutputText();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain('"statusCode": 400');
       });
     });
   });

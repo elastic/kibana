@@ -10,10 +10,10 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { RepoPath } from '@kbn/repo-path';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { RepoPath } from '@kbn/repo-path';
 
-import { NamedViolation, Rule } from './rule';
+import type { NamedViolation, Rule } from './rule';
 
 export class RuleContext {
   constructor(

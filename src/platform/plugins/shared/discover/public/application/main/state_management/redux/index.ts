@@ -8,40 +8,82 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
-import {
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
-  setAdHocDataViews,
-  setDataView,
-  setDefaultProfileAdHocDataViews,
-} from './actions';
+import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
+import * as actions from './actions';
 
-export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type DiscoverAppState,
+  type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
+  TabInitializationStatus,
+} from './types';
+
+export { DEFAULT_TAB_STATE } from './constants';
 
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
-  setDataView,
-  setAdHocDataViews,
-  setDefaultProfileAdHocDataViews,
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
+  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...actions,
+  syncLocallyPersistedTabState,
 };
 
 export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
+  CurrentTabProvider,
+  useCurrentTabSelector,
+  useAppStateSelector,
+  useCurrentTabAction,
+  useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 
 export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+  selectTabAppState,
+  selectTabCombinedFilters,
+  selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
+  selectTabSavedSearch,
+} from './selectors';
+
+export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
+  type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
+  selectTabRuntimeState,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
+  selectInitialUnifiedHistogramLayoutPropsMap,
+  useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
+
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  getSerializedSearchSourceDataViewDetails,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
+
+export {
+  fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToTabState,
+  fromSavedObjectTabToSavedSearch,
+  fromTabStateToSavedObjectTab,
+  fromSavedSearchToSavedObjectTab,
+} from './tab_mapping_utils';

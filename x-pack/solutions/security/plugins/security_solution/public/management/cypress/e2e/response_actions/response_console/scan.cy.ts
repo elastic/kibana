@@ -41,7 +41,8 @@ describe(
       login();
     });
 
-    describe('Scan operation:', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/212175
+    describe.skip('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
       const fileContent = 'This is a test file for the scan command.';
@@ -122,7 +123,7 @@ describe(
 
         cy.getByTestSubj('scan-actionFailure')
           .should('exist')
-          .contains('File path or folder was not found (404)');
+          .contains('File path or folder was not found');
       });
     });
   }

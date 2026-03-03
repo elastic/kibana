@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
@@ -49,7 +50,7 @@ describe('AttachToCaseButton', () => {
     useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
-  it('should render the 2 options in the popover when clicking on the button', () => {
+  it('should render the 2 options in the popover when clicking on the button', async () => {
     const { getByTestId } = renderAttachToCaseButton();
 
     const button = getByTestId('timeline-modal-attach-to-case-dropdown-button');
@@ -57,7 +58,7 @@ describe('AttachToCaseButton', () => {
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Attach to case');
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toHaveTextContent(
@@ -81,11 +82,11 @@ describe('AttachToCaseButton', () => {
 
     const { getByTestId } = renderAttachToCaseButton();
 
-    getByTestId('timeline-modal-attach-to-case-dropdown-button').click();
+    await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
 
     await waitForEuiPopoverOpen();
 
-    getByTestId('timeline-modal-attach-timeline-to-existing-case').click();
+    await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/create',
@@ -103,11 +104,11 @@ describe('AttachToCaseButton', () => {
 
     const { getByTestId } = renderAttachToCaseButton();
 
-    getByTestId('timeline-modal-attach-to-case-dropdown-button').click();
+    await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
 
     await waitForEuiPopoverOpen();
 
-    getByTestId('timeline-modal-attach-timeline-to-existing-case').click();
+    await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/case-id',

@@ -8,10 +8,19 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type {
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  MlAnomaliesTableRecord,
+} from '@kbn/ml-anomaly-utils';
 import { type MlEntityField, type MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
 
+export interface GetAnomaliesTableDataResult {
+  anomalies: MlAnomaliesTableRecord[];
+  interval: string;
+  examplesByJobId?: Record<string, Record<string, string[]>>;
+}
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
 }
@@ -35,7 +44,7 @@ export interface DatafeedResultsChartDataParams {
   end: number;
 }
 
-export const defaultSearchQuery: estypes.QueryDslQueryContainer = {
+export const defaultSearchQuery: NonNullable<estypes.QueryDslQueryContainer> = {
   bool: {
     must: [
       {
@@ -127,4 +136,25 @@ export interface ExplorerChartsData {
   tooManyBuckets: boolean;
   timeFieldName: string;
   errorMessages: ExplorerChartSeriesErrorMessages | undefined;
+}
+
+export interface GetTopInfluencersRequest {
+  jobIds: string[];
+  earliestMs: number;
+  latestMs: number;
+  maxFieldValues?: number;
+  perPage?: number;
+  page?: number;
+  influencers?: Array<{ fieldName: string; fieldValue: string }>;
+  influencersFilterQuery?: any;
+}
+
+export type InfluencersByFieldResponse = Record<
+  string,
+  Array<{ influencerFieldValue: string; maxAnomalyScore: number; sumAnomalyScore: number }>
+>;
+
+export interface ViewByResponse {
+  results: Record<string, Record<number, number>>;
+  cardinality: number;
 }

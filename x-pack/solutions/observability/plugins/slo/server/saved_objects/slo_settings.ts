@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { StoredSLOSettings } from '../domain/models';
+import type { StoredSLOSettings } from '../domain/models';
 
 export const SO_SLO_SETTINGS_TYPE = 'slo-settings';
 export const sloSettingsObjectId = (space: string = 'default') => `slo-settings-singleton-${space}`;

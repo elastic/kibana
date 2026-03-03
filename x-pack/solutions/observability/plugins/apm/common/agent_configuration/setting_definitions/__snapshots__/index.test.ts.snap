@@ -78,6 +78,16 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "deactivate_all_instrumentations",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "deactivate_instrumentations",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "dedot_custom_metrics",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
@@ -127,6 +137,11 @@ Array [
     "key": "ignore_message_queues",
     "type": "text",
     "validationName": "string",
+  },
+  Object {
+    "key": "infer_spans",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
     "key": "log_ecs_reformatting",
@@ -192,9 +207,55 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "logging_level",
+    "options": Array [
+      Object {
+        "text": "trace",
+        "value": "trace",
+      },
+      Object {
+        "text": "debug",
+        "value": "debug",
+      },
+      Object {
+        "text": "info",
+        "value": "info",
+      },
+      Object {
+        "text": "warn",
+        "value": "warn",
+      },
+      Object {
+        "text": "error",
+        "value": "error",
+      },
+      Object {
+        "text": "fatal",
+        "value": "fatal",
+      },
+      Object {
+        "text": "off",
+        "value": "off",
+      },
+    ],
+    "type": "select",
+    "validationName": "(\\"trace\\" | \\"debug\\" | \\"info\\" | \\"warn\\" | \\"error\\" | \\"fatal\\" | \\"off\\")",
+  },
+  Object {
     "key": "mongodb_capture_statement_commands",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "opamp_polling_interval",
+    "min": "1s",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
   },
   Object {
     "key": "profiling_inferred_spans_enabled",
@@ -240,9 +301,29 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "sampling_rate",
+    "type": "float",
+    "validationName": "floatFourDecimalPlacesRt",
+  },
+  Object {
     "key": "sanitize_field_names",
     "type": "text",
     "validationName": "string",
+  },
+  Object {
+    "key": "send_logs",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "send_metrics",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "send_traces",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
     "key": "server_timeout",

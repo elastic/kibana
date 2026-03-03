@@ -11,13 +11,14 @@ import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { copyFile } from 'fs/promises';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import Mustache from 'mustache';
 
-import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
+import type { Config } from '../../../lib';
+import { compressTar, copyAll, mkdirp, write } from '../../../lib';
 import { dockerfileTemplate } from './templates';
-import { TemplateContext } from './template_context';
+import type { TemplateContext } from './template_context';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
   log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);

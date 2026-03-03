@@ -80,17 +80,26 @@ const generateFieldValue = (field: DataViewField, index: number) => {
   }
 };
 
-export const generateEsHits = (dataView: DataView, count: number): EsHitRecord[] => {
-  return Array.from({ length: count }, (_, i) => ({
+export const generateEsHit = (params: Partial<EsHitRecord> = {}): EsHitRecord => {
+  return {
     _index: 'i',
-    _id: i.toString(),
+    _id: '1',
     _score: 1,
-    fields: dataView.fields.reduce<Record<string, any>>(
-      (source, field) => ({
-        ...source,
-        [field.name]: [generateFieldValue(field, i)],
-      }),
-      {}
-    ),
-  }));
+    fields: {},
+    ...params,
+  };
+};
+
+export const generateEsHits = (dataView: DataView, count: number): EsHitRecord[] => {
+  return Array.from({ length: count }, (_, i) =>
+    generateEsHit({
+      _id: i.toString(),
+      fields: dataView.fields.reduce<Record<string, any>>((source, field) => {
+        return {
+          ...source,
+          [field.name]: [generateFieldValue(field, i)],
+        };
+      }, {}),
+    })
+  );
 };

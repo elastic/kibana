@@ -13,14 +13,16 @@ import {
   EuiSelect,
   EuiSplitPanel,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { NumberField } from '../helpers/number_field';
-import { RRuleFrequency, RecurrenceSchedule } from '../../../../../../types';
+import type { RecurrenceSchedule } from '../../../../../../types';
+import { RRuleFrequency } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
 import {
   DEFAULT_REPEAT_OPTIONS,
@@ -29,15 +31,9 @@ import {
   RECURRENCE_END_OPTIONS,
 } from './constants';
 import { CustomRecurrenceScheduler } from './custom_recurrence_scheduler';
-import {
-  CustomFrequencyState,
-  generateNthByweekday,
-  getWeekdayInfo,
-  recurrenceSummary,
-} from './helpers';
+import type { CustomFrequencyState } from './helpers';
+import { generateNthByweekday, getWeekdayInfo, recurrenceSummary } from './helpers';
 import { i18nNthWeekday } from './translations';
-
-import './recurrence_scheduler.scss';
 
 interface ComponentOpts {
   startDate: Moment | null;
@@ -55,6 +51,16 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   const hasInitialized = useRef(false);
   const [frequency, setFrequency] = useState<RRuleFrequency | 'CUSTOM'>(RRuleFrequency.DAILY);
   const [recurrenceEnds, setRecurrenceEnds] = useState('never');
+
+  const ramRecurrenceSchedulerCss = css`
+    .euiFormRow__labelWrapper {
+      width: calc(20% - 8px);
+    }
+
+    .euiFormRow__fieldWrapper {
+      width: 80%;
+    }
+  `;
 
   const [customFrequency, setCustomFrequency] = useState<CustomFrequencyState>({
     freq: RRuleFrequency.WEEKLY,
@@ -113,6 +119,13 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
     return {
       repeatOptions: [
         {
+          text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurHourly', {
+            defaultMessage: 'Hourly',
+          }),
+          value: RRuleFrequency.HOURLY,
+          disabled: disableDailyOption,
+        },
+        {
           text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDaily', {
             defaultMessage: 'Daily',
           }),
@@ -147,6 +160,9 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
         },
       ],
       rrulePresets: {
+        [RRuleFrequency.HOURLY]: {
+          interval: 1,
+        },
         [RRuleFrequency.DAILY]: {
           interval: 1,
         },
@@ -194,7 +210,11 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
-      <EuiSplitPanel.Inner color="subdued" className="ramRecurrenceScheduler">
+      <EuiSplitPanel.Inner
+        color="subdued"
+        className="ramRecurrenceScheduler"
+        css={ramRecurrenceSchedulerCss}
+      >
         <EuiFormRow
           display="columnCompressed"
           style={{ alignItems: 'center' }}

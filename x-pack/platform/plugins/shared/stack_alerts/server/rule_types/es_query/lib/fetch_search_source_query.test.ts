@@ -107,7 +107,8 @@ describe('fetchSearchSourceQuery', () => {
         undefined,
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -148,7 +149,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBe(true);
@@ -214,7 +216,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-01-09T22:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -255,7 +258,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -302,7 +306,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBeUndefined();
@@ -379,7 +384,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBeUndefined();
@@ -513,6 +519,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -625,6 +632,7 @@ describe('fetchSearchSourceQuery', () => {
         spacePrefix: '',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        sourceFields: [],
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
@@ -652,10 +660,33 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
         expect(err.message).toBe('Saved object [index-pattern/abc] not found');
+      }
+    });
+
+    it('should throw user error if data view does not have a timefield', async () => {
+      try {
+        const dataView = createDataView();
+        dataView.timeFieldName = undefined;
+        const searchSourceInstance = createSearchSourceMock({ index: dataView });
+
+        await updateSearchSource(
+          searchSourceInstance,
+          dataView,
+          defaultParams,
+          '2020-01-09T22:12:41.941Z',
+          new Date().toISOString(),
+          new Date().toISOString(),
+          logger,
+          100
+        );
+      } catch (err) {
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        expect(err.message).toBe('Data view with ID test-id no longer contains a time field.');
       }
     });
 
@@ -676,6 +707,7 @@ describe('fetchSearchSourceQuery', () => {
           spacePrefix: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
+          sourceFields: [],
         });
       } catch (err) {
         expect(getErrorSource(err)).not.toBeDefined();
@@ -698,7 +730,8 @@ describe('fetchSearchSourceQuery', () => {
         '2020-02-09T23:12:41.941Z',
         dateStart,
         dateEnd,
-        logger
+        logger,
+        100
       );
 
       expect(filterToExcludeHitsFromPreviousRun).toMatchInlineSnapshot(`
@@ -720,7 +753,7 @@ describe('fetchSearchSourceQuery', () => {
       `);
 
       const locatorMock = {
-        getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+        getRedirectUrl: jest.fn(() => 'test1/app/r?l=DISCOVER_APP_LOCATOR'),
       } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
 
       const dataViews = {
@@ -744,7 +777,8 @@ describe('fetchSearchSourceQuery', () => {
       expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: [],
-        })
+        }),
+        { spaceId: 'test1' }
       );
 
       const linkWithExcludedRuns = await generateLink(
@@ -754,11 +788,11 @@ describe('fetchSearchSourceQuery', () => {
         dataViewMock,
         dateStart,
         dateEnd,
-        'test2',
+        'test1',
         filterToExcludeHitsFromPreviousRun
       );
 
-      expect(linkWithExcludedRuns).toBe('test2/app/r?l=DISCOVER_APP_LOCATOR');
+      expect(linkWithExcludedRuns).toBe('test1/app/r?l=DISCOVER_APP_LOCATOR');
       expect(locatorMock.getRedirectUrl).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
@@ -769,7 +803,8 @@ describe('fetchSearchSourceQuery', () => {
               undefined
             )
           ),
-        })
+        }),
+        { spaceId: 'test1' }
       );
     });
 
@@ -779,7 +814,7 @@ describe('fetchSearchSourceQuery', () => {
       const { dateStart, dateEnd } = getTimeRange();
 
       const locatorMock = {
-        getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+        getRedirectUrl: jest.fn(() => 'test1/app/r?l=DISCOVER_APP_LOCATOR'),
       } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
 
       const dataViews = {
@@ -816,6 +851,7 @@ describe('fetchSearchSourceQuery', () => {
           title: 'title',
           type: 'index-pattern',
           version: undefined,
+          managed: false,
         },
         true // skipFetchFields flag
       );

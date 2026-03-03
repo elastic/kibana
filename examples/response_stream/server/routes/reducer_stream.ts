@@ -10,12 +10,12 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 
+import type { ReducerStreamApiAction } from '../../common/api/reducer_stream/reducer_actions';
 import {
   errorAction,
   updateProgressAction,
   addToEntityAction,
   deleteEntityAction,
-  ReducerStreamApiAction,
 } from '../../common/api/reducer_stream/reducer_actions';
 import { reducerStreamRequestBodySchema } from './schemas/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
@@ -27,6 +27,12 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
     .post({
       path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out of authorization as it is a developer example endpoint.',
+        },
+      },
     })
     .addVersion(
       {

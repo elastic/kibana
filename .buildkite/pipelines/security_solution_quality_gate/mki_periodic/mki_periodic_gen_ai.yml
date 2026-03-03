@@ -1,11 +1,11 @@
 steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai_assistant
-    label: "Cypress MKI - GenAI"
+    label: "Cypress MKI - AI Assistant"
     key: test_ai_assistant
     env:
       BK_TEST_SUITE_KEY: "serverless-cypress-gen-ai"
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
@@ -13,15 +13,14 @@ steps:
     timeout_in_minutes: 300
     parallelism: 1
 
-  - group: "API MKI - GenAI"
+  - group: "API MKI - AI Assistant"
     key: api_test_ai_assistant
     steps:
-
-      - label: Running nlp_cleanup_task:complete:qa:serverless
+      - label: 'API MKI - nlp_cleanup_task:complete:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:complete:qa:serverless
         key: nlp_cleanup_task:complete:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -31,11 +30,11 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running nlp_cleanup_task:essentials:qa:serverless
+      - label: 'API MKI - nlp_cleanup_task:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless
         key: nlp_cleanup_task:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/saved-objects-hidden-type-plugin",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "savedObjectsHiddenType",
     "server": true,

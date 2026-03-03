@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RoutingDefinition } from '@kbn/streams-schema';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 
 export const ChildrenAffectedCallout = ({

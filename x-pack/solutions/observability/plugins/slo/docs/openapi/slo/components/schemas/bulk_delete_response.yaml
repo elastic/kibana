@@ -1,0 +1,9 @@
+title: Bulk delete SLO response
+description: >
+  The bulk delete SLO response returns a taskId that can be used to poll for its status
+type: object
+properties:
+  taskId:
+    type: string
+    example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+    description: The taskId of the bulk delete operation

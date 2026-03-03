@@ -22,4 +22,5 @@ export interface UpdateRuleData<Params extends RuleParams = never> {
   notifyWhen?: UpdateRuleDataType['notifyWhen'];
   alertDelay?: UpdateRuleDataType['alertDelay'];
   flapping?: UpdateRuleDataType['flapping'];
+  artifacts?: UpdateRuleDataType['artifacts'];
 }

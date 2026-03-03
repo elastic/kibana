@@ -6,23 +6,24 @@
  */
 
 import type { Map as MbMap, RasterTileSource } from '@kbn/mapbox-gl';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import _ from 'lodash';
+import type { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import type { LayerDescriptor, RasterLayerDescriptor } from '../../../../common/descriptor_types';
 import { TileStyle } from '../../styles/tile/tile_style';
-import { DataRequestContext } from '../../../actions';
+import type { DataRequestContext } from '../../../actions';
 
-import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
+import type { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
 
 export class RasterTileLayer extends AbstractLayer {
-  static createDescriptor(options: Partial<LayerDescriptor>) {
-    const tileLayerDescriptor = super.createDescriptor(options);
+  static createDescriptor(options: Partial<LayerDescriptor>): RasterLayerDescriptor {
+    const tileLayerDescriptor = super.createDescriptor(options) as Writable<LayerDescriptor>;
     tileLayerDescriptor.type = LAYER_TYPE.RASTER_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
-    return tileLayerDescriptor;
+    return tileLayerDescriptor as RasterLayerDescriptor;
   }
 
   private readonly _style: TileStyle;
@@ -32,7 +33,7 @@ export class RasterTileLayer extends AbstractLayer {
     layerDescriptor,
   }: {
     source: IRasterSource;
-    layerDescriptor: LayerDescriptor;
+    layerDescriptor: RasterLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
     this._style = new TileStyle();

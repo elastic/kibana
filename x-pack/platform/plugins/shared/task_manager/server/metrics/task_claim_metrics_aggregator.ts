@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { isOk } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { TaskRun } from '../task_events';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskRun } from '../task_events';
 import { type SerializedHistogram, SimpleHistogram, MetricCounterService } from './lib';
-import { ITaskMetricsAggregator } from './types';
+import type { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
 const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis

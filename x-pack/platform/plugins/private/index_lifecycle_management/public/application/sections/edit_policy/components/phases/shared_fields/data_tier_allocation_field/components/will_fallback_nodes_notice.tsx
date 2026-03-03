@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
+import { useKibana } from '../../../../../../../../shared_imports';
+import type { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
@@ -25,6 +27,10 @@ export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Pro
   phase,
   targetNodeRole,
 }) => {
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
     <EuiCallOut
       data-test-subj="willUseFallbackTierUsingNodeAttributesNotice"
@@ -40,13 +46,7 @@ export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Pro
           }
         )}
       </p>
-
-      <p>
-        {
-          // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
-          nodeAllocationMigrationGuidance
-        }
-      </p>
+      <p>{nodeAllocationMigrationGuidance({ docLinks })}</p>
     </EuiCallOut>
   );
 };

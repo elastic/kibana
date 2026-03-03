@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import semverRcompare from 'semver/functions/rcompare';
+import semverCompareBuild from 'semver/functions/compare-build';
+
 import semverLt from 'semver/functions/lt';
 
 import { differsOnlyInPatch } from '../../common/services';
@@ -27,7 +28,7 @@ export const useAgentVersion = (): string | undefined => {
         const availableVersions = res?.data?.items;
         let agentVersionToUse;
 
-        availableVersions?.sort(semverRcompare);
+        availableVersions?.sort(semverCompareBuild)?.reverse();
         if (
           availableVersions &&
           availableVersions.length > 0 &&

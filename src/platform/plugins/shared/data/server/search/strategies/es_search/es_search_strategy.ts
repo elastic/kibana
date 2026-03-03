@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, from, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
@@ -69,6 +70,7 @@ export const esSearchStrategyProvider = (
           ...defaults,
           ...getShardTimeout(config),
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
+          ...(options.projectRouting !== undefined && { project_routing: options.projectRouting }),
           ...requestParams,
         };
         const { body, meta } = await esClient.asCurrentUser.search(params, {

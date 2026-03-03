@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import { css } from '@emotion/react';
 
+import type { WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -23,10 +26,12 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  withEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
@@ -54,6 +59,7 @@ export interface ReportingPanelProps {
   onClose?: () => void;
 
   startServices$: Rx.Observable<StartServices>;
+  theme: WithEuiThemeProps['theme'];
 }
 
 export type Props = ReportingPanelProps & { intl: InjectedIntl };
@@ -66,7 +72,7 @@ interface State {
   isCreatingReportJob: boolean;
 }
 
-class ReportingPanelContentUi extends Component<Props, State> {
+class ReportingPanelContentUi extends Component<Props, State, WithEuiThemeProps> {
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -136,7 +142,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+      <EuiCopy
+        textToCopy={this.state.absoluteUrl}
+        tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
+      >
         {(copy) => (
           <EuiButton
             color={isUnsaved ? 'warning' : 'primary'}
@@ -157,10 +166,14 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   public render() {
     const isUnsaved: boolean = this.isNotSaved() || this.props.isDirty || this.state.isStale;
+    const { theme } = this.props;
+    const basePadding = css({
+      padding: theme.euiTheme.size.base,
+    });
 
     if (this.props.requiresSavedState && isUnsaved) {
       return (
-        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+        <EuiForm css={basePadding} data-test-subj="shareReportingForm">
           <EuiFormRow
             helpText={
               <FormattedMessage
@@ -178,7 +191,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     const exceedsMaxLength = this.state.absoluteUrl.length >= getMaxUrlLength();
 
     return (
-      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+      <EuiForm css={basePadding} data-test-subj="shareReportingForm">
         <EuiText size="s">
           <p>
             <FormattedMessage
@@ -283,9 +296,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private createReportingJob = async () => {
     const { startServices$, apiClient, intl } = this.props;
     const [coreStart] = await Rx.firstValueFrom(startServices$);
-    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
-    const { toasts } = coreStart.notifications;
+    const {
+      rendering,
+      notifications: { toasts },
+    } = coreStart;
 
+    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
     this.setState({ isCreatingReportJob: true });
 
     try {
@@ -313,7 +329,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               ),
             }}
           />,
-          coreStart
+          rendering
         ),
         'data-test-subj': 'queueReportSuccess',
       });
@@ -343,4 +359,4 @@ class ReportingPanelContentUi extends Component<Props, State> {
   };
 }
 
-export const ReportingPanelContent = injectI18n(ReportingPanelContentUi);
+export const ReportingPanelContent = injectI18n(withEuiTheme(ReportingPanelContentUi));

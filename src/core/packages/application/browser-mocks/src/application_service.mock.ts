@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,7 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { scopedHistoryMock } from './scoped_history.mock';
-import {
+import type {
   ApplicationSetup,
   ApplicationStart,
   PublicAppInfo,
@@ -26,24 +26,27 @@ import type {
   InternalApplicationStart,
   InternalApplicationSetup,
 } from '@kbn/core-application-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 
-const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
-  register: jest.fn(),
-  registerAppUpdater: jest.fn(),
-});
+const createSetupContractMock = (): jest.Mocked<ApplicationSetup> =>
+  lazyObject({
+    register: jest.fn(),
+    registerAppUpdater: jest.fn(),
+  });
 
-const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({
-  register: jest.fn(),
-  registerAppUpdater: jest.fn(),
-});
+const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> =>
+  lazyObject({
+    register: jest.fn(),
+    registerAppUpdater: jest.fn(),
+  });
 
 const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
   const currentLocation$ = new Subject<string>();
 
-  return {
+  return lazyObject({
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
     currentLocation$: currentLocation$.asObservable(),
@@ -52,11 +55,11 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     navigateToUrl: jest.fn(),
     getUrlForApp: jest.fn(),
     isAppRegistered: jest.fn(),
-  };
+  });
 };
 
 const createHistoryMock = (): jest.Mocked<History> => {
-  return {
+  return lazyObject({
     block: jest.fn(),
     createHref: jest.fn(),
     go: jest.fn(),
@@ -74,7 +77,7 @@ const createHistoryMock = (): jest.Mocked<History> => {
       key: '',
       state: undefined,
     },
-  };
+  });
 };
 
 const createInternalStartContractMock = (
@@ -85,7 +88,7 @@ const createInternalStartContractMock = (
     : new Subject<string | undefined>();
   const currentLocation$ = new Subject<string>();
 
-  return {
+  return lazyObject({
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
@@ -97,11 +100,11 @@ const createInternalStartContractMock = (
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),
     navigateToUrl: jest.fn(),
     history: createHistoryMock(),
-  };
+  });
 };
 
 const createAppMountParametersMock = (parts: Partial<AppMountParameters> = {}) => {
-  const mock: AppMountParameters = {
+  const mock: AppMountParameters = lazyObject({
     element: document.createElement('div'),
     history: scopedHistoryMock.create(),
     appBasePath: '/app',
@@ -109,15 +112,16 @@ const createAppMountParametersMock = (parts: Partial<AppMountParameters> = {}) =
     setHeaderActionMenu: jest.fn(),
     theme$: themeServiceMock.createTheme$(),
     ...parts,
-  };
+  });
   return mock;
 };
 
-const createMock = (): jest.Mocked<ApplicationServiceContract> => ({
-  setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
-  start: jest.fn().mockReturnValue(createInternalStartContractMock()),
-  stop: jest.fn(),
-});
+const createMock = (): jest.Mocked<ApplicationServiceContract> =>
+  lazyObject({
+    setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
+    start: jest.fn().mockReturnValue(createInternalStartContractMock()),
+    stop: jest.fn(),
+  });
 
 export const applicationServiceMock = {
   create: createMock,

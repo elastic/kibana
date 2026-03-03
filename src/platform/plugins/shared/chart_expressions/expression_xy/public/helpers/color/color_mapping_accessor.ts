@@ -7,45 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SeriesColorAccessorFn } from '@elastic/charts';
+import type { SeriesColorAccessorFn } from '@elastic/charts';
 import { getColorFactory, type ColorMapping, type ColorMappingInputData } from '@kbn/coloring';
-import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import { MultiFieldKey } from '@kbn/data-plugin/common';
+import type { InvertedRawValueMap } from '../data_layers';
 
 /**
  * Return a color accessor function for XY charts depending on the split accessors received.
  */
 export function getColorSeriesAccessorFn(
   config: ColorMapping.Config,
+  invertedRawValueMap: InvertedRawValueMap,
   palettes: KbnPalettes,
   isDarkMode: boolean,
   mappingData: ColorMappingInputData,
-  fieldId: string,
-  specialTokens: Map<string, string>
+  configuredSplitAccessors: string[]
 ): SeriesColorAccessorFn {
-  // inverse map to handle the conversion between the formatted string and their original format
-  // for any specified special tokens
-  const specialHandlingInverseMap: Map<string, string> = new Map(
-    [...specialTokens.entries()].map((d) => [d[1], d[0]])
-  );
-
   const getColor = getColorFactory(config, palettes, isDarkMode, mappingData);
 
   return ({ splitAccessors }) => {
-    const splitValue = splitAccessors.get(fieldId);
-    // if there isn't a category associated in the split accessor, let's use the default color
-    if (splitValue === undefined) {
-      return null;
+    if (configuredSplitAccessors.length > 1) {
+      // if we have more then 1 split accessor we are in an ESQL multi-term context
+      // we need to reconstruct back the MultiFieldKey from the original set of raw values to get the right color
+      const rawValues = configuredSplitAccessors.map((fieldId) => {
+        const splitValue = splitAccessors.get(fieldId);
+        if (splitValue === undefined) return null;
+        const rawValueMap = invertedRawValueMap.get(fieldId) ?? new Map<string, unknown>();
+        return typeof splitValue === 'string'
+          ? rawValueMap.get(splitValue) ?? splitValue
+          : splitValue;
+      });
+      return getColor(new MultiFieldKey({ key: rawValues }));
     }
 
-    // category can be also a number, range, ip, multi-field. We need to stringify it to be sure
-    // we can correctly match it a with user string
-    // if the separator exist, we de-construct it into a multifieldkey into values.
-    const categories = `${splitValue}`.split(MULTI_FIELD_KEY_SEPARATOR).map((category) => {
-      return specialHandlingInverseMap.get(category) ?? category;
-    });
-    // we must keep the array nature of a multi-field key or just use a single string
-    // This is required because the rule stored are checked differently for single values or multi-values
-    return getColor(categories.length > 1 ? categories : categories[0]);
+    const fieldId = configuredSplitAccessors[0];
+    const splitValue = splitAccessors.get(fieldId);
+    // No category associated in the split accessor, use the default color
+    if (splitValue === undefined) return null;
+    const rawValueMap = invertedRawValueMap.get(fieldId) ?? new Map<string, unknown>();
+    const rawValue =
+      typeof splitValue === 'string' ? rawValueMap.get(splitValue) ?? splitValue : splitValue;
+
+    return getColor(rawValue);
   };
 }

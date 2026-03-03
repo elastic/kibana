@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
+import React from 'react';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
-import { GenerationTiming } from './generation_timing';
 
 interface Props {
-  connectorIntervals: GenerationInterval[];
+  successfulGenerations?: number;
 }
 
-const LastTimesPopoverComponent: React.FC<Props> = ({ connectorIntervals }) => {
-  const { euiTheme } = useEuiTheme();
-  const { theme } = useKibana().services;
-  const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);
+const LastTimesPopoverComponent: React.FC<Props> = ({ successfulGenerations }) => {
+  const isDarkMode = useKibanaIsDarkMode();
+  const calculatedBy = successfulGenerations ?? 0;
 
   return (
     <EuiFlexGroup
@@ -38,22 +35,10 @@ const LastTimesPopoverComponent: React.FC<Props> = ({ connectorIntervals }) => {
           data-test-subj="averageTimeIsCalculated"
           size="s"
         >
-          {i18n.AVERAGE_TIME_IS_CALCULATED(connectorIntervals.length)}
+          {i18n.AVERAGE_TIME_IS_CALCULATED(calculatedBy)}
         </EuiText>
         <EuiSpacer size="s" />
       </EuiFlexItem>
-
-      {connectorIntervals.map((interval, index) => (
-        <EuiFlexItem
-          css={css`
-            margin-bottom: ${euiTheme.size.xs};
-          `}
-          grow={false}
-          key={index}
-        >
-          <GenerationTiming interval={interval} />
-        </EuiFlexItem>
-      ))}
     </EuiFlexGroup>
   );
 };

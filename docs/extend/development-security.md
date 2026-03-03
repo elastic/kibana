@@ -21,10 +21,10 @@ Role-based access control (RBAC) in {{kib}} relies upon the [application privile
 
 When {{kib}} first starts up, it executes the following `POST` request against {{es}}. This synchronizes the definition of the privileges with various `actions` which are later used to authorize a user:
 
-```js
+```js subs=true
 POST /_security/privilege
 Content-Type: application/json
-Authorization: Basic {kib} changeme
+Authorization: Basic {{kib}} changeme
 
 {
    "kibana-.kibana":{
@@ -145,7 +145,6 @@ Registering a feature consists of the following fields. For more information, co
 | `app` (required)<br> | `string[]`<br> | `["sample_app", "kibana"]`<br> | An array of applications this feature enables. Typically, all of your plugin’s apps (from `uiExports`) will be included here.<br> |
 | `privileges` (required)<br> | [`KibanaFeatureConfig`](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/shared/features/common/kibana_feature.ts).<br> | See [Example 1](#example-1-canvas) and [Example 2](#example-2-dev-tools)<br> | The set of privileges this feature requires to function.<br> |
 | `subFeatures` (optional)<br> | [`KibanaFeatureConfig`](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/shared/features/common/kibana_feature.ts).<br> | See [Example 3](#example-3-discover)<br> | The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.<br> |
-| `scope` (optional)<br> | `string[]`<br> | `["spaces", "security"]`<br> | Default `security`. Scope identifies if feature should appear in both Spaces Visibility Toggles and Security Feature Privileges or only in Security Feature Privileges.<br> |
 
 #### Privilege definition [_privilege_definition]
 
@@ -256,7 +255,7 @@ public setup(core, { features }) {
     },
     privilegesTooltip: i18n.translate('xpack.features.devToolsPrivilegesTooltip', {
      defaultMessage:
-       'User should also be granted the appropriate {es} cluster and index privileges',
+       'User should also be granted the appropriate Elasticsearch cluster and index privileges',
    }),
   });
 }
@@ -268,8 +267,12 @@ Unlike the Canvas example, Dev Tools does not require access to any saved object
 server.route({
  path: '/api/console/proxy',
  method: 'POST',
+ security: {
+  authz: {
+    requiredPrivileges: ['console'],
+  },
+ },
  config: {
-   tags: ['access:console'],
    handler: async (req, h) => {
      // ...
    }

@@ -8,7 +8,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface CloseFilterEditorConfirmModalProps {
@@ -38,10 +38,14 @@ const strings = {
 export const CloseFilterEditorConfirmModal = memo(function CloseFilterEditorConfirmModal(
   props: CloseFilterEditorConfirmModalProps
 ) {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       data-test-subj="close-filter-editor-confirm-modal"
+      aria-labelledby={modalTitleId}
       title={strings.getTitle()}
+      titleProps={{ id: modalTitleId }}
       cancelButtonText={strings.getCancelButton()}
       confirmButtonText={strings.getConfirmButton()}
       buttonColor="danger"

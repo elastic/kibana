@@ -7,45 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 
-import { StateComparators } from '@kbn/presentation-publishing';
-
-import { CONTROL_GROUP_TYPE } from '../../../common';
-import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
-import type { ControlGroupApi } from '../../control_group/types';
-import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
-
-export const getMockedControlGroupApi = (
-  dashboardApi?: unknown,
-  overwriteApi?: Partial<ControlGroupApi>
-) => {
-  return {
-    type: CONTROL_GROUP_TYPE,
-    parentApi: dashboardApi,
-    autoApplySelections$: new BehaviorSubject(true),
-    ignoreParentSettings$: new BehaviorSubject(undefined),
-    controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
-    allowExpensiveQueries$: new BehaviorSubject(true),
-    ...overwriteApi,
-  } as unknown as ControlGroupApi;
-};
-
-export const getMockedBuildApi =
-  <StateType extends object = object, ApiType extends DefaultControlApi = DefaultControlApi>(
+export const getMockedFinalizeApi =
+  <
+    StateType extends object = object,
+    ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  >(
     uuid: string,
-    factory: ControlFactory<StateType, ApiType>,
-    controlGroupApi?: ControlGroupApi
+    factory: EmbeddableFactory<StateType, ApiType>,
+    parentApi?: Partial<DashboardApi>
   ) =>
-  (api: ControlApiRegistration<ApiType>, nextComparators: StateComparators<StateType>) => {
+  (api: EmbeddableApiRegistration<StateType, ApiType>) => {
     return {
       ...api,
       uuid,
-      parentApi: controlGroupApi ?? getMockedControlGroupApi(),
-      unsavedChanges$: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
-      resetUnsavedChanges: () => {
-        return true;
-      },
+      parentApi,
       type: factory.type,
-    };
+    } as ApiType;
   };

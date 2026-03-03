@@ -21,7 +21,8 @@ import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
 import type { OpenApiDocument, ParsedSource } from './parser/openapi_types';
-import { initTemplateService, TemplateName } from './template_service/template_service';
+import type { TemplateName } from './template_service/template_service';
+import { initTemplateService } from './template_service/template_service';
 
 export interface GeneratorConfig {
   title?: string;
@@ -35,6 +36,17 @@ export interface GeneratorConfig {
      */
     outFile: string;
   };
+  /**
+   * Schema name transformation strategy for generated TypeScript/zod types
+   * - 'pascalCase': Converts names to PascalCase
+   * - undefined: No transformation (preserves original names)
+   * @default undefined
+   */
+  schemaNameTransform?: 'pascalCase';
+  /**
+   * This forces the generator to use the Zod v4 import.
+   */
+  experimentallyImportZodV4?: boolean;
 }
 
 export const generate = async (config: GeneratorConfig) => {
@@ -61,7 +73,10 @@ export const generate = async (config: GeneratorConfig) => {
       return {
         sourcePath,
         generatedPath: getGeneratedFilePath(sourcePath),
-        generationContext: getGenerationContext(parsedSchema),
+        generationContext: getGenerationContext(parsedSchema, {
+          schemaNameTransform: config.schemaNameTransform,
+          experimentallyImportZodV4: config.experimentallyImportZodV4,
+        }),
       };
     })
   );
@@ -104,6 +119,10 @@ export const generate = async (config: GeneratorConfig) => {
       info: {
         title,
         version: 'Bundle (no version)',
+      },
+      config: {
+        schemaNameTransform: config.schemaNameTransform,
+        experimentallyImportZodV4: config.experimentallyImportZodV4,
       },
     });
 

@@ -11,6 +11,10 @@ import { TsProjectRule } from '@kbn/repo-linter';
 
 export const requiredFileSelectors = TsProjectRule.create('requiredFileSelectors', {
   check({ tsProject }) {
+    if (tsProject.pkg?.id === '@kbn/tsconfig-base') {
+      return undefined;
+    }
+
     if (tsProject.config.files || !tsProject.config.include) {
       return {
         msg: 'every ts project must use the "include" key (and not the "files" key) to select the files for that project',

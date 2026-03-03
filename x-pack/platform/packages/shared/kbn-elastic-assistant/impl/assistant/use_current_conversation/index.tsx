@@ -5,27 +5,35 @@
  * 2.0.
  */
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import {
+import type { Dispatch, SetStateAction } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
   InfiniteData,
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+} from '@kbn/react-query';
+import type {
+  ApiConfig,
+  PromptResponse,
+  User,
+  ConversationSharedState,
+} from '@kbn/elastic-assistant-common';
+import { getIsConversationOwner, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { LastConversation } from '../../assistant_context';
-import { FetchConversationsResponse } from '../api';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type { FetchConversationsResponse } from '../api';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
+import type { LastConversation } from '../use_space_aware_context';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
   connectors?: AIConnector[];
   currentAppId?: string;
+  currentUser?: User;
   lastConversation: LastConversation;
   conversations: Record<string, Conversation>;
   defaultConnector?: AIConnector;
@@ -34,10 +42,11 @@ export interface Props {
   refetchCurrentUserConversations: <TPageData>(
     options?: RefetchOptions & RefetchQueryFilters<TPageData>
   ) => Promise<QueryObserverResult<InfiniteData<FetchConversationsResponse>, unknown>>;
-  setLastConversation: Dispatch<SetStateAction<LastConversation | undefined>>;
+  setLastConversation: (lastConversation: LastConversation) => void;
 }
 
 interface UseCurrentConversation {
+  conversationSharedState: ConversationSharedState;
   currentConversation: Conversation | undefined;
   currentSystemPrompt: PromptResponse | undefined;
   handleCreateConversation: () => Promise<void>;
@@ -49,6 +58,7 @@ interface UseCurrentConversation {
     cId: string;
     cTitle?: string;
   }) => Promise<void>;
+  isConversationOwner: boolean;
   refetchCurrentConversation: (options?: {
     cId?: string;
     isStreamRefetch?: boolean;
@@ -68,6 +78,7 @@ export const useCurrentConversation = ({
   currentAppId,
   lastConversation,
   conversations,
+  currentUser,
   spaceId,
   defaultConnector,
   mayUpdateConversations,
@@ -125,14 +136,18 @@ export const useCurrentConversation = ({
    * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
    */
   const refetchCurrentConversation = useCallback(
-    async ({ cId, isStreamRefetch = false }: { cId?: string; isStreamRefetch?: boolean } = {}) => {
+    async ({
+      cId,
+      isStreamRefetch = false,
+      silent,
+    }: { cId?: string; isStreamRefetch?: boolean; silent?: boolean } = {}) => {
       if (cId === '') {
         return;
       }
       const cConversationId = cId ?? currentConversation?.id;
 
       if (cConversationId) {
-        let updatedConversation = await getConversation(cConversationId);
+        let updatedConversation = await getConversation(cConversationId, silent);
         let retries = 0;
         const maxRetries = 5;
 
@@ -189,21 +204,46 @@ export const useCurrentConversation = ({
             }
           : {}),
         id: '',
+        users: [currentUser ?? {}],
+        createdBy: currentUser ?? {},
+        createdAt: new Date().toISOString(),
         messages: [],
         replacements: {},
         category: 'assistant',
         title: cTitle ?? '',
       });
     },
-    [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
+    [
+      allSystemPrompts,
+      currentConversation?.apiConfig,
+      currentUser,
+      defaultConnector,
+      setLastConversation,
+    ]
   );
-
+  useEffect(() => {
+    if (defaultConnector && !currentConversation?.apiConfig && currentConversation?.id === '') {
+      // first connector created, provide nothing to getNewConversation
+      // to set new conversation with the defaultConnector
+      getNewConversation({});
+    }
+  }, [defaultConnector, currentConversation, getNewConversation]);
   const [localSecuritySolutionAssistantConnectorId] = useLocalStorage<string | undefined>(
     `securitySolution.onboarding.assistantCard.connectorId.${spaceId}`
   );
 
   const handleOnConversationSelected = useCallback(
-    async ({ cId, cTitle, apiConfig }: { apiConfig?: ApiConfig; cId: string; cTitle?: string }) => {
+    async ({
+      cId,
+      cTitle,
+      apiConfig,
+      silent,
+    }: {
+      apiConfig?: ApiConfig;
+      cId: string;
+      cTitle?: string;
+      silent?: boolean;
+    }) => {
       if (cId === '') {
         if (
           currentAppId === 'securitySolutionUI' &&
@@ -228,7 +268,7 @@ export const useCurrentConversation = ({
       }
       // refetch will set the currentConversation
       try {
-        await refetchCurrentConversation({ cId });
+        await refetchCurrentConversation({ cId, silent });
         setLastConversation({
           id: cId,
         });
@@ -249,7 +289,11 @@ export const useCurrentConversation = ({
 
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
-    handleOnConversationSelected({ cId: lastConversation.id, cTitle: lastConversation.title });
+    handleOnConversationSelected({
+      cId: lastConversation.id,
+      cTitle: lastConversation.title,
+      silent: false,
+    });
   }, [lastConversation, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 
   const handleOnConversationDeleted = useCallback(
@@ -268,12 +312,25 @@ export const useCurrentConversation = ({
     [handleOnConversationSelected]
   );
 
+  // is current user the owner of the conversation?
+  const isConversationOwner = useMemo(
+    () => getIsConversationOwner(currentConversation, currentUser),
+    [currentConversation, currentUser]
+  );
+
+  const conversationSharedState = useMemo(
+    () => getConversationSharedState(currentConversation),
+    [currentConversation]
+  );
+
   return {
+    conversationSharedState,
     currentConversation,
     currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
+    isConversationOwner,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,

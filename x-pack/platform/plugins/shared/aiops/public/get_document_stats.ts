@@ -84,7 +84,6 @@ export const getDocumentCountStatsRequest = (
     ...(changePoints
       ? {
           change_point_request: {
-            // @ts-expect-error missing from ES spec
             change_point: {
               buckets_path: 'eventRate>_count',
             },
@@ -95,7 +94,7 @@ export const getDocumentCountStatsRequest = (
 
   const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
 
-  const searchBody: estypes.MsearchMultisearchBody = {
+  const searchBody: estypes.SearchSearchRequestBody = {
     query: {
       bool: {
         filter: filterCriteria,

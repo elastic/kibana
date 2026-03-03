@@ -9,12 +9,12 @@
 
 import { action } from '@storybook/addon-actions';
 
-import { SampleDataSet } from '@kbn/home-sample-data-types';
+import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import previewImagePath from './dashboard.png';
 import darkPreviewImagePath from './dashboard_dark.png';
 import iconPath from './icon.svg';
 
-import { Services } from '../services';
+import type { Services } from '../services';
 
 /**
  * A set of e-commerce images for use in Storybook stories.
@@ -67,6 +67,10 @@ export const getStoryServices = (params: Params) => {
     addBasePath: (path) => {
       action('addBasePath')(path);
       return path;
+    },
+    fetchSampleDataSets: async () => {
+      action('fetchSampleDataSets')();
+      return [mockDataSet];
     },
     getAppNavigationHandler: (path) => () => action('getAppNavigationHandler')(path),
     installSampleDataSet: async (id, defaultIndex) => {
@@ -126,6 +130,7 @@ export const getStoryArgTypes = () => ({
 export const getMockServices = (params: Partial<Services> = {}) => {
   const services: Services = {
     addBasePath: (path) => path,
+    fetchSampleDataSets: jest.fn(async () => [mockDataSet]),
     getAppNavigationHandler: jest.fn(),
     installSampleDataSet: jest.fn(),
     notifyError: jest.fn(),

@@ -11,6 +11,8 @@ import { wrapper } from '../../../mocks';
 import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsTableLensAttributes } from './alerts_table';
+import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 interface VisualizationState {
   visualization: { columns: {} };
@@ -20,12 +22,8 @@ interface VisualizationState {
 }
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('mockLayerId')
-    .mockReturnValueOnce('mockTopValuesOfStackByFieldColumnId')
-    .mockReturnValueOnce('mockCountColumnId')
-    .mockReturnValueOnce('mockTopValuesOfBreakdownFieldColumnId'),
+  ...jest.requireActual('uuid'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({
@@ -46,6 +44,12 @@ jest.mock('../../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getAlertsTableLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
+  });
+
   it('should render without extra options', () => {
     const { result } = renderHook(
       () =>
@@ -112,11 +116,12 @@ describe('getAlertsTableLensAttributes', () => {
     const state = result?.current?.state as VisualizationState;
     expect(result?.current).toMatchSnapshot();
 
-    expect(state.datasourceStates.formBased.layers.mockLayerId.columnOrder).toMatchInlineSnapshot(`
+    expect(state.datasourceStates.formBased.layers['layer-id-generated-uuid'].columnOrder)
+      .toMatchInlineSnapshot(`
       Array [
-        "mockTopValuesOfStackByFieldColumnId",
-        "mockTopValuesOfBreakdownFieldColumnId",
-        "mockCountColumnId",
+        "top-values-of-stack-by-field-column-id-generated-uuid",
+        "top-values-of-breakdown-field-column-id-generated-uuid",
+        "count-column-id-generated-uuid",
       ]
     `);
   });
@@ -136,21 +141,22 @@ describe('getAlertsTableLensAttributes', () => {
     expect(state.visualization?.columns).toMatchInlineSnapshot(`
       Array [
         Object {
-          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "columnId": "top-values-of-stack-by-field-column-id-generated-uuid",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "mockCountColumnId",
+          "columnId": "count-column-id-generated-uuid",
           "isTransposed": false,
         },
       ]
     `);
 
-    expect(state.datasourceStates.formBased.layers.mockLayerId.columnOrder).toMatchInlineSnapshot(`
+    expect(state.datasourceStates.formBased.layers['layer-id-generated-uuid'].columnOrder)
+      .toMatchInlineSnapshot(`
       Array [
-        "mockTopValuesOfStackByFieldColumnId",
-        "mockCountColumnId",
+        "top-values-of-stack-by-field-column-id-generated-uuid",
+        "count-column-id-generated-uuid",
       ]
     `);
   });

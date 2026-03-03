@@ -483,7 +483,7 @@ export class JobCreator {
 
   /**
    * Extends assigned calendars with created job id.
-   * @private
+   * @internal
    */
   private async _updateCalendars() {
     if (this._calendars.length === 0) {
@@ -509,7 +509,7 @@ export class JobCreator {
   }
 
   public get query(): object {
-    return this._datafeed_config.query;
+    return this._datafeed_config.query!;
   }
 
   public set query(query: object) {

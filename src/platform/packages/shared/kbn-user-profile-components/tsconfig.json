@@ -1,11 +1,14 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
       "node",
       "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "react",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [

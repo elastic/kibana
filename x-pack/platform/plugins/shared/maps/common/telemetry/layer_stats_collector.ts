@@ -11,7 +11,7 @@ import {
   DEFAULT_EMS_ROADMAP_ID,
 } from '@kbn/maps-ems-plugin/common';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../constants';
-import {
+import type {
   EMSTMSSourceDescriptor,
   EMSFileSourceDescriptor,
   ESGeoGridSourceDescriptor,
@@ -20,7 +20,7 @@ import {
   JoinDescriptor,
   VectorLayerDescriptor,
 } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { MapAttributes } from '../../server';
 import { EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
 export class LayerStatsCollector {
@@ -36,16 +36,7 @@ export class LayerStatsCollector {
   private _sourceIds: Set<string> = new Set();
 
   constructor(attributes: MapAttributes) {
-    if (!attributes || !attributes.layerListJSON) {
-      return;
-    }
-
-    let layerList: LayerDescriptor[] = [];
-    try {
-      layerList = JSON.parse(attributes.layerListJSON);
-    } catch (e) {
-      return;
-    }
+    const layerList: LayerDescriptor[] = (attributes?.layers as LayerDescriptor[]) ?? [];
 
     this._layerCount = layerList.length;
     layerList.forEach((layerDescriptor) => {
@@ -63,8 +54,9 @@ export class LayerStatsCollector {
       if (layerDescriptor.type) {
         this._updateCounts(layerDescriptor.type, this._layerTypeCounts);
       }
-      if (layerDescriptor.sourceDescriptor?.id) {
-        this._sourceIds.add(layerDescriptor.sourceDescriptor.id);
+      const sourceId = (layerDescriptor.sourceDescriptor as { id?: string })?.id;
+      if (sourceId) {
+        this._sourceIds.add(sourceId);
       }
     });
   }
@@ -117,7 +109,7 @@ export class LayerStatsCollector {
 }
 
 function getEmsFileId(layerDescriptor: LayerDescriptor): string | null {
-  return layerDescriptor.sourceDescriptor !== null &&
+  return layerDescriptor.sourceDescriptor &&
     layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
     'id' in layerDescriptor.sourceDescriptor
     ? (layerDescriptor.sourceDescriptor as EMSFileSourceDescriptor).id

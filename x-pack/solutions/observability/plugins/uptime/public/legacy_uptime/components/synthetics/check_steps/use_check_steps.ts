@@ -8,9 +8,9 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '../../../state';
+import type { AppState } from '../../../state';
 import { getJourneySteps } from '../../../state/actions/journey';
-import { JourneyState } from '../../../state/reducers/journey';
+import type { JourneyState } from '../../../state/reducers/journey';
 
 export const useCheckSteps = (): JourneyState => {
   const { checkGroupId } = useParams<{ checkGroupId: string }>();

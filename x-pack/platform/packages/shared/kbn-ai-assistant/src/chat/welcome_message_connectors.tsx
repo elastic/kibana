@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 
-const fadeInAnimation = keyframes`
+export const fadeInAnimation = keyframes`
   from {
     opacity: 0;
   }
@@ -90,7 +90,7 @@ export function WelcomeMessageConnectors({
             css: { verticalAlign: 'text-bottom' },
           }}
           size="s"
-          type="iInCircle"
+          type="info"
           position="top"
         />
       </EuiText>

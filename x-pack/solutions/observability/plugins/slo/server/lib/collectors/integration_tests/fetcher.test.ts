@@ -16,7 +16,8 @@ import {
   type Logger,
   type SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { KibanaSavedObjectsSLORepository, SLORepository } from '../../../services';
+import type { SLODefinitionRepository } from '../../../services';
+import { DefaultSLODefinitionRepository } from '../../../services';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
@@ -47,7 +48,7 @@ describe('SLO usage collector fetcher', () => {
   let esClient: ElasticsearchClient;
   let soClient: SavedObjectsClientContract;
   let kibanaServer: TestKibanaUtils;
-  let sloRepository: SLORepository;
+  let sloRepository: SLODefinitionRepository;
   let loggerMock: jest.Mocked<Logger>;
 
   beforeAll(async () => {
@@ -143,7 +144,7 @@ describe('SLO usage collector fetcher', () => {
     );
     loggerMock = createLoggerMock();
 
-    sloRepository = new KibanaSavedObjectsSLORepository(soClient, loggerMock);
+    sloRepository = new DefaultSLODefinitionRepository(soClient, loggerMock);
   }
 
   async function stopServers() {

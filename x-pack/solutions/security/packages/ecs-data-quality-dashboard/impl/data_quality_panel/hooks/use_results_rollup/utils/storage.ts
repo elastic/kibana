@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpFetchQuery, HttpHandler } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpFetchQuery, HttpHandler } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 
-import {
+import type {
   DataQualityCheckResult,
   DataQualityIndexCheckedParams,
   IncompatibleFieldMappingItem,

@@ -7,7 +7,8 @@
 
 import { useAIAssistChat } from './use_ai_assist_chat';
 import { useKibana } from './use_kibana';
-import { APIRoutes, UseChatHelpers } from '../types';
+import type { UseChatHelpers } from '../types';
+import { APIRoutes } from '../types';
 
 export const useChat = (): UseChatHelpers => {
   const { services } = useKibana();

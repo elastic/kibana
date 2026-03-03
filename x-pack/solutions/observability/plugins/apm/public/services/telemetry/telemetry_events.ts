@@ -34,56 +34,45 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-const entityInventoryAddDataEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA,
+const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
+  schema: {},
+};
+
+const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED,
   schema: {
-    view: {
+    searchQuery: {
       type: 'keyword',
-      _meta: {
-        description:
-          'Where the action was initiated (empty_state or add_data_button or add_apm_cta)',
-      },
+      _meta: { description: 'The search query entered by the user' },
     },
-    journey: {
-      type: 'keyword',
-      _meta: {
-        optional: true,
-        description:
-          'Which action was performed (add_apm_agent or associate_existing_service_logs or collect_new_service_logs)',
+  },
+};
+
+const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED,
+  schema: {
+    statuses: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'A status filter value (e.g., VIOLATED, DEGRADING, HEALTHY, NO_DATA)',
+        },
       },
     },
   },
 };
 
-const tryItClickEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.TRY_IT_CLICK,
-  schema: {
-    view: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Where the action was initiated (empty_state or add_data_button or add_apm_cta)',
-      },
-    },
-  },
-};
-
-const learnMoreClickEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.LEARN_MORE_CLICK,
-  schema: {
-    view: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Where the action was initiated (empty_state or add_data_button or add_apm_cta)',
-      },
-    },
-  },
+const sloInfoShownEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_INFO_SHOWN,
+  schema: {},
 };
 
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
-  entityInventoryAddDataEventType,
-  tryItClickEventType,
-  learnMoreClickEventType,
+  sloOverviewFlyoutViewedEventType,
+  sloOverviewFlyoutSearchQueriedEventType,
+  sloOverviewFlyoutStatusFilteredEventType,
+  sloInfoShownEventType,
 ];

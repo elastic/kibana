@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { mutateError } from './mutate_error';
+export { getErrorBoundaryLabels } from './error_boundary_labels';

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
-import { EuiFormRow, EuiPanel, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MapSettings } from '../../../common/descriptor_types';
+import type { MapSettings } from '../../../common/descriptor_types';
 import { MbValidatedColorPicker } from '../../classes/styles/vector/components/color/mb_validated_color_picker';
 
 const PROJECTION_OPTIONS = [

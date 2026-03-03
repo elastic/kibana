@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import {
+  CONTENT_TEST_ID,
+  HEADER_TEST_ID,
+} from '../../../../flyout_v2/shared/components/expandable_section';
 import { PREFIX } from '../../../shared/test_ids';
-import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 /* Table */
 
@@ -17,6 +20,15 @@ export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
 export const FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}PreviewLinkField` as const;
+export const FLYOUT_TABLE_PIN_ACTION_TEST_ID = `${FLYOUT_TABLE_TEST_ID}PinAction` as const;
+export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${PREFIX}TableTabSettingButton` as const;
+export const TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HighlightedFieldsOnly` as const;
+export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideEmptyFields` as const;
+export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideAlertFields` as const;
+export const TABLE_TAB_TOUR_TEST_ID = `${FLYOUT_TABLE_TEST_ID}Tour` as const;
 
 /* Header */
 
@@ -32,6 +44,7 @@ export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle`
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
+export const AGENT_ATTACHMENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment' as const;
 
 export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
 export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
@@ -53,21 +66,11 @@ export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
 
-export const RULE_SUMMARY_BUTTON_TEST_ID = `${PREFIX}RuleSummaryButton` as const;
-const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
-export const ALERT_DESCRIPTION_TITLE_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Title` as const;
-export const ALERT_DESCRIPTION_DETAILS_TEST_ID = `${ALERT_DESCRIPTION_TEST_ID}Details` as const;
-
 export const EVENT_CATEGORY_DESCRIPTION_TEST_ID = `${PREFIX}EventCategoryDescription` as const;
 export const EVENT_KIND_DESCRIPTION_TEST_ID = `${PREFIX}EventKindDescription` as const;
 export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TEST_ID}Text` as const;
 export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
   `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
-
-const REASON_TEST_ID = `${PREFIX}Reason` as const;
-export const REASON_TITLE_TEST_ID = `${REASON_TEST_ID}Title` as const;
-export const REASON_DETAILS_TEST_ID = `${REASON_TEST_ID}Details` as const;
-export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewButton` as const;
 
 const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
 export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
@@ -86,10 +89,6 @@ export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_I
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
 
-export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
-export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
-export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
-
 const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
 export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;
 export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Details` as const;
@@ -100,6 +99,26 @@ export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
 export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
+
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}EditButton` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Loading` as const;
+export const HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID}Tooltip` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Modal` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Title` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DESCRIPTION_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}Description` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_DEFAULT_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}DefaultFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CustomFields` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_SAVE_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}SaveButton` as const;
+export const HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_MODAL_TEST_ID}CancelButton` as const;
 
 /* Insights section */
 

@@ -32,7 +32,12 @@ import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations, setDefaultToolingLoggingLevel } from './utils';
+import {
+  orderSpecFilesForLoadBalance,
+  parseTestFileConfig,
+  retrieveIntegrations,
+  setDefaultToolingLoggingLevel,
+} from './utils';
 import { getFTRConfig } from './get_ftr_config';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 
@@ -135,7 +140,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               : undefined
           ); // convert the glob pattern to concrete file paths
 
-      let files = retrieveIntegrations(concreteFilePaths);
+      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
+      let files = retrieveIntegrations(orderedFilePaths);
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 
@@ -368,6 +374,10 @@ ${JSON.stringify(
               let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
+              const esFromEnv = process.env.CYPRESS_ES_FROM;
+              const configEsFrom = config.get('esTestCluster.from');
+              const esFrom = esFromEnv || (configEsFrom === 'serverless' ? 'serverless' : 'docker');
+
               try {
                 shutdownEs = await pRetry(
                   async () =>
@@ -375,7 +385,7 @@ ${JSON.stringify(
                       config,
                       log,
                       name: `ftr-${esPort}`,
-                      esFrom: config.get('esTestCluster')?.from || 'snapshot',
+                      esFrom,
                       onEarlyExit,
                     }),
                   { retries: 2, forever: false }

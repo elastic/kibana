@@ -7,66 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '../../comparators';
-import { PublishesWritableDescription } from './publishes_description';
-import { PublishesWritableTitle } from './publishes_title';
+import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { WithAllKeys } from '../../state_manager';
+import { initializeStateManager } from '../../state_manager/state_manager';
+import type { StateComparators, StateManager } from '../../state_manager/types';
+import type { PublishesWritableDescription } from './publishes_description';
+import type { PublishesWritableTitle } from './publishes_title';
+import type { PublishesWritableHideBorder } from './publishes_hide_border';
 
-export interface SerializedTitles {
-  title?: string;
-  description?: string;
-  hidePanelTitles?: boolean;
-}
+export type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+
+export type TitleManager = {
+  api: PublishesWritableTitle & PublishesWritableDescription & PublishesWritableHideBorder;
+} & Pick<
+  StateManager<SerializedTitles>,
+  'anyStateChange$' | 'getLatestState' | 'reinitializeState'
+>;
+
+const defaultTitlesState: WithAllKeys<SerializedTitles> = {
+  title: undefined,
+  description: undefined,
+  hide_title: undefined,
+  hide_border: undefined,
+};
+
+export const titleComparators: StateComparators<SerializedTitles> = {
+  title: 'referenceEquality',
+  description: 'referenceEquality',
+  hide_title: (a, b) => Boolean(a) === Boolean(b),
+  hide_border: (a, b) => Boolean(a) === Boolean(b),
+};
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
-    (state as SerializedTitles)?.hidePanelTitles !== undefined
+    (state as SerializedTitles)?.hide_title !== undefined ||
+    (state as SerializedTitles)?.hide_border !== undefined
   );
 };
 
-export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
+export interface TitlesApi
+  extends PublishesWritableTitle,
+    PublishesWritableDescription,
+    PublishesWritableHideBorder {}
 
 export const initializeTitleManager = (
-  rawState: SerializedTitles
-): {
-  api: TitlesApi;
-  comparators: StateComparators<SerializedTitles>;
-  serialize: () => SerializedTitles;
-} => {
-  const title$ = new BehaviorSubject<string | undefined>(rawState.title);
-  const description$ = new BehaviorSubject<string | undefined>(rawState.description);
-  const hideTitle$ = new BehaviorSubject<boolean | undefined>(rawState.hidePanelTitles);
-
-  const setTitle = (value: string | undefined) => {
-    if (value !== title$.value) title$.next(value);
-  };
-  const setHideTitle = (value: boolean | undefined) => {
-    if (value !== hideTitle$.value) hideTitle$.next(value);
-  };
-  const setDescription = (value: string | undefined) => {
-    if (value !== description$.value) description$.next(value);
-  };
-
-  return {
-    api: {
-      title$,
-      hideTitle$,
-      setTitle,
-      setHideTitle,
-      description$,
-      setDescription,
-    },
-    comparators: {
-      title: [title$, setTitle],
-      description: [description$, setDescription],
-      hidePanelTitles: [hideTitle$, setHideTitle, (a, b) => Boolean(a) === Boolean(b)],
-    } as StateComparators<SerializedTitles>,
-    serialize: () => ({
-      title: title$.value,
-      hidePanelTitles: hideTitle$.value,
-      description: description$.value,
-    }),
-  };
+  initialTitlesState: SerializedTitles,
+  options?: {
+    borderlessByDefault: boolean;
+  }
+): TitleManager => {
+  return initializeStateManager(initialTitlesState, {
+    ...defaultTitlesState,
+    hide_border: options?.borderlessByDefault ?? defaultTitlesState.hide_border,
+  });
 };

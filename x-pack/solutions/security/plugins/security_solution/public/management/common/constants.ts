@@ -14,18 +14,23 @@ export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_PATH}/:tabName(${
 export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/settings`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/trustedApps`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/trustedDevices`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/eventFilters`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/hostIsolationExceptions`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/blocklists`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/endpointExceptions`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/protectionUpdates`;
 export const MANAGEMENT_ROUTING_NOTES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.notes})`;
 /** @deprecated use the paths defined above instead */
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
+export const MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.endpointExceptions})`;
 export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.trustedApps})`;
+export const MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.trustedDevices})`;
 export const MANAGEMENT_ROUTING_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.eventFilters})`;
 export const MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.hostIsolationExceptions})`;
 export const MANAGEMENT_ROUTING_BLOCKLIST_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.blocklist})`;
 export const MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.responseActionsHistory})`;
+export const MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.scriptsLibrary})`;
 
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */

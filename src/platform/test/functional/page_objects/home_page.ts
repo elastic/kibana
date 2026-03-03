@@ -29,32 +29,30 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.exists(`sampleDataSetCard${id}`);
   }
 
+  /**
+   * @deprecated The sample data accordion was removed. Sample data cards are now displayed directly.
+   * References to 'showSampleDataButton' and 'showSampleDataAccordion' data-test-subj should be
+   * removed from relevant tests.
+   */
   async openSampleDataAccordion() {
-    const accordionButton = await this.testSubjects.find('showSampleDataButton');
-    let expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
-    let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
-    this.log.debug(`Sample data accordion expanded: ${expanded}`);
-
-    if (!expanded) {
-      await this.retry.waitFor('sample data according to be expanded', async () => {
-        this.log.debug(`Opening sample data accordion`);
-        await accordionButton.click();
-        expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
-        expanded = expandedAttribute.toLocaleLowerCase().includes('true');
-        return expanded;
-      });
-      this.log.debug(`Sample data accordion expanded: ${expanded}`);
-    }
+    // No-op: The accordion UI was removed; sample data cards are now displayed directly.
   }
 
   async isSampleDataSetInstalled(id: string) {
-    const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    const installStatus = await (
-      await sampleDataCard.findByCssSelector('[data-status]')
-    ).getAttribute('data-status');
-    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
-    this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
-    return installStatus === 'installed' && deleteButton.length > 0;
+    try {
+      // The find timeout is short because we don't want to hang here. Calling this method happens within
+      // a parent `waitFor` which handles retries.
+      const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`, 500);
+      const installStatus = await (
+        await sampleDataCard.findByCssSelector('[data-status]')
+      ).getAttribute('data-status');
+      const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+      this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
+      return installStatus === 'installed' && deleteButton.length > 0;
+    } catch (e) {
+      this.log.debug(`Sample data card for [${id}] not found.`);
+      return false;
+    }
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -68,20 +66,16 @@ export class HomePageObject extends FtrService {
     });
   }
 
-  async isGuidedOnboardingLandingDisplayed() {
-    return await this.testSubjects.isDisplayed('guided-onboarding--landing-page');
-  }
-
   async isHomePageDisplayed() {
     return await this.testSubjects.isDisplayed('homeApp');
   }
 
   async getVisibileSolutions() {
-    const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
+    const solutionPanels = await this.testSubjects.findAll('~homeSolutionPanel', 2000);
     const panelAttributes = await Promise.all(
       solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
     );
-    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
+    return panelAttributes.map((attributeValue) => attributeValue?.split('homeSolutionPanel_')[1]);
   }
 
   async goToSampleDataPage() {
@@ -91,8 +85,7 @@ export class HomePageObject extends FtrService {
 
   async addSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    await this.retry.waitFor('sample data to be installed', async () => {
-      // count for the edge case where some how installation completes just before the retry occurs
+    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
       if (await this.isSampleDataSetInstalled(id)) {
         return true;
       }
@@ -113,7 +106,6 @@ export class HomePageObject extends FtrService {
   async removeSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
     await this.retry.waitFor('sample data to be removed', async () => {
-      // account for the edge case where some how data is uninstalled just before the retry occurs
       if (!(await this.isSampleDataSetInstalled(id))) {
         return true;
       }
@@ -248,17 +240,5 @@ export class HomePageObject extends FtrService {
   // collapse the observability side nav details
   async collapseObservabibilitySideNav() {
     await this.testSubjects.click('collapsibleNavGroup-observability');
-  }
-
-  async loadSavedObjects() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('loadSavedObjects');
-      const successMsgExists = await this.testSubjects.exists('loadSavedObjects_success', {
-        timeout: 5000,
-      });
-      if (!successMsgExists) {
-        throw new Error('Failed to load saved objects');
-      }
-    });
   }
 }

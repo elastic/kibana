@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
+import type { OperatorOption } from '@kbn/securitysolution-list-utils';
 import {
   ALL_OPERATORS,
-  EVENT_FILTERS_OPERATORS,
-  OperatorOption,
+  ENDPOINT_ARTIFACT_OPERATORS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
@@ -31,7 +31,7 @@ export const getOperators = (field: DataViewFieldBase | undefined): OperatorOpti
   } else if (field.type === 'nested') {
     return [isOperator];
   } else if (field.name === 'file.path.text') {
-    return EVENT_FILTERS_OPERATORS;
+    return ENDPOINT_ARTIFACT_OPERATORS;
   } else {
     return ALL_OPERATORS;
   }

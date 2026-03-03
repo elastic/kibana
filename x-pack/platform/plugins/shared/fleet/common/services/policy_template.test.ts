@@ -11,7 +11,10 @@ import type {
   PackageInfo,
   RegistryVarType,
   PackageListItem,
+  RegistryDataStream,
 } from '../types';
+
+import type { NewPackagePolicy } from '../types';
 
 import {
   isInputOnlyPolicyTemplate,
@@ -19,6 +22,7 @@ import {
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
+  hasMultipleEnabledPolicyTemplates,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -281,6 +285,100 @@ describe('getNormalizedDataStreams', () => {
     expect(result[0].streams).toHaveLength(1);
     expect(result?.[0].streams?.[0]?.vars).toEqual([datasetVar]);
   });
+
+  const inputPkg: PackageInfo = {
+    name: 'log',
+    type: 'input',
+    title: 'Custom logs',
+    version: '2.4.0',
+    description: 'Collect custom logs with Elastic Agent.',
+    format_version: '3.1.5',
+    owner: { github: '' },
+    assets: {} as any,
+    data_streams: [],
+    policy_templates: [
+      {
+        name: 'logs',
+        type: 'logs',
+        title: 'Custom log file',
+        description: 'Collect logs from custom files.',
+        input: 'logfile',
+        template_path: 'input.yml.hbs',
+        vars: [
+          {
+            name: 'paths',
+            type: 'text',
+            title: 'Paths',
+            multi: true,
+            required: true,
+            show_user: true,
+            default: ['/var/log/nginx/access.log*'],
+          },
+        ],
+      },
+    ],
+    latestVersion: '1.3.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+  const expectedInputPackageDataStream: RegistryDataStream = {
+    type: 'logs',
+    dataset: 'log.logs',
+    elasticsearch: {
+      dynamic_dataset: true,
+      dynamic_namespace: true,
+    },
+    title: expect.any(String),
+    release: 'ga',
+    package: 'log',
+    path: 'log.logs',
+    streams: [
+      {
+        input: 'logfile',
+        vars: expect.any(Array),
+        template_path: 'input.yml.hbs',
+        title: 'Custom log file',
+        description: 'Custom log file',
+        enabled: true,
+      },
+    ],
+  };
+  it('should build data streams for input package', () => {
+    expect(getNormalizedDataStreams(inputPkg)).toEqual([expectedInputPackageDataStream]);
+  });
+  it('should use user-defined data stream type in input package', () => {
+    expect(getNormalizedDataStreams(inputPkg, undefined, 'metrics')).toEqual([
+      {
+        ...expectedInputPackageDataStream,
+        type: 'metrics',
+      },
+    ]);
+  });
+
+  it('should add use_apm var with default true for otel traces input', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          type: 'traces',
+          name: 'otel-traces',
+          template_path: 'some/path.hbl',
+          title: 'OTel Traces',
+          description: 'OTel Traces',
+          vars: [],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].streams).toHaveLength(1);
+    const vars = result[0].streams![0].vars;
+    const useApmVar = vars?.find((v) => v.name === 'use_apm');
+    expect(useApmVar).toBeDefined();
+    expect(useApmVar?.default).toEqual(true);
+    expect(useApmVar?.title).toEqual('Enable Elastic APM Enrichment');
+  });
 });
 
 describe('filterPolicyTemplatesTiles', () => {
@@ -402,5 +500,57 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
       },
     ]);
+  });
+});
+
+describe('hasMultipleEnabledPolicyTemplates', () => {
+  const makePackagePolicy = (
+    inputs: Array<{ type: string; policy_template?: string; enabled: boolean }>
+  ): NewPackagePolicy => ({
+    name: 'test-policy',
+    namespace: 'default',
+    enabled: true,
+    policy_ids: ['policy-1'],
+    inputs: inputs.map((input) => ({
+      ...input,
+      streams: [],
+    })),
+  });
+
+  it('should return false when all enabled inputs belong to a single policy template', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'metrics', policy_template: 'template_a', enabled: true },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return true when enabled inputs span multiple policy templates', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'httpjson', policy_template: 'template_b', enabled: true },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(true);
+  });
+
+  it('should return false when inputs span multiple templates but only one template is enabled', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: true },
+      { type: 'httpjson', policy_template: 'template_b', enabled: false },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return false when there is a single enabled input with no policy_template', () => {
+    const packagePolicy = makePackagePolicy([{ type: 'logfile', enabled: true }]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+
+  it('should return false when there are no enabled inputs', () => {
+    const packagePolicy = makePackagePolicy([
+      { type: 'logfile', policy_template: 'template_a', enabled: false },
+      { type: 'httpjson', policy_template: 'template_b', enabled: false },
+    ]);
+    expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
   });
 });

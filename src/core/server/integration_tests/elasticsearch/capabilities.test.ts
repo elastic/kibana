@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createTestServers, TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 
@@ -30,9 +31,7 @@ describe('ES capabilities for traditional ES', () => {
   });
 
   afterEach(async () => {
-    if (esServer) {
-      await esServer.stop();
-    }
+    await esServer?.stop();
   });
 
   it('returns the correct capabilities', async () => {

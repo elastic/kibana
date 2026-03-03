@@ -7,13 +7,17 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
+import { ALERT_GROUPING, ALERT_REASON } from '@kbn/rule-data-utils';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type {
+  AlertPendingStatusMetaData,
+  AlertStatusMetaData,
+  MissingPingMonitorInfo,
+} from '../../../common/runtime_types/alert_rules/common';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { AND_LABEL, getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
-import { MonitorSummaryStatusRule } from './types';
+import type { MonitorSummaryStatusRule } from './types';
 import {
   MONITOR_ID,
   MONITOR_TYPE,
@@ -27,14 +31,16 @@ import {
   SERVICE_NAME,
   ERROR_STACK_TRACE,
 } from '../../../common/field_names';
-import { OverviewPing } from '../../../common/runtime_types';
+import type { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 
 export const getMonitorAlertDocument = (
   monitorSummary: MonitorSummaryStatusRule,
   locationNames: string[],
   locationIds: string[],
-  useLatestChecks: boolean
+  useLatestChecks: boolean,
+  threshold: number,
+  grouping?: Record<string, unknown>
 ) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
@@ -53,15 +59,37 @@ export const getMonitorAlertDocument = (
   'location.name': locationNames,
   labels: monitorSummary.labels,
   configId: monitorSummary.configId,
-  'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
+  'kibana.alert.evaluation.threshold': threshold,
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
+  'monitor.failed_step_info': monitorSummary.failedStepInfo,
+  ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
 });
 
+type Reason = 'pending' | 'down' | 'recovered';
+
+const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
+  defaultMessage: `down`,
+});
+
+const PENDING_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.pendingLabel', {
+  defaultMessage: `pending`,
+});
+
+const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
+  defaultMessage: 'recovered',
+});
+
+const statusMap: Record<Reason, string> = {
+  down: DOWN_LABEL,
+  pending: PENDING_LABEL,
+  recovered: RECOVERED_LABEL,
+};
+
 export interface MonitorSummaryData {
-  monitorInfo: OverviewPing;
-  statusMessage: string;
+  monitorInfo: OverviewPing | MissingPingMonitorInfo;
+  reason: Reason;
   locationId: string[];
   configId: string;
   dateFormat: string;
@@ -71,6 +99,7 @@ export interface MonitorSummaryData {
     down: number;
   };
   params?: StatusRuleParams;
+  failedStepInfo?: string;
 }
 
 export const getMonitorSummary = ({
@@ -79,9 +108,10 @@ export const getMonitorSummary = ({
   configId,
   tz,
   dateFormat,
-  statusMessage,
+  reason,
   checks,
   params,
+  failedStepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const { downThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
@@ -89,9 +119,18 @@ export const getMonitorSummary = ({
   const formattedLocationName = Array.isArray(locationName)
     ? locationName.join(` ${AND_LABEL} `)
     : locationName;
-  const checkedAt = moment(monitorInfo?.['@timestamp'])
-    .tz(tz || 'UTC')
-    .format(dateFormat);
+
+  // When the monitor is pending there is no timestamp for the last ping
+  const { timestamp, checkedAt } =
+    monitorInfo && '@timestamp' in monitorInfo
+      ? {
+          timestamp: monitorInfo['@timestamp'],
+          checkedAt: moment(monitorInfo['@timestamp'])
+            .tz(tz || 'UTC')
+            .format(dateFormat),
+        }
+      : { timestamp: undefined, checkedAt: undefined };
+
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
     tcp: 'TCP',
@@ -126,19 +165,20 @@ export const getMonitorSummary = ({
     locationName: formattedLocationName,
     locationNames: formattedLocationName,
     hostName: monitorInfo.agent?.name!,
-    status: statusMessage,
+    status: statusMap[reason],
     stateId,
     [ALERT_REASON_MSG]: getReasonMessage({
       name: monitorName,
       location: formattedLocationName,
-      status: statusMessage,
+      reason,
       checks,
       params,
     }),
     checks,
     downThreshold,
-    timestamp: monitorInfo['@timestamp'],
+    timestamp,
     monitorTags: monitorInfo.tags,
+    failedStepInfo,
   };
 };
 
@@ -146,12 +186,12 @@ export const getUngroupedReasonMessage = ({
   statusConfigs,
   monitorName,
   params,
-  status = DOWN_LABEL,
+  reason,
 }: {
-  statusConfigs: AlertStatusMetaData[];
+  statusConfigs: Array<AlertStatusMetaData | AlertPendingStatusMetaData>;
   monitorName: string;
   params: StatusRuleParams;
-  status?: string;
+  reason: Reason;
   checks?: {
     downWithinXChecks: number;
     down: number;
@@ -159,7 +199,42 @@ export const getUngroupedReasonMessage = ({
 }) => {
   const { useLatestChecks, numberOfChecks, timeWindow, downThreshold, locationsThreshold } =
     getConditionType(params.condition);
-
+  const status = statusMap[reason];
+  const locationDetails = statusConfigs
+    .map((c) => {
+      let downCount = 1;
+      if ('checks' in c) {
+        downCount = useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down;
+      }
+      return i18n.translate(
+        'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
+        {
+          defaultMessage:
+            '{downCount} {downCount, plural, one {time} other {times}} from {locName}',
+          values: {
+            locName:
+              c.latestPing?.observer.geo?.name ||
+              ('monitorInfo' in c && c.monitorInfo.observer.geo.name) ||
+              c.locationId,
+            downCount,
+          },
+        }
+      );
+    })
+    .join(` ${AND_LABEL} `);
+  if (reason === 'pending') {
+    return i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple.pending',
+      {
+        defaultMessage: `Monitor "{name}" is {status} {locationDetails}.`,
+        values: {
+          name: monitorName,
+          status,
+          locationDetails,
+        },
+      }
+    );
+  }
   return i18n.translate(
     'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.ungrouped.multiple',
     {
@@ -187,21 +262,7 @@ export const getUngroupedReasonMessage = ({
                 },
               }
             ),
-        locationDetails: statusConfigs
-          .map((c) => {
-            return i18n.translate(
-              'xpack.synthetics.alertRules.monitorStatus.reasonMessage.locationDetails',
-              {
-                defaultMessage:
-                  '{downCount} {downCount, plural, one {time} other {times}} from {locName}',
-                values: {
-                  locName: c.ping.observer.geo?.name,
-                  downCount: useLatestChecks ? c.checks?.downWithinXChecks : c.checks?.down,
-                },
-              }
-            );
-          })
-          .join(` ${AND_LABEL} `),
+        locationDetails,
       },
     }
   );
@@ -209,20 +270,31 @@ export const getUngroupedReasonMessage = ({
 
 export const getReasonMessage = ({
   name,
-  status,
+  reason,
   location,
   checks,
   params,
 }: {
   name: string;
   location: string;
-  status: string;
+  reason: Reason;
   checks?: {
     downWithinXChecks: number;
     down: number;
   };
   params?: StatusRuleParams;
 }) => {
+  const status = statusMap[reason];
+  if (reason === 'pending') {
+    return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.pending', {
+      defaultMessage: `Monitor "{name}" from {location} is {status}.`,
+      values: {
+        name,
+        status,
+        location,
+      },
+    });
+  }
   const { useTimeWindow, numberOfChecks, locationsThreshold, downThreshold } = getConditionType(
     params?.condition
   );
@@ -230,7 +302,7 @@ export const getReasonMessage = ({
     return getReasonMessageForTimeWindow({
       name,
       location,
-      status,
+      reason,
       params,
     });
   }
@@ -260,14 +332,15 @@ export const getReasonMessage = ({
 export const getReasonMessageForTimeWindow = ({
   name,
   location,
-  status = DOWN_LABEL,
+  reason,
   params,
 }: {
   name: string;
   location: string;
-  status?: string;
+  reason: Reason;
   params?: StatusRuleParams;
 }) => {
+  const status = statusMap[reason];
   const { timeWindow, locationsThreshold, downThreshold } = getConditionType(params?.condition);
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased', {
     defaultMessage: `Monitor "{name}" from {location} is {status}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
@@ -283,10 +356,6 @@ export const getReasonMessageForTimeWindow = ({
   });
 };
 
-export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
-  defaultMessage: `down`,
-});
-
 export const UNAVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.alertRules.monitorStatus.unavailableUrlLabel',
   {
@@ -297,3 +366,70 @@ export const UNAVAILABLE_LABEL = i18n.translate(
 export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
   defaultMessage: 'Host',
 });
+
+const MAX_SCRIPT_LENGTH = 200;
+
+/**
+ * Formats step information for display in alert messages
+ */
+export const formatStepInformation = (
+  stepInfo: {
+    stepName?: string;
+    scriptSource?: string;
+    stepNumber?: number;
+  } | null
+): string => {
+  if (!stepInfo) {
+    return '';
+  }
+
+  const parts: string[] = [];
+
+  // Format: "Step: 1. Step name"
+  if (stepInfo.stepNumber !== undefined && stepInfo.stepName) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.step', {
+        defaultMessage: '\n- Step: {stepNumber}. {stepName}  ',
+        values: {
+          stepNumber: stepInfo.stepNumber,
+          stepName: stepInfo.stepName,
+        },
+      })
+    );
+  } else if (stepInfo.stepName) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNameOnly', {
+        defaultMessage: '\n- Step: {stepName}  ',
+        values: {
+          stepName: stepInfo.stepName,
+        },
+      })
+    );
+  } else if (stepInfo.stepNumber !== undefined) {
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepNumberOnly', {
+        defaultMessage: '\n- Step: {stepNumber}  ',
+        values: {
+          stepNumber: stepInfo.stepNumber,
+        },
+      })
+    );
+  }
+
+  if (stepInfo.scriptSource) {
+    // Limit script source to first 200 characters to avoid too long messages
+    const truncatedScript = stepInfo.scriptSource.substring(0, MAX_SCRIPT_LENGTH);
+    const script =
+      stepInfo.scriptSource.length > MAX_SCRIPT_LENGTH ? `${truncatedScript}...` : truncatedScript;
+    parts.push(
+      i18n.translate('xpack.synthetics.alertRules.monitorStatus.stepInfo.stepScript', {
+        defaultMessage: '\n- Step script: {script}  ',
+        values: {
+          script,
+        },
+      })
+    );
+  }
+
+  return parts.join('');
+};

@@ -9,7 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import fs from 'fs';
 import fetch from 'node-fetch';

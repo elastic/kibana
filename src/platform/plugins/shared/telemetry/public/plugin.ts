@@ -52,8 +52,9 @@ export interface TelemetryServicePublicApis {
    * Overwrite the opt-in status.
    * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
    * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   * @param signal An AbortSignal to cancel any ongoing requests if the caller decides to
    */
-  setOptIn: (optedIn: boolean) => Promise<boolean>;
+  setOptIn: (optedIn: boolean, signal?: AbortSignal) => Promise<boolean>;
 }
 
 /**
@@ -318,7 +319,7 @@ export class TelemetryPlugin
    * Kibana should skip telemetry collection if reporting is taking a screenshot
    * or Synthetics monitoring is navigating Kibana.
    * @param screenshotMode {@link ScreenshotModePluginSetup}
-   * @private
+   * @internal
    */
   private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
     return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
@@ -339,7 +340,7 @@ export class TelemetryPlugin
   /**
    * Retrieve the up-to-date configuration
    * @param http HTTP helper to make requests to the server
-   * @private
+   * @internal
    */
   private async refreshConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const updatedConfig = await this.fetchUpdatedConfig(http);
@@ -357,7 +358,7 @@ export class TelemetryPlugin
    * This is a security feature, not included in the OSS build, so we need to fallback to `true`
    * in case it is `undefined`.
    * @param application CoreStart.application
-   * @private
+   * @internal
    */
   private getCanUserChangeSettings(application: ApplicationStart): boolean {
     return (application.capabilities?.savedObjectsManagement?.edit as boolean | undefined) ?? true;
@@ -389,7 +390,7 @@ export class TelemetryPlugin
   /**
    * Fetch configuration from the server and merge it with the one the browser already knows
    * @param http The HTTP helper to make the requests
-   * @private
+   * @internal
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const {

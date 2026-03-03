@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FC } from 'react';
-import {
+import type { FC, ReactNode } from 'react';
+import type {
   ApplicationStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -17,7 +17,7 @@ import {
   OverlayStart,
 } from '@kbn/core/public';
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type {
   DataView,
@@ -25,8 +25,9 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewEditorService } from './data_view_editor_service';
-import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
+import type { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
   uiSettings: IUiSettingsClient;
@@ -37,6 +38,7 @@ export interface DataViewEditorContext {
   overlays: OverlayStart;
   dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
+  cps?: CPSPluginStart;
 }
 
 /** @public */
@@ -71,6 +73,18 @@ export interface DataViewEditorProps {
    * if set to true a link to the management page is shown
    */
   showManagementLink?: boolean;
+  /**
+   * If editing a data view and onDuplicate is defined, a duplicate button is shown
+   */
+  onDuplicate?: () => void;
+  /**
+   * Optional boolean to indicate if the data view is being duplicated
+   */
+  isDuplicating?: boolean;
+  /**
+   * Optional callback to get help text based on the active data view
+   */
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -98,6 +112,7 @@ export interface SetupPlugins {}
 export interface StartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsServicePublic;
+  cps?: CPSPluginStart;
 }
 
 export type CloseEditor = () => void;
@@ -136,6 +151,7 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
 export interface TimestampOption {
   display: string;
   fieldName?: string;
+  isDisabled?: boolean;
 }
 
 export interface MatchedIndicesSet {

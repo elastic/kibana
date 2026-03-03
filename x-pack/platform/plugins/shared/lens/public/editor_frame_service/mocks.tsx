@@ -6,14 +6,14 @@
  */
 
 import type { PaletteDefinition } from '@kbn/coloring';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
+import type { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 
 export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
   return {

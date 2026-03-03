@@ -7,7 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
@@ -23,6 +23,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,
   actionItems,
   ecsData,
+  addToTimeline,
 }) => {
   const { read } = useKibana().services.application.capabilities.osquery;
 
@@ -43,6 +44,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
             startDate={startDate}
             ruleName={ruleName}
             ecsData={ecsData}
+            addToTimeline={addToTimeline}
           />
         );
       })}

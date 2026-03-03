@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { ObjectType, schema } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
-import { getFetchTrendsQuery, TrendsQuery } from './fetch_trends';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { SyntheticsEsClient } from '../../lib';
+import type { TrendsQuery } from './fetch_trends';
+import { getFetchTrendsQuery } from './fetch_trends';
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsEsClient } from '../../lib';
 
 export const getIntervalForCheckCount = (schedule: string, numChecks = 50) =>
   Number(schedule) * numChecks;
@@ -61,7 +63,8 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
         configId: schema.string(),
         locationId: schema.string(),
         schedule: schema.string(),
-      })
+      }),
+      { maxSize: 500 }
     ) as unknown as ObjectType,
   },
   handler: async (routeContext): Promise<TrendTable> => {

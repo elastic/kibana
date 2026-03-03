@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiExpression, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiExpression, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ interface Props {
   setExpirationThreshold: (value: number) => void;
 }
 
-export const AlertTlsComponent: React.FC<Props> = ({
+export const AlertTlsCondition: React.FC<Props> = ({
   ageThreshold,
   expirationThreshold,
   setAgeThreshold,
@@ -25,7 +25,16 @@ export const AlertTlsComponent: React.FC<Props> = ({
 }) => (
   <>
     <EuiSpacer size="m" />
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate('xpack.synthetics.rules.tls.condition.title', {
+              defaultMessage: 'Condition',
+            })}
+          </h3>
+        </EuiTitle>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiExpression
           aria-label={TlsTranslations.criteriaAriaLabel}

@@ -100,20 +100,17 @@ describe('useMonitorFilters', () => {
   it('should handle a combination of parameters', () => {
     spaceSpy.mockReturnValue({ space: { id: 'space3' } } as any);
     paramSpy.mockReturnValue({
-      schedules: 'daily',
       projects: ['projectA'],
       tags: ['tagB'],
       locations: ['locationC'],
       monitorTypes: 'http',
     } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id3', 'id4'] } });
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: false }), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toEqual([
-      { field: 'monitor.id', values: ['id3', 'id4'] },
       { field: 'monitor.project.id', values: ['projectA'] },
       { field: 'monitor.type', values: ['http'] },
       { field: 'tags', values: ['tagB'] },

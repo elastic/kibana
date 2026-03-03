@@ -14,7 +14,7 @@ exports[`it renders correctly in serverless mode 1`] = `
         />
         <EuiLink
           className="editRole__learnMore"
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
+          href="https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster"
           target="_blank"
         >
           <Memo(MemoizedFormattedMessage)
@@ -87,7 +87,7 @@ exports[`it renders correctly in serverless mode 1`] = `
       />
       <EuiLink
         className="editRole__learnMore"
-        href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
+        href="https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-indices"
         target="_blank"
       >
         <MemoizedFormattedMessage
@@ -164,7 +164,7 @@ exports[`it renders without crashing 1`] = `
         />
         <EuiLink
           className="editRole__learnMore"
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
+          href="https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster"
           target="_blank"
         >
           <Memo(MemoizedFormattedMessage)
@@ -222,7 +222,7 @@ exports[`it renders without crashing 1`] = `
         />
         <EuiLink
           className="editRole__learnMore"
-          href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#_run_as_privilege"
+          href="https://www.elastic.co/docs/reference/elasticsearch/security-privileges#_run_as_privilege"
           target="_blank"
         >
           <Memo(MemoizedFormattedMessage)
@@ -283,7 +283,7 @@ exports[`it renders without crashing 1`] = `
       />
       <EuiLink
         className="editRole__learnMore"
-        href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
+        href="https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-indices"
         target="_blank"
       >
         <MemoizedFormattedMessage

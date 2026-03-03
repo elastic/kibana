@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UrlForwardingPlugin } from './plugin';
+import type { UrlForwardingPlugin } from './plugin';
 
 export type Setup = jest.Mocked<ReturnType<UrlForwardingPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<UrlForwardingPlugin['start']>>;

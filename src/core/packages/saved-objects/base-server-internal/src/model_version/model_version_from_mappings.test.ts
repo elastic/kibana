@@ -71,4 +71,23 @@ describe('getModelVersionsFromMappings', () => {
 
     expect(versionMap).toBeUndefined();
   });
+
+  it('default to the minimum version if specified', () => {
+    const mappings = createIndexMapping({
+      mappingVersions: {
+        foo: '10.3.0',
+        bar: '8.16.2',
+      },
+    });
+    const versionMap = getVirtualVersionsFromMappings({
+      mappings,
+      source: 'mappingVersions',
+      minimumVirtualVersion: '10.0.0',
+    });
+
+    expect(versionMap).toEqual({
+      foo: '10.3.0',
+      bar: '10.0.0',
+    });
+  });
 });

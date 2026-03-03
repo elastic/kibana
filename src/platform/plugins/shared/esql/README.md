@@ -37,3 +37,6 @@ It is also part of the:
 - Maps new ES|QL layer
 - ML data visualizer
 - Alerts
+
+## Want to add support for a new command?
+Follow this [guide](ADD_COMMAND_GUIDE.md).

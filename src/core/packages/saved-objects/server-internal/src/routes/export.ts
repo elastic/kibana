@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -20,6 +21,7 @@ import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-inte
 import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
+import { badResponseSchema } from './shared_schemas';
 import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
@@ -148,8 +150,14 @@ export const registerExportRoute = (
         summary: `Export saved objects`,
         tags: ['oas-tag:saved objects'],
         access: 'public',
-        description:
-          'Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.  \nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.  \nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.',
+        description: `Retrieve sets of saved objects that you want to import into Kibana. You must include \`type\` or \`objects\` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
+
+Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+NOTE: The exported saved objects include \`coreMigrationVersion\` and \`typeMigrationVersion\` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
+
+NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
+        oasOperationObject: () => path.resolve(__dirname, './export.examples.yaml'),
       },
       security: {
         authz: {
@@ -158,24 +166,62 @@ export const registerExportRoute = (
         },
       },
       validate: {
-        body: schema.object({
-          type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          hasReference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
-          ),
-          objects: schema.maybe(
-            schema.arrayOf(
-              schema.object({
-                type: schema.string(),
-                id: schema.string(),
-              }),
-              { maxSize: maxImportExportSize }
-            )
-          ),
-          search: schema.maybe(schema.string()),
-          includeReferencesDeep: schema.boolean({ defaultValue: false }),
-          excludeExportDetails: schema.boolean({ defaultValue: false }),
-        }),
+        request: {
+          body: schema.object({
+            hasReference: schema.maybe(
+              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+            ),
+            type: schema.maybe(
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+                meta: {
+                  description:
+                    'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
+                },
+              })
+            ),
+            objects: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  type: schema.string(),
+                  id: schema.string(),
+                }),
+                {
+                  maxSize: maxImportExportSize,
+                  meta: {
+                    description:
+                      'A list of objects to export. NOTE: this optional parameter cannot be combined with the `types` option',
+                  },
+                }
+              )
+            ),
+            search: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    'Search for documents to export using the Elasticsearch Simple Query String syntax.',
+                },
+              })
+            ),
+            includeReferencesDeep: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description: 'Includes all of the referenced objects in the exported objects.',
+              },
+            }),
+            excludeExportDetails: schema.boolean({
+              defaultValue: false,
+              meta: { description: 'Do not add export details entry at the end of the stream.' },
+            }),
+          }),
+        },
+        response: {
+          200: {
+            bodyContentType: 'application/x-ndjson',
+            description: 'Indicates a successfull call.',
+            body: okResponseSchema,
+          },
+          400: badResponseSchema(),
+        },
       },
     },
     catchAndReturnBoomErrors(async (context, request, response) => {
@@ -220,7 +266,7 @@ export const registerExportRoute = (
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,
           createMapStream((obj: unknown) => {
-            return stringify(obj);
+            return stableStringify(obj);
           }),
           createConcatStream([]),
         ]);
@@ -246,3 +292,5 @@ export const registerExportRoute = (
     })
   );
 };
+
+const okResponseSchema = () => schema.object({}, { unknowns: 'allow' });

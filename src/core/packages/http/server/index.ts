@@ -119,6 +119,8 @@ export type {
   AuthcEnabled,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
   RouteSecurity,
   RouteSecurityGetter,
   InternalRouteSecurity,
@@ -149,6 +151,7 @@ export type {
   SessionStorageFactory,
   SessionCookieValidationResult,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
 } from './src/session_storage';
 
 export type { GetAuthState, IsAuthenticated } from './src/auth_state';

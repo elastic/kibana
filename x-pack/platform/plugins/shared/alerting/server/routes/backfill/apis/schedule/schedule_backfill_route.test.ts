@@ -28,8 +28,12 @@ describe('scheduleBackfillRoute', () => {
   const mockScheduleOptions = [
     {
       rule_id: 'abc',
-      start: '2023-11-16T08:00:00.000Z',
-      end: '2023-11-16T08:20:00.000Z',
+      ranges: [
+        {
+          start: '2023-11-16T08:00:00.000Z',
+          end: '2023-11-16T08:20:00.000Z',
+        },
+      ],
     },
   ];
 
@@ -39,6 +43,7 @@ describe('scheduleBackfillRoute', () => {
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
+      initiator: 'user',
       rule: {
         name: 'my rule name',
         tags: ['foo'],
@@ -67,6 +72,7 @@ describe('scheduleBackfillRoute', () => {
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
+      initiator: 'user',
       rule: {
         name: 'my rule name',
         tags: ['foo'],

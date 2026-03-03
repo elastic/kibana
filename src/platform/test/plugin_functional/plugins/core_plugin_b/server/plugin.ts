@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginAApiRequestContext } from '@kbn/core-plugin-a-plugin/server';
+import type { PluginAApiRequestContext } from '@kbn/core-plugin-a-plugin/server';
 
 type PluginBContext = CustomRequestHandlerContext<{
   pluginA: PluginAApiRequestContext;
@@ -18,16 +18,34 @@ type PluginBContext = CustomRequestHandlerContext<{
 export class CorePluginBPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     const router = core.http.createRouter<PluginBContext>();
-    router.get({ path: '/core_plugin_b', validate: false }, async (context, req, res) => {
-      const pluginAContext = await context.pluginA;
-      if (!pluginAContext) throw new Error('pluginA is disabled');
-      const response = await pluginAContext.ping();
-      return res.ok({ body: `Pong via plugin A: ${response}` });
-    });
+    router.get(
+      {
+        path: '/core_plugin_b',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      async (context, req, res) => {
+        const pluginAContext = await context.pluginA;
+        if (!pluginAContext) throw new Error('pluginA is disabled');
+        const response = await pluginAContext.ping();
+        return res.ok({ body: `Pong via plugin A: ${response}` });
+      }
+    );
 
     router.post(
       {
         path: '/core_plugin_b',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({ id: schema.string() }),
           body: ({ bar, baz } = {}, { ok, badRequest }) => {
@@ -47,6 +65,12 @@ export class CorePluginBPlugin implements Plugin {
     router.post(
       {
         path: '/core_plugin_b/system_request',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
       },
       async (context, req, res) => {

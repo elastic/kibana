@@ -6,19 +6,18 @@
  */
 
 import React from 'react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { render, screen, within } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FormBasedDataPanel, FormBasedDataPanelProps } from './datapanel';
+import type { FormBasedDataPanelProps } from './datapanel';
+import { FormBasedDataPanel } from './datapanel';
 import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import { FormBasedPrivateState } from './types';
 import { documentField } from './document_field';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -27,7 +26,8 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
-import { DataViewsState } from '../../state_management';
+import type { DataViewsState, FormBasedPrivateState } from '@kbn/lens-common';
+import { renderWithProviders } from '../../test_utils/test_utils';
 
 const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -241,11 +241,8 @@ const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 const renderFormBasedDataPanel = async (propsOverrides?: Partial<FormBasedDataPanelProps>) => {
-  const { rerender, ...rest } = render(
-    <FormBasedDataPanel {...defaultProps} {...propsOverrides} />,
-    {
-      wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-    }
+  const { rerender, ...rest } = renderWithProviders(
+    <FormBasedDataPanel {...defaultProps} {...propsOverrides} />
   );
   await waitToLoad();
   return {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { Groupings } from '../../domain/models';
+import type { Groupings } from '../../domain/models';
 
 /**
  * Takes a list of groupBy fields and the nested groupings object provided from

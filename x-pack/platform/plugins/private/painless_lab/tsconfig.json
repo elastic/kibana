@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -21,6 +22,9 @@
     "@kbn/config-schema",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/scout",
+    "@kbn/css-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

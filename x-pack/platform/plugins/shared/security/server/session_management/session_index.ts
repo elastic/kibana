@@ -9,8 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
-  BulkOperationContainer,
-  CreateRequest,
+  BulkDeleteOperation,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
@@ -762,8 +761,7 @@ export class SessionIndex {
       try {
         await this.options.elasticsearchClient.indices.putMapping({
           index: this.aliasName,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          body: sessionIndexSettings.mappings,
+          ...sessionIndexSettings.mappings,
         });
         this.options.logger.debug('Successfully updated session index mappings.');
       } catch (err) {
@@ -787,7 +785,7 @@ export class SessionIndex {
         document: sessionValueToStore,
         refresh: false,
         require_alias: true,
-      } as CreateRequest,
+      },
       { meta: true, ignore: ignore404 ? [404] : [] }
     );
 
@@ -903,11 +901,12 @@ export class SessionIndex {
     }
 
     const openPitResponse = response.body;
+    let pitId = openPitResponse.id;
     try {
       let searchAfter: SortResults | undefined;
       for (let i = 0; i < SESSION_INDEX_CLEANUP_BATCH_LIMIT; i++) {
         const searchResponse = await this.options.elasticsearchClient.search<SessionIndexValue>({
-          pit: { id: openPitResponse.id, keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE },
+          pit: { id: pitId, keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE },
           _source_includes: 'usernameHash,provider',
           query: { bool: { should: deleteQueries } },
           search_after: searchAfter,
@@ -915,6 +914,7 @@ export class SessionIndex {
           sort: '_shard_doc',
           track_total_hits: false, // for performance
         });
+        pitId = searchResponse.pit_id ?? pitId;
         const { hits } = searchResponse.hits;
         if (hits.length > 0) {
           yield hits;
@@ -926,7 +926,7 @@ export class SessionIndex {
       }
     } finally {
       await this.options.elasticsearchClient.closePointInTime({
-        id: openPitResponse.id,
+        id: pitId,
       });
     }
   }
@@ -1104,9 +1104,7 @@ export class SessionIndex {
    * @param deleteOperations Bulk delete operations.
    * @returns Returns `true` if the bulk delete affected any session document.
    */
-  private async bulkDeleteSessions(
-    deleteOperations: Array<Required<Pick<BulkOperationContainer, 'delete'>>>
-  ) {
+  private async bulkDeleteSessions(deleteOperations: Array<{ delete: BulkDeleteOperation }>) {
     if (deleteOperations.length === 0) {
       return false;
     }

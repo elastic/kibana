@@ -8,7 +8,7 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 type Duration =
@@ -818,7 +818,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getLegendItemsContent(): Promise<string[]> {
-    const legendList = await this.find.byCssSelector('.echLegendList');
+    const legendList = await this.find.byCssSelector('.echLegendGridList');
     const $ = await legendList.parseDomContent();
 
     return $('li')

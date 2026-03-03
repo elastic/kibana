@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '@kbn/cypress-test-helper/src/services/alerting_services';
 import { disableNewFeaturesTours } from './navigation';
 import { getAdvancedButton } from '../screens/integrations';
-import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
+import {
+  LIVE_QUERY_EDITOR,
+  OSQUERY_FLYOUT_BODY_EDITOR,
+  RESULTS_TABLE,
+} from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
+export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const selectAllAgents = () => {
   cy.getBySel('globalLoadingIndicator').should('not.exist');
@@ -31,16 +36,16 @@ export const clearInputQuery = () =>
   cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.getBySel(LIVE_QUERY_EDITOR).type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).click().type(query, options);
 
 export const inputQueryInFlyout = (
   query: string,
   options?: { parseSpecialCharSequences: boolean }
-) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).type(query, options);
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click().type(query, options);
 
 export const submitQuery = () => {
-  cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
-  cy.contains('Submit').click();
+  cy.wait(1000);
+  cy.get('#submit-button').should('not.be.disabled').click({ force: true });
 };
 
 export const fillInQueryTimeout = (timeout: string) => {
@@ -58,13 +63,13 @@ export const verifyQueryTimeout = (timeout: string) => {
 
 // sometimes the results get stuck in the tests, this is a workaround
 export const checkResults = () => {
-  cy.getBySel('osqueryResultsTable', { timeout: 120000 }).then(($table) => {
+  cy.getBySel(RESULTS_TABLE, { timeout: 240000 }).then(($table) => {
     if ($table.find('div .euiDataGridRow').length > 0) {
-      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+      cy.getBySel('dataGridRowCell', { timeout: 240000 }).should('have.lengthOf.above', 0);
     } else {
-      cy.getBySel('osquery-status-tab').click();
-      cy.getBySel('osquery-results-tab').click();
-      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+      cy.getBySel('osquery-status-tab').click({ multiple: true });
+      cy.getBySel('osquery-results-tab').click({ multiple: true });
+      cy.getBySel('dataGridRowCell', { timeout: 240000 }).should('have.lengthOf.above', 0);
     }
   });
 };
@@ -105,7 +110,7 @@ export const deleteAndConfirm = (type: string) => {
 
 export const toggleRuleOffAndOn = (ruleName: string) => {
   cy.visit('/app/security/rules');
-  cy.wait(2000);
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.contains(ruleName)
     .parents('tr')
     .within(() => {
@@ -117,13 +122,33 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
-export const loadRuleAlerts = (ruleName: string) => {
+export const navigateToRule = (ruleName: string) => {
   cy.login(ServerlessRoleName.SOC_MANAGER, false);
   cy.visit('/app/security/rules', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
   clickRuleName(ruleName);
+  goToAlertsTab();
   waitForAlertsToPopulate();
+};
+
+export const loadRuleAlerts = (ruleName: string) => {
+  navigateToRule(ruleName);
+  cy.getBySel('ruleSwitch')
+    .invoke('attr', 'aria-checked')
+    .then((ariaChecked) => {
+      if (ariaChecked === 'true') {
+        // Rule is on - turn off first, then back on to refresh
+        cy.getBySel('ruleSwitch').click();
+        cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+        cy.getBySel('ruleSwitch').click();
+        cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+      } else {
+        // Rule is off - turn it on
+        cy.getBySel('ruleSwitch').click();
+        cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+      }
+    });
 };
 
 export const addToCase = (caseId: string) => {
@@ -166,7 +191,8 @@ export const checkActionItemsInResults = ({
 };
 
 export const takeOsqueryActionWithParams = () => {
-  cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
+  // Force click due to element sometimes being covered by other flyout elements
+  cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
   cy.getBySel('osquery-action-item').click();
   selectAllAgents();
   inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
@@ -175,11 +201,19 @@ export const takeOsqueryActionWithParams = () => {
   cy.contains('Advanced').click();
   typeInECSFieldInput('tags{downArrow}{enter}');
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
-  cy.wait(1000);
   submitQuery();
-  cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
+  cy.getBySel('dataGridHeader', { timeout: 120000 }).then(($header) => {
+    if (!$header.text().includes('tags')) {
+      submitQuery();
+    }
+  });
+  cy.getBySel('dataGridHeader', { timeout: 120000 }).should('contain', 'tags');
 };
 
 export const clickRuleName = (ruleName: string) => {
   cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
+};
+
+export const goToAlertsTab = () => {
+  cy.get(ALERTS_TAB).click();
 };

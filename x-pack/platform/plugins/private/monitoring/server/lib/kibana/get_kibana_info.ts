@@ -6,9 +6,9 @@
  */
 
 import { merge } from 'lodash';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../../common/get_index_patterns';
 import { MissingRequiredError } from '../error_missing_required';
 import { buildKibanaInfo } from './build_kibana_info';

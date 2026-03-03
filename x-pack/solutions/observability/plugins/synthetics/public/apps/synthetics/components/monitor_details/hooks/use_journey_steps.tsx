@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import {
   fetchJourneyAction,
   selectBrowserJourney,

@@ -15,6 +15,7 @@ import { AttachmentGetter } from './get';
 import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
 import { mockPointInTimeFinder, createSOFindResponse, createErrorSO } from '../../test_utils';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common';
+import type { ConfigType } from '../../../config';
 
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -31,6 +32,7 @@ describe('AttachmentService getter', () => {
       log: mockLogger,
       persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+      config: {} as ConfigType,
     });
   });
 
@@ -75,7 +77,7 @@ describe('AttachmentService getter', () => {
         });
 
         await expect(attachmentGetter.bulkGet(['1'])).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );
       });
     });
@@ -89,7 +91,7 @@ describe('AttachmentService getter', () => {
         mockFinder(soFindRes);
 
         await expect(
-          attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' })
+          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1' })
         ).resolves.not.toThrow();
       });
 
@@ -100,7 +102,7 @@ describe('AttachmentService getter', () => {
 
         mockFinder(soFindRes);
 
-        const res = await attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' });
+        const res = await attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1' });
         expect(res).toStrictEqual([{ ...createAlertAttachment(), score: 0 }]);
       });
 
@@ -112,7 +114,7 @@ describe('AttachmentService getter', () => {
         mockFinder(soFindRes);
 
         await expect(
-          attachmentGetter.getAllAlertsAttachToCase({ caseId: '1' })
+          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"alertId\\""`
         );
@@ -146,7 +148,7 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.get({ attachmentId: '1' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );
       });
     });
@@ -188,7 +190,7 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.getFileAttachments({ caseId: '1', fileIds: ['1'] })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"externalReference\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"savedObject\\" supplied to \\"externalReferenceStorage,type\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"externalReference\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"savedObject\\" supplied to \\"externalReferenceStorage,type\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
         );
       });
     });

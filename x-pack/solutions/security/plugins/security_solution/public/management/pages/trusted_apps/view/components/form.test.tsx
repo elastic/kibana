@@ -11,23 +11,29 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-
-import { TrustedAppsForm } from './form';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { useFetchIndex } from '../../../../../common/containers/source';
+import { TrustedAppsForm, validateValues } from './form'; // validateValues is tested in its own describe block below
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { INPUT_ERRORS } from '../translations';
+import {
+  INPUT_ERRORS,
+  USING_ADVANCED_MODE,
+  USING_ADVANCED_MODE_DESCRIPTION,
+} from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
-import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
-
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 
+jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -42,7 +48,6 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 
 describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
-  const generator = new EndpointDocGenerator('effected-policy-select');
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
   let formProps: jest.Mocked<ArtifactFormComponentProps>;
@@ -77,13 +82,14 @@ describe('Trusted apps form', () => {
     overrides: Partial<ArtifactFormComponentProps['item']> = {}
   ): ArtifactFormComponentProps['item'] {
     const defaults: ArtifactFormComponentProps['item'] = {
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       name: '',
       description: '',
       os_types: [OperatingSystem.WINDOWS],
       entries: [createEntry(ConditionEntryField.HASH, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
+      meta: { temporaryUuid: '1111' },
     };
     return {
       ...defaults,
@@ -102,19 +108,6 @@ describe('Trusted apps form', () => {
       ...defaults,
       ...overrides,
     };
-  }
-
-  function createPolicies(): PolicyData[] {
-    const policies = [
-      generator.generatePolicyPackagePolicy(),
-      generator.generatePolicyPackagePolicy(),
-    ];
-    policies.map((p, i) => {
-      p.id = `id-${i}`;
-      p.name = `some-policy-${Math.random().toString(36).split('.').pop()}`;
-      return p;
-    });
-    return policies;
   }
 
   // Some helpers
@@ -171,22 +164,43 @@ describe('Trusted apps form', () => {
     return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
   };
 
+  const getAdvancedModeToggle = (): HTMLButtonElement => {
+    return renderResult.getByTestId(`advancedModeButton`) as HTMLButtonElement;
+  };
+
+  const getBasicModeToggle = (): HTMLButtonElement => {
+    return renderResult.getByTestId(`basicModeButton`) as HTMLButtonElement;
+  };
+
+  const getAdvancedModeUsageWarningHeader = (dataTestSub: string = formPrefix): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningHeader`);
+  };
+
+  const getAdvancedModeUsageWarningBody = (dataTestSub: string = formPrefix): HTMLElement => {
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningBody`);
+  };
+
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
     latestUpdatedItem = createItem();
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      {
+        indexPatterns: stubIndexPattern,
+      },
+    ]);
 
     formProps = {
       item: latestUpdatedItem,
       mode: 'create',
       disabled: false,
       error: undefined,
-      policiesIsLoading: false,
       onChange: jest.fn((updates) => {
         latestUpdatedItem = updates.item;
       }),
-      policies: [],
     };
   });
 
@@ -290,7 +304,6 @@ describe('Trusted apps form', () => {
         (label) => (label.textContent || '').trim()
       );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
-      expect(formProps.onChange).not.toHaveBeenCalled();
     });
 
     it('should not allow the entry to be removed if its the only one displayed', () => {
@@ -322,29 +335,63 @@ describe('Trusted apps form', () => {
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 
-    it('should show path malformed warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+    describe('IS operator', () => {
+      it('should show path malformed warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+      });
+
+      it('should show path malformed path warning for linux/mac without an executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '/')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
+
+      it('should show path malformed path warning for windows with no executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'c:\\fold\\')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
     });
 
-    it('should show wildcard in path warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+    describe('MATCHES operator', () => {
+      it('should show wildcard in path warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        os_types: [OperatingSystem.LINUX],
-        entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+      });
     });
 
     it('should display the `AND` button', () => {
@@ -358,13 +405,18 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
         rerender();
       });
 
       it('should add a new condition entry when `AND` is clicked with no column labels', () => {
         const condition2 = getCondition(1);
         expect(condition2.querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0);
+        expect(
+          renderResult
+            .getByTestId(`trustedApps-form-conditionsBuilder-group1-entry1`)
+            .querySelectorAll('.euiFormRow__labelWrapper')
+        ).toHaveLength(0);
       });
 
       it('should have remove buttons enabled when multiple conditions are present', () => {
@@ -377,108 +429,252 @@ describe('Trusted apps form', () => {
         expect(getConditionBuilderAndConnectorBadge().textContent).toEqual('AND');
       });
     });
-  });
 
-  describe('the Policy Selection area', () => {
-    beforeEach(() => {
-      formProps.policies = createPolicies();
-    });
-
-    it('should have `global` switch on if effective scope is global and policy options hidden', () => {
-      render();
-      const globalButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-global`
-      ) as HTMLButtonElement;
-
-      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeNull();
-      expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
-    });
-
-    it('should have policy options visible and specific policies checked if scope is per-policy', () => {
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-
-      const perPolicyButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-perPolicy`
-      ) as HTMLButtonElement;
-
-      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toEqual(
-        'false'
-      );
-      expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
-    });
-
-    it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should preserve other tags when policies are updated', async () => {
-      formProps.item.tags = ['some:unknown_tag'];
-      const policyId = formProps.policies[0].id;
-      render();
-      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-
-      expect(formProps.onChange).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          item: expect.objectContaining({
-            tags: ['some:unknown_tag', `policy:${policyId}`],
-          }),
-        })
-      );
-    });
-  });
-
-  describe('the Policy Selection area when the license downgrades to gold or below', () => {
-    beforeEach(() => {
-      const policies = createPolicies();
-      formProps.policies = policies;
-      formProps.item.tags = [policies.map((p) => `policy:${p.id}`)[0]];
-      formProps.mode = 'edit';
-      // downgrade license
-      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-      render();
-    });
-
-    it('maintains policy configuration but does not allow the user to edit add/remove individual policies in edit mode', () => {
-      const perPolicyButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-perPolicy`
-      ) as HTMLButtonElement;
-      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toEqual('true');
-      expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
-    });
-    it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
-      const globalButtonInput = renderResult.getByTestId(
-        'trustedApps-form-effectedPolicies-global'
-      ) as HTMLButtonElement;
-      act(() => {
-        fireEvent.click(globalButtonInput);
+    describe('Advanced Mode', () => {
+      afterEach(() => {
+        cleanup();
       });
 
-      const policyItem = formProps.onChange.mock.calls[0][0].item.tags
-        ? formProps.onChange.mock.calls[0][0].item.tags[0]
-        : '';
-      expect(policyItem).toBe('policy:all');
-    });
+      it('should update tags to include "form_mode:advanced" and show advanced mode warning', async () => {
+        await userEvent.click(getAdvancedModeToggle());
 
-    it('hides the policy assignment section if the TA is set to global', () => {
-      formProps.item.tags = ['policy:all'];
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          tags: ['policy:all', 'form_mode:advanced'],
+          entries: [],
+        };
+        const expected = createOnChangeArgs({
+          item: createItem(propsItem),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expected);
+
+        // update TA to show toggle change
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+        rerender();
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE);
+        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(
+          USING_ADVANCED_MODE_DESCRIPTION
+        );
+      });
+
+      it('when updating an existing trusted app, the previous form mode is enabled by default', async () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          name: 'edit advanced mode ta',
+          entries: [
+            { field: 'file.path.text', operator: 'included', type: 'match', value: 'asdf' },
+          ],
+          tags: ['policy:all', 'form_mode:advanced'],
+        };
+
+        formProps = {
+          item: { ...formProps.item, ...propsItem },
+          mode: 'edit',
+          disabled: false,
+          error: undefined,
+          onChange: jest.fn((updates) => {
+            latestUpdatedItem = updates.item;
+          }),
+        };
+
+        latestUpdatedItem = { ...formProps.item, ...propsItem };
+
+        rerenderWithLatestProps();
+
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getBasicModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(
+          false
+        );
+      });
+
+      it('retains previous user input when switching from basic to advanced mode', async () => {
+        setTextFieldValue(getConditionValue(getCondition()), 'some value');
+        const propsItem1: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+        };
+        const expectedAfterBasicValueChange = createOnChangeArgs({
+          item: createItem(propsItem1),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterBasicValueChange);
+
+        await userEvent.click(getAdvancedModeToggle());
+        const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
+          tags: ['policy:all', 'form_mode:advanced'],
+          entries: [],
+        };
+        const expectedAfterSwitchToAdvancedMode = createOnChangeArgs({
+          item: createItem(propsItem2),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToAdvancedMode);
+
+        await userEvent.click(getBasicModeToggle());
+        const propsItem3: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+        };
+        const expectedAfterSwitchToBasicMode = createOnChangeArgs({
+          item: createItem(propsItem3),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
+      });
+
+      describe('Process Descendants', () => {
+        beforeEach(() => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForTrustedAppsEnabled: true,
+          });
+        });
+
+        it('should not display button when feature flag is disabled', () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForTrustedAppsEnabled: false,
+          });
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced'],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          expect(
+            renderResult.queryByTestId('trustedApps-processDescendantsSelector')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should not display button in basic mode', () => {
+          render();
+
+          expect(
+            renderResult.queryByTestId('trustedApps-processDescendantsSelector')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should add the tag "trust_process_descendants" when the button is selected', async () => {
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced'],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+          await userEvent.click(
+            renderResult.getByTestId('trustedApps-filterProcessDescendantsButton')
+          );
+
+          const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+          const expected = createOnChangeArgs({
+            item: createItem(propsItem2),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
+
+        it('should remove the tag "trust_process_descendants" when the button is not selected', async () => {
+          // Start with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Click the "Events" button to deselect "Process Descendants"
+          await userEvent.click(renderResult.getByTestId('trustedApps-filterEventsButton'));
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all', 'form_mode:advanced'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
+
+        it('should remove "process_descendants" tag when switching to basic mode', async () => {
+          // Start in advanced mode with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Switch to basic mode
+          userEvent.click(renderResult.getAllByTestId('basicModeButton')[0]);
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
+
+        it('should retain "process_descendants" tag when switching from advanced mode to basic mode and then back to advanced mode options', async () => {
+          // Start in advanced mode with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Click the "Process Descendants" button to ensure it's selected
+          await userEvent.click(
+            renderResult.getByTestId('trustedApps-filterProcessDescendantsButton')
+          );
+
+          // Switch to basic mode
+          await userEvent.click(renderResult.getAllByTestId('basicModeButton')[0]);
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+
+          // Switch back to advanced mode
+          await userEvent.click(renderResult.getAllByTestId('advancedModeButton')[0]);
+
+          // The process descendants tag should be present in the tags array
+          const expectedAfterSwitchBack = createOnChangeArgs({
+            item: createItem({
+              tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+            }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchBack);
+        });
+      });
     });
-    it('hides the policy assignment section if the user is adding a new TA', () => {
-      formProps.mode = 'create';
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
+  });
+
+  it('should display effective scope options', () => {
+    render();
+    const globalButton = renderResult.getByTestId(
+      `${formPrefix}-effectedPolicies-global`
+    ) as HTMLButtonElement;
+
+    expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+    expect(
+      renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
+    ).toBeNull();
+    expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
   });
 
   describe('and the user visits required fields but does not fill them out', () => {
@@ -513,8 +709,14 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.name));
     });
 
-    it('should validate invalid Hash value', () => {
-      setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
+    it('should validate invalid Hash value', async () => {
+      const valueField = getConditionValue(getCondition());
+      await act(async () => {
+        await userEvent.clear(valueField);
+        await userEvent.type(valueField, 'someHASH');
+        fireEvent.blur(valueField);
+      });
+      rerenderWithLatestProps();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
 
@@ -526,7 +728,8 @@ describe('Trusted apps form', () => {
     it('should validate all condition values (when multiples exist) have non empty space value', async () => {
       const andButton = getConditionBuilderAndButton();
       await userEvent.click(andButton);
-      rerenderWithLatestProps();
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
       rerenderWithLatestProps();
@@ -537,6 +740,8 @@ describe('Trusted apps form', () => {
     it('should validate duplicated conditions', async () => {
       const andButton = getConditionBuilderAndButton();
       await userEvent.click(andButton);
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), '');
       rerenderWithLatestProps();
@@ -548,7 +753,8 @@ describe('Trusted apps form', () => {
       const andButton = getConditionBuilderAndButton();
 
       await userEvent.click(andButton);
-      rerenderWithLatestProps();
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
       rerenderWithLatestProps();
@@ -561,13 +767,12 @@ describe('Trusted apps form', () => {
     beforeEach(() => render());
     it('shows warning callout and help text warning if the field is PATH', async () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', '')],
+        entries: [createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*')],
       };
       latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
-
       act(() => {
-        setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+        fireEvent.blur(getConditionValue(getCondition()));
       });
 
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
@@ -576,13 +781,17 @@ describe('Trusted apps form', () => {
 
     it('shows a warning if field is HASH or SIGNATURE', () => {
       setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        entries: [createEntry(ConditionEntryField.HASH, 'match', 'somewildcard*')],
+      };
+      latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
     });
   });
 
   describe('and all required data passes validation', () => {
-    it('should call change callback with isValid set to true and contain the new item', () => {
+    it('should call change callback with isValid set to true and contain the new item', async () => {
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
         os_types: [OperatingSystem.LINUX],
         name: 'Some process',
@@ -593,9 +802,8 @@ describe('Trusted apps form', () => {
       };
       formProps.item = { ...formProps.item, ...propsItem };
       render();
-      act(() => {
-        fireEvent.blur(getNameField());
-      });
+      // get around formChanged check
+      await userEvent.type(getNameField(), ' ');
 
       expect(getAllValidationErrors()).toHaveLength(0);
       const expected = createOnChangeArgs({
@@ -613,14 +821,17 @@ describe('Trusted apps form', () => {
       };
       formProps.item = { ...formProps.item, ...propsItem };
       render();
+
       expect(getAllValidationErrors()).toHaveLength(0);
       expect(getAllValidationWarnings()).toHaveLength(0);
 
-      formProps.item.name = '';
-      rerender();
+      // clear name value
+      latestUpdatedItem = { ...formProps.item, name: '' };
+      rerenderWithLatestProps();
       act(() => {
         fireEvent.blur(getNameField());
       });
+
       expect(getAllValidationErrors()).toHaveLength(1);
       expect(getAllValidationWarnings()).toHaveLength(0);
       expect(formProps.onChange).toHaveBeenLastCalledWith({
@@ -639,6 +850,112 @@ describe('Trusted apps form', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('validateValues function', () => {
+    it('should not crash when validating advanced mode entries with nested types', () => {
+      const item: ArtifactFormComponentProps['item'] = {
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test with nested entries',
+        description: 'Testing nested entry validation',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all', 'form_mode:advanced'],
+        type: 'simple',
+        entries: [
+          // Nested entry - no top-level 'value' property
+          {
+            field: 'file.Ext',
+            type: 'nested',
+            entries: [
+              {
+                field: 'malware_signature.primary_signature.hash',
+                operator: 'included',
+                type: 'match',
+                value: 'abc123',
+              },
+            ],
+          },
+          // Non-nested entry with empty value
+          {
+            field: 'process.hash.sha256',
+            operator: 'included',
+            type: 'match',
+            value: '',
+          },
+        ],
+      };
+
+      // This should not throw when encountering nested entries
+      expect(() => validateValues(item)).not.toThrow();
+
+      // Should return invalid because of empty sha256 value
+      const result = validateValues(item);
+      expect(result.isValid).toBe(false);
+    });
+
+    it('should validate advanced mode entries with only nested entries as valid', () => {
+      const item: ArtifactFormComponentProps['item'] = {
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test with only nested entries',
+        description: '',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all', 'form_mode:advanced'],
+        type: 'simple',
+        entries: [
+          {
+            field: 'file.Ext',
+            type: 'nested',
+            entries: [
+              {
+                field: 'code_signature.subject_name',
+                operator: 'included',
+                type: 'match',
+                value: 'SomeSigner',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = validateValues(item);
+      // Should be valid - nested entries are skipped in the empty value check
+      expect(result.isValid).toBe(true);
+    });
+
+    it('should validate advanced mode with mixed nested and non-nested entries', () => {
+      const item: ArtifactFormComponentProps['item'] = {
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test mixed entries',
+        description: '',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all', 'form_mode:advanced'],
+        type: 'simple',
+        entries: [
+          {
+            field: 'file.Ext',
+            type: 'nested',
+            entries: [
+              {
+                field: 'code_signature.subject_name',
+                operator: 'included',
+                type: 'match',
+                value: 'SomeSigner',
+              },
+            ],
+          },
+          {
+            field: 'process.hash.sha256',
+            operator: 'included',
+            type: 'match',
+            value: 'valid-hash-value',
+          },
+        ],
+      };
+
+      const result = validateValues(item);
+      // Should be valid - all non-nested entries have values
+      expect(result.isValid).toBe(true);
     });
   });
 });

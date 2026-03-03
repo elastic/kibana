@@ -11,13 +11,6 @@ export const USER_ID = i18n.translate('xpack.securitySolution.flyout.entityDetai
   defaultMessage: 'User ID',
 });
 
-export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.user.maxAnomalyScoreByJobLabel',
-  {
-    defaultMessage: 'Max anomaly score by job',
-  }
-);
-
 export const FIRST_SEEN = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.user.firstSeenLabel',
   {

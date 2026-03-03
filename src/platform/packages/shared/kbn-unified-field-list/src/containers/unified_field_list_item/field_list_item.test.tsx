@@ -8,14 +8,15 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { EuiButtonIcon, EuiPopover, EuiProgress } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiProgress, EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getServicesMock } from '../../../__mocks__/services.mock';
-import { UnifiedFieldListItem, UnifiedFieldListItemProps } from './field_list_item';
+import type { UnifiedFieldListItemProps } from './field_list_item';
+import { UnifiedFieldListItem } from './field_list_item';
 import { FieldItemButton } from '../../components/field_item_button';
 import { createStateService } from '../services/state_service';
 
@@ -89,7 +90,11 @@ async function getComponent({
     size: 'xs',
     workspaceSelectedFieldNames: [],
   };
-  const comp = await mountWithIntl(<UnifiedFieldListItem {...props} />);
+  const comp = await mountWithIntl(
+    <EuiThemeProvider>
+      <UnifiedFieldListItem {...props} />
+    </EuiThemeProvider>
+  );
   // wait for lazy modules
   await new Promise((resolve) => setTimeout(resolve, 0));
   await comp.update();
@@ -120,8 +125,9 @@ describe('UnifiedFieldListItem', function () {
       selected: true,
       field,
     });
-    const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
-    expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
+
+    const fieldInfoIcon = findTestSubject(comp, 'kbnFieldButton_fieldInfoIcon');
+    expect(fieldInfoIcon.exists()).toBe(true);
   });
   it('should not enable the popover if onAddFilter is not provided', async function () {
     const field = new DataViewField({

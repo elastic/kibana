@@ -8,10 +8,12 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import React, { useEffect } from 'react';
 import queryString from 'query-string';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptor, History } from 'history';
@@ -22,7 +24,7 @@ import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
-import { CustomSortingOptions } from './components/table_sort_select';
+import type { CustomSortingOptions } from './components/table_sort_select';
 
 const mockUseEffect = useEffect;
 
@@ -59,7 +61,6 @@ describe('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
     entityNamePlural: 'tests',
-    listingLimit: 500,
     initialFilter: '',
     initialPageSize: 20,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
@@ -1896,7 +1897,6 @@ describe('TableList', () => {
     entityName: 'test',
     entityNamePlural: 'tests',
     initialPageSize: 20,
-    listingLimit: 500,
     findItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
     onFetchSuccess: jest.fn(),
     tableCaption: 'test title',

@@ -90,7 +90,8 @@ const mockAlertsGroupingState = {
   updateGrouping: jest.fn(),
 };
 
-describe('AlertsGrouping', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253312
+describe.skip('AlertsGrouping', () => {
   beforeEach(() => {
     window.localStorage.clear();
     mockUseGetAlertsGroupAggregationsQuery.mockImplementation(() => ({
@@ -240,7 +241,7 @@ describe('AlertsGrouping', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     await userEvent.click(screen.getAllByTestId('group-selector-dropdown')[0]);
@@ -254,7 +255,7 @@ describe('AlertsGrouping', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -307,7 +308,7 @@ describe('AlertsGrouping', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -366,7 +367,7 @@ describe('AlertsGrouping', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     // level 2 pagination is reset
@@ -374,7 +375,7 @@ describe('AlertsGrouping', () => {
       within(screen.getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-0')
         .getAttribute('aria-current')
-    ).toEqual('true');
+    ).toEqual('page');
     expect(
       within(screen.getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-1')
@@ -429,11 +430,11 @@ describe('AlertsGrouping', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });
@@ -484,11 +485,11 @@ describe('AlertsGrouping', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });

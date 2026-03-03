@@ -10,4 +10,6 @@ export const DEFAULT_TIME_WINDOW = '7d';
 export enum TIME_UNITS {
   DAYS = 'd',
   WEEKS = 'w',
+  HOURS = 'h',
+  MINUTES = 'm',
 }

@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { get, isEmpty } from 'lodash';
 
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { TelemetryChannel } from '../../../../telemetry/types';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
@@ -21,10 +21,11 @@ import type {
   ThreatMatchedFields,
   ThreatTermNamedQuery,
   DecodedThreatNamedQuery,
-  SignalValuesMap,
-  GetSignalValuesMap,
+  FieldAndValueToDocIdsMap,
+  GetFieldAndValueToDocIdsMap,
   ThreatMatchNamedQuery,
 } from './types';
+import { checkErrorDetails } from '../../utils/check_error_details';
 
 export const MANY_NESTED_CLAUSES_ERR =
   'Query contains too many nested clauses; maxClauseCount is set to';
@@ -95,7 +96,6 @@ export const combineResults = (
     currentResult.searchAfterTimes,
     newResult.searchAfterTimes
   ),
-  lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
   warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
@@ -118,29 +118,29 @@ export const combineConcurrentResults = (
       const maxSearchAfterTime = calculateMax(accum.searchAfterTimes, item.searchAfterTimes);
       const maxEnrichmentTimes = calculateMax(accum.enrichmentTimes, item.enrichmentTimes);
       const maxBulkCreateTimes = calculateMax(accum.bulkCreateTimes, item.bulkCreateTimes);
-      const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
         success: accum.success && item.success,
         warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         enrichmentTimes: [maxEnrichmentTimes],
-        lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
+        userError:
+          accum.userError || item.errors.every((err) => checkErrorDetails(err).isUserError),
         suppressedAlertsCount:
           (accum.suppressedAlertsCount ?? 0) + (item.suppressedAlertsCount ?? 0),
       };
     },
     {
       success: true,
+      userError: false,
       warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
       enrichmentTimes: [],
-      lastLookBackDate: undefined,
       createdSignalsCount: 0,
       suppressedAlertsCount: 0,
       createdSignals: [],
@@ -156,7 +156,7 @@ const separator = '__SEP__';
 export const encodeThreatMatchNamedQuery = (
   query: ThreatMatchNamedQuery | ThreatTermNamedQuery
 ): string => {
-  const { field, value, queryType } = query;
+  const { threatMappingIndex, queryType } = query;
   let id;
   let index;
   if ('id' in query) {
@@ -164,19 +164,26 @@ export const encodeThreatMatchNamedQuery = (
     index = query.index;
   }
 
-  return [id, index, field, value, queryType].join(separator);
+  return [id, index, threatMappingIndex, queryType].join(separator);
 };
 
 export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamedQuery => {
   const queryValues = encoded.split(separator);
-  const [id, index, field, value, queryType] = queryValues;
-  const query = { id, index, field, value, queryType };
+  const [id, index, threatMappingIndexString, queryType] = queryValues;
+  const threatMappingIndex = parseInt(threatMappingIndexString, 10);
+  if (isNaN(threatMappingIndex)) {
+    throw new Error(
+      `Decoded threat mapping index is invalid. Decoded value: ${threatMappingIndexString}`
+    );
+  }
+  const query = { id, index, threatMappingIndex, queryType };
   let isValidQuery = false;
   if (queryType === ThreatMatchQueryType.match) {
-    isValidQuery = queryValues.length === 5 && queryValues.every(Boolean);
+    isValidQuery = queryValues.length === 4 && queryValues.every(Boolean);
   }
   if (queryType === ThreatMatchQueryType.term) {
-    isValidQuery = Boolean(field && value);
+    // We checked if threatMappingIndex is a number above already, so at this point a decoded term query is valid
+    isValidQuery = true;
   }
   if (!isValidQuery) {
     const queryString = JSON.stringify(query);
@@ -230,11 +237,11 @@ export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFie
     { source: [], threat: [] }
   );
 
-export const getSignalValueMap = ({
+export const getFieldAndValueToDocIdsMap = ({
   eventList,
   threatMatchedFields,
-}: GetSignalValuesMap): SignalValuesMap =>
-  eventList.reduce<SignalValuesMap>((acc, event) => {
+}: GetFieldAndValueToDocIdsMap): FieldAndValueToDocIdsMap =>
+  eventList.reduce<FieldAndValueToDocIdsMap>((acc, event) => {
     threatMatchedFields.source.forEach((field) => {
       const fieldValue = get(event.fields, field)?.[0];
       if (!fieldValue) return;

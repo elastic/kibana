@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiText,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { isElasticConnector } from '../../utils/playground_connectors';
+import { ElasticManagedConnector } from './elastic_connector_connected';
 
 export const ConnectLLMButton: React.FC = () => {
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
@@ -45,25 +55,46 @@ export const ConnectLLMButton: React.FC = () => {
       usageTracker?.load(AnalyticsEvents.genAiConnectorSetup);
     }
   }, [connectors?.length, showCallout, usageTracker]);
+  const hasConnectors = connectors?.length;
+  const elasticConnector = hasConnectors ? connectors.find(isElasticConnector) : undefined;
+  const hasElasticConnector = elasticConnector !== undefined;
 
   return (
     <>
-      {connectors?.length ? (
-        <EuiButtonEmpty
-          iconType="check"
-          color="success"
-          onClick={handleSetupGenAiConnector}
-          data-test-subj="successConnectLLMButton"
-        >
-          <FormattedMessage
-            id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
-            defaultMessage="LLM connected"
-          />
-        </EuiButtonEmpty>
+      {hasConnectors ? (
+        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMText">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="checkInCircleFilled" color="success" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {hasElasticConnector ? (
+              <ElasticManagedConnector name={elasticConnector.name} />
+            ) : (
+              <EuiText color="success">
+                <FormattedMessage
+                  id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
+                  defaultMessage="{connectorName} connected"
+                  values={{ connectorName: connectors[0]?.name || 'LLM' }}
+                />
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              target="_blank"
+              data-test-subj="manageConnectorsLink"
+              iconType="wrench"
+              size="s"
+              onClick={handleSetupGenAiConnector}
+              aria-label={i18n.translate('xpack.searchPlayground.setupPage.manageConnectorLink', {
+                defaultMessage: 'Manage connector',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiButton
-          fill
-          iconType="link"
+          iconType="sparkles"
           data-test-subj="connectLLMButton"
           onClick={handleSetupGenAiConnector}
         >

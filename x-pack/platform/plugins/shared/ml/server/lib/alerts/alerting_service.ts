@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
 import { capitalize, get, memoize, pick } from 'lodash';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
@@ -28,6 +30,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
@@ -55,6 +58,7 @@ import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
+import { assertUserError } from './utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -78,9 +82,28 @@ interface AnomalyESQueryParams {
   includeInterimResults: boolean;
   /** Source index from the datafeed. Required for retrieving field types for formatting results. */
   indexPattern: string;
+  kqlQueryString?: string;
 }
 
 const TIME_RANGE_PADDING = 10;
+
+/**
+ * Parse KQL filter and convert to Elasticsearch Query DSL.
+ */
+function parseCustomKqlFilter(
+  kqlQueryString: string | null | undefined
+): QueryDslQueryContainer | undefined {
+  if (!kqlQueryString) return undefined;
+
+  try {
+    const ast = fromKueryExpression(kqlQueryString);
+    return toElasticsearchQuery(ast);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to parse custom KQL filter:', error);
+    return undefined;
+  }
+}
 
 /**
  * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
@@ -165,15 +188,6 @@ export function buildExplorerUrl(
     rison.encode(globalState)
   )}&_a=${encodeURIComponent(rison.encode(appState))}`;
 }
-
-/**
- * Mapping for result types and corresponding score fields.
- */
-const resultTypeScoreMapping = {
-  [ML_ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
-  [ML_ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
-  [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
-};
 
 export interface AnomalyDetectionAlertFieldFormatters {
   numberFormatter: IFieldFormat['convert'];
@@ -400,7 +414,7 @@ export function alertingServiceProvider(
   };
 
   const getScoreFields = (resultType: MlAnomalyResultType, useInitialScore?: boolean) => {
-    return `${useInitialScore ? 'initial_' : ''}${resultTypeScoreMapping[resultType]}`;
+    return `${useInitialScore ? 'initial_' : ''}${ANOMALY_RESULT_TYPE_SCORE_FIELDS[resultType]}`;
   };
 
   const getRecordKey = (source: MlAnomalyRecordDoc): string => {
@@ -451,7 +465,9 @@ export function alertingServiceProvider(
         record.entityValue = getEntityFieldValue(recordSource);
       }
 
-      const { anomalyDescription, mvDescription } = getAnomalyDescription(record);
+      const { anomalyDescription, mvDescription } = getAnomalyDescription(record, {
+        breakAutoLinkifyFieldName: true,
+      });
 
       const anomalyDescriptionSummary = `${anomalyDescription}${
         mvDescription ? ` (${mvDescription})` : ''
@@ -672,6 +688,8 @@ export function alertingServiceProvider(
 
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
+    const parsedCustomFilter = parseCustomKqlFilter(params.kqlQueryString);
+
     const requestBody = {
       size: 0,
       query: {
@@ -694,13 +712,14 @@ export function alertingServiceProvider(
                 result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
-            ...(params.includeInterim
-              ? []
-              : [
+            ...(!params.includeInterim
+              ? [
                   {
                     term: { is_interim: false },
                   },
-                ]),
+                ]
+              : []),
+            ...(parsedCustomFilter ? [parsedCustomFilter] : []),
           ],
         },
       },
@@ -771,7 +790,7 @@ export function alertingServiceProvider(
    */
   const getQueryParams = async (
     params: MlAnomalyDetectionAlertParams
-  ): Promise<AnomalyESQueryParams | void> => {
+  ): Promise<AnomalyESQueryParams | never> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
       ...(params.jobSelection.groupIds ?? []),
@@ -785,12 +804,16 @@ export function alertingServiceProvider(
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
-      return;
+      throw Boom.notFound('Unable to find jobs for provided job ids');
     }
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+
+    if (datafeeds && datafeeds.length === 0) {
+      throw Boom.notFound('Unable to find datafeed for provided job ids');
+    }
 
     const maxBucketInSeconds = resolveMaxTimeInterval(
       jobsResponse.map((v) => v.analysis_config.bucket_span!)
@@ -798,11 +821,11 @@ export function alertingServiceProvider(
 
     if (maxBucketInSeconds === undefined) {
       // Technically it's not possible, just in case.
-      throw new Error('Unable to resolve a valid bucket length');
+      throw Boom.badRequest('Unable to resolve a valid bucket length');
     }
 
     const lookBackTimeInterval: string =
-      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, datafeeds ?? []);
+      params.lookbackInterval || resolveLookbackInterval(jobsResponse, datafeeds ?? []);
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
@@ -811,11 +834,12 @@ export function alertingServiceProvider(
       topNBuckets,
       maxBucketInSeconds,
       lookBackTimeInterval,
-      anomalyScoreField: resultTypeScoreMapping[params.resultType],
+      anomalyScoreField: ANOMALY_RESULT_TYPE_SCORE_FIELDS[params.resultType],
       includeInterimResults: params.includeInterim,
       resultType: params.resultType,
       indexPattern: datafeeds![0]!.indices[0],
       anomalyScoreThreshold: params.severity,
+      kqlQueryString: params.kqlQueryString ?? undefined,
     };
   };
 
@@ -837,7 +861,10 @@ export function alertingServiceProvider(
       anomalyScoreField,
       includeInterimResults,
       anomalyScoreThreshold,
+      kqlQueryString,
     } = params;
+
+    const parsedCustomFilter = parseCustomKqlFilter(kqlQueryString);
 
     const requestBody = {
       size: 0,
@@ -856,16 +883,18 @@ export function alertingServiceProvider(
               range: {
                 timestamp: {
                   gte: `now-${lookBackTimeInterval}`,
+                  lte: 'now',
                 },
               },
             },
-            ...(includeInterimResults
-              ? []
-              : [
+            ...(!includeInterimResults
+              ? [
                   {
                     term: { is_interim: false },
                   },
-                ]),
+                ]
+              : []),
+            ...(parsedCustomFilter ? [parsedCustomFilter] : []),
           ],
         },
       },
@@ -988,11 +1017,7 @@ export function alertingServiceProvider(
         }
       | undefined
     > => {
-      const queryParams = await getQueryParams(params);
-
-      if (!queryParams) {
-        return;
-      }
+      const queryParams = await getQueryParams(params).catch(assertUserError);
 
       const result = await fetchResult(queryParams);
 

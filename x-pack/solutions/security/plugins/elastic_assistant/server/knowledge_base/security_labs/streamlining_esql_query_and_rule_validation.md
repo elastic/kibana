@@ -53,7 +53,7 @@ In some components, you will receive additional feedback based on the context of
 
 ![](/assets/images/streamlining-esql-query-and-rule-validation/image8.png)
 
-For example, this query could easily be converted to an [EQL](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) or [KQL](https://www.elastic.co/guide/en/kibana/current/kuery-query.html) query as it does not leverage powerful features of ES|QL like statistics, frequency analysis, or parsing unstructured data. If you want to learn more about the benefits of queries using ES|QL check out this [blog by Costin](https://www.elastic.co/blog/elasticsearch-query-language-esql), which covers performance boosts. In this case, we must add `metadata _id, _version, _index` to the query, which informs the UI which components to return in the results.
+For example, this query could easily be converted to an [EQL](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) or [KQL](https://www.elastic.co/guide/en/kibana/current/kuery-query.html) query as it does not leverage powerful features of ES|QL like statistics, frequency analysis, or parsing unstructured data. If you want to learn more about the benefits of queries using ES|QL check out this [blog by Costin](https://www.elastic.co/blog/elasticsearch-query-language-esql), which covers performance boosts. In this case, we must add `[metadata _id, _version, _index]` to the query, which informs the UI which components to return in the results.
 
 ## API calls? Of course!
 

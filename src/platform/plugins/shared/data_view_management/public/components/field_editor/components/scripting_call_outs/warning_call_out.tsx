@@ -14,7 +14,7 @@ import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternManagmentContext } from '../../../../types';
+import type { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {
   isVisible: boolean;
@@ -55,6 +55,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
       <EuiSpacer size="m" />
       <EuiCallOut
         color="warning"
+        announceOnMount={false}
         iconType="warning"
         title={
           <FormattedMessage

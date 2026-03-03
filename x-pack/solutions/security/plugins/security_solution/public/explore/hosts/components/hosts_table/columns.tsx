@@ -7,13 +7,10 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
@@ -43,7 +40,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
                 value: hostName[0],
                 field: 'host.name',
@@ -62,7 +59,7 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -85,7 +82,7 @@ export const getHostsColumns = (
       name: (
         <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.OS} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+            {i18n.OS} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -99,7 +96,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
                 value: hostOsName[0],
                 field: 'host.os.name',
@@ -125,7 +122,7 @@ export const getHostsColumns = (
               mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
-              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
               data={{
                 value: hostOsVersion[0],
                 field: 'host.os.version',

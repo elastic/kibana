@@ -10,6 +10,7 @@
 import { basename, join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import type { Package } from '../types';
 import { HARDCODED_MODULE_PATHS, applyTransforms } from './transforms';
 import {
@@ -68,15 +69,6 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   chunks.shift(); // remove the base path up to '/packages/' or '/plugins/'
   const moduleFolder = chunks.join(moduleDelimiter); // in case there's an extra /packages/ or /plugins/ folder
 
-  if (
-    module.isDevOnly() &&
-    (!module.group || module.group === 'common') &&
-    fullPath.includes(`/${KIBANA_FOLDER}/packages/`) &&
-    !fullPath.includes(`/${KIBANA_FOLDER}/packages/core/`)
-  ) {
-    // relocate all dev modules under /packages to /src/dev/packages
-    return applyTransforms(module, join(BASE_FOLDER, 'src', 'dev', 'packages', moduleFolder));
-  }
   let path: string;
 
   if (group === 'platform') {
@@ -99,7 +91,7 @@ export const calculateModuleTargetFolder = (module: Package): string => {
         moduleFolder
       );
     }
-  } else if (group === 'observability' || group === 'security' || group === 'search') {
+  } else if (KIBANA_SOLUTIONS.some((solution) => solution === group)) {
     path = join(
       BASE_FOLDER,
       'x-pack', // all solution modules are 'x-pack'

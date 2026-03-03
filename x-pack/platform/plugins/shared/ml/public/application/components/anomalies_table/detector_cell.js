@@ -8,7 +8,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 /*
@@ -16,19 +16,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * description of the detector, and an icon if rules have been configured for the detector.
  */
 export function DetectorCell({ detectorDescription, numberOfRules }) {
+  const { euiTheme } = useEuiTheme();
   let rulesIcon;
   if (numberOfRules !== undefined && numberOfRules > 0) {
     rulesIcon = (
-      <EuiToolTip
+      <EuiIconTip
         content={
           <FormattedMessage
             id="xpack.ml.anomaliesTable.detectorCell.rulesConfiguredTooltip"
             defaultMessage="rules have been configured for this detector"
           />
         }
-      >
-        <EuiIcon type="controlsHorizontal" className="detector-rules-icon" />
-      </EuiToolTip>
+        type="controlsHorizontal"
+        css={{
+          marginLeft: euiTheme.size.xs,
+        }}
+      />
     );
   }
   return (

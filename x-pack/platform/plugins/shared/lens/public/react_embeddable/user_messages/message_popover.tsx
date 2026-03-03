@@ -9,8 +9,8 @@ import { useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import React from 'react';
+import type { UserMessage } from '@kbn/lens-common';
 import { MessageList } from '../../editor_frame_service/editor_frame/workspace_panel/message_list';
-import { UserMessage } from '../../types';
 
 export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();

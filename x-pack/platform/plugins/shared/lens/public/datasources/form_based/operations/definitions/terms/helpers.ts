@@ -9,26 +9,29 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import {
-  FieldBasedOperationErrorMessage,
+import type {
+  FiltersIndexPatternColumn,
+  FormBasedLayer,
   GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '..';
-import { defaultLabel } from '../filters';
+  IndexPattern,
+  IndexPatternField,
+  LastValueIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
+  TermsIndexPatternColumn,
+  FramePublicAPI,
+} from '@kbn/lens-common';
+import { operationDefinitionMap } from '..';
+import { filtersDefaultLabel } from '../filters/filters';
 import { isReferenced } from '../../layer_helpers';
 
-import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
-import type { FiltersIndexPatternColumn } from '..';
-import type { TermsIndexPatternColumn } from './types';
-import type { LastValueIndexPatternColumn } from '../last_value';
-import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
-import type { PercentileIndexPatternColumn } from '../percentile';
+import type { FieldBasedOperationErrorMessage } from '..';
 
-import type { FormBasedLayer } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import { isColumnOfType } from '../helpers';
 import {
@@ -150,12 +153,12 @@ export function getDisallowedTermsMessage(
             currentColumn.sourceField,
             ...(currentColumn.params?.secondaryFields ?? []),
           ];
+          const table = frame.activeData?.[layerId] || frame.activeData?.default;
           const activeDataFieldNameMatch =
-            frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
-            fieldNames[0];
+            table?.columns.find(({ id }) => id === columnId)?.meta.field === fieldNames[0];
 
           let currentTerms = uniq(
-            frame.activeData?.[layerId].rows
+            table?.rows
               .map((row) => row[columnId] as string | MultiFieldKeyFormat)
               .filter((term) =>
                 fieldNames.length > 1
@@ -228,7 +231,7 @@ export function getDisallowedTermsMessage(
                               query: '*',
                               language: 'kuery',
                             },
-                            label: defaultLabel,
+                            label: filtersDefaultLabel,
                           },
                         ],
                 },

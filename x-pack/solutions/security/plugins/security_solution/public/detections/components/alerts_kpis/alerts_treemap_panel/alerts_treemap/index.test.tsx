@@ -20,6 +20,11 @@ import * as i18n from './translations';
 import type { Props } from '.';
 import { AlertsTreemap } from '.';
 
+jest.mock('../../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
+
 const defaultProps: Props = {
   data: mockAlertSearchResponse,
   maxBuckets: 1000,

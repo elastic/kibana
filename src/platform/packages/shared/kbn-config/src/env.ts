@@ -11,7 +11,7 @@ import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
 import type { Package } from '@kbn/repo-packages';
-import { PackageInfo, EnvironmentMode } from './types';
+import type { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */
 export interface EnvOptions {
@@ -36,6 +36,7 @@ export interface CliArgs {
   cache: boolean;
   dist: boolean;
   serverless?: boolean;
+  uiam?: boolean;
   retrictInternalApis?: boolean;
 }
 

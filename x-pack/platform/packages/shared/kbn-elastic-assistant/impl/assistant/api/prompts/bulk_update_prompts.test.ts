@@ -10,9 +10,9 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { bulkUpdatePrompts } from './bulk_update_prompts';
-import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 
 const prompt1 = {
   id: 'field1',

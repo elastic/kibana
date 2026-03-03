@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-const rootConfig = require('@kbn/test/jest-preset');
-
 module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/packages/ecs_data_quality_dashboard_impl',
@@ -26,9 +23,4 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/x-pack/solutions/security/packages/ecs-data-quality-dashboard/setup_tests.ts',
   ],
-  transform: {
-    ...rootConfig.transform,
-    '^.+\\.(js|tsx?)$':
-      '<rootDir>/x-pack/solutions/security/packages/ecs-data-quality-dashboard/jest/babel-transformer.js',
-  },
 };

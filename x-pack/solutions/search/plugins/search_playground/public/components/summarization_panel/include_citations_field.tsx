@@ -32,6 +32,7 @@ export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
         label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {
           defaultMessage: 'Include citations',
         })}
+        data-test-subj="includeCitationsToggle"
         checked={checked}
         onChange={(e) => handleChange(e.target.checked)}
       />

@@ -12,8 +12,7 @@ import type { ConnectionStatsItemWithComparisonData } from '../../../../common/c
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
-import type { ITableColumn } from '../managed_table';
-import { ManagedTable } from '../managed_table';
+import { type ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import type { SpanMetricGroup } from './get_span_metric_columns';
@@ -38,6 +37,7 @@ interface Props {
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
   onChangeRenderedItems?: (items: FormattedSpanMetricGroup[]) => void;
+  saveTableOptionsToUrl?: boolean;
 }
 
 export type FormattedSpanMetricGroup = SpanMetricGroup & {
@@ -57,6 +57,7 @@ export function DependenciesTable({
   initialPageSize,
   showSparkPlots,
   onChangeRenderedItems,
+  saveTableOptionsToUrl = true,
 }: Props) {
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
@@ -145,6 +146,7 @@ export function DependenciesTable({
             showPerPageOptions={showPerPageOptions}
             initialPageSize={initialPageSize}
             onChangeRenderedItems={onChangeRenderedItems}
+            saveTableOptionsToUrl={saveTableOptionsToUrl}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

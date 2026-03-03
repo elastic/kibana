@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EndpointActionCallout } from './callout';
-import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
 

@@ -22,13 +22,22 @@ import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { setFieldFormats } from '@kbn/reporting-server';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+};
 
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
@@ -76,6 +85,7 @@ beforeAll(async () => {
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    licensing: licensingMock.createStart(),
   });
 });
 
@@ -84,9 +94,10 @@ beforeEach(() => {
 });
 
 test('gets the csv content from job parameters', async () => {
-  const payload = await mockCsvSearchSourceExportType.runTask(
-    'cool-job-id',
-    {
+  const payload = await mockCsvSearchSourceExportType.runTask({
+    jobId: 'cool-job-id',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: {
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
       searchSource: {},
@@ -95,9 +106,9 @@ test('gets the csv content from job parameters', async () => {
       version: '7.13.0',
     },
     taskInstanceFields,
-    new CancellationToken(),
-    stream
-  );
+    cancellationToken: new CancellationToken(),
+    stream,
+  });
 
   expect(payload).toMatchInlineSnapshot(`
         Object {
@@ -110,9 +121,10 @@ test('gets the csv content from job parameters', async () => {
 test('uses the provided logger', async () => {
   const logSpy = jest.spyOn(mockLogger, 'get');
 
-  await mockCsvSearchSourceExportType.runTask(
-    'cool-job-id',
-    {
+  await mockCsvSearchSourceExportType.runTask({
+    jobId: 'cool-job-id',
+    request: fakeRawRequest as unknown as KibanaRequest,
+    payload: {
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
       searchSource: {},
@@ -121,9 +133,9 @@ test('uses the provided logger', async () => {
       version: '7.13.0',
     },
     taskInstanceFields,
-    new CancellationToken(),
-    stream
-  );
+    cancellationToken: new CancellationToken(),
+    stream,
+  });
 
-  expect(logSpy).toHaveBeenCalledWith('execute-job:cool-job-id');
+  expect(logSpy).toHaveBeenCalledWith('execute-job');
 });

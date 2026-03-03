@@ -8,45 +8,32 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ExperimentalFeatures } from '../../server/config';
+import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverRouter } from './discover_router';
 import type { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {
   element: HTMLElement;
+  onAppLeave: AppMountParameters['onAppLeave'];
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const renderApp = ({
   element,
+  onAppLeave,
   services,
   customizationContext,
-  experimentalFeatures,
 }: RenderAppProps) => {
-  const { history, capabilities, chrome, data, core } = services;
+  const { data, core } = services;
 
-  if (!capabilities.discover_v2.save) {
-    chrome.setBadge({
-      text: i18n.translate('discover.badge.readOnly.text', {
-        defaultMessage: 'Read only',
-      }),
-      tooltip: i18n.translate('discover.badge.readOnly.tooltip', {
-        defaultMessage: 'Unable to save Discover sessions',
-      }),
-      iconType: 'glasses',
-    });
-  }
   const unmount = toMountPoint(
     <DiscoverRouter
+      onAppLeave={onAppLeave}
       services={services}
       customizationContext={customizationContext}
-      experimentalFeatures={experimentalFeatures}
-      history={history}
     />,
     core
   )(element);

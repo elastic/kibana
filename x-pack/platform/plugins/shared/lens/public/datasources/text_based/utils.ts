@@ -5,25 +5,16 @@
  * 2.0.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
-import { generateId } from '../../id_generator';
-import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type {
+  ValueFormatConfig,
   IndexPatternRef,
   TextBasedPrivateState,
   TextBasedLayerColumn,
   TextBasedLayer,
-} from './types';
-import type { DataViewsState } from '../../state_management';
-import { addColumnsToCache } from './fieldlist_cache';
+} from '@kbn/lens-common';
 
-export const MAX_NUM_OF_COLUMNS = 5;
+export const MAX_NUM_OF_COLUMNS = 10;
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
@@ -75,74 +66,9 @@ export const getAllColumns = (
   });
 };
 
-export async function getStateFromAggregateQuery(
-  state: TextBasedPrivateState,
-  query: AggregateQuery,
-  dataViews: DataViewsPublicPluginStart,
-  data: DataPublicPluginStart,
-  expressions: ExpressionsStart,
-  frameDataViews?: DataViewsState
-) {
-  let indexPatternRefs: IndexPatternRef[] = frameDataViews?.indexPatternRefs.length
-    ? frameDataViews.indexPatternRefs
-    : await loadIndexPatternRefs(dataViews);
-  const errors: Error[] = [];
-  const layerIds = Object.keys(state.layers);
-  const context = state.initialContext;
-  const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-  // fetch the pattern from the query
-  const indexPattern = getIndexPatternFromTextBasedQuery(query);
-  // get the id of the dataview
-  let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
-  let columnsFromQuery: DatatableColumn[] = [];
-  let timeFieldName;
-  try {
-    const dataView = await getESQLAdHocDataview(query.esql, dataViews);
-
-    if (dataView && dataView.id) {
-      dataViewId = dataView?.id;
-      indexPatternRefs = [
-        ...indexPatternRefs,
-        {
-          id: dataView.id,
-          title: dataView.name,
-          timeField: dataView.timeFieldName,
-        },
-      ];
-    }
-    timeFieldName = dataView.timeFieldName;
-    const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
-    columnsFromQuery = table?.columns ?? [];
-    addColumnsToCache(query, columnsFromQuery);
-  } catch (e) {
-    errors.push(e);
-  }
-
-  const tempState = {
-    layers: {
-      [newLayerId]: {
-        index: dataViewId,
-        query,
-        columns: state.layers[newLayerId].columns ?? [],
-        timeField: timeFieldName,
-        errors,
-      },
-    },
-  };
-
-  return {
-    ...tempState,
-    indexPatternRefs,
-    initialContext: context,
-  };
-}
-
-export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string {
-  return getIndexPatternFromESQLQuery(query.esql);
-}
-
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
+
 export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
 
 export function canColumnBeDroppedInMetricDimension(

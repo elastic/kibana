@@ -8,18 +8,19 @@
  */
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import type { PieVisConfig } from '../types/expression_renderers';
 import {
-  PieVisConfig,
   EmptySizeRatios,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#pieVis', () => {
   const fn = functionWrapper(pieVisFunction());

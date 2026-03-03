@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DocViewer, DocViewsRegistry, ElasticRequestState, FieldName } from './src';
+export {
+  DocViewer,
+  type DocViewerProps,
+  type DocViewerApi,
+  type DocViewerRestorableState,
+  DocViewsRegistry,
+  ElasticRequestState,
+  FieldName,
+} from './src';

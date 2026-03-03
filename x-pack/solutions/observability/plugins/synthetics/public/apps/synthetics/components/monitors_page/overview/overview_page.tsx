@@ -9,13 +9,12 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { usePageReady } from '@kbn/ebt-tools';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
-import { selectServiceLocationsState } from '../../../state';
+import { selectOverviewState, selectServiceLocationsState } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
@@ -28,20 +27,24 @@ import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
   useTrackPageview({ app: 'synthetics', path: 'overview', delay: 15000 });
   useOverviewBreadcrumbs();
 
+  const { view } = useSelector(selectOverviewState);
+
   const dispatch = useDispatch();
 
   const { search } = useLocation();
 
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
-  const { loaded } = useSelector(selectOverviewStatus);
 
-  usePageReady({ isReady: loaded });
+  useSyntheticsPageReady({
+    meta: { description: '[ttfmp_synthetics] Synthetics overview page has loaded monitor data.' },
+  });
 
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {
@@ -94,15 +97,15 @@ export const OverviewPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
-            <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
+            <EuiFlexItem grow={3} css={{ minWidth: 300 }}>
               <OverviewErrors />
             </EuiFlexItem>
-            <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
+            <EuiFlexItem grow={3} css={{ minWidth: 300 }}>
               <OverviewAlerts />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-          <OverviewGrid />
+          <OverviewGrid view={view} />
         </>
       ) : (
         <NoMonitorsFound />

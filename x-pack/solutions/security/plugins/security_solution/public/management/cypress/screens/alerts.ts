@@ -30,7 +30,7 @@ export const getAlertsTableRows = (timeout?: number): Cypress.Chainable<JQuery<H
         clickAlertListRefreshButton();
 
         return cy
-          .getByTestSubj('alertsTable')
+          .getByTestSubj('alertsTableIsLoaded')
           .find<HTMLDivElement>('.euiDataGridRow')
           .then(($rowsFound) => {
             $rows = $rowsFound;

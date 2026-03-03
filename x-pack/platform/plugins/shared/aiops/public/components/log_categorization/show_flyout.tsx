@@ -19,6 +19,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 import { AiopsAppContext, type AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
@@ -32,7 +33,8 @@ export async function showCategorizeFlyout(
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
-  additionalFilter?: CategorizationAdditionalFilter
+  additionalFilter?: CategorizationAdditionalFilter,
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps']
 ): Promise<void> {
   const { overlays, application, i18n } = coreStart;
 
@@ -91,6 +93,7 @@ export async function showCategorizeFlyout(
           closeButtonProps: { 'aria-label': 'aiopsCategorizeFlyout' },
           onClose: onFlyoutClose,
           size: 'l',
+          focusTrapProps,
         }
       );
 

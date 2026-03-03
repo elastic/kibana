@@ -7,24 +7,25 @@
 
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
-  AIMessageChunk,
   HumanMessage,
   isAIMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCount,
   InferenceConnector,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   InferenceConnectorType,
   MessageRole,
   createInferenceRequestError,
@@ -37,6 +38,7 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     connectorId: 'connector-id',
     name: 'My connector',
     config: {},
+    capabilities: {},
     ...parts,
   };
 };
@@ -94,13 +96,19 @@ const createChunkEvent = (input: ChunkEventInput): ChatCompletionChunkEvent => {
   }
 };
 
+const telemetryMetadata = {
+  pluginId: 'plugin-id',
+};
+
+const metadata = {
+  connectorTelemetry: telemetryMetadata,
+};
+
 describe('InferenceChatModel', () => {
   let chatComplete: ChatCompleteAPI & jest.MockedFn<ChatCompleteAPI>;
   let connector: InferenceConnector;
-  let logger: MockedLogger;
 
   beforeEach(() => {
-    logger = loggerMock.create();
     chatComplete = jest.fn();
     connector = createConnector();
   });
@@ -108,9 +116,9 @@ describe('InferenceChatModel', () => {
   describe('Request conversion', () => {
     it('converts a basic message call', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -128,14 +136,15 @@ describe('InferenceChatModel', () => {
           },
         ],
         stream: false,
+        metadata,
       });
     });
 
     it('converts a complete conversation call', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -175,14 +184,15 @@ describe('InferenceChatModel', () => {
           },
         ],
         stream: false,
+        metadata,
       });
     });
 
     it('converts a tool call conversation', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -253,14 +263,15 @@ describe('InferenceChatModel', () => {
           },
         ],
         stream: false,
+        metadata,
       });
     });
 
     it('converts tools', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -295,6 +306,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',
@@ -315,19 +327,21 @@ describe('InferenceChatModel', () => {
           },
         },
         stream: false,
+        metadata,
       });
     });
 
     it('uses constructor parameters', async () => {
       const abortCtrl = new AbortController();
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         temperature: 0.7,
         model: 'super-duper-model',
         functionCallingMode: 'simulated',
         signal: abortCtrl.signal,
+        timeout: 60000,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -343,13 +357,41 @@ describe('InferenceChatModel', () => {
         temperature: 0.7,
         modelName: 'super-duper-model',
         abortSignal: abortCtrl.signal,
+        timeout: 60000,
+        maxRetries: undefined,
         stream: false,
+        metadata,
+      });
+    });
+
+    it('accepts timeout argument in constructor', async () => {
+      const timeout = 60000;
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        timeout,
+        telemetryMetadata,
+      });
+
+      const response = createResponse({ content: 'dummy' });
+      chatComplete.mockResolvedValue(response);
+
+      await chatModel.invoke('question');
+
+      // Verify the instance was created successfully and can make calls
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        connectorId: connector.connectorId,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        timeout: 60000,
+        maxRetries: undefined,
+        stream: false,
+        metadata,
       });
     });
 
     it('uses invocation parameters', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         temperature: 0.7,
@@ -370,23 +412,30 @@ describe('InferenceChatModel', () => {
       });
 
       expect(chatComplete).toHaveBeenCalledTimes(1);
-      expect(chatComplete).toHaveBeenCalledWith({
-        connectorId: connector.connectorId,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        toolChoice: 'auto',
-        functionCalling: 'simulated',
-        temperature: 0,
-        modelName: 'some-other-model',
-        abortSignal: abortCtrl.signal,
-        stream: false,
-      });
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: connector.connectorId,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          functionCalling: 'simulated',
+          temperature: 0,
+          modelName: 'some-other-model',
+          abortSignal: abortCtrl.signal,
+          stream: false,
+          metadata: {
+            connectorTelemetry: undefined,
+          },
+        })
+      );
+
+      // We intentionally do not forward tool params unless tools are present.
+      expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
     });
   });
 
   describe('Response handling', () => {
     it('returns the content', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });
@@ -404,7 +453,6 @@ describe('InferenceChatModel', () => {
 
     it('returns tool calls', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });
@@ -444,7 +492,6 @@ describe('InferenceChatModel', () => {
       let rawOutput: Record<string, any>;
 
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         callbacks: [
@@ -483,7 +530,6 @@ describe('InferenceChatModel', () => {
 
     it('throws when the underlying call throws', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         maxRetries: 0,
@@ -500,7 +546,6 @@ describe('InferenceChatModel', () => {
 
     it('respects the maxRetries parameter', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         maxRetries: 1,
@@ -524,7 +569,6 @@ describe('InferenceChatModel', () => {
 
     it('does not retry unrecoverable errors', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         maxRetries: 0,
@@ -545,7 +589,6 @@ describe('InferenceChatModel', () => {
   describe('Streaming response handling', () => {
     it('returns the chunks', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });
@@ -566,7 +609,6 @@ describe('InferenceChatModel', () => {
 
     it('returns tool calls', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });
@@ -578,11 +620,8 @@ describe('InferenceChatModel', () => {
           ],
         },
         {
-          tool_calls: [{ toolCallId: '', index: 0, function: { name: 'myfun', arguments: '' } }],
-        },
-        {
           tool_calls: [
-            { toolCallId: '', index: 0, function: { name: 'ction', arguments: ' { "' } },
+            { toolCallId: '', index: 0, function: { name: 'myfunction', arguments: ' { "' } },
           ],
         },
         {
@@ -603,7 +642,8 @@ describe('InferenceChatModel', () => {
         concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
       }
 
-      expect(allChunks.length).toBe(5);
+      expect(allChunks.length).toBe(4);
+
       expect(concatChunk!.tool_calls).toEqual([
         {
           id: 'my-tool-call-id',
@@ -618,7 +658,6 @@ describe('InferenceChatModel', () => {
 
     it('returns the token count meta', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });
@@ -658,7 +697,6 @@ describe('InferenceChatModel', () => {
 
     it('throws when the underlying call throws', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         maxRetries: 0,
@@ -675,7 +713,6 @@ describe('InferenceChatModel', () => {
 
     it('throws when the underlying observable errors', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });
@@ -687,25 +724,24 @@ describe('InferenceChatModel', () => {
       });
       chatComplete.mockReturnValue(response);
 
-      const output = await chatModel.stream('Some question');
-
       const allChunks: AIMessageChunk[] = [];
       await expect(async () => {
+        const output = await chatModel.stream('Some question');
         for await (const chunk of output) {
           allChunks.push(chunk);
         }
       }).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
 
-      expect(allChunks.length).toBe(2);
+      expect(allChunks.length).toBe(0);
     });
   });
 
   describe('#bindTools', () => {
     it('bind tools to be used for invocation', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -737,6 +773,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',
@@ -757,6 +794,7 @@ describe('InferenceChatModel', () => {
           },
         },
         stream: false,
+        metadata,
       });
     });
   });
@@ -764,10 +802,10 @@ describe('InferenceChatModel', () => {
   describe('#identifyingParams', () => {
     it('returns connectorId and modelName from the constructor', () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         model: 'my-super-model',
+        telemetryMetadata,
       });
 
       const identifyingParams = chatModel.identifyingParams();
@@ -776,6 +814,7 @@ describe('InferenceChatModel', () => {
         connectorId: 'connector-id',
         modelName: 'my-super-model',
         model_name: 'my-super-model',
+        metadata,
       });
     });
   });
@@ -792,7 +831,6 @@ describe('InferenceChatModel', () => {
       });
 
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
         model: 'my-super-model',
@@ -813,9 +851,9 @@ describe('InferenceChatModel', () => {
   describe('#withStructuredOutput', () => {
     it('binds the correct parameters', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
+        telemetryMetadata,
       });
 
       const structuredOutputModel = chatModel.withStructuredOutput(
@@ -882,12 +920,12 @@ describe('InferenceChatModel', () => {
           },
         },
         stream: false,
+        metadata,
       });
     });
 
     it('returns the correct tool call', async () => {
       const chatModel = new InferenceChatModel({
-        logger,
         chatComplete,
         connector,
       });

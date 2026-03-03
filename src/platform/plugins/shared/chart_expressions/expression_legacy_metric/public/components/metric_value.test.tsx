@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_value';
-import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
+import type { MetricOptions, MetricStyle, VisParams } from '../../common/types';
 import { LabelPosition } from '../../common/constants';
 
 const baseMetric: MetricOptions = {
@@ -49,7 +49,8 @@ describe('MetricVisValue', () => {
         labelConfig={labelConfig}
       />
     );
-    expect(component.find('button').exists()).toBe(true);
+
+    expect(component.find('[data-test-subj="metric_value_button"]').exists()).toBe(true);
   });
 
   it('should not be wrapped in button without having a click listener', () => {

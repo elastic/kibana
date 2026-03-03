@@ -7,7 +7,7 @@
 
 import { Command } from 'commander';
 import { FAKE_LOGS, FAKE_HOSTS, FAKE_STACK, DEFAULTS } from '../constants';
-import { CliOptions } from '../types';
+import type { CliOptions } from '../types';
 
 const parseCliInt = (value: string) => parseInt(value, 10);
 
@@ -24,7 +24,12 @@ export function parseCliOptions(): CliOptions {
       parseCliInt,
       DEFAULTS.EVENTS_PER_CYCLE
     )
-    .option('--payload-size <number>', 'The size of the ES bulk payload', DEFAULTS.PAYLOAD_SIZE)
+    .option(
+      '--payload-size <number>',
+      'The size of the ES bulk payload',
+      parseCliInt,
+      DEFAULTS.PAYLOAD_SIZE
+    )
     .option(
       '--concurrency <number>',
       'The number of concurrent connections to Elasticsearch',
@@ -94,6 +99,11 @@ export function parseCliOptions(): CliOptions {
       'The number of ephemeral projects to create. This is only enabled for the "fake_stack" dataset. It will create project IDs that will last 5 to 12 hours.',
       parseCliInt,
       DEFAULTS.EPHEMERAL_PROJECT_IDS
+    )
+    .option(
+      '--slash-logs',
+      'This will index everything through Streams slash logs endpoint',
+      DEFAULTS.SLASH_LOGS
     );
 
   program.parse(process.argv);

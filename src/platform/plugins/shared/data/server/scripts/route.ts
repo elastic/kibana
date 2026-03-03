@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '../../common/constants';
 
@@ -16,16 +16,16 @@ export function registerScriptsRoute(router: IRouter) {
     .get({
       path: '/internal/scripts/languages',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           response: {
             '200': {

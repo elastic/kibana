@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { map, takeUntil, firstValueFrom, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -23,11 +24,18 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
-
-import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import {
+  ClusterClient,
+  AgentManager,
+  getRequestHandlerFactory,
+  type OnRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
+
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
+import type { ElasticsearchConfigType } from './elasticsearch_config';
+import { ElasticsearchConfig } from './elasticsearch_config';
+import type {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
@@ -45,6 +53,7 @@ export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  security: InternalSecurityServiceSetup;
 }
 
 /** @internal */
@@ -53,6 +62,8 @@ export class ElasticsearchService
 {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
+  private readonly isServerless: boolean;
+  private onRequestHandlerFactory: OnRequestHandlerFactory;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -62,13 +73,17 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  private security?: InternalSecurityServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
+    this.isServerless = coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
+    // cli / preboot / interactive startup => non-CPS mode (strip project_routing params)
+    this.onRequestHandlerFactory = getRequestHandlerFactory(false);
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -92,17 +107,30 @@ export class ElasticsearchService
 
     const config = await firstValueFrom(this.config$);
 
+    // TODO we should find a better method to determine whether the underlying ES is CPS-capable.
+    const cpsEnabled = this.isServerless
+      ? (
+          await firstValueFrom(
+            this.coreContext.configService.atPath<{ cpsEnabled?: boolean }>('cps')
+          ).catch(() => ({ cpsEnabled: false }))
+        ).cpsEnabled ?? false
+      : false;
+    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled);
+
     const agentManager = this.getAgentManager(config);
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
+    this.security = deps.security;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckFailureInterval: config.healthCheckFailureInterval?.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      healthCheckRetry: config.healthCheckRetry,
       log: this.log,
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
@@ -159,8 +187,11 @@ export class ElasticsearchService
         `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`,
         {
           event: {
-            type: 'kibana_started.elasticsearch.waitTime',
+            // ECS Event reference: https://www.elastic.co/docs/reference/ecs/ecs-event
+            action: 'kibana_started.elasticsearch.waitTime',
+            category: 'database',
             duration: elasticsearchWaitTime,
+            type: 'connection',
           },
         }
       );
@@ -189,7 +220,10 @@ export class ElasticsearchService
     }
 
     return {
-      client: this.client!,
+      client: {
+        asInternalUser: this.client!.asInternalUser,
+        asScoped: this.client!.asScoped.bind(this.client!),
+      },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
       metrics: {
@@ -219,10 +253,12 @@ export class ElasticsearchService
       logger: this.coreContext.logger.get('elasticsearch'),
       type,
       authHeaders: this.authHeaders,
+      security: this.security,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      onRequestHandlerFactory: this.onRequestHandlerFactory,
     });
   }
 

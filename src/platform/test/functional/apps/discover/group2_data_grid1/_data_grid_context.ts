@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
       await context.waitUntilContextLoadingHasFinished();
 
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
 
       // close popup

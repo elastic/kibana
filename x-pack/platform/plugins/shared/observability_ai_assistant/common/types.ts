@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import type { ToolSchema } from '@kbn/inference-common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
@@ -30,10 +30,55 @@ export interface PendingMessage {
   error?: any;
 }
 
+export interface Deanonymization {
+  start: number;
+  end: number;
+  entity: {
+    class_name: string;
+    value: string;
+    mask: string;
+  };
+}
+
+export interface DeanonymizationItem {
+  message: {
+    role: MessageRole;
+    content?: string;
+    toolCalls?: Array<{
+      function: {
+        name: string;
+        arguments: Record<string, any> | {};
+      };
+    }>;
+    name?: string;
+    response?: Record<string, any>;
+    toolCallId?: string;
+  };
+  deanonymizations: Deanonymization[];
+}
+
+export type DeanonymizationInput = DeanonymizationItem[];
+
+export interface DeanonymizationOutput {
+  message: {
+    content?: string;
+    toolCalls?: Array<{
+      toolCallId: string;
+      function: {
+        name: string;
+        arguments: Record<string, any>;
+      };
+    }>;
+    role: MessageRole;
+  };
+  deanonymizations: Deanonymization[];
+}
+
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    deanonymizations?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -62,6 +107,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -78,8 +124,6 @@ export interface KnowledgeBaseEntry {
   id: string;
   title?: string;
   text: string;
-  confidence: 'low' | 'medium' | 'high';
-  is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
@@ -87,6 +131,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {
@@ -100,6 +146,15 @@ export enum KnowledgeBaseType {
 
   // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
+}
+
+export enum InferenceModelState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
@@ -149,4 +204,13 @@ export interface ObservabilityAIAssistantScreenContext {
 export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
+}
+
+export interface IntegrationKnowledgeBaseEntry {
+  content: string;
+  package_name: string;
+  filename: string;
+  version: string;
+  path: string;
+  installed_at: string;
 }

@@ -64,3 +64,10 @@ export const PLUGIN = {
     defaultMessage: 'Index Management',
   }),
 };
+
+export const MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX = 2000000000; // 2 billion documents
+export const MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX = 1; // Single shard
+
+export const PLATFORM_INDEX_MGMT_V2 = 'platform:indexManagementV2';
+
+export const DEFAULT_DOCUMENT_PAGE_SIZE = 10;

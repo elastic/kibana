@@ -1,0 +1,12 @@
+# DoS Security Query Suite for Kibana
+# This suite detects potential Denial of Service vulnerabilities in API route validation
+
+- description: "DoS vulnerabilities in API route input validation"
+- queries: .
+- from: codeql/javascript-queries
+- include:
+    kind: problem
+    tags contain: 
+      - security
+      - dos
+

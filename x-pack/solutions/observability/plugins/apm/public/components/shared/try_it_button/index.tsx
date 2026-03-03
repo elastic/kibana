@@ -73,10 +73,10 @@ export function TryItButton({
           button={
             <EuiButtonIcon
               data-test-subj="apmPopoverButton"
-              iconType="iInCircle"
+              iconType="info"
               aria-label={i18n.translate(
                 'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
-                { defaultMessage: 'Try it helper button' }
+                { defaultMessage: 'Try it help' }
               )}
               onClick={togglePopover}
             />
@@ -170,10 +170,11 @@ export function TryItButton({
   function HideThisButton() {
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={hideThisContent}>
+        <EuiToolTip content={hideThisContent} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="apmHideThisButtonButton"
             iconType="cross"
+            aria-label={hideThisContent}
             onClick={() => {
               setShowFastFilterTryCallout(false);
             }}
@@ -184,7 +185,7 @@ export function TryItButton({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <TechnicalPreviewBadge icon="beaker" />
       {isFeatureEnabled ? null : <PromoLabel />}
       <Link />

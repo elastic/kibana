@@ -30,7 +30,13 @@ export const ChartPlaceHolder = ({
   width?: string | null;
   data: ChartSeriesData[] | null | undefined;
 }) => (
-  <FlexGroup justifyContent="center" alignItems="center" height={height} width={width}>
+  <FlexGroup
+    data-test-subj="chartPlaceHolder"
+    justifyContent="center"
+    alignItems="center"
+    height={height}
+    width={width}
+  >
     <EuiFlexItem grow={false}>
       <EuiText size="s" textAlign="center" color="subdued" data-test-subj="chartHolderText">
         {checkIfAllValuesAreZero(data)

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { chain } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
+import { chain } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/function';
 import * as t from 'io-ts';
 import { isoToEpochRt } from '../iso_to_epoch_rt';
 

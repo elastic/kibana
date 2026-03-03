@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
@@ -87,7 +88,7 @@ describe('ExploratoryView', () => {
     const toggleButton = await screen.findByText('Hide chart');
     expect(toggleButton).toBeInTheDocument();
 
-    toggleButton.click();
+    await userEvent.click(toggleButton);
 
     expect(toggleButton.textContent).toBe('Show chart');
     expect(screen.queryByText('Refresh')).toBeNull();

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getReadEndpointListItemSchemaMock } from './index.mock';
-import { ReadEndpointListItemSchema, readEndpointListItemSchema } from '.';
+import type { ReadEndpointListItemSchema } from '.';
+import { readEndpointListItemSchema } from '.';
 
 describe('read_endpoint_list_item_schema', () => {
   test('it should validate a typical list request', () => {

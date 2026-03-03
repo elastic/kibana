@@ -5,22 +5,33 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { EuiCallOut, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import type { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { PreviewTable } from '../../preview_table';
+import { PreviewTable } from '../../shared/preview_table';
 import { LoadingPanel } from '../../../loading_panel';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../types';
+import type { MappedSchemaField, SchemaField } from '../types';
+import { isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 
 interface SamplePreviewTableProps {
-  stream: WiredStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   nextField: SchemaField;
+  onValidate?: ({
+    isValid,
+    isIgnored,
+    isExpensiveQueries,
+  }: {
+    isValid: boolean;
+    isIgnored: boolean;
+    isExpensiveQueries: boolean;
+  }) => void;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
@@ -37,6 +48,7 @@ const SAMPLE_DOCUMENTS_TO_SHOW = 20;
 const SamplePreviewTableContent = ({
   stream,
   nextField,
+  onValidate,
 }: SamplePreviewTableProps & { nextField: MappedSchemaField }) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
@@ -63,6 +75,25 @@ const SamplePreviewTableContent = ({
     { disableToastOnError: true }
   );
 
+  useEffect(() => {
+    if (onValidate) {
+      const isExpensiveQueriesError =
+        error && getFormattedError(error)?.message.includes('allow_expensive_queries');
+
+      onValidate({
+        isValid: value?.status === 'failure' || error ? false : true,
+        isIgnored:
+          value?.documentsWithRuntimeFieldsApplied &&
+          value?.documentsWithRuntimeFieldsApplied?.some(
+            (doc) => doc?.ignored_fields && doc.ignored_fields?.length > 0
+          )
+            ? true
+            : false,
+        isExpensiveQueries: isExpensiveQueriesError ?? false,
+      });
+    }
+  }, [value, error, onValidate]);
+
   const columns = useMemo(() => {
     return [nextField.name];
   }, [nextField.name]);
@@ -76,19 +107,45 @@ const SamplePreviewTableContent = ({
     (value.status === 'unknown' || value.documentsWithRuntimeFieldsApplied?.length === 0)
   ) {
     return (
-      <EuiCallOut>
-        {i18n.translate('xpack.streams.samplePreviewTable.unknownStatus', {
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="warning"
+        iconType="warning"
+        title={i18n.translate('xpack.streams.samplePreviewTable.unknownStatus', {
           defaultMessage:
             "Couldn't simulate changes due to a lack of indexed documents with this field",
         })}
-      </EuiCallOut>
+      />
     );
   }
 
   if ((value && value.status === 'failure') || error) {
     const formattedError = error && getFormattedError(error);
+
+    const isExpensiveQueries = formattedError?.message.includes('allow_expensive_queries');
+
+    if (isExpensiveQueries) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          title={i18n.translate('xpack.streams.samplePreviewTable.warningTitle', {
+            defaultMessage: 'Some fields are failing when simulating ingestion.',
+          })}
+        >
+          {i18n.translate('xpack.streams.samplePreviewTable.expensiveQueriesDisabledWarning', {
+            defaultMessage:
+              'Field simulation is unavailable because expensive queries are disabled on your cluster. ' +
+              'The schema changes can still be applied, but field compatibility cannot be verified in advance. ' +
+              'Proceed with caution - incompatible field types may cause ingestion errors.',
+          })}
+        </EuiCallOut>
+      );
+    }
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         title={i18n.translate('xpack.streams.samplePreviewTable.errorTitle', {
           defaultMessage:
@@ -109,7 +166,42 @@ const SamplePreviewTableContent = ({
       >
         <PreviewTable
           documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
+          renderCellValue={(doc, columnId, ignoredFields = []) => {
+            const emptyCell = <>&nbsp;</>;
+            const docValue = doc[columnId];
+
+            let renderedValue = emptyCell as ReactNode;
+
+            if (typeof docValue === 'object') {
+              renderedValue = JSON.stringify(docValue);
+            } else {
+              renderedValue = String(docValue) || emptyCell;
+            }
+
+            const isFieldIgnored = ignoredFields.find((field) => field?.field === columnId);
+
+            if (isFieldIgnored) {
+              renderedValue = (
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiIconTip
+                    position="bottom"
+                    content={i18n.translate('xpack.streams.samplePreviewTable.ignoredField', {
+                      defaultMessage: 'This value caused an issue and was ignored',
+                    })}
+                    type="warning"
+                    iconProps={{
+                      color: 'warning',
+                    }}
+                  />
+                  {renderedValue}
+                </EuiFlexGroup>
+              );
+            }
+
+            return renderedValue;
+          }}
           displayColumns={columns}
+          showLeadingControlColumns={false}
         />
       </div>
     );

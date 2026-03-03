@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
 
 import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
-import { InferenceUsageInfo } from '../../../../types';
+import type { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { RenderMessageWithIcon } from './render_message_with_icon';
 import * as i18n from '../delete/confirm_delete_endpoint/translations';

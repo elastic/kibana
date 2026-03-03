@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -10,23 +10,35 @@
     "browser": true,
     "configPath": ["xpack", "streamsApp"],
     "requiredPlugins": [
-      "streams",
+      "charts",
       "data",
-      "dataViews",
-      "unifiedSearch",
-      "share",
-      "savedObjectsTagging",
-      "navigation",
-      "fieldsMetadata",
       "datasetQuality",
-      "licensing"
+      "dataViews",
+      "discoverShared",
+      "console",
+      "fieldFormats",
+      "fieldsMetadata",
+      "licensing",
+      "indexManagement",
+      "ingestPipelines",
+      "navigation",
+      "savedObjectsTagging",
+      "share",
+      "streams",
+      "unifiedSearch",
+      "unifiedDocViewer",
+      "dashboard",
     ],
+    "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement"],
     "requiredBundles": [
-      "kibanaReact"
+      "discover",
+      "esql",
+      "kibanaReact",
+      "kibanaUtils",
+      "observabilityAIAssistant",
+      "esUiShared",
+      "stackConnectors"
     ],
-    "optionalPlugins": [
-      "observabilityAIAssistant"
-    ],
-    "extraPublicDirs": []
+    "extraPublicDirs": ["common"]
   }
 }

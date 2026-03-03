@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type ModuleGroup = 'platform' | 'observability' | 'search' | 'security' | 'common';
-export type ModuleVisibility = 'private' | 'shared';
+import type { KibanaGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 
 export interface KibanaPackageJson {
   name: string;
@@ -30,6 +29,6 @@ export interface KibanaPackageJson {
     [name: string]: string | undefined;
   };
   [key: string]: unknown;
-  group?: ModuleGroup;
+  group?: KibanaGroup;
   visibility?: ModuleVisibility;
 }

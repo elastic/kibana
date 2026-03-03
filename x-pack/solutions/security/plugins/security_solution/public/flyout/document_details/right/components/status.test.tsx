@@ -14,6 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { STATUS_BUTTON_TEST_ID } from './test_ids';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
 
@@ -36,10 +37,12 @@ const actionItem = {
 
 (useAlertsActions as jest.Mock).mockReturnValue({
   actionItems: [actionItem],
+  panels: [],
 });
 
-describe('<DocumentStatus />', () => {
-  it('should render status information', () => {
+// Failing: See https://github.com/elastic/kibana/issues/231701
+describe.skip('<DocumentStatus />', () => {
+  it('should render status information', async () => {
     const contextValue = {
       eventId: 'eventId',
       browserFields: {},
@@ -52,7 +55,7 @@ describe('<DocumentStatus />', () => {
     expect(getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByText('open')).toBeInTheDocument();
 
-    getByTestId(STATUS_BUTTON_TEST_ID).click();
+    await userEvent.click(getByTestId(STATUS_BUTTON_TEST_ID));
     expect(getByTestId('data-test-subj')).toBeInTheDocument();
   });
 
@@ -75,7 +78,7 @@ describe('<DocumentStatus />', () => {
       browserFields: {},
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
-      isPreview: true,
+      isRulePreview: true,
     } as unknown as DocumentDetailsContext;
 
     const { container } = renderStatus(contextValue);

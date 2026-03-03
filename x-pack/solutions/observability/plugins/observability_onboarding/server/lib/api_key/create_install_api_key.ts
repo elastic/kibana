@@ -12,8 +12,10 @@ import type { CreateAPIKeyParams } from '@kbn/security-plugin/server';
  * Creates a short lived API key with the necessary permissions to install integrations
  */
 export function createInstallApiKey(name: string): CreateAPIKeyParams {
+  const timestamp = new Date().toISOString();
+
   return {
-    name,
+    name: `${name}-${timestamp}`,
     expiration: '1h', // This API key is only used for initial setup and should be short lived
     metadata: {
       managed: true,

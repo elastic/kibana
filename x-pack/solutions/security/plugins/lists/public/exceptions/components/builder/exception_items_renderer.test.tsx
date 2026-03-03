@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -21,7 +22,7 @@ import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
 
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;

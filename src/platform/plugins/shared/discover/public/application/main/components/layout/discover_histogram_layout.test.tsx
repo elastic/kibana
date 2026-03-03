@@ -8,129 +8,100 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
-import type {
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-} from '../../state_management/discover_data_state_container';
-import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import type { DiscoverMainContentProps } from './discover_main_content';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { render, screen } from '@testing-library/react';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import userEvent from '@testing-library/user-event';
 
-function getStateContainer(savedSearch?: SavedSearch) {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
-  const appState = {
-    dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
-    interval: 'auto',
-    hideChart: false,
-  };
+const dataView = dataViewWithTimefieldMock;
+const mockSearchSessionId = '123';
 
-  stateContainer.appState.update(appState);
+const setup = async ({
+  noSearchSessionId,
+}: {
+  noSearchSessionId?: boolean;
+} = {}) => {
+  const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
+  const services = createDiscoverServicesMock();
 
-  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
-  stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      timeRangeAbsolute: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-      timeRangeRelative: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
+  services.profilesManager = profilesManagerMock;
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataView],
+  });
+
+  await toolkit.initializeTabs();
+
+  toolkit.internalState.dispatch(
+    internalStateActions.updateAppState({
+      tabId: toolkit.getCurrentTab().id,
+      appState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        query: { query: '', language: 'kuery' },
       },
     })
   );
 
-  return stateContainer;
-}
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
 
-const mountComponent = async ({
-  isEsqlMode = false,
-  storage,
-  savedSearch = savedSearchMockWithTimeField,
-  searchSessionId = '123',
-}: {
-  isEsqlMode?: boolean;
-  isTimeBased?: boolean;
-  storage?: Storage;
-  savedSearch?: SavedSearch;
-  searchSessionId?: string | null;
-} = {}) => {
-  const dataView = savedSearch?.searchSource?.getField('index') as DataView;
-
-  let services = discoverServiceMock;
-
-  (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
-    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
+  toolkit.internalState.dispatch(
+    internalStateActions.setDataRequestParams({
+      tabId: toolkit.getCurrentTab().id,
+      dataRequestParams: {
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
+        isSearchSessionRestored: false,
+      },
+    })
   );
 
-  if (storage) {
-    services = { ...services, storage };
-  }
-
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments: true,
-  }) as DataMain$;
-
-  const documents$ = new BehaviorSubject({
+  stateContainer.dataState.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
-  }) as DataDocuments$;
-
-  const totalHits$ = new BehaviorSubject({
+  });
+  stateContainer.dataState.data$.totalHits$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
-  }) as DataTotalHits$;
+  });
+  stateContainer.dataState.data$.main$.next({
+    fetchStatus: FetchStatus.COMPLETE,
+    foundDocuments: true,
+  });
 
-  const savedSearchData$ = {
-    main$,
-    documents$,
-    totalHits$,
-  };
-
-  const session = getSessionServiceMock();
-
-  session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
-
-  const stateContainer = getStateContainer(savedSearch);
-  stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.actions.undoSavedSearchChanges = jest.fn();
-
-  const props: DiscoverHistogramLayoutProps = {
+  const props: DiscoverMainContentProps = {
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
-    container: null,
     panelsToggle: (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -142,52 +113,37 @@ const mountComponent = async ({
       />
     ),
   };
-  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
-  const component = mountWithIntl(
-    <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-            <DiscoverHistogramLayout {...props} />
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+  render(
+    <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
+      <DiscoverHistogramLayout {...props} />
+    </DiscoverToolkitTestProvider>
   );
 
   // wait for lazy modules
   await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-  await act(async () => {
-    component.update();
-  });
-
-  return { component, stateContainer };
 };
 
 describe('Discover histogram layout component', () => {
   describe('render', () => {
-    it('should render null if there is no search session', async () => {
-      const { component } = await mountComponent({ searchSessionId: null });
-      expect(component.isEmptyRender()).toBe(true);
+    it('should not render chart if there is no search session', async () => {
+      await setup({ noSearchSessionId: true });
+      expect(screen.queryByTestId('unifiedHistogramRendered')).not.toBeInTheDocument();
     });
 
-    it('should not render null if there is a search session', async () => {
-      const { component } = await mountComponent();
-      expect(component.isEmptyRender()).toBe(false);
-    }, 10000);
-
-    it('should not render null if there is no search session, but isEsqlMode is true', async () => {
-      const { component } = await mountComponent({ isEsqlMode: true });
-      expect(component.isEmptyRender()).toBe(false);
+    it('should render chart if there is a search session', async () => {
+      await setup();
+      expect(screen.queryByTestId('unifiedHistogramRendered')).toBeInTheDocument();
     });
 
     it('should render PanelsToggle', async () => {
-      const { component } = await mountComponent();
-      expect(component.find(PanelsToggle).first().prop('isChartAvailable')).toBe(undefined);
-      expect(component.find(PanelsToggle).first().prop('renderedFor')).toBe('histogram');
-      expect(component.find(PanelsToggle).last().prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).last().prop('renderedFor')).toBe('tabs');
+      const user = userEvent.setup();
+      await setup();
+      expect(screen.queryByTestId('dscPanelsToggleInHistogram')).toBeInTheDocument();
+      expect(screen.queryByTestId('dscPanelsToggleInPage')).not.toBeInTheDocument();
+      await user.click(screen.getByTestId('dscHideHistogramButton'));
+      expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
     });
   });
 });

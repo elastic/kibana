@@ -10,8 +10,7 @@
 /*
  * Mock the function "populateContext" that accesses the autocomplete definitions
  */
-import { monaco } from '@kbn/monaco';
-import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import type { monaco } from '@kbn/monaco';
 
 const mockPopulateContext = jest.fn();
 
@@ -22,12 +21,13 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
     },
   };
 });
-import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,
-  shouldTriggerSuggestions,
   getBodyCompletionItems,
+  shouldTriggerSuggestions,
+  getInsertText,
 } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
@@ -122,9 +122,25 @@ describe('autocomplete_utils', () => {
       const actual = shouldTriggerSuggestions(' "');
       expect(actual).toBe(true);
     });
-    it('triggers no suggestions for the property name when the property name is typed', () => {
+    it('triggers suggestions for the property name when the property name is typed', () => {
       const actual = shouldTriggerSuggestions('"propertyName');
-      expect(actual).toBe(false);
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions when typing a single character field name', () => {
+      const actual = shouldTriggerSuggestions('"c');
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions when typing a field name with dot', () => {
+      const actual = shouldTriggerSuggestions('"category.');
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions for nested field names', () => {
+      const actual = shouldTriggerSuggestions('"category.keyword');
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions with whitespace before quote', () => {
+      const actual = shouldTriggerSuggestions('  "field');
+      expect(actual).toBe(true);
     });
     it('triggers suggestions for the property value', () => {
       const actual = shouldTriggerSuggestions(' "propertyName": ');
@@ -166,46 +182,60 @@ describe('autocomplete_utils', () => {
           name: '.index',
           meta: 'index',
         },
-      ] as AutoCompleteContext['autoCompleteSet'];
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
       // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
         context.autoCompleteSet = mockAutocompleteSet;
       });
     });
-    it('only suggests index items if there is a comma at the end of the line', () => {
-      const mockModel = {
-        getValueInRange: () => 'GET .kibana,',
-        getWordUntilPosition: () => ({ startColumn: 13 }),
-      } as unknown as monaco.editor.ITextModel;
-      const mockPosition = { lineNumber: 1, column: 13 } as unknown as monaco.Position;
-      const items = getUrlPathCompletionItems(mockModel, mockPosition);
-      expect(items.length).toBe(2);
-      expect(items.every((item) => item.detail === 'index')).toBe(true);
-    });
-
-    it('only suggests index items if there is a comma in the last url path token', () => {
+    it('only suggests index items matching prefix if there is a comma at the end of the line', () => {
       const mockModel = {
         getValueInRange: () => 'GET .kibana,index',
         getWordUntilPosition: () => ({ startColumn: 13 }),
       } as unknown as monaco.editor.ITextModel;
       const mockPosition = { lineNumber: 1, column: 18 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // Only index1 and index2 match 'index' prefix
+      expect(items.length).toBe(2);
+      expect(items.every((item) => item.detail === 'index')).toBe(true);
+      expect(items.map((item) => item.label)).toEqual(['index1', 'index2']);
+    });
+
+    it('only suggests index items starting with comma-prefix when typing after comma', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET .kibana,ind',
+        getWordUntilPosition: () => ({ startColumn: 13 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 16 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // Should suggest index items matching 'ind' prefix
       expect(items.length).toBe(2);
       expect(items.every((item) => item.detail === 'index')).toBe(true);
     });
 
-    it('suggest endpoints and index names, excluding dot-prefixed ones, if no comma and no dot', () => {
+    it('suggest only endpoints matching prefix, excluding dot-prefixed ones, if no comma and no dot', () => {
       const mockModel = {
         getValueInRange: () => 'GET _search',
         getWordUntilPosition: () => ({ startColumn: 12 }),
       } as unknown as monaco.editor.ITextModel;
       const mockPosition = { lineNumber: 1, column: 12 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
-      expect(items.length).toBe(4);
-      expect(
-        items.every((item) => typeof item.label === 'string' && item.label.startsWith('.'))
-      ).toBe(false);
+      // Only _search matches '_search' prefix
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('_search');
+    });
+
+    it('suggests endpoints and indices matching underscore prefix', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET _',
+        getWordUntilPosition: () => ({ startColumn: 5 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // _cat and _search should match '_' prefix
+      expect(items.length).toBe(2);
+      expect(items.map((item) => item.label).sort()).toEqual(['_cat', '_search']);
     });
 
     it('suggests all endpoints and indices, including dot-prefixed ones, if last char is a dot', () => {
@@ -215,83 +245,236 @@ describe('autocomplete_utils', () => {
       } as unknown as monaco.editor.ITextModel;
       const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
-      expect(items.length).toBe(5);
+      // Only .index matches '.' prefix
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('.index');
+    });
+
+    it('filters suggestions based on typed prefix after selecting an index', () => {
+      // This tests the fix for the bug where typing a dot after selecting an index
+      // would show all dot-prefixed indices instead of filtering by the full prefix
+      const mockModel = {
+        getValueInRange: () => 'GET .alerts-dataset.',
+        getWordUntilPosition: () => ({ startColumn: 5 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 21 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // No indices start with '.alerts-dataset.' so should return empty
+      expect(items.length).toBe(0);
+    });
+
+    it('excludes already selected indices from comma-separated suggestions', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET index1,index2,',
+        getWordUntilPosition: () => ({ startColumn: 19 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 19 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // index1 and index2 are already selected, so only .index should remain
+      // (dot-prefixed indices are excluded when line doesn't end with dot)
+      expect(items.length).toBe(0);
+    });
+
+    it('excludes already selected indices while filtering by prefix', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET index1,ind',
+        getWordUntilPosition: () => ({ startColumn: 12 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 15 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // index1 is already selected, so only index2 should match 'ind' prefix
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('index2');
+    });
+
+    it('calculates correct replacement range for partial token with dots', () => {
+      const mockModel = {
+        getValueInRange: () => 'GET .ind',
+        getWordUntilPosition: () => ({ startColumn: 9 }),
+      } as unknown as monaco.editor.ITextModel;
+      const mockPosition = { lineNumber: 1, column: 9 } as unknown as monaco.Position;
+      const items = getUrlPathCompletionItems(mockModel, mockPosition);
+      // The range should replace the entire '.ind' partial token
+      // startColumn should be column (9) - partialToken.length (4) = 5
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('.index');
+      expect(items[0].range).toEqual({
+        startLineNumber: 1,
+        startColumn: 5,
+        endLineNumber: 1,
+        endColumn: 9,
+      });
     });
   });
 
-  describe('inline JSON body completion', () => {
-    it('completes "term" inside {"query": {te}} without extra quotes or missing template', async () => {
-      // 1) Set up a mock monaco model with two lines of text
-      //    - Line 1: GET index/_search
-      //    - Line 2: {"query": {te}}
-      // In a real editor, requestStartLineNumber = 1 (0-based vs 1-based might differ),
-      // so we adjust accordingly in the test.
-      const mockModel = {
-        getLineContent: (lineNumber: number) => {
-          if (lineNumber === 1) {
-            // request line
-            return 'GET index/_search';
-          } else if (lineNumber === 2) {
-            // inline JSON with partial property 'te'
-            return '{"query": {te}}';
-          }
-          return '';
-        },
-        // getValueInRange will return everything from line 2 up to our position
-        getValueInRange: ({ startLineNumber, endLineNumber }: monaco.IRange) => {
-          if (startLineNumber === 2 && endLineNumber === 2) {
-            // partial body up to cursor (we can just return the entire line for simplicity)
-            return '{"query": {te}}';
-          }
-          return '';
-        },
-        getWordUntilPosition: () => ({
-          startColumn: 13, // approximate "te" start
-          endColumn: 15,
-          word: 'te',
-        }),
-        getLineMaxColumn: () => 999, // large max
-      } as unknown as monaco.editor.ITextModel;
+  describe('getBodyCompletionItems', () => {
+    const mockEditor = {} as any;
 
-      // 2) The user is on line 2, at column ~15 (after 'te').
-      const mockPosition = {
-        lineNumber: 2,
-        column: 15,
-      } as monaco.Position;
+    beforeEach(() => {
+      // Reset mock before each test
+      mockPopulateContext.mockReset();
+    });
+
+    it('calculates correct replacement range for unquoted fields with dots', async () => {
+      // Mock autocomplete suggestions
+      const mockAutocompleteSet = [
+        { name: 'index.mode', template: 'standard' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
 
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
-        context.autoCompleteSet = [
-          {
-            name: 'term',
-          },
-        ];
+        context.autoCompleteSet = mockAutocompleteSet;
       });
 
-      // 4) We call getBodyCompletionItems, passing requestStartLineNumber = 1
-      //    because line 1 has "GET index/_search", so line 2 is the body.
-      const mockEditor = {} as MonacoEditorActionsProvider;
-      const suggestions = await getBodyCompletionItems(
-        mockModel,
-        mockPosition,
-        1, // the line number where the request method/URL is
-        mockEditor
+      // Simulate typing "index.mode" without quotes in the body
+      // Line content: "        index.mode"
+      const mockModel = {
+        getLineContent: () => 'PUT my-index',
+        getValueInRange: jest.fn((range: any) => {
+          // Body content before position
+          if (range.startLineNumber === 2) {
+            return '{\n    "settings": {\n        index.mode';
+          }
+          // Line content before position (current line)
+          if (range.startColumn === 1 && range.endLineNumber === 4) {
+            return '        index.mode';
+          }
+          // Line content after position
+          return '';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 15, word: 'mode' }), // Only "mode" is detected as word
+        getLineMaxColumn: () => 19,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 4, column: 19 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      // The range should cover "index.mode" (columns 9-19), not just "mode" (columns 15-19)
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('index.mode');
+      expect(items[0].range).toEqual({
+        startLineNumber: 4,
+        startColumn: 9, // Should start at "index", not "mode"
+        endLineNumber: 4,
+        endColumn: 19,
+      });
+    });
+
+    it('calculates correct replacement range for quoted fields with dots', async () => {
+      const mockAutocompleteSet = [
+        { name: 'index.mode', template: 'standard' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      // Simulate typing "index.mode" with quotes in the body
+      const mockModel = {
+        getLineContent: () => 'PUT my-index',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n    "settings": {\n        "index.mode';
+          }
+          if (range.startColumn === 1 && range.endLineNumber === 4) {
+            return '        "index.mode';
+          }
+          return '"'; // closing quote after cursor
+        }),
+        getWordUntilPosition: () => ({ startColumn: 16, word: 'mode' }),
+        getLineMaxColumn: () => 21,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 4, column: 20 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('index.mode');
+      // Range should cover "index.mode" (after the opening quote) and include closing quote
+      expect(items[0].range).toEqual({
+        startLineNumber: 4,
+        startColumn: 10, // After the opening quote
+        endLineNumber: 4,
+        endColumn: 21, // Including the closing quote
+      });
+    });
+  });
+
+  describe('getInsertText', () => {
+    const mockContext = { addTemplate: false } as AutoCompleteContext;
+
+    it('returns empty string if name is undefined', () => {
+      expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
+    });
+
+    it('handles unclosed quotes correctly', () => {
+      expect(
+        getInsertText(
+          { name: 'match_all' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      "match_a',
+          mockContext
+        )
+      ).toBe('match_all"');
+    });
+
+    it('wraps insertValue with quotes when appropriate', () => {
+      expect(
+        getInsertText(
+          { name: 'match_all' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('"match_all"');
+    });
+
+    it('appends template when available and context.addTemplate is true', () => {
+      expect(
+        getInsertText({ name: 'query', template: {} } as ResultTerm, '{\n' + '    ', {
+          ...mockContext,
+          addTemplate: true,
+        })
+      ).toBe('"query": {$0}');
+    });
+
+    it('inserts template when provided directly and context.addTemplate is true', () => {
+      expect(
+        getInsertText(
+          { name: 'terms', template: { field: '' } },
+          '{\n' + '    "aggs": {\n' + '      "NAME": {\n' + '        "',
+          { ...mockContext, addTemplate: true }
+        )
+      ).toBe('terms": {\n' + '  "field": ""\n' + '}');
+    });
+
+    it('inserts only field name when template is provided and context.addTemplate is false', () => {
+      expect(
+        getInsertText(
+          { name: 'terms', template: { field: '' } },
+          '{\n' + '    "aggs": {\n' + '      "NAME": {\n' + '        "',
+          mockContext
+        )
+      ).toBe('terms"');
+    });
+
+    it('inserts template inline', () => {
+      expect(
+        getInsertText({ name: 'term', template: { FIELD: { value: 'VALUE' } } }, '{"query": {te', {
+          ...mockContext,
+          addTemplate: true,
+        })
+      ).toBe('"term": {\n' + '  "FIELD": {\n' + '    "value": "VALUE"\n' + '  }\n' + '}');
+    });
+
+    it('adds cursor placeholder inside empty objects and arrays', () => {
+      expect(getInsertText({ name: 'field', value: '{' } as ResultTerm, '', mockContext)).toBe(
+        '"field": {$0}'
       );
-
-      // 5) We should get 1 suggestion for "term"
-      expect(suggestions).toHaveLength(1);
-      const termSuggestion = suggestions[0];
-
-      // 6) Check the snippet text. For example, if your final snippet logic
-      //    inserts `"term": $0`, we ensure there's no extra quote like ""term"
-      //    and if you have a template for "term", we can check that too.
-      const insertText = termSuggestion.insertText;
-
-      // No double quotes at the start:
-      expect(insertText).not.toContain('""term"');
-      // Valid JSON snippet
-      expect(insertText).toContain('"term"');
-      expect(insertText).toContain('$0');
+      expect(getInsertText({ name: 'field', value: '[' } as ResultTerm, '', mockContext)).toBe(
+        '"field": [$0]'
+      );
     });
   });
 });

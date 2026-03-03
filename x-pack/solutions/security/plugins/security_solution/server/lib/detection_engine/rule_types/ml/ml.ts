@@ -8,19 +8,13 @@
 /* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
-import type { CreateRuleOptions, SecuritySharedParams, WrapSuppressedHits } from '../types';
+import type { SecurityRuleServices, SecuritySharedParams, WrapSuppressedHits } from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -33,15 +27,17 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { AnomalyResults } from '../../../machine_learning';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
+import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 
 interface MachineLearningRuleExecutorParams {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
   ml: SetupPlugins['ml'];
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
   isAlertSuppressionActive: boolean;
-  experimentalFeatures: ExperimentalFeatures;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   isLoggedRequestsEnabled?: boolean;
 }
 
@@ -51,7 +47,6 @@ export const mlExecutor = async ({
   services,
   isAlertSuppressionActive,
   wrapSuppressedHits,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
   isLoggedRequestsEnabled = false,
 }: MachineLearningRuleExecutorParams) => {
@@ -87,21 +82,25 @@ export const mlExecutor = async ({
       jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
     ) {
       const warningMessage = [
-        'Machine learning job(s) are not started:',
+        'ML jobs are not started',
         ...jobSummaries.map((job) =>
           [
-            `job id: "${job.id}"`,
-            `job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
-            `job status: "${job.jobState}"`,
-            `datafeed status: "${job.datafeedState}"`,
-          ].join(', ')
+            `Job ID: "${job.id}"`,
+            `Job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
+            `Job status: "${job.jobState}"`,
+            `Datafeed status: "${job.datafeedState}"`,
+          ].join('. ')
         ),
-      ].join(' ');
+      ].join('\n');
 
       result.warningMessages.push(warningMessage);
-      ruleExecutionLogger.warn(warningMessage);
+      ruleExecutionLogger.debug(warningMessage);
       result.warning = true;
     }
+
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
 
     let anomalyResults: AnomalyResults;
     try {
@@ -117,14 +116,13 @@ export const mlExecutor = async ({
         to: tuple.to.toISOString(),
         maxSignals: tuple.maxSignals,
         exceptionFilter,
+        additionalFilters: dataStreamNamespaceFilters,
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      result.totalEventsFound = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
-      if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
-        result.userError = true;
-      }
       result.errors.push(error.message);
       result.success = false;
       return { result };
@@ -148,10 +146,14 @@ export const mlExecutor = async ({
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
+      ruleExecutionLogger.debug(`Alerts from ML anomalies: ${anomalyCount}`);
     }
 
-    if (anomalyCount && isAlertSuppressionActive) {
+    if (
+      anomalyCount &&
+      isAlertSuppressionActive &&
+      alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+    ) {
       await bulkCreateSuppressedAlertsInMemory({
         sharedParams,
         enrichedEvents: filteredAnomalyHits,
@@ -160,7 +162,6 @@ export const mlExecutor = async ({
         buildReasonMessage: buildReasonMessageForMlAlert,
         alertSuppression: completeRule.ruleParams.alertSuppression,
         wrapSuppressedHits,
-        experimentalFeatures,
       });
     } else {
       const createResult = await bulkCreateMlSignals({

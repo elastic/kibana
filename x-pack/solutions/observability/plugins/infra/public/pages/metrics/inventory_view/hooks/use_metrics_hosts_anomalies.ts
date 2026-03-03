@@ -8,6 +8,8 @@
 import { useState, useCallback, useEffect, useReducer } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { isPending, isFailure, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   Sort,
@@ -168,6 +170,7 @@ export const useMetricsHostsAnomaliesResults = (
     search,
     hostName,
     metric,
+    schema,
   }: {
     endTime: number;
     startTime: number;
@@ -179,12 +182,16 @@ export const useMetricsHostsAnomaliesResults = (
     search?: string;
     hostName?: string;
     metric?: Metric;
+    schema?: DataSchemaFormat;
   },
   {
     request$,
     active = true,
   }: { request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>; active?: boolean }
 ) => {
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
   const [reducerState, dispatch] = useReducer(
     stateReducer,
     STATE_DEFAULTS,
@@ -199,12 +206,19 @@ export const useMetricsHostsAnomaliesResults = (
 
   const [metricsHostsAnomalies, setMetricsHostsAnomalies] = useState<MetricsHostsAnomalies>([]);
 
+  const mlCapabilities = application.capabilities.ml as { canGetJobs: boolean } | undefined;
+  const canGetAnomalies = mlCapabilities?.canGetJobs && schema !== 'semconv';
+
   const {
     data: response,
     status,
     refetch,
   } = useFetcher(
     async (callApi) => {
+      if (!canGetAnomalies) {
+        return;
+      }
+
       const apiResponse = await callApi(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
         method: 'POST',
         body: JSON.stringify(
@@ -242,6 +256,7 @@ export const useMetricsHostsAnomaliesResults = (
       reducerState.timeRange.start,
       search,
       sourceId,
+      canGetAnomalies,
     ],
     {
       requestObservable$: request$,

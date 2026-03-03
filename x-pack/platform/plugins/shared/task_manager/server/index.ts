@@ -6,8 +6,9 @@
  */
 
 import { get } from 'lodash';
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { TaskManagerConfig } from './config';
+import { configSchema, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { TaskManagerPlugin } = await import('./plugin');
@@ -22,6 +23,14 @@ export type {
   IntervalSchedule,
 } from './task';
 
+export { Frequency, Weekday } from '@kbn/rrule';
+export {
+  scheduleRruleSchemaV1,
+  scheduleRruleSchemaV2,
+  scheduleRruleSchemaV3,
+} from './saved_objects';
+
+export type { RruleSchedule } from './task';
 export { TaskStatus, TaskPriority, TaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
@@ -45,6 +54,7 @@ export {
 } from './queries/mark_available_tasks_as_claimed';
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
+export { runInvalidate } from './invalidate_api_keys/lib';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,

@@ -7,43 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
-import React from 'react';
-import { HeaderActionMenu } from '../header/header_action_menu';
+import type { Observable } from 'rxjs';
+import { EMPTY } from 'rxjs';
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import React, { useMemo } from 'react';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { HeaderAppMenu } from '../header/header_app_menu';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
+import { useHasAppMenuConfig } from '../use_has_app_menu_config';
 
 interface AppMenuBarProps {
-  headerActionMenuMounter: { mount: MountPoint<HTMLElement> | undefined };
+  // TODO: get rid of observable
+  appMenuActions$?: Observable<MountPoint | undefined> | null;
+  appMenu$: Observable<AppMenuConfig | undefined>;
 }
-export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
+
+const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
+  useMemo(() => {
+    // Root bar styles
+    const root = {
+      display: 'flex',
+      justifyContent: 'end',
+      alignItems: 'center',
+      padding: `0 ${euiTheme.size.s}`,
+      background: euiTheme.colors.backgroundBasePlain,
+      borderBottom: euiTheme.border.thin,
+      marginBottom: `-${euiTheme.border.width.thin}`,
+      height: '100%',
+    };
+
+    return { root };
+  }, [euiTheme]);
+
+export const AppMenuBar = ({ appMenuActions$, appMenu$ }: AppMenuBarProps) => {
+  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$ ?? EMPTY);
   const { euiTheme } = useEuiTheme();
-  const zIndex =
-    typeof euiTheme.levels.header === 'number'
-      ? euiTheme.levels.header - 1 // We want it to appear right below the header
-      : euiTheme.levels.header;
+
+  const styles = useAppMenuBarStyles(euiTheme);
+
+  const hasBetaConfig = useHasAppMenuConfig(appMenu$);
+
+  if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
 
   return (
     <div
       className="header__actionMenu"
       data-test-subj="kibanaProjectHeaderActionMenu"
-      css={css`
-        z-index: ${zIndex};
-        background: ${euiTheme.colors.body};
-        border-bottom: ${euiTheme.border.thin};
-        display: flex;
-        justify-content: end;
-        align-items: center;
-        padding: 0 ${euiTheme.size.s};
-        height: var(--kbnProjectHeaderAppActionMenuHeight, ${euiTheme.size.xxxl});
-        margin-bottom: -${euiTheme.border.width.thin};
-        /* fixates the elements position in the viewport, removes the element from the flow of the page */
-        position: sticky;
-        /* position below the primary fixed EuiHeader in the viewport */
-        top: var(--euiFixedHeadersOffset, 0);
-      `}
+      css={styles.root}
     >
-      <HeaderActionMenu mounter={headerActionMenuMounter} />
+      {hasBetaConfig ? (
+        <HeaderAppMenu config={appMenu$} />
+      ) : (
+        <HeaderActionMenu mounter={headerActionMenuMounter} />
+      )}
     </div>
   );
 };

@@ -23,7 +23,7 @@ import {
   useEuiPaddingCSS,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
   DataView,
   DataViewSpec,
@@ -31,7 +31,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
-import { EsQueryRuleMetaData } from '../es_query/types';
+import type { EsQueryRuleMetaData } from '../es_query/types';
 
 const DESKTOP_WIDTH = 450;
 const MOBILE_WIDTH = 350;
@@ -59,7 +59,7 @@ const toDataViewListItem = (dataView: DataView): DataViewListItemEnhanced => {
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
   dependencies: { dataViews, dataViewEditor },
-  metadata = { adHocDataViewList: [], isManagementPage: true },
+  metadata,
   dataView,
   onSelectDataView,
   onChangeMetaData,
@@ -72,9 +72,20 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
+  const computedMetadata = useMemo(() => {
+    return {
+      ...metadata,
+      adHocDataViewList: metadata?.adHocDataViewList ?? [],
+      isManagementPage: metadata?.isManagementPage ?? true,
+    };
+  }, [metadata]);
+
   const allDataViewItems = useMemo(
-    () => [...(dataViewItems ?? []), ...metadata.adHocDataViewList.map(toDataViewListItem)],
-    [dataViewItems, metadata.adHocDataViewList]
+    () => [
+      ...(dataViewItems ?? []),
+      ...(computedMetadata.adHocDataViewList || []).map(toDataViewListItem),
+    ],
+    [dataViewItems, computedMetadata.adHocDataViewList]
   );
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
@@ -104,11 +115,11 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const onAddAdHocDataView = useCallback(
     (adHocDataView: DataView) => {
       onChangeMetaData({
-        ...metadata,
-        adHocDataViewList: [...metadata.adHocDataViewList, adHocDataView],
+        ...computedMetadata,
+        adHocDataViewList: [...(computedMetadata.adHocDataViewList || []), adHocDataView],
       });
     },
-    [metadata, onChangeMetaData]
+    [computedMetadata, onChangeMetaData]
   );
 
   const createDataView = useMemo(

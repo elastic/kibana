@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { API_ROUTE_WORKPAD } from '../../common/lib/constants';
 
 export async function getHasWorkpads(http: HttpSetup): Promise<boolean> {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
-import { UseIndicesCheckCheckState } from '../../hooks/use_indices_check/types';
+import type { UseIndicesCheckCheckState } from '../../hooks/use_indices_check/types';
 import { getUnallowedValues } from '../../utils/fetch_unallowed_values';
 import { getUnallowedValueRequestItems } from '../../utils/get_unallowed_value_request_items';
 import { EcsFlatTyped } from '../../constants';
 import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
-import { UnallowedValueSearchResult } from '../../types';
+import type { UnallowedValueSearchResult } from '../../types';
 import { getMappingsProperties, getSortedPartitionedFieldMetadata } from '../../utils/metadata';
 
 export const getCheckStateStub = (

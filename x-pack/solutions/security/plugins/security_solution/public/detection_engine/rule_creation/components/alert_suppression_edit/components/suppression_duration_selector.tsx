@@ -10,7 +10,7 @@ import { EuiFormRow, EuiRadioGroup, EuiToolTip, useEuiTheme } from '@elastic/eui
 import { css } from '@emotion/css';
 import type { FieldHook } from '../../../../../shared_imports';
 import { UseMultiFields } from '../../../../../shared_imports';
-import { AlertSuppressionDurationType } from '../../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../common/types';
 import { DurationInput } from '../../duration_input';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
@@ -94,6 +94,7 @@ const SuppressionDurationSelectorFields = memo(function SuppressionDurationSelec
   return (
     <>
       <EuiRadioGroup
+        name="alertSuppressionDurationType"
         disabled={disabled}
         idSelected={suppressionDurationSelectorField.value}
         options={[
@@ -101,7 +102,9 @@ const SuppressionDurationSelectorFields = memo(function SuppressionDurationSelec
             id: AlertSuppressionDurationType.PerRuleExecution,
             label: onlyPerTimePeriod ? (
               <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
-                <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
+                <span tabIndex={0}>
+                  {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}
+                </span>
               </EuiToolTip>
             ) : (
               i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION

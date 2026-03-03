@@ -14,7 +14,7 @@ import type { ResponseActionsApiCommandNames } from '../../../../../../common/en
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
 
-const TOOLTIP_CONTENT_STYLES: React.CSSProperties = Object.freeze({ width: 150 });
+const TOOLTIP_CONTENT_STYLES = { width: 150 };
 
 interface AgentResponseActionsStatusProps {
   /** The host's individual pending action list as return by the pending action summary api */
@@ -128,7 +128,7 @@ export const AgentResponseActionsStatus = memo<AgentResponseActionsStatusProps>(
             anchorClassName="eui-textTruncate"
             anchorProps={{ 'data-test-subj': getTestId('tooltipTrigger') }}
             content={
-              <div style={TOOLTIP_CONTENT_STYLES} data-test-subj={`${dataTestSubj}-tooltipContent`}>
+              <div css={TOOLTIP_CONTENT_STYLES} data-test-subj={`${dataTestSubj}-tooltipContent`}>
                 <div>
                   <FormattedMessage
                     id="xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions"

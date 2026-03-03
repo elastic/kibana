@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import {
   getLensDataViewMigrations,
   getLensFilterMigrations,
   commonMigratePartitionChartGroups,
   commonMigrateMetricFormatter,
 } from './common_migrations';
-import { LensDocShape840, LensDocShape860 } from './types';
+import type { LensDocShape840, LensDocShape860 } from './types';
 
 describe('Lens migrations', () => {
   describe('applying filter migrations', () => {

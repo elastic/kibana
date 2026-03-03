@@ -7,11 +7,11 @@
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import moment from 'moment';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { parseExpression } from '@kbn/expressions-plugin/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
-import { TelemetryCollector, CanvasWorkpad } from '../../types';
+import type { TelemetryCollector, CanvasWorkpad } from '../../types';
 
 interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;

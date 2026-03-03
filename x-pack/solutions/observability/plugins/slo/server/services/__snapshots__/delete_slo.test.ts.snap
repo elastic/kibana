@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 1`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -16,7 +16,7 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 1`] = 
 }
 `;
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 2`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -32,23 +32,7 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 2`] = 
 }
 `;
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 3`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "slo-summary-irrelevant-1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
-exports[`DeleteSLO happy path removes all resources associatde to the slo 4`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 3`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -64,43 +48,29 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 4`] = 
 }
 `;
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 5`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "slo-irrelevant-1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
-exports[`DeleteSLO happy path removes all resources associatde to the slo 6`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 4`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
-        "id": ".slo-observability.sli.pipeline-irrelevant-1",
+        "id": ".slo-observability.*.pipeline-irrelevant-1",
       },
       Object {
         "ignore": Array [
           404,
         ],
+        "signal": AbortSignal {},
       },
     ],
     Array [
       Object {
-        "id": ".slo-observability.summary.pipeline-irrelevant-1",
+        "id": ".slo-*irrelevant@custom",
       },
       Object {
         "ignore": Array [
           404,
         ],
+        "signal": AbortSignal {},
       },
     ],
   ],
@@ -117,29 +87,48 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 6`] = 
 }
 `;
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 5`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.sli-v3*",
         "query": Object {
-          "match": Object {
-            "slo.id": "irrelevant",
+          "bool": Object {
+            "filter": Object {
+              "term": Object {
+                "slo.id": "irrelevant",
+              },
+            },
           },
         },
+        "slices": "auto",
         "wait_for_completion": false,
+      },
+      Object {
+        "signal": AbortSignal {},
       },
     ],
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3*",
         "query": Object {
-          "match": Object {
-            "slo.id": "irrelevant",
+          "bool": Object {
+            "filter": Object {
+              "term": Object {
+                "slo.id": "irrelevant",
+              },
+            },
           },
         },
-        "refresh": true,
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+      Object {
+        "signal": AbortSignal {},
       },
     ],
   ],
@@ -156,7 +145,7 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = 
 }
 `;
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 8`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 6`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -174,11 +163,14 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 8`] = 
 }
 `;
 
-exports[`DeleteSLO happy path removes all resources associatde to the slo 9`] = `
+exports[`DeleteSLO happy path removes all resources associated to the slo 7`] = `
 [MockFunction] {
   "calls": Array [
     Array [
       "irrelevant",
+      Object {
+        "ignoreNotFound": true,
+      },
     ],
   ],
   "results": Array [

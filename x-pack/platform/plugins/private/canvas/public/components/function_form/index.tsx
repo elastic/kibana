@@ -7,9 +7,9 @@
 
 import React, { useCallback } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import deepEqual from 'react-fast-compare';
-import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
 import { findExpressionType } from '../../lib/find_expression_type';
 
 // @ts-expect-error unconverted action function
@@ -32,8 +32,8 @@ import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error unconverted lib
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
-import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
-import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
+import type { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
+import type { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
 import { createAsset, notifyError } from '../../lib/assets';
 import { getCanvasWorkpadService } from '../../services/canvas_workpad_service';
 

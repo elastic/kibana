@@ -6,18 +6,21 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RuleDefinitionSection } from './rule_definition_section';
+import {
+  RuleDefinitionSection,
+  constructThreatMappingDescription,
+} from './rule_definition_section';
 import type {
-  RuleResponse,
   AlertSuppressionMissingFieldsStrategy,
+  RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import * as useAlertSuppressionMock from '../../logic/use_alert_suppression';
-import * as useGetSavedQueryMock from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import * as useGetSavedQueryMock from '../../../common/use_get_saved_query';
 import * as useUpsellingMessageMock from '../../../../common/hooks/use_upselling';
 import {
-  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
   ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS,
   ALERT_SUPPRESSION_PER_RULE_EXECUTION,
+  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
 } from '../../../rule_creation_ui/components/description_step/translations';
 
 jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
@@ -154,6 +157,89 @@ describe('RuleDefinitionSection', () => {
       expect(
         screen.queryByTestId('alertSuppressionMissingFieldPropertyTitle')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('constructThreatMappingDescription', () => {
+    it('returns correct description for single entry, negate undefined', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe('host.name MATCHES threat.indicator.host.name');
+    });
+
+    it('returns correct description for single entry, negate=false', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe('host.name MATCHES threat.indicator.host.name');
+    });
+
+    it('returns correct description for single entry, negate=true', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: true,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe('host.name DOES NOT MATCH threat.indicator.host.name');
+    });
+
+    it('returns correct description for multiple AND and OR entries', () => {
+      const result = constructThreatMappingDescription([
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: true,
+              type: 'mapping' as const,
+            },
+            {
+              field: 'user.name',
+              value: 'threat.indicator.user.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'process.name',
+              value: 'threat.indicator.process.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result).toBe(
+        '((host.name DOES NOT MATCH threat.indicator.host.name) AND (user.name MATCHES threat.indicator.user.name)) OR (process.name MATCHES threat.indicator.process.name)'
+      );
     });
   });
 });

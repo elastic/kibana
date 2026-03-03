@@ -32,11 +32,12 @@ describe('When using the ArtifactListPage component', () => {
   let history: AppContextTestRender['history'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
+  let setExperimentalFlag: ArtifactListPageRenderingSetup['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getFirstCard } = renderSetup);
+    ({ history, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
 
     mockUseGetEndpointSpecificPolicies.mockReturnValue({
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
@@ -149,12 +150,44 @@ describe('When using the ArtifactListPage component', () => {
       expect(getAllByText('mock decorator')).toHaveLength(10);
     });
 
-    it('should call useGetEndpointSpecificPolicies hook with specific perPage value', () => {
-      expect(mockUseGetEndpointSpecificPolicies).toHaveBeenCalledWith(
-        expect.objectContaining({
-          perPage: 1000,
-        })
-      );
+    describe('Import and export', () => {
+      beforeEach(() => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+      });
+
+      it('should not show import and export actions with feature flag disabled', async () => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+
+        const { queryByTestId } = await renderWithListData();
+
+        expect(queryByTestId('testPage-exportImportMenuButtonIcon')).not.toBeInTheDocument();
+      });
+
+      it('should show import and export actions', async () => {
+        const { getByTestId } = await renderWithListData();
+
+        expect(getByTestId('testPage-exportImportMenuButtonIcon')).toBeInTheDocument();
+
+        await userEvent.click(getByTestId('testPage-exportImportMenuButtonIcon'));
+        expect(getByTestId('testPage-exportImportMenuActionItemImportButton')).toBeInTheDocument();
+        expect(getByTestId('testPage-exportImportMenuActionItemExportButton')).toBeInTheDocument();
+      });
+
+      it('should enable import and export buttons when user can create artifacts', async () => {
+        const { getByTestId } = await renderWithListData({ allowCardCreateAction: true });
+
+        await userEvent.click(getByTestId('testPage-exportImportMenuButtonIcon'));
+        expect(getByTestId('testPage-exportImportMenuActionItemImportButton')).toBeEnabled();
+        expect(getByTestId('testPage-exportImportMenuActionItemExportButton')).toBeEnabled();
+      });
+
+      it('should disable import button when user cannot create artifacts', async () => {
+        const { getByTestId } = await renderWithListData({ allowCardCreateAction: false });
+
+        await userEvent.click(getByTestId('testPage-exportImportMenuButtonIcon'));
+        expect(getByTestId('testPage-exportImportMenuActionItemImportButton')).toBeDisabled();
+        expect(getByTestId('testPage-exportImportMenuActionItemExportButton')).toBeEnabled();
+      });
     });
 
     describe('and interacting with card actions', () => {
@@ -252,7 +285,7 @@ describe('When using the ArtifactListPage component', () => {
 
       it('should persist policy filter to the URL params', async () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
-        const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
+        const firstPolicyTestId = `policiesSelectorButton-policySelector-policy-${policyId}`;
 
         await waitFor(() => {
           expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();

@@ -7,9 +7,79 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getIndicesForProductNames, mapResult } from './utils';
-import { performSearch } from './perform_search';
+import {
+  ResourceTypes,
+  getSecurityLabsIndexName,
+  getOpenApiSpecIndexName,
+} from '@kbn/product-doc-common';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { getIndicesForResourceTypes, mapResult } from './utils';
+import {
+  performSearch,
+  performSecurityLabsSearch,
+  performOpenapiSpecSearch,
+  type OpenapiSpecAttributes,
+} from './perform_search';
 import type { DocSearchOptions, DocSearchResponse } from './types';
+
+const SECURITY_LABS_BASE_URL = 'https://www.elastic.co/security-labs/';
+
+interface SecurityLabsAttributes {
+  title: string;
+  slug: string;
+  content?: string | { text: string };
+}
+
+const isSecurityLabsHit = (
+  hit: SearchHit<unknown>
+): hit is SearchHit<SecurityLabsAttributes> & { _source: SecurityLabsAttributes } => {
+  return Boolean(hit._source && typeof hit._source === 'object' && 'title' in hit._source);
+};
+
+const isOpenapiSpecHit = (
+  hit: SearchHit<unknown>
+): hit is SearchHit<OpenapiSpecAttributes> & { _source: OpenapiSpecAttributes } => {
+  return Boolean(
+    hit._source &&
+      typeof hit._source === 'object' &&
+      'operationId' in hit._source &&
+      'endpoint' in hit._source
+  );
+};
+
+const mapSecurityLabsResult = (docHit: SearchHit<SecurityLabsAttributes>) => {
+  const source = docHit._source!;
+  const content = source.content;
+  return {
+    title: source.title,
+    content: typeof content === 'string' ? content : content?.text ?? '',
+    url: `${SECURITY_LABS_BASE_URL}${source.slug}`,
+    productName: 'security' as const,
+    highlights:
+      (docHit.highlight as Record<string, string[] | undefined> | undefined)?.content ?? [],
+  };
+};
+
+const mapOpenapiSpecResult = (docHit: SearchHit<OpenapiSpecAttributes>) => {
+  const source = docHit._source!;
+  return {
+    title: source.operationId as string,
+    content: JSON.stringify({
+      operationId: source.operationId,
+      description: source.description,
+      summary: source.summary,
+      parameters: source.parameters,
+      method: source.method,
+      path: source.path,
+      responses: source.responses,
+      endpoint: source.endpoint,
+    }),
+    url: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/${source.operationId}`,
+    productName: 'elasticsearch' as const,
+    highlights:
+      (docHit.highlight as Record<string, string[] | undefined> | undefined)?.content ?? [],
+  };
+};
 
 export class SearchService {
   private readonly log: Logger;
@@ -21,18 +91,76 @@ export class SearchService {
   }
 
   async search(options: DocSearchOptions): Promise<DocSearchResponse> {
-    const { query, max = 3, highlights = 3, products } = options;
-    this.log.debug(`performing search - query=[${query}]`);
-    const results = await performSearch({
-      searchQuery: query,
-      size: max,
-      highlights,
-      index: getIndicesForProductNames(products),
-      client: this.esClient,
-    });
+    const { query, max = 3, highlights = 3, products, inferenceId } = options;
+    const resourceTypes = options.resourceTypes ?? [ResourceTypes.productDoc];
+
+    const results: Array<SearchHit<unknown>> = [];
+
+    if (resourceTypes.includes(ResourceTypes.productDoc)) {
+      const productDocIndex = getIndicesForResourceTypes(products, inferenceId, [
+        ResourceTypes.productDoc,
+      ]);
+      this.log.debug(
+        `performing search - query=[${query}] at index=[${productDocIndex}] resourceType=[${ResourceTypes.productDoc}]`
+      );
+      results.push(
+        ...(await performSearch({
+          searchQuery: query,
+          size: max,
+          highlights,
+          index: productDocIndex,
+          client: this.esClient,
+        }))
+      );
+    }
+
+    if (resourceTypes.includes(ResourceTypes.securityLabs)) {
+      const securityLabsIndex = getSecurityLabsIndexName(inferenceId);
+      this.log.debug(
+        `performing search - query=[${query}] at index=[${securityLabsIndex}] resourceType=[${ResourceTypes.securityLabs}]`
+      );
+      results.push(
+        ...(await performSecurityLabsSearch({
+          searchQuery: query,
+          size: max,
+          highlights,
+          index: securityLabsIndex,
+          client: this.esClient,
+        }))
+      );
+    }
+
+    if (resourceTypes.includes(ResourceTypes.openapiSpec)) {
+      const openApiSpecIndex = getOpenApiSpecIndexName(inferenceId);
+      this.log.debug(
+        `performing search - query=[${query}] at index=[${openApiSpecIndex}] resourceType=[${ResourceTypes.openapiSpec}]`
+      );
+      results.push(
+        ...(await performOpenapiSpecSearch({
+          searchQuery: query,
+          size: max,
+          highlights,
+          index: openApiSpecIndex,
+          client: this.esClient,
+        }))
+      );
+    }
+
+    const sorted = results
+      .slice()
+      .sort((a, b) => (b._score ?? 0) - (a._score ?? 0))
+      .slice(0, max);
 
     return {
-      results: results.map(mapResult),
+      results: sorted.map((hit) => {
+        if (isOpenapiSpecHit(hit)) {
+          return mapOpenapiSpecResult(hit);
+        }
+        if (isSecurityLabsHit(hit)) {
+          return mapSecurityLabsResult(hit);
+        }
+        return mapResult(hit as any);
+      }),
     };
   }
 }

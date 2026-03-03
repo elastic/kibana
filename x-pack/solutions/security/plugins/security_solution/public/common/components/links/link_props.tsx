@@ -64,11 +64,13 @@ export const useSecuritySolutionLinkProps: GetSecuritySolutionLinkProps = ({
   return securitySolutionLinkProps;
 };
 
-const withSecuritySolutionLinkProps = <T extends { id: string; urlState?: string }>(
+const withSecuritySolutionLinkProps = <T extends { id?: string; urlState?: string }>(
   WrappedComponent: React.ComponentType<T>
-): React.FC<Omit<T, 'id' | 'urlState'> & { deepLinkId: SecurityPageName }> =>
-  React.memo(function WithSecuritySolutionProps({ deepLinkId, ...rest }) {
-    const getUrlStateQueryParams = useGetUrlStateQueryParams();
+): React.FC<
+  Omit<T, 'id' | 'urlState'> & { deepLinkId: SecurityPageName; override?: Record<string, unknown> }
+> =>
+  React.memo(function WithSecuritySolutionProps({ deepLinkId, override, ...rest }) {
+    const getUrlStateQueryParams = useGetUrlStateQueryParams(override);
     const urlState = getUrlStateQueryParams(deepLinkId);
     return <WrappedComponent {...({ id: deepLinkId, urlState, ...rest } as unknown as T)} />;
   });

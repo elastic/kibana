@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -62,6 +63,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -84,7 +87,6 @@ describe('listRuleTypes', () => {
     solution: 'stack',
     enabledInLicense: true,
     hasAlertsMappings: false,
-    hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
 
@@ -102,7 +104,6 @@ describe('listRuleTypes', () => {
     solution: 'stack',
     enabledInLicense: true,
     hasAlertsMappings: false,
-    hasFieldsForAAD: false,
     validLegacyConsumers: [],
   };
 
@@ -155,7 +156,6 @@ describe('listRuleTypes', () => {
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "hasAlertsMappings": false,
-          "hasFieldsForAAD": false,
           "id": "myAppAlertType",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
@@ -189,7 +189,6 @@ describe('listRuleTypes', () => {
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "hasAlertsMappings": false,
-          "hasFieldsForAAD": false,
           "id": "alertingAlertType",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
@@ -240,7 +239,6 @@ describe('listRuleTypes', () => {
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
           "hasAlertsMappings": false,
-          "hasFieldsForAAD": false,
           "id": "myAppAlertType",
           "isExportable": true,
           "minimumLicenseRequired": "basic",
@@ -275,7 +273,6 @@ describe('listRuleTypes', () => {
           solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -294,7 +291,6 @@ describe('listRuleTypes', () => {
           solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
-          hasFieldsForAAD: false,
           validLegacyConsumers: [],
         },
       ],
@@ -334,7 +330,6 @@ describe('listRuleTypes', () => {
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
             "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
             "id": "myType",
             "isExportable": true,
             "minimumLicenseRequired": "basic",

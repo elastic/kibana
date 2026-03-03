@@ -15,14 +15,11 @@ import { TestProviders } from '../../../../../common/mock';
 jest.mock('../../../../../assistant/use_assistant_availability');
 
 describe('EmptyPrompt', () => {
-  const alertsCount = 20;
   const aiConnectorsCount = 2;
   const attackDiscoveriesCount = 0;
   const onGenerate = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   describe('when the user has the assistant privilege', () => {
     beforeEach(() => {
@@ -34,7 +31,6 @@ describe('EmptyPrompt', () => {
       render(
         <TestProviders>
           <EmptyPrompt
-            alertsCount={alertsCount}
             aiConnectorsCount={aiConnectorsCount}
             attackDiscoveriesCount={attackDiscoveriesCount}
             isLoading={false}
@@ -49,18 +45,6 @@ describe('EmptyPrompt', () => {
       const emptyPromptAvatar = screen.getByTestId('emptyPromptAvatar');
 
       expect(emptyPromptAvatar).toBeInTheDocument();
-    });
-
-    it('renders the animated counter', () => {
-      const emptyPromptAnimatedCounter = screen.getByTestId('emptyPromptAnimatedCounter');
-
-      expect(emptyPromptAnimatedCounter).toBeInTheDocument();
-    });
-
-    it('renders the expected statement', () => {
-      const emptyPromptAlertsWillBeAnalyzed = screen.getByTestId('emptyPromptAlertsWillBeAnalyzed');
-
-      expect(emptyPromptAlertsWillBeAnalyzed).toHaveTextContent('alerts will be analyzed');
     });
 
     it('calls onGenerate when the generate button is clicked', () => {
@@ -84,7 +68,6 @@ describe('EmptyPrompt', () => {
           <EmptyPrompt
             aiConnectorsCount={2} // <-- non-null
             attackDiscoveriesCount={0} // <-- no discoveries
-            alertsCount={alertsCount}
             isLoading={true} // <-- loading
             isDisabled={false}
             onGenerate={onGenerate}
@@ -112,7 +95,6 @@ describe('EmptyPrompt', () => {
           <EmptyPrompt
             aiConnectorsCount={null} // <--  null
             attackDiscoveriesCount={0} // <-- no discoveries
-            alertsCount={alertsCount}
             isLoading={false} // <-- not loading
             isDisabled={false}
             onGenerate={onGenerate}
@@ -140,7 +122,6 @@ describe('EmptyPrompt', () => {
           <EmptyPrompt
             aiConnectorsCount={2} // <-- non-null
             attackDiscoveriesCount={7} // there are discoveries
-            alertsCount={alertsCount}
             isLoading={false} // <-- not loading
             isDisabled={false}
             onGenerate={onGenerate}
@@ -168,7 +149,6 @@ describe('EmptyPrompt', () => {
       render(
         <TestProviders>
           <EmptyPrompt
-            alertsCount={alertsCount}
             aiConnectorsCount={2} // <-- non-null
             attackDiscoveriesCount={0} // <-- no discoveries
             isLoading={false}
@@ -183,6 +163,42 @@ describe('EmptyPrompt', () => {
       const generateButton = screen.getByTestId('generate');
 
       expect(generateButton).toBeDisabled();
+    });
+  });
+
+  describe('rendering', () => {
+    const defaultProps = {
+      alertsCount: 20,
+      aiConnectorsCount: 2,
+      attackDiscoveriesCount: 0,
+      isLoading: false,
+      isDisabled: false,
+      onGenerate: jest.fn(),
+    };
+
+    beforeEach(() => {
+      (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasAssistantPrivilege: true,
+        isAssistantEnabled: true,
+      });
+      jest.clearAllMocks();
+      render(
+        <TestProviders>
+          <EmptyPrompt {...defaultProps} />
+        </TestProviders>
+      );
+    });
+
+    it('renders the history title', () => {
+      const historyTitle = screen.getByTestId('historyTitle');
+
+      expect(historyTitle).toBeInTheDocument();
+    });
+
+    it('renders the history body', () => {
+      const historyBody = screen.getByTestId('historyBody');
+
+      expect(historyBody).toBeInTheDocument();
     });
   });
 });

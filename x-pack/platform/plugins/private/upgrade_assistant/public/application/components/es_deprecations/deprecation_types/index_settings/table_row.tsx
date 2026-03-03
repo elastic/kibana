@@ -6,25 +6,29 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
-import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
+import type { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
-import { DeprecationTableColumns, Status } from '../../../types';
+import type { DeprecationTableColumns, Status } from '../../../types';
 import { IndexSettingsResolutionCell } from './resolution_table_cell';
-import { RemoveIndexSettingsFlyout, RemoveIndexSettingsFlyoutProps } from './flyout';
+import type { RemoveIndexSettingsFlyoutProps } from './flyout';
+import { RemoveIndexSettingsFlyout } from './flyout';
+import { IndexSettingsActionsCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  index: number;
 }
 
 export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
   rowFieldNames,
   deprecation,
+  index: rowIndex,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [status, setStatus] = useState<{
@@ -81,23 +85,24 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
   }, [addContentToGlobalFlyout, deprecation, removeIndexSettings, showFlyout, closeFlyout, status]);
 
   return (
-    <>
+    <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${rowIndex}`}>
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
             key={field}
             truncateText={false}
             data-test-subj={`indexSettingsTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<IndexSettingsResolutionCell status={status} />}
+              actionsTableCell={<IndexSettingsActionsCell openFlyout={() => setShowFlyout(true)} />}
             />
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };

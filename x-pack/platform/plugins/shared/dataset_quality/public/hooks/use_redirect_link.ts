@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { AggregateQuery, Query, buildPhraseFilter } from '@kbn/es-query';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useMemo } from 'react';
-import { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../common/types';
+import type { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
-import { SendTelemetryFn } from './use_redirect_link_telemetry';
+import type { SendTelemetryFn } from './use_redirect_link_telemetry';
 
-export const useRedirectLink = <T extends BasicDataStream>({
+export const useRedirectLink = <T extends BasicDataStream | string>({
   dataStreamStat,
   query,
   timeRangeConfig,
   breakdownField,
   sendTelemetry,
   selector,
+  external = false,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
@@ -29,6 +32,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
   breakdownField?: string;
   sendTelemetry: SendTelemetryFn;
   selector?: DataStreamSelector;
+  external?: boolean;
 }) => {
   const {
     services: { share },
@@ -53,7 +57,8 @@ export const useRedirectLink = <T extends BasicDataStream>({
 
     const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
       sendTelemetry();
-      if (config.routerLinkProps.onClick) {
+      // If the link is external, we don't want to use router link props handler because it would prevent the default behavior of the event and a new tab wouldn't be opened.
+      if (config.routerLinkProps.onClick && !external) {
         config.routerLinkProps.onClick(event);
       }
     };
@@ -80,10 +85,11 @@ export const useRedirectLink = <T extends BasicDataStream>({
     breakdownField,
     selector,
     sendTelemetry,
+    external,
   ]);
 };
 
-const buildDiscoverConfig = <T extends BasicDataStream>({
+const buildDiscoverConfig = <T extends BasicDataStream | string>({
   locatorClient,
   dataStreamStat,
   query,
@@ -103,28 +109,17 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   navigate: () => void;
   routerLinkProps: RouterLinkProps;
 } => {
-  const dataViewNamespace = `${selector ? dataStreamStat.namespace : '*'}`;
-  const dataViewSelector = selector ? `${selector}` : '';
-  const dataViewId = `${dataStreamStat.type}-${dataStreamStat.name}-${dataViewNamespace}${dataViewSelector}`;
-  const dataViewTitle = dataStreamStat.integration
-    ? `[${dataStreamStat.integration.title}] ${dataStreamStat.name}-${dataViewNamespace}${dataViewSelector}`
-    : `${dataViewId}`;
+  const { dataViewId, dataViewTitle } = getDataView({
+    dataStreamStat,
+    selector,
+  });
 
-  const filters = selector
-    ? []
-    : [
-        buildPhraseFilter(
-          {
-            name: 'data_stream.namespace',
-            type: 'string',
-          },
-          dataStreamStat.namespace,
-          {
-            id: dataViewId,
-            title: dataViewTitle,
-          }
-        ),
-      ];
+  const filters = getFilters({
+    dataStreamStat,
+    dataViewId,
+    dataViewTitle,
+    selector,
+  });
 
   const params: DiscoverAppLocatorParams = {
     timeRange: {
@@ -163,4 +158,60 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   });
 
   return { routerLinkProps: discoverLinkProps, navigate: navigateToDiscover };
+};
+
+const getDataView = <T extends BasicDataStream | string>({
+  dataStreamStat,
+  selector,
+}: {
+  dataStreamStat: T;
+  selector?: DataStreamSelector;
+}): { dataViewId: string; dataViewTitle: string } => {
+  const dataViewSelector = selector ? `${selector}` : '';
+  if (dataStreamStat && typeof dataStreamStat === 'string') {
+    const dataViewId = `${dataStreamStat}${dataViewSelector}`;
+    return { dataViewId, dataViewTitle: dataViewId };
+  }
+
+  const { name, namespace, type, integration } = dataStreamStat as BasicDataStream;
+
+  const dataViewNamespace = `${namespace || '*'}`;
+  const dataViewId = `${type}-${name}-${dataViewNamespace}${dataViewSelector}`;
+  const dataViewTitle = integration
+    ? `[${integration.title}] ${name}-${dataViewNamespace}${dataViewSelector}`
+    : `${dataViewId}`;
+
+  return { dataViewId, dataViewTitle };
+};
+
+const getFilters = <T extends BasicDataStream | string>({
+  dataStreamStat,
+  dataViewId,
+  dataViewTitle,
+  selector,
+}: {
+  dataStreamStat: T;
+  dataViewId: string;
+  dataViewTitle: string;
+  selector?: DataStreamSelector;
+}): Filter[] => {
+  if (dataStreamStat && typeof dataStreamStat === 'string') {
+    return [];
+  }
+
+  return selector
+    ? []
+    : [
+        buildPhraseFilter(
+          {
+            name: 'data_stream.namespace',
+            type: 'string',
+          },
+          (dataStreamStat as BasicDataStream).namespace,
+          {
+            id: dataViewId,
+            title: dataViewTitle,
+          }
+        ),
+      ];
 };

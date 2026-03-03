@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { isDashboardSection } from '../../common';
+import { embeddableService } from '../kibana_services';
+import type {
+  DashboardPanel,
+  DashboardState,
+  DashboardPinnedPanel,
+  DashboardSection,
+} from './types';
+
+function isPinnedPanel(
+  panel: DashboardPanel | DashboardPinnedPanel | DashboardSection
+): panel is DashboardPinnedPanel {
+  return !('grid' in panel);
+}
+
+export function stripUnmappedKeys(dashboardState: DashboardState) {
+  const warnings: string[] = [];
+  const { pinned_panels, panels, ...rest } = dashboardState;
+
+  function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
+    const transforms = embeddableService?.getTransforms(panel.type);
+    if (transforms?.throwOnUnmappedPanel) {
+      try {
+        transforms.throwOnUnmappedPanel(panel.config);
+      } catch (e) {
+        warnings.push(
+          `Dropped panel ${panel.uid}, panel config is not supported. Reason: ${e.message}.`
+        );
+        return false;
+      }
+    }
+
+    const panelSchema = transforms?.schema;
+
+    if (!panelSchema) {
+      warnings.push(
+        `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
+      );
+    }
+    return Boolean(panelSchema);
+  }
+
+  function removeEnhancements(panel: DashboardPanel) {
+    const { enhancements, ...restOfConfig } = panel.config as {
+      enhancements?: { dynamicActions: { events: [] } };
+    };
+    if (
+      typeof enhancements?.dynamicActions === 'object' &&
+      Array.isArray(enhancements?.dynamicActions?.events) &&
+      enhancements.dynamicActions.events.length
+    ) {
+      warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
+    }
+    return {
+      ...panel,
+      config: restOfConfig,
+    };
+  }
+
+  const mappedPanels = [...(panels ?? []), ...(pinned_panels ?? [])]
+    .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
+    .map((panel) => {
+      if (isPinnedPanel(panel)) return panel;
+      if (!isDashboardSection(panel)) return removeEnhancements(panel);
+      const { panels: sectionPanels, ...restOfSection } = panel;
+      return {
+        ...restOfSection,
+        panels: sectionPanels.filter(isMappedPanelType).map(removeEnhancements),
+      };
+    });
+
+  return {
+    data: {
+      ...rest,
+      panels: mappedPanels,
+    },
+    warnings,
+  };
+}

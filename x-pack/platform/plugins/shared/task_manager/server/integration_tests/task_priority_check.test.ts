@@ -9,9 +9,9 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { TaskDefinition, TaskPriority } from '../task';
-import { setupTestServers } from './lib';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskDefinition, TaskPriority } from '../task';
+import { retry, setupTestServers } from './lib';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 jest.mock('../task_type_dictionary', () => {
   const actual = jest.requireActual('../task_type_dictionary');
@@ -49,12 +49,16 @@ describe('Task priority checks', () => {
   });
 
   it('detects tasks with priority definitions', async () => {
-    const taskTypes = taskTypeDictionary.getAllDefinitions();
-    const taskTypesWithPriority = taskTypes
-      .map((taskType: TaskDefinition) =>
-        !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
-      )
-      .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
-    expect(taskTypesWithPriority).toMatchSnapshot();
+    await retry(async () => {
+      const taskTypes = taskTypeDictionary.getAllDefinitions();
+      const taskTypesWithPriority = taskTypes
+        .map((taskType: TaskDefinition) =>
+          !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
+        )
+        .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
+
+      expect(taskTypesWithPriority.length).toEqual(2);
+      expect(taskTypesWithPriority).toMatchSnapshot();
+    });
   });
 });

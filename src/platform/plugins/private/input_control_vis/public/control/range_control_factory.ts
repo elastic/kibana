@@ -10,13 +10,13 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { TimefilterContract, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { TimefilterContract, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
-import { ControlParams } from '../editor_utils';
-import { InputControlVisDependencies } from '../plugin';
+import type { ControlParams } from '../editor_utils';
+import type { InputControlVisDependencies } from '../plugin';
 
 const minMaxAgg = (field?: DataViewField) => {
   const aggBody: any = {};
@@ -132,7 +132,7 @@ export async function rangeControlFactory(
       controlParams.id,
       controlParams.fieldName,
       controlParams.indexPattern,
-      dataPluginStart.indexPatterns,
+      dataPluginStart.dataViews,
       deps.data.query.filterManager
     ),
     useTimeFilter,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '@kbn/cypress-test-helper/src/services/alerting_services';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 import { initializeDataViews } from '../../tasks/login';
-import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
+import { checkResults, clickRuleName, goToAlertsTab, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -32,6 +32,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
         onBeforeLoad: (win) => disableNewFeaturesTours(win),
       });
       clickRuleName(ruleName);
+      goToAlertsTab();
       waitForAlertsToPopulate();
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();

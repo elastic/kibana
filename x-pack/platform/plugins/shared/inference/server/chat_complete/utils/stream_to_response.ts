@@ -6,13 +6,15 @@
  */
 
 import { toArray, map, firstValueFrom } from 'rxjs';
-import {
+import type {
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
+  ToolOptions,
+} from '@kbn/inference-common';
+import {
   createInferenceInternalError,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
-  ToolOptions,
   withoutChunkEvents,
 } from '@kbn/inference-common';
 
@@ -33,8 +35,12 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
 
         return {
           content: messageEvent.content,
+          refusal: messageEvent.refusal,
           toolCalls: messageEvent.toolCalls,
           tokens: tokenEvent?.tokens,
+          deanonymized_input: messageEvent.deanonymized_input,
+          deanonymized_output: messageEvent.deanonymized_output,
+          model: tokenEvent?.model,
         };
       })
     )

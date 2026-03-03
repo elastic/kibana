@@ -13,17 +13,11 @@ import useMount from 'react-use/lib/useMount';
 import useUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  EuiBadge,
-  EuiComboBox,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiFlexGroup,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFlexItem, EuiHighlight, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { DashboardItem } from '../../types';
+import type { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard, fetchDashboards } from './dashboard_link_tools';
 
@@ -48,7 +42,7 @@ export const DashboardLinkDestinationPicker = ({
     return {
       key: dashboard.id,
       value: dashboard,
-      label: dashboard.attributes.title,
+      label: dashboard.title,
       className: 'linksDashboardItem',
     };
   }, []);

@@ -18,6 +18,7 @@ import { licenseService } from '../../../hooks/use_license';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
 import { getEndpointPrivilegesInitialState } from './utils';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_license', () => {
@@ -53,7 +54,7 @@ describe('When using useEndpointPrivileges hook', () => {
       catalogue: {},
       management: {},
       navLinks: {},
-      siemV2: {
+      [SECURITY_FEATURE_ID]: {
         crud: true,
         show: true,
       },
@@ -84,7 +85,9 @@ describe('When using useEndpointPrivileges hook', () => {
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
     rerender();
 
-    expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
+    expect(result.current).toEqual({
+      ...getEndpointPrivilegesInitialStateMock(),
+    });
   });
 
   it('should return initial state when no user authz', async () => {

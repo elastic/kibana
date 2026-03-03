@@ -26,10 +26,8 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import type { MlCapabilities } from '../common/types/capabilities';
+import { type MlCapabilities, alertingFeatures } from '../common/types/capabilities';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -62,7 +60,6 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import { managementRoutes } from './routes/management';
 import {
   setupSavedObjects,
   jobSavedObjectsInitializationFactory,
@@ -70,7 +67,6 @@ import {
 } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
-import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
@@ -106,6 +102,7 @@ export class MlServerPlugin
     nlp: true,
   };
   private compatibleModuleType: CompatibleModule | null = null;
+  private isServerless: boolean;
 
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
@@ -114,6 +111,7 @@ export class MlServerPlugin
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
 
     const config = ctx.config.get();
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, config);
     this.compatibleModuleType = config.compatibleModuleType ?? null;
     this.enabledFeatures = Object.freeze(this.enabledFeatures);
@@ -133,7 +131,6 @@ export class MlServerPlugin
       }),
       order: 500,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {
@@ -143,10 +140,7 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
-      alerting: Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
-        ruleTypeId,
-        consumers: [PLUGIN_ID, ALERTING_FEATURE_ID],
-      })),
+      alerting: alertingFeatures,
       privileges: {
         all: admin,
         read: user,
@@ -275,7 +269,6 @@ export class MlServerPlugin
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    managementRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,
@@ -284,6 +277,7 @@ export class MlServerPlugin
       getSpaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
+      isServerless: this.isServerless,
     });
     notificationsRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);

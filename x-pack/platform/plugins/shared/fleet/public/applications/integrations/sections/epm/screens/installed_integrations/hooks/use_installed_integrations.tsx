@@ -17,7 +17,21 @@ import type {
   InstalledPackageUIPackageListItem,
 } from '../types';
 
-function getIntegrationStatus(item: PackageListItem): InstalledPackagesUIInstallationStatus {
+function getIntegrationStatus(
+  item: PackageListItem,
+  isUpgrading: boolean,
+  isUninstalling: boolean,
+  isRollingback: boolean
+): InstalledPackagesUIInstallationStatus {
+  if (isUpgrading) {
+    return 'upgrading';
+  }
+  if (isUninstalling) {
+    return 'uninstalling';
+  }
+  if (isRollingback) {
+    return 'rolling_back';
+  }
   if (item.status === 'install_failed') {
     return 'install_failed';
   } else if (item.status === 'installed') {
@@ -41,10 +55,15 @@ function getIntegrationStatus(item: PackageListItem): InstalledPackagesUIInstall
 
 export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
-  pagination: Pagination
+  pagination: Pagination,
+  upgradingIntegrations?: InstalledPackageUIPackageListItem[],
+  uninstallingIntegrations?: InstalledPackageUIPackageListItem[],
+  rollingbackIntegrations?: InstalledPackageUIPackageListItem[],
+  prereleaseIntegrationsEnabled?: boolean
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
+    prerelease: prereleaseIntegrationsEnabled,
   });
 
   const internalInstalledPackages: InstalledPackageUIPackageListItem[] = useMemo(
@@ -55,10 +74,15 @@ export function useInstalledIntegrations(
         .map((item) => ({
           ...item,
           ui: {
-            installation_status: getIntegrationStatus(item),
+            installation_status: getIntegrationStatus(
+              item,
+              upgradingIntegrations?.some((u) => u.name === item.name) ?? false,
+              uninstallingIntegrations?.some((u) => u.name === item.name) ?? false,
+              rollingbackIntegrations?.some((u) => u.name === item.name) ?? false
+            ),
           },
         })),
-    [data]
+    [data, upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations]
   );
 
   const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);
@@ -80,7 +104,7 @@ export function useInstalledIntegrations(
           const validSearchTerms = filters.q ? searchResults.find((s) => s.id === item.id) : true;
 
           const validCustomIntegrations = filters.customIntegrations
-            ? item?.installationInfo?.install_source === 'custom'
+            ? item.categories?.includes('custom')
             : true;
 
           return validInstalationStatus && validSearchTerms && validCustomIntegrations;
@@ -100,10 +124,10 @@ export function useInstalledIntegrations(
   }, [internalInstalledPackagesFiltered]);
 
   const customIntegrationsCount = useMemo(() => {
-    return internalInstalledPackagesFiltered.reduce((acc, item) => {
-      return item?.installationInfo?.install_source === 'custom' ? acc + 1 : acc;
+    return internalInstalledPackages.reduce((acc, item) => {
+      return item.categories?.includes('custom') ? acc + 1 : acc;
     }, 0);
-  }, [internalInstalledPackagesFiltered]);
+  }, [internalInstalledPackages]);
 
   const installedPackages: InstalledPackageUIPackageListItem[] = useMemo(() => {
     // Pagination

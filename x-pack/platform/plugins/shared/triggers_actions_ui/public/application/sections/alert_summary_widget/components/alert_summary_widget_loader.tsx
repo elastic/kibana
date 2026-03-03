@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLoadingChart, EuiLoadingSpinner } from '@elastic/eui';
-import { AlertSummaryWidgetProps } from '..';
+import type { AlertSummaryWidgetProps } from '..';
 
 type Props = { isLoadingWithoutChart: boolean | undefined } & Pick<
   AlertSummaryWidgetProps,

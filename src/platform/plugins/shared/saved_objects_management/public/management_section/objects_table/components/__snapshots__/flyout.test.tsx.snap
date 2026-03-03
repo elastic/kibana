@@ -26,9 +26,10 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         size="s"
       />
       <EuiCallOut
+        announceOnMount={true}
         color="warning"
         data-test-subj="importSavedObjectsConflictsWarning"
-        iconType="help"
+        iconType="question"
         title={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Data Views Conflicts"
@@ -111,6 +112,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Conflicting data views"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>

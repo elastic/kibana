@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import {
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
@@ -18,6 +18,7 @@ import {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_INSTANCE_ID,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -90,6 +91,7 @@ const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as 
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_CONTEXT = `${ALERT_NAMESPACE}.context` as const;
 const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
+const ALERT_GROUPING = `${ALERT_NAMESPACE}.grouping` as const;
 const ALERT_GROUP = `${ALERT_NAMESPACE}.group` as const;
 const ALERT_GROUP_FIELD = `${ALERT_GROUP}.field` as const;
 const ALERT_GROUP_VALUE = `${ALERT_GROUP}.value` as const;
@@ -134,11 +136,13 @@ const fields = {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
   ALERT_FLAPPING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_INSTANCE_ID,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
@@ -209,6 +213,7 @@ export {
   ALERT_EVALUATION_VALUE,
   ALERT_CONTEXT,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,

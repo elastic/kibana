@@ -18,6 +18,7 @@ import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from './transform_raw_actions_to_domain_actions';
+import { transformRawArtifactsToDomainArtifacts } from './transform_raw_artifacts_to_domain_artifacts';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -169,6 +170,11 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
+  const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
+    id,
+    esRule.artifacts,
+    references
+  );
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,
@@ -201,6 +207,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     apiKey: esRule.apiKey,
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
+    ...(esRule.uiamApiKey !== undefined ? { uiamApiKey: esRule.uiamApiKey } : {}),
     throttle: esRule.throttle,
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
@@ -234,6 +241,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
+    artifacts: ruleDomainArtifacts,
   };
 
   // Bad casts, but will fix once we fix all rule types

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getPathListSchemaMock } from './index.mock';
-import { PatchListSchema, patchListSchema } from '.';
+import type { PatchListSchema } from '.';
+import { patchListSchema } from '.';
 
 describe('patch_list_schema', () => {
   test('it should validate a typical list item request', () => {

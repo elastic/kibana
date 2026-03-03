@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
+import type { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
@@ -68,7 +68,7 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
 const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
-      <RulesSettingsLink />
+      <RulesSettingsLink alertDeleteCategoryIds={['management']} />
     </QueryClientProvider>
   </IntlProvider>
 );
@@ -107,7 +107,7 @@ describe('rules_settings_link', () => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
     expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
   test('renders the rules setting link correctly (readFlappingSettingsUI = true)', async () => {
@@ -133,7 +133,7 @@ describe('rules_settings_link', () => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
     expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
   test('renders the rules setting link correctly (readQueryDelaySettingsUI = true)', async () => {
@@ -159,19 +159,19 @@ describe('rules_settings_link', () => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
     expect(result.getByText('Settings')).not.toBeDisabled();
-    expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+    expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
   test('clicking the settings link opens the rules settings modal', async () => {
     const result = render(<RulesSettingsLinkWithProviders />);
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
+      expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
     });
 
     await userEvent.click(result.getByText('Settings'));
 
     await waitFor(() => {
-      expect(result.queryByTestId('rulesSettingsModal')).not.toBe(null);
+      expect(result.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
     });
   });
 

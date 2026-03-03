@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HeatmapStyle, RecursivePartial } from '@elastic/charts';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { HeatmapStyle, RecursivePartial } from '@elastic/charts';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export function getMonitorStatusChartTheme(
   euiTheme: EuiThemeComputed,
@@ -34,7 +34,7 @@ export function getMonitorStatusChartTheme(
       visible: true,
       fontSize: 10,
       fontFamily: euiTheme.font.family,
-      fontWeight: euiTheme.font.weight.light,
+      fontWeight: euiTheme.font.weight.light === 300 ? 300 : 'normal',
       textColor: euiTheme.colors.subduedText,
     },
     yAxisLabel: {

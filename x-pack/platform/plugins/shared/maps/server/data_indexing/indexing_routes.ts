@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   INDEX_SOURCE_API_PATH,
   MAX_DRAWING_SIZE_BYTES,
@@ -42,17 +42,17 @@ export function initIndexingRoutes({
           accepts: ['application/json'],
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             body: schema.object({
@@ -101,17 +101,17 @@ export function initIndexingRoutes({
           maxBytes: MAX_DRAWING_SIZE_BYTES,
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             body: schema.object({
@@ -144,17 +144,17 @@ export function initIndexingRoutes({
     .delete({
       path: `${INDEX_FEATURE_PATH}/{featureId}`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -213,17 +213,17 @@ export function initIndexingRoutes({
     .get({
       path: GET_MATCHING_INDEXES_PATH,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -247,17 +247,17 @@ export function initIndexingRoutes({
     .get({
       path: CHECK_IS_DRAWING_INDEX,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             query: schema.object({

@@ -9,15 +9,13 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
-import { RefreshToken } from './types';
+import type { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {

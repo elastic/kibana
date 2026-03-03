@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { MarkdownVisParams } from './types';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { css } from '@emotion/react';
+import type { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   const onMarkdownUpdate = useCallback(
@@ -29,7 +30,22 @@ function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<Markdo
   );
 
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel
+      paddingSize="s"
+      css={css`
+        flex-grow: 1 !important;
+        .visEditor--markdown__textarea {
+          flex-grow: 1;
+        }
+
+        .mkdEditor,
+        .euiFormControlLayout__childrenWrapper,
+        .euiFormControlLayout--euiTextArea,
+        .visEditor--markdown__textarea {
+          height: 100%;
+        }
+      `}
+    >
       <EuiFlexGroup direction="column" gutterSize="m" className="mkdEditor">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">

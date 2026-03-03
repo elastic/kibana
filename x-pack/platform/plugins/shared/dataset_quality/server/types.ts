@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
+  alerting?: AlertingServerSetup;
   fleet: FleetSetupContract;
-  telemetry: TelemetryPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
+  share?: SharePluginSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
+  alerting?: AlertingServerStart;
   fleet: FleetStartContract;
-  telemetry: TelemetryPluginStart;
-  taskManager: TaskManagerStartContract;
-  usageCollection?: UsageCollectionStart;
+  share?: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

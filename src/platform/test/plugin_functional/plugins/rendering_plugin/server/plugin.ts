@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 import { schema } from '@kbn/config-schema';
 
@@ -16,6 +16,7 @@ export class RenderingPlugin implements Plugin {
     core.http.resources.register(
       {
         path: '/render/{id}',
+        security: { authz: { enabled: false, reason: '' } },
         validate: {
           query: schema.object(
             {

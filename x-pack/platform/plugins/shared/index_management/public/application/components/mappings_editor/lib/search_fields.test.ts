@@ -6,7 +6,7 @@
  */
 
 import { searchFields } from './search_fields';
-import { NormalizedField } from '../types';
+import type { NormalizedField } from '../types';
 import { getUniqueId } from '.';
 
 const irrelevantProps = {

@@ -6,16 +6,14 @@
  */
 
 import React from 'react';
+import type { BarStyleAccessor, DomainRange, TickFormatter } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
-  BarStyleAccessor,
   Chart,
-  DomainRange,
   Position,
   ScaleType,
   Settings,
-  TickFormatter,
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
@@ -49,7 +47,6 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
               },
             },
           ]}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
           baseTheme={baseChartTheme}
           locale={i18n.getLocale()}
         />

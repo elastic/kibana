@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetCookieOptions, SamlSessionManager } from '@kbn/test';
+import type { GetCookieOptions } from '@kbn/test';
+import { SamlSessionManager } from '@kbn/test';
 import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { getAuthProvider } from './get_auth_provider';
-import { InternalRequestHeader } from './default_request_headers';
+import type { InternalRequestHeader } from './default_request_headers';
 
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
@@ -75,6 +76,9 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
   const CUSTOM_ROLE = authRoleProvider.getCustomRole();
   const isCustomRoleEnabled = authRoleProvider.isCustomRoleEnabled();
+  const distroName = authRoleProvider.isServerless()
+    ? `serverless ${authRoleProvider.getProjectType()} project`
+    : 'stateful deployment';
 
   const getAdminCredentials = async () => {
     return await sessionManager.getApiCredentialsForRole('admin');
@@ -126,6 +130,12 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       return sessionManager.getApiCredentialsForRole(role, options);
     },
 
+    async getM2MApiCookieCredentialsWithCustomRoleScope(
+      options?: GetCookieOptions
+    ): Promise<CookieCredentials> {
+      return this.getM2MApiCookieCredentialsWithRoleScope(CUSTOM_ROLE, options);
+    },
+
     async getEmail(role: string) {
       return sessionManager.getEmail(role);
     },
@@ -134,26 +144,39 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       return sessionManager.getUserData(role);
     },
 
+    checkRoleIsSupported(role: string): void {
+      if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
+        throw new Error(
+          `Custom roles are disabled for the current ${distroName}. Please use built-in roles or update the FTR config file to enable custom roles.`
+        );
+      }
+      if (!supportedRoles.includes(role)) {
+        throw new Error(
+          `The '${role}' role is not supported for the current ${distroName}. Supported roles are: ${supportedRoles.join(
+            ', '
+          )}. Default roles are defined in '${authRoleProvider.getRolesDefinitionPath()}'. If you need to use a custom role, use 'samlAuth.CUSTOM_ROLE' instead.`
+        );
+      }
+    },
+
     async createM2mApiKeyWithDefaultRoleScope() {
       log.debug(`Creating API key for default role: [${DEFAULT_ROLE}]`);
       return this.createM2mApiKeyWithRoleScope(DEFAULT_ROLE);
     },
 
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
+      this.checkRoleIsSupported(role);
       // Get admin credentials in order to create the API key
       const adminCookieHeader = await getAdminCredentials();
       let roleDescriptors = {};
 
       if (role !== 'admin') {
-        if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
-          throw new Error(`Custom roles are not supported for the current deployment`);
-        }
         const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
           throw new Error(
             role === CUSTOM_ROLE
               ? `Before creating API key for '${CUSTOM_ROLE}', use 'samlAuth.setCustomRole' to set the role privileges`
-              : `Cannot create API key for non-existent role "${role}"`
+              : `Cannot create API key for role "${role}", role descriptor is not defined in '${authRoleProvider.getRolesDefinitionPath()}'`
           );
         }
         log.debug(
@@ -180,6 +203,10 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       log.debug(`Created API key for role: [${role}]`);
       return { apiKey, apiKeyHeader };
+    },
+
+    async createM2mApiKeyWithCustomRoleScope() {
+      return this.createM2mApiKeyWithRoleScope(CUSTOM_ROLE);
     },
 
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
@@ -210,13 +237,22 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         elasticsearch: descriptors.elasticsearch ?? [],
       };
 
-      const { status } = await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .put(`/api/security/role/${CUSTOM_ROLE}`)
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
         .send(customRoleDescriptors);
 
-      expect(status).to.be(204);
+      if (response.status !== 204) {
+        const baseErrorMessage = `Failed to update custom role, status code: ${response.status}.`;
+        const additionalMessage =
+          response.status === 403
+            ? isCloud
+              ? ` \nEnsure the user listed as 'admin' in '${cloudUsersFilePath}' has the required privileges.`
+              : ` \nEnsure the 'admin' role has the required privileges in '${authRoleProvider.getRolesDefinitionPath()}'.`
+            : '';
+        throw new Error(baseErrorMessage + additionalMessage);
+      }
 
       // Update descriptors for the custom role, it will be used to create API key
       supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);

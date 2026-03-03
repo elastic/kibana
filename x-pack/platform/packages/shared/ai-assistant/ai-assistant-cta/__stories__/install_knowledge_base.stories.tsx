@@ -6,15 +6,27 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 
 import { InstallKnowledgeBase as Component } from '../install_knowledge_base';
 
 export default {
   title: 'Layout/Call to Action/Types',
   component: Component,
+  args: {
+    isInstallAvailable: true,
+    isInstalling: false,
+  },
   argTypes: {
     onInstallKnowledgeBase: { action: 'onInstallKnowledgeBase' },
+    isInstallAvailable: {
+      control: 'boolean',
+      defaultValue: true,
+    },
+    isInstalling: {
+      control: 'boolean',
+      defaultValue: false,
+    },
   },
 } as Meta<typeof Component>;
 

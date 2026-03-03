@@ -19,17 +19,14 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { MANAGEMENT_SECTION_IDS } from '../../management';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 
 function NoFilterListsCallOut() {
-  const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
-  const redirectToFilterManagementPage = async () => {
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.FILTER_LISTS_MANAGE,
-    });
-    await navigateToPath(path, true);
-  };
+  const redirectToFilterManagementPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_MANAGE,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
 
   return (
     <EuiCallOut
@@ -48,7 +45,10 @@ function NoFilterListsCallOut() {
             to create the list of values you want to include or exclude in the job rule."
           values={{
             filterListsLink: (
-              <EuiLink onClick={redirectToFilterManagementPage}>
+              <EuiLink
+                onClick={redirectToFilterManagementPage}
+                data-test-subj="mlScopeNoFilterListsLink"
+              >
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription.filterListsLinkText"
                   defaultMessage="Filter Lists"
@@ -131,6 +131,7 @@ export function ScopeSection({
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="enable_scope_checkbox"
+        data-test-subj="mlScopeEnableCheckbox"
         label={
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"

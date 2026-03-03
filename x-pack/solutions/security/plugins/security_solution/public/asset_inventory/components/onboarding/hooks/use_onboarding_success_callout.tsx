@@ -6,6 +6,8 @@
  */
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY } from '../../../constants';
 
 /**
@@ -17,13 +19,18 @@ export const useOnboardingSuccessCallout = () => {
   const [isOnboardingSuccessCalloutVisible, setOnboardingSuccessCalloutVisible] =
     useLocalStorage<boolean>(LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY, false);
 
+  const { application } = useKibana().services;
+
   const hideOnboardingSuccessCallout = () => setOnboardingSuccessCalloutVisible(false);
 
   const showOnboardingSuccessCallout = () => setOnboardingSuccessCalloutVisible(true);
+
+  const onAddIntegrationClick = () => application.navigateToApp(INTEGRATIONS_PLUGIN_ID);
 
   return {
     isOnboardingSuccessCalloutVisible,
     hideOnboardingSuccessCallout,
     showOnboardingSuccessCallout,
+    onAddIntegrationClick,
   };
 };

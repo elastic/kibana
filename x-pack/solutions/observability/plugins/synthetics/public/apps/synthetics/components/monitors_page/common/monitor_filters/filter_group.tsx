@@ -12,12 +12,12 @@ import { useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 
-import {
+import type {
   SyntheticsMonitorFilterItem,
-  getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterChangeHandler,
   LabelWithCountValue,
 } from '../../../../utils/filters/filter_fields';
+import { getSyntheticsFilterDisplayValues } from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 

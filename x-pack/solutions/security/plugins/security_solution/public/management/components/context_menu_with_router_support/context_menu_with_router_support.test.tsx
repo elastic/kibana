@@ -99,11 +99,9 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
   it('should close menu when a menu item is clicked and call menu item onclick callback', async () => {
     render();
     clickMenuTriggerButton();
-    await act(async () => {
-      const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
-      fireEvent.click(renderResult.getByTestId('menu-item-one'));
-      await menuPanelRemoval;
-    });
+    const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
+    fireEvent.click(renderResult.getByTestId('menu-item-one'));
+    await menuPanelRemoval;
 
     expect(getContextMenuPanel()).toBeNull();
   });
@@ -151,6 +149,13 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     expect(appTestContext.coreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
 
+  it('should display menu items as text when `isNavigationDisabled` is true', () => {
+    render({ isNavigationDisabled: true });
+    clickMenuTriggerButton();
+
+    expect(renderResult.getByTestId('testMenu-item-1').hasAttribute('href')).toBe(false);
+  });
+
   it('should display loading state', () => {
     render({ loading: true });
     clickMenuTriggerButton();
@@ -168,5 +173,14 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     render();
     clickMenuTriggerButton();
     expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual('click me 2');
+  });
+
+  it('should display menu item `hoverInfo` when no `hoverInfo` is provided to menu component', () => {
+    items[1].hoverInfo = 'item hover info here';
+    render();
+    clickMenuTriggerButton();
+    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual(
+      'click me 2item hover info here'
+    );
   });
 });

@@ -8,7 +8,8 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import {
   DetailPanelAlertActions,
   BUTTON_TEST_ID,
@@ -16,7 +17,7 @@ import {
   JUMP_TO_PROCESS_TEST_ID,
 } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
-import { ProcessEvent } from '../../../common';
+import type { ProcessEvent } from '../../../common';
 
 describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
-import { Conversation } from '../../../../..';
+import type { SystemPromptSettings } from '../../../settings/use_settings_updater/use_system_prompt_updater';
+import type { Conversation } from '../../../../..';
 import * as i18n from './translations';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
@@ -55,8 +55,8 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   // Prompt
   const promptContent = useMemo(
     // Fixing Cursor Jump in text area
-    () => systemPromptSettings.find((sp) => sp.id === selectedSystemPrompt?.id)?.content ?? '',
-    [selectedSystemPrompt?.id, systemPromptSettings]
+    () => selectedSystemPrompt?.content ?? '',
+    [selectedSystemPrompt?.content]
   );
   // Conversations this system prompt should be a default for
   const conversationOptions = useMemo(() => Object.values(conversations), [conversations]);

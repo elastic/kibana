@@ -9,13 +9,13 @@
 
 import { Transform } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { Stats } from '../stats';
+import type { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { cleanSavedObjectIndices } from './kibana_index';
 import { deleteDataStream } from './delete_data_stream';

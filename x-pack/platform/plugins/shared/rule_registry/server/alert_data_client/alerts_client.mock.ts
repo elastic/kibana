@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertsClient } from './alerts_client';
+import type { AlertsClient } from './alerts_client';
 
 type Schema = PublicMethodsOf<AlertsClient>;
 export type AlertsClientMock = jest.Mocked<Schema>;
@@ -18,6 +18,7 @@ const createAlertsClientMock = () => {
     getAuthorizedAlertsIndices: jest.fn(),
     bulkUpdate: jest.fn(),
     bulkUpdateCases: jest.fn(),
+    bulkUpdateTags: jest.fn(),
     find: jest.fn(),
     getGroupAggregations: jest.fn(),
     getBrowserFields: jest.fn(),
@@ -25,7 +26,7 @@ const createAlertsClientMock = () => {
     ensureAllAlertsAuthorizedRead: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
-    getAADFields: jest.fn(),
+    getAlertFields: jest.fn(),
   };
   return mocked;
 };

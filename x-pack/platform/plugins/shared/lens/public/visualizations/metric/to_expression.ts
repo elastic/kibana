@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import {
-  CustomPaletteParams,
-  CUSTOM_PALETTE,
-  PaletteRegistry,
-  PaletteOutput,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
 } from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
-import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
-import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
-import { DatasourceLayers } from '../../types';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { DatasourceLayers, MetricVisualizationState } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_STATE_DEFAULTS, LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
+import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
+import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import { MetricVisualizationState } from './types';
-import { metricStateDefaults } from './constants';
-import { isMetricNumericType } from './helpers';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getSecondaryLabelSelected,
+  getTrendPalette,
+  getSecondaryDynamicTrendBaselineValue,
+} from './helpers';
+import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(
@@ -96,7 +98,8 @@ export const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricVisualizationState,
   datasourceLayers: DatasourceLayers,
-  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {},
+  theme: ThemeServiceStart
 ): Ast | null => {
   if (!state.metricAccessor) {
     return null;
@@ -105,7 +108,7 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const isMetricNumeric = isMetricNumericType(datasource, state.metricAccessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
@@ -139,7 +142,9 @@ export const toExpression = (
     };
   };
 
-  const collapseExpressionFunction = state.collapseFn
+  const canCollapseBy = state.collapseFn && isMetricNumeric;
+
+  const collapseExpressionFunction = canCollapseBy
     ? buildExpressionFunction<CollapseExpressionFunction>(
         'lens_collapse',
         getCollapseFnArguments()
@@ -147,25 +152,67 @@ export const toExpression = (
     : undefined;
 
   const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
+  const { isNumeric: isNumericType } = getAccessorType(datasource, state.secondaryMetricAccessor);
+
+  const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
+
+  // Replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
+  const secondaryLabelConfig = getSecondaryLabelSelected(state, {
+    defaultSecondaryLabel: '',
+    colorMode: secondaryDynamicColorMode,
+    isPrimaryMetricNumeric: isMetricNumeric,
+  });
+
+  const secondaryTrendConfig =
+    state.secondaryTrend?.type === secondaryDynamicColorMode
+      ? state.secondaryTrend
+      : getDefaultConfigForMode(secondaryDynamicColorMode);
+
+  const hasMetricIcon = hasIcon(state.icon);
+  // If an icon is present but no iconAlign is set (legacy state), default to 'left' alignment;
+  // otherwise, use the configured or default alignment
+  let iconAlign: 'right' | 'left';
+  if (hasMetricIcon) {
+    // Legacy: If iconAlign is missing, default to 'left'
+    iconAlign = state.iconAlign ?? LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign;
+  } else {
+    iconAlign = LENS_METRIC_STATE_DEFAULTS.iconAlign;
+  }
 
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryPrefix: state.secondaryPrefix,
+    secondaryLabel:
+      secondaryLabelConfig.mode === 'custom' ? secondaryLabelConfig.label : state.secondaryLabel,
+    secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
+    secondaryTrendVisuals:
+      secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
+    secondaryTrendBaseline:
+      secondaryTrendConfig.type === 'dynamic'
+        ? getSecondaryDynamicTrendBaselineValue(isMetricNumeric, secondaryTrendConfig.baselineValue)
+        : undefined,
+    secondaryTrendPalette: getTrendPalette(
+      secondaryDynamicColorMode,
+      secondaryTrendConfig,
+      theme.getTheme()
+    ),
     max: state.maxAccessor,
     breakdownBy:
-      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+      state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
     progressDirection: showingBar(state)
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
-    titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
-    valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
-    iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
-    valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
-    color: state.color || getDefaultColor(state, isMetricNumeric),
-    icon: hasIcon(state.icon) ? state.icon : undefined,
+    titlesTextAlign: state.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
+    primaryAlign: state.primaryAlign ?? LENS_METRIC_STATE_DEFAULTS.primaryAlign,
+    secondaryAlign: state.secondaryAlign ?? LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
+    iconAlign,
+    valueFontSize: state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode,
+    primaryPosition: state.primaryPosition ?? LENS_METRIC_STATE_DEFAULTS.primaryPosition,
+    titleWeight: state.titleWeight ?? LENS_METRIC_STATE_DEFAULTS.titleWeight,
+    color: state.color ?? getDefaultColor(state, isMetricNumeric),
+    icon: hasMetricIcon ? state.icon : undefined,
     palette:
       isMetricNumeric && state.palette?.params
         ? [
@@ -177,6 +224,9 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
+    secondaryLabelPosition:
+      state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+    applyColorTo: state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo,
   });
 
   return {

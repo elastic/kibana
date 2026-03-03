@@ -9,23 +9,29 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { from } from 'rxjs';
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerSearchRoute } from './search';
-import { DataPluginStart } from '../../plugin';
+import type { DataPluginStart } from '../../plugin';
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
 import { KbnSearchError } from '../report_search_error';
 
 describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
+  let mockLogger: Logger;
 
   function mockEsError(message: string, statusCode: number, errBody?: Record<string, any>) {
     return new KbnSearchError(message, statusCode, errBody);
   }
 
   async function runMockSearch(mockContext: any, mockRequest: any, mockResponse: any) {
-    registerSearchRoute(mockCoreSetup.http.createRouter());
+    registerSearchRoute(
+      mockCoreSetup.http.createRouter(),
+      mockLogger,
+      mockCoreSetup.executionContext
+    );
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1];
@@ -33,7 +39,11 @@ describe('Search service', () => {
   }
 
   async function runMockDelete(mockContext: any, mockRequest: any, mockResponse: any) {
-    registerSearchRoute(mockCoreSetup.http.createRouter());
+    registerSearchRoute(
+      mockCoreSetup.http.createRouter(),
+      mockLogger,
+      mockCoreSetup.executionContext
+    );
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.versioned.delete.mock.results[0].value.addVersion.mock.calls[0][1];
@@ -43,6 +53,7 @@ describe('Search service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCoreSetup = coreMock.createSetup();
+    mockLogger = coreMock.createPluginInitializerContext().logger.get();
   });
 
   it('handler calls context.search.search with the given request and strategy', async () => {

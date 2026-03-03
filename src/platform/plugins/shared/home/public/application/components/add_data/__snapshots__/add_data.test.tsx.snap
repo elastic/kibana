@@ -1,10 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddData render 1`] = `
-<_EuiPageSection
-  aria-labelledby="homDataAdd__title"
+<EuiPageTemplate.Section
+  aria-labelledby="homeDataAdd__title"
   bottomBorder={true}
-  className="homDataAdd"
   paddingSize="xl"
 >
   <EuiFlexGroup
@@ -15,7 +14,7 @@ exports[`AddData render 1`] = `
         size="s"
       >
         <h2
-          id="homDataAdd__title"
+          id="homeDataAdd__title"
         >
           <MemoizedFormattedMessage
             defaultMessage="Get started by adding integrations"
@@ -39,33 +38,19 @@ exports[`AddData render 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <RedirectAppLinks
-            coreStart={
-              Object {
-                "application": Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "integrations": true,
-                    },
-                  },
-                },
-              }
-            }
+          <EuiButton
+            data-test-subj="homeAddData"
+            fill={false}
+            fullWidth={true}
+            href="/app/integrations/browse"
+            iconType="plusInCircle"
+            onClick={[Function]}
           >
-            <EuiButton
-              data-test-subj="homeAddData"
-              fill={true}
-              fullWidth={true}
-              href="/app/integrations/browse"
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <MemoizedFormattedMessage
-                defaultMessage="Add integrations"
-                id="home.addData.addDataButtonLabel"
-              />
-            </EuiButton>
-          </RedirectAppLinks>
+            <MemoizedFormattedMessage
+              defaultMessage="Add integrations"
+              id="home.addData.addDataButtonLabel"
+            />
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
@@ -131,5 +116,5 @@ exports[`AddData render 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;

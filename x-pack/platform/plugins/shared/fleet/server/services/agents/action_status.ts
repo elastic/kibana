@@ -24,6 +24,7 @@ import {
 } from '../../../common';
 import { appContextService } from '..';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+import { hasVersionSuffix } from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Return current bulk actions.
@@ -165,7 +166,6 @@ async function getActionResults(
         throw err;
       }
     }
-
     results.push({
       ...action,
       nbAgentsAck: nbAgentsAck - errorCount,
@@ -251,6 +251,13 @@ async function getActions(
 
       const source = hit._source!;
 
+      const newPolicyId = source.data?.policy_id as string;
+
+      if (hasVersionSuffix(newPolicyId)) {
+        // skip version specific policy actions
+        return acc;
+      }
+
       if (!acc[source.action_id!]) {
         const isExpired =
           source.expiration && source.type !== 'UPGRADE'
@@ -262,7 +269,7 @@ async function getActions(
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
           startTime: source.start_time,
-          type: source.type as AgentActionType,
+          type: (source.data?.rollback === true ? 'ROLLBACK' : source.type) as AgentActionType,
           nbAgentsActioned: source.total ?? 0,
           status: isExpired
             ? 'EXPIRED'
@@ -270,10 +277,12 @@ async function getActions(
             ? 'ROLLOUT_PASSED'
             : 'IN_PROGRESS',
           expiration: source.expiration,
-          newPolicyId: source.data?.policy_id as string,
+          newPolicyId,
           creationTime: source['@timestamp']!,
           nbAgentsFailed: 0,
           hasRolloutPeriod: !!source.rollout_duration_seconds,
+          is_automatic: source.is_automatic,
+          policyId: source.policyId,
         };
       }
 
@@ -412,6 +421,10 @@ async function getPolicyChangeActions(
   const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.hits.hits.reduce(
     (acc, curr) => {
       const hit = curr._source! as any;
+      if (hasVersionSuffix(hit.policy_id)) {
+        // skip version specific policy actions
+        return acc;
+      }
       acc[`${hit.policy_id}:${hit.revision_idx}`] = {
         policyId: hit.policy_id,
         revision: hit.revision_idx,

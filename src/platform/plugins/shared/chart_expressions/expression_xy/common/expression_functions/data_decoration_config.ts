@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DATA_DECORATION_CONFIG } from '../constants';
-import { DataDecorationConfigFn } from '../types';
+import type { DataDecorationConfigFn } from '../types';
 import { commonDecorationConfigArgs } from './common_y_config_args';
 
 export const dataDecorationConfigFunction: DataDecorationConfigFn = {

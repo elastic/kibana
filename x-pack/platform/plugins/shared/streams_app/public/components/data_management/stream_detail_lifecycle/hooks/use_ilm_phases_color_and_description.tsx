@@ -6,91 +6,57 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { compact } from 'lodash';
 import { useEuiTheme } from '@elastic/eui';
-import {
-  IlmPolicyDeletePhase,
-  IlmPolicyHotPhase,
-  IlmPolicyPhase,
-  IlmPolicyPhases,
-} from '@kbn/streams-schema';
-import { rolloverCondition } from '../helpers/rollover_condition';
+import { useMemo } from 'react';
 
 export const useIlmPhasesColorAndDescription = () => {
   const { euiTheme } = useEuiTheme();
 
-  return {
-    ilmPhases: {
-      hot: {
-        color: euiTheme.colors.vis.euiColorVis6,
-        description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase, phases: IlmPolicyPhases) => {
-          const hotPhase = phase as IlmPolicyHotPhase;
-          const hasNextPhase = Boolean(
-            phases.warm || phases.cold || phases.frozen || phases.delete
-          );
-          const condition = rolloverCondition(hotPhase.rollover);
-          return compact([
-            i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
+  return useMemo(
+    () => ({
+      ilmPhases: {
+        hot: {
+          color: euiTheme.colors.severity.risk,
+          description: i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
+            defaultMessage:
+              'Use for data that is searched frequently and actively updated, optimized for indexing and search performance.',
+          }),
+        },
+        warm: {
+          color: euiTheme.colors.severity.warning,
+          description: i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
+            defaultMessage:
+              'Use for data that is searched occasionally but rarely updated, optimized for search over indexing.',
+          }),
+        },
+        cold: {
+          color: euiTheme.colors.severity.neutral,
+          description: i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
+            defaultMessage:
+              'Use for infrequently searched, read-only data where cost savings are prioritized over performance.',
+          }),
+        },
+        frozen: {
+          color: euiTheme.colors.vis.euiColorVis3,
+          description: i18n.translate(
+            'xpack.streams.streamDetailLifecycle.frozenPhaseDescription',
+            {
               defaultMessage:
-                'Recent, frequently-searched data. Best indexing and search performance.',
-            }),
-            hasNextPhase
-              ? condition
-                ? i18n.translate(
-                    'xpack.streams.streamDetailLifecycle.hotPhaseRolloverDescription',
-                    {
-                      defaultMessage:
-                        '*Time since rollover. Current rollover condition: {condition}.',
-                      values: { condition },
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.streams.streamDetailLifecycle.hotPhaseNoRolloverDescription',
-                    {
-                      defaultMessage:
-                        '*Time since rollover. Data will not move to the next phase because rollover is not enabled.',
-                    }
-                  )
-              : '',
-          ]);
+                'Use for long-term retention of searchable data at the lowest possible cost.',
+            }
+          ),
+        },
+        delete: {
+          color: euiTheme.colors.borderBasePlain,
+          description: i18n.translate(
+            'xpack.streams.streamDetailLifecycle.deletePhaseDescription',
+            {
+              defaultMessage: 'Use to delete your data once it has reached a specified age.',
+            }
+          ),
         },
       },
-      warm: {
-        color: euiTheme.colors.vis.euiColorVis9,
-        description: () => [
-          i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
-            defaultMessage:
-              'Frequently searched data, rarely updated. Optimized for search, not indexing.',
-          }),
-        ],
-      },
-      cold: {
-        color: euiTheme.colors.vis.euiColorVis1,
-        description: () => [
-          i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
-            defaultMessage:
-              'Data searched infrequently, not updated. Optimized for cost savings over search performance.',
-          }),
-        ],
-      },
-      frozen: {
-        color: euiTheme.colors.vis.euiColorVis2,
-        description: () => [
-          i18n.translate('xpack.streams.streamDetailLifecycle.frozenPhaseDescription', {
-            defaultMessage:
-              'Most cost-effective way to store your data and still be able to search it.',
-          }),
-        ],
-      },
-      delete: {
-        color: euiTheme.border.color,
-        description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => [
-          i18n.translate('xpack.streams.streamDetailLifecycle.deletePhaseDescription', {
-            defaultMessage: 'Data deleted after {duration}.',
-            values: { duration: phase.min_age! },
-          }),
-        ],
-      },
-    },
-  };
+    }),
+    [euiTheme]
+  );
 };

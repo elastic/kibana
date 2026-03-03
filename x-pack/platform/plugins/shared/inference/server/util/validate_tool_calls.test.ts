@@ -53,7 +53,9 @@ describe('validateToolCalls', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Tool my_unknown_function called but was not available"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Tool \\"my_unknown_function\\" called but was not available"`
+    );
   });
 
   it('throws an error if invalid JSON was generated', () => {
@@ -117,7 +119,7 @@ describe('validateToolCalls', () => {
       if (isToolValidationError(error)) {
         expect(error.meta).toEqual({
           arguments: JSON.stringify({ foo: 'bar' }),
-          errorsText: `data must have required property 'bar'`,
+          errorsText: 'bar: Required',
           name: 'my_function',
           toolCalls: [
             {

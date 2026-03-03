@@ -41,7 +41,7 @@ describe('ClusterAddressForm', () => {
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/interactive_setup/ping', {
         body: JSON.stringify({
-          host: 'https://localhost:9200',
+          host: 'https://localhost',
         }),
       });
       expect(onSuccess).toHaveBeenCalled();

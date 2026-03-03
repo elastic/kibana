@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Agent } from './agent';
+import type { Agent } from './agent';
 
 export type JobState =
   | 'pending'

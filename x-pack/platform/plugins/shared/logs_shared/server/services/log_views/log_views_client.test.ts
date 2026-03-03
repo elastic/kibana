@@ -6,16 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/stubs';
 import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
-import {
-  defaultLogViewId,
-  LogView,
-  LogViewAttributes,
-  LogViewsStaticConfig,
-} from '../../../common/log_views';
+import type { LogView, LogViewAttributes, LogViewsStaticConfig } from '../../../common/log_views';
+import { defaultLogViewId } from '../../../common/log_views';
 import { createLogViewMock } from '../../../common/log_views/log_view.mock';
 import {
   extractLogViewSavedObjectReferences,
@@ -190,8 +187,8 @@ describe('LogViewsClient class', () => {
   it('resolveLogView method resolves given LogViewAttributes with DataView reference', async () => {
     const { logViewsClient, dataViews } = createLogViewsClient();
 
-    dataViews.get.mockResolvedValue(
-      createStubDataView({
+    dataViews.getDataViewLazy.mockResolvedValue(
+      createStubDataViewLazy({
         spec: {
           id: 'LOG_DATA_VIEW',
           title: 'log-indices-*',
@@ -249,13 +246,16 @@ describe('LogViewsClient class', () => {
             },
           },
         ],
-        "dataViewReference": DataView {
+        "dataViewReference": DataViewLazy {
           "allowHidden": false,
           "allowNoIndex": false,
+          "apiClient": Object {
+            "getFieldsForWildcard": [MockFunction],
+          },
           "deleteFieldFormat": [Function],
           "deleteScriptedFieldInternal": [Function],
-          "etag": undefined,
           "fieldAttrs": Map {},
+          "fieldCache": Map {},
           "fieldFormatMap": Object {},
           "fieldFormats": Object {
             "deserialize": [MockFunction],
@@ -275,15 +275,17 @@ describe('LogViewsClient class', () => {
             "parseDefaultTypeMap": [MockFunction],
             "register": [MockFunction],
           },
-          "fields": FldList [],
-          "flattenHit": [Function],
           "getAllowHidden": [Function],
-          "getEtag": [Function],
           "getFieldAttrs": [Function],
           "getIndexPattern": [Function],
           "getName": [Function],
           "getOriginalSavedObjectBody": [Function],
+          "getRuntimeFieldSpecMap": [Function],
+          "getRuntimeFields": [Function],
+          "getTimeField": [Function],
           "id": "LOG_DATA_VIEW",
+          "isTimeBased": [Function],
+          "managed": false,
           "matchedIndices": Array [],
           "metaFields": Array [
             "_id",
@@ -302,9 +304,9 @@ describe('LogViewsClient class', () => {
               "type": "keyword",
             },
           },
+          "scriptedFieldsEnabled": true,
           "scriptedFieldsMap": Object {},
           "setAllowHidden": [Function],
-          "setEtag": [Function],
           "setFieldFormat": [Function],
           "setIndexPattern": [Function],
           "shortDotsEnable": false,
@@ -313,12 +315,10 @@ describe('LogViewsClient class', () => {
           "title": "log-indices-*",
           "type": undefined,
           "typeMeta": undefined,
-          "upsertScriptedField": [Function],
           "upsertScriptedFieldInternal": [Function],
           "version": "1",
         },
         "description": "LOG VIEW DESCRIPTION",
-        "fields": FldList [],
         "indices": "log-indices-*",
         "messageField": Array [
           "message",

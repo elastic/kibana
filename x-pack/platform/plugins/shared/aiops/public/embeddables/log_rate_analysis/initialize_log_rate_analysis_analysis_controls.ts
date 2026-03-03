@@ -5,39 +5,31 @@
  * 2.0.
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { LogRateAnalysisComponentApi, LogRateAnalysisEmbeddableState } from './types';
+import type { LogRateAnalysisComponentApi } from './types';
+import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 
-type LogRateAnalysisEmbeddableCustomState = Omit<
-  LogRateAnalysisEmbeddableState,
-  'timeRange' | 'title' | 'description' | 'hidePanelTitles' | 'windowParameters'
->;
+export const initializeLogRateAnalysisControls = (initialState: LogRateAnalysisEmbeddableState) => {
+  const dataViewId = new BehaviorSubject(initialState.dataViewId);
 
-export const initializeLogRateAnalysisControls = (rawState: LogRateAnalysisEmbeddableState) => {
-  const dataViewId = new BehaviorSubject(rawState.dataViewId);
-
-  const updateUserInput = (update: LogRateAnalysisEmbeddableCustomState) => {
+  const updateUserInput = (update: Pick<LogRateAnalysisEmbeddableState, 'dataViewId'>) => {
     dataViewId.next(update.dataViewId);
   };
 
-  const serializeLogRateAnalysisChartState = (): LogRateAnalysisEmbeddableCustomState => {
+  const serializeLogRateAnalysisChartState = (): Pick<
+    LogRateAnalysisEmbeddableState,
+    'dataViewId'
+  > => {
     return {
       dataViewId: dataViewId.getValue(),
     };
   };
 
-  const logRateAnalysisControlsComparators: StateComparators<LogRateAnalysisEmbeddableCustomState> =
-    {
-      dataViewId: [dataViewId, (arg) => dataViewId.next(arg)],
-    };
-
   return {
     logRateAnalysisControlsApi: {
       dataViewId,
       updateUserInput,
-    } as unknown as LogRateAnalysisComponentApi,
+    } as LogRateAnalysisComponentApi,
     serializeLogRateAnalysisChartState,
-    logRateAnalysisControlsComparators,
   };
 };

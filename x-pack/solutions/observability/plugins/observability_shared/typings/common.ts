@@ -9,9 +9,11 @@ export type ObservabilityApp =
   | 'infra_metrics'
   | 'infra_logs'
   | 'apm'
+  | 'slo'
   // we will remove uptime in future to replace to be replace by synthetics
   | 'uptime'
   | 'synthetics'
+  | 'alerts'
   | 'observability-overview'
   | 'ux'
   | 'fleet'

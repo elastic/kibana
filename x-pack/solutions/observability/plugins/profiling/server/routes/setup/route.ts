@@ -32,6 +32,12 @@ export function registerSetupRoute({
           requiredPrivileges: ['profiling'],
         },
       },
+      options: {
+        access: 'public',
+        summary: 'Get Universal Profiling setup status',
+        description: 'Check if Universal Profiling has been set up and configured properly',
+        tags: ['Universal Profiling'],
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -49,6 +55,7 @@ export function registerSetupRoute({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+          isServerless: dependencies.esCapabilities.serverless,
         });
 
         return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });
@@ -70,6 +77,12 @@ export function registerSetupRoute({
         authz: {
           requiredPrivileges: ['profiling'],
         },
+      },
+      options: {
+        access: 'public',
+        summary: 'Initialize Universal Profiling setup',
+        description: 'Set up Universal Profiling resources and configuration',
+        tags: ['Universal Profiling'],
       },
       validate: false,
     },
@@ -96,6 +109,11 @@ export function registerSetupRoute({
           spaceId:
             dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
         };
+
+        // For now, we don't support serverless setup
+        if (dependencies.esCapabilities.serverless) {
+          return response.badRequest({ body: { message: 'Serverless setup is not supported' } });
+        }
 
         const scopedESClient = (await context.core).elasticsearch.client;
         const { type, setupState } =

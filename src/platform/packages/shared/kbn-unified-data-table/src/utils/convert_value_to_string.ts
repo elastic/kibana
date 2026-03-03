@@ -12,7 +12,7 @@ import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '@kbn/discover-utils';
+import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
 
 interface ConvertedResult {
   formattedString: string;
@@ -53,46 +53,15 @@ export const convertValueToString = ({
     dataView,
     columnMeta: columnsMeta?.[columnId],
   });
-  const valuesArray = Array.isArray(value) ? value : [value];
-  const disableMultiline = options?.compatibleWithCSV ?? false;
-  const enableEscapingForValue = options?.compatibleWithCSV ?? false;
 
-  if (field?.type === '_source') {
-    return {
-      formattedString: stringify(rowFlattened, disableMultiline),
-      withFormula: false,
-    };
-  }
-
-  let withFormula = false;
-
-  const formatted = valuesArray
-    .map((subValue) => {
-      const formattedValue = formatFieldValue(
-        subValue,
-        rows[rowIndex].raw,
-        fieldFormats,
-        dataView,
-        field,
-        'text',
-        {
-          skipFormattingInStringifiedJSON: disableMultiline,
-        }
-      );
-
-      if (typeof formattedValue === 'string') {
-        withFormula = withFormula || cellHasFormulas(formattedValue);
-        return enableEscapingForValue ? escapeFormattedValue(formattedValue) : formattedValue;
-      }
-
-      return stringify(formattedValue, disableMultiline) || '';
-    })
-    .join(`${separator} `);
-
-  return {
-    formattedString: formatted,
-    withFormula,
-  };
+  return commonConvertValueToString({
+    dataView,
+    dataViewField: field,
+    flattenedValue: value,
+    dataTableRecord: rows[rowIndex],
+    fieldFormats,
+    options,
+  });
 };
 
 export const convertNameToString = (name: string): ConvertedResult => {
@@ -100,11 +69,6 @@ export const convertNameToString = (name: string): ConvertedResult => {
     formattedString: escapeFormattedValue(name),
     withFormula: cellHasFormulas(name),
   };
-};
-
-const stringify = (val: object | string, disableMultiline: boolean) => {
-  // it can wrap "strings" with quotes
-  return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
 };
 
 const escapeValueFn = createEscapeValue({

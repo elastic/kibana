@@ -13,6 +13,11 @@ import type { SavedObjectsType } from './saved_objects_type';
  */
 export interface ISavedObjectTypeRegistry {
   /**
+   * Return legacy types, this types can't be registered
+   */
+  getLegacyTypes(): string[];
+
+  /**
    * Return the {@link SavedObjectsType | type} definition for given type name.
    */
   getType(type: string): SavedObjectsType | undefined;
@@ -95,4 +100,9 @@ export interface ISavedObjectTypeRegistry {
    * the property/type is not registered.
    */
   getNameAttribute(type: string): string;
+
+  /**
+   * Returns whether the type supports access control.
+   */
+  supportsAccessControl(type: string): boolean;
 }

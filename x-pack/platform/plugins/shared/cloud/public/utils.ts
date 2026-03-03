@@ -6,7 +6,7 @@
  */
 
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
-import { CloudConfigType } from './plugin';
+import type { CloudConfigType } from './plugin';
 
 export function getSupportUrl(config: CloudConfigType): string {
   let supportUrl = ELASTIC_SUPPORT_LINK;

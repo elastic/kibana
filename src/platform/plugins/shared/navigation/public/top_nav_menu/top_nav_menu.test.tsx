@@ -8,18 +8,18 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { MountPoint } from '@kbn/core/public';
+import type { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
-import { TopNavMenuData } from './top_nav_menu_data';
+import type { TopNavMenuData } from './top_nav_menu_data';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiToolTipProps } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 import { unifiedSearchMock } from '../mocks';
 
 describe('TopNavMenu', () => {
-  const WRAPPER_SELECTOR = '[data-test-subj="kbn-top-nav-menu-wrapper"]';
+  const WRAPPER_SELECTOR = 'TopNavMenuItems[data-test-subj="kbn-top-nav-menu-wrapper"]';
   const BADGES_GROUP_SELECTOR = '[data-test-subj="kbn-top-nav-menu-badge-group"]';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'AggregateQuerySearchBar';
@@ -134,12 +134,14 @@ describe('TopNavMenu', () => {
     const refresh = () => {
       new Promise(async (resolve, reject) => {
         try {
+          // @ts-expect-error upgrade typescript v5.9.3
           if (dom) {
             act(() => {
               dom.update();
             });
           }
 
+          // @ts-expect-error upgrade typescript v5.9.3
           setImmediate(() => resolve(dom)); // flushes any pending promises
         } catch (error) {
           reject(error);

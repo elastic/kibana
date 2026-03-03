@@ -10,8 +10,13 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { GetPingsParams, HttpResponseBody, Ping, PingsResponse } from '../../common/runtime_types';
-import { SyntheticsEsClient } from '../lib';
+import type {
+  GetPingsParams,
+  HttpResponseBody,
+  Ping,
+  PingsResponse,
+} from '../../common/runtime_types';
+import type { SyntheticsEsClient } from '../lib';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 const DEFAULT_PAGE_SIZE = 25;

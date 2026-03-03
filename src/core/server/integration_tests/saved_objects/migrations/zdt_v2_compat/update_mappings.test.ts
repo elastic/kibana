@@ -11,14 +11,13 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
   getFooType,
   getLegacyType,
   dummyModelVersion,
-  noopMigration,
 } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'update_mappings.test.log');
@@ -61,15 +60,6 @@ describe('ZDT with v2 compat - basic mapping update', () => {
       someAddedField: { type: 'keyword' },
     };
 
-    legacyType.migrations = {
-      ...legacyType.migrations,
-      '8.0.0': noopMigration,
-    };
-    legacyType.mappings.properties = {
-      ...legacyType.mappings.properties,
-      anotherAddedField: { type: 'boolean' },
-    };
-
     const { runMigrations, client } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams({ kibanaVersion: '8.8.0' }),
       logFilePath,
@@ -106,7 +96,7 @@ describe('ZDT with v2 compat - basic mapping update', () => {
 
     expect(mappingMeta.mappingVersions).toEqual({
       foo: '10.3.0',
-      legacy: '8.0.0',
+      legacy: '10.0.0',
     });
 
     const records = await parseLogFile(logFilePath);

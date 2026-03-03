@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
-import { Shape } from '@kbn/expression-shape-plugin/common';
+import type { Shape } from '../../../canvas_plugin_src/renderers/shape';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
@@ -39,6 +40,8 @@ export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLab
 ShapePickerPopover.propTypes = {
   ariaLabel: PropTypes.string,
   onChange: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   shapes: PropTypes.object.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
 };

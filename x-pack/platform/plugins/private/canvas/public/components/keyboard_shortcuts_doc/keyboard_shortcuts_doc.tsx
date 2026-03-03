@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlyout,
@@ -19,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { getPlatform } from '@kbn/shared-ux-utility';
 import { keymap } from '../../lib/keymap';
-import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
-import { getClientPlatform } from '../../lib/get_client_platform';
+import type { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
 
@@ -54,11 +55,11 @@ interface Props {
   onClose: () => void;
 }
 
-const os = getClientPlatform();
+const platform = getPlatform();
 
 const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[] =>
   shortcuts.map((shortcutKeyMap: ShortcutMap): DescriptionListItem => {
-    const osShortcuts = shortcutKeyMap[os];
+    const osShortcuts = shortcutKeyMap[platform];
     return {
       title: shortcutKeyMap.help,
       description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {

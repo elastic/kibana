@@ -8,7 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerSentEventBase, ServerSentEventType } from './events';
+import type { ServerSentEventBase } from './events';
+import { ServerSentEventType } from './events';
 
 export enum ServerSentEventErrorCode {
   internalError = 'internalError',
@@ -21,6 +22,13 @@ export class ServerSentEventError<
 > extends Error {
   constructor(public code: TCode, message: string, public meta: TMeta) {
     super(message);
+  }
+
+  public get status() {
+    if (typeof this.meta === 'object' && this.meta.status) {
+      return this.meta.status as number;
+    }
+    return undefined;
   }
 
   toJSON(): ServerSentErrorEvent {

@@ -34,7 +34,9 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
       GetProcessesActionOutputContent
     >({
       ResultComponent,
+      // @ts-expect-error upgrade typescript v5.4.5
       setStore,
+      // @ts-expect-error upgrade typescript v5.4.5
       store,
       status,
       setStatus,

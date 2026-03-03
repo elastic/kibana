@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
-import { TemplateDeserialized } from '../../../../../../common';
-import { WizardContent } from '../../../template_form/template_form';
-import { CommonWizardSteps } from './types';
+import type { TemplateDeserialized } from '../../../../../../common';
+import type { WizardContent } from '../../../template_form/template_form';
+import type { CommonWizardSteps } from './types';
 import { StepSettings } from './step_settings';
 
 interface Props {

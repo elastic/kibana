@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import { type PackageListItem, SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
+import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
+
+export interface UseFetchIntegrationsResult {
+  /**
+   * Is true while the data is loading
+   */
+  isLoading: boolean;
+  /**
+   * EASE installed integrations (see list in the constant above)
+   */
+  installedPackages: PackageListItem[];
+  /**
+   * EASE not-installed integrations (see list in the constant above)
+   */
+  availablePackages: PackageListItem[];
+}
+
+/**
+ * Fetches all integrations, then returns the installed and non-installed ones filtered with a list of
+ * hard coded EASE integrations:
+ * - splunk
+ * - google_secops
+ * - microsoft_sentinel
+ * - sentinel_one
+ * - crowdstrike
+ * - elastic_security
+ */
+export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
+  // TODO this might need to be revisited once the integration make it out of prerelease
+  //  The issue will be that users will see prerelease versions and not the GA ones
+  const { data: allPackages, isLoading } = useGetPackagesQuery({
+    prerelease: true,
+  });
+
+  const easePackages: PackageListItem[] = useMemo(
+    () => (allPackages?.items || []).filter((pkg) => SEARCH_AI_LAKE_PACKAGES.includes(pkg.name)),
+    [allPackages]
+  );
+  const availablePackages: PackageListItem[] = useMemo(
+    () => easePackages.filter((pkg) => pkg.status === installationStatuses.NotInstalled),
+    [easePackages]
+  );
+  const installedPackages: PackageListItem[] = useMemo(
+    () =>
+      easePackages.filter(
+        (pkg) =>
+          pkg.status === installationStatuses.Installed ||
+          pkg.status === installationStatuses.InstallFailed
+      ),
+    [easePackages]
+  );
+
+  return useMemo(
+    () => ({
+      availablePackages,
+      installedPackages,
+      isLoading,
+    }),
+    [availablePackages, installedPackages, isLoading]
+  );
+};

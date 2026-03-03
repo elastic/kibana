@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
 interface UptimeRefreshContext {
   lastRefresh: number;

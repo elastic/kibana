@@ -37,7 +37,13 @@ export const createRailsAgentInstructions = (commonOptions: AgentInstructions): 
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.rails.install.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for Ruby on Rails',
+            })}
+          >
             gem &apos;elastic-apm&apos;
           </EuiCodeBlock>
         </>

@@ -13,7 +13,7 @@ import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
-import { SearchStrategyDependencies } from '../../types';
+import type { SearchStrategyDependencies } from '../../types';
 import { esqlAsyncSearchStrategyProvider } from './esql_async_search_strategy';
 import { getMockSearchConfig } from '../../../../config.mock';
 
@@ -191,6 +191,21 @@ describe('ES|QL async search strategy', () => {
         expect(request).toHaveProperty('keep_alive');
       });
 
+      it('calls /stop with the given ID when using options.retrieveResults: true', async () => {
+        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const id = 'FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ==';
+        const params = { query: 'from logs* | limit 10' };
+        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
+        await esSearch.search({ id, params }, { retrieveResults: true }, mockDeps).toPromise();
+
+        expect(mockApiCaller).toBeCalled();
+        const request = mockApiCaller.mock.calls[0][0];
+        expect(request.path).toEqual(
+          '/_query/async/FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ==/stop'
+        );
+      });
+
       it('should delete when aborted', async () => {
         mockApiCaller.mockResolvedValueOnce({
           ...mockAsyncResponse,
@@ -329,7 +344,7 @@ describe('ES|QL async search strategy', () => {
 
       expect(mockApiCaller).toBeCalled();
       const request = mockApiCaller.mock.calls[0][0];
-      expect(request.body).toEqual({ id, keep_alive: keepAlive });
+      expect(request.querystring).toEqual({ id, keep_alive: keepAlive });
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 export {
   ILLEGAL_CHARACTERS_KEY,
@@ -15,7 +15,7 @@ export {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
-} from '../common/lib';
+} from '@kbn/data-view-validation';
 
 export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
 export type {

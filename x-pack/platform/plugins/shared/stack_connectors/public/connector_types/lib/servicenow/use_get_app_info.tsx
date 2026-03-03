@@ -7,9 +7,9 @@
 
 import { isEmpty } from 'lodash';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { getAppInfo } from './api';
-import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
+import type { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 import { FETCH_ERROR } from './translations';
 import { CORSError } from './cors_error';
 

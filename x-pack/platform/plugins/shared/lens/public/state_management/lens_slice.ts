@@ -6,34 +6,39 @@
  */
 
 import { createAction, createReducer, current } from '@reduxjs/toolkit';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Filter, Query } from '@kbn/es-query';
-import { History } from 'history';
+import type { Filter, Query } from '@kbn/es-query';
+import type { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { SeriesType } from '@kbn/visualizations-plugin/common';
-import { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type {
-  VisualizeEditorContext,
-  Suggestion,
-  IndexPattern,
+  DateRange,
+  VisualizationState,
+  DataViewsState,
+  FramePublicAPI,
+  Datasource,
   VisualizationMap,
   DatasourceMap,
+  SeriesType,
+  VisualizeEditorContext,
+  LensAppState,
+  LensStoreDeps,
+  TableInspectorAdapter,
   DragDropOperation,
-} from '../types';
+  LensAppServices,
+  IndexPattern,
+  LensEditEvent,
+  LensEditContextMapping,
+} from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
-import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
+import { getUpdatedFrameWithDatasourceState } from './utils';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import type { LensAppServices } from '../app_plugin/types';
-import type { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState, LayerType, Suggestion, Visualization } from '..';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -63,13 +68,16 @@ export const initialState: LensAppState = {
   visualization: {
     state: null,
     activeId: null,
+    selectedLayerId: null,
   },
   dataViews: {
     indexPatternRefs: [],
     indexPatterns: {},
   },
   annotationGroups: {},
+  projectRouting: undefined,
   managed: false,
+  hideTextBasedEditor: false,
 };
 
 export const getPreloadedState = ({
@@ -79,6 +87,7 @@ export const getPreloadedState = ({
   embeddableEditorIncomingState,
   datasourceMap,
   visualizationMap,
+  visualizationType,
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
@@ -115,28 +124,32 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
+  const isDashboardListingOrigin =
+    embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
+    Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
+    query,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
       ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId() || '',
+    searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      embeddableEditorIncomingState?.originatingApp ||
-        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
+      (embeddableEditorIncomingState?.originatingApp && !isDashboardListingOrigin) ??
+        (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {
       state: null,
-      activeId: Object.keys(visualizationMap)[0] || null,
+      activeId: visualizationType ?? Object.keys(visualizationMap)[0] ?? null,
+      selectedLayerId: null,
     },
   };
   return state;
@@ -154,6 +167,8 @@ export interface InitialAppState {
   redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
   inlineEditing?: boolean;
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
@@ -234,6 +249,9 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+export const setSelectedLayerId = createAction<{
+  layerId: string | null;
+}>('lens/setSelectedLayerId');
 
 export const cloneLayer = createAction(
   'cloneLayer',
@@ -260,6 +278,14 @@ export const setLayerDefaultDimension = createAction<{
   columnId: string;
   groupId: string;
 }>('lens/setLayerDefaultDimension');
+export const setDimensionAndUpdateDatasource = createAction<{
+  visualizationId: string;
+  datasourceId: string;
+  newDatasourceState: unknown;
+  layerId: string;
+  groupId: string;
+  columnId: string;
+}>('lens/setDimensionAndUpdateDatasource');
 
 export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
   'lens/updateIndexPatterns'
@@ -310,8 +336,10 @@ export const lensActions = {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
   addLayer,
   onDropToDimension,
+  setDimensionAndUpdateDatasource,
   cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
@@ -410,6 +438,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           newLayerId,
           clonedIDsMap
         );
+        // Set the selected layer to the newly cloned layer
+        state.visualization.selectedLayerId = newLayerId;
       })
       .addCase(removeOrClearLayer, (state, { payload: { visualizationId, layerId, layerIds } }) => {
         const activeVisualization = visualizationMap[visualizationId];
@@ -464,6 +494,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               removedId
             ))
         );
+      })
+      .addCase(setSelectedLayerId, (state, { payload }) => {
+        state.visualization.selectedLayerId = payload.layerId;
       })
       .addCase(changeIndexPattern, (state, { payload }) => {
         const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
@@ -668,6 +701,71 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
         state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
         state.visualization.state = syncedVisualizationState;
+      })
+      .addCase(setDimensionAndUpdateDatasource, (state, { payload }) => {
+        if (!state.visualization.activeId) {
+          return state;
+        }
+        // This is a safeguard that prevents us from accidentally updating the
+        // wrong visualization. This occurs in some cases due to the uncoordinated
+        // way we manage state across plugins.
+        if (state.visualization.activeId !== payload.visualizationId) {
+          return state;
+        }
+
+        const layerDatasource = datasourceMap[payload.datasourceId];
+        if (!layerDatasource) {
+          return state;
+        }
+
+        const currentDatasourceState = state.datasourceStates[payload.datasourceId]?.state;
+        if (currentDatasourceState === undefined) {
+          return state;
+        }
+
+        const activeVisualization = visualizationMap[state.visualization.activeId];
+        const newDatasourceState =
+          typeof payload.newDatasourceState === 'function'
+            ? (payload.newDatasourceState as (previousState: unknown) => unknown)(
+                currentDatasourceState
+              )
+            : payload.newDatasourceState;
+
+        const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+        const updatedFramePublicAPI = getUpdatedFrameWithDatasourceState(
+          framePublicAPI,
+          layerDatasource,
+          newDatasourceState,
+          payload.layerId
+        );
+
+        state.visualization.state = activeVisualization.setDimension({
+          layerId: payload.layerId,
+          groupId: payload.groupId,
+          columnId: payload.columnId,
+          prevState: state.visualization.state,
+          frame: updatedFramePublicAPI,
+        });
+        state.datasourceStates[payload.datasourceId] = {
+          state: newDatasourceState,
+          isLoading: false,
+        };
+
+        const {
+          datasourceState: syncedDatasourceState,
+          visualizationState: syncedVisualizationState,
+          frame,
+        } = syncLinkedDimensions(
+          current(state),
+          visualizationMap,
+          datasourceMap,
+          payload.datasourceId
+        );
+
+        state.visualization.state =
+          activeVisualization.onDatasourceUpdate?.(syncedVisualizationState, frame) ??
+          syncedVisualizationState;
+        state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
       })
 
       .addCase(switchVisualization, (state, { payload }) => {
@@ -896,14 +994,19 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
         }
 
+        const datasourceByLayerId = new Map<string, string>(
+          Object.entries(datasourceMap).flatMap(([datasourceId, datasource]) => {
+            if (!state.datasourceStates[datasourceId]) {
+              return [];
+            }
+            return datasource
+              .getLayers(state.datasourceStates[datasourceId].state)
+              .map((layerId) => [layerId, datasourceId]);
+          }) ?? []
+        );
+
         layerIds.forEach((layerId) => {
-          const [layerDatasourceId] =
-            Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
-              return (
-                state.datasourceStates[datasourceId] &&
-                datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-              );
-            }) ?? [];
+          const layerDatasourceId = datasourceByLayerId.get(layerId);
           if (layerDatasourceId) {
             const { newState } = datasourceMap[layerDatasourceId].removeLayer(
               current(state).datasourceStates[layerDatasourceId].state,
@@ -1029,11 +1132,23 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           state.datasourceStates[layerDatasourceId].state = newDatasourceState;
         }
 
+        // Create an updated frame with the new datasource state so that
+        // setDimension (called by onDrop) has access to the updated operation info
+        const updatedFramePublicAPI =
+          newDatasourceState && layerDatasource
+            ? getUpdatedFrameWithDatasourceState(
+                framePublicAPI,
+                layerDatasource,
+                newDatasourceState,
+                target.layerId
+              )
+            : framePublicAPI;
+
         activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
         const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
           {
             prevState: state.visualization.state,
-            frame: framePublicAPI,
+            frame: updatedFramePublicAPI,
             target,
             source,
             dropType,

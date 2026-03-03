@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { act } from '@testing-library/react';
-import { shallow } from 'enzyme';
+import { EuiThemeProvider } from '@elastic/eui';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { nextTick } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import { LoginPage } from './login_page';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
@@ -34,8 +32,14 @@ const createLoginState = (options?: Partial<LoginState>) => {
   } as LoginState;
 };
 
+const renderPage = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <EuiThemeProvider>{ui}</EuiThemeProvider>
+    </I18nProvider>
+  );
+
 describe('LoginPage', () => {
-  // mock a minimal subset of the HttpSetup
   const httpMock = {
     get: jest.fn(),
     addLoadingCountSource: jest.fn(),
@@ -53,15 +57,15 @@ describe('LoginPage', () => {
     });
 
     resetHttpMock();
+    customBrandingMock.customBranding$ = of({});
   });
 
   describe('page', () => {
     it('renders as expected', async () => {
       const coreStartMock = coreMock.createStart();
-      customBrandingMock.customBranding$ = of({});
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           customBranding={customBrandingMock}
@@ -71,13 +75,10 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
-
-      expect(wrapper).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders with custom branding', async () => {
@@ -85,7 +86,7 @@ describe('LoginPage', () => {
       customBrandingMock.customBranding$ = of({ logo: 'logo' });
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           customBranding={customBrandingMock}
@@ -95,13 +96,10 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
-
-      expect(wrapper).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
@@ -124,7 +122,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -134,19 +132,18 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(screen.getByText('A secure connection is required for log in')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
-
-      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when a connection to ES is not available', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ layout: 'error-es-unavailable' }));
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -156,19 +153,18 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(screen.getByText('Cannot connect to the Elasticsearch cluster')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
-
-      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when xpack is not available', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ layout: 'error-xpack-unavailable' }));
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -178,12 +174,15 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'Cannot connect to the Elasticsearch cluster currently configured for Kibana.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
-
-      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when an unknown loginState layout is provided', async () => {
@@ -192,7 +191,7 @@ describe('LoginPage', () => {
         createLoginState({ layout: 'error-asdf-asdf-unknown' as any })
       );
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -202,12 +201,11 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(screen.getByText('Unsupported login form layout.')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
-
-      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when login is not enabled', async () => {
@@ -216,7 +214,7 @@ describe('LoginPage', () => {
         createLoginState({ selector: { enabled: false, providers: [] } })
       );
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -226,12 +224,11 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(screen.getByText('Login is disabled.')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
-
-      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked', async () => {
@@ -247,7 +244,7 @@ describe('LoginPage', () => {
         writable: true,
       });
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -258,12 +255,15 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'To view this content, open it in a new window or ask your administrator to allow cross-origin cookies.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.getByText('Open in new window')).toBeInTheDocument();
       });
-
-      expect(wrapper.find(EuiFlexItem).children()).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed', async () => {
@@ -279,7 +279,7 @@ describe('LoginPage', () => {
         writable: true,
       });
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -290,12 +290,15 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'To view this content, open it in a new window or adjust your browser settings to allow third-party cookies.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.getByText('Open in new window')).toBeInTheDocument();
       });
-
-      expect(wrapper.find(EuiFlexItem).children()).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders warning when cookies are disabled and document is not embedded inside iframe', async () => {
@@ -307,7 +310,7 @@ describe('LoginPage', () => {
         writable: true,
       });
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -317,12 +320,11 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(screen.getByText('Cookies are required to log in to Elastic')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
-
-      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
@@ -331,7 +333,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -341,13 +343,10 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
-
-      expect(wrapper.find(LoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('properly passes query string parameters to the form', async () => {
@@ -355,7 +354,7 @@ describe('LoginPage', () => {
       httpMock.get.mockResolvedValue(createLoginState());
       window.location.href = `http://some-host/bar?msg=SESSION_EXPIRED&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=basic1`;
 
-      const wrapper = shallow(
+      renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -365,17 +364,11 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
-      });
-
-      const { authProviderHint, message } = wrapper.find(LoginForm).props();
-      expect(authProviderHint).toBe('basic1');
-      expect(message).toEqual({
-        type: LoginFormMessageType.Info,
-        content: 'Your session has timed out. Please log in again.',
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your session has timed out. Please log in again.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -383,7 +376,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -393,20 +386,20 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(screen.getByTestId('loginAssistanceMessage')).toHaveTextContent(
+          'This is an important message'
+        );
       });
-
-      expect(wrapper.find(LoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when loginHelp is set', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ loginHelp: '**some-help**' }));
 
-      const wrapper = shallow(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -416,13 +409,11 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(screen.getByTestId('loginHelpLink')).toBeInTheDocument();
       });
-
-      expect(wrapper.find(LoginForm)).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
@@ -431,7 +422,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -441,15 +432,12 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(httpMock.addLoadingCountSource).toHaveBeenCalledTimes(1);
+        expect(httpMock.get).toHaveBeenCalledTimes(1);
+        expect(httpMock.get).toHaveBeenCalledWith('/internal/security/login_state');
+        expect(coreStartMock.fatalErrors.add).not.toHaveBeenCalled();
       });
-
-      expect(httpMock.addLoadingCountSource).toHaveBeenCalledTimes(1);
-      expect(httpMock.get).toHaveBeenCalledTimes(1);
-      expect(httpMock.get).toHaveBeenCalledWith('/internal/security/login_state');
-      expect(coreStartMock.fatalErrors.add).not.toHaveBeenCalled();
     });
 
     it('GET login_state failure', async () => {
@@ -457,7 +445,7 @@ describe('LoginPage', () => {
       const error = Symbol();
       httpMock.get.mockRejectedValue(error);
 
-      const wrapper = shallow(
+      renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -467,16 +455,13 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await waitFor(() => {
+        expect(httpMock.addLoadingCountSource).toHaveBeenCalledTimes(1);
+        expect(httpMock.get).toHaveBeenCalledTimes(1);
+        expect(httpMock.get).toHaveBeenCalledWith('/internal/security/login_state');
+        expect(coreStartMock.fatalErrors.add).toHaveBeenCalledTimes(1);
+        expect(coreStartMock.fatalErrors.add).toHaveBeenCalledWith(error);
       });
-
-      expect(httpMock.addLoadingCountSource).toHaveBeenCalledTimes(1);
-      expect(httpMock.get).toHaveBeenCalledTimes(1);
-      expect(httpMock.get).toHaveBeenCalledWith('/internal/security/login_state');
-      expect(coreStartMock.fatalErrors.add).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.fatalErrors.add).toHaveBeenCalledWith(error);
     });
   });
 });

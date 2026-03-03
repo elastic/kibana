@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
+import type { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   getDatasetQualityStateFromUrl,

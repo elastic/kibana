@@ -8,13 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useApmRouter } from '../../../../../../../hooks/use_apm_router';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
   TRANSACTION_NAME,
 } from '../../../../../../../../common/es_fields/apm';
-import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getNextEnvironmentUrlParam,
+} from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -37,7 +41,9 @@ export function StickySpanProperties({ span, transaction }: Props) {
     '/traces/explorer',
     '/dependencies/operation'
   );
-  const { environment, comparisonEnabled, offset } = query;
+  const router = useApmRouter();
+
+  const { environment } = query;
 
   const latencyAggregationType =
     ('latencyAggregationType' in query && query.latencyAggregationType) ||
@@ -48,7 +54,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
   const trackEvent = useUiTracker();
 
   const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: transaction?.service.environment,
+    requestedEnvironment: transaction?.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
     currentEnvironmentUrlParam: environment,
   });
 
@@ -82,15 +88,17 @@ export function StickySpanProperties({ span, transaction }: Props) {
           fieldName: TRANSACTION_NAME,
           val: (
             <TransactionDetailLink
-              serviceName={transaction.service.name}
-              transactionId={transaction.transaction.id}
-              traceId={transaction.trace.id}
               transactionName={transaction.transaction.name}
-              transactionType={transaction.transaction.type}
-              environment={nextEnvironment}
-              latencyAggregationType={latencyAggregationType}
-              comparisonEnabled={comparisonEnabled}
-              offset={offset}
+              href={router.link('/services/{serviceName}/transactions/view', {
+                path: { serviceName: transaction.service.name },
+                query: {
+                  ...query,
+                  environment: nextEnvironment,
+                  serviceGroup,
+                  latencyAggregationType,
+                  transactionName: transaction.transaction.name,
+                },
+              })}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>

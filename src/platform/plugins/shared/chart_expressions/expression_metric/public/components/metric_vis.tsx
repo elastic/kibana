@@ -7,111 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Chart,
-  Metric,
+import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
+import type {
   MetricSpec,
   MetricWProgress,
-  isMetricElementEvent,
   RenderChangeListener,
-  Settings,
   MetricWTrend,
   MetricWNumber,
-  SettingsProps,
   MetricWText,
+  SettingsProps,
+  SecondaryMetricProps,
 } from '@elastic/charts';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type {
   Datatable,
   DatatableColumn,
-  DatatableRow,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import {
-  FieldFormatConvertFunction,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
-import { CUSTOM_PALETTE, PaletteOutput } from '@kbn/coloring';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
-import { getPaletteService, getThemeService, getFormatService } from '../services';
-import { getDataBoundsForPalette } from '../utils';
-
-export const defaultColor = euiThemeVars.euiColorEmptyShade;
-
-function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
-  const formatId = serializedFieldFormat?.id || 'number';
-  if (formatId === 'duration' && !serializedFieldFormat?.params?.formatOverride) {
-    return {
-      ...serializedFieldFormat,
-      params: {
-        // by default use the compact precise format
-        outputFormat: 'humanizePrecise',
-        outputPrecision: 1,
-        useShortSuffix: true,
-        // but if user configured something else, use it
-        ...serializedFieldFormat!.params,
-      },
-    };
-  }
-  return serializedFieldFormat ?? { id: formatId };
-}
-
-const renderSecondaryMetric = (
-  columns: DatatableColumn[],
-  row: DatatableRow,
-  config: Pick<VisParams, 'metric' | 'dimensions'>
-) => {
-  let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
-  if (config.dimensions.secondaryMetric) {
-    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
-    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, columns);
-  }
-  const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
-  return (
-    <span>
-      {secondaryPrefix}
-      {secondaryMetricColumn
-        ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(row[secondaryMetricColumn.id])}`
-        : undefined}
-    </span>
-  );
-};
-
-const getMetricFormatter = (
-  accessor: ExpressionValueVisDimension | string,
-  columns: Datatable['columns']
-) => {
-  const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
-  return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
-};
-
-const getColor = (
-  value: number,
-  palette: PaletteOutput<CustomPaletteState>,
-  accessors: { metric: string; max?: string; breakdownBy?: string },
-  data: Datatable,
-  rowNumber: number
-) => {
-  const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-
-  return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, palette.params, {
-    min,
-    max,
-  });
-};
+import type { MetricVisParam, VisParams } from '../../common';
+import { getThemeService, getFormatService } from '../services';
+import { getColor, getMetricFormatter } from './helpers';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
+import type { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -133,7 +60,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} style={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} />;
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -144,6 +71,24 @@ export interface MetricVisComponentProps {
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
+function buildTrendConfig(
+  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  value: number | string
+): TrendConfig | undefined {
+  if (!palette) return undefined;
+
+  return {
+    showIcon: visuals !== 'value',
+    showValue: visuals !== 'icon',
+    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    palette,
+    borderColor: undefined,
+    compareToPrimary: baseline === 'primary',
+  };
+}
+
+const DEFAULT_TILE_SIDE_LENGTH = 310;
+
 export const MetricVis = ({
   data,
   config,
@@ -153,6 +98,11 @@ export const MetricVis = ({
   overrides,
 }: MetricVisComponentProps) => {
   const grid = useRef<MetricSpec['data']>([[]]);
+  const {
+    euiTheme: { colors },
+    highContrastMode,
+  } = useEuiTheme();
+  const defaultColor = colors.emptyShade;
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -164,7 +114,8 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength = grid.current.length * grid.current[0]?.length > 1 ? 200 : 300;
+    const maxTileSideLength =
+      grid.current.length * grid.current[0]?.length > 1 ? 200 : DEFAULT_TILE_SIDE_LENGTH;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
@@ -183,7 +134,10 @@ export const MetricVis = ({
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
 
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
-  const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
+  const formatPrimaryMetric = useMemo(
+    () => getMetricFormatter(config.dimensions.metric, data.columns),
+    [config.dimensions.metric, data.columns]
+  );
 
   let breakdownByColumn: DatatableColumn | undefined;
   let formatBreakdownValue: FieldFormatConvertFunction;
@@ -205,6 +159,7 @@ export const MetricVis = ({
     data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
   ).slice(0, 1);
 
+  // TODO: optimize this so it doesn't run many times
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
@@ -215,12 +170,51 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
+    const tileColor =
+      config.metric.palette?.params && typeof value === 'number'
+        ? getColor(
+            value,
+            config.metric.palette,
+            {
+              metric: primaryMetricColumn.id,
+              max: maxColId,
+              breakdownBy: breakdownByColumn?.id,
+            },
+            data,
+            rowIdx
+          ) ?? defaultColor
+        : config.metric.color ?? defaultColor;
+
+    let secondaryMetricProps: SecondaryMetricProps | undefined;
+    const { secondaryMetric } = config.dimensions;
+    if (secondaryMetric) {
+      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
+      const secondaryMetricInfo = getSecondaryMetricInfo({
+        row,
+        columns: data.columns,
+        secondaryMetric,
+        secondaryLabel: config.metric.secondaryLabel,
+        trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
+        staticColor: config.metric.secondaryColor,
+      });
+
+      secondaryMetricProps = {
+        value: secondaryMetricInfo.value,
+        label: secondaryMetricInfo.label,
+        badgeColor: secondaryMetricInfo.badgeColor,
+        ariaDescription: secondaryMetricInfo.description,
+        icon: secondaryMetricInfo.icon,
+        labelPosition: config.metric.secondaryLabelPosition,
+        badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
+      };
+    }
+
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: renderSecondaryMetric(data.columns, row, config),
+        extra: secondaryMetricProps,
         color: config.metric.color ?? defaultColor,
       };
       return Array.isArray(value)
@@ -234,21 +228,8 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: renderSecondaryMetric(data.columns, row, config),
-      color:
-        config.metric.palette?.params && value != null
-          ? getColor(
-              value,
-              config.metric.palette,
-              {
-                metric: primaryMetricColumn.id,
-                max: maxColId,
-                breakdownBy: breakdownByColumn?.id,
-              },
-              data,
-              rowIdx
-            ) ?? defaultColor
-          : config.metric.color ?? defaultColor,
+      extra: secondaryMetricProps,
+      color: tileColor,
     };
 
     const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
@@ -281,7 +262,14 @@ export const MetricVis = ({
       return metricWProgress;
     }
 
-    return baseMetric;
+    // Metric with number, without trend line and without progress bar
+    return {
+      ...baseMetric,
+      // Override the background and main value color when the color is applied to the value
+      ...(config.metric.applyColorTo === 'value'
+        ? { color: defaultColor, valueColor: tileColor }
+        : { color: tileColor, valueColor: undefined }),
+    };
   });
 
   if (config.metric.minTiles) {
@@ -297,6 +285,8 @@ export const MetricVis = ({
 
   const minHeight = chartBaseTheme.metric.minHeight;
 
+  // this needs to use a useEffect as it depends on the scrollContainerRef
+  // which is not available on the first render
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * numRows;
     setScrollChildHeight(
@@ -321,12 +311,15 @@ export const MetricVis = ({
   return (
     <div
       ref={scrollContainerRef}
-      css={css`
-        height: 100%;
-        width: 100%;
-        overflow-y: auto;
-        ${useEuiScrollBar()}
-      `}
+      css={[
+        styles.layout,
+        css`
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          ${useEuiScrollBar()}
+        `,
+      ]}
     >
       <div
         css={css`
@@ -341,13 +334,16 @@ export const MetricVis = ({
               {
                 background: { color: defaultColor },
                 metric: {
-                  barBackground: euiThemeVars.euiColorLightShade,
-                  emptyBackground: euiThemeVars.euiColorEmptyShade,
-                  blendingBackground: euiThemeVars.euiColorEmptyShade,
+                  barBackground: colors.lightestShade,
+                  emptyBackground: colors.emptyShade,
+                  blendingBackground: colors.emptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
-                  valuesTextAlign: config.metric.valuesTextAlign,
+                  valueTextAlign: config.metric.primaryAlign,
+                  extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
+                  valuePosition: config.metric.primaryPosition,
+                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)
@@ -383,4 +379,18 @@ export const MetricVis = ({
       </div>
     </div>
   );
+};
+
+const styles = {
+  layout: css({
+    '.echMetricText__valuesBlock': {
+      display: 'flex',
+      minWidth: 0,
+      maxWidth: '100%',
+    },
+    '.echMetricText__valuesBlock > div': {
+      minWidth: 'inherit',
+      maxWidth: 'inherit',
+    },
+  }),
 };

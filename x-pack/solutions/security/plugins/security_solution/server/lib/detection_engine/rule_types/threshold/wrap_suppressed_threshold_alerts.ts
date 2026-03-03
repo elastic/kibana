@@ -6,7 +6,7 @@
  */
 
 import objectHash from 'object-hash';
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
@@ -19,12 +19,12 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
-import type { ThresholdBucket } from './types';
+import type { ThresholdCompositeBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { transformBucketIntoHit } from './bulk_create_threshold_signals';
 import type { SecuritySharedParams } from '../types';
@@ -43,10 +43,10 @@ export const wrapSuppressedThresholdALerts = ({
   startedAt,
 }: {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
+  buckets: ThresholdCompositeBucket[];
   buildReasonMessage: BuildReasonMessage;
   startedAt: Date;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId } = sharedParams;
   return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(
@@ -64,7 +64,7 @@ export const wrapSuppressedThresholdALerts = ({
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
       doc: hit,
       applyOverrides: true,

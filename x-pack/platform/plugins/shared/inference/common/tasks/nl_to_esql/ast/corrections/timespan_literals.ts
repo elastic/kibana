@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Walker, type ESQLAstQueryExpression } from '@kbn/esql-ast';
+import { Walker } from '@elastic/esql';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { isDateTruncFunctionNode, isBucketFunctionNode, isStringLiteralNode } from '../typeguards';
 import type { ESQLDateTruncFunction, ESQLBucketFunction } from '../types';
 import { stringToTimespanLiteral, isTimespanString } from '../ast_tools/timespan';
-import { QueryCorrection } from './types';
+import type { QueryCorrection } from './types';
 
 /**
  * Correct timespan literal grammar mistakes, and returns the list of corrections that got applied.

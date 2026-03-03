@@ -15,7 +15,7 @@ import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '..
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
-import { SessionViewTelemetryKey } from '../../types';
+import type { SessionViewTelemetryKey } from '../../types';
 
 type FetchFunction = () => void;
 
