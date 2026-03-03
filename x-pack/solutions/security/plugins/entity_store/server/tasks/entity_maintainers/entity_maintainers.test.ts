@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { scheduleEntityMaintainerTask, registerEntityMaintainerTask } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
+import { EntityMaintainerTaskStatus } from './types';
 
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
@@ -19,7 +20,6 @@ jest.mock('./entity_maintainers_registry', () => ({
   entityMaintainersRegistry: {
     getAll: jest.fn(),
     register: jest.fn(),
-    update: jest.fn(),
     hasId: jest.fn(),
   },
 }));
@@ -96,7 +96,10 @@ describe('entity_maintainer task', () => {
           id: 'maintainer-a:default',
           taskType: 'entity_store:v2:entity_maintainer_task:maintainer-a',
           schedule: { interval: '1m' },
-          state: { namespace: 'default' },
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          },
           params: {},
         },
         { request }
@@ -130,7 +133,10 @@ describe('entity_maintainer task', () => {
           id: 'maintainer-a:default',
           taskType: 'entity_store:v2:entity_maintainer_task:maintainer-a',
           schedule: { interval: '1m' },
-          state: { namespace: 'default' },
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          },
           params: {},
         },
         { request }
@@ -141,7 +147,10 @@ describe('entity_maintainer task', () => {
           id: 'maintainer-b:default',
           taskType: 'entity_store:v2:entity_maintainer_task:maintainer-b',
           schedule: { interval: '5m' },
-          state: { namespace: 'default' },
+          state: {
+            namespace: 'default',
+            taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+          },
           params: {},
         },
         { request }

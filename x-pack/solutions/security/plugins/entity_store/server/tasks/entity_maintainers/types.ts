@@ -20,7 +20,6 @@ export type EntityMaintainerTaskStatus =
 
 export interface EntityMaintainerRegistryData {
   interval: string;
-  taskStatus: EntityMaintainerTaskStatus;
   description?: string;
 }
 
@@ -44,6 +43,7 @@ export interface EntityMaintainerState {
 export interface EntityMaintainerStatus extends Record<string, unknown> {
   metadata: EntityMaintainerStatusMetadata;
   state: EntityMaintainerState;
+  taskStatus: EntityMaintainerTaskStatus;
 }
 
 interface EntityMaintainerTaskMethodContext {

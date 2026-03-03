@@ -64,7 +64,6 @@ export class EntityMaintainersClient {
         logger: this.logger,
         request,
       });
-      entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STARTED });
     } catch (error) {
       this.logger.error(`Failed to start entity maintainer task: ${id}`, { error });
       throw error;
@@ -85,7 +84,6 @@ export class EntityMaintainersClient {
             namespace: this.namespace,
             request,
           });
-          entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STARTED });
         })
       );
     } catch (error) {
@@ -107,7 +105,6 @@ export class EntityMaintainersClient {
         namespace: this.namespace,
         logger: this.logger,
       });
-      entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STOPPED });
     } catch (error) {
       this.logger.error(`Failed to stop entity maintainer task: ${id}`, { error });
       throw error;
@@ -126,7 +123,6 @@ export class EntityMaintainersClient {
             namespace: this.namespace,
             logger: this.logger,
           });
-          entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STOPPED });
         })
       );
     } catch (error) {
@@ -140,13 +136,15 @@ export class EntityMaintainersClient {
 
     const results = await Promise.all(
       entries.map(async (entry): Promise<EntityMaintainerListEntry> => {
-        const { id, interval, taskStatus, description } = entry;
+        const { id, interval, description } = entry;
         const taskId = getTaskId(id, this.namespace);
         let taskSnapshot: TaskSnapshot | undefined;
+        let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NOT_STARTED;
 
         try {
           const task = await this.taskManager.get(taskId);
-          const { metadata, state } = task.state;
+          const { metadata, state, taskStatus: taskStatusFromState } = task.state;
+          taskStatus = taskStatusFromState;
           const runs = metadata?.runs ?? 0;
           const lastSuccessTimestamp = metadata?.lastSuccessTimestamp ?? null;
           const lastErrorTimestamp = metadata?.lastErrorTimestamp ?? null;

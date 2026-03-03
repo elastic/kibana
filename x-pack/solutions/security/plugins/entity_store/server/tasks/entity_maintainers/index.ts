@@ -50,7 +50,7 @@ export async function scheduleEntityMaintainerTask({
       id: getTaskId(id, namespace),
       taskType: getTaskType(id),
       schedule: { interval },
-      state: { namespace },
+      state: { namespace, taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
       params: {},
     },
     { request }
@@ -90,16 +90,16 @@ export function registerEntityMaintainerTask({
             run: async () => {
               const currentStatus = taskInstance.state;
 
-              if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
-                logger.debug(`Entity maintainer task is stopped, skipping run`);
+              if (!fakeRequest) {
+                logger.error(`No fake request found, skipping run`);
+
                 return {
                   state: currentStatus,
                 };
               }
 
-              if (!fakeRequest) {
-                logger.error(`No fake request found, skipping run`);
-
+              if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
+                logger.debug(`Entity maintainer task is stopped, skipping run`);
                 return {
                   state: currentStatus,
                 };
@@ -113,6 +113,8 @@ export function registerEntityMaintainerTask({
                   namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace,
                 },
                 state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
+                taskStatus:
+                  currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
               };
 
               const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
@@ -196,6 +198,24 @@ async function runEntityMaintainerTask({
   };
 }
 
+async function updateTaskStatus({
+  taskManager,
+  taskId,
+  taskStatus,
+  request,
+}: {
+  taskManager: TaskManagerStartContract;
+  taskId: string;
+  taskStatus: EntityMaintainerTaskStatus;
+  request: KibanaRequest;
+}): Promise<void> {
+  await taskManager.bulkUpdateState(
+    [taskId],
+    (state) => ({ ...state, taskStatus }),
+    { request }
+  );
+}
+
 export async function stopEntityMaintainer({
   taskManager,
   id,
@@ -210,14 +230,12 @@ export async function stopEntityMaintainer({
   request: KibanaRequest;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
-  await taskManager.bulkUpdateState(
-    [taskId],
-    (state) => ({
-      ...state,
-      taskStatus: EntityMaintainerTaskStatus.STOPPED,
-    }),
-    { request }
-  );
+  await updateTaskStatus({
+    taskManager,
+    taskId,
+    taskStatus: EntityMaintainerTaskStatus.STOPPED,
+    request,
+  });
   logger.debug(`Stopped entity maintainer task: ${taskId}`);
 }
 
@@ -235,14 +253,12 @@ export async function startEntityMaintainer({
   request: KibanaRequest;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
-  await taskManager.bulkUpdateState(
-    [taskId],
-    (state) => ({
-      ...state,
-      taskStatus: EntityMaintainerTaskStatus.STARTED,
-    }),
-    { request }
-  );
+  await updateTaskStatus({
+    taskManager,
+    taskId,
+    taskStatus: EntityMaintainerTaskStatus.STARTED,
+    request,
+  });
   logger.debug(`Start entity maintainer task: ${taskId}`);
 }
 

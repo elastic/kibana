@@ -26,7 +26,6 @@ jest.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => ({
     hasId: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn().mockReturnValue([]),
-    update: jest.fn().mockReturnValue(true),
   },
 }));
 
@@ -69,7 +68,6 @@ const { entityMaintainersRegistry } = jest.requireMock(
     hasId: jest.MockedFunction<(id: string) => boolean>;
     get: jest.MockedFunction<(id: string) => EntityMaintainerTaskEntry | undefined>;
     getAll: jest.MockedFunction<() => EntityMaintainerTaskEntry[]>;
-    update: jest.MockedFunction<(id: string, overrides: unknown) => boolean>;
   };
 };
 
@@ -113,10 +111,9 @@ describe('EntityMaintainersClient', () => {
 
       expect(entityMaintainersRegistry.hasId).toHaveBeenCalledWith('unknown-id');
       expect(startEntityMaintainer).not.toHaveBeenCalled();
-      expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
 
-    it('should start task and update registry to STARTED when id is in registry', async () => {
+    it('should start task when id is in registry', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       const client = createClient();
       const request = createMockRequest();
@@ -130,27 +127,23 @@ describe('EntityMaintainersClient', () => {
           request,
         })
       );
-      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('maintainer-a', {
-        taskStatus: EntityMaintainerTaskStatus.STARTED,
-      });
     });
 
-    it('should propagate error and not update registry when startEntityMaintainer throws', async () => {
+    it('should propagate error when startEntityMaintainer throws', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       (startEntityMaintainer as jest.Mock).mockRejectedValueOnce(new Error('start failed'));
       const client = createClient();
       const request = createMockRequest();
 
       await expect(client.start('maintainer-a', request)).rejects.toThrow('start failed');
-      expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
   });
 
   describe('startAll', () => {
-    it('should schedule all registered tasks and update each to STARTED', async () => {
+    it('should schedule all registered tasks', async () => {
       const entries: EntityMaintainerTaskEntry[] = [
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
-        { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STOPPED },
+        { id: 'm1', interval: '5m' },
+        { id: 'm2', interval: '1h' },
       ];
       entityMaintainersRegistry.getAll.mockReturnValue(entries);
       const client = createClient();
@@ -165,18 +158,10 @@ describe('EntityMaintainersClient', () => {
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'm2', interval: '1h' })
       );
-      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m1', {
-        taskStatus: EntityMaintainerTaskStatus.STARTED,
-      });
-      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m2', {
-        taskStatus: EntityMaintainerTaskStatus.STARTED,
-      });
     });
 
     it('should propagate error when any schedule fails', async () => {
-      entityMaintainersRegistry.getAll.mockReturnValue([
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
-      ]);
+      entityMaintainersRegistry.getAll.mockReturnValue([{ id: 'm1', interval: '5m' }]);
       (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(
         new Error('schedule failed')
       );
@@ -196,10 +181,9 @@ describe('EntityMaintainersClient', () => {
       await client.stop('unknown-id', request);
 
       expect(stopEntityMaintainer).not.toHaveBeenCalled();
-      expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
 
-    it('should stop task and update registry to STOPPED when id is in registry', async () => {
+    it('should stop task when id is in registry', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       const client = createClient();
       const request = createMockRequest();
@@ -213,27 +197,23 @@ describe('EntityMaintainersClient', () => {
           request,
         })
       );
-      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('maintainer-a', {
-        taskStatus: EntityMaintainerTaskStatus.STOPPED,
-      });
     });
 
-    it('should propagate error and not update registry when stopEntityMaintainer throws', async () => {
+    it('should propagate error when stopEntityMaintainer throws', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       (stopEntityMaintainer as jest.Mock).mockRejectedValueOnce(new Error('stop failed'));
       const client = createClient();
       const request = createMockRequest();
 
       await expect(client.stop('maintainer-a', request)).rejects.toThrow('stop failed');
-      expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
   });
 
   describe('removeAll', () => {
-    it('should remove all registered tasks and update each to STOPPED', async () => {
+    it('should remove all registered tasks', async () => {
       const entries: EntityMaintainerTaskEntry[] = [
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
-        { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STARTED },
+        { id: 'm1', interval: '5m' },
+        { id: 'm2', interval: '1h' },
       ];
       entityMaintainersRegistry.getAll.mockReturnValue(entries);
       const client = createClient();
@@ -248,18 +228,12 @@ describe('EntityMaintainersClient', () => {
       expect(removeEntityMaintainer).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'm2', namespace: 'default' })
       );
-      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m1', {
-        taskStatus: EntityMaintainerTaskStatus.STOPPED,
-      });
-      expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m2', {
-        taskStatus: EntityMaintainerTaskStatus.STOPPED,
-      });
     });
 
     it('should propagate error when any remove fails', async () => {
       const entries: EntityMaintainerTaskEntry[] = [
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
-        { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STARTED },
+        { id: 'm1', interval: '5m' },
+        { id: 'm2', interval: '1h' },
       ];
       entityMaintainersRegistry.getAll.mockReturnValue(entries);
       (removeEntityMaintainer as jest.Mock)
@@ -272,12 +246,11 @@ describe('EntityMaintainersClient', () => {
   });
 
   describe('getMaintainers', () => {
-    it('should return entries from registry with no taskSnapshot when task does not exist (not-found)', async () => {
+    it('should return entries with taskStatus NOT_STARTED and no taskSnapshot when task does not exist (not-found)', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
         {
           id: 'm1',
           interval: '5m',
-          taskStatus: EntityMaintainerTaskStatus.STARTED,
           description: 'Maintainer one',
         },
       ]);
@@ -290,7 +263,7 @@ describe('EntityMaintainersClient', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         id: 'm1',
-        taskStatus: EntityMaintainerTaskStatus.STARTED,
+        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
         interval: '5m',
         description: 'Maintainer one',
         taskSnapshot: undefined,
@@ -299,16 +272,11 @@ describe('EntityMaintainersClient', () => {
       expect(taskManagerGet).toHaveBeenCalledWith('m1:default');
     });
 
-    it('should return entries with taskSnapshot when task exists', async () => {
-      entityMaintainersRegistry.getAll.mockReturnValue([
-        {
-          id: 'm1',
-          interval: '5m',
-          taskStatus: EntityMaintainerTaskStatus.STARTED,
-        },
-      ]);
+    it('should return entries with taskSnapshot and taskStatus from task state when task exists', async () => {
+      entityMaintainersRegistry.getAll.mockReturnValue([{ id: 'm1', interval: '5m' }]);
       const taskManagerGet = jest.fn().mockResolvedValue({
         state: {
+          taskStatus: EntityMaintainerTaskStatus.STARTED,
           metadata: {
             runs: 10,
             lastSuccessTimestamp: '2024-01-15T12:00:00.000Z',
@@ -335,17 +303,13 @@ describe('EntityMaintainersClient', () => {
       });
     });
 
-    it('should return registry taskStatus and task snapshot independently (task exists but registry status differs)', async () => {
+    it('should return taskStatus from task state', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
-        {
-          id: 'm1',
-          interval: '5m',
-          taskStatus: EntityMaintainerTaskStatus.STOPPED,
-          description: 'Registry says stopped',
-        },
+        { id: 'm1', interval: '5m', description: 'Registry says stopped' },
       ]);
       const taskManagerGet = jest.fn().mockResolvedValue({
         state: {
+          taskStatus: EntityMaintainerTaskStatus.STOPPED,
           metadata: {
             runs: 3,
             lastSuccessTimestamp: '2024-01-10T08:00:00.000Z',
@@ -369,9 +333,7 @@ describe('EntityMaintainersClient', () => {
     });
 
     it('should propagate non-not-found errors from taskManager.get', async () => {
-      entityMaintainersRegistry.getAll.mockReturnValue([
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
-      ]);
+      entityMaintainersRegistry.getAll.mockReturnValue([{ id: 'm1', interval: '5m' }]);
       const taskManagerGet = jest.fn().mockRejectedValue(new Error('ES connection failed'));
       const client = createClient({ taskManager: { get: taskManagerGet } });
       mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(false);
@@ -380,11 +342,10 @@ describe('EntityMaintainersClient', () => {
     });
 
     it('should use default runs and timestamps when task state metadata is missing', async () => {
-      entityMaintainersRegistry.getAll.mockReturnValue([
-        { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
-      ]);
+      entityMaintainersRegistry.getAll.mockReturnValue([{ id: 'm1', interval: '5m' }]);
       const taskManagerGet = jest.fn().mockResolvedValue({
         state: {
+          taskStatus: EntityMaintainerTaskStatus.STARTED,
           metadata: undefined,
           state: {},
         },
@@ -393,6 +354,7 @@ describe('EntityMaintainersClient', () => {
 
       const result = await client.getMaintainers();
 
+      expect(result[0].taskStatus).toBe(EntityMaintainerTaskStatus.STARTED);
       expect(result[0].taskSnapshot).toEqual({
         runs: 0,
         lastSuccessTimestamp: null,
