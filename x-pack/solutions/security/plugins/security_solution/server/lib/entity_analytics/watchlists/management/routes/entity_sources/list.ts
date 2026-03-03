@@ -17,6 +17,8 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
+import { WatchlistConfigClient } from '../../watchlist_config';
+import { getRequestSavedObjectClient } from '../../../shared/utils';
 
 export const listEntitySourcesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -54,8 +56,24 @@ export const listEntitySourcesRoute = (
 
           try {
             const secSol = await context.securitySolution;
+            const core = await context.core;
             const client = secSol.getMonitoringEntitySourceDataClient();
-            const body = await client.list(request.query);
+
+            const watchlistClient = new WatchlistConfigClient({
+              logger,
+              namespace: secSol.getSpaceId(),
+              soClient: getRequestSavedObjectClient(core),
+              esClient: core.elasticsearch.client.asCurrentUser,
+            });
+            const linkedSourceIds = await watchlistClient.getEntitySourceIds(
+              request.params.watchlist_id
+            );
+
+            const allSources = await client.list(request.query);
+            const body = {
+              ...allSources,
+              sources: allSources.sources.filter((source) => linkedSourceIds.includes(source.id)),
+            };
 
             return response.ok({ body });
           } catch (e) {

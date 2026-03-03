@@ -23,7 +23,7 @@ components:
         updatedAt: "2026-02-18T12:00:00.000Z"
 
       properties:
-        id: 
+        id:
           type: string
           description: The unique ID of the watchlist
         name:
@@ -38,6 +38,11 @@ components:
         riskModifier:
           type: number
           description: Risk score modifier associated with the watchlist
+        entitySourceIds:
+          type: array
+          items:
+            type: string
+          description: List of entity source IDs associated with the watchlist
         createdAt:
           type: string
           format: date-time
