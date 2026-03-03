@@ -6,26 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import React from 'react';
 
-export * from './constants';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
 
-// Schemas
-export {
-  MCPConnectorConfigSchema,
-  MCPConnectorSecretsSchema,
-  MCPAuthType,
-  API_KEY_PLACEHOLDER,
-  // Sub-action schemas
-  TestConnectorRequestSchema,
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-} from './schemas/latest';
+import pagerdutyIcon from './pagerduty.svg';
 
-// Types
-export type {
-  MCPConnectorConfig,
-  MCPConnectorSecrets,
-  Config,
-  Secrets,
-  CallToolParams,
-} from './types/latest';
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={pagerdutyIcon} {...props} />;
+};
