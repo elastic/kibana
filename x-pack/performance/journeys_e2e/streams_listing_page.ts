@@ -14,6 +14,7 @@ const STREAMS_EXPAND_ALL_BUTTON = subj('streamsExpandAllButton');
 const STREAMS_COLLAPSE_ALL_BUTTON = subj('streamsCollapseAllButton');
 
 export const journey = new Journey({
+  ftrConfigPath: 'x-pack/performance/configs/streams_heavy_config.ts',
   beforeSteps: async ({ kibanaServer, es, log }) => {
     await setupListingPageData(kibanaServer, es, log);
   },
