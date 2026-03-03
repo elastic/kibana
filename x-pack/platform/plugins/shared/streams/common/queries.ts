@@ -7,9 +7,6 @@
 
 import type { StreamQuery, StreamQueryInput } from '@kbn/streams-schema';
 
-// Legacy stored query links may not include rule_backed and should be treated as already backed.
-export const LEGACY_RULE_BACKED_FALLBACK = true;
-
 export interface QueryLink {
   'asset.uuid': string;
   'asset.type': 'query';
@@ -17,7 +14,7 @@ export interface QueryLink {
   query: StreamQuery;
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
-  rule_backed?: boolean;
+  rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */
   rule_id: string;
 }

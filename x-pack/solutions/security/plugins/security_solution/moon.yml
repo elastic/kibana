@@ -231,7 +231,6 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/security-ai-prompts'
   - '@kbn/inference-common'
-  - '@kbn/esql-language'
   - '@kbn/inference-langchain'
   - '@kbn/scout-security'
   - '@kbn/custom-icons'
@@ -275,6 +274,8 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/entity-store'
   - '@kbn/as-code-filters-transforms'
+  - '@kbn/cps-utils'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

@@ -243,6 +243,20 @@ export function InternalDashboardTopNav({
     };
   }, [onAppLeave, hasUnsavedChanges, viewMode]);
 
+  // Browser refresh/close with unsaved changes - only native confirmation, no custom message
+  useEffect(() => {
+    if (viewMode !== 'edit' || !hasUnsavedChanges) return;
+
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [hasUnsavedChanges, viewMode]);
+
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || isChromeVisible) && !fullScreenMode;

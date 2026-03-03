@@ -171,6 +171,12 @@ export {
   type PublishesWritableTitle,
 } from './interfaces/titles/publishes_title';
 export {
+  apiPublishesHideBorder,
+  apiPublishesWritableHideBorder,
+  type PublishesHideBorder,
+  type PublishesWritableHideBorder,
+} from './interfaces/titles/publishes_hide_border';
+export {
   initializeTitleManager,
   stateHasTitles,
   titleComparators,
