@@ -32,6 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasOnlySourceCommand,
+  getMultiplierFromESQLQuery,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1093,6 +1094,47 @@ describe('esql query helpers', () => {
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe(false);
+    });
+  });
+
+  describe('getMultiplierFromESQLQuery', () => {
+    it('should return 1 for empty query', () => {
+      expect(getMultiplierFromESQLQuery('')).toBe(1);
+    });
+
+    it('should return 1 when no multiplier comment exists', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* | LIMIT 10')).toBe(1);
+    });
+
+    it('should parse single-line comment // 1000x', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* | LIMIT 10 // 1000x')).toBe(1000);
+    });
+
+    it('should parse block comment /* 500x */', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* /* 500x */ | LIMIT 10')).toBe(500);
+    });
+
+    it('should be case-insensitive', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* // 100X')).toBe(100);
+    });
+
+    it('should handle whitespace around the number', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* //  50 x')).toBe(50);
+    });
+
+    it('should return 1 for non-numeric multiplier', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* // abcx')).toBe(1);
+    });
+
+    it('should return 1 for zero multiplier', () => {
+      expect(getMultiplierFromESQLQuery('FROM logs-* // 0x')).toBe(1);
+    });
+
+    it('should parse multiplier in multiline query', () => {
+      const query = `FROM logs-*
+        | WHERE status > 200
+        | LIMIT 10 // 2000x`;
+      expect(getMultiplierFromESQLQuery(query)).toBe(2000);
     });
   });
 });
