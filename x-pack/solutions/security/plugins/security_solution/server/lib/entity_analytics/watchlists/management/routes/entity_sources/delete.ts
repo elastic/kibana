@@ -36,7 +36,7 @@ export const deleteEntitySourceRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: WatchlistDataSources.DeleteEntitySourceRequestParams,
+            params: WatchlistDataSources.DeleteWatchlistEntitySourceRequestParams,
           },
         },
       },

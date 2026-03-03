@@ -36,7 +36,7 @@ export const getEntitySourceRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: WatchlistDataSources.GetEntitySourceRequestParams,
+            params: WatchlistDataSources.GetWatchlistEntitySourceRequestParams,
           },
         },
       },
@@ -45,7 +45,7 @@ export const getEntitySourceRoute = (
           context,
           request,
           response
-        ): Promise<IKibanaResponse<WatchlistDataSources.GetEntitySourceResponse>> => {
+        ): Promise<IKibanaResponse<WatchlistDataSources.GetWatchlistEntitySourceResponse>> => {
           const siemResponse = buildSiemResponse(response);
 
           try {

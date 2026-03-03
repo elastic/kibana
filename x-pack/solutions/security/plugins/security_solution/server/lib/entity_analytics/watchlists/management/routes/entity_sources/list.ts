@@ -37,8 +37,10 @@ export const listEntitySourcesRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: WatchlistDataSources.ListEntitySourcesRequestParams,
-            query: buildRouteValidationWithZod(WatchlistDataSources.ListEntitySourcesRequestQuery),
+            params: WatchlistDataSources.ListWatchlistEntitySourcesRequestParams,
+            query: buildRouteValidationWithZod(
+              WatchlistDataSources.ListWatchlistEntitySourcesRequestQuery
+            ),
           },
         },
       },
@@ -47,7 +49,7 @@ export const listEntitySourcesRoute = (
           context,
           request,
           response
-        ): Promise<IKibanaResponse<WatchlistDataSources.ListEntitySourcesResponse>> => {
+        ): Promise<IKibanaResponse<WatchlistDataSources.ListWatchlistEntitySourcesResponse>> => {
           const siemResponse = buildSiemResponse(response);
 
           try {
