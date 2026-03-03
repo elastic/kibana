@@ -69,6 +69,23 @@ describe('FirecrawlConnector', () => {
       );
       expect(result).toEqual(mockData);
     });
+
+    it('should truncate markdown when exceeding maxMarkdownLength', async () => {
+      const longMarkdown = 'x'.repeat(5000);
+      mockClient.post.mockResolvedValue({
+        data: { markdown: longMarkdown, metadata: { title: 'Page' } },
+      });
+
+      const result = await FirecrawlConnector.actions.scrape.handler(mockContext, {
+        url: 'https://example.com',
+        maxMarkdownLength: 100,
+      });
+
+      expect(result).toMatchObject({
+        metadata: { title: 'Page' },
+        markdown: 'x'.repeat(100) + '\n\n[... content truncated for length ...]',
+      });
+    });
   });
 
   describe('search action', () => {

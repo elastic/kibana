@@ -93,13 +93,24 @@ export const FirecrawlConnector: ConnectorSpec = {
       description: i18n.translate(
         'core.kibanaConnectorSpecs.firecrawl.actions.scrape.description',
         {
-          defaultMessage: 'Scrape a single URL and extract content (for example, markdown)',
+          defaultMessage:
+            'Scrape a single URL and extract content (for example, markdown). Markdown is truncated to maxMarkdownLength (default 100000 chars) to avoid context overflow; only set a lower value if a previous scrape returned truncated output and you need to fit within a smaller context.',
         }
       ),
       input: z.object({
         url: z.string().url().describe('The URL to scrape'),
         onlyMainContent: z.boolean().optional().default(true),
         waitFor: z.number().int().min(0).optional().default(0),
+        maxMarkdownLength: z
+          .number()
+          .int()
+          .min(1000)
+          .max(500_000)
+          .optional()
+          .default(100_000)
+          .describe(
+            'Maximum characters of markdown to return. Default 100000; max 500000 to avoid context overflow. Only set a lower value if you already got truncated output and need to fit within a smaller context.'
+          ),
       }),
       handler: async (ctx, input) => {
         const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
@@ -107,7 +118,23 @@ export const FirecrawlConnector: ConnectorSpec = {
           onlyMainContent: input.onlyMainContent,
           waitFor: input.waitFor,
         });
-        return response.data;
+        const data = response.data as {
+          markdown?: string;
+          data?: { markdown?: string };
+          [key: string]: unknown;
+        };
+        const markdownContainer = data?.markdown !== undefined ? data : data?.data;
+        const markdown =
+          typeof markdownContainer?.markdown === 'string' ? markdownContainer.markdown : '';
+        if (markdown.length > input.maxMarkdownLength) {
+          const truncated =
+            markdown.slice(0, input.maxMarkdownLength) +
+            '\n\n[... content truncated for length ...]';
+          if (markdownContainer) {
+            markdownContainer.markdown = truncated;
+          }
+        }
+        return data;
       },
     },
 
