@@ -28,7 +28,10 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
 
 import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
@@ -990,6 +993,93 @@ describe('Agent policy', () => {
 
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
+
+    it('should handle package policies using output when space awareness is not enabled', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Mock find for agent policies
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              revision: 1,
+              data_output_id: 'output-id-123',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      // Mock find for package policies
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'package-policy-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              output_id: 'output-id-123',
+              policy_ids: ['policy-2'],
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      // Mock bulkGet for agent policies of package policies
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-2',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              revision: 2,
+            },
+            references: [],
+          },
+        ],
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [],
+      } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      // Verify bulkGet was called without namespaces parameter when space awareness is disabled
+      expect(soClient.bulkGet).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            id: 'policy-2',
+            fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
+          }),
+        ])
+      );
+      expect(soClient.bulkGet).toHaveBeenCalledWith(
+        expect.not.arrayContaining([
+          expect.objectContaining({
+            namespaces: expect.anything(),
+          }),
+        ])
+      );
+    });
   });
 
   describe('removeOutputFromAll', () => {
@@ -1706,7 +1796,7 @@ describe('Agent policy', () => {
       } as FullAgentPolicy);
 
       const mockSo = {
-        attributes: {},
+        attributes: { revision: 1 },
         id: 'policy123',
         type: 'mocked',
         references: [],
@@ -1736,6 +1826,12 @@ describe('Agent policy', () => {
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [mockSo],
       });
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [{ _source: { policy_id: 'policy123', revision_idx: 1 } }],
+        },
+      } as any);
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
       expect(esClient.bulk).toBeCalledWith(
@@ -1798,7 +1894,7 @@ describe('Agent policy', () => {
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
-        id: 'policy123',
+        id: 'test-agentless-policy',
         revision: 1,
         namespaces: ['mySpace'],
         inputs: [
@@ -1842,6 +1938,13 @@ describe('Agent policy', () => {
           },
         ],
       });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [{ _source: { policy_id: 'test-agentless-policy', revision_idx: 1 } }],
+        },
+      } as any);
 
       jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
@@ -1865,7 +1968,7 @@ describe('Agent policy', () => {
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
-        id: 'policy123',
+        id: 'test-agentless-policy',
         revision: 1,
         namespaces: ['mySpace'],
         inputs: [
@@ -1910,6 +2013,13 @@ describe('Agent policy', () => {
         ],
       });
 
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [{ _source: { policy_id: 'test-agentless-policy', revision_idx: 1 } }],
+        },
+      } as any);
+
       jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
       await expect(
@@ -1917,6 +2027,88 @@ describe('Agent policy', () => {
           throwOnAgentlessError: true,
         })
       ).rejects.toThrow('createAgentlessAgent error');
+    });
+
+    it('should log a warning when .fleet-policies revision does not match .kibana_ingest revision after deploy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue({
+        id: 'policy123',
+        revision: 2,
+        namespaces: ['default'],
+        inputs: [{ id: 'input-1' }],
+      } as FullAgentPolicy);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { attributes: { revision: 2 }, id: 'policy123', type: 'mocked', references: [] },
+        ],
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [{ _source: { policy_id: 'policy123', revision_idx: 1 } }],
+        },
+      } as any);
+
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
+
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Policy [policy123] has mismatched revisions after deploy')
+      );
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('.kibana_ingest revision [2]')
+      );
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('.fleet-policies revision_idx [1]')
+      );
+    });
+
+    it('should not log a warning when .fleet-policies revision matches .kibana_ingest revision after deploy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue({
+        id: 'policy123',
+        revision: 2,
+        namespaces: ['default'],
+        inputs: [{ id: 'input-1' }],
+      } as FullAgentPolicy);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { attributes: { revision: 2 }, id: 'policy123', type: 'mocked', references: [] },
+        ],
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [{ _source: { policy_id: 'policy123', revision_idx: 2 } }],
+        },
+      } as any);
+
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
+
+      expect(mockedLogger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('has mismatched revisions after deploy')
+      );
     });
   });
 

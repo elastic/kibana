@@ -25,6 +25,7 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
+import { DataSourceSelectionChange } from '../types';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
@@ -36,7 +37,7 @@ interface DataSourceBrowserProps {
   allSources: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
-  onSelect: (selectedSources: string[]) => void;
+  onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
 
@@ -53,7 +54,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>(selectedSources);
   const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
@@ -66,10 +66,8 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       setSelectedIntegrations([]);
       setSearchValue('');
       setIsIntegrationPopoverOpen(false);
-      // Pre-select sources that are already in the query
-      setSelectedItems(selectedSources);
     }
-  }, [isOpen, selectedSources]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isFilterPopoverOpen) {
@@ -144,7 +142,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     return allSources.map((source) => ({
       key: source.name,
       label: source.name,
-      checked: selectedItems.includes(source.name) ? ('on' as const) : undefined,
+      checked: selectedSources.includes(source.name) ? ('on' as const) : undefined,
       append: <EuiTextColor color="subdued">{getSourceTypeLabel(source.type)}</EuiTextColor>,
       data: {
         type: source.type,
@@ -152,7 +150,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         title: source.title,
       },
     }));
-  }, [allSources, selectedItems]);
+  }, [allSources, selectedSources]);
 
   const filteredOptions = useMemo(() => {
     let filtered = options;
@@ -187,18 +185,14 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const handleSelectionChange = useCallback(
     (changedOption: EuiSelectableOption | undefined) => {
-      let newSelected;
+      if (!changedOption?.key) return;
 
-      if (changedOption?.checked === 'on') {
-        newSelected = [...selectedItems, changedOption.key as string];
-      } else {
-        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
-      }
+      const key = changedOption.key as string;
+      const isAdding = changedOption.checked === 'on';
 
-      setSelectedItems(newSelected);
-      onSelect(newSelected);
+      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
     },
-    [onSelect, selectedItems]
+    [onSelect]
   );
 
   const handleTypeFilterChange = (

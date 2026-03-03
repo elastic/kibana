@@ -1,7 +1,8 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "useUnknownInCatchVariables": true
   },
   "include": [
     "common/**/*",
@@ -54,7 +55,6 @@
     "@kbn/content-packs-schema",
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/visualization-utils",
     "@kbn/calculate-auto",
     "@kbn/deeplinks-observability",
     "@kbn/ui-theme",
@@ -84,7 +84,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/io-ts-utils",
     "@kbn/otel-semantic-conventions",
-    "@kbn/storage-adapter",
     "@kbn/cloud-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/deeplinks-security",
@@ -106,6 +105,7 @@
     "@kbn/react-query",
     "@kbn/timerange",
     "@kbn/inference-common",
+    "@kbn/esql",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/stack-connectors-plugin",
   ]

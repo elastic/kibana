@@ -9,14 +9,8 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
-    timeout_in_minutes: 75
-    parallelism: 20
+    timeout_in_minutes: 60
+    parallelism: 24
     retry:
       automatic:
         - exit_status: '-1'
@@ -32,14 +26,8 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
-    timeout_in_minutes: 75
-    parallelism: 14
+    timeout_in_minutes: 60
+    parallelism: 16
     retry:
       automatic:
         - exit_status: '-1'

@@ -29,6 +29,9 @@ Name
 API URL
 :   The {{bedrock}} request URL.
 
+Region
+:   (Optional) The AWS region used for request signing. Required when using a custom endpoint URL that does not include the region in the hostname (for example, `us-east-1`).
+
 Default model
 :   The GAI model for {{bedrock}} to use. Current support is for the Anthropic Claude models, defaulting to Claude 2. The model can be set on a per request basis by including a "model" parameter alongside the request body.
 

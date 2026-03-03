@@ -64,7 +64,8 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
-      "share"
+      "share",
+      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -82,7 +83,8 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
-      "llmTasks"
+      "llmTasks",
+      "cps"
     ],
     "requiredBundles": [
       "esUiShared",

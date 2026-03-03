@@ -15,7 +15,6 @@ import type {
 } from '../../schema/metric_ops';
 
 describe('Cumulative Sum Transforms', () => {
-  const testRef = { id: 'col1', field: 'sales' };
   const columnRef: LensApiSumMetricOperation = {
     operation: 'sum',
     field: 'sales',
@@ -32,7 +31,7 @@ describe('Cumulative Sum Transforms', () => {
 
       const expected: CumulativeSumIndexPatternColumn = {
         operationType: 'cumulative_sum',
-        references: ['col1'],
+        references: [],
         label: '',
         customLabel: false,
         isBucketed: false,
@@ -40,7 +39,7 @@ describe('Cumulative Sum Transforms', () => {
         params: {},
       };
 
-      expect(fromCumulativeSumAPItoLensState(input, testRef)).toEqual(expected);
+      expect(fromCumulativeSumAPItoLensState(input)).toEqual(expected);
     });
 
     it('should handle format configuration', () => {
@@ -54,7 +53,7 @@ describe('Cumulative Sum Transforms', () => {
         },
       };
 
-      const result = fromCumulativeSumAPItoLensState(input, testRef);
+      const result = fromCumulativeSumAPItoLensState(input);
       expect(result.params?.format).toEqual({
         id: 'number',
         params: {
@@ -71,20 +70,9 @@ describe('Cumulative Sum Transforms', () => {
         label: 'Running Total',
       };
 
-      const result = fromCumulativeSumAPItoLensState(input, testRef);
+      const result = fromCumulativeSumAPItoLensState(input);
       expect(result.label).toBe('Running Total');
       expect(result.customLabel).toBe(true);
-    });
-
-    it('should handle missing reference field', () => {
-      const input: LensApiCumulativeSumOperation = {
-        operation: 'cumulative_sum',
-        field: 'sales',
-      };
-
-      const emptyRef = { id: 'col1', field: '' };
-      const result = fromCumulativeSumAPItoLensState(input, emptyRef);
-      expect(result.label).toBe('');
     });
   });
 

@@ -39,6 +39,7 @@ export interface ToolCallEventData {
   tool_call_id: string;
   tool_id: string;
   params: Record<string, unknown>;
+  tool_call_group_id?: string;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;

@@ -56,4 +56,36 @@ describe('SectionPanel', () => {
 
     expect(screen.getByTestId('custom-title')).toBeInTheDocument();
   });
+
+  it('renders title as link when link prop is provided and invokes callback on click', () => {
+    const callback = jest.fn();
+    renderWithEui(
+      <SectionPanel
+        title="Entities"
+        link={{
+          callback,
+          tooltip: 'Show all entities',
+        }}
+      >
+        <div />
+      </SectionPanel>
+    );
+
+    const titleLink = screen.getByTestId('sectionPanelTitleLink');
+    expect(titleLink).toBeInTheDocument();
+    expect(titleLink).toHaveTextContent('Entities');
+
+    titleLink.click();
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders custom data-test-subj when provided', () => {
+    renderWithEui(
+      <SectionPanel title="Title" data-test-subj="customPanel">
+        <div />
+      </SectionPanel>
+    );
+
+    expect(screen.getByTestId('customPanel')).toBeInTheDocument();
+  });
 });

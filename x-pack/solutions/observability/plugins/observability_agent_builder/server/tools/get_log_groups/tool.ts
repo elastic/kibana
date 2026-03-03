@@ -18,7 +18,7 @@ import type {
 import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
-import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
+import { OBSERVABILITY_GET_TRACES_TOOL_ID } from '../get_traces/tool';
 
 export interface GetLogGroupsToolResult {
   type: ToolResultType.other;
@@ -95,10 +95,10 @@ export function createGetLogGroupsTool({
       - Answering "what kinds of things are happening?" rather than "what exactly happened?"
 
       After using this tool:
-      - Use \`${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}\` to trace the full sequence of events leading up to a given log sample
+      - Use \`${OBSERVABILITY_GET_TRACES_TOOL_ID}\` to trace the full sequence of events leading up to a given log sample
 
       Do NOT use for:
-      - Understanding the sequence of events for a specific error (use \`${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}\`)
+      - Understanding the sequence of events for a specific error (use \`${OBSERVABILITY_GET_TRACES_TOOL_ID}\`)
       - Analyzing changes in log volume over time (use run_log_rate_analysis)
     `,
     schema: getLogsSchema,

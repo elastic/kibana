@@ -129,7 +129,7 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    processing,
+    ...(processing ? { processing } : {}),
     schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />

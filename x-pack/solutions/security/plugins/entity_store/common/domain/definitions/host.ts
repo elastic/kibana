@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collectValues as collect, oldestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
@@ -28,7 +28,9 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   entityTypeFallback: 'Host',
   indexPatterns: [],
   fields: [
+    newestValue({ destination: 'entity.name', source: 'host.name' }),
     oldestValue({ source: 'host.entity.id' }),
+
     collect({ source: 'host.name' }),
     collect({ source: 'host.domain' }),
     collect({ source: 'host.hostname' }),
@@ -54,39 +56,36 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'host.mac' }),
     collect({ source: 'host.type' }),
     collect({ source: 'host.architecture' }),
+    newestValue({ source: 'host.boot.id' }),
+    newestValue({
+      source: 'host.cpu.usage',
+      mapping: { type: 'scaled_float', scaling_factor: 1000 },
+    }),
+    newestValue({ source: 'host.disk.read.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.disk.write.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.egress.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.egress.packets', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.ingress.bytes', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.network.ingress.packets', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.uptime', mapping: { type: 'long' } }),
+    newestValue({ source: 'host.pid_ns_ino' }),
+    newestValue({ source: 'host.os.family' }),
+    newestValue({ source: 'host.os.full' }),
+    newestValue({ source: 'host.os.kernel' }),
+    newestValue({ source: 'host.os.platform' }),
+    newestValue({ source: 'host.os.version' }),
+    newestValue({ source: 'host.geo.city_name' }),
+    newestValue({ source: 'host.geo.continent_code' }),
+    newestValue({ source: 'host.geo.continent_name' }),
+    newestValue({ source: 'host.geo.country_iso_code' }),
+    newestValue({ source: 'host.geo.country_name' }),
+    // collect({ source: 'host.geo.location', mapping: { type: 'geo_point' } }), // geo_point is not supported in ESQL TOP
+    collect({ source: 'host.geo.name' }),
+    collect({ source: 'host.geo.postal_code' }),
+    collect({ source: 'host.geo.region_iso_code' }),
+    collect({ source: 'host.geo.region_name' }),
+    collect({ source: 'host.geo.timezone' }),
     ...getCommonFieldDescriptions('host'),
     ...getEntityFieldsDescriptions('host'),
-
-    collect({
-      source: `host.entity.relationships.Communicates_with`,
-      destination: 'entity.relationships.Communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `host.entity.relationships.Depends_on`,
-      destination: 'entity.relationships.Depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `host.entity.relationships.Dependent_of`,
-      destination: 'entity.relationships.Dependent_of',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-
-    collect({
-      source: `host.entity.relationships.Owned_by`,
-      destination: 'entity.relationships.Owned_by',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `host.entity.relationships.Accessed_frequently_by`,
-      destination: 'entity.relationships.Accessed_frequently_by',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

@@ -12,14 +12,10 @@
 - Plugin IDs are additional camelCase IDs under `plugin.id` in `kibana.jsonc`, used by core platform and other plugins.
 - Modules are grouped by domain (platform vs solutions) with visibility rules (`shared` vs `private`) that limit cross-group access.
 - Utility scripts live in `scripts/` (e.g., `node scripts/generate.js`).
-
-## Critical Thinking
-- Fix root cause (not band-aid).
-- Unsure: read more code; if still stuck, ask w/ short options.
-- Conflicts: call out; pick safer path.
-- Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
+- If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
+Always run `node scripts/check_changes.ts` to validate your changes
 
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
@@ -31,24 +27,24 @@
 `yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
 - Auto-discovers `jest.integration.config.js` (not `jest.config.js`). Same single-config constraint as above.
 
+### Function Test Runner (FTR)
+`yarn test:ftr [--config <file1> [--config <file2> ...]]`
+- For new tests, prefer using Scout
+
+### Scout (UI/API with Playwright)
+`node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
+
+## Code Style Guidelines
+Follow existing patterns in the target area first; below are common defaults.
+
 ### Type check
 `yarn test:type_check [--project path/to/tsconfig.json]`
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
 
-### Function Test Runner (FTR)
-`yarn test:ftr [--config <file1> [--config <file2> ...]]`
-- For new tests, prefer using Scout
-
-### Scout (UI/API with Playwright)
-`node scripts/scout.js run-tests --stateful --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
-
-## Code Style Guidelines
-Follow existing patterns in the target area first; below are common defaults.
-
 ### TypeScript & Types
-- Use TypeScript for all new code; avoid `any`.
+- Use TypeScript for all new code; avoid `any` and `unknown`.
 - Prefer explicit return types for public APIs and exported functions.
 - Use `import type` for type-only imports.
 - Avoid non-null assertions (`!`) unless locally justified.
@@ -56,6 +52,11 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer const arrow functions
 - Prefer explicit import/exports over "*"
 - Prefer destructuring of variables, rather than property access
+- Never suppress type errors with `@ts-ignore`, `@ts-expect-error`; fix the root cause.
+
+### Linting
+`node scripts/eslint --fix $(git diff --name-only)`
+- Never suppress linting errors with `eslint-disable`; fix the root cause.
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.
@@ -79,5 +80,8 @@ Follow existing patterns in the target area first; below are common defaults.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
 ## Contribution Hygiene
+- Unsure: read more code; if still stuck, ask w/ short options. Never guess.
+- Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
-- Update docs when behavior or usage changes.
+- Update docs and tests when behavior or usage changes.
+- Never remove, skip, or comment out tests to make them pass; fix the underlying code.

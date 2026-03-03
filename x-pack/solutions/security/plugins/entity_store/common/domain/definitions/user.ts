@@ -7,7 +7,7 @@
 
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { collectValues as collect, oldestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
@@ -28,7 +28,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   entityTypeFallback: 'Identity',
   indexPatterns: [],
   fields: [
+    newestValue({ destination: 'entity.name', source: 'user.name' }),
     oldestValue({ source: 'user.entity.id' }),
+
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
     collect({ source: 'user.name' }),
@@ -46,38 +48,15 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'user.hash' }),
     collect({ source: 'user.id' }),
     collect({ source: 'user.roles' }),
+    collect({ source: 'user.group.domain' }),
+    collect({ source: 'user.group.id' }),
+    collect({ source: 'user.group.name' }),
     ...getCommonFieldDescriptions('user'),
     ...getEntityFieldsDescriptions('user'),
 
-    // Used to populate the identity field
+    /* Used to populate the identity field */
     collect({ source: 'host.entity.id' }),
     collect({ source: 'host.id' }),
     collect({ source: 'host.name' }),
-
-    collect({
-      source: `user.entity.relationships.Accesses_frequently`,
-      destination: 'entity.relationships.Accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `user.entity.relationships.Owns`,
-      destination: 'entity.relationships.Owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-
-    collect({
-      source: `user.entity.relationships.Supervises`,
-      destination: 'entity.relationships.Supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `user.entity.relationships.Supervised_by`,
-      destination: 'entity.relationships.Supervised_by',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

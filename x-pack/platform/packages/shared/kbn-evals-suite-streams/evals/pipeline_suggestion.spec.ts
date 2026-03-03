@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { node } from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
 import kbnDatemath from '@kbn/datemath';
-import type { ScoutTestConfig } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
@@ -24,6 +21,7 @@ import {
   calculatePipelineSuggestionMetrics,
   type PipelineSuggestionMetrics,
 } from './pipeline_suggestion_metrics';
+import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 /**
  * Pipeline suggestion quality evaluation.
@@ -31,7 +29,7 @@ import {
  * Tests the quality of complete pipeline generation (parsing + normalization)
  * using real LogHub log samples.
  *
- * @tags @ess
+ * @tags @local-stateful-classic @cloud-stateful-classic
  */
 
 evaluate.describe.configure({ timeout: 600_000 });
@@ -39,28 +37,6 @@ evaluate.describe.configure({ timeout: 600_000 });
 evaluate.describe('Pipeline suggestion quality evaluation', () => {
   const from = kbnDatemath.parse('now-2m')!;
   const to = kbnDatemath.parse('now')!;
-
-  function getSharedArgs({ config }: { config: ScoutTestConfig }) {
-    const esUrl = new URL(config.hosts.elasticsearch);
-    const kbnUrl = new URL(config.hosts.kibana);
-
-    esUrl.username = config.auth.username;
-    esUrl.password = config.auth.password;
-
-    kbnUrl.username = config.auth.username;
-    kbnUrl.password = config.auth.password;
-
-    return [
-      `--from=${from.toISOString()}`,
-      `--to=${to.toISOString()}`,
-      `--kibana=${kbnUrl.toString()}`,
-      `--target=${esUrl.toString()}`,
-      '--assume-package-version=9.2.0',
-      '--workers=1',
-    ];
-  }
-
-  const synthtraceScript = Path.join(REPO_ROOT, 'scripts/synthtrace.js');
 
   /**
    * Flatten nested objects into dot notation.
@@ -80,23 +56,6 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
     }
 
     return flattened;
-  }
-
-  /**
-   * Index logs for a specific system using synthtrace.
-   */
-  async function indexSystemLogs({ config, system }: { config: ScoutTestConfig; system: string }) {
-    await node(
-      require.resolve(synthtraceScript),
-      [
-        'sample_logs',
-        ...getSharedArgs({ config }),
-        `--scenarioOpts.systems="${system}"`,
-        '--scenarioOpts.rpm=100',
-        '--scenarioOpts.streamType=wired',
-      ],
-      { stdio: 'inherit' }
-    );
   }
 
   /**
@@ -314,20 +273,113 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       // Parse SSE response
       const suggestedPipeline = parseSSEResponse(pipelineResponse.data as string);
 
-      // Check if pipeline suggestion failed
-      if (!suggestedPipeline) {
-        // Log first 1000 chars of response for debugging
+      // Check if no pipeline is expected
+      const expectsNoPipeline =
+        expected.expected_processors.parsing === undefined &&
+        (expected.expected_processors.normalization?.length ?? 0) === 0;
+
+      // Check if LLM returned no pipeline (null or empty steps array)
+      const isEmptyPipeline = !suggestedPipeline || (suggestedPipeline.steps?.length ?? 0) === 0;
+
+      // Handle case where LLM returns no pipeline (null or empty)
+      if (isEmptyPipeline) {
+        if (expectsNoPipeline) {
+          // LLM correctly identified that no pipeline is needed - perfect score
+          const perfectMetrics: PipelineSuggestionMetrics = {
+            parseRate: 1,
+            fieldCount: 0,
+            processorCount: 0,
+            processorTypes: {},
+            processorFailureRates: {},
+            otelCompliance: 1,
+            semanticFieldCoverage: 1,
+            typeCorrectness: 1,
+            stepCount: 0,
+            stepEfficiency: 1,
+            hasRedundantProcessors: false,
+            overallQuality: 1,
+          };
+
+          const emptySimulationResult: ProcessingSimulationResponse = {
+            documents: [],
+            processors_metrics: {},
+            documents_metrics: {
+              failed_rate: 0,
+              partially_parsed_rate: 0,
+              skipped_rate: 0,
+              parsed_rate: 1,
+              dropped_rate: 0,
+            },
+            detected_fields: [],
+            definition_error: undefined,
+          };
+
+          return {
+            input,
+            output: {
+              suggestedPipeline: null,
+              simulationResult: emptySimulationResult,
+              metrics: perfectMetrics,
+            },
+            expected,
+            metadata,
+          };
+        }
+
+        // LLM returned no/empty pipeline but we expected one - this is an error
         const responsePreview = (pipelineResponse.data as string).slice(0, 1000);
-        // Log sample of documents to check format
         const sampleDoc = documents[0];
         const bodyPreview = (sampleDoc['body.text'] as string | undefined)?.slice(0, 200);
 
         throw new Error(
-          `Pipeline suggestion returned null for ${input.stream_name}. ` +
+          `Pipeline suggestion returned null/empty for ${input.stream_name}. ` +
             `Response preview: ${responsePreview}. ` +
             `Sample document body.text: ${bodyPreview}. ` +
             `Document count: ${documents.length}`
         );
+      }
+
+      // If we get here, LLM suggested a non-empty pipeline but we expected none
+      if (expectsNoPipeline) {
+        const poorMetrics: PipelineSuggestionMetrics = {
+          parseRate: 0,
+          fieldCount: 0,
+          processorCount: suggestedPipeline.steps?.length ?? 0,
+          processorTypes: {},
+          processorFailureRates: {},
+          otelCompliance: 0,
+          semanticFieldCoverage: 0,
+          typeCorrectness: 0,
+          stepCount: suggestedPipeline.steps?.length ?? 0,
+          stepEfficiency: 0,
+          hasRedundantProcessors: true,
+          overallQuality: 0,
+        };
+
+        const emptySimulationResult: ProcessingSimulationResponse = {
+          documents: [],
+          processors_metrics: {},
+          documents_metrics: {
+            failed_rate: 1,
+            partially_parsed_rate: 0,
+            skipped_rate: 0,
+            parsed_rate: 0,
+            dropped_rate: 0,
+          },
+          detected_fields: [],
+          definition_error: undefined,
+        };
+
+        return {
+          input,
+          output: {
+            suggestedPipeline,
+            simulationResult: emptySimulationResult,
+            metrics: poorMetrics,
+          },
+          expected,
+          metadata,
+        };
       }
 
       // Simulate the suggested pipeline
@@ -432,6 +484,23 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
         const pipeline = actualOutput?.suggestedPipeline;
         const metrics = actualOutput?.metrics;
 
+        // Check if no pipeline is expected (structured data that needs no processing)
+        const expectsNoPipeline =
+          expected?.expected_processors?.parsing === undefined &&
+          (expected?.expected_processors?.normalization?.length ?? 0) === 0;
+
+        const isEmptyPipeline = !pipeline || (pipeline.steps?.length ?? 0) === 0;
+
+        // If no pipeline was expected and LLM returned empty/no pipeline, that's perfect
+        if (expectsNoPipeline && isEmptyPipeline) {
+          return { score: 1.0 };
+        }
+
+        // If no pipeline was expected but LLM returned one, that's poor
+        if (expectsNoPipeline && !isEmptyPipeline) {
+          return { score: 0.0 };
+        }
+
         if (!metrics) {
           // eslint-disable-next-line no-console
           console.error('No metrics found for LLM evaluator:', JSON.stringify(output, null, 2));
@@ -506,7 +575,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
    * Run tests for each dataset.
    */
   PIPELINE_SUGGESTION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, { tag: '@ess' }, () => {
+    evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
       });
@@ -522,7 +591,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
         evaluate(
           `${idx + 1}. ${example.input.system}`,
           async ({
-            phoenixClient,
+            executorClient,
             kbnClient,
             esClient,
             connector,
@@ -546,9 +615,12 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               });
 
               // Index logs for this system - this will route to the child stream
-              await indexSystemLogs({
+              await indexSynthtraceScenario({
+                scenario: 'sample_logs',
+                scenarioOpts: { systems: example.input.system, rpm: 100, streamType: 'wired' },
                 config,
-                system: example.input.system,
+                from,
+                to,
               });
 
               // Wait for documents to be indexed and routed
@@ -556,7 +628,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
             }
             // Both modes: stream now exists, documents ready (inline in example, indexed for system)
 
-            await phoenixClient.runExperiment(
+            await executorClient.runExperiment(
               {
                 dataset: {
                   name: `Pipeline Suggestion - ${example.input.system}`,

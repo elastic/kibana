@@ -9,9 +9,22 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { buildEsqlQuery } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import type { StreamsPluginStartDependencies } from '../../../../types';
+import {
+  QUERY_ESQL_QUERY,
+  QUERY_KQL_BODY,
+  QUERY_FEATURE_FILTER,
+  QUERY_FEATURE_NAME,
+  STREAM_NAME,
+  RULE_ID,
+  RULE_BACKED,
+  ASSET_UUID,
+} from '../fields';
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
+import { computeRuleId } from './helpers/query';
 
 export class QueryService {
   constructor(
@@ -35,7 +48,62 @@ export class QueryService {
     const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       core.elasticsearch.client.asInternalUser,
       this.logger.get('queries'),
-      queryStorageSettings
+      queryStorageSettings,
+      {
+        migrateSource: (source) => {
+          let migrated = source as Record<string, unknown>;
+
+          if (!migrated[QUERY_ESQL_QUERY]) {
+            const streamName = migrated[STREAM_NAME] as string;
+            const featureFilterJson = migrated[QUERY_FEATURE_FILTER];
+            let featureFilter: Condition | undefined;
+            if (
+              featureFilterJson &&
+              typeof featureFilterJson === 'string' &&
+              featureFilterJson !== ''
+            ) {
+              try {
+                featureFilter = JSON.parse(featureFilterJson) as Condition;
+              } catch {
+                featureFilter = undefined;
+              }
+            }
+
+            const input = {
+              kql: { query: migrated[QUERY_KQL_BODY] as string },
+              feature:
+                migrated[QUERY_FEATURE_NAME] && featureFilter
+                  ? {
+                      name: migrated[QUERY_FEATURE_NAME] as string,
+                      filter: featureFilter,
+                      type: 'system' as const,
+                    }
+                  : undefined,
+            };
+
+            // Uses the wired stream pattern as a best-effort fallback:
+            // the definition is not available in the sync storage migration callback.
+            const esqlQuery = buildEsqlQuery([streamName, `${streamName}.*`], input);
+            migrated = { ...migrated, [QUERY_ESQL_QUERY]: esqlQuery };
+          }
+
+          // Back-fill rule_id for pre-existing documents using the KQL query as the hash
+          // input — this preserves the IDs of rules that were already created before rule_id
+          // was persisted. New documents use the compiled ESQL query instead (see toQueryLinkFromQuery).
+          if (!(RULE_ID in migrated)) {
+            const uuid = migrated[ASSET_UUID] as string;
+            const kqlQuery = migrated[QUERY_KQL_BODY] as string;
+            migrated = { ...migrated, [RULE_ID]: computeRuleId(uuid, kqlQuery) };
+          }
+
+          // Pre-existing queries were all rule-backed; back-fill the flag so it is persisted.
+          if (!(RULE_BACKED in migrated)) {
+            migrated = { ...migrated, [RULE_BACKED]: true };
+          }
+
+          return migrated as StoredQueryLink;
+        },
+      }
     );
 
     return new QueryClient(

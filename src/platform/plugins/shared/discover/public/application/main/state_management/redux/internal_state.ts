@@ -29,9 +29,14 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
+import {
+  type RuntimeStateManager,
+  selectTabRuntimeInternalState,
+  selectTabRuntimeState,
+} from './runtime_state';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -44,6 +49,8 @@ import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
+import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
+import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -55,6 +62,7 @@ const initialState: DiscoverInternalState = {
   persistedDiscoverSession: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
+  defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
@@ -146,6 +154,13 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setDefaultProfileEsqlQuery: (
+      state,
+      action: PayloadAction<DiscoverInternalState['defaultProfileEsqlQuery']>
+    ) => {
+      state.defaultProfileEsqlQuery = action.payload;
     },
 
     setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
@@ -446,6 +461,14 @@ export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
 
 export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
 
+export const transitionedFromEsqlToDataView = createAction<TabActionPayload>(
+  'internalState/transitionedFromEsqlToDataView'
+);
+
+export const transitionedFromDataViewToEsql = createAction<TabActionPayload>(
+  'internalState/transitionedFromDataViewToEsql'
+);
+
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
   TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
@@ -470,9 +493,9 @@ const createMiddleware = (options: InternalStateDependencies) => {
       (action, listenerApi) => {
         const discoverSession =
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId);
+          selectTabRuntimeInternalState(runtimeStateManager, tabId, services);
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -488,10 +511,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: syncLocallyPersistedTabState,
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id, services),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
@@ -510,6 +533,41 @@ const createMiddleware = (options: InternalStateDependencies) => {
     },
   });
 
+  // This pair of listeners updates the default query mode based on the last used query type (ES|QL vs Data View), we use
+  // this so new discover sessions use that query mode as a default.
+  //
+  // NOTE: In the short term we will add a feature flag to default to ES|QL when there is no existing preference saved.
+  // Right now we use classic - this means that users will have to switch to ES|QL manually the first time if they already
+  // had classic stored as their last used mode.
+  startListening({
+    actionCreator: transitionedFromDataViewToEsql,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'esql');
+    },
+  });
+
+  startListening({
+    actionCreator: transitionedFromEsqlToDataView,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
+    },
+  });
+
+  startListening({
+    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
+    effect: (action, listenerApi) => {
+      const { runtimeStateManager } = listenerApi.extra;
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
+      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+
+      if (tabStateContainer?.dataState.cleanupEsql) {
+        tabStateContainer.dataState.cleanupEsql();
+      }
+    },
+  });
+
   return listenerMiddleware.middleware;
 };
 
@@ -521,16 +579,23 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$'>
+  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getCascadedDocumentsStateManager: (tabId) => {
+      return createCascadedDocumentsStateManager({
+        internalState,
+        tabId,
+      });
+    },
   };
 
   const internalState = configureStore({

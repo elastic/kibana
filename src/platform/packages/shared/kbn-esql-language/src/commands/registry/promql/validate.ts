@@ -14,26 +14,45 @@ import type {
   ESQLAstPromqlCommand,
   ESQLLocation,
   ESQLMessage,
-} from '../../../types';
-import { isIdentifier, isList, isSource } from '../../../ast/is';
+} from '@elastic/esql/types';
+import { isIdentifier, isList, isSource, Walker } from '@elastic/esql';
+import type {
+  PromQLBinaryExpression,
+  PromQLFunction,
+  PromQLLabelName,
+  PromQLSelector,
+} from '@elastic/esql';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
+import {
+  getPromqlFunctionDefinition,
+  getPromqlOperatorDefinition,
+  isPromqlAcrossSeriesFunction,
+} from '../../definitions/utils/promql';
+import { getPromqlExpressionType } from '../../definitions/utils/expressions';
 import { sourceExists } from '../../definitions/utils/sources';
 import { errors } from '../../definitions/utils/errors';
+import { validateColumnForCommand } from '../../definitions/utils/validation/column';
+import type { PromQLFunctionDefinition } from '../../definitions/types';
+import {
+  getPromqlFunctionArityCheck,
+  getPromqlMatchingSignatures,
+  getPromqlSignatureMismatch,
+} from '../../definitions/utils/validation/function';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,
   isPromqlParamName,
   looksLikePromqlParamAssignment,
-  PROMQL_REQUIRED_PARAMS,
+  PromqlParamName,
 } from './utils';
 
 // ISO 8601 with Z, optional milliseconds (e.g. 2024-01-15T10:00:00Z or ...00.000Z).
 const FORMAT_DATE_LITERAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 // Prometheus duration format (one or more number+unit segments).
-const FORMAT_STEP_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
-// Catches split step values like "step= 1 m" which the parser drops from params.
-const STEP_WITH_SPACES_REGEX = /\bstep\s*=\s*\d+\s+[a-z]+/i;
+const FORMAT_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
+// Catches split duration param values like "step= 1 m" which the parser drops from params.
+const DURATION_PARAM_WITH_SPACES_REGEX = /\b(step|scrape_interval)\s*=\s*\d+\s+[a-z]+/i;
 // Extracts "param = value" from the query field when the last param is mis-parsed.
 const PROMQL_QUERY_PARAM_VALUE_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(\\S*)`);
 
@@ -51,40 +70,42 @@ export const validate = (
   for (const param of getUsedPromqlParamNames(command.text)) {
     usedParams.add(param);
   }
-  const requiredParams = PROMQL_REQUIRED_PARAMS;
 
-  if (STEP_WITH_SPACES_REGEX.test(command.text) && !paramValues.has('step')) {
+  const durationSpaceMatch = command.text.match(DURATION_PARAM_WITH_SPACES_REGEX);
+
+  if (durationSpaceMatch && !paramValues.has(durationSpaceMatch[1].toLowerCase())) {
+    const param = durationSpaceMatch[1].toLowerCase();
     messages.push(
       getMessageFromId({
-        messageId: 'promqlInvalidStepParam',
-        values: {},
+        messageId: 'promqlInvalidParam',
+        values: { reason: `Invalid ${param} value` },
         locations: command.location,
       })
     );
   }
 
-  for (const param of requiredParams) {
-    if (usedParams.has(param)) {
-      continue;
-    }
+  const hasStep = usedParams.has(PromqlParamName.Step);
+  const hasBuckets = usedParams.has(PromqlParamName.Buckets);
 
+  if (hasStep && hasBuckets) {
     messages.push({
       ...getMessageFromId({
-        messageId: 'promqlMissingParam',
-        values: { param },
+        messageId: 'promqlMutuallyExclusiveParams',
+        values: { param1: PromqlParamName.Step, param2: PromqlParamName.Buckets },
         locations: command.location,
       }),
     });
   }
 
-  const hasStart = usedParams.has('start');
-  const hasEnd = usedParams.has('end');
+  const hasStart = usedParams.has(PromqlParamName.Start);
+  const hasEnd = usedParams.has(PromqlParamName.End);
 
   if (hasStart !== hasEnd) {
+    const param = hasStart ? PromqlParamName.End : PromqlParamName.Start;
     messages.push({
       ...getMessageFromId({
-        messageId: 'promqlMissingParam',
-        values: { param: hasStart ? 'end' : 'start' },
+        messageId: 'promqlInvalidParam',
+        values: { reason: `Missing required param "${param}"` },
         locations: command.location,
       }),
     });
@@ -100,37 +121,53 @@ export const validate = (
     if (value === '') {
       messages.push({
         ...getMessageFromId({
-          messageId: 'promqlMissingParamValue',
-          values: { param },
+          messageId: 'promqlInvalidParam',
+          values: { reason: `Missing value for "${param}"` },
           locations: entryLocation ?? location,
         }),
       });
       continue;
     }
 
-    if (param === 'start' || param === 'end') {
+    if (param === PromqlParamName.Start || param === PromqlParamName.End) {
       const normalized = stripQuotes(value);
       const isPlaceholder = normalized === '?_tstart' || normalized === '?_tend';
 
       if (!isPlaceholder && !FORMAT_DATE_LITERAL_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidDateParam',
-            values: { param },
+            messageId: 'promqlInvalidParam',
+            values: {
+              reason: `Invalid ${param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend`,
+            },
             locations: location,
           }),
         });
       }
     }
 
-    if (param === 'step') {
+    if (param === PromqlParamName.Step || param === PromqlParamName.ScrapeInterval) {
       const normalized = stripQuotes(value);
 
-      if (!FORMAT_STEP_DURATION_REGEX.test(normalized)) {
+      if (!FORMAT_DURATION_REGEX.test(normalized)) {
         messages.push({
           ...getMessageFromId({
-            messageId: 'promqlInvalidStepParam',
-            values: {},
+            messageId: 'promqlInvalidParam',
+            values: { reason: `Invalid ${param} value` },
+            locations: keyLocation ?? location,
+          }),
+        });
+      }
+    }
+
+    if (param === PromqlParamName.Buckets) {
+      const num = Number(value);
+
+      if (!Number.isInteger(num) || num <= 0) {
+        messages.push({
+          ...getMessageFromId({
+            messageId: 'promqlInvalidParam',
+            values: { reason: 'Invalid buckets value. Must be a positive integer' },
             locations: keyLocation ?? location,
           }),
         });
@@ -138,7 +175,9 @@ export const validate = (
     }
   }
 
-  if (!hasValidQuery(command)) {
+  const hasQuery = hasValidQuery(command);
+
+  if (!hasQuery) {
     messages.push({
       ...getMessageFromId({
         messageId: 'promqlMissingQuery',
@@ -148,7 +187,8 @@ export const validate = (
     });
   }
 
-  return messages;
+  const shouldValidateColumns = hasQuery && !command.query?.incomplete;
+  return [...messages, ...validatePromqlQuery(command, _context, shouldValidateColumns)];
 };
 
 // ============================================================================
@@ -218,7 +258,7 @@ function validateIndexSources(
 ): void {
   const params = command.params;
   const indexEntry = params?.entries.find(
-    (entry) => isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
+    (entry) => isIdentifier(entry.key) && entry.key.name.toLowerCase() === PromqlParamName.Index
   );
 
   if (indexEntry) {
@@ -245,7 +285,7 @@ function validateIndexSources(
   }
 
   // Fallback: handles case when index is mis-parsed into query field
-  const indexParam = paramValues.get('index');
+  const indexParam = paramValues.get(PromqlParamName.Index);
   if (indexParam && indexParam.value) {
     const indexName = stripQuotes(indexParam.value);
 
@@ -376,4 +416,203 @@ function extractTrailingParamFromQuery(
   }
 
   return { param, value: match[2] ?? '' };
+}
+
+// ============================================================================
+// PromQL query validation (walker-based)
+// ============================================================================
+
+function validatePromqlQuery(
+  command: ESQLAstPromqlCommand,
+  context?: ICommandContext,
+  shouldValidateColumns: boolean = false
+): ESQLMessage[] {
+  const queryNode = command.query;
+
+  if (!queryNode || queryNode.incomplete) {
+    return [];
+  }
+
+  const messages: ESQLMessage[] = [];
+  const selectors: PromQLSelector[] = [];
+  const groupingArgs: PromQLLabelName[] = [];
+
+  // ES|QL Walker needed: command.query can be ESQLParens/ESQLFunction wrapping PromQL content.
+  Walker.walk(queryNode, {
+    promql: {
+      visitPromqlFunction: (fn) => {
+        const definition = getPromqlFunctionDefinition(fn.name);
+
+        messages.push(
+          ...getUnknownFunctionErrors(fn, definition),
+          ...getFunctionArityErrors(fn, definition),
+          ...getMatchingSignatureErrors(fn, definition),
+          ...getGroupingErrors(fn)
+        );
+        if (fn.grouping) groupingArgs.push(...fn.grouping.args);
+      },
+
+      visitPromqlSelector: (selector) => {
+        selectors.push(selector);
+      },
+
+      visitPromqlBinaryExpression: (binary) => {
+        const definition = getPromqlOperatorDefinition(binary.name);
+        messages.push(...getBinaryOperatorTypeErrors(binary, definition));
+      },
+    },
+  });
+
+  if (context && shouldValidateColumns) {
+    const completeSelectors = selectors.filter(({ incomplete }) => !incomplete);
+    messages.push(...getColumnErrors(completeSelectors, groupingArgs, command.name, context));
+  }
+
+  return messages;
+}
+
+/* Returns an error when a function name is not present in the PromQL registry. */
+function getUnknownFunctionErrors(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition) {
+    return [
+      getMessageFromId({
+        messageId: 'promqlUnknownFunction',
+        values: { fn: fn.name },
+        locations: fn.location,
+      }),
+    ];
+  }
+
+  return [];
+}
+
+/* Returns an error when function arity doesn't match signature min/max parameter counts. */
+function getFunctionArityErrors(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition) return [];
+
+  const check = getPromqlFunctionArityCheck(fn, definition);
+  if (!check) return [];
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlWrongNumberArgs',
+      values: { fn: fn.name, expected: check.expected, actual: check.actual },
+      locations: fn.location,
+    }),
+  ];
+}
+
+/* Returns an error when grouping (by/without) is used on a non-aggregation function. */
+function getGroupingErrors(fn: PromQLFunction): ESQLMessage[] {
+  const { grouping, name } = fn;
+
+  if (!grouping || isPromqlAcrossSeriesFunction(name)) {
+    return [];
+  }
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlGroupingNotAllowed',
+      values: { fn: name },
+      locations: grouping.location,
+    }),
+  ];
+}
+
+/* Returns an error when argument types don't match any signature for the given arity. */
+function getMatchingSignatureErrors(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition || fn.incomplete) return [];
+
+  const argTypes = fn.args.map((arg) => getPromqlExpressionType(arg));
+  if (argTypes.some((argType) => argType === undefined)) return [];
+
+  const matching = getPromqlMatchingSignatures(definition.signatures, argTypes);
+  if (matching.length > 0) return [];
+
+  const mismatch = getPromqlSignatureMismatch(definition.signatures, argTypes, fn.args.length);
+  if (!mismatch) return [];
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlNoMatchingSignature',
+      values: { fn: fn.name, required: mismatch.required },
+      locations: getPromqlNodeLocation(fn.args[mismatch.mismatchIdx], fn.location),
+    }),
+  ];
+}
+
+/* Returns an error when binary operator operand types don't match any signature. */
+function getBinaryOperatorTypeErrors(
+  binary: PromQLBinaryExpression,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition || binary.incomplete) return [];
+
+  const argTypes = [binary.left, binary.right].map(getPromqlExpressionType);
+  if (argTypes.some((argType) => !argType)) return [];
+
+  const matching = getPromqlMatchingSignatures(definition.signatures, argTypes);
+  if (matching.length > 0) return [];
+
+  const mismatch = getPromqlSignatureMismatch(definition.signatures, argTypes, 2);
+  if (!mismatch) return [];
+
+  const mismatchedNode = mismatch.mismatchIdx === 0 ? binary.left : binary.right;
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlNoMatchingSignature',
+      values: { fn: binary.name, required: mismatch.required },
+      locations: getPromqlNodeLocation(mismatchedNode, binary.location),
+    }),
+  ];
+}
+
+/* Returns errors for PromQL column references (metrics, labels, grouping) not found in ES|QL columns. */
+function getColumnErrors(
+  selectors: PromQLSelector[],
+  groupingArgs: PromQLLabelName[],
+  commandName: string,
+  context: ICommandContext
+): ESQLMessage[] {
+  const metrics = selectors.map(({ metric }) => metric);
+  const labels = selectors.flatMap(
+    ({ labelMap }) => labelMap?.args.map(({ labelName }) => labelName) ?? []
+  );
+
+  const columns = [...metrics, ...labels, ...groupingArgs].filter((node) => isIdentifier(node));
+
+  return columns.flatMap((column) =>
+    validateColumnForCommand(
+      { ...column, text: column.name, incomplete: !!column.incomplete },
+      commandName,
+      context
+    )
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Utilities
+// ----------------------------------------------------------------------------
+
+/* Extracts a node location for precise error highlighting. */
+function getPromqlNodeLocation(node: unknown, fallback: ESQLLocation): ESQLLocation {
+  if (node && typeof node === 'object' && 'location' in node) {
+    const location = (node as { location?: ESQLLocation }).location;
+
+    if (location?.min !== undefined && location?.max !== undefined) {
+      return location;
+    }
+  }
+
+  return fallback;
 }

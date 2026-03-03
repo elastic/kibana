@@ -23,8 +23,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/tinymath'
   - '@kbn/datemath'
-  - '@kbn/esql-language'
   - '@kbn/tinymath'
+  - '@kbn/grok-ui'
 tags:
   - shared-common
   - package

@@ -19,9 +19,22 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { createESQLQuery } from '../../../common/utils';
 
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
+}));
+
+jest.mock('../../../common/utils', () => ({
+  ...jest.requireActual('../../../common/utils'),
+  createESQLQuery: jest.fn((params) => {
+    const { metric, splitAccessors = [] } = params;
+    const splitAccessorsStr =
+      splitAccessors.length > 0
+        ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
+        : '';
+    return `FROM ${metric.index} | STATS AVG(${metric.name}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
+  }),
 }));
 
 describe('MetricsGrid', () => {
@@ -112,6 +125,68 @@ describe('MetricsGrid', () => {
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
+  });
+
+  it('passes getUserMessages(metric) result to each chart when getUserMessages is provided', () => {
+    const messagesForCpu = [
+      {
+        uniqueId: 'cpu-message',
+        severity: 'warning' as const,
+        shortMessage: 'CPU',
+        longMessage: 'CPU message',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'embeddableBadge' as const }],
+      },
+    ];
+
+    const getUserMessages = jest.fn((metric: (typeof fields)[0]) =>
+      metric.name === 'system.cpu.utilization' ? messagesForCpu : undefined
+    );
+
+    renderMetricsGrid({ getUserMessages });
+
+    expect(getUserMessages).toHaveBeenCalledTimes(fields.length);
+    expect(getUserMessages).toHaveBeenNthCalledWith(1, fields[0]);
+    expect(getUserMessages).toHaveBeenNthCalledWith(2, fields[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ userMessages: messagesForCpu }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ userMessages: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('handles multiple dimensions correctly in ESQL query and chart layers', () => {
+    const multipleDimensions = [
+      { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+      { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+      { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
+    ];
+
+    renderMetricsGrid({ dimensions: multipleDimensions });
+
+    expect(createESQLQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metric: expect.any(Object),
+        splitAccessors: ['host.name', 'service.name', 'container.id'],
+      })
+    );
+
+    expect(Chart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chartLayers: expect.arrayContaining([
+          expect.objectContaining({
+            breakdown: ['host.name', 'service.name', 'container.id'],
+          }),
+        ]),
+      }),
+      expect.anything()
+    );
   });
 
   describe('MetricsGrid keyboard navigation', () => {

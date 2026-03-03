@@ -8,10 +8,11 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../../types';
+import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
+  ICommandContext,
   ESQLColumnData,
   ESQLCommandSummary,
   UnmappedFieldsStrategy,
@@ -23,7 +24,7 @@ import type {
  *
  * @template TContext The type of any additional context required by the methods.
  */
-export interface ICommandMethods<TContext = any> {
+export interface ICommandMethods<TContext = ICommandContext> {
   /**
    * Validates the given query string or AST snippet for the specific command.
    * @param command The parsed Abstract Syntax Tree for deeper semantic validation.
@@ -85,6 +86,7 @@ export interface ICommandMethods<TContext = any> {
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
   subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
+  viewsSupport?: boolean; // Optional property to indicate if the command suggests/validates ES|QL views (ONLY FROM). This is temporary and we will remove it when views in FROM move to Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
@@ -93,6 +95,7 @@ export interface ICommandMetadata {
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
+  isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)
@@ -144,6 +147,12 @@ export interface ICommandRegistry {
   getProcessingCommandNames(): string[];
 
   /**
+   * Retrieves the names of timeseries source commands.
+   * @returns An array of timeseries command names.
+   */
+  getTimeseriesCommandNames(): string[];
+
+  /**
    * Retrieves a command by its name, including its methods and optional metadata.
    * @param commandName The name of the command to retrieve.
    * @returns The ICommand object if found, otherwise undefined.
@@ -173,6 +182,7 @@ export class CommandRegistry implements ICommandRegistry {
 
   private sourceCommandNames: string[] = [];
   private processingCommandNames: string[] = [];
+  private timeseriesCommandNames: string[] = [];
 
   constructor() {
     this.commands = new Map<
@@ -199,6 +209,10 @@ export class CommandRegistry implements ICommandRegistry {
         this.sourceCommandNames.push(command.name);
       } else if (!command.metadata.type) {
         this.processingCommandNames.push(command.name);
+      }
+
+      if (command.metadata.isTimeseries) {
+        this.timeseriesCommandNames.push(command.name);
       }
     }
   }
@@ -234,6 +248,14 @@ export class CommandRegistry implements ICommandRegistry {
    */
   public getProcessingCommandNames(): string[] {
     return this.processingCommandNames;
+  }
+
+  /**
+   * Retrieves the names of timeseries source commands.
+   * @returns An array of timeseries command names.
+   */
+  public getTimeseriesCommandNames(): string[] {
+    return this.timeseriesCommandNames;
   }
 
   /**

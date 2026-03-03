@@ -73,7 +73,9 @@ export const singleSearchAfter = async <
         loggedRequests,
       };
     } catch (exc) {
-      ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
+      ruleExecutionLogger.error(`Error searching events\nError: ${exc}`, {
+        consoleLogLevel: 'error',
+      });
       throw exc;
     }
   });

@@ -6,12 +6,9 @@
  */
 
 import rison from '@kbn/rison';
-import {
-  APPLY_FILTER_TRIGGER,
-  type RefreshInterval,
-  type TimeRange,
-} from '@kbn/data-plugin/common';
+import { type RefreshInterval, type TimeRange } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;
@@ -105,4 +102,4 @@ export const COLOR_MAPPING_OFF_BY_DEFAULT = false;
 // Do not change constan value - part of public REST API
 export const DISCOVER_DRILLDOWN_TYPE = 'discover_drilldown';
 // Only additive changes are allowed, part of public REST API
-export const DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS = [APPLY_FILTER_TRIGGER];
+export const DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER];
