@@ -86,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.jira-service-management',
         'actions:.mcp',
         'actions:.microsoft_defender_endpoint',
+        'actions:.mongodb',
         'actions:.observability-ai-assistant',
         'actions:.opsgenie',
         'actions:.pagerduty',
