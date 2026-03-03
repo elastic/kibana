@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export const ADD_SLO_OVERVIEW_ACTION_ID = 'CREATE_SLO_OVERVIEW_EMBEDDABLE';
+/** Re-exported from server (derived from schemas there) */
+export type {
+  GroupBy,
+  GroupFilters,
+  OverviewMode,
+  SingleOverviewCustomState,
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+} from '../../../server/lib/embeddables/schema';

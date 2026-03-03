@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const ADD_SLO_OVERVIEW_ACTION_ID = 'CREATE_SLO_OVERVIEW_EMBEDDABLE';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+export const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
+export const SLO_EMBEDDABLE_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
