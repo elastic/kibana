@@ -65,7 +65,6 @@ export const useLayoutStyles = () => {
       .kbnGridPanel--resizeGauge {
         padding: ${euiTheme.size.xs};
         z-index: ${euiTheme.levels.menu};
-        background-color: ${euiTheme.colors.backgroundBasePlain};
         border-radius: ${euiTheme.border.radius.small};
 
         & .kbnGridPanel--resizeGauge--inner {
@@ -74,7 +73,7 @@ export const useLayoutStyles = () => {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+          background-color: ${euiTheme.colors.vis.euiColorVis0};
           border-radius: ${euiTheme.border.radius.small};
         }
 
