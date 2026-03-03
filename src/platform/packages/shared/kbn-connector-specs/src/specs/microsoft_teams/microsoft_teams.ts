@@ -45,9 +45,18 @@ export const MicrosoftTeams: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: 'Microsoft API token',
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.label',
+                { defaultMessage: 'Microsoft API token' }
+              ),
               placeholder: 'abcde...',
-              description: 'Your Microsoft Bearer Token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.helpText',
+                {
+                  defaultMessage:
+                    'A Microsoft Bearer token obtained via delegated OAuth flow (for example, a user access token).',
+                }
+              ),
             },
           },
         },
@@ -207,7 +216,19 @@ export const MicrosoftTeams: ConnectorSpec = {
         size: z.number().optional().describe('Number of results to return (max 25)'),
         enableTopResults: z.boolean().optional().describe('Sort results by relevance'),
       }),
-      output: z.any(),
+      output: z
+        .object({
+          value: z
+            .array(
+              z.object({
+                hitsContainers: z
+                  .array(z.any())
+                  .describe('Containers with search hits and associated metadata'),
+              })
+            )
+            .describe('Search response containers'),
+        })
+        .describe('Microsoft Graph Search API response'),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;

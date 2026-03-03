@@ -5,6 +5,7 @@
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 * [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 * [PagerDuty](/reference/connectors-kibana/pagerduty-data-source.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
+* [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
 * [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 * [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages via Slack.
 * [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles via the Zendesk API.

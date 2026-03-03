@@ -46,7 +46,6 @@ toc:
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
-          - file: connectors-kibana/microsoft-teams-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
         children:
           - file: connectors-kibana/crowdstrike-action-type.md
@@ -80,6 +79,7 @@ toc:
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/jina-action-type.md
+          - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/pagerduty-data-source.md
           - file: connectors-kibana/servicenow-search-action-type.md

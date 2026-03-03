@@ -15,9 +15,11 @@ inputs:
       - "listChats"
       - "listChatMessages"
     required: true
+    description: "Action to perform. Use listJoinedTeams to discover teams; listChannels/listChannelMessages to browse a team; listChats/listChatMessages to browse direct messages."
   - name: team_id
     type: string
     required: false
+    description: "ID of the team (required for listChannels and listChannelMessages)"
   - name: user_id
     type: string
     required: false
@@ -25,9 +27,11 @@ inputs:
   - name: channel_id
     type: string
     required: false
+    description: "ID of the channel (required for listChannelMessages)"
   - name: chat_id
     type: string
     required: false
+    description: "ID of the chat (required for listChatMessages)"
   - name: top
     type: number
     required: false
@@ -58,6 +62,7 @@ steps:
     if: "${{ inputs.list_action == 'listChats' }}"
     connector-id: <%= microsoft-teams-stack-connector-id %>
     with:
+      userId: "${{ inputs.user_id }}"
       top: ${{ inputs.top }}
   - name: list-chat-messages
     type: microsoft-teams.listChatMessages
