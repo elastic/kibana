@@ -9,7 +9,9 @@
 
 import { AuthzDisabled } from '@kbn/core-security-server';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { isResponseError } from '@kbn/es-errors';
+import { esql } from '@kbn/esql-language';
 import { TYPE_A, TYPE_B } from './saved_objects';
 import { setupData } from './saved_objects_data';
 
@@ -34,29 +36,33 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
         const savedObjectsClient = core.savedObjects.client;
         await setupData(savedObjectsClient);
         try {
-          // Basic ES|QL query demonstrating the esql method.
+          // Use the `esql` tagged template from `@kbn/esql-language` for safe query
+          // construction. The ${{ name: value }} syntax creates named ?param placeholders,
+          // separating code from data at the protocol level (preventing injection attacks).
+          //
           // The `type` and `namespaces` options control which saved objects are accessible.
           // Security filters (namespace and type) are injected into the `filter` parameter
           // automatically — you don't need to filter by namespace in your query.
-          //
-          // For dynamic user input, use ES|QL named parameters (? placeholders) to prevent
-          // injection attacks:
-          //   query: 'FROM .kibana | WHERE type == ? | LIMIT ?',
-          //   params: [TYPE_A, 100],
-          //
-          // Or use the `esql` tagged template from `@kbn/esql-language`:
-          //   import { esql } from '@kbn/esql-language';
-          //   const request = esql({ myType: TYPE_A })`
-          //     FROM .kibana | WHERE type == ?myType | LIMIT 100
-          //   `.toRequest();
+          const query = esql`FROM .kibana
+            | WHERE type == ${{ typeA: TYPE_A }} OR type == ${{ typeB: TYPE_B }}
+            | KEEP type, ${TYPE_A}.myField, ${TYPE_B}.anotherField
+            | SORT type
+            | LIMIT 100`;
+
+          // Extract query string and named params separately.
+          // The ES client TypeScript types don't include the named param record format,
+          // but Elasticsearch supports named params at runtime.
+          const params = query.getParams();
           const result = await savedObjectsClient.esql({
             type: [TYPE_A, TYPE_B],
             namespaces: ['default'],
-            query: `FROM .kibana
-              | WHERE type == "${TYPE_A}" OR type == "${TYPE_B}"
-              | KEEP type, ${TYPE_A}.myField, ${TYPE_B}.anotherField
-              | SORT type
-              | LIMIT 100`,
+            query: query.print(),
+            // Named params are supported by ES at runtime but the ES client TypeScript
+            // types only define positional params (EsqlESQLParam = FieldValue | FieldValue[]).
+            // Cast through unknown to bridge the type gap.
+            params: Object.entries(params).map(([k, v]) => ({
+              [k]: v,
+            })) as unknown as estypes.EsqlESQLParam[],
           });
           return res.ok({
             body: {

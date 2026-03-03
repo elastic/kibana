@@ -57,49 +57,65 @@ See the full example in the Kibana repository at `examples/saved_objects`.
 
 ## Safe query construction with `esql` tagged template
 
-When interpolating user input into ES|QL queries, **never** use string concatenation. Instead, use the `esql` tagged template from `@kbn/esql-language` or ES|QL named parameters.
+When interpolating user input into ES|QL queries, **never** use string concatenation. Instead, use the `esql` tagged template from `@kbn/esql-language` with the **named param syntax**.
 
-### Using the `esql` tagged template (recommended)
+### Named param syntax `${{ name: value }}` (recommended for user input)
 
-The `esql` tagged template from `@kbn/esql-language` provides safe query construction with named parameters via `?paramName` placeholders. Call `.toRequest()` to get the `{ query, params }` object that can be spread into the `esql()` options:
+The `esql` tagged template from `@kbn/esql-language` provides safe query construction. When you use the `${{ name: value }}` shorthand, it creates a `?name` placeholder in the query and stores the value separately in a params bag. This is true parameterization — code and data are separated at the protocol level, preventing injection attacks.
+
+Use `.print()` to extract the query string and `.getParams()` to extract the named params:
 
 ```ts
 import { esql } from '@kbn/esql-language';
 
 const userInput = req.body.searchTerm;
 
-const request = esql({ searchTerm: userInput })`
+const query = esql`
   FROM .kibana
   | WHERE type == "my-type"
-  | WHERE my-type.title LIKE ?searchTerm
+  | WHERE my-type.title LIKE ${{ searchTerm: userInput }}
   | LIMIT 100
-`.toRequest();
+`;
+
+const params = query.getParams();
 
 const result = await savedObjectsClient.esql({
   type: ['my-type'],
   namespaces: ['default'],
-  ...request, // spreads { query, params }
+  query: query.print(),
+  // Convert named params to the format expected by the ES client.
+  // Named params are supported by ES at runtime, but the ES client TypeScript types
+  // only define positional params — cast through unknown to bridge the type gap.
+  params: Object.entries(params).map(([k, v]) => ({
+    [k]: v,
+  })) as unknown as EsqlESQLParam[],
 });
 ```
 
+The query sent to Elasticsearch will be `FROM .kibana | WHERE type == "my-type" | WHERE my-type.title LIKE ?searchTerm | LIMIT 100` — with `searchTerm` as a separate parameter, never interpolated into the query string.
+
+<DocCallOut title="Avoid the plain ${value} syntax for user input">
+  The composer also supports a plain `${value}` syntax (without the double braces), but this **inlines** the value directly into the query string as an escaped literal (e.g., `"O\"Brien"`). While the escaping provides some protection, it is NOT true parameterization. Use `${{ name: value }}` for any untrusted input. The plain `${value}` syntax is acceptable for developer-controlled constants like column names.
+</DocCallOut>
+
 ### Using ES|QL positional parameters (alternative)
 
-ES|QL also supports positional `?` placeholders natively:
+ES|QL also supports positional `?` placeholders natively. Params are plain values (string, number, boolean, or null):
 
 ```ts
 const result = await savedObjectsClient.esql({
   type: ['my-type'],
   namespaces: ['default'],
   query: 'FROM .kibana | WHERE my-type.title LIKE ? | LIMIT 100',
-  params: [{ type: 'keyword' as const, value: userInput }],
+  params: [userInput],
 });
 ```
 
 ## Security model
 
-### Index controlled server-side
+### Index is NOT controlled server-side
 
-The `esql` method controls which Elasticsearch index is queried server-side. While your ES|QL `query` string may contain a `FROM` clause, the actual index access is determined by the saved objects system. The `filter` parameter is used to inject security restrictions.
+Unlike the `search` method (which passes an explicit `index` parameter), ES|QL does not support an explicit index parameter. The data source is specified in the `FROM` clause of your query string. Security is enforced via the `filter` parameter, which injects namespace and type restrictions — not by controlling which index is accessed.
 
 ### Space and type filtering
 
