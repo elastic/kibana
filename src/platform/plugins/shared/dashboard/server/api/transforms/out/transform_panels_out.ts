@@ -69,34 +69,20 @@ function transformPanelProperties(
   isDashboardAppRequest: boolean = false
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
-  const { embeddableConfig, gridData, panelIndex, type, version } = panel;
+  const { embeddableConfig, gridData, panelIndex, version } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
+  // Temporary escape hatch for lens as code
+  // TODO remove when lens as code transforms are ready for production
+  const type = panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
   const transforms = embeddableService?.getTransforms(type);
 
   let transformedPanelConfig;
   try {
-    // Temporary escape hatch for lens as code
-    // TODO remove when lens as code transforms are ready for production
-    if (type === 'lens' && isDashboardAppRequest) {
-      const lensDashboardTransformOut =
-        embeddableService?.getTransforms('lens-dashboard-app')?.transformOut;
-
-      if (!lensDashboardTransformOut) {
-        throw new Error('Must have lens dashboard transforms');
-      }
-
-      transformedPanelConfig = lensDashboardTransformOut(
-        embeddableConfig,
-        panelReferences,
-        containerReferences
-      );
-    } else {
-      transformedPanelConfig =
-        transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
-        defaultTransform(embeddableConfig);
-    }
+    transformedPanelConfig =
+      transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
+      defaultTransform(embeddableConfig);
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(
