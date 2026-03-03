@@ -73,11 +73,9 @@ class MeteringServiceImpl implements MeteringService {
     const usageMeta: Record<string, string> = {
       time_to_first_token_ms: String(round.time_to_first_token),
       time_to_last_token_ms: String(round.time_to_last_token),
-      time_to_first_token_minutes: String(Math.ceil(round.time_to_first_token / 60000)),
-      time_to_last_token_minutes: String(Math.ceil(round.time_to_last_token / 60000)),
       agent_id: agentId,
       conversation_id: conversationId ?? 'unknown',
-      execution_id: executionId ?? 'unknown',
+      execution_id: executionId,
       round_id: round.id,
       round_number: String(roundCount),
       round_status: round.status,
