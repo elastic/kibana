@@ -267,6 +267,11 @@ export const AmazonS3: ConnectorSpec = {
           });
           const metadata = await s3Client.send(headCommand);
 
+          if (!metadata) {
+            throw new Error('Failed to retrieve file metadata');
+          }
+
+          const contentType = metadata.ContentType || 'application/octet-stream';
           const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
           if (metadata.ContentLength && metadata.ContentLength > maxSize) {
             const urlString = await getSignedUrl(
@@ -281,7 +286,7 @@ export const AmazonS3: ConnectorSpec = {
             return {
               bucket: typedInput.bucket,
               key: typedInput.key,
-              contentType: metadata.ContentType,
+              contentType: contentType,
               contentLength: metadata.ContentLength,
               lastModified: metadata.LastModified?.toISOString(),
               etag: metadata.ETag,
@@ -290,56 +295,27 @@ export const AmazonS3: ConnectorSpec = {
             };
           }
 
-          // Download the file content
           const getCommand = new GetObjectCommand({
             Bucket: typedInput.bucket,
             Key: typedInput.key,
           });
           const response = await s3Client.send(getCommand);
 
-          // Convert stream to buffer
           if (!response.Body) {
             throw new Error('No content in response body');
           }
 
-          const chunks: Uint8Array[] = [];
-          const stream = response.Body as ReadableStream;
+          const contentBytes = await response.Body.transformToByteArray();
+          const base64Content = contentBytes ? Buffer.from(contentBytes).toString('base64') : undefined;
 
-          // Handle the stream based on its type
-          if (typeof stream.getReader === 'function') {
-            const reader = stream.getReader();
-            let done = false;
-            while (!done) {
-              const result = await reader.read();
-              done = result.done;
-              if (result.value) {
-                chunks.push(result.value);
-              }
-            }
-          } else {
-            // Fallback for Node.js streams
-            const nodeStream = stream as unknown as NodeJS.ReadableStream;
-            for await (const chunk of nodeStream) {
-              chunks.push(chunk as Uint8Array);
-            }
+          if (!base64Content) {
+            throw new Error('Failed to read file content');
           }
-
-          // Combine chunks into a single buffer
-          const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-          const buffer = new Uint8Array(totalLength);
-          let offset = 0;
-          for (const chunk of chunks) {
-            buffer.set(chunk, offset);
-            offset += chunk.length;
-          }
-
-          // Convert to base64
-          const base64Content = Buffer.from(buffer).toString('base64');
 
           return {
             bucket: typedInput.bucket,
             key: typedInput.key,
-            contentType: metadata.ContentType,
+            contentType: contentType,
             contentLength: metadata.ContentLength,
             lastModified: metadata.LastModified?.toISOString(),
             etag: metadata.ETag,

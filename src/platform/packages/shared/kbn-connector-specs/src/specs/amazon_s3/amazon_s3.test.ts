@@ -414,6 +414,8 @@ describe('AmazonS3', () => {
       })
       .mockResolvedValueOnce({
         Body: {
+          // Some AWS SDK environments provide transformToByteArray(), ensure tests mock it
+          transformToByteArray: async () => new Uint8Array(Buffer.from(fileContent)),
           getReader: () => {
             let done = false;
             return {
