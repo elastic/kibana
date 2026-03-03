@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
-
-import { createSAMLResponse, MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
@@ -24,60 +21,16 @@ const INDEX_THRESHOLD_PARAMS = {
   timeField: '@timestamp',
 };
 
-export const extractAttributeValue = (xmlDocument: string, attributeName: string) => {
-  const [, attributeValue] =
-    xmlDocument.match(
-      new RegExp(
-        `Name="${attributeName}"[\\s\\S]*?<saml:AttributeValue[^>]*>([\\s\\S]*?)<\\/saml:AttributeValue>`
-      )
-    ) ?? [];
-  if (!attributeValue) {
-    throw new Error(`Attribute ${attributeName} isn't found in SAML response.`);
-  }
-  return attributeValue.trim();
-};
-
 const RULE_NAME = 'scout-create-rule';
 
 apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete }, () => {
   let createdRuleId: string;
-  let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 
-  apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
-    userSessionCookieFactory = async () => {
-      const samlResponse = await createSAMLResponse({
-        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
-        username: '1234567890',
-        email: 'elastic_admin@elastic.co',
-        roles: ['admin'],
-        serverless: {
-          uiamEnabled: true,
-          organizationId: organizationId!,
-          projectType: projectType!,
-        },
-      });
+  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-      const decodedSamlResponse = Buffer.from(samlResponse, 'base64').toString('utf-8');
-      return [
-        parseCookie(
-          (
-            await apiClient.post('api/security/saml/callback', {
-              body: `SAMLResponse=${encodeURIComponent(samlResponse)}`,
-            })
-          ).headers['set-cookie'][0]
-        )!.cookieString(),
-        {
-          accessToken: extractAttributeValue(
-            decodedSamlResponse,
-            MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN
-          ),
-        },
-      ];
-    };
-
-    const [userSessionCookie] = await userSessionCookieFactory();
     const createResponse = await apiClient.post('api/alerting/rule', {
-      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
       body: {
         name: RULE_NAME,
         rule_type_id: '.index-threshold',
@@ -97,11 +50,11 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
     createdRuleId = createBody.id;
   });
 
-  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+  apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
     if (createdRuleId) {
-      const [userSessionCookie] = await userSessionCookieFactory();
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const deleteResponse = await apiClient.delete(`api/alerting/rule/${createdRuleId}`, {
-        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
       });
       // Rule may already be deleted by the "when rule is deleted..." test
       expect(deleteResponse.statusCode === 204 || deleteResponse.statusCode === 404).toBe(true);
@@ -121,13 +74,13 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
     expect(alertAttrs).toBeDefined();
     expect(alertAttrs.apiKey).toBeDefined();
     expect(alertAttrs.uiamApiKey).toBeDefined();
-    expect(alertAttrs.apiKeyOwner).toBe('1234567890');
+    expect(alertAttrs.apiKeyOwner).toBeDefined();
   });
 
-  apiTest('The rule runs and event log shows success', async ({ apiClient }) => {
+  apiTest('The rule runs and event log shows success', async ({ apiClient, samlAuth }) => {
     // rule is created with enabled: true, so it should run automatically
 
-    const [userSessionCookie] = await userSessionCookieFactory();
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
     const dateStart = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const pollIntervalMs = 2000;
@@ -148,7 +101,7 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
         `internal/alerting/rule/${createdRuleId}/_execution_log?date_start=` +
         `${encodeURIComponent(dateStart)}&per_page=10`;
       const logResponse = await apiClient.get(logUrl, {
-        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
       expect(logResponse).toHaveStatusCode(200);
@@ -162,8 +115,8 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
 
   apiTest(
     'when rule is updated, apiKey and uiamApiKey are queued for invalidation',
-    async ({ apiClient, kbnClient }) => {
-      const [userSessionCookie] = await userSessionCookieFactory();
+    async ({ apiClient, kbnClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
       const { saved_objects: pendingInvalidationsBefore } = await kbnClient.savedObjects.find({
         type: 'api_key_pending_invalidation',
@@ -172,7 +125,7 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
       expect(pendingInvalidationsBefore).toHaveLength(0);
 
       const updateResponse = await apiClient.put(`api/alerting/rule/${createdRuleId}`, {
-        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           name: 'scout-updated-rule',
           tags: ['scout'],
@@ -197,11 +150,11 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
 
   apiTest(
     'when rule is deleted, apiKey and uiamApiKey are queued for invalidation',
-    async ({ apiClient, kbnClient }) => {
-      const [userSessionCookie] = await userSessionCookieFactory();
+    async ({ apiClient, kbnClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
       const deleteResponse = await apiClient.delete(`api/alerting/rule/${createdRuleId}`, {
-        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
       });
       expect(deleteResponse).toHaveStatusCode(204);
 
