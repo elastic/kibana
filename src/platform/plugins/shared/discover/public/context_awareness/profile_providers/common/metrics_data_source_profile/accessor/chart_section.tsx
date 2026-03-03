@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   internalStateActions,
   useAppStateSelector,
@@ -22,7 +23,6 @@ import type { DiscoverAppState } from '../../../../../application/main/state_man
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { fetchMetricsInfo } from '../utils/fetch_metrics_info';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 
 /**
  * Triggers a METRICS_INFO fetch when in Metrics Experience (non-transformational ES|QL, chart visible).
