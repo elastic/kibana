@@ -81,6 +81,7 @@ xpack.actions.enabledActionTypes:
     '.index',
     '.slack',
     '.slack_api',
+    '.slack2',
     '.jira',
     '.jira-cloud',
     '.webhook',

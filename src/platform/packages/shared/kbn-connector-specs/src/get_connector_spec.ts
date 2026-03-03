@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { yamlTransform } = require('./yaml');
-const { babelTransform } = require('./babel');
+import * as connectorsSpecs from './all_specs';
+import type { ConnectorSpec } from './connector_spec';
 
-module.exports = {
-  /**
-   * @type {Record<string, import('./types').Transform>}
-   */
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    '.yaml': yamlTransform,
-    '.yml': yamlTransform,
-    default: babelTransform,
-  },
-};
+/**
+ * Returns the ConnectorSpec for a given connector type ID, or undefined if not found.
+ */
+export function getConnectorSpec(connectorTypeId: string): ConnectorSpec | undefined {
+  const specEntries = Object.values(connectorsSpecs) as ConnectorSpec[];
+  return specEntries.find((s) => s.metadata.id === connectorTypeId);
+}

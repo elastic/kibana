@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { yamlTransform } = require('./yaml');
-const { babelTransform } = require('./babel');
+import { getConnectorSpec } from './get_connector_spec';
 
-module.exports = {
-  /**
-   * @type {Record<string, import('./types').Transform>}
-   */
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    '.yaml': yamlTransform,
-    '.yml': yamlTransform,
-    default: babelTransform,
-  },
-};
+/**
+ * Returns the workflow YAML template strings for a connector type.
+ *
+ * Returns an empty array if the connector type has no workflows or doesn't exist.
+ */
+export function getWorkflowTemplatesForConnector(connectorTypeId: string): string[] {
+  return getConnectorSpec(connectorTypeId)?.agentBuilderWorkflows ?? [];
+}

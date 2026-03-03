@@ -24,6 +24,9 @@ export type {
   ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
+  ConnectorLifecycleListener,
+  ConnectorLifecyclePostSaveParams,
+  ConnectorLifecyclePostDeleteParams,
 } from './types';
 
 export type {

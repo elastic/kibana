@@ -7,20 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { yamlTransform } = require('./yaml');
-const { babelTransform } = require('./babel');
-
-module.exports = {
-  /**
-   * @type {Record<string, import('./types').Transform>}
-   */
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    '.yaml': yamlTransform,
-    '.yml': yamlTransform,
-    default: babelTransform,
-  },
-};
+export { getWorkflowTemplatesForConnector } from './src/get_workflow_templates';

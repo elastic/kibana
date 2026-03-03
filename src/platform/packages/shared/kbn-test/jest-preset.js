@@ -116,7 +116,7 @@ module.exports = {
   transform: {
     '^.+\\.(js|tsx?)$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
-    '^.+\\.(txt|html)?$':
+    '^.+\\.(txt|html|yaml|yml)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
     '^.+\\.text?$':

@@ -19,12 +19,17 @@ import { AgentBuilderSkillsPage } from './pages/skills';
 import { AgentBuilderSkillCreatePage } from './pages/skill_create';
 import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { useExperimentalFeatures } from './hooks/use_experimental_features';
+import { AgentBuilderConnectorsPage } from './pages/connectors';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
   return (
     <Routes>
+      <Route path="/connectors">
+        <AgentBuilderConnectorsPage />
+      </Route>
+
       <Route path="/conversations/:conversationId">
         <AgentBuilderConversationsPage />
       </Route>

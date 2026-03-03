@@ -30,6 +30,7 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
 
@@ -135,6 +136,21 @@ export class AgentBuilderPlugin
     });
 
     registerSkillToolsLoaderHook(serviceSetups);
+
+    // Register connector lifecycle listener to auto-create workflows/tools
+    // when connectors with workflow definitions are created.
+    // The handler itself checks the experimental features flag at runtime.
+    const connectorLifecycleHandler = createConnectorLifecycleHandler({
+      serviceManager: this.serviceManager,
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger.get('connector-lifecycle'),
+    });
+
+    setupDeps.actions.registerConnectorLifecycleListener({
+      connectorTypes: '*',
+      onPostSave: connectorLifecycleHandler.onPostSave,
+      onPostDelete: connectorLifecycleHandler.onPostDelete,
+    });
 
     return {
       tools: {

@@ -15,6 +15,7 @@ import { validateConfig, validateConnector, validateSecrets } from '../../../../
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import { invokeLifecycleListeners } from '../../../../lib/invoke_lifecycle_listeners';
 
 export async function create({
   context,
@@ -153,6 +154,24 @@ export async function create({
       });
     }
   }
+
+  // Invoke cross-plugin lifecycle listeners
+  await invokeLifecycleListeners(
+    context.connectorLifecycleListeners,
+    'onPostSave',
+    actionTypeId,
+    {
+      connectorId: id,
+      config,
+      secrets,
+      logger: context.logger,
+      request: context.request,
+      services: hookServices,
+      isUpdate: false,
+      wasSuccessful,
+    },
+    context.logger
+  );
 
   if (!wasSuccessful) {
     throw result;
