@@ -77,8 +77,13 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           getV1StatusRequest
         );
 
-        if (space.id === 'default' || isEntityStoreInstalled(statusResponseV1.status)) {
+        const isV1Installed = isEntityStoreInstalled(statusResponseV1.status);
+
+        if (isV1Installed) {
           await stopAndUninstallV1Engines({ http: services.http, logger: services.logger });
+        }
+
+        if (space.id === 'default' || isV1Installed) {
           await services.http.post(installAllEntitiesRequest);
         }
       } catch (e) {
@@ -97,16 +102,13 @@ const stopAndUninstallV1Engines = async ({ http, logger }: Pick<Services, 'http'
   const resp = await http.get<{ engines?: Array<{ type: string }> }>(getV1ListEnginesRequest);
   const v1Engines = resp.engines ?? [];
 
-  for (const { engine } of v1Engines) {
+  for (const { type } of v1Engines) {
     try {
-      await http.post(postv1StopEngineRequest(engine));
-      await http.delete(deleteV1UninstallEngineRequest(engine));
+      await http.post(postv1StopEngineRequest(type));
+      await http.delete(deleteV1UninstallEngineRequest(type));
     } catch (e) {
-      logger.error(
-        `Failed to uninstall Entity Store v1 ${engine} in namespace ${
-          this.namespace
-        }: ${getErrorMessage(e)}`
-      );
+      logger.error(`Failed to uninstall Entity Store v1 engine ${type}`);
+      logger.error(e);
     }
   }
 };

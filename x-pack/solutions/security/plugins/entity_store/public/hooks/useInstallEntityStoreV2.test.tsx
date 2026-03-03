@@ -49,17 +49,24 @@ describe('useInstallEntityStoreV2', () => {
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
     await waitFor(() => {
-      expect(mockServices.http.get).toHaveBeenCalledWith({
-        path: '/api/entity_store/status',
-        query: { include_components: false },
-        version: '2023-10-31',
-      });
+      expect(mockServices.http.get).toHaveBeenCalledTimes(2);
     });
 
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(1, {
+      path: ENTITY_STORE_ROUTES.STATUS,
+      query: { apiVersion: '2', include_components: false },
+    });
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
+      path: '/api/entity_store/status',
+      query: { include_components: false },
+      version: '2023-10-31',
+    });
+    expect(mockServices.spaces.getActiveSpace).toHaveBeenCalled();
     expect(mockServices.http.post).not.toHaveBeenCalled();
     expect(mockServices.http.delete).not.toHaveBeenCalled();
   });
@@ -68,12 +75,12 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.running });
     mockServices.http.get.mockResolvedValueOnce({ engines: [{ type: 'host' }] });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
-    mockServices.http.post.mockResolvedValueOnce({});
     mockServices.http.post.mockResolvedValueOnce({});
     mockServices.http.delete.mockResolvedValueOnce({});
+    mockServices.http.post.mockResolvedValueOnce({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
@@ -82,17 +89,17 @@ describe('useInstallEntityStoreV2', () => {
     });
 
     expect(mockServices.http.get).toHaveBeenNthCalledWith(1, {
+      path: ENTITY_STORE_ROUTES.STATUS,
+      query: { apiVersion: '2', include_components: false },
+    });
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
       path: '/api/entity_store/status',
       query: { include_components: false },
       version: '2023-10-31',
     });
-    expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(3, {
       path: '/api/entity_store/engines',
       version: '2023-10-31',
-    });
-    expect(mockServices.http.get).toHaveBeenNthCalledWith(3, {
-      path: ENTITY_STORE_ROUTES.STATUS,
-      query: { apiVersion: '2', include_components: false },
     });
     expect(mockServices.http.post).toHaveBeenNthCalledWith(1, {
       path: '/api/entity_store/engines/host/stop',
@@ -177,6 +184,7 @@ describe('useInstallEntityStoreV2', () => {
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.Values.not_installed });
     mockServices.http.post.mockResolvedValueOnce({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -185,14 +193,20 @@ describe('useInstallEntityStoreV2', () => {
       expect(mockServices.http.post).toHaveBeenCalledTimes(1);
     });
 
-    expect(mockServices.http.get).toHaveBeenCalledWith({
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(1, {
       path: ENTITY_STORE_ROUTES.STATUS,
       query: { apiVersion: '2', include_components: false },
+    });
+    expect(mockServices.http.get).toHaveBeenNthCalledWith(2, {
+      path: '/api/entity_store/status',
+      query: { include_components: false },
+      version: '2023-10-31',
     });
     expect(mockServices.http.post).toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.INSTALL,
       body: JSON.stringify({}),
       query: { apiVersion: '2' },
     });
+    expect(mockServices.http.delete).not.toHaveBeenCalled();
   });
 });
