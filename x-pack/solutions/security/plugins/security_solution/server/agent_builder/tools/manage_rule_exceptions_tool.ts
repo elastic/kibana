@@ -67,7 +67,9 @@ const manageRuleExceptionsSchema = z.object({
   entries: z
     .array(exceptionEntrySchema)
     .min(1)
-    .describe('Conditions that define when the exception applies. All entries are AND-ed together.'),
+    .describe(
+      'Conditions that define when the exception applies. All entries are AND-ed together.'
+    ),
 });
 
 export function manageRuleExceptionsTool(
@@ -136,8 +138,7 @@ export function manageRuleExceptionsTool(
         }
 
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-        const username =
-          coreStart.security.authc.getCurrentUser(request)?.username || 'elastic';
+        const username = coreStart.security.authc.getCurrentUser(request)?.username || 'elastic';
         const exceptionListClient = setupPlugins.lists.getExceptionListClient(
           savedObjectsClient,
           username
@@ -226,7 +227,8 @@ async function getOrCreateDefaultExceptionList(
     }) => Promise<unknown>;
   }
 ): Promise<string> {
-  const exceptionsList = (rule.params.exceptionsList as Array<{ list_id: string; type: string }>) ?? [];
+  const exceptionsList =
+    (rule.params.exceptionsList as Array<{ list_id: string; type: string }>) ?? [];
   const defaultList = exceptionsList.find((list) => list.type === 'rule_default');
 
   if (defaultList) {

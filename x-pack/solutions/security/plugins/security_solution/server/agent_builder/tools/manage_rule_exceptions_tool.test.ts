@@ -6,10 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import {
-  createToolTestMocks,
-  setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
+import { createToolTestMocks } from '../__mocks__/test_helpers';
 import {
   manageRuleExceptionsTool,
   SECURITY_MANAGE_RULE_EXCEPTIONS_TOOL_ID,
@@ -32,11 +29,7 @@ describe('manageRuleExceptionsTool', () => {
     update: jest.fn(),
   };
 
-  const tool = manageRuleExceptionsTool(
-    mockCore as any,
-    mockSetupPlugins as any,
-    mockLogger
-  );
+  const tool = manageRuleExceptionsTool(mockCore as any, mockSetupPlugins as any, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -111,7 +104,9 @@ describe('manageRuleExceptionsTool', () => {
         rule_id: 'test-rule-1',
         name: 'Exclude when field exists',
         description: 'Test exists',
-        entries: [{ type: 'exists', field: 'process.code_signature.subject_name', operator: 'included' }],
+        entries: [
+          { type: 'exists', field: 'process.code_signature.subject_name', operator: 'included' },
+        ],
       };
       expect(tool.schema.safeParse(input).success).toBe(true);
     });
@@ -186,9 +181,7 @@ describe('manageRuleExceptionsTool', () => {
             actions: [],
             params: {
               ruleId: 'test-rule-1',
-              exceptionsList: [
-                { list_id: 'existing-list-id', type: 'rule_default' },
-              ],
+              exceptionsList: [{ list_id: 'existing-list-id', type: 'rule_default' }],
             },
           },
         ],

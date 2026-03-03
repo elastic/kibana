@@ -107,9 +107,7 @@ describe('Security Skills', () => {
       expect(detectionEngineeringSkill.referencedContent).toBeDefined();
       expect(detectionEngineeringSkill.referencedContent!.length).toBe(3);
       const names = detectionEngineeringSkill.referencedContent!.map((rc) => rc.name);
-      expect(names).toEqual(
-        expect.arrayContaining(['kql-rule', 'eql-sequence', 'threshold-rule'])
-      );
+      expect(names).toEqual(expect.arrayContaining(['kql-rule', 'eql-sequence', 'threshold-rule']));
     });
   });
 
