@@ -29,11 +29,8 @@ export class SkillsStoreImpl implements WritableSkillsStore {
 
   add(skill: InternalSkillDefinition): void {
     this.skills.set(skill.id, skill);
-    if (skill.basePath) {
-      const mountable = skill as InternalSkillDefinition & { basePath: string };
-      const entries = createSkillEntries(mountable);
-      entries.forEach((entry) => this.volume.add(entry));
-    }
+    const entries = createSkillEntries(skill);
+    entries.forEach((entry) => this.volume.add(entry));
   }
 
   /**
@@ -43,11 +40,8 @@ export class SkillsStoreImpl implements WritableSkillsStore {
    */
   delete(skillId: string): boolean {
     const skill = this.skills.get(skillId);
-    if (skill && skill.basePath) {
-      const mountable = skill as InternalSkillDefinition & { basePath: string };
-      const path = getSkillEntryPath({
-        skill: mountable,
-      });
+    if (skill) {
+      const path = getSkillEntryPath({ skill });
       this.volume.remove(path);
     }
     return this.skills.delete(skillId);

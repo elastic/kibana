@@ -8,6 +8,8 @@
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillPersistedDefinition } from './client';
 
+export const USER_SKILLS_BASE_PATH = 'skills/user';
+
 export const convertPersistedSkill = (
   skill: SkillPersistedDefinition
 ): InternalSkillDefinition => ({
@@ -16,7 +18,7 @@ export const convertPersistedSkill = (
   description: skill.description,
   content: skill.content,
   readonly: false,
-  basePath: 'skills/user',
+  basePath: USER_SKILLS_BASE_PATH,
   referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,

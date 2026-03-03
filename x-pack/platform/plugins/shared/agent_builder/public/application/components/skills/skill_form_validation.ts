@@ -11,6 +11,7 @@ import {
   skillIdMaxLength,
   skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
   maxToolsPerSkill,
 } from '@kbn/agent-builder-common';
 
@@ -35,6 +36,10 @@ const validationMessages = {
     tooLong: i18n.translate('xpack.agentBuilder.skills.validation.name.tooLong', {
       defaultMessage: 'Name must be at most {maxLength} characters.',
       values: { maxLength: skillNameMaxLength },
+    }),
+    format: i18n.translate('xpack.agentBuilder.skills.validation.name.format', {
+      defaultMessage:
+        'Name must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores.',
     }),
   },
   description: {
@@ -64,7 +69,8 @@ export const skillFormValidationSchema = z.object({
   name: z
     .string()
     .min(1, { message: validationMessages.name.required })
-    .max(skillNameMaxLength, { message: validationMessages.name.tooLong }),
+    .max(skillNameMaxLength, { message: validationMessages.name.tooLong })
+    .regex(skillNameRegexp, { message: validationMessages.name.format }),
   description: z.string().min(1, { message: validationMessages.description.required }),
   content: z.string().min(1, { message: validationMessages.content.required }),
   tool_ids: z.array(z.string()).max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),

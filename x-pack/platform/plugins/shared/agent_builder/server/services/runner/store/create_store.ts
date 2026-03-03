@@ -13,7 +13,7 @@ import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
 
-export const filterSkillsBySelection = <T extends { id: string }>(
+export const filterSkillsBySelection = <T extends { id: string; readonly: boolean }>(
   skills: T[],
   selection: SkillSelection[] | undefined
 ): T[] => {
@@ -24,7 +24,8 @@ export const filterSkillsBySelection = <T extends { id: string }>(
     return [];
   }
   if (hasSkillSelectionWildcard(selection)) {
-    return skills;
+    const explicitIds = new Set(getExplicitSkillIds(selection));
+    return skills.filter((skill) => skill.readonly || explicitIds.has(skill.id));
   }
   const explicitIds = new Set(getExplicitSkillIds(selection));
   return skills.filter((skill) => explicitIds.has(skill.id));

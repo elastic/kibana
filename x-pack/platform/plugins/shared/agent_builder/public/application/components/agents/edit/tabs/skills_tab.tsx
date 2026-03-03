@@ -21,7 +21,6 @@ import type { PublicSkillDefinition, SkillSelection } from '@kbn/agent-builder-c
 import {
   hasSkillSelectionWildcard,
   getExplicitSkillIds,
-  skillMatchSelection,
 } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
@@ -89,20 +88,27 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 20;
 
-  const isAllSelected = hasSkillSelectionWildcard(selectedSkills);
+  const isAllBuiltinSelected = hasSkillSelectionWildcard(selectedSkills);
+  const explicitSelectedIds = useMemo(
+    () => new Set(getExplicitSkillIds(selectedSkills)),
+    [selectedSkills]
+  );
 
   const isSkillActive = useCallback(
-    (skillId: string) => {
-      return skillMatchSelection(skillId, selectedSkills);
+    (skill: PublicSkillDefinition) => {
+      if (isAllBuiltinSelected && skill.readonly) {
+        return true;
+      }
+      return explicitSelectedIds.has(skill.id);
     },
-    [selectedSkills]
+    [isAllBuiltinSelected, explicitSelectedIds]
   );
 
   const displaySkills = useMemo(() => {
     let result = skills;
 
     if (showActiveOnly) {
-      result = skills.filter((skill) => isSkillActive(skill.id));
+      result = skills.filter((skill) => isSkillActive(skill));
     }
 
     if (searchQuery) {
@@ -125,29 +131,37 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }, [displaySkills, sortField, sortDirection, pageIndex, pageSize]);
 
   const activeSkillsCount = useMemo(() => {
-    if (isAllSelected) return skills.length;
-    const explicitIds = new Set(getExplicitSkillIds(selectedSkills));
-    return skills.filter((skill) => explicitIds.has(skill.id)).length;
-  }, [skills, selectedSkills, isAllSelected]);
+    return skills.filter((skill) => isSkillActive(skill)).length;
+  }, [skills, isSkillActive]);
 
   const handleToggleSkill = useCallback(
     (skillId: string) => {
-      if (isAllSelected) {
-        // Switch from wildcard to explicit list, excluding this skill
-        const allIds = skills.map((s) => s.id).filter((id) => id !== skillId);
-        onSkillsChange([{ skill_ids: allIds }]);
-      } else {
+      const skill = skills.find((s) => s.id === skillId);
+      if (!skill) return;
+
+      if (isAllBuiltinSelected && skill.readonly) {
+        const builtinIds = skills
+          .filter((s) => s.readonly && s.id !== skillId)
+          .map((s) => s.id);
         const explicitIds = getExplicitSkillIds(selectedSkills);
-        const isCurrentlySelected = explicitIds.includes(skillId);
-        if (isCurrentlySelected) {
-          const newIds = explicitIds.filter((id) => id !== skillId);
-          onSkillsChange(newIds.length > 0 ? [{ skill_ids: newIds }] : []);
+        onSkillsChange([{ skill_ids: [...builtinIds, ...explicitIds] }]);
+      } else if (explicitSelectedIds.has(skillId)) {
+        const newExplicitIds = getExplicitSkillIds(selectedSkills).filter((id) => id !== skillId);
+        if (isAllBuiltinSelected) {
+          onSkillsChange([{ skill_ids: ['*', ...newExplicitIds] }]);
         } else {
-          onSkillsChange([{ skill_ids: [...explicitIds, skillId] }]);
+          onSkillsChange(newExplicitIds.length > 0 ? [{ skill_ids: newExplicitIds }] : []);
+        }
+      } else {
+        const currentExplicitIds = getExplicitSkillIds(selectedSkills);
+        if (isAllBuiltinSelected) {
+          onSkillsChange([{ skill_ids: ['*', ...currentExplicitIds, skillId] }]);
+        } else {
+          onSkillsChange([{ skill_ids: [...currentExplicitIds, skillId] }]);
         }
       }
     },
-    [isAllSelected, selectedSkills, skills, onSkillsChange]
+    [isAllBuiltinSelected, explicitSelectedIds, selectedSkills, skills, onSkillsChange]
   );
 
   if (skillsLoading) {
@@ -167,7 +181,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         <EuiSwitch
           label=""
           showLabel={false}
-          checked={isSkillActive(skill.id)}
+          checked={isSkillActive(skill)}
           onChange={() => handleToggleSkill(skill.id)}
           disabled={disabled}
           compressed

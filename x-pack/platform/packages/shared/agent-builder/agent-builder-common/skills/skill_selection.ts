@@ -21,11 +21,15 @@ export const allBuiltInSkillsSelection: SkillSelection[] = [
  * Represents a skill selection based on individual skill IDs
  *
  * The '*' wildcard can be used for ID selection, to inform that all built-in skills should be selected.
+ * User-created skills are NOT included by the wildcard — they must be explicitly listed.
  *
  * @example
  * ```ts
  * // select all built-in skills
  * const allSkills: SkillSelection = { skill_ids: ['*'] }
+ *
+ * // select all built-in skills + a specific user-created skill
+ * const withUser: SkillSelection = { skill_ids: ['*', 'my-user-skill'] }
  *
  * // select specific skills
  * const specific: SkillSelection = { skill_ids: ['skill-a', 'skill-b'] }

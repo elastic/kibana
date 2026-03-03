@@ -17,6 +17,7 @@ describe('internalToPublicDefinition', () => {
     description: 'A test skill',
     content: 'Skill content',
     readonly: true,
+    basePath: 'skills/platform',
     getRegistryTools: () => [],
     ...overrides,
   });

@@ -58,21 +58,19 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
       </Route>
 
       {isExperimentalFeaturesEnabled && (
-        <Route path="/skills/new">
-          <AgentBuilderSkillCreatePage />
-        </Route>
-      )}
+        <>
+          <Route path="/skills/new">
+            <AgentBuilderSkillCreatePage />
+          </Route>
 
-      {isExperimentalFeaturesEnabled && (
-        <Route path="/skills/:skillId">
-          <AgentBuilderSkillDetailsPage />
-        </Route>
-      )}
+          <Route path="/skills/:skillId">
+            <AgentBuilderSkillDetailsPage />
+          </Route>
 
-      {isExperimentalFeaturesEnabled && (
-        <Route path="/skills">
-          <AgentBuilderSkillsPage />
-        </Route>
+          <Route path="/skills">
+            <AgentBuilderSkillsPage />
+          </Route>
+        </>
       )}
 
       {/* Default to conversations page */}

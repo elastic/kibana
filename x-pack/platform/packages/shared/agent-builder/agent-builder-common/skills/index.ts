@@ -26,5 +26,6 @@ export {
   skillIdMaxLength,
   skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
   maxToolsPerSkill,
 } from './validation';

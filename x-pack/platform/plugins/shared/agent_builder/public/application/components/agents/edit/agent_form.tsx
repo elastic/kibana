@@ -113,22 +113,22 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     notifications.toasts.addSuccess(
       isCreateMode
         ? i18n.translate('xpack.agentBuilder.agents.createSuccessMessage', {
-            defaultMessage: 'Agent created successfully',
-          })
+          defaultMessage: 'Agent created successfully',
+        })
         : i18n.translate('xpack.agentBuilder.agents.updateSuccessMessage', {
-            defaultMessage: 'Agent updated successfully',
-          })
+          defaultMessage: 'Agent updated successfully',
+        })
     );
   };
 
   const onSaveError = (err: Error) => {
     const errorMessageTitle = isCreateMode
       ? i18n.translate('xpack.agentBuilder.agents.createErrorMessage', {
-          defaultMessage: 'Failed to create agent',
-        })
+        defaultMessage: 'Failed to create agent',
+      })
       : i18n.translate('xpack.agentBuilder.agents.updateErrorMessage', {
-          defaultMessage: 'Failed to update agent',
-        });
+        defaultMessage: 'Failed to update agent',
+      });
 
     notifications.toasts.addDanger({
       title: errorMessageTitle,
@@ -229,7 +229,16 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const activeSkillsCount = useMemo(() => {
     if (!agentSkills || agentSkills.length === 0) return skills.length;
     const hasWildcard = agentSkills.some((s) => s.skill_ids.includes('*'));
-    if (hasWildcard) return skills.length;
+    if (hasWildcard) {
+      const builtinCount = skills.filter((s) => s.readonly).length;
+      const explicitIds = new Set(
+        agentSkills.flatMap((s) => s.skill_ids.filter((id) => id !== '*'))
+      );
+      const explicitUserCount = skills.filter(
+        (s) => !s.readonly && explicitIds.has(s.id)
+      ).length;
+      return builtinCount + explicitUserCount;
+    }
     const explicitIds = new Set(agentSkills.flatMap((s) => s.skill_ids));
     return skills.filter((skill) => explicitIds.has(skill.id)).length;
   }, [skills, agentSkills]);
@@ -278,33 +287,33 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       },
       ...(isExperimentalFeaturesEnabled
         ? [
-            {
-              id: 'skills',
-              name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
-                defaultMessage: 'Skills',
-              }),
-              content: (
-                <SkillsTab
-                  control={control}
-                  skills={skills}
-                  isLoading={isLoading}
-                  isFormDisabled={isFormDisabled || !manageAgents}
-                />
-              ),
-              append: (
-                <EuiNotificationBadge
-                  color="subdued"
-                  css={css`
+          {
+            id: 'skills',
+            name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+              defaultMessage: 'Skills',
+            }),
+            content: (
+              <SkillsTab
+                control={control}
+                skills={skills}
+                isLoading={isLoading}
+                isFormDisabled={isFormDisabled || !manageAgents}
+              />
+            ),
+            append: (
+              <EuiNotificationBadge
+                color="subdued"
+                css={css`
                     block-size: 20px;
                     min-inline-size: ${euiTheme.size.l};
                     padding: 0 ${euiTheme.size.xs};
                   `}
-                >
-                  {activeSkillsCount}
-                </EuiNotificationBadge>
-              ),
-            },
-          ]
+              >
+                {activeSkillsCount}
+              </EuiNotificationBadge>
+            ),
+          },
+        ]
         : []),
     ],
     [
@@ -509,7 +518,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           ...(!manageAgents
             ? []
             : !isCreateMode
-            ? [
+              ? [
                 <EuiFlexGroup gutterSize="xs">
                   {renderSaveButton({ size: 'm' })}
                   <EuiPopover
@@ -548,12 +557,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   </EuiPopover>
                 </EuiFlexGroup>,
               ]
-            : [renderSaveButton({ size: 'm' })]),
+              : [renderSaveButton({ size: 'm' })]),
           renderChatButton({ size: 'm' }),
           ...(!manageAgents
             ? []
             : !isCreateMode
-            ? [
+              ? [
                 <EuiPopover
                   button={
                     <EuiButtonIcon
@@ -607,7 +616,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   />
                 </EuiPopover>,
               ]
-            : []),
+              : []),
         ]}
         rightSideGroupProps={{ gutterSize: 's' }}
       />

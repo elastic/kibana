@@ -195,9 +195,10 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           tool_ids: data.tool_ids,
         });
       }
-      navigateToAgentBuilderUrl(appPaths.skills.list);
+      reset(data, { keepDirty: false });
+      deferNavigateToAgentBuilderUrl(appPaths.skills.list);
     },
-    [onSave, mode, navigateToAgentBuilderUrl]
+    [onSave, mode, reset, deferNavigateToAgentBuilderUrl]
   );
 
   const handleCancel = useCallback(() => {
@@ -261,41 +262,28 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                 })}
               >
                 <EuiSpacer size="s" />
-                <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="subdued">
-                  <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-                    {isCreateMode && (
-                      <>
-                        <EuiTitle size="xxs">
-                          <span>
-                            {i18n.translate('xpack.agentBuilder.skills.form.skillIdHint', {
-                              defaultMessage: 'Skill ID',
-                            })}
-                          </span>
-                        </EuiTitle>
-                        <EuiText size="s" color="subdued">
-                          {i18n.translate('xpack.agentBuilder.skills.form.skillIdHintDescription', {
+                {isCreateMode && (
+                  <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="subdued">
+                    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                      <EuiTitle size="xxs">
+                        <span>
+                          {i18n.translate('xpack.agentBuilder.skills.form.skillIdHint', {
+                            defaultMessage: 'Skill ID',
+                          })}
+                        </span>
+                      </EuiTitle>
+                      <EuiText size="s" color="subdued">
+                        {i18n.translate(
+                          'xpack.agentBuilder.skills.form.skillIdHintDescription',
+                          {
                             defaultMessage:
                               'A unique identifier for the skill, used in code and configurations. Cannot be changed after creation.',
-                          })}
-                        </EuiText>
-                        <EuiSpacer size="s" />
-                      </>
-                    )}
-                    <EuiTitle size="xxs">
-                      <span>
-                        {i18n.translate('xpack.agentBuilder.skills.form.nameHint', {
-                          defaultMessage: 'Name',
-                        })}
-                      </span>
-                    </EuiTitle>
-                    <EuiText size="s" color="subdued">
-                      {i18n.translate('xpack.agentBuilder.skills.form.nameHintDescription', {
-                        defaultMessage:
-                          'A human-friendly display name for the skill, visible to users.',
-                      })}
-                    </EuiText>
-                  </EuiFlexGroup>
-                </EuiPanel>
+                          }
+                        )}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
 
                 {isCreateMode && (
                   <Controller
