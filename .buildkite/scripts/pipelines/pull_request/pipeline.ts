@@ -35,6 +35,7 @@ if (!prConfig) {
 }
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
+const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
@@ -79,14 +80,16 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/cases/])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
     }
@@ -96,7 +99,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
     }
@@ -113,7 +117,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
@@ -124,7 +129,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^package.json/,
         /^yarn.lock/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
@@ -214,7 +220,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml')
@@ -230,7 +237,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml')
@@ -263,7 +271,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
@@ -344,7 +353,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
@@ -357,7 +367,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
-        GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
+        GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+        ALL_UI_TEST_SUITES) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
       pipeline.push(
@@ -372,7 +383,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
         getPipeline(
@@ -383,7 +395,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals') ||
-      GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts')
+      GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts') ||
+      ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')

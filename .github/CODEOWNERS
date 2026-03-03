@@ -1850,6 +1850,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/platform/test/serverless/functional/config* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
+/**/scout/.meta/** @kibanamachine @elastic/appex-qa
+/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # Core
 ^/src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -2886,8 +2888,22 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ## These rules are always last so they take ultimate priority over everything else
 ####
 
-# Leads approval
+# These files influence agent behavior and are loaded into every new agent session.
+# Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
+# tech lead review by default.
 /AGENTS.md @elastic/kibana-tech-leads
+.cursorignore @elastic/kibana-tech-leads
+/.claude/ @elastic/kibana-tech-leads
+/.agents/skills/ @elastic/kibana-tech-leads
+
+# Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
+# codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
+/.agents/skills/ftr-testing/** @elastic/appex-qa
+/.agents/skills/scout-api-testing/** @elastic/appex-qa
+/.agents/skills/scout-best-practices-reviewer/** @elastic/appex-qa
+/.agents/skills/scout-create-scaffold/** @elastic/appex-qa
+/.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
+/.agents/skills/scout-ui-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
