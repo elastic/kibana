@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../../registry/types';
 import type { ExpressionContext, PartialOperatorDetection } from '../../types';
-import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../../../types';
 import { getFunctionDefinition } from '../../../../functions';
 import { createSyntheticListOperatorNode, createSyntheticLikeOperatorNode } from './utils';
 import { dispatchOperators } from '../dispatcher';
