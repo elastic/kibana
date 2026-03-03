@@ -49,14 +49,13 @@ export function setBreadcrumbs({
   rootBreadcrumbPath,
   titleBreadcrumbText,
   services,
-  isEmbeddedEditor,
 }: {
   rootBreadcrumbPath?: string;
   titleBreadcrumbText?: string;
   services: DiscoverServices;
-  isEmbeddedEditor?: boolean;
 }) {
   const embeddable = services.embeddableEditor;
+  const isEmbeddedEditor = embeddable.isEmbeddedEditor();
   const byValueTitle = embeddable.getByValueInput()?.label;
 
   const breadcrumbTitle = byValueTitle || titleBreadcrumbText;

@@ -214,7 +214,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       setBreadcrumbs({
         titleBreadcrumbText: persistedDiscoverSession?.title,
         services,
-        isEmbeddedEditor,
       });
     }
   }, [
