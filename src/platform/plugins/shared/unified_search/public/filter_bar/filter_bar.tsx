@@ -9,23 +9,31 @@
 
 import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  euiFontSize,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { IntlShape } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import type { ReactNode } from 'react';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { i18n } from '@kbn/i18n';
 import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
+
+const collapseLabel = i18n.translate('unifiedSearch.filter.filterBar.collapseFiltersButtonLabel', {
+  defaultMessage: 'Collapse filters',
+});
+const expandLabel = i18n.translate('unifiedSearch.filter.filterBar.expandFiltersButtonLabel', {
+  defaultMessage: 'Expand filters',
+});
 
 export interface Props {
   filters: Filter[];
@@ -54,16 +62,19 @@ export interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const themeContext = useEuiTheme();
+  const styles = filterBarStyles(themeContext, props.afterQueryBar);
   const { euiTheme } = themeContext;
-  const styles = filterBarStyles({ euiTheme }, props.afterQueryBar);
-  const { fontSize } = euiFontSize(themeContext, 's');
+
   const groupRef = useRef<HTMLDivElement>(null);
+
   const filterCount = props.filters?.length ?? 0;
+  const isExpandable = filterCount > 1;
+  const expandTooltipRef = useRef<EuiToolTip>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const renderFilterPills = (groupCss = styles.group) => (
+  const filterPills = (
     <EuiFlexGroup
-      css={groupCss}
+      css={isExpandable ? styles.groupWithoutMargin : styles.group}
       ref={groupRef}
       wrap={true}
       responsive={false}
@@ -87,20 +98,15 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     </EuiFlexGroup>
   );
 
-  const filterPillsContent = renderFilterPills();
+  const onToggleExpand = useCallback(() => {
+    setIsExpanded(!isExpanded);
+    // Hide the expand button tooltip on click so that it doesn't block the new content
+    expandTooltipRef.current?.hideToolTip();
+  }, [isExpanded]);
 
-  if (filterCount === 0) {
-    return filterPillsContent;
+  if (!isExpandable) {
+    return filterPills;
   }
-
-  const collapseLabel = i18n.translate(
-    'unifiedSearch.filter.filterBar.collapseFiltersButtonLabel',
-    { defaultMessage: 'Collapse filters' }
-  );
-  const expandLabel = i18n.translate(
-    'unifiedSearch.filter.filterBar.expandFiltersButtonLabel',
-    { defaultMessage: 'Expand filters' }
-  );
   const filtersAppliedLabel = i18n.translate(
     'unifiedSearch.filter.filterBar.filtersAppliedAccordionButton',
     {
@@ -109,64 +115,40 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     }
   );
 
-  if (isExpanded) {
-    return (
-      <EuiFlexGroup
-        css={[styles.group, css({ marginTop: props.afterQueryBar ? euiTheme.size.s : 0 })]}
-        alignItems="flexStart"
-        gutterSize="xs"
-        wrap={true}
-        responsive={false}
-        data-test-subj="filter-bar-accordion"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="arrowDown"
-            aria-label={collapseLabel}
-            onClick={() => setIsExpanded(false)}
-            data-test-subj="filter-bar-collapse"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} css={[css({ minWidth: 0 }), styles.pillsScrollContainer]}>
-          {renderFilterPills(styles.groupWithoutMargin)}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <EuiFlexGroup
       css={[styles.group, css({ marginTop: props.afterQueryBar ? euiTheme.size.s : 0 })]}
-      alignItems="center"
+      alignItems={isExpanded ? 'flexStart' : 'center'}
       gutterSize="xs"
+      wrap={isExpanded}
       responsive={false}
-      data-test-subj="filter-bar-accordion"
     >
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="arrowRight"
-          aria-label={expandLabel}
-          onClick={() => setIsExpanded(true)}
-          data-test-subj="filter-bar-expand"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <button
-          type="button"
-          onClick={() => setIsExpanded(true)}
-          css={css({
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            fontSize,
-            color: euiTheme.colors.text,
-          })}
-          data-test-subj="filter-bar-toggle"
+        <EuiToolTip
+          ref={expandTooltipRef}
+          content={isExpanded ? collapseLabel : expandLabel}
+          disableScreenReaderOutput
         >
-          {filtersAppliedLabel}
-        </button>
+          <EuiButtonIcon
+            css={isExpanded ? css({ marginTop: euiTheme.size.xs }) : null}
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            aria-label={isExpanded ? collapseLabel : expandLabel}
+            onClick={onToggleExpand}
+            aria-expanded={isExpanded}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
+      {isExpanded ? (
+        <EuiFlexItem grow={true} css={[css({ minWidth: 0 }), styles.pillsScrollContainer]}>
+          {filterPills}
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty flush="left" type="button" onClick={onToggleExpand} color="text">
+            {filtersAppliedLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });
