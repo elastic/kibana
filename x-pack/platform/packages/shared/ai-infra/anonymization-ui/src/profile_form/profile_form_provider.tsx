@@ -17,6 +17,7 @@ interface ProfileFormProviderProps extends ProfileFormProps {
 export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderProps) => {
   const { fetch, onFieldRulesChange, onTargetIdChange, targetId, targetType } = props;
   const [includeHiddenAndSystemIndices, setIncludeHiddenAndSystemIndices] = useState(false);
+  const [submitAttemptCount, setSubmitAttemptCount] = useState(0);
 
   const targetIdField = useTargetIdField({
     targetType,
@@ -28,6 +29,7 @@ export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderP
   });
 
   const onSubmitWithTargetValidation = async () => {
+    setSubmitAttemptCount((count) => count + 1);
     const isTargetValid = await targetIdField.validateAndHydrateTargetId();
     if (!isTargetValid) {
       return;
@@ -43,6 +45,7 @@ export const ProfileFormProvider = ({ children, ...props }: ProfileFormProviderP
         targetIdField,
         includeHiddenAndSystemIndices,
         onIncludeHiddenAndSystemIndicesChange: setIncludeHiddenAndSystemIndices,
+        submitAttemptCount,
       }}
     >
       {children}

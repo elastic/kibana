@@ -121,7 +121,7 @@ describe('useFieldRulesPanelState', () => {
     expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: 'EMAIL' });
   });
 
-  it('allows clearing entity class without forcing a fallback value', () => {
+  it('keeps existing entity class when clearing with invalid value', () => {
     const onFieldRulesChange = jest.fn();
     const { result } = renderHook(() =>
       useFieldRulesPanelState({
@@ -136,7 +136,7 @@ describe('useFieldRulesPanelState', () => {
 
     const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
     const userRule = nextRules.find((rule) => rule.field === 'user.email');
-    expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: undefined });
+    expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: 'EMAIL' });
   });
 
   it('suggests entity class when toggling field to anonymize', () => {

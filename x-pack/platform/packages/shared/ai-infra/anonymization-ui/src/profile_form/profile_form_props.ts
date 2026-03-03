@@ -12,6 +12,7 @@ import type {
   TrustedNerModelOption,
 } from '../contracts';
 import type { ProfilesApiError } from '../common/services/profiles/errors';
+import type { InlineDeanonymizationEntry } from '../common/types/replacements';
 import type { TargetType } from './types';
 
 export interface ProfileFormProps {
@@ -43,6 +44,8 @@ export interface ProfileFormProps {
   onNerRulesChange: (rules: NerRule[]) => void;
   listTrustedNerModels?: () => Promise<TrustedNerModelOption[]>;
   fetchPreviewDocument?: FetchPreviewDocument;
+  replacementsId?: string;
+  inlineDeanonymizations?: InlineDeanonymizationEntry[];
   fetch: AnonymizationUiServices['http']['fetch'];
   onCancel: () => void;
   onSubmit: () => Promise<void>;

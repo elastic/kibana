@@ -13,6 +13,7 @@ export interface ProfileFormContextValue extends ProfileFormProps {
   targetIdField: UseTargetIdFieldResult;
   includeHiddenAndSystemIndices: boolean;
   onIncludeHiddenAndSystemIndicesChange: (value: boolean) => void;
+  submitAttemptCount: number;
 }
 
 const ProfileFormContext = createContext<ProfileFormContextValue | undefined>(undefined);

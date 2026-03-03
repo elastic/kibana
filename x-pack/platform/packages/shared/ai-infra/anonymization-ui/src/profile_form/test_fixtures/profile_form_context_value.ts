@@ -46,6 +46,7 @@ const createDefaultProfileFormContextValue = (): ProfileFormContextValue => ({
   },
   includeHiddenAndSystemIndices: false,
   onIncludeHiddenAndSystemIndicesChange: jest.fn(),
+  submitAttemptCount: 0,
 });
 
 export const buildProfileFormContextValue = (

@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { PreviewPanel } from './preview_panel';
 import { useProfileFormContext } from '../../profile_form_context';
 import { usePreviewPanelState } from '../../hooks/use_preview_panel_state';
+import { useResolveAnonymizedValues } from '../../../common/hooks/use_resolve_anonymized_values';
 import {
   FIELD_RULE_ACTION_ALLOW,
   FIELD_RULE_ACTION_ANONYMIZE,
@@ -23,6 +24,10 @@ jest.mock('../../profile_form_context', () => ({
 
 jest.mock('../../hooks/use_preview_panel_state', () => ({
   usePreviewPanelState: jest.fn(),
+}));
+
+jest.mock('../../../common/hooks/use_resolve_anonymized_values', () => ({
+  useResolveAnonymizedValues: jest.fn(),
 }));
 
 const setContext = (overrides = {}) =>
@@ -58,6 +63,16 @@ const createBasePreviewState = () => ({
   isEmptyPreviewRows: false,
 });
 
+const setResolverState = (overrides = {}) => {
+  jest.mocked(useResolveAnonymizedValues).mockReturnValue({
+    resolveText: (value: string) => value,
+    tokenToOriginalMap: {},
+    isLoading: false,
+    error: undefined,
+    ...overrides,
+  });
+};
+
 const setPreviewState = (overrides = {}) => {
   jest.mocked(usePreviewPanelState).mockReturnValue({
     ...createBasePreviewState(),
@@ -70,6 +85,7 @@ describe('PreviewPanel', () => {
     jest.clearAllMocks();
     setContext();
     setPreviewState();
+    setResolverState();
   });
 
   it('renders preview title', () => {
@@ -158,5 +174,25 @@ describe('PreviewPanel', () => {
     expect(
       container.querySelector('[data-test-subj="anonymizationProfilesPreviewMaskToken"]')
     ).toBeTruthy();
+  });
+
+  it('uses resolved text for original-value mode when tokenized values are present', () => {
+    setResolverState({
+      resolveText: (value: string) => value.replace('EMAIL_1', 'resolved@example.com'),
+    });
+    setPreviewState({
+      previewValueMode: 'original',
+      previewRows: [
+        {
+          field: 'user.email',
+          action: FIELD_RULE_ACTION_ALLOW,
+          originalValue: 'EMAIL_1',
+          anonymizedValue: 'EMAIL_1',
+        },
+      ],
+    });
+    render(<PreviewPanel />);
+
+    expect(screen.getByText('resolved@example.com')).toBeInTheDocument();
   });
 });

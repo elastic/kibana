@@ -49,7 +49,7 @@ describe('NerRulesPanel', () => {
     expect(screen.getByTestId('anonymizationProfilesNerRulesDefaultModelId')).toHaveTextContent(
       NER_MODEL_ID
     );
-    expect(screen.getByLabelText('Allowed entities')).toBeInTheDocument();
+    expect(screen.getByLabelText('New allowed entities')).toBeInTheDocument();
   });
 
   it('uses NER_MODEL_ID as default in manual mode when trusted models are not provided', () => {
@@ -169,7 +169,8 @@ describe('NerRulesPanel', () => {
     setContext();
     render(<NerRulesPanel />);
 
-    expect(screen.getAllByPlaceholderText('Select allowed entities')).toHaveLength(2);
+    expect(screen.getByLabelText('New allowed entities')).toBeInTheDocument();
+    expect(screen.getByLabelText('Allowed entities for NER rule ner-1')).toBeInTheDocument();
   });
 
   it('shows row-level invalid state when ner validation error is present', () => {

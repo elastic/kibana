@@ -26,6 +26,8 @@ import {
   FIELD_RULE_ACTION_ANONYMIZE,
   FIELD_RULE_ACTION_DENY,
 } from '../../hooks/field_rule_actions';
+import { createAnonymizationReplacementsClient } from '../../../common/services/replacements/client';
+import { useResolveAnonymizedValues } from '../../../common/hooks/use_resolve_anonymized_values';
 import { useProfileFormContext } from '../../profile_form_context';
 import { usePreviewPanelState } from '../../hooks/use_preview_panel_state';
 
@@ -132,8 +134,26 @@ const renderDeniedIndicator = (action: PreviewRow['action']) => {
 };
 
 export const PreviewPanel = () => {
-  const { fieldRules, regexRules, isSubmitting, targetType, targetId, fetchPreviewDocument } =
-    useProfileFormContext();
+  const {
+    fieldRules,
+    regexRules,
+    isSubmitting,
+    targetType,
+    targetId,
+    fetchPreviewDocument,
+    fetch,
+    replacementsId,
+    inlineDeanonymizations,
+  } = useProfileFormContext();
+  const replacementsClient = useMemo(
+    () => createAnonymizationReplacementsClient({ fetch }),
+    [fetch]
+  );
+  const { resolveText } = useResolveAnonymizedValues({
+    client: replacementsClient,
+    replacementsId,
+    inlineDeanonymizations,
+  });
   const {
     previewViewMode,
     setPreviewViewMode,
@@ -194,6 +214,7 @@ export const PreviewPanel = () => {
             getPreviewDisplayValue({
               row,
               showAnonymizedValues: previewValueMode === 'tokens',
+              resolveText,
             }),
             {
               highlightMaskToken: previewValueMode === 'tokens',
@@ -202,7 +223,7 @@ export const PreviewPanel = () => {
         },
       },
     ],
-    [previewValueMode]
+    [previewValueMode, resolveText]
   );
 
   return (

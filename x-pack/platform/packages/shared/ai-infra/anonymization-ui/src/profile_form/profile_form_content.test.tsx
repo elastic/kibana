@@ -33,17 +33,17 @@ describe('ProfileFormContent', () => {
     });
     render(<ProfileFormContent />);
 
-    expect(screen.queryByText('Field rules')).not.toBeInTheDocument();
-    expect(screen.getByText('Regex rules')).toBeInTheDocument();
-    expect(screen.getByText('NER rules')).toBeInTheDocument();
-    expect(screen.queryByText('Preview')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Field rules' })).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Regex rules' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'NER rules' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Preview' })).not.toBeInTheDocument();
   });
 
   it('shows Field rules tab for non-global profiles', () => {
     setContext();
     render(<ProfileFormContent />);
 
-    expect(screen.getByText('Field rules')).toBeInTheDocument();
-    expect(screen.getByText('Preview')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Field rules' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Preview' })).toBeInTheDocument();
   });
 });

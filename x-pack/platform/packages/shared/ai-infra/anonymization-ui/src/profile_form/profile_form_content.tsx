@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiIcon, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isGlobalAnonymizationProfileTarget } from '@kbn/anonymization-common';
@@ -64,6 +64,7 @@ const ProfileFormTabs = ({ isGlobalProfile }: { isGlobalProfile: boolean }) => {
     nerRulesError,
     onFieldRulesChange,
     regexRulesError,
+    submitAttemptCount,
     targetId,
     targetIdField,
   } = useProfileFormContext();
@@ -155,7 +156,45 @@ const ProfileFormTabs = ({ isGlobalProfile }: { isGlobalProfile: boolean }) => {
     ]
   );
 
-  return <EuiTabbedContent tabs={tabs} data-test-subj="anonymizationProfilesFlyoutTabs" />;
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(tabs[0]?.id);
+
+  const errorTabId = useMemo(() => {
+    if (!isGlobalProfile && hasFieldRulesError) {
+      return 'fieldRules';
+    }
+    if (hasRegexRulesError) {
+      return 'regexRules';
+    }
+    if (hasNerRulesError) {
+      return 'nerRules';
+    }
+    return undefined;
+  }, [hasFieldRulesError, hasNerRulesError, hasRegexRulesError, isGlobalProfile]);
+
+  useEffect(() => {
+    if (!errorTabId) {
+      return;
+    }
+    setSelectedTabId(errorTabId);
+  }, [errorTabId, submitAttemptCount]);
+
+  useEffect(() => {
+    if (tabs.some((tab) => tab.id === selectedTabId)) {
+      return;
+    }
+    setSelectedTabId(tabs[0]?.id);
+  }, [selectedTabId, tabs]);
+
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+
+  return (
+    <EuiTabbedContent
+      tabs={tabs}
+      selectedTab={selectedTab}
+      onTabClick={(tab) => setSelectedTabId(tab.id)}
+      data-test-subj="anonymizationProfilesFlyoutTabs"
+    />
+  );
 };
 
 export const ProfileFormContent = () => {

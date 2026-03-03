@@ -209,10 +209,18 @@ export const buildLocalPreviewRows = ({
 export const getPreviewDisplayValue = ({
   row,
   showAnonymizedValues,
+  resolveText,
 }: {
   row: PreviewRow;
   showAnonymizedValues: boolean;
-}): unknown => (showAnonymizedValues ? row.anonymizedValue : row.originalValue);
+  resolveText?: (value: string) => string;
+}): unknown => {
+  const value = showAnonymizedValues ? row.anonymizedValue : row.originalValue;
+  if (showAnonymizedValues || typeof value !== 'string' || !resolveText) {
+    return value;
+  }
+  return resolveText(value);
+};
 
 export const buildLocalPreviewDocument = ({
   document,

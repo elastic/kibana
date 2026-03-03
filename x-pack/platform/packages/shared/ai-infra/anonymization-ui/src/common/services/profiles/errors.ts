@@ -6,6 +6,7 @@
  */
 
 import { isObjectRecord } from '../../utils/is_object_record';
+import { getHttpErrorBody, getHttpStatusCode } from '../http_error_utils';
 
 export type ProfilesApiErrorKind =
   | 'conflict'
@@ -33,27 +34,6 @@ const PROFILES_API_ERROR_KINDS: readonly ProfilesApiErrorKind[] = [
 const isProfilesApiErrorKind = (kind: unknown): kind is ProfilesApiErrorKind =>
   typeof kind === 'string' &&
   PROFILES_API_ERROR_KINDS.some((candidateKind) => candidateKind === kind);
-
-const getStatusCode = (error: unknown): number | undefined => {
-  if (!isObjectRecord(error)) {
-    return undefined;
-  }
-
-  const statusCode = error.statusCode;
-  if (typeof statusCode === 'number') {
-    return statusCode;
-  }
-
-  return undefined;
-};
-
-const getBody = (error: unknown): unknown => {
-  if (!isObjectRecord(error)) {
-    return undefined;
-  }
-
-  return error.body;
-};
 
 const toMessage = (statusCode?: number, body?: unknown) => {
   if (isObjectRecord(body) && typeof body.message === 'string') {
@@ -111,8 +91,8 @@ const createUnknownProfilesApiError = (
 };
 
 export const mapProfilesApiError = (error: unknown): ProfilesApiError => {
-  const statusCode = getStatusCode(error);
-  const body = getBody(error);
+  const statusCode = getHttpStatusCode(error);
+  const body = getHttpErrorBody(error);
 
   if (statusCode === 409) {
     return new ProfilesApiErrorImpl('conflict', statusCode, body);
@@ -145,7 +125,7 @@ export const ensureProfilesApiError = (
     return error;
   }
 
-  const statusCode = getStatusCode(error);
+  const statusCode = getHttpStatusCode(error);
   if (typeof statusCode === 'number') {
     return mapProfilesApiError(error);
   }

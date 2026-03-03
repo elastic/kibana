@@ -38,7 +38,9 @@ jest.mock('../profile_form/profile_form_provider', () => {
   return {
     ProfileFormProvider: (providerProps: MockProfileFormProviderProps) => {
       const { children, ...props } = providerProps;
+      const [submitAttemptCount, setSubmitAttemptCount] = mockReact.useState(0);
       const onSubmitWithTargetValidation = async () => {
+        setSubmitAttemptCount((count) => count + 1);
         const isTargetValid = await mockTargetIdField.validateAndHydrateTargetId();
         if (!isTargetValid) {
           return;
@@ -51,6 +53,7 @@ jest.mock('../profile_form/profile_form_provider', () => {
         targetIdField: mockTargetIdField,
         includeHiddenAndSystemIndices: false,
         onIncludeHiddenAndSystemIndicesChange: jest.fn(),
+        submitAttemptCount,
       };
 
       return mockReact.createElement(
@@ -302,5 +305,27 @@ describe('ProfileFlyout', () => {
       'aria-selected',
       'true'
     );
+  });
+
+  it('switches back to ner rules on save when ner error already exists', async () => {
+    renderFlyout({
+      nerRulesError:
+        'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.',
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: /^Regex rules/ }));
+    expect(screen.getByRole('tab', { name: /^Regex rules/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: /^NER rules/ })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    });
   });
 });
