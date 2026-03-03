@@ -16,6 +16,11 @@ import type { Logger } from '@kbn/core/server';
 import { getRemovedPanels, upsertMarkdownPanel, type VisualizationFailure } from './utils';
 import type { VisualizationQueryInput } from './visualization_generation';
 
+const panelGridInputSchema = z.object({
+  w: z.number().int().min(1).max(48).describe('Width in grid units (dashboard has 48 columns).'),
+  h: z.number().int().min(1).max(24).describe('Height in grid units.'),
+});
+
 export const visualizationQueryInputSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
   index: z.string().optional().describe('(optional) Index, alias, or datastream to target.'),
@@ -24,6 +29,11 @@ export const visualizationQueryInputSchema = z.object({
     .optional()
     .describe('(optional) The type of chart to create.'),
   esql: z.string().optional().describe('(optional) An ES|QL query to use for the visualization.'),
+  grid: panelGridInputSchema
+    .optional()
+    .describe(
+      '(optional) Panel size in grid units. Choose based on number and type of panels for a balanced layout.'
+    ),
 }) satisfies z.ZodType<VisualizationQueryInput>;
 
 export const setMetadataOperationSchema = z.object({

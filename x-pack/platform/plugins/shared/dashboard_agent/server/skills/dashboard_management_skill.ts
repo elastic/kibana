@@ -148,6 +148,7 @@ Each entry in \`add_generated_panels.items[]\` accepts:
     ', '
   )}. Set only when you are confident about the right chart type. See the chart type guide below.
 - \`esql\` (optional): a pre-generated ES|QL query. When provided, the visualization generator uses this directly instead of generating a query from scratch.
+- \`grid\` (optional): \`{ w: number, h: number }\` — panel size in grid units. **You should set this to control layout.** The dashboard grid has 48 columns; \`w\` is width (1–48), \`h\` is height in the same units (typically 4–12). Decide \`grid\` for each panel based on the number and type of panels so the dashboard is balanced (see Panel layout below).
 
 **Good queries are specific and reference real field names:**
 
@@ -188,6 +189,20 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), compo
 - One or two breakdowns (top sources, top error types)
 
 Base panel selection on the fields actually available in the discovered index mapping.
+
+## Panel layout (decide per panel)
+
+**You control layout by setting \`grid\` on each item in \`add_generated_panels.items[]\`.** The dashboard has a 48-column grid; each panel uses \`grid: { w, h }\` (width and height in grid units). If you omit \`grid\`, the renderer falls back to fixed defaults, which may not suit the mix of panels.
+
+**Decide the best layout from the number and type of panels:**
+
+- **Metric / Gauge panels:** Use smaller panels so several fit in one row, e.g. \`grid: { w: 12, h: 5 }\` or \`{ w: 16, h: 6 }\`. For 2–4 KPI-style panels, use equal widths that fill the row (e.g. two panels: \`w: 24\` each; four: \`w: 12\` each).
+- **XY (line/bar/area) and Tagcloud:** Use medium or full width for readability, e.g. \`grid: { w: 24, h: 8 }\` or \`{ w: 48, h: 9 }\`. Prefer wider panels for time series with many series or long time ranges.
+- **Heatmap:** Use a taller panel so the matrix is readable, e.g. \`grid: { w: 24, h: 10 }\` or \`{ w: 48, h: 10 }\`.
+- **Mix of panels:** Place metrics in a compact first row (e.g. 3× \`{ w: 16, h: 5 }\`), then use full-width or half-width for trend and breakdown panels below. Keep row heights consistent within a row when possible (e.g. all \`h: 8\` for a row of XY charts).
+- **Single panel:** Use \`grid: { w: 48, h: 9 }\` or similar so it uses the full width.
+
+**Guidelines:** Prefer \`w\` values that divide 48 evenly (e.g. 12, 16, 24, 48) for a clean grid. Use \`h\` between 4 and 12 for most panels; use larger \`h\` for heatmaps or dense charts.
 
 ## Examples
 
@@ -231,42 +246,50 @@ Base panel selection on the fields actually available in the discovered index ma
            {
              "query": "Show total request count as a metric",
              "index": "logs-nginx.access-default",
-             "chartType": "${SupportedChartType.Metric}"
+             "chartType": "${SupportedChartType.Metric}",
+             "grid": { "w": 24, "h": 5 }
            },
            {
              "query": "Show average system.cpu.total.pct as a metric",
              "index": "metrics-system.cpu-default",
-             "chartType": "${SupportedChartType.Metric}"
+             "chartType": "${SupportedChartType.Metric}",
+             "grid": { "w": 24, "h": 5 }
            },
            {
              "query": "Show request count over time",
              "index": "logs-nginx.access-default",
-             "chartType": "${SupportedChartType.XY}"
+             "chartType": "${SupportedChartType.XY}",
+             "grid": { "w": 48, "h": 8 }
            },
            {
              "query": "Show 95th percentile of http.response.body.bytes over time",
              "index": "logs-nginx.access-default",
-             "chartType": "${SupportedChartType.XY}"
+             "chartType": "${SupportedChartType.XY}",
+             "grid": { "w": 24, "h": 8 }
            },
            {
              "query": "Show top 10 url.path values by request count",
              "index": "logs-nginx.access-default",
-             "chartType": "${SupportedChartType.XY}"
+             "chartType": "${SupportedChartType.XY}",
+             "grid": { "w": 24, "h": 8 }
            },
            {
              "query": "Show top source.ip values by request count",
              "index": "logs-nginx.access-default",
-             "chartType": "${SupportedChartType.XY}"
+             "chartType": "${SupportedChartType.XY}",
+             "grid": { "w": 24, "h": 8 }
            },
            {
              "query": "Show system.cpu.total.pct over time grouped by host.name",
              "index": "metrics-system.cpu-default",
-             "chartType": "${SupportedChartType.XY}"
+             "chartType": "${SupportedChartType.XY}",
+             "grid": { "w": 24, "h": 8 }
            },
            {
              "query": "Show top http.response.status_code values by request count",
              "index": "logs-nginx.access-default",
-             "chartType": "${SupportedChartType.XY}"
+             "chartType": "${SupportedChartType.XY}",
+             "grid": { "w": 24, "h": 8 }
            }
          ]
        }
@@ -383,17 +406,20 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
         {
           "query": "Show the total number of documents as a single metric",
           "index": "logs-nginx.access-default",
-          "chartType": "metric"
+          "chartType": "metric",
+          "grid": { "w": 24, "h": 5 }
         },
         {
           "query": "Show average system.cpu.total.pct as a single metric",
           "index": "metrics-system.cpu-default",
-          "chartType": "metric"
+          "chartType": "metric",
+          "grid": { "w": 24, "h": 5 }
         },
         {
           "query": "Show document count over time as a line chart",
           "index": "logs-nginx.access-default",
-          "chartType": "xy"
+          "chartType": "xy",
+          "grid": { "w": 48, "h": 8 }
         }
       ]
     }

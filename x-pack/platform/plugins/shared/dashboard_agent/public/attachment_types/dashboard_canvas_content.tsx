@@ -104,6 +104,8 @@ export interface BuildPanelFromRawConfigOptions {
   layout?: typeof PANEL_LAYOUT;
   uid?: string;
   getLensPanelWidth?: (lensAttributes: LensAttributes) => number;
+  /** When set (e.g. from agent-specified layout), use these dimensions instead of layout defaults. */
+  preferredGrid?: { w: number; h: number };
 }
 
 export const buildPanelFromRawConfig = ({
@@ -114,12 +116,15 @@ export const buildPanelFromRawConfig = ({
   position,
   uid,
   getLensPanelWidth,
+  preferredGrid,
 }: BuildPanelFromRawConfigOptions): DashboardPanel | null => {
   const { currentX, currentY } = position;
 
   if (isLensEmbeddableType(embeddableType, rawConfig)) {
     const lensAttributes = rawConfig;
-    const width = getLensPanelWidth ? getLensPanelWidth(lensAttributes) : layout.largePanelWidth;
+    const width =
+      preferredGrid?.w ?? (getLensPanelWidth ? getLensPanelWidth(lensAttributes) : layout.largePanelWidth);
+    const height = preferredGrid?.h ?? layout.defaultPanelHeight;
 
     let x = currentX;
     let y = currentY;
@@ -135,7 +140,7 @@ export const buildPanelFromRawConfig = ({
 
     return {
       type: 'lens',
-      grid: { x, y, w: width, h: layout.defaultPanelHeight },
+      grid: { x, y, w: width, h: height },
       config: lensConfig,
       uid,
     };
@@ -143,8 +148,8 @@ export const buildPanelFromRawConfig = ({
 
   if (embeddableType === MARKDOWN_EMBEDDABLE_TYPE) {
     const content = (rawConfig as { content?: string }).content ?? '';
-    const height = calculateMarkdownPanelHeight(content, layout);
-    const width = layout.markdownPanelWidth;
+    const height = preferredGrid?.h ?? calculateMarkdownPanelHeight(content, layout);
+    const width = preferredGrid?.w ?? layout.markdownPanelWidth;
 
     let x = currentX;
     let y = currentY;
@@ -161,7 +166,8 @@ export const buildPanelFromRawConfig = ({
     };
   }
 
-  const width = layout.largePanelWidth;
+  const width = preferredGrid?.w ?? layout.largePanelWidth;
+  const panelHeight = preferredGrid?.h ?? layout.defaultPanelHeight;
   let x = currentX;
   let y = currentY;
   if (x + width > layout.dashboardGridColumnCount) {
@@ -171,7 +177,7 @@ export const buildPanelFromRawConfig = ({
 
   return {
     type: embeddableType,
-    grid: { x, y, w: width, h: layout.defaultPanelHeight },
+    grid: { x, y, w: width, h: panelHeight },
     config: rawConfig,
     uid,
   };
@@ -189,18 +195,22 @@ export const normalizePanels = (
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
   let currentY = yOffset;
+  let rowMaxHeight = 0;
 
   for (const panel of panelList) {
     let dashboardPanel: DashboardPanel | null = null;
 
     if (isLensAttachmentPanel(panel)) {
       const config = panel.visualization as LensApiSchemaType;
-      const width = getPanelWidth(config.type, normalizedLayout);
+      const width = panel.grid?.w ?? getPanelWidth(config.type, normalizedLayout);
+      const height = panel.grid?.h ?? normalizedLayout.defaultPanelHeight;
 
       if (currentX + width > normalizedLayout.dashboardGridColumnCount) {
         currentX = 0;
-        currentY += normalizedLayout.defaultPanelHeight;
+        currentY += rowMaxHeight;
+        rowMaxHeight = 0;
       }
+      rowMaxHeight = Math.max(rowMaxHeight, height);
 
       dashboardPanel = buildLensPanelFromApi(
         config,
@@ -208,7 +218,7 @@ export const normalizePanels = (
           x: currentX,
           y: currentY,
           w: width,
-          h: normalizedLayout.defaultPanelHeight,
+          h: height,
         },
         includePanelIdAsUid ? panel.panelId : undefined
       );
@@ -225,13 +235,16 @@ export const normalizePanels = (
         layout: normalizedLayout,
         uid: includePanelIdAsUid ? panel.panelId : undefined,
         getLensPanelWidth,
+        preferredGrid: panel.grid,
       });
 
       if (dashboardPanel) {
         currentX += dashboardPanel.grid.w;
+        rowMaxHeight = Math.max(rowMaxHeight, dashboardPanel.grid.h);
         if (currentX >= normalizedLayout.dashboardGridColumnCount) {
           currentX = 0;
-          currentY += normalizedLayout.defaultPanelHeight;
+          currentY += rowMaxHeight;
+          rowMaxHeight = 0;
         }
       }
     }

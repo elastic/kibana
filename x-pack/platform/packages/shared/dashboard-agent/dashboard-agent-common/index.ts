@@ -12,6 +12,7 @@ export {
 } from './constants';
 
 export {
+  panelGridSchema,
   lensAttachmentPanelSchema,
   genericAttachmentPanelSchema,
   attachmentPanelSchema,

@@ -18,6 +18,8 @@ export interface VisualizationQueryInput {
   index?: string;
   chartType?: SupportedChartType;
   esql?: string;
+  /** Optional panel size in grid units (w, h). When set, stored on the panel for the renderer to use. */
+  grid?: { w: number; h: number };
 }
 
 export const buildVisualizationsFromQueriesWithLLM = async ({
@@ -46,7 +48,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   const failures: VisualizationFailure[] = [];
 
   for (let i = 0; i < queries.length; i++) {
-    const { query: nlQuery, index, chartType, esql } = queries[i];
+    const { query: nlQuery, index, chartType, esql, grid } = queries[i];
 
     events.reportProgress(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
 
@@ -69,6 +71,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
         title: validatedConfig.title ?? nlQuery.slice(0, 50),
         query: nlQuery,
         esql: esqlQuery,
+        ...(grid ? { grid } : {}),
       };
 
       panels.push(panelEntry);
