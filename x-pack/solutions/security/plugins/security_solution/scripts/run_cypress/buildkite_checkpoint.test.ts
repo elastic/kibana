@@ -53,9 +53,7 @@ describe('buildkite_checkpoint', () => {
     it('strips the agent workspace prefix from an absolute Buildkite path', () => {
       const absolute =
         '/opt/buildkite-agent/builds/bk-agent-prod-gcp-123456/elastic/kibana-pull-request/kibana/x-pack/solutions/security/test/spec.cy.ts';
-      expect(normalizeSpecPath(absolute)).toBe(
-        'x-pack/solutions/security/test/spec.cy.ts'
-      );
+      expect(normalizeSpecPath(absolute)).toBe('x-pack/solutions/security/test/spec.cy.ts');
     });
 
     it('returns the same value for the same spec on different agents', () => {
@@ -67,9 +65,7 @@ describe('buildkite_checkpoint', () => {
     });
 
     it('returns the path unchanged when already relative', () => {
-      expect(normalizeSpecPath('cypress/e2e/alerts.cy.ts')).toBe(
-        'cypress/e2e/alerts.cy.ts'
-      );
+      expect(normalizeSpecPath('cypress/e2e/alerts.cy.ts')).toBe('cypress/e2e/alerts.cy.ts');
     });
 
     it('handles paths without the /kibana/ marker', () => {
