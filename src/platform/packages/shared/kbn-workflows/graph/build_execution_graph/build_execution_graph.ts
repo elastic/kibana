@@ -21,6 +21,8 @@ import type {
   StepWithOnFailure,
   TimeoutProp,
   WaitStep,
+  WorkflowExecuteAsyncStep,
+  WorkflowExecuteStep,
   WorkflowOnFailure,
   WorkflowRetry,
   WorkflowSettings,
@@ -51,6 +53,8 @@ import type {
   GraphNodeUnion,
   KibanaGraphNode,
   WaitGraphNode,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowGraphType,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
@@ -148,6 +152,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitKibanaStep(currentStep as KibanaStep, context);
   }
 
+  if ((currentStep as WorkflowExecuteStep).type === 'workflow.execute') {
+    return visitWorkflowExecuteStep(currentStep as WorkflowExecuteStep, context);
+  }
+
+  if ((currentStep as WorkflowExecuteAsyncStep).type === 'workflow.executeAsync') {
+    return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
+  }
+
   return visitAtomicStep(currentStep, context);
 }
 
@@ -226,6 +238,44 @@ export function visitKibanaStep(
   };
   graph.setNode(kibanaNode.id, kibanaNode);
 
+  return graph;
+}
+
+export function visitWorkflowExecuteStep(
+  currentStep: WorkflowExecuteStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowExecuteNode: WorkflowExecuteGraphNode = {
+    id: stepId,
+    type: 'workflow.execute',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(workflowExecuteNode.id, workflowExecuteNode);
+  return graph;
+}
+
+export function visitWorkflowExecuteAsyncStep(
+  currentStep: WorkflowExecuteAsyncStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowExecuteAsyncNode: WorkflowExecuteAsyncGraphNode = {
+    id: stepId,
+    type: 'workflow.executeAsync',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(workflowExecuteAsyncNode.id, workflowExecuteAsyncNode);
   return graph;
 }
 

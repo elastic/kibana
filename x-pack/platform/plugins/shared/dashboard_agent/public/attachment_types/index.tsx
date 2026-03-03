@@ -5,47 +5,29 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import { isToolUiEvent, isRoundCompleteEvent, getLatestVersion } from '@kbn/agent-builder-common';
-import type {
-  DashboardAttachmentData,
-  PanelAddedEventData,
-  PanelsRemovedEventData,
-} from '@kbn/dashboard-agent-common';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
-} from '@kbn/dashboard-agent-common';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DashboardAttachmentStore } from '../services/attachment_store';
-import { createFlyoutConsumer } from '../flyout';
+import { DashboardCanvasContent } from './dashboard_canvas_content';
 
-/**
- * Registers the dashboard attachment UI definition, including the icon and label.
- * Returns a cleanup function that should be called when the plugin stops.
- */
+// TODO: Remove this once we have a real action for the canvas - required to show the canvas header
+const canvasNoopAction = {
+  label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasNoopActionLabel', {
+    defaultMessage: 'Placeholder',
+  }),
+  icon: 'eye',
+  type: ActionButtonType.PRIMARY,
+  handler: () => undefined,
+} as const;
+
 export const registerDashboardAttachmentUiDefinition = ({
   attachments,
-  chat$,
-  share,
-  core,
 }: {
   attachments: AttachmentServiceStartContract;
-  chat$: Observable<ChatEvent>;
-  share?: SharePluginStart;
-  core: CoreStart;
 }): (() => void) => {
-  const attachmentStore = new DashboardAttachmentStore();
-
-  // Create flyout consumer - it subscribes to attachmentStore.state$
-  const unsubscribeFlyout = createFlyoutConsumer({ attachmentStore, core, chat$, share });
-
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -56,56 +38,28 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onClick: ({ attachment }) => {
-      const data = attachment.data;
-      if (!data) return;
+    renderCanvasContent: (props) => <DashboardCanvasContent {...props} />,
+    getActionButtons: ({ isCanvas, openCanvas }) => {
+      if (isCanvas) {
+        return [canvasNoopAction];
+      }
 
-      attachmentStore.setAttachment(attachment.id, data);
+      if (!openCanvas) {
+        return [];
+      }
+
+      return [
+        {
+          label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
+            defaultMessage: 'Preview',
+          }),
+          icon: 'eye',
+          type: ActionButtonType.SECONDARY,
+          handler: openCanvas,
+        },
+      ];
     },
   });
 
-  // Subscribe to chat events for progressive panel updates
-  const eventsSubscription = chat$.subscribe((event) => {
-    // Handle progressive panel additions
-    if (
-      isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(
-        event,
-        DASHBOARD_PANEL_ADDED_EVENT
-      )
-    ) {
-      const { dashboardAttachmentId, panel } = event.data.data;
-      attachmentStore.addPanel(dashboardAttachmentId, panel);
-    }
-
-    // Handle progressive panel removals
-    if (
-      isToolUiEvent<typeof DASHBOARD_PANELS_REMOVED_EVENT, PanelsRemovedEventData>(
-        event,
-        DASHBOARD_PANELS_REMOVED_EVENT
-      )
-    ) {
-      const { dashboardAttachmentId, panelIds } = event.data.data;
-      attachmentStore.removePanels(dashboardAttachmentId, panelIds);
-    }
-
-    // Handle final attachment update (round complete)
-    if (isRoundCompleteEvent(event) && event.data.attachments) {
-      for (const attachment of event.data.attachments) {
-        if (attachment.type === DASHBOARD_ATTACHMENT_TYPE) {
-          const latestVersion = getLatestVersion(attachment);
-          if (latestVersion?.data) {
-            attachmentStore.updateAttachment(
-              attachment.id,
-              latestVersion.data as DashboardAttachmentData
-            );
-          }
-        }
-      }
-    }
-  });
-
-  return () => {
-    eventsSubscription.unsubscribe();
-    unsubscribeFlyout();
-  };
+  return () => {};
 };

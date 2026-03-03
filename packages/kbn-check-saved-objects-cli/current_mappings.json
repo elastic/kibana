@@ -3042,6 +3042,21 @@
       }
     }
   },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "type": "text",
+        "index": false
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
   "metrics-data-source": {
     "dynamic": false,
     "properties": {}

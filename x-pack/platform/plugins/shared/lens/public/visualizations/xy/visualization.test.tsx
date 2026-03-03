@@ -909,6 +909,255 @@ describe('xy_visualization', () => {
       });
     });
 
+    it('hides X axis title when adding date histogram (undefined setting)', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: undefined,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // X axis title should be hidden for date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('hides X axis title when switching from non-histogram to date histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto for non-histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should change to None when switching to date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('shows X axis title when switching from date histogram to non-histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true }, // Was None for date histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldDateCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should change to Auto when switching away from date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves user choice of None for non-histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true }, // User set None for non-histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve user's choice of None
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves user choice of Auto for date histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // User set Auto for date histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldDateCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should preserve user's choice of Auto
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves custom title when switching between field types', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto (visible)
+          xTitle: 'My Custom Title', // User has set a custom title
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve visibility setting when custom title is set
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('does not change settings for non-date histogram with undefined setting', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: undefined,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should not change settings for non-date histogram (defaults to Auto)
+      expect(result.axisTitlesVisibilitySettings).toBeUndefined();
+    });
+
     it('should add a dimension to a reference layer', () => {
       expect(
         xyVisualization.setDimension({

@@ -50,6 +50,7 @@ export function registerExchangeCodeRoute({
         }),
         body: schema.object({
           code: schema.string(),
+          pkce_verifier: schema.string(),
         }),
       },
     },
@@ -68,7 +69,7 @@ export function registerExchangeCodeRoute({
 
       const { provider } = request.params;
 
-      const { code } = request.body;
+      const { code, pkce_verifier } = request.body;
 
       try {
         const fetchOptions: RequestInit & { dispatcher?: Agent } = {
@@ -76,7 +77,7 @@ export function registerExchangeCodeRoute({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ code, pkce_verifier }),
         };
 
         if (allowInsecure) {

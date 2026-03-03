@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { isSchema } from '@kbn/zod-helpers';
+import { isSchema, DeepStrict } from '@kbn/zod-helpers';
 import type { Condition } from './conditions';
 import { conditionSchema } from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';
@@ -91,6 +91,12 @@ export interface StreamlangDSL {
 export const streamlangDSLSchema = z.object({
   steps: z.array(streamlangStepSchema),
 });
+
+/**
+ * Strict version of streamlangDSLSchema that rejects excess/unknown keys.
+ * Pre-constructed for performance as DeepStrict creates proxy wrappers,
+ */
+export const streamlangDSLSchemaStrict = DeepStrict(streamlangDSLSchema);
 
 export const isStreamlangDSLSchema = (obj: any): obj is StreamlangDSL => {
   return isSchema(streamlangDSLSchema, obj);

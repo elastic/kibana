@@ -173,4 +173,24 @@ describe('crud_client utils', () => {
 
     expect(() => validateAndTransformDocForUpsert('generic', 'default', doc, true)).not.toThrow();
   });
+
+  it('validateAndTransformDocForUpsert: accepts flat doc (dot-notation keys) when force=true', () => {
+    mockGetEntityDefinition.mockReturnValue(
+      createDefinition('user', [createField('entity.id'), createField('entity.name')])
+    );
+
+    const flatDoc = {
+      'entity.id': 'user:u1',
+      'entity.name': 'alice',
+    } as unknown as Entity;
+
+    const result = validateAndTransformDocForUpsert('user', 'default', flatDoc, true);
+
+    expect(result).toHaveProperty('@timestamp');
+    expect(typeof result['@timestamp']).toBe('string');
+    expect(result['entity.id']).toBe('user:u1');
+    expect(result['entity.name']).toBe('alice');
+    expect(result).toHaveProperty('user');
+    expect((result.user as Record<string, unknown>).entity).toBeUndefined();
+  });
 });
