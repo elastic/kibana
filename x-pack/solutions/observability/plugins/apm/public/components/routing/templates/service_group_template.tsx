@@ -131,7 +131,7 @@ export function ServiceGroupTemplate({
                 {
                   text: (
                     <>
-                      <EuiIcon size="s" type="arrowLeft" aria-hidden={true} />{' '}
+                      <EuiIcon size="s" type="arrowLeft" />{' '}
                       {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
                         defaultMessage: 'Return to service groups',
                       })}

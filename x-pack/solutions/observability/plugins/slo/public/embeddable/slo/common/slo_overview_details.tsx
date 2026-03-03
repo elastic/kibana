@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
 import {
@@ -33,6 +33,7 @@ import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
@@ -44,13 +45,24 @@ export function SloOverviewDetailsContent({
   initialTabId = OVERVIEW_TAB_ID,
 }: SloOverviewDetailsContentProps) {
   const { agentBuilder } = useKibana().services;
+  const { telemetry } = usePluginContext();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
+
+  const handleTabChange = useCallback(
+    (tabId: SloTabId) => {
+      setSelectedTabId(tabId);
+      if (telemetry) {
+        telemetry.reportSloDetailsFlyoutTabChanged({ tabId });
+      }
+    },
+    [telemetry]
+  );
 
   const { tabs } = useSloDetailsTabs({
     slo,
     isAutoRefreshing: false,
     selectedTabId,
-    setSelectedTabId,
+    setSelectedTabId: handleTabChange,
   });
 
   // Configure agent builder global flyout with the SLO attachment

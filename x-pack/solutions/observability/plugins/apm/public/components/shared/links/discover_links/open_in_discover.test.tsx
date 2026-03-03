@@ -46,8 +46,6 @@ const mockLocatorGet = jest.fn().mockReturnValue({
 describe('OpenInDiscover', () => {
   beforeEach(() => {
     mockUseApmIndexSettingsContext.mockReturnValue({
-      serviceName: 'test-service',
-      transactionType: 'request',
       indexSettings: [
         {
           configurationName: 'transaction',
@@ -146,8 +144,6 @@ describe('OpenInDiscover', () => {
 
     it('should be disabled when indexSettings is empty', () => {
       mockUseApmIndexSettingsContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -169,8 +165,6 @@ describe('OpenInDiscover', () => {
 
     it('should show loading state when indexSettingsStatus is LOADING', () => {
       mockUseApmIndexSettingsContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
         indexSettings: [
           {
             configurationName: 'transaction',
@@ -264,8 +258,6 @@ describe('OpenInDiscover', () => {
 
     it('should render disabled link when indexSettings is empty', () => {
       mockUseApmIndexSettingsContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -288,8 +280,6 @@ describe('OpenInDiscover', () => {
 
     it('should render disabled link when indexSettingsStatus is not SUCCESS', () => {
       mockUseApmIndexSettingsContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
         indexSettings: [
           {
             configurationName: 'transaction',
@@ -386,8 +376,6 @@ describe('OpenInDiscover', () => {
 
     it('should return null ESQL query when indexSettings is empty', () => {
       mockUseApmIndexSettingsContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);

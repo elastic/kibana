@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDITOR_MARKER } from '../constants';
-import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../../ast/is';
+import { isColumn, isIdentifier, isList, isOptionNode, isSource, Walker } from '@elastic/esql';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,
@@ -18,8 +17,8 @@ import type {
   ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
-} from '../../../types';
-import { Walker } from '../../../..';
+} from '@elastic/esql/types';
+import { EDITOR_MARKER } from '../constants';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   if (Array.isArray(node)) {
@@ -261,7 +260,7 @@ export function correctQuerySyntax(_query: string) {
   const bracketsToAppend = getBracketsToClose(query);
 
   const endsWithBinaryOperatorRegex =
-    /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+    /(?:\+|\/|==|>=|>|<=|<|:|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
   const endsWithCastingOperatorRegex = /::\s*$/i;
   const endsWithCommaRegex = /,\s+$/;
 

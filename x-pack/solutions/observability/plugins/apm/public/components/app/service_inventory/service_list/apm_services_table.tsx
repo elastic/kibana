@@ -376,7 +376,7 @@ export function ApmServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core, share } = useApmPluginContext();
-  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+  const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
   const { slo } = useKibana<ApmPluginStartDeps>().services;
   const { indexSettings = [] } = useApmIndexSettingsContext();
   const { link } = useApmRouter();
@@ -504,7 +504,7 @@ export function ApmServicesTable({
     openSloOverviewFlyout,
   ]);
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(
     apmEnableServiceInventoryTableSearchBar,
     true
   );

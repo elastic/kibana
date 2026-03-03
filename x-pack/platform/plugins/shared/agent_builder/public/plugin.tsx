@@ -12,6 +12,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
@@ -49,6 +50,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 
 export class AgentBuilderPlugin
   implements
@@ -69,6 +71,7 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -120,7 +123,13 @@ export class AgentBuilderPlugin
     const { licensing, inference } = startDependencies;
 
     const agentService = new AgentService({ http });
-    const attachmentsService = new AttachmentsService();
+    const attachmentsService = new AttachmentsService({ http });
+
+    attachmentsService.addAttachmentType(
+      'visualization',
+      createVisualizationAttachmentDefinition({ startDependencies })
+    );
+
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
@@ -196,6 +205,11 @@ export class AgentBuilderPlugin
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      addAttachment: (attachment: AttachmentInput) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;

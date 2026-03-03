@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment, isColumn } from '@elastic/esql';
+import type { ESQLAstItem, ESQLCommand } from '@elastic/esql/types';
 import { getExpressionType } from '../../definitions/utils';
-import type { ESQLAstItem, ESQLCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 
 export const columnsAfter = (

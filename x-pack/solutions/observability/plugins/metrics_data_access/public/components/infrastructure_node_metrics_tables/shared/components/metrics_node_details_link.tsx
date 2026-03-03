@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
-import { type ComposerQuery, esql } from '@kbn/esql-language';
+import { esql, type ComposerQuery } from '@elastic/esql';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRedirect } from '../../../../pages/link_to/use_asset_details_redirect';
