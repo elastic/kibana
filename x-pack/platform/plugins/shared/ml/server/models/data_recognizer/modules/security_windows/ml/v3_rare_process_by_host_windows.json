@@ -2,7 +2,7 @@
   "description": "Security: Windows - Looks for processes that are unusual to a particular Windows host. Such unusual processes may indicate unauthorized software, malware, or persistence mechanisms.",
   "groups": ["security", "windows"],
   "analysis_config": {
-    "bucket_span": "15m",
+    "bucket_span": "4h",
     "detectors": [
       {
         "detector_description": "Detects rare processes per host.",
