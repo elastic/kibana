@@ -12,10 +12,17 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 const mockUseUrlFilters = jest.fn();
 const mockUseAddUrlFilters = jest.fn();
+const mockUseUrlCategories = jest.fn();
+const mockUseSetUrlCategory = jest.fn();
 
 jest.mock('../hooks/url_filters', () => ({
   useUrlFilters: () => mockUseUrlFilters(),
   useAddUrlFilters: () => mockUseAddUrlFilters(),
+}));
+
+jest.mock('../hooks/url_categories', () => ({
+  useUrlCategories: () => mockUseUrlCategories(),
+  useSetUrlCategory: () => mockUseSetUrlCategory(),
 }));
 
 jest.mock('../../../../../hooks', () => ({}));
@@ -33,6 +40,11 @@ describe('SearchAndFiltersBar', () => {
       status: undefined,
     });
     mockUseAddUrlFilters.mockReturnValue(mockAddUrlFilters);
+    mockUseUrlCategories.mockReturnValue({
+      category: '',
+      subCategory: undefined,
+    });
+    mockUseSetUrlCategory.mockReturnValue(jest.fn());
   });
 
   function renderSearchAndFiltersBar() {
