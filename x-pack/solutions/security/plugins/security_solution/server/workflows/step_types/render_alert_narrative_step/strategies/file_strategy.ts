@@ -48,8 +48,7 @@ export const fileStrategy: NarrativeStrategy = {
   priority: 10,
   match: (source) => {
     const hasFile =
-      getSingleValue(source, 'file.path') != null ||
-      getSingleValue(source, 'file.name') != null;
+      getSingleValue(source, 'file.path') != null || getSingleValue(source, 'file.name') != null;
     const hasProcess = getSingleValue(source, 'process.name') != null;
     return (
       hasFile &&
