@@ -16,8 +16,7 @@ export const visualizationCreationSkill = defineSkillType({
   id: 'visualization-creation',
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
-  description:
-    'Create high-quality visualizations from grounded index and field context. Works standalone and returns attachment IDs for follow-up operations.',
+  description: 'Create high-quality visualizations from grounded index and field context.',
   content: `## When to Use This Skill
 
 Use this skill when:
