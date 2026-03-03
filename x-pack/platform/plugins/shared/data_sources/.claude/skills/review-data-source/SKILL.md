@@ -28,7 +28,7 @@ validation against the vendor API.
 
 - Look at existing specs for patterns: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
 - If non-MCP: valid structure with required fields, correct auth type
-- **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnector(s).type`, `DataSource.iconType`, and
+- **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnectors[].type`, `DataSource.iconType`, and
   `ConnectorIconsMap` key all match. IDs must start with a dot.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
@@ -65,7 +65,7 @@ validation against the vendor API.
 ### Data Source Definition
 
 - Correct references to the connector spec and workflows
-- **IDs**: `id` (lowercase, hyphenated), `iconType` (dot-prefixed, matches ConnectorIconsMap), `stackConnector(s).type`
+- **IDs**: `id` (lowercase, hyphenated), `iconType` (dot-prefixed, matches ConnectorIconsMap), `stackConnectors[].type`
   matches the connector spec ID
 - Data source is imported and registered in the plugin's sources index (e.g. `server/sources/index.ts`)
 - `workflows.directory` points to the correct workflows folder; all workflows referenced exist as YAML files
@@ -74,7 +74,7 @@ validation against the vendor API.
 ### Documentation and icons
 
 - Generator scaffold docs are filled in (no remaining `TODO:` placeholders)
-- `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md` description filled in
+- `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` entry filled in
 - `docs/reference/toc.yml` entry exists in the correct section
 - **Icon**: Data source has an icon (ConnectorIconsMap entry and, if custom, spec icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
