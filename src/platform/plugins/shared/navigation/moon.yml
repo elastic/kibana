@@ -36,6 +36,8 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/split-button'
   - '@kbn/scout'
+  - '@kbn/core-chrome-navigation'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
