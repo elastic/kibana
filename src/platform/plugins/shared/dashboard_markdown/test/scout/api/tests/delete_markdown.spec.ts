@@ -13,6 +13,7 @@ import { tags } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS, MARKDOWN_API_PATH } from '../fixtures';
 
 const TEST_MARKDOWN_ID = 'test-delete-markdown';
+const TEST_MARKDOWN_ID_IN_SPACE = 'test-delete-markdown-in-space';
 
 apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
@@ -33,7 +34,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
 
     await kbnClient.savedObjects.create({
       type: 'markdown',
-      id: TEST_MARKDOWN_ID,
+      id: TEST_MARKDOWN_ID_IN_SPACE,
       attributes: {
         title: 'Markdown to delete in specific space',
         content: '# Delete me',
@@ -79,7 +80,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     'should return 200 if the markdown panel is deleted in a specific space',
     async ({ apiClient }) => {
       const response = await apiClient.delete(
-        `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`,
+        `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
         {
           headers: {
             ...COMMON_HEADERS,
