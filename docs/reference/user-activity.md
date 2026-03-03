@@ -43,7 +43,7 @@ Filters are evaluated with **AND semantics**: for an activity to be logged, its 
 Each filter has:
 
 - `policy`: `keep` or `drop`
-- `actions`: list of action ids (see [Available actions](#available-actions))
+- `actions`: list of action IDs (see [Available actions](#available-actions))
 
 `keep` allows only actions listed in `actions`. `drop` excludes actions listed in `actions`. If you don’t configure any filters, all actions are eligible to be logged.
 
