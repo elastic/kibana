@@ -14,7 +14,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { buildMetadataOption, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { useDebouncedValue } from '@kbn/react-hooks';

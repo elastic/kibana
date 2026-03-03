@@ -9,7 +9,7 @@ import objectHash from 'object-hash';
 import { v5 } from 'uuid';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst } from '@kbn/streamlang';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
 import { buildMetadataOption } from '@kbn/streams-schema';
 
 export function computeRuleId(assetUuid: string, query: string): string {

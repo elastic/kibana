@@ -7,7 +7,7 @@
 
 import type { StreamQuery } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 
 export interface FieldValidation {
   isInvalid: boolean;
