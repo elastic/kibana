@@ -13,9 +13,8 @@ jest.mock('axios', () => ({
   create: jest.fn().mockReturnValue({}),
 }));
 
-const mockRequest = jest.fn();
 jest.mock('../lib/axios_utils', () => ({
-  request: mockRequest,
+  request: jest.fn(),
 }));
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -23,6 +22,9 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthDisconnectRoute } from './oauth_disconnect';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { request as mockRequestImport } from '../lib/axios_utils';
+
+const mockRequest = mockRequestImport as jest.Mock;
 
 const MockUserConnectorTokenClient = UserConnectorTokenClient as jest.MockedClass<
   typeof UserConnectorTokenClient
