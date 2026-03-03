@@ -209,4 +209,21 @@ steps: []`;
     expect(result).toContain('version: 1.0');
     expect(result).toContain('steps: []');
   });
+
+  it('should not fold long template expressions across lines', () => {
+    const longTemplateVar =
+      '${{steps.extract_content.output.docs[0].doc._source.attachment.content}}';
+    const yaml = `name: Test Workflow
+enabled: false
+steps:
+  - name: step1
+    type: data.set
+    with:
+      content: "${longTemplateVar}"`;
+
+    const result = updateYamlField(yaml, 'name', 'Prefixed Workflow');
+
+    expect(result).toContain(`content: "${longTemplateVar}"`);
+    expect(result).not.toMatch(/\\\n/);
+  });
 });
