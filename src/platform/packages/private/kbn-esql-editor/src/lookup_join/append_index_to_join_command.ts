@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BasicPrettyPrinter,
-  Parser,
-  isSource,
-  mutate,
-  type ESQLAstItem,
-  type ESQLAstJoinCommand,
-  type ESQLAstQueryExpression,
-  type ESQLSingleAstItem,
-  type ESQLSource,
-} from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser, isSource, mutate } from '@elastic/esql';
+import type {
+  ESQLAstItem,
+  ESQLAstJoinCommand,
+  ESQLAstQueryExpression,
+  ESQLSingleAstItem,
+  ESQLSource,
+} from '@elastic/esql/types';
 import type { monaco } from '@kbn/monaco';
 
 interface SelectedJoin {

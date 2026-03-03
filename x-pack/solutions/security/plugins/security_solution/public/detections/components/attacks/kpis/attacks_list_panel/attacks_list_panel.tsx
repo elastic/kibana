@@ -14,6 +14,8 @@ import {
   EuiLink,
   EuiLoadingChart,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
@@ -21,6 +23,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
+import { SeverityBar } from '../../../../../entity_analytics/components/severity/severity_bar';
 import { useAttacksListData } from './use_attacks_list_data';
 import type { AttacksListItem } from './types';
 
@@ -33,6 +36,12 @@ const TableContainer = styled.div`
   overflow: auto;
   display: flex;
   flex-direction: column;
+`;
+
+const SeverityBarContainer = styled.div`
+  width: 75px;
+  border-radius: 4px;
+  overflow: hidden;
 `;
 
 export interface AttacksListPanelProps {
@@ -98,8 +107,18 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
               defaultMessage: 'Alerts count',
             }
           ),
-          width: '100px',
-          align: 'center',
+          width: '110px',
+          align: 'left',
+          render: (count: number, item: AttacksListItem) => (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <SeverityBarContainer>
+                  <SeverityBar severityCount={item.severityCount} />
+                </SeverityBarContainer>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{count}</EuiFlexItem>
+            </EuiFlexGroup>
+          ),
         },
       ],
       [dataView, openFlyout]
