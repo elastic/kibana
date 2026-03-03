@@ -386,7 +386,7 @@ export function getFormStateFromJobConfig(
     resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
   }
 
-  const analysisConfig = analyticsJobConfig.analysis[jobType];
+  const analysisConfig = analyticsJobConfig.analysis?.[jobType];
 
   for (const key in analysisConfig) {
     if (Object.hasOwn(analysisConfig, key)) {

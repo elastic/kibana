@@ -231,6 +231,9 @@ export const useESQLDataVisualizerData = (
       }
 
       // Ensure that we don't query frozen data
+      if (!filter) {
+        filter = { bool: {} };
+      }
       if (filter.bool === undefined) {
         filter.bool = Object.create(null);
       }

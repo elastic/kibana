@@ -20,12 +20,14 @@ interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   openIndicesBrowser: (options?: { openedFrom?: IndicesBrowserOpenMode }) => void;
+  suppressSuggestionsRef: MutableRefObject<boolean>;
 }
 
 export const useSourcesBadge = ({
   editorRef,
   editorModel,
   openIndicesBrowser,
+  suppressSuggestionsRef,
 }: UseSourcesBadgeParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
@@ -79,6 +81,19 @@ export const useSourcesBadge = ({
     const firstSupportedCommand = getSupportedCommand(queryText);
 
     if (!firstSupportedCommand || !firstSupportedCommand.range) return;
+
+    // Only show the badge when there is whitespace after the command keyword.
+    // When the text is just "FROM" or "TS" with nothing after it, the badge would
+    // cover the entire clickable area and prevent the user from clicking into the
+    // editor to continue typing.
+    const commandEndOffset = model.getOffsetAt(
+      new monaco.Position(
+        firstSupportedCommand.range.lineNumber,
+        firstSupportedCommand.range.endColumn
+      )
+    );
+    if (!/\s/.test(queryText[commandEndOffset] ?? '')) return;
+
     collections.push({
       range: new monaco.Range(
         firstSupportedCommand.range.lineNumber,
@@ -122,16 +137,33 @@ export const useSourcesBadge = ({
         currentWord.startColumn >= firstSupportedCommand.range.startColumn &&
         currentWord.endColumn <= firstSupportedCommand.range.endColumn
       ) {
+        // Don't open the browser when there's no whitespace after the command keyword
+        // (e.g. "FROM" with no trailing space) -- the user is trying to click into the
+        // editor to continue typing, not to open the data source browser.
+        const commandEndOffset = model.getOffsetAt(
+          new monaco.Position(
+            firstSupportedCommand.range.lineNumber,
+            firstSupportedCommand.range.endColumn
+          )
+        );
+        if (!/\s/.test(queryText[commandEndOffset] ?? '')) return;
+
         const positionAfterCommand = new monaco.Position(
           firstSupportedCommand.range.lineNumber,
           firstSupportedCommand.range.endColumn + 1
         );
         editor.setPosition(positionAfterCommand);
-        editor.revealPosition(positionAfterCommand);
+
+        suppressSuggestionsRef.current = true;
+
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
+
+        // Remove focus from the editor immediately so there is no visible
+        // focus state while the popover mounts and takes over.
+        (editor.getDomNode()?.ownerDocument.activeElement as HTMLElement)?.blur();
       }
     },
-    [editorModel, editorRef, openIndicesBrowser]
+    [editorModel, editorRef, openIndicesBrowser, suppressSuggestionsRef]
   );
 
   return {

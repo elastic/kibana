@@ -17,13 +17,34 @@
 export {
   ContentListTable,
   Column,
+  Action,
   getRowId,
   type ContentListTableProps,
 } from './src/content_list_table';
 
 // Column components.
 export { NameColumn, NameCell, type NameColumnProps, type NameCellProps } from './src/column';
+export {
+  ActionsColumn,
+  type ActionsColumnProps,
+  UpdatedAtColumn,
+  UpdatedAtCell,
+  type UpdatedAtColumnProps,
+  type UpdatedAtCellProps,
+} from './src/column';
 export type { ColumnNamespace, ColumnProps } from './src/column';
+
+// Action components.
+export {
+  EditAction,
+  DeleteAction,
+  type EditActionProps,
+  type DeleteActionProps,
+} from './src/action';
+export type { ActionNamespace, ActionProps } from './src/action';
+
+// Selection hook.
+export { useSelection, type UseSelectionReturn } from './src/hooks';
 
 // Empty state.
 export { EmptyState, type EmptyStateProps } from './src/empty_state';

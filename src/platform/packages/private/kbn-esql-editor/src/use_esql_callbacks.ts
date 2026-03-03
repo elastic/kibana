@@ -30,6 +30,8 @@ import { clearCacheWhenOld } from './helpers';
 import { getHistoryItems } from './history_local_storage';
 import type { ESQLEditorDeps } from './types';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
+import { useCanCreateLookupIndex } from './lookup_join';
+import { useCanSuggestResourceBrowser } from './resource_browser/use_can_suggest_resource_browser';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -68,7 +70,6 @@ interface UseEsqlCallbacksParams {
   esqlService?: ESQLEditorDeps['esql'];
   histogramBarTarget: number;
   activeSolutionId?: Parameters<typeof getEditorExtensions>[2];
-  canCreateLookupIndex: ESQLCallbacks['canCreateLookupIndex'];
   minimalQueryRef: MutableRefObject<string>;
   abortControllerRef: MutableRefObject<AbortController>;
   dataSourcesCache: MapCache;
@@ -79,7 +80,7 @@ interface UseEsqlCallbacksParams {
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
-  isResourceBrowserEnabled: () => Promise<boolean>;
+  enableResourceBrowser: boolean;
 }
 
 export const useEsqlCallbacks = ({
@@ -90,7 +91,6 @@ export const useEsqlCallbacks = ({
   esqlService,
   histogramBarTarget,
   activeSolutionId,
-  canCreateLookupIndex,
   minimalQueryRef,
   abortControllerRef,
   dataSourcesCache,
@@ -101,7 +101,7 @@ export const useEsqlCallbacks = ({
   memoizedHistoryStarredItems,
   favoritesClient,
   getJoinIndicesCallback,
-  isResourceBrowserEnabled,
+  enableResourceBrowser,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
@@ -212,6 +212,9 @@ export const useEsqlCallbacks = ({
 
   const isServerless = Boolean(esqlService?.isServerless);
 
+  const canCreateLookupIndex = useCanCreateLookupIndex();
+  const canSuggestResourceBrowser = useCanSuggestResourceBrowser(enableResourceBrowser);
+
   const getKqlSuggestions = useCallback(
     async (kqlQuery: string, cursorPositionInKql: number) => {
       const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
@@ -264,7 +267,7 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
-      isResourceBrowserEnabled,
+      canSuggestResourceBrowser,
     }),
     [
       getSources,
@@ -285,7 +288,7 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
-      isResourceBrowserEnabled,
+      canSuggestResourceBrowser,
     ]
   );
 };

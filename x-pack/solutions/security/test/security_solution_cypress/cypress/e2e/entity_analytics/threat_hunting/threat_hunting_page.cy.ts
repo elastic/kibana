@@ -24,7 +24,7 @@ import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/wa
 describe(
   'Entity Threat Hunting page',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

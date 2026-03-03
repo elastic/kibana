@@ -8,15 +8,23 @@ import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { googleDriveDataSource } from './google_drive';
-import { jiraDataSource } from './jira-cloud';
-import { microsoftTeamsDataSource } from './microsoft_teams';
 import { sharepointOnlineDataSource } from './sharepoint_online';
+import { slackDataSource } from './slack';
+import { jiraDataSource } from './jira-cloud';
+import { zendeskDataSource } from './zendesk';
+import { pagerdutyDataSource } from './pagerduty';
+import { servicenowDataSource } from './servicenow';
+import { microsoftTeamsDataSource } from './microsoft_teams';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
   dataCatalog.register(googleDriveDataSource);
-  dataCatalog.register(jiraDataSource);
-  dataCatalog.register(microsoftTeamsDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
+  dataCatalog.register(slackDataSource);
+  dataCatalog.register(jiraDataSource);
+  dataCatalog.register(zendeskDataSource);
+  dataCatalog.register(servicenowDataSource);
+  dataCatalog.register(pagerdutyDataSource);
+  dataCatalog.register(microsoftTeamsDataSource);
 }

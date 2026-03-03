@@ -27,6 +27,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profile: {
     getRenderAppWrapper,
     getDefaultAdHocDataViews,
+    getDefaultEsqlQuery,
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       '@timestamp': (props) => {
@@ -83,6 +84,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                   // To do so, simply return a React element and call onFinishAction when you're done.
                   return (
                     <EuiFlyout
+                      aria-label="Example custom action flyout"
                       onClose={onFinishAction}
                       data-test-subj="example-custom-root-action12-flyout"
                     >
@@ -129,6 +131,7 @@ const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper']
           {children}
           {currentMessage && (
             <EuiFlyout
+              aria-label="Inspect message"
               type="push"
               maxWidth={500}
               onClose={() => setCurrentMessage(undefined)}
@@ -162,3 +165,9 @@ const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocD
         timeFieldName: '@timestamp',
       },
     ];
+
+const getDefaultEsqlQuery: RootProfileProvider['profile']['getDefaultEsqlQuery'] =
+  (prev) => () => ({
+    ...prev(),
+    query: 'FROM my-example-* | LIMIT 10',
+  });

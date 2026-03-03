@@ -24,7 +24,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
-import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -40,10 +39,6 @@ export interface ChromeNavigationProps {
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
-  // feedback
-  isFeedbackEnabled$: Observable<boolean>;
-  feedbackUrlParams$: Observable<URLSearchParams | undefined>;
-
   // collapse toggle callback
   onToggleCollapsed: (isCollapsed: boolean) => void;
 
@@ -54,27 +49,18 @@ export interface ChromeNavigationProps {
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
-  const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
-  const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
 
   if (!state) {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, logoItem, activeItemId } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
         logo={logoItem}
-        sidePanelFooter={
-          <NavigationFeedbackSnippet
-            isEnabled={isFeedbackEnabled}
-            solutionId={solutionId}
-            feedbackUrlParams={feedbackUrlParams}
-          />
-        }
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}

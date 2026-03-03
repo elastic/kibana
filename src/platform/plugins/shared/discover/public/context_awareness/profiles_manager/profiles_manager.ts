@@ -40,6 +40,10 @@ export interface ResolveRootProfileResult {
    * Default ad hoc data views accessor
    */
   getDefaultAdHocDataViews: AppliedProfile['getDefaultAdHocDataViews'];
+  /**
+   * Default ES|QL query accessor
+   */
+  getDefaultEsqlQuery: AppliedProfile['getDefaultEsqlQuery'];
 }
 
 export class ProfilesManager {
@@ -75,6 +79,7 @@ export class ProfilesManager {
       return {
         getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
         getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+        getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
       };
     }
 
@@ -94,6 +99,7 @@ export class ProfilesManager {
       return {
         getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
         getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+        getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
       };
     }
 
@@ -103,6 +109,7 @@ export class ProfilesManager {
     return {
       getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
       getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+      getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
     };
   }
 

@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-examples-plugin'
-  - '@kbn/presentation-containers'
 tags:
   - plugin
   - prod

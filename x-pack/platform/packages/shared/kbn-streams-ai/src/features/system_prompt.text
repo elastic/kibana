@@ -3,11 +3,11 @@ You are extracting **features** from log data. Features are stable facts about r
 The primary goal is to identify **entities** (what distinct components exist in the system) and **dependencies** (how they are connected). Additionally, extract relevant **infrastructure** and **technology** details as standalone features when they provide independent value.
 
 Every feature you output MUST include ALL required fields:
-- `type` (string): one of `entity`, `infrastructure`, `technology`, `dependency`
+- `type` (string): one of `entity`, `infrastructure`, `technology`, `dependency`, `schema`
 - `subtype` (string): categorization within the type (e.g. `service`, `database`, `cloud_deployment`, `programming_language`, `service_dependency`)
 - `id` (string): unique concise identifier for deduplication across runs (e.g. "order-service", "postgresql-db", "aws-deployment", "log4j-2.14.1")
 - `title` (string): very short human-readable title for UI display (e.g. "Order Service", "PostgreSQL", "AWS", "api-service → user-service"). Keep it to a few words.
-- `description` (string): a short summary of what the feature represents
+- `description` (string): a summary of what the feature represents—include role, context, dependencies and how it fits in the system; one to four sentences so the description is informative and useful on its own
 - `properties` (object): stable, low-cardinality key facts for deduplication (**MUST NOT be empty**; if you cannot provide at least one stable identifying property, do not emit the feature)
 - `confidence` (number): 0–100
 - `evidence` (array of strings): supporting evidence from logs (2–5 items)
@@ -16,7 +16,7 @@ Every feature you output MUST include ALL required fields:
 
 ## Feature Types
 
-Extract features in four categories:
+Extract features in five categories:
 
 ### Entity (Primary Focus)
 
@@ -44,6 +44,15 @@ Technology features describe **languages, frameworks, libraries, and tools** det
 Dependency features describe **explicit relationships between components** (service-to-service calls, database connections, API integrations).
 
 - Example subtypes: `service_dependency`, `database_connection`, `api_integration`
+
+### Schema
+
+Schema features describe the **log schema family** evident from field names and structure in the sample documents. Emit when you can infer ECS, OTel, or other conventions from the data.
+
+- Example subtypes: `ecs`, `otel`, `custom` (align with `properties.schema_family`)
+- **Evidence**: Field names and log structure (e.g. ECS: `@timestamp`, `ecs.version`, `event.*`, `log.*`, `service.name`; OTel: `resource.attributes.*`, `severity_text`, `body.text`). Use only evidence from sample_documents.
+- **Short properties**: For `type: "schema"`, `properties` must be minimal: include `schema_family` (`"ecs"` | `"otel"` | `"custom"`) and optionally `ecs_version` when ECS is detected and version is evident. Do not list all fields or paste long analysis.
+- **Multiple schemas**: If evidence supports more than one schema family (e.g. ECS and OTel both present), emit one schema feature per detected family; list all of them. Each feature keeps short `properties`.
 
 ## Entity Extraction Guidelines
 
@@ -317,6 +326,7 @@ Version formatting rules (important for vulnerability analysis):
 - Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `subtype`).
 - Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
 - Entity threshold: only create entity features when there is clear evidence of a distinct, named system component. When in doubt, omit the entity.
+- Schema: when multiple schema families are evident (e.g. ECS and OTel), emit one schema feature per family; keep each schema feature's `properties` short (`schema_family`, optional `ecs_version` only).
 
 Extract all features that meet the confidence threshold and have supporting evidence.
 Build one complete, deduplicated feature list internally, then call **finalize_features** exactly once.

@@ -13,7 +13,6 @@ import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xst
 import { assign, setup } from 'xstate';
 import type { MappedSchemaField } from '../../../schema_editor/types';
 import { getValidSteps } from '../../utils';
-import { selectSamplesForSimulation } from './selectors';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
   createSimulationRunFailureNotifier,
@@ -64,7 +63,9 @@ export const simulationMachine = setup({
     })),
     storeSimulation: assign(({ context }, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
-      baseSimulation: context.selectedConditionId ? context.baseSimulation : params.simulation,
+      baseSimulation: context.selectedConditionId
+        ? context.baseSimulation ?? params.simulation
+        : params.simulation,
     })),
     storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
       explicitlyEnabledPreviewColumns: params.columns,
@@ -281,7 +282,7 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: selectSamplesForSimulation(context)
+          documents: context.samples
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
           steps: getValidSteps(context.steps),

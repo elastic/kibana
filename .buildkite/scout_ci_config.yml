@@ -1,6 +1,7 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - advanced_settings
     - apm
     - banners
     - cloud_security_posture
@@ -8,8 +9,10 @@ plugins:
     - custom_branding
     - dashboard
     - data_views
+    - discover
     - discover_enhanced
     - entity_store
+    - exploratory_view
     - fleet
     - gen_ai_settings
     - global_search
@@ -18,6 +21,7 @@ plugins:
     - intercepts
     - lens
     - maps
+    - navigation
     - observability
     - observability_onboarding
     - painless_lab
@@ -31,7 +35,11 @@ plugins:
     - spaces
     - streams
     - streams_app
+    - synthetics
     - transform
+    - triggers_actions_ui
+    - uptime
+    - ux
     - workflows_extensions
     - workflows_management
   disabled:
@@ -40,7 +48,10 @@ packages:
   enabled:
     - kbn-streamlang-tests
   disabled:
-    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)
+    # Scout's own tests are executed first to validate the Scout framework
+    # (see .buildkite/scripts/steps/test/scout/test_run_builder.sh). Excluded here
+    # so they don't rerun alongside plugin/package Scout tests discovered later.
+    - kbn-scout
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)

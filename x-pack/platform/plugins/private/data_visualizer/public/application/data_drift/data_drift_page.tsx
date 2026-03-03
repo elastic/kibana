@@ -192,7 +192,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: estypes.QueryDslQueryContainer;
+      searchQuery: NonNullable<estypes.QueryDslQueryContainer>;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];

@@ -28,14 +28,19 @@ export function showCspWarningIfNeeded({
     return;
   }
 
-  getNotifications().then((notifications) => {
-    notifications.toasts.addWarning({
-      title: mountReactNode(
-        <FormattedMessage
-          id="core.chrome.legacyBrowserWarning"
-          defaultMessage="Your browser does not meet the security requirements for Kibana."
-        />
-      ),
+  getNotifications()
+    .then((notifications) => {
+      notifications.toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="core.chrome.legacyBrowserWarning"
+            defaultMessage="Your browser does not meet the security requirements for Kibana."
+          />
+        ),
+      });
+    })
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to show CSP warning toast', e);
     });
-  });
 }

@@ -4,7 +4,7 @@ Task: Create a system prompt for an LLM to extract "features" from log data.
 Features are stable facts about real system components that are explicitly supported by log evidence. The primary focus is on identifying **entities** (what distinct components exist) and **dependencies** (how they are connected), supplemented by standalone **infrastructure** and **technology** features.
 
 **Required BaseFeature schema fields** (ALL must be present in every feature):
-- `type` (string): "entity", "infrastructure", "technology", or "dependency"
+- `type` (string): "entity", "infrastructure", "technology", "dependency", or "schema"
 - `subtype` (string): categorization within the type (e.g. `service`, `database`, `cloud_deployment`, `programming_language`)
 - `id` (string): unique concise identifier for deduplication
 - `title` (string): very short human-readable title for UI display
@@ -24,6 +24,7 @@ Features are stable facts about real system components that are explicitly suppo
 - **infrastructure**: Cloud providers, container orchestration (Kubernetes, Docker), operating systems, networking, hardware
 - **technology**: Programming languages, web servers, databases, libraries, frameworks (e.g., nginx, postgresql, log4j, React)
 - **dependency**: Relationships between components (service-to-service calls, database connections, API integrations)
+- **schema**: Log schema family (ECS, OTel, or custom) inferred from field names and structure. Keep `properties` short (`schema_family`, optional `ecs_version`). When multiple schema families are evident, list all (one feature per family).
 
 ## Entity Extraction Guidelines
 - Identify high-level components (services, databases, queues, caches) — not individual instances
@@ -127,7 +128,7 @@ Return features following the BaseFeature schema structure using the finalize_fe
 ## Prompt Structure
 The prompt should follow this structure:
 1. Opening paragraph: Define features, state primary goal (entities + dependencies), list all required fields. No mention of specific downstream use cases.
-2. Feature Types section: List the four types (entity, infrastructure, technology, dependency) with example subtypes. Entity is primary focus.
+2. Feature Types section: List the five types (entity, infrastructure, technology, dependency, schema) with example subtypes. Entity is primary focus.
 3. Entity Extraction Guidelines section: High-level components, attach context, require evidence, keep rules generic.
 4. Consolidation Rules section: When to consolidate vs separate with examples.
 5. Naming Conventions section: Generic subtypes with good/bad examples.
