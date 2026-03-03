@@ -38,7 +38,6 @@ export const visorStyles = (
     ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
     : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
   const visorInnerPadding = '2px';
-  const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorGradientPadding})`;
 
   const gradientBoxStyles = {
     background: visorGradient,
@@ -49,13 +48,18 @@ export const visorStyles = (
 
   return {
     visorContainer: {
+      position: 'absolute' as const,
+      bottom: euiTheme.size.s,
+      left: '50%',
+      transform: isVisible
+        ? 'translateX(-50%) translateY(0)'
+        : 'translateX(-50%) translateY(8px)',
+      zIndex: 5,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      width: isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}% )`,
-      margin: isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0',
-      height: isVisible ? `${totalHeight}` : '0',
+      width: isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}%)`,
       opacity: isVisible ? 1 : 0,
       pointerEvents: isVisible ? ('auto' as const) : ('none' as const),
-      transition: 'all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
+      transition: 'opacity 0.3s ease, transform 0.3s ease',
     },
     visorWrapper: {
       width: `calc(100% - ${euiTheme.size.xl})`,
