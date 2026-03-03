@@ -69,7 +69,9 @@ describe('transformWorkpadOut', () => {
     it('migrates savedLens to an embeddable expression with transforms applied', () => {
       const workpad = makeWorkpad('savedLens id="lens-id" title="My Lens"');
 
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const transformedWorkpad = transformWorkpadOut(workpad, [
+        { id: 'lens-id', name: 'savedObjectRef', type: 'lens' },
+      ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -90,7 +92,9 @@ describe('transformWorkpadOut', () => {
         'savedLens id="lens-id" timerange={timerange from="now-7d" to="now"}'
       );
 
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const transformedWorkpad = transformWorkpadOut(workpad, [
+        { id: 'vis-id', name: 'savedObjectRef', type: 'visualization' },
+      ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual(
@@ -101,7 +105,9 @@ describe('transformWorkpadOut', () => {
     it('migrates savedVisualization to an embeddable expression with transforms applied', () => {
       const workpad = makeWorkpad('savedVisualization id="vis-id" title="My Viz"');
 
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const transformedWorkpad = transformWorkpadOut(workpad, [
+        { id: 'vis-id', name: 'savedObjectRef', type: 'visualization' },
+      ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -115,7 +121,9 @@ describe('transformWorkpadOut', () => {
     it('migrates savedMap to an embeddable expression with transforms applied', () => {
       const workpad = makeWorkpad('savedMap id="map-id" title="My Map"');
 
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const transformedWorkpad = transformWorkpadOut(workpad, [
+        { id: 'map-id', name: 'savedObjectRef', type: 'map' },
+      ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
