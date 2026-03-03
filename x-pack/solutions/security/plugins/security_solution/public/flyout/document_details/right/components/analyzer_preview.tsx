@@ -17,7 +17,6 @@ import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
-import { isActiveTimeline } from '../../../../helpers';
 import { getField } from '../../shared/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
@@ -56,7 +55,6 @@ export const AnalyzerPreview: React.FC = () => {
   const {
     dataFormattedForFieldBrowser: data,
     getFieldsData,
-    scopeId,
     eventId,
     isRulePreview,
   } = useDocumentDetailsContext();
@@ -86,7 +84,6 @@ export const AnalyzerPreview: React.FC = () => {
     loading: dataLoading,
     error,
   } = useAlertPrevalenceFromProcessTree({
-    isActiveTimeline: isActiveTimeline(scopeId),
     documentId,
     indices,
   });
