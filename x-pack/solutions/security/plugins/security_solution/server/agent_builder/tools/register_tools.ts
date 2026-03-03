@@ -13,7 +13,11 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import { manageRuleExceptionsTool } from './manage_rule_exceptions_tool';
+import type {
+  SecuritySolutionPluginCoreSetupDependencies,
+  SecuritySolutionPluginSetupDependencies,
+} from '../../plugin_contract';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin
@@ -22,11 +26,13 @@ export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  setupPlugins: Pick<SecuritySolutionPluginSetupDependencies, 'lists'>
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(manageRuleExceptionsTool(core, setupPlugins, logger));
 };
