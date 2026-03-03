@@ -176,6 +176,10 @@ export const SettingsPage: React.FC<Props> = memo(
       keepPoliciesUpToDate ?? false
     );
 
+    useEffect(() => {
+      setKeepPoliciesUpToDateSwitchValue(keepPoliciesUpToDate ?? false);
+    }, [keepPoliciesUpToDate]);
+
     const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
       setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 

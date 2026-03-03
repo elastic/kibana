@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 
-import { reviewUpgrade } from './update';
+import { reviewUpgrade, updatePackage } from './update';
 
 jest.mock('./get', () => ({
   getInstallationObject: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock('../../audit_logging', () => ({
   auditLoggingService: { writeCustomSoAuditLog: jest.fn() },
 }));
 
-const { getInstallationObject } = jest.requireMock('./get');
+const { getInstallationObject, getPackageInfo } = jest.requireMock('./get');
 
 const pendingReview = {
   target_version: '2.0.0',
@@ -139,6 +139,59 @@ describe('reviewUpgrade', () => {
         ...pendingReview,
         action: 'pending',
       },
+    });
+  });
+});
+
+describe('updatePackage', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should clear pending_upgrade_review when disabling keep_policies_up_to_date', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '1.0.0',
+        pending_upgrade_review: pendingReview,
+      },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+
+    await updatePackage({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      keepPoliciesUpToDate: false,
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      keep_policies_up_to_date: false,
+      pending_upgrade_review: undefined,
+    });
+  });
+
+  it('should not clear pending_upgrade_review when enabling keep_policies_up_to_date', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '1.0.0',
+        pending_upgrade_review: pendingReview,
+      },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+
+    await updatePackage({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      keepPoliciesUpToDate: true,
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      keep_policies_up_to_date: true,
     });
   });
 });

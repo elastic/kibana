@@ -57,9 +57,18 @@ export const useIsPackagePolicyUpgradable = () => {
     [findInstalledPackage]
   );
 
+  const getKeepPoliciesUpToDate = useCallback(
+    (pkgPolicy: PackagePolicy): boolean => {
+      const installedPackage = findInstalledPackage(pkgPolicy);
+      return installedPackage?.installationInfo?.keep_policies_up_to_date === true;
+    },
+    [findInstalledPackage]
+  );
+
   return {
     isPackagePolicyUpgradable,
     getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
     isLoadingPackages,
   };
 };

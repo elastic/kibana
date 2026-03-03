@@ -39,9 +39,17 @@ export async function updatePackage(
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+  const updateAttrs: Partial<Installation> = {
     keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
-  });
+  };
+  if (keepPoliciesUpToDate === false) {
+    updateAttrs.pending_upgrade_review = undefined;
+  }
+  await savedObjectsClient.update<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    installedPackage.id,
+    updateAttrs
+  );
 
   const packageInfo = await getPackageInfo({
     savedObjectsClient,
@@ -80,7 +88,10 @@ export async function reviewUpgrade(options: {
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
     pending_upgrade_review: {
       ...review,
-      action: { accept: 'accepted', decline: 'declined', pending: 'pending' }[userAction],
+      action: { accept: 'accepted', decline: 'declined', pending: 'pending' }[userAction] as
+        | 'accepted'
+        | 'declined'
+        | 'pending',
     },
   });
 }

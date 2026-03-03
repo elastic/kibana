@@ -599,7 +599,6 @@ export type InstallationInfo = {
   | 'es_index_patterns'
   | 'install_version'
   | 'install_started_at'
-  | 'keep_policies_up_to_date'
   | 'internal'
   | 'removable'
 >;

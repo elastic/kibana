@@ -7,25 +7,13 @@
 import { stringify, parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  EuiBasicTable,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButton,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../../types';
 import type { usePagination } from '../../../../../../hooks';
 import { useLink, useAuthz, useMultipleAgentPolicies } from '../../../../../../hooks';
-import {
-  PendingUpgradeReviewStatus,
-  DeclinedUpgradeStatus,
-} from '../../../installed_integrations/components/pending_upgrade_review_status';
 import {
   AgentEnrollmentFlyout,
   MultipleAgentPoliciesSummaryLine,
@@ -36,6 +24,7 @@ import {
 import { Persona } from '../persona';
 
 import { PackagePolicyAgentsCell } from './package_policy_agents_cell';
+import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
 export const AgentBasedPackagePoliciesTable = ({
   isLoading,
@@ -66,7 +55,6 @@ export const AgentBasedPackagePoliciesTable = ({
 
   const [selectedTableIndex, setSelectedTableIndex] = useState<number | undefined>();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const canReadAgentPolicies = useAuthz().fleet.readAgentPolicies;
   const canShowMultiplePoliciesCell =
@@ -152,52 +140,10 @@ export const AgentBasedPackagePoliciesTable = ({
                     </EuiText>
                   </EuiFlexItem>
 
-                  {agentPolicies.length > 0 &&
-                    packagePolicy.hasUpgrade &&
-                    (() => {
-                      const review = packagePolicy.pendingUpgradeReview;
-                      if (review && (!review.action || review.action === 'pending')) {
-                        return (
-                          <EuiFlexItem grow={false}>
-                            <PendingUpgradeReviewStatus
-                              pkgName={packagePolicy.package?.name ?? ''}
-                              pkgTitle={packagePolicy.package?.title ?? ''}
-                              pendingUpgradeReview={review}
-                            />
-                          </EuiFlexItem>
-                        );
-                      }
-                      if (review && review.action === 'declined') {
-                        return (
-                          <EuiFlexItem grow={false}>
-                            <DeclinedUpgradeStatus
-                              pkgTitle={packagePolicy.package?.title ?? ''}
-                              pkgName={packagePolicy.package?.name ?? ''}
-                              pendingUpgradeReview={review}
-                            />
-                          </EuiFlexItem>
-                        );
-                      }
-                      return (
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            size="s"
-                            minWidth="0"
-                            href={`${getHref('upgrade_package_policy', {
-                              policyId: agentPolicies[0].id,
-                              packagePolicyId: packagePolicy.id,
-                            })}?from=integrations-policy-list`}
-                            data-test-subj="integrationPolicyUpgradeBtn"
-                            isDisabled={!canWriteIntegrationPolicies}
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                              defaultMessage="Upgrade"
-                            />
-                          </EuiButton>
-                        </EuiFlexItem>
-                      );
-                    })()}
+                  <PackagePolicyUpgradeCell
+                    packagePolicy={packagePolicy}
+                    agentPolicies={agentPolicies}
+                  />
                 </EuiFlexGroup>
               );
             },

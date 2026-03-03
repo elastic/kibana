@@ -15,4 +15,5 @@ export interface InMemoryPackagePolicy extends PackagePolicy {
   type?: string;
   hasUpgrade: boolean;
   pendingUpgradeReview?: Installation['pending_upgrade_review'];
+  keepPoliciesUpToDate?: boolean;
 }

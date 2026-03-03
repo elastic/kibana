@@ -65,4 +65,70 @@ describe('useIsPackagePolicyUpgradable', () => {
     } as any);
     expect(isUpgradable).toBeFalsy();
   });
+
+  describe('getKeepPoliciesUpToDate', () => {
+    it('should return true when keep_policies_up_to_date is true', () => {
+      mockedUseGetPackagesQuery.mockReturnValue({
+        isLoading: false,
+        data: {
+          items: [
+            {
+              status: 'installed',
+              installationInfo: {
+                name: 'test',
+                version: '1.0.0',
+                keep_policies_up_to_date: true,
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+      const keepUpToDate = result.current.getKeepPoliciesUpToDate({
+        package: { name: 'test', version: '1.0.0' },
+      } as any);
+      expect(keepUpToDate).toBe(true);
+    });
+
+    it('should return false when keep_policies_up_to_date is false', () => {
+      mockedUseGetPackagesQuery.mockReturnValue({
+        isLoading: false,
+        data: {
+          items: [
+            {
+              status: 'installed',
+              installationInfo: {
+                name: 'test',
+                version: '1.0.0',
+                keep_policies_up_to_date: false,
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+      const keepUpToDate = result.current.getKeepPoliciesUpToDate({
+        package: { name: 'test', version: '1.0.0' },
+      } as any);
+      expect(keepUpToDate).toBe(false);
+    });
+
+    it('should return false when keep_policies_up_to_date is undefined', () => {
+      const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+      const keepUpToDate = result.current.getKeepPoliciesUpToDate({
+        package: { name: 'test', version: '1.0.0' },
+      } as any);
+      expect(keepUpToDate).toBe(false);
+    });
+
+    it('should return false for a non-installed package', () => {
+      const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+      const keepUpToDate = result.current.getKeepPoliciesUpToDate({
+        package: { name: 'idonotexists', version: '1.0.0' },
+      } as any);
+      expect(keepUpToDate).toBe(false);
+    });
+  });
 });

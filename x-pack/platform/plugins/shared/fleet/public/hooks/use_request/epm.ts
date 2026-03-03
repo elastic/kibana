@@ -471,15 +471,21 @@ interface InstallKibanaAssetsArgs {
 }
 
 export const useUpdatePackageMutation = () => {
-  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
-    ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>({
+    mutationFn: ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
       sendRequestForRq<UpdatePackageResponse>({
         path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
         method: 'put',
         version: API_VERSIONS.public.v1,
         body,
-      })
-  );
+      }),
+    onSuccess: (_data, { pkgName }) => {
+      queryClient.invalidateQueries([pkgName]);
+      queryClient.invalidateQueries(['get-packages']);
+    },
+  });
 };
 
 interface ReviewUpgradeArgs {

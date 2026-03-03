@@ -41,8 +41,10 @@ function getIntegrationStatus(
     );
 
     const review = item?.installationInfo?.pending_upgrade_review;
-    const hasPendingUpgradeReview = !!review && (!review.action || review.action === 'pending');
-    const hasDeclinedReview = !!review && review.action === 'declined';
+    const keepUpToDate = item?.installationInfo?.keep_policies_up_to_date === true;
+    const hasPendingUpgradeReview =
+      keepUpToDate && !!review && (!review.action || review.action === 'pending');
+    const hasDeclinedReview = keepUpToDate && !!review && review.action === 'declined';
 
     const isUpgradeAvailable =
       (item?.installationInfo && semverLt(item.installationInfo.version, item.version)) ?? false;
