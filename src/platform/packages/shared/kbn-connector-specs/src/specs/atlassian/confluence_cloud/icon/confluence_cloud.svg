@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none">
+  <linearGradient id="confluence-a" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#0052CC"/>
+    <stop offset="100%" stop-color="#2684FF"/>
+  </linearGradient>
+  <path fill="url(#confluence-a)" d="M20 12h40v8H20v-8zm0 20h40v8H20v-8zm0 20h28v8H20v-8z"/>
+  <path fill="url(#confluence-a)" opacity="0.8" d="M68 52h12v36H68V52zM52 52h12v36H52V52zM36 52h12v36H36V52z"/>
+</svg>

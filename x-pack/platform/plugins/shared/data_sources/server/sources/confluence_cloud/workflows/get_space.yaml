@@ -1,0 +1,16 @@
+version: '1'
+name: 'sources.confluence-cloud.get_space'
+description: 'Get a Confluence space by ID. Use when you already have the space ID and need full space details. Inputs: id (string).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: id
+    type: string
+steps:
+  - name: get-space
+    type: confluence-cloud.getSpace
+    connector-id: <%= confluence-cloud-stack-connector-id %>
+    with:
+      id: "${{inputs.id}}"
