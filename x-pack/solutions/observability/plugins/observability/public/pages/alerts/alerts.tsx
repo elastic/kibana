@@ -405,7 +405,7 @@ function InternalAlertsPage() {
                     data-test-subj="manageRulesPageButton"
                     href={manageRulesHref}
                     iconType="gear"
-                    fill
+                    color="text"
                     size="s"
                   >
                     {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {

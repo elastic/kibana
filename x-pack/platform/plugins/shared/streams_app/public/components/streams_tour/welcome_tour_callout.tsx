@@ -49,7 +49,7 @@ export function WelcomeTourCallout({
   };
 
   return (
-    <>
+    <div css={css`padding: 12px 12px 0;`}>
       {/* <EuiThemeProvider colorMode="dark"> */}
       <EuiPanel hasBorder={false} color="subdued" paddingSize="m" grow={false} borderRadius="none">
         <EuiFlexGroup alignItems="center">
@@ -135,6 +135,6 @@ export function WelcomeTourCallout({
         </EuiFlexGroup>
       </EuiPanel>
       {/* </EuiThemeProvider> */}
-    </>
+    </div>
   );
 }

@@ -75,7 +75,7 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   leftNavcontrols: css`
     .navcontrols__separator {
       display: flex;
-      margin-right: ${size.xs};
+      margin-inline: ${size.s};
       &:after {
         content: '';
         flex-shrink: 0;
@@ -84,7 +84,8 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
         margin-inline: ${size.s};
         block-size: 8px;
         inline-size: 1px;
-        // transform: translateY(-1px) rotate(15deg);
+        transform: translateY(-1px) rotate(15deg);
+        display: none;
       }
     }
   `,
