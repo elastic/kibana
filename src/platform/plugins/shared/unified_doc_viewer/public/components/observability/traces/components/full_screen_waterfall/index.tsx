@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
@@ -97,8 +97,10 @@ export const FullScreenWaterfall = ({
     };
   }, [euiTheme.levels.menu]);
 
+  const skipAnimationOnMountRef = useRef(skipOpenAnimation);
+
   useLayoutEffect(() => {
-    if (!skipOpenAnimation) return;
+    if (!skipAnimationOnMountRef.current) return;
 
     const style = document.createElement('style');
     style.id = 'flyout-skip-open-animation';
@@ -113,7 +115,7 @@ export const FullScreenWaterfall = ({
       clearTimeout(timerId);
       style.remove();
     };
-  }, [skipOpenAnimation]);
+  }, []);
 
   const [scrollElement, setScrollElement] = useState<Element | null>(null);
 
