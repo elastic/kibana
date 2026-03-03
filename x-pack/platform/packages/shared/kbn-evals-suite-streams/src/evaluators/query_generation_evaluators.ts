@@ -14,7 +14,7 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from '@kbn/streams-ai/src/significant_events/types';
 import type { Evaluator } from '@kbn/evals/src/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { selectEvaluators } from '@kbn/evals/src/evaluators/filter';
 import type { EvaluationCriterion } from '@kbn/evals/src/evaluators/criteria';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
@@ -27,7 +27,10 @@ const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 ];
 
-const createQueryGenerationCodeEvaluator = (esClient: ElasticsearchClient): Evaluator => ({
+const createQueryGenerationCodeEvaluator = (
+  esClient: ElasticsearchClient,
+  logger?: Logger
+): Evaluator => ({
   name: 'significant_events_code_evaluator',
   kind: 'CODE' as const,
   evaluate: async ({ output, input, metadata }) => {
@@ -50,6 +53,7 @@ const createQueryGenerationCodeEvaluator = (esClient: ElasticsearchClient): Eval
       kql: string;
       isSyntaxValid: boolean;
       isExecutionHit: boolean;
+      executionError?: string;
       isCategoryCompliant: boolean;
       isSeverityCompliant: boolean;
       evidenceValidation: { allEvidenceFound: boolean; missingEvidence: string[] };
@@ -71,16 +75,22 @@ const createQueryGenerationCodeEvaluator = (esClient: ElasticsearchClient): Eval
 
       // 2. Execution Verification
       let isExecutionHit = false;
+      let executionError: string | undefined;
       if (isSyntaxValid) {
-        const searchResult = await esClient.search({
-          index: metadata?.test_index as string,
-          q: kql,
-        });
-        const total = searchResult.hits.total;
-        const hits = typeof total === 'number' ? total : total?.value ?? 0;
-        if (hits > 0) {
-          isExecutionHit = true;
-          executionHitCount++;
+        try {
+          const searchResult = await esClient.search({
+            index: metadata?.test_index as string,
+            q: kql,
+          });
+          const total = searchResult.hits.total;
+          const hits = typeof total === 'number' ? total : total?.value ?? 0;
+          if (hits > 0) {
+            isExecutionHit = true;
+            executionHitCount++;
+          }
+        } catch (e) {
+          executionError = e instanceof Error ? e.message : String(e);
+          logger?.warn(`Execution verification failed for KQL "${kql}": ${executionError}`);
         }
       }
 
@@ -111,6 +121,7 @@ const createQueryGenerationCodeEvaluator = (esClient: ElasticsearchClient): Eval
         kql,
         isSyntaxValid,
         isExecutionHit,
+        ...(executionError ? { executionError } : {}),
         isCategoryCompliant,
         isSeverityCompliant,
         evidenceValidation,
@@ -139,9 +150,10 @@ export const createQueryGenerationEvaluators = (
   scenarioCriteria?: {
     criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
     criteria: EvaluationCriterion[];
-  }
+  },
+  logger?: Logger
 ) => {
-  const base = selectEvaluators([createQueryGenerationCodeEvaluator(esClient)]);
+  const base = selectEvaluators([createQueryGenerationCodeEvaluator(esClient, logger)]);
 
   if (!scenarioCriteria) {
     return base;

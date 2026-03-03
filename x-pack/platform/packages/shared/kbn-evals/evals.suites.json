@@ -37,6 +37,18 @@
       ]
     },
     {
+      "id": "streams/significant-events",
+      "name": "Streams Significant Events",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/significant_events/playwright.config.ts",
+      "tags": [
+        "platform",
+        "streams"
+      ],
+      "ciLabels": [
+        "evals:streams-sigevents"
+      ]
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",

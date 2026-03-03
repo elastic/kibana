@@ -245,10 +245,14 @@ evaluate.describe(
                       return queries;
                     },
                   },
-                  createQueryGenerationEvaluators(esClient, {
-                    criteriaFn: evaluators.criteria.bind(evaluators),
-                    criteria: scenario.output.criteria,
-                  })
+                  createQueryGenerationEvaluators(
+                    esClient,
+                    {
+                      criteriaFn: evaluators.criteria.bind(evaluators),
+                      criteria: scenario.output.criteria,
+                    },
+                    logger
+                  )
                 );
               }
             );

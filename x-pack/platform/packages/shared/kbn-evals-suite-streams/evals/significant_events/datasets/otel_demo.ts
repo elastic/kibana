@@ -12,11 +12,9 @@ import {
 } from '../../../scripts/significant_events_snapshots/lib/constants';
 import type { DatasetConfig } from './types';
 
-// TODO: Only the `healthy-baseline` and `payment-unreachable` scenario criteria have been validated
-// against replayed snapshot data so far. Treat the remaining scenarios as unvalidated placeholders
-// until the criteria are validated and refined.
-// Until the criteria are refined, we will only be running the evals against the `healthy-baseline`
-// and `payment-unreachable` scenarios.
+// TODO: Only `healthy-baseline` and `payment-unreachable` have validated criteria and GCS snapshots.
+// The remaining scenarios are unvalidated placeholders — snapshots and criteria will be added as
+// each scenario is validated.
 export const otelDemoDataset: DatasetConfig = {
   id: OTEL_DEMO_NAMESPACE,
   description: 'OpenTelemetry Demo microservices application',
