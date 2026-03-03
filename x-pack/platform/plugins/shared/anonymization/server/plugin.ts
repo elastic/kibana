@@ -12,7 +12,6 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -25,9 +24,10 @@ import type {
   AnonymizationPluginStart,
   AnonymizationPolicyService,
 } from './types';
+import { registerAnonymizationSaltSavedObjectType } from './saved_objects/register_anonymization_salt_saved_object_type';
 import { registerRoutes } from './routes';
 import { ensureProfilesIndex } from './system_index';
-import { SaltService, ANONYMIZATION_SALT_SAVED_OBJECT_TYPE } from './salt';
+import { SaltService } from './salt';
 import { ProfilesRepository } from './repository';
 import { registerFeatures } from './features';
 import { createAnonymizationPolicyService } from './policy_service';
@@ -40,11 +40,6 @@ export interface AnonymizationSetupDeps {
 export interface AnonymizationStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
-
-const anonymizationSaltSchemaV1 = schema.object({
-  salt: schema.string(),
-  replacementsEncryptionKey: schema.maybe(schema.string()),
-});
 
 export class AnonymizationPlugin
   implements
@@ -73,30 +68,7 @@ export class AnonymizationPlugin
     const router = core.http.createRouter();
     registerRoutes(router, this.logger, { active: this.config.active });
 
-    // Register the encrypted saved object type for per-space salt material
-    core.savedObjects.registerType({
-      name: ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
-      hidden: true,
-      namespaceType: 'single',
-      mappings: {
-        dynamic: false,
-        properties: {},
-      },
-      modelVersions: {
-        1: {
-          changes: [],
-          schemas: {
-            forwardCompatibility: anonymizationSaltSchemaV1.extends({}, { unknowns: 'ignore' }),
-            create: anonymizationSaltSchemaV1,
-          },
-        },
-      },
-    });
-
-    deps.encryptedSavedObjects.registerType({
-      type: ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['salt', 'replacementsEncryptionKey']),
-    });
+    registerAnonymizationSaltSavedObjectType(core, deps.encryptedSavedObjects);
 
     return {
       isEnabled: () => this.config.active,
