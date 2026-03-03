@@ -24,3 +24,7 @@ packages:
     # so they don't rerun alongside plugin/package Scout tests discovered later.
     - kbn-scout
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
+
+# Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
+excluded_configs:
+  - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
