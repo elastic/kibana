@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLColumn, ESQLCommand } from '@elastic/esql/types';
 import type {
   ColumnExpressionVisitorContext,
   LiteralExpressionVisitorContext,
@@ -14,14 +15,18 @@ import type {
   StatsCommandVisitorContext,
   InlineStatsCommandVisitorContext,
   SharedData,
-} from '../../../ast/visitor';
-import { Visitor } from '../../../ast/visitor';
-import { singleItems } from '../../../ast';
-import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '../../../ast/is';
-import type { ESQLColumn, ESQLCommand } from '../../../types';
+  VisitorMethods,
+} from '@elastic/esql';
+import {
+  Visitor,
+  singleItems,
+  isAssignment,
+  isColumn,
+  isParamLiteral,
+  isWhereExpression,
+} from '@elastic/esql';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 import { getColumnName } from '../../definitions/utils/columns';
-import type { VisitorMethods } from '../../../ast/visitor/types';
 
 interface SummaryData extends SharedData {
   newColumns: string[];
