@@ -167,6 +167,13 @@ export const ENTITY_ANALYTICS_TURNED_OFF = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_TOGGLE_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.toggleError',
+  {
+    defaultMessage: 'Failed to toggle Entity Analytics',
+  }
+);
+
 export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.engineRunSuccess',
   {

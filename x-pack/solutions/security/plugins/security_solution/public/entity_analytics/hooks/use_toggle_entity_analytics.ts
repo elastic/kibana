@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { StoreStatusEnum } from '../../../common/api/entity_analytics/entity_store/common.gen';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
@@ -40,10 +41,18 @@ const TEN_SECONDS = 10000;
 const TOAST_OPTIONS = { toastLifeTimeMs: 5000 };
 const UNKNOWN_ERROR = 'An unknown error occurred';
 
-const collectMutationErrors = (mutations: Array<{ isError: boolean; error: unknown }>): string[] =>
-  mutations.flatMap(({ isError, error }) =>
+interface MutationStatus {
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+}
+
+const deriveMutationState = (mutations: MutationStatus[]) => ({
+  isMutating: mutations.some((m) => m.isLoading),
+  errors: mutations.flatMap(({ isError, error }) =>
     isError ? [safeErrorMessage(error, UNKNOWN_ERROR)] : []
-  );
+  ),
+});
 
 interface ToggleOptions {
   selectedSettingsMatchSavedSettings: boolean;
@@ -69,7 +78,7 @@ export const useToggleEntityAnalytics = ({
   onSaveSettings,
   isSavingSettings,
 }: ToggleOptions): UseToggleEntityAnalyticsReturn => {
-  const { addSuccess } = useAppToasts();
+  const { addSuccess, addError } = useAppToasts();
   const { uiSettings } = useKibana().services;
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
@@ -105,43 +114,40 @@ export const useToggleEntityAnalytics = ({
 
   const [isToggling, setIsToggling] = useState(false);
 
-  // Consolidate version-specific state into a single selection point.
+  const riskEngineMutations: MutationStatus[] = [
+    initRiskEngineMutation,
+    enableRiskEngineMutation,
+    disableRiskEngineMutation,
+  ];
+
+  const v1StoreMutations: MutationStatus[] = [
+    enableEntityStoreMutation,
+    startEntityEngineMutation,
+    stopEntityEngineMutation,
+  ];
+
+  const v2StoreMutations: MutationStatus[] = [
+    installEntityStoreMutationV2,
+    startEntityStoreMutationV2,
+    stopEntityStoreMutationV2,
+  ];
+
   const v1Store = {
     status: v1StoreStatusQuery.data?.status,
-    isMutating:
-      enableEntityStoreMutation.isLoading ||
-      startEntityEngineMutation.isLoading ||
-      stopEntityEngineMutation.isLoading,
-    errors: collectMutationErrors([
-      enableEntityStoreMutation,
-      startEntityEngineMutation,
-      stopEntityEngineMutation,
-    ]),
+    ...deriveMutationState(v1StoreMutations),
   };
 
   const v2Store = {
     status: v2StoreStatusQuery.data?.status,
-    isMutating:
-      installEntityStoreMutationV2.isLoading ||
-      startEntityStoreMutationV2.isLoading ||
-      stopEntityStoreMutationV2.isLoading,
-    errors: collectMutationErrors([
-      installEntityStoreMutationV2,
-      startEntityStoreMutationV2,
-      stopEntityStoreMutationV2,
-    ]),
+    ...deriveMutationState(v2StoreMutations),
   };
 
-  const activeStore = isEntityStoreV2Enabled ? v2Store : v1Store;
-  const { status: entityStoreStatus } = activeStore;
+  const entityStore = isEntityStoreV2Enabled ? v2Store : v1Store;
+  const { status: entityStoreStatus } = entityStore;
+  const riskEngineState = deriveMutationState(riskEngineMutations);
 
   const isLoading =
-    isToggling ||
-    initRiskEngineMutation.isLoading ||
-    enableRiskEngineMutation.isLoading ||
-    disableRiskEngineMutation.isLoading ||
-    activeStore.isMutating ||
-    isSavingSettings;
+    isToggling || riskEngineState.isMutating || entityStore.isMutating || isSavingSettings;
 
   const riskEngineStatus = riskEngineStatusQuery.data?.risk_engine_status;
 
@@ -152,14 +158,13 @@ export const useToggleEntityAnalytics = ({
     isMutationLoading: isLoading,
   });
 
-  const errors: EntityAnalyticsErrors = {
-    riskEngine: collectMutationErrors([
-      initRiskEngineMutation,
-      enableRiskEngineMutation,
-      disableRiskEngineMutation,
-    ]),
-    entityStore: activeStore.errors,
-  };
+  const errors: EntityAnalyticsErrors = useMemo(
+    () => ({
+      riskEngine: riskEngineState.errors,
+      entityStore: entityStore.errors,
+    }),
+    [riskEngineState.errors, entityStore.errors]
+  );
 
   const stopEntityStore = useCallback(async () => {
     if (isEntityStoreV2Enabled) {
@@ -171,16 +176,25 @@ export const useToggleEntityAnalytics = ({
 
   const enableEntityStore = useCallback(async () => {
     if (isEntityStoreV2Enabled) {
-      if (entityStoreStatus === 'not_installed') {
+      if (entityStoreStatus === StoreStatusEnum.not_installed) {
         await installEntityStoreMutationV2.mutateAsync();
-      }
-      if (entityStoreStatus !== 'running' && entityStoreStatus !== 'installing') {
+        await startEntityStoreMutationV2.mutateAsync();
+      } else if (
+        entityStoreStatus === StoreStatusEnum.stopped ||
+        entityStoreStatus === StoreStatusEnum.error
+      ) {
         await startEntityStoreMutationV2.mutateAsync();
       }
     } else {
-      if (entityStoreStatus === 'stopped' || entityStoreStatus === 'error') {
+      if (
+        entityStoreStatus === StoreStatusEnum.stopped ||
+        entityStoreStatus === StoreStatusEnum.error
+      ) {
         await startEntityEngineMutation.mutateAsync();
-      } else if (entityStoreStatus !== 'running' && entityStoreStatus !== 'installing') {
+      } else if (
+        entityStoreStatus !== StoreStatusEnum.running &&
+        entityStoreStatus !== StoreStatusEnum.installing
+      ) {
         await enableEntityStoreMutation.mutateAsync({});
       }
     }
@@ -201,7 +215,10 @@ export const useToggleEntityAnalytics = ({
     setIsToggling(true);
     try {
       const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
-      const storeOn = !isEntityStoreFeatureFlagDisabled && entityStoreStatus === 'running';
+      const storeOn =
+        !isEntityStoreFeatureFlagDisabled && entityStoreStatus === StoreStatusEnum.running;
+      // When partially_enabled (only one subsystem running), toggle disables whatever is on.
+      // The user must toggle again to enable both subsystems together.
       const isCurrentlyEnabled = riskOn || storeOn;
 
       if (isCurrentlyEnabled) {
@@ -230,8 +247,8 @@ export const useToggleEntityAnalytics = ({
 
         addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);
       }
-    } catch {
-      // Errors are surfaced via mutation.isError states in the error panel
+    } catch (e) {
+      addError(e, { title: i18n.ENTITY_ANALYTICS_TOGGLE_ERROR, ...TOAST_OPTIONS });
     } finally {
       setIsToggling(false);
     }
@@ -241,6 +258,7 @@ export const useToggleEntityAnalytics = ({
     entityStoreStatus,
     isEntityStoreFeatureFlagDisabled,
     addSuccess,
+    addError,
     disableRiskEngineMutation,
     stopEntityStore,
     selectedSettingsMatchSavedSettings,

@@ -87,7 +87,8 @@ export const EntityAnalyticsManagementPage = () => {
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const entityStoreStatus = useEntityStoreStatus({});
   const entityTypes = useEntityStoreTypes();
-  const { data: entityEnginePrivileges } = useEntityEnginePrivileges();
+  const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
+    useEntityEnginePrivileges();
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({ entityTypes });
 
   const userHasRiskEnginePrivileges =
@@ -128,11 +129,13 @@ export const EntityAnalyticsManagementPage = () => {
     [history]
   );
 
+  const isStatusDataLoading = entityStoreStatus.isLoading || isLoadingPrivileges;
+
   useEffect(() => {
-    if (selectedTabId === TabId.Status && !shouldDisplayEngineStatusTab) {
+    if (selectedTabId === TabId.Status && !isStatusDataLoading && !shouldDisplayEngineStatusTab) {
       history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-  }, [shouldDisplayEngineStatusTab, selectedTabId, history]);
+  }, [shouldDisplayEngineStatusTab, isStatusDataLoading, selectedTabId, history]);
 
   const deleteError = safeErrorMessage(deleteEntityEngineMutation.error);
 

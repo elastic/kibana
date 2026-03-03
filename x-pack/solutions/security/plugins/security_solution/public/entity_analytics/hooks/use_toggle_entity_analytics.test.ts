@@ -10,8 +10,9 @@ import { renderHook, act } from '@testing-library/react';
 import { useToggleEntityAnalytics } from './use_toggle_entity_analytics';
 
 const mockAddSuccess = jest.fn();
+const mockAddError = jest.fn();
 jest.mock('../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addSuccess: mockAddSuccess }),
+  useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
 }));
 
 const mockInitRiskEngine = jest.fn().mockResolvedValue({});
@@ -507,6 +508,135 @@ describe('useToggleEntityAnalytics', () => {
         expect(mockStartEntityEngine).not.toHaveBeenCalled();
         expect(mockStopEntityEngine).not.toHaveBeenCalled();
       });
+    });
+
+    describe('toggle ON from error (v2)', () => {
+      it('starts entity store via v2 without reinstalling when status is error', async () => {
+        mockRiskEngineStatusReturn = {
+          data: { risk_engine_status: 'DISABLED' },
+          isFetching: false,
+        };
+        mockEntityStoreStatusV2Return = { data: { status: 'error', engines: [] } };
+
+        const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+        await act(async () => {
+          await result.current.toggle();
+        });
+
+        expect(mockInstallEntityStoreV2).not.toHaveBeenCalled();
+        expect(mockStartEntityStoreV2).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('concurrent toggle guard', () => {
+    it('blocks a second toggle while the first is still in flight', async () => {
+      let resolveInit: () => void;
+      mockInitRiskEngine.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveInit = resolve;
+        })
+      );
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      let firstToggle: Promise<void>;
+      await act(async () => {
+        firstToggle = result.current.toggle();
+      });
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockInitRiskEngine).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveInit!();
+        await firstToggle!;
+      });
+    });
+  });
+
+  describe('onSaveSettings failure', () => {
+    it('does not call initRiskEngine and shows error toast when onSaveSettings rejects', async () => {
+      mockSaveSettings.mockRejectedValueOnce(new Error('save failed'));
+
+      const { result } = renderHook(() =>
+        useToggleEntityAnalytics({
+          ...defaultOptions,
+          selectedSettingsMatchSavedSettings: false,
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledTimes(1);
+      expect(mockInitRiskEngine).not.toHaveBeenCalled();
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
+    });
+  });
+
+  describe('error toast on mutation failure', () => {
+    it('shows error toast when initRiskEngine rejects', async () => {
+      mockInitRiskEngine.mockRejectedValueOnce(new Error('init failed'));
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
+    });
+
+    it('shows error toast when v1 enableEntityStore rejects', async () => {
+      mockEnableEntityStore.mockRejectedValueOnce(new Error('store enable failed'));
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
+    });
+
+    it('shows error toast when disableRiskEngine rejects during toggle OFF', async () => {
+      mockRiskEngineStatusReturn = {
+        data: { risk_engine_status: 'ENABLED' },
+        isFetching: false,
+      };
+      mockEntityStoreStatusReturn = {
+        data: { status: 'running', engines: [] },
+      };
+      mockDisableRiskEngine.mockRejectedValueOnce(new Error('disable failed'));
+
+      const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
+
+      await act(async () => {
+        await result.current.toggle();
+      });
+
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
     });
   });
 });

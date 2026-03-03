@@ -102,6 +102,7 @@ export enum SecurityPageName {
   entityAnalyticsWatchlists = 'entity_analytics-watchlists',
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsThreatHunting = 'entity_analytics-threat_hunting',
+  entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
