@@ -61,9 +61,10 @@ const extractRetrievedDocsFromResults = (results: SearchToolResult[] = []): Retr
 
 export const extractSearchRetrievedDocs = (output: TaskOutput): RetrievedDoc[] => {
   const outputValue = output as SearchToolOutput | undefined;
+  const searchToolResults = outputValue?.searchToolResults;
 
-  if (outputValue && 'searchToolResults' in outputValue) {
-    return extractRetrievedDocsFromResults(outputValue.searchToolResults);
+  if (Array.isArray(searchToolResults)) {
+    return extractRetrievedDocsFromResults(searchToolResults);
   }
 
   const stepResults = (outputValue?.steps ?? [])
