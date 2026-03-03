@@ -103,13 +103,15 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
     // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
-      shouldShowStreamsByDefault(
-        packageInput,
-        packageInputStreams,
-        packagePolicyInput,
-        defaultDataStreamId
-      )
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
+      () =>
+        isSingleInputAndStreams ||
+        shouldShowStreamsByDefault(
+          packageInput,
+          packageInputStreams,
+          packagePolicyInput,
+          defaultDataStreamId
+        )
     );
 
     // Hide registry variables based on `hide_in_deployment_modes` value
@@ -316,31 +318,33 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color={hasErrors ? 'danger' : 'primary'}
-                  onClick={() => setIsShowingStreams(!isShowingStreams)}
-                  iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
-                  iconSide="right"
-                  aria-expanded={isShowingStreams}
-                  aria-label={i18n.translate(
-                    'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+              {!isSingleInputAndStreams && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color={hasErrors ? 'danger' : 'primary'}
+                    onClick={() => setIsShowingStreams(!isShowingStreams)}
+                    iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+                    iconSide="right"
+                    aria-expanded={isShowingStreams}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+                      {
+                        defaultMessage: 'Change default settings for {title}',
+                        values: {
+                          title: packageInput.title || packageInput.type,
+                        },
+                      }
+                    )}
+                  >
                     {
-                      defaultMessage: 'Change default settings for {title}',
-                      values: {
-                        title: packageInput.title || packageInput.type,
-                      },
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
+                        defaultMessage="Change defaults"
+                      />
                     }
-                  )}
-                >
-                  {
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
-                      defaultMessage="Change defaults"
-                    />
-                  }
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
