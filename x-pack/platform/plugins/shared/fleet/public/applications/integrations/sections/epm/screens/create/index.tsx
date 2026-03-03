@@ -7,14 +7,13 @@
 
 import React from 'react';
 
-import { ExperimentalFeaturesService } from '../../../../services';
 import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
 export const CreateIntegration = React.memo(() => {
   const { automaticImport, automaticImportVTwo } = useStartServices();
   useBreadcrumbs('integration_create');
 
-  const useVTwo = ExperimentalFeaturesService.get().newBrowseIntegrationUx;
+  const useVTwo = Boolean(automaticImportVTwo);
   const CreateAutomaticImport = useVTwo
     ? automaticImportVTwo?.components.CreateIntegration
     : automaticImport?.components.CreateIntegration;
