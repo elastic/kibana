@@ -20,7 +20,7 @@ const SingleOverviewCustomSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. SLOs without group_by have * as the instance ID.',
+          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. When * is used, all instances of the specified slo_id are shown.',
       },
     })
   ),
