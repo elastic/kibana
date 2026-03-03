@@ -23,6 +23,7 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
       headers: isEmpty(configHeaders) ? undefined : configHeaders,
     },
     secrets: {
+      ...formData.secrets,
       secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
     },
   };

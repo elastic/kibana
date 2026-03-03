@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EsqlFieldType } from '@kbn/esql-types';
-import type { SupportedDataType, FunctionDefinition, ESQLMessage, EditorError } from '../../..';
+import type { ESQLMessage, EditorError } from '@elastic/esql/types';
+import type { SupportedDataType, FunctionDefinition } from '../../..';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '../../..';
 import { getFunctionSignatures } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';

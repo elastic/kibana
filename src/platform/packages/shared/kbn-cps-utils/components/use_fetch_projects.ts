@@ -18,39 +18,45 @@ export interface UseFetchProjectsResult {
   error: Error | null;
 }
 
+const INITIAL_STATE: UseFetchProjectsResult = {
+  originProject: null,
+  linkedProjects: [],
+  isLoading: true,
+  error: null,
+};
+
 /**
  * Hook for fetching projects data from CPSManager.
- * Returns loading/error states alongside the fetched data.
+ * Uses a single state object to batch all updates into one re-render per fetch cycle.
  */
 export const useFetchProjects = (
   fetchProjects: (routing?: ProjectRouting) => Promise<ProjectsData | null>,
   routing?: ProjectRouting
 ): UseFetchProjectsResult => {
-  const [originProject, setOriginProject] = useState<CPSProject | null>(null);
-  const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [state, setState] = useState<UseFetchProjectsResult>(INITIAL_STATE);
 
   useEffect(() => {
     let isMounted = true;
-    setIsLoading(true);
-    setError(null);
+    setState((prev) => (prev.isLoading ? prev : { ...prev, isLoading: true, error: null }));
 
     fetchProjects(routing)
       .then((projectsData) => {
         if (isMounted) {
-          setOriginProject(projectsData?.origin ?? null);
-          setLinkedProjects(projectsData?.linkedProjects ?? []);
+          setState({
+            originProject: projectsData?.origin ?? null,
+            linkedProjects: projectsData?.linkedProjects ?? [],
+            isLoading: false,
+            error: null,
+          });
         }
       })
       .catch((err) => {
         if (isMounted) {
-          setError(err instanceof Error ? err : new Error(String(err)));
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: err instanceof Error ? err : new Error(String(err)),
+          }));
         }
       });
 
@@ -59,5 +65,5 @@ export const useFetchProjects = (
     };
   }, [fetchProjects, routing]);
 
-  return { originProject, linkedProjects, isLoading, error };
+  return state;
 };
