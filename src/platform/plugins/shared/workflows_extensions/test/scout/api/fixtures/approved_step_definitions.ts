@@ -33,6 +33,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
   },
   {
+    id: 'ai.guardrails',
+    handlerHash: '0000000000000000000000000000000000000000000000000000000000000000',
+  },
+  {
     id: 'ai.prompt',
     handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
   },
