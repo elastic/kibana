@@ -39,7 +39,7 @@ export interface GenerateEsqlDeps {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
-  events: ToolEventEmitter;
+  events?: ToolEventEmitter;
 }
 
 export interface GenerateEsqlOptions {
@@ -89,16 +89,13 @@ export const generateEsql = async ({
   model,
   esClient,
   logger,
-  events,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const docBase = await EsqlDocumentBase.load();
 
   const graph = createNlToEsqlGraph({
     model,
     esClient,
-    logger,
     docBase,
-    events,
   });
 
   return withActiveInferenceSpan(

@@ -141,12 +141,12 @@ dependsOn:
   - '@kbn/react-kibana-context-common'
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
-  - '@kbn/esql-language'
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-kibana-context-env'
   - '@kbn/scout'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

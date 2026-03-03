@@ -23,10 +23,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm, streamType, systems, isLogsEnabled } = (runOptions.scenarioOpts ?? {}) as {
+  const { rpm, streamType, systems, isLogsEnabled, skipFork } = (runOptions.scenarioOpts ?? {}) as {
     rpm?: number;
     systems?: string | string[];
     streamType?: 'classic' | 'wired';
+    skipFork?: boolean;
     isLogsEnabled?: boolean;
   };
 
@@ -41,6 +42,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   return {
     bootstrap: async ({ streamsClient }) => {
       await streamsClient.enable();
+
+      if (skipFork) {
+        return;
+      }
 
       const setupChildStreams = async (rootStream: string) => {
         const isEcsStream = rootStream === 'logs.ecs';

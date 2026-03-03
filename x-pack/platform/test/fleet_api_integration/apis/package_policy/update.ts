@@ -937,6 +937,16 @@ export default function (providerContext: FtrProviderContext) {
 
         const inputPackagePolicyId = packagePolicyResponse.item.id;
 
+        // index a document so the data stream is created
+        await es.index({
+          index: 'logs-somedataset-default',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            message: 'test',
+          },
+          refresh: 'true',
+        });
+
         await supertest
           .put(`/api/fleet/package_policies/${inputPackagePolicyId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -978,7 +988,7 @@ export default function (providerContext: FtrProviderContext) {
           );
 
           expectIdArraysEqual(
-            installation.installed_es.filter((a: any) => a.type !== 'knowledge_base'),
+            installation.installed_es.filter((item: any) => item.type !== 'knowledge_base'),
             [
               // assets from version 1.0.0
               { id: 'logs-integration_to_input.log', type: 'index_template' },

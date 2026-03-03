@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { Suspense } from 'react';
+import React, { Suspense, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { isMac } from '@kbn/shared-ux-utility';
+import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
 import { MagnifyGradientIcon } from './magnify_gradient_icon';
@@ -44,6 +45,15 @@ export function ESQLMenu({
   const isStarred = Boolean(editorActions?.isCurrentQueryStarred);
   const starredQueryLabel = isStarred ? removeStarredQueryLabel : addStarredQueryLabel;
 
+  const [showStardust, setShowStardust] = useState(false);
+  const wasStarredRef = useRef(isStarred);
+  if (isStarred && !wasStarredRef.current) {
+    setShowStardust(true);
+  } else if (!isStarred && wasStarredRef.current) {
+    setShowStardust(false);
+  }
+  wasStarredRef.current = isStarred;
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -77,16 +87,18 @@ export function ESQLMenu({
       {!hideHistory && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType={isStarred ? 'starFilled' : 'starEmpty'}
-              size="xs"
-              aria-label={starredQueryLabel}
-              className={!isStarred ? 'cm-favorite-button--empty' : ''}
-              onClick={onToggleStarredQuery}
-              isDisabled={!editorActions?.canToggleStarredQuery}
-              data-test-subj="ESQLEditor-toggle-starred-query-icon"
-              color="text"
-            />
+            <StardustWrapper active={showStardust}>
+              <EuiButtonIcon
+                iconType={isStarred ? 'starFilled' : 'starEmpty'}
+                size="xs"
+                aria-label={starredQueryLabel}
+                className={!isStarred ? 'cm-favorite-button--empty' : ''}
+                onClick={onToggleStarredQuery}
+                isDisabled={!editorActions?.canToggleStarredQuery}
+                data-test-subj="ESQLEditor-toggle-starred-query-icon"
+                color="text"
+              />
+            </StardustWrapper>
           </EuiToolTip>
         </EuiFlexItem>
       )}

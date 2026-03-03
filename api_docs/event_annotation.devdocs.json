@@ -1996,7 +1996,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                      "(\"dashed\" | \"solid\" | \"dotted\")[]"
                     ],
                     "path": "src/platform/plugins/private/event_annotation/common/manual_event_annotation/index.ts",
                     "lineNumber": 62,
@@ -2113,7 +2113,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
                     ],
                     "path": "src/platform/plugins/private/event_annotation/common/manual_event_annotation/index.ts",
                     "lineNumber": 78,
@@ -3282,7 +3282,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"solid\" | \"dashed\" | \"dotted\")[]"
+                      "(\"dashed\" | \"solid\" | \"dotted\")[]"
                     ],
                     "path": "src/platform/plugins/private/event_annotation/common/query_point_event_annotation/index.ts",
                     "lineNumber": 70,
@@ -3399,7 +3399,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\")[]"
                     ],
                     "path": "src/platform/plugins/private/event_annotation/common/query_point_event_annotation/index.ts",
                     "lineNumber": 86,

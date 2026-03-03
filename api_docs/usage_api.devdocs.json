@@ -9,9 +9,456 @@
     "objects": []
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "usageApi",
+        "id": "def-server.UsageReportingService",
+        "type": "Class",
+        "tags": [],
+        "label": "UsageReportingService",
+        "description": [
+          "\nHTTP client for sending UsageRecords to the Usage API.\n\nBased on the pattern from security_solution_serverless UsageReportingService.\nSupports mTLS authentication required by the Usage API in cloud environments."
+        ],
+        "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageReportingService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "usageApi",
+                "id": "def-server.UsageReportingService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    config,\n    kibanaVersion,\n    logger,\n  }",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+                "lineNumber": 49,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "usageApi",
+                    "id": "def-server.UsageReportingService.Unnamed.$1.config",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "config",
+                    "description": [],
+                    "signature": [
+                      "UsageReportingConfig"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+                    "lineNumber": 50,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "usageApi",
+                    "id": "def-server.UsageReportingService.Unnamed.$1.kibanaVersion",
+                    "type": "string",
+                    "tags": [],
+                    "label": "kibanaVersion",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+                    "lineNumber": 51,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "usageApi",
+                    "id": "def-server.UsageReportingService.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/logging",
+                        "scope": "common",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-common.Logger",
+                        "text": "Logger"
+                      }
+                    ],
+                    "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+                    "lineNumber": 52,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageReportingService.reportUsage",
+            "type": "Function",
+            "tags": [],
+            "label": "reportUsage",
+            "description": [
+              "\nSends a usage record with inline retry and exponential backoff.\nPer billing team guidance: data loss is preferable to overbilling,\nso we retry a few times then give up (logged at error level)."
+            ],
+            "signature": [
+              "(records: ",
+              {
+                "pluginId": "usageApi",
+                "scope": "server",
+                "docId": "kibUsageApiPluginApi",
+                "section": "def-server.UsageRecord",
+                "text": "UsageRecord"
+              },
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "usageApi",
+                "id": "def-server.UsageReportingService.reportUsage.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "records",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "usageApi",
+                    "scope": "server",
+                    "docId": "kibUsageApiPluginApi",
+                    "section": "def-server.UsageRecord",
+                    "text": "UsageRecord"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/usage_reporting_service.ts",
+                "lineNumber": 64,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "usageApi",
+        "id": "def-server.UsageMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "UsageMetrics",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageMetrics.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The metered dimension/resource. Must be unique and agreed upon with Billing team."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageMetrics.sub_type",
+            "type": "string",
+            "tags": [],
+            "label": "sub_type",
+            "description": [
+              "Optional sub-group for further breakdown (e.g., step type)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageMetrics.quantity",
+            "type": "number",
+            "tags": [],
+            "label": "quantity",
+            "description": [
+              "Measured quantity. For discrete events like workflow executions, this is 1."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageMetrics.period_seconds",
+            "type": "number",
+            "tags": [],
+            "label": "period_seconds",
+            "description": [
+              "Duration of usage represented by this record in seconds."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageMetrics.cause",
+            "type": "string",
+            "tags": [],
+            "label": "cause",
+            "description": [
+              "Underlying cause of the usage (low cardinality identifier)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageMetrics.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "Additional metadata for filtering/categorization in Stage 3 transform functions."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "usageApi",
+        "id": "def-server.UsageRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "UsageRecord",
+        "description": [
+          "\nUsage Record Schema v2 - matches the Serverless metering pipeline schema.\n\nStage 1 (Kibana) populates: id, usage_timestamp, creation_timestamp, usage.type,\nusage.quantity, usage.period_seconds, usage.metadata, source.id, source.instance_group_id.\n\nStage 2 (Usage API) enriches with: source.account, source.product, source.provider, source.region.\nStage 3 (Transform function) adds: usage.pli, usage.count."
+        ],
+        "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageRecord.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique ID for deduplication. Must be deterministic per execution to prevent overbilling."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageRecord.usage_timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "usage_timestamp",
+            "description": [
+              "When the usage occurred (ISO 8601)."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageRecord.creation_timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "creation_timestamp",
+            "description": [
+              "When the record was created, immediately before sending (ISO 8601)."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageRecord.usage",
+            "type": "Object",
+            "tags": [],
+            "label": "usage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageApi",
+                "scope": "server",
+                "docId": "kibUsageApiPluginApi",
+                "section": "def-server.UsageMetrics",
+                "text": "UsageMetrics"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageRecord.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageApi",
+                "scope": "server",
+                "docId": "kibUsageApiPluginApi",
+                "section": "def-server.UsageSource",
+                "text": "UsageSource"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "usageApi",
+        "id": "def-server.UsageSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "UsageSource",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageSource.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Identifies the system that wrote the record. Should map to something in logs for debugging."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageSource.instance_group_id",
+            "type": "string",
+            "tags": [],
+            "label": "instance_group_id",
+            "description": [
+              "Serverless project ID or stateful deployment ID."
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageApi",
+            "id": "def-server.UsageSource.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "Optional metadata such as product tier."
+            ],
+            "signature": [
+              "{ tier?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/usage_api/server/usage_reporting/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -25,7 +472,7 @@
         "\nSetup contract"
       ],
       "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
-      "lineNumber": 12,
+      "lineNumber": 13,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -43,7 +490,32 @@
             "{ readonly url?: string | undefined; readonly tls?: Readonly<{} & { key: string; certificate: string; ca: string; }> | undefined; readonly enabled: boolean; }"
           ],
           "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
-          "lineNumber": 16,
+          "lineNumber": 17,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "usageApi",
+          "id": "def-server.UsageApiSetup.usageReporting",
+          "type": "Object",
+          "tags": [],
+          "label": "usageReporting",
+          "description": [
+            "\nUsage reporting service for reporting usage metrics.\nOnly exposed if usage reporting is enabled and available."
+          ],
+          "signature": [
+            {
+              "pluginId": "usageApi",
+              "scope": "server",
+              "docId": "kibUsageApiPluginApi",
+              "section": "def-server.UsageReportingService",
+              "text": "UsageReportingService"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
+          "lineNumber": 21,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -55,20 +527,44 @@
     "start": {
       "parentPluginId": "usageApi",
       "id": "def-server.UsageApiStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "UsageApiStart",
       "description": [
         "\nStart contract"
       ],
-      "signature": [
-        "void"
-      ],
       "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
-      "lineNumber": 22,
+      "lineNumber": 28,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "usageApi",
+          "id": "def-server.UsageApiStart.usageReporting",
+          "type": "Object",
+          "tags": [],
+          "label": "usageReporting",
+          "description": [
+            "\nUsage reporting service for reporting usage metrics.\nOnly exposed if usage reporting is enabled and available."
+          ],
+          "signature": [
+            {
+              "pluginId": "usageApi",
+              "scope": "server",
+              "docId": "kibUsageApiPluginApi",
+              "section": "def-server.UsageReportingService",
+              "text": "UsageReportingService"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

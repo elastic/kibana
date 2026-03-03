@@ -1194,7 +1194,7 @@
             "section": "def-public.SourcesApiOptions",
             "text": "SourcesApiOptions"
           },
-          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
           {
             "pluginId": "apmSourcesAccess",
             "scope": "public",
@@ -1212,7 +1212,7 @@
             "section": "def-public.SourcesApiOptions",
             "text": "SourcesApiOptions"
           },
-          " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+          " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
           "SavedObject",
           "<{}>>; } | undefined; }) => Promise<",
           {
@@ -1259,7 +1259,7 @@
                     "section": "def-public.SourcesApiOptions",
                     "text": "SourcesApiOptions"
                   },
-                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
                   {
                     "pluginId": "apmSourcesAccess",
                     "scope": "public",
@@ -1277,7 +1277,7 @@
                     "section": "def-public.SourcesApiOptions",
                     "text": "SourcesApiOptions"
                   },
-                  " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+                  " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
                   "SavedObject",
                   "<{}>>; } | undefined"
                 ],
@@ -1927,7 +1927,15 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          ") => ",
+          ", columnsMeta: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined) => ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -1937,7 +1945,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-        "lineNumber": 35,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1959,7 +1967,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 46,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1982,7 +1990,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 47,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2005,7 +2013,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 48,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2022,7 +2030,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2045,11 +2053,35 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
-            "lineNumber": 50,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$6",
+            "type": "Object",
+            "tags": [],
+            "label": "columnsMeta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/format_hit.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4045,7 +4077,7 @@
         "signature": [
           "({ logLevel, fallback, \"data-test-subj\": dataTestSubj, ...badgeProps }: Omit<",
           "EuiBadgeProps",
-          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any> | undefined; }) => React.JSX.Element"
+          ", \"children\" | \"color\"> & { logLevel: {}; fallback?: React.ReactElement<any> | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
         "lineNumber": 21,
@@ -4063,7 +4095,7 @@
             "signature": [
               "Omit<",
               "EuiBadgeProps",
-              ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
+              ", \"children\" | \"color\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
             "lineNumber": 21,
@@ -5688,7 +5720,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 22,
@@ -6544,6 +6576,20 @@
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DataGridDensity",
+        "type": "Enum",
+        "tags": [],
+        "label": "DataGridDensity",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
