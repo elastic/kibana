@@ -18,6 +18,7 @@ import type {
   ConcreteTaskInstance,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
+import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { RawRule } from '../types';
 import {
   RULE_SAVED_OBJECT_TYPE,
@@ -32,11 +33,6 @@ import {
   emptyState,
   type LatestTaskStateSchema,
 } from './uiam_api_key_provisioning_task_state';
-import {
-  generateUiamKeysForRules,
-  type UiamConvertParams,
-  type UiamConvertResponse,
-} from './generate_uiam_keys_for_rules';
 import { getExcludeRulesFilter } from './lib/get_exclude_rules_filter';
 import type {
   ProvisioningStatusDocs,
@@ -284,21 +280,17 @@ export class UiamApiKeyProvisioningTask {
       };
     }
 
-    const keys = apiKeysToConvert.map(({ apiKey }) => ({
-      key: apiKey,
-      type: 'elasticsearch' as const,
-    }));
+    const keys = apiKeysToConvert.map(({ apiKey }) => apiKey);
 
     try {
-      const uiam = coreStart.security?.authc?.apiKeys?.uiam as
-        | { convert?: (params: UiamConvertParams) => Promise<UiamConvertResponse> }
-        | null
-        | undefined;
-      const uiamConvert = uiam?.convert;
-      const convertResponse: UiamConvertResponse =
-        typeof uiamConvert === 'function'
-          ? await uiamConvert({ keys })
-          : await generateUiamKeysForRules({ keys });
+      const uiamConvert = coreStart.security?.authc?.apiKeys?.uiam?.convert;
+      if (typeof uiamConvert !== 'function') {
+        throw new Error('UIAM convert API is not available');
+      }
+      const convertResponse: ConvertUiamAPIKeysResponse | null = await uiamConvert(keys);
+      if (convertResponse === null) {
+        throw new Error('License required for the UIAM convert API is not enabled');
+      }
 
       const apiKeysByRuleId: Array<UiamApiKeyByRuleId> = [];
       const provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs> = [];

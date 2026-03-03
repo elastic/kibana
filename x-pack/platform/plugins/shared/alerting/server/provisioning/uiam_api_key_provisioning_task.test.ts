@@ -8,7 +8,7 @@
 import { of, Subject } from 'rxjs';
 import { loggingSystemMock, coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
-import type { UiamConvertResponse } from './generate_uiam_keys_for_rules';
+import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import {
   UiamApiKeyProvisioningTask,
   API_KEY_PROVISIONING_TASK_ID,
@@ -41,9 +41,12 @@ function createMockCore(uiamConvert: jest.Mock): {
 
   coreStart.savedObjects.createInternalRepository = jest.fn().mockReturnValue(savedObjectsClient);
 
-  const uiam = coreStart.security?.authc?.apiKeys?.uiam;
+  const uiam = coreStart.security?.authc?.apiKeys?.uiam as
+    | { convert?: jest.Mock }
+    | null
+    | undefined;
   if (uiam && typeof uiam === 'object') {
-    (uiam as { convert?: jest.Mock }).convert = uiamConvert;
+    uiam.convert = uiamConvert;
   }
 
   return { coreSetup, coreStart, savedObjectsClient };
@@ -76,6 +79,38 @@ function createTaskInstance(state: { runs: number } = emptyState) {
     status: 'idle' as const,
     ownerId: null,
     traceparent: '',
+  };
+}
+
+/** Build a convert API success result matching core ConvertUiamAPIKeyResultSuccess */
+function createConvertSuccessResult(overrides: {
+  key: string;
+  id?: string;
+}): ConvertUiamAPIKeysResponse['results'][0] {
+  return {
+    status: 'success',
+    id: overrides.id ?? 'essu_0',
+    key: overrides.key,
+    organization_id: '',
+    description: '',
+    internal: true,
+    role_assignments: {},
+    creation_date: new Date().toISOString(),
+    expiration_date: null,
+  };
+}
+
+/** Build a convert API failed result matching core ConvertUiamAPIKeyResultFailed */
+function createConvertFailedResult(overrides: {
+  message: string;
+  code?: string;
+}): ConvertUiamAPIKeysResponse['results'][0] {
+  return {
+    status: 'failed',
+    message: overrides.message,
+    type: 'err',
+    resource: null,
+    code: overrides.code ?? '500',
   };
 }
 
@@ -260,29 +295,30 @@ describe('UiamApiKeyProvisioningTask', () => {
     it('calls uiam.convert with rule apiKeys and updates rules when convert succeeds', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [
-          {
-            status: 'success' as const,
-            id: 'essu_0',
-            key: 'uiam-key-1',
-            organization_id: '',
-            description: '',
-            internal: true,
-            role_assignments: {},
-            creation_date: new Date().toISOString(),
-          },
+          createConvertSuccessResult({ key: 'uiam-key-1' }),
+          createConvertSuccessResult({ key: 'uiam-key-2', id: 'essu_1' }),
+          createConvertSuccessResult({ key: 'uiam-key-3', id: 'essu_2' }),
         ],
-      } as UiamConvertResponse);
+      } as ConvertUiamAPIKeysResponse);
 
       const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
 
       savedObjectsClient.find.mockResolvedValue({
-        total: 1,
+        total: 3,
         per_page: 500,
         page: 1,
         saved_objects: [
           createRuleSavedObject({
             id: 'rule-1',
             attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
+          }),
+          createRuleSavedObject({
+            id: 'rule-2',
+            attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
+          }),
+          createRuleSavedObject({
+            id: 'rule-3',
+            attributes: { apiKey: 'es-api-key-3', apiKeyCreatedByUser: false },
           }),
         ],
       });
@@ -291,6 +327,22 @@ describe('UiamApiKeyProvisioningTask', () => {
         saved_objects: [
           {
             id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+          {
+            id: 'rule-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+          {
+            id: 'rule-3',
             type: RULE_SAVED_OBJECT_TYPE,
             attributes: {},
             references: [],
@@ -316,15 +368,23 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).toHaveBeenCalledTimes(1);
-      expect(uiamConvert).toHaveBeenCalledWith({
-        keys: [{ key: 'es-api-key-1', type: 'elasticsearch' }],
-      });
+      expect(uiamConvert).toHaveBeenCalledWith(['es-api-key-1', 'es-api-key-2', 'es-api-key-3']);
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
             id: 'rule-1',
             attributes: { uiamApiKey: 'uiam-key-1' },
+          }),
+          expect.objectContaining({
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-2',
+            attributes: { uiamApiKey: 'uiam-key-2' },
+          }),
+          expect.objectContaining({
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-3',
+            attributes: { uiamApiKey: 'uiam-key-3' },
           }),
         ])
       );
@@ -339,28 +399,42 @@ describe('UiamApiKeyProvisioningTask', () => {
               status: UiamApiKeyProvisioningStatus.COMPLETED,
             }),
           }),
+          expect.objectContaining({
+            type: 'uiam_api_keys_provisioning_status',
+            id: 'rule-2',
+            attributes: expect.objectContaining({
+              entityId: 'rule-2',
+              entityType: UiamApiKeyProvisioningEntityType.RULE,
+              status: UiamApiKeyProvisioningStatus.COMPLETED,
+            }),
+          }),
+          expect.objectContaining({
+            type: 'uiam_api_keys_provisioning_status',
+            id: 'rule-3',
+            attributes: expect.objectContaining({
+              entityId: 'rule-3',
+              entityType: UiamApiKeyProvisioningEntityType.RULE,
+              status: UiamApiKeyProvisioningStatus.COMPLETED,
+            }),
+          }),
         ]),
         { overwrite: true }
       );
     });
 
-    it('records provisioning status for failed conversions and does not update rule', async () => {
+    it('records provisioning status for failed conversions and updates only rules that succeeded', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [
-          {
-            status: 'failed' as const,
-            message: 'Conversion failed',
-            type: 'err',
-            resource: '',
-            code: '500',
-          },
+          createConvertSuccessResult({ key: 'uiam-key-2' }),
+          createConvertFailedResult({ message: 'Conversion failed for rule-3' }),
+          createConvertFailedResult({ message: 'Conversion failed for rule-4' }),
         ],
-      } as UiamConvertResponse);
+      } as ConvertUiamAPIKeysResponse);
 
       const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
 
       savedObjectsClient.find.mockResolvedValue({
-        total: 1,
+        total: 3,
         per_page: 500,
         page: 1,
         saved_objects: [
@@ -368,6 +442,27 @@ describe('UiamApiKeyProvisioningTask', () => {
             id: 'rule-2',
             attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
           }),
+          createRuleSavedObject({
+            id: 'rule-3',
+            attributes: { apiKey: 'es-api-key-3', apiKeyCreatedByUser: false },
+          }),
+          createRuleSavedObject({
+            id: 'rule-4',
+            attributes: { apiKey: 'es-api-key-4', apiKeyCreatedByUser: false },
+          }),
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'rule-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
         ],
       });
 
@@ -386,10 +481,16 @@ describe('UiamApiKeyProvisioningTask', () => {
       const result = await runner.run();
 
       expect(result).toEqual({ state: { runs: 1 } });
-      expect(uiamConvert).toHaveBeenCalledWith({
-        keys: [{ key: 'es-api-key-2', type: 'elasticsearch' }],
-      });
-      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(uiamConvert).toHaveBeenCalledWith(['es-api-key-2', 'es-api-key-3', 'es-api-key-4']);
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-2',
+            attributes: { uiamApiKey: 'uiam-key-2' },
+          }),
+        ])
+      );
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -398,8 +499,27 @@ describe('UiamApiKeyProvisioningTask', () => {
             attributes: expect.objectContaining({
               entityId: 'rule-2',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
+              status: UiamApiKeyProvisioningStatus.COMPLETED,
+            }),
+          }),
+          expect.objectContaining({
+            type: 'uiam_api_keys_provisioning_status',
+            id: 'rule-3',
+            attributes: expect.objectContaining({
+              entityId: 'rule-3',
+              entityType: UiamApiKeyProvisioningEntityType.RULE,
               status: UiamApiKeyProvisioningStatus.FAILED,
-              message: expect.stringContaining('Conversion failed'),
+              message: expect.stringContaining('Conversion failed for rule-3'),
+            }),
+          }),
+          expect.objectContaining({
+            type: 'uiam_api_keys_provisioning_status',
+            id: 'rule-4',
+            attributes: expect.objectContaining({
+              entityId: 'rule-4',
+              entityType: UiamApiKeyProvisioningEntityType.RULE,
+              status: UiamApiKeyProvisioningStatus.FAILED,
+              message: expect.stringContaining('Conversion failed for rule-4'),
             }),
           }),
         ]),
@@ -502,19 +622,8 @@ describe('UiamApiKeyProvisioningTask', () => {
 
     it('returns runAt when hasMoreToUpdate is true', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
-        results: [
-          {
-            status: 'success' as const,
-            id: 'essu_0',
-            key: 'uiam-1',
-            organization_id: '',
-            description: '',
-            internal: true,
-            role_assignments: {},
-            creation_date: new Date().toISOString(),
-          },
-        ],
-      } as UiamConvertResponse);
+        results: [createConvertSuccessResult({ key: 'uiam-1' })],
+      });
 
       const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
 
@@ -598,6 +707,84 @@ describe('UiamApiKeyProvisioningTask', () => {
       );
     });
 
+    it('throws when uiam.convert is not available', async () => {
+      const { coreSetup, coreStart, savedObjectsClient } = createMockCore(jest.fn());
+      const uiam = coreStart.security?.authc?.apiKeys?.uiam as unknown as
+        | { convert?: jest.Mock }
+        | undefined;
+      if (uiam) uiam.convert = undefined;
+
+      savedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 500,
+        page: 1,
+        saved_objects: [
+          createRuleSavedObject({
+            id: 'rule-1',
+            attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+          }),
+        ],
+      });
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+
+      await expect(runner.run()).rejects.toThrow('UIAM convert API is not available');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error converting API keys: UIAM convert API is not available',
+        expect.any(Object)
+      );
+    });
+
+    it('throws when uiam.convert returns null (license not enabled)', async () => {
+      const uiamConvert = jest.fn().mockResolvedValue(null);
+      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+
+      savedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 500,
+        page: 1,
+        saved_objects: [
+          createRuleSavedObject({
+            id: 'rule-1',
+            attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+          }),
+        ],
+      });
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+
+      await expect(runner.run()).rejects.toThrow(
+        'License required for the UIAM convert API is not enabled'
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error converting API keys: License required for the UIAM convert API is not enabled',
+        expect.any(Object)
+      );
+      expect(uiamConvert).toHaveBeenCalledWith(['es-1']);
+    });
+
     it('throws when savedObjectsClient.find throws', async () => {
       const uiamConvert = jest.fn();
       const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
@@ -629,19 +816,8 @@ describe('UiamApiKeyProvisioningTask', () => {
 
     it('throws when savedObjectsClient.bulkUpdate throws', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
-        results: [
-          {
-            status: 'success' as const,
-            id: 'essu_0',
-            key: 'uiam-key-1',
-            organization_id: '',
-            description: '',
-            internal: true,
-            role_assignments: {},
-            creation_date: new Date().toISOString(),
-          },
-        ],
-      } as UiamConvertResponse);
+        results: [createConvertSuccessResult({ key: 'uiam-key-1' })],
+      });
 
       const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
 
@@ -684,19 +860,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     it('handles mixed success and failed convert results', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [
-          {
-            status: 'success' as const,
-            id: 'essu_0',
-            key: 'uiam-a',
-            organization_id: '',
-            description: '',
-            internal: true,
-            role_assignments: {},
-            creation_date: new Date().toISOString(),
-          },
-          { status: 'failed' as const, message: 'Bad key', type: 'err', resource: '', code: '400' },
+          createConvertSuccessResult({ key: 'uiam-a' }),
+          createConvertFailedResult({ message: 'Bad key', code: '400' }),
         ],
-      } as UiamConvertResponse);
+      });
 
       const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
 
@@ -744,12 +911,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const result = await runner.run();
 
       expect(result).toEqual({ state: { runs: 1 } });
-      expect(uiamConvert).toHaveBeenCalledWith({
-        keys: [
-          { key: 'es-a', type: 'elasticsearch' },
-          { key: 'es-b', type: 'elasticsearch' },
-        ],
-      });
+      expect(uiamConvert).toHaveBeenCalledWith(['es-a', 'es-b']);
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({ id: 'r1', attributes: { uiamApiKey: 'uiam-a' } }),
