@@ -11,8 +11,8 @@ import type { RoleCredentials } from '../../services';
 import { createAlertEvent, indexAlertEvents } from './fixtures';
 
 const ALERT_ACTION_API_PATH = '/internal/alerting/v2/alerts';
-const ALERTS_EVENTS_INDEX = '.alerts-events';
-const ALERTS_ACTIONS_INDEX = '.alerts-actions';
+const ALERTING_EVENTS_INDEX = '.alerting-events';
+const ALERTING_ACTIONS_INDEX = '.alerting-actions';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
@@ -32,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await Promise.all([
         esClient.deleteByQuery(
           {
-            index: ALERTS_EVENTS_INDEX,
+            index: ALERTING_EVENTS_INDEX,
             query: { match_all: {} },
             refresh: true,
             wait_for_completion: true,
@@ -42,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ),
         esClient.deleteByQuery(
           {
-            index: ALERTS_ACTIONS_INDEX,
+            index: ALERTING_ACTIONS_INDEX,
             query: { match_all: {} },
             refresh: true,
             wait_for_completion: true,
@@ -54,9 +54,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     async function getLatestAction(ruleIds: string[]) {
-      await esClient.indices.refresh({ index: ALERTS_ACTIONS_INDEX });
+      await esClient.indices.refresh({ index: ALERTING_ACTIONS_INDEX });
       const result = await esClient.search({
-        index: ALERTS_ACTIONS_INDEX,
+        index: ALERTING_ACTIONS_INDEX,
         query: {
           bool: {
             must_not: [{ terms: { action_type: ['fire', 'suppress'] } }],
