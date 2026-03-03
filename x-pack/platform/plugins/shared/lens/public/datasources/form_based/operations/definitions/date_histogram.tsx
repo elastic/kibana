@@ -105,9 +105,7 @@ function getTimeZoneAndInterval(
   };
 }
 
-export function splitIntervalToValueAndUnit(
-  interval: string
-): { value: number; unit: string } | null {
+function splitIntervalToValueAndUnit(interval: string) {
   if (!interval || interval === 'auto') return null;
   const trimmed = interval.trim();
   const numMatch = trimmed.match(/^[\d.]+/);
@@ -126,10 +124,9 @@ const ESQL_UNIT_MAP: Record<string, [string, string]> = {
   w: ['week', 'weeks'],
   M: ['month', 'months'],
   y: ['year', 'years'],
-  q: ['quarter', 'quarters'],
 };
 
-export function mapToEsqlInterval(_dateRange: DateRange, interval: string): string {
+function mapToEsqlInterval(_dateRange: DateRange, interval: string) {
   const parsed = splitIntervalToValueAndUnit(interval);
   if (!parsed) return '1 hour';
   const { value, unit } = parsed;
