@@ -46,8 +46,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
   try {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
-    throw Error();
-
     if (skippable) {
       emitPipeline([emptyStep]);
       return;
