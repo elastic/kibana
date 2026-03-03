@@ -215,7 +215,7 @@ config="${encode({
           {
             elements: [
               {
-                id: 'new-element-id',
+                id: 'element-id',
                 expression: updatedRuntimeExpression,
               },
             ],
@@ -230,7 +230,7 @@ config="${encode({
           {
             elements: [
               {
-                id: 'new-element-id',
+                id: 'element-id',
                 expression: updatedStoredExpression,
               },
             ],
