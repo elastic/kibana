@@ -58,19 +58,17 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
 
           return res.ok({ body: result });
         } catch (error) {
-          if (error instanceof SelfLinkError) {
-            return res.badRequest({ body: error });
-          }
           if (error instanceof EntitiesNotFoundError) {
             return res.customError({ statusCode: 404, body: error });
           }
           if (
+            error instanceof SelfLinkError ||
             error instanceof MixedEntityTypesError ||
             error instanceof ChainResolutionError ||
             error instanceof EntityHasAliasesError ||
             error instanceof ResolutionSearchTruncatedError
           ) {
-            return res.customError({ statusCode: 409, body: error });
+            return res.badRequest({ body: error });
           }
 
           logger.error(error);

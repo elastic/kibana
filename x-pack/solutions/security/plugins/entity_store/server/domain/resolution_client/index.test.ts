@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ResolutionClient } from './resolution_client';
+import { ResolutionClient } from '.';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -16,7 +16,7 @@ import {
   ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
-} from './errors';
+} from '../errors';
 
 const NAMESPACE = 'default';
 

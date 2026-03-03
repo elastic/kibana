@@ -8,8 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
-import { ENTITY_ID_FIELD } from '../../common/domain/definitions/common_fields';
-import { getLatestEntitiesIndexName } from './assets/latest_index';
+import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
+import { getLatestEntitiesIndexName } from '../assets/latest_index';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -18,7 +18,7 @@ import {
   ResolutionSearchTruncatedError,
   ResolutionUpdateError,
   SelfLinkError,
-} from './errors';
+} from '../errors';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
@@ -74,30 +74,24 @@ export class ResolutionClient {
       throw new SelfLinkError(targetId);
     }
 
-    // 3. Fetch all involved entities
+    // 3. Fetch and validate all involved entities exist
     const allIds = [targetId, ...entityIds];
-    const entities = await this.fetchEntitiesByIds(allIds);
+    const entities = await this.fetchAndValidateEntities(allIds);
 
-    // 4. Validate: all exist
-    const missingIds = allIds.filter((id) => !entities.has(id));
-    if (missingIds.length > 0) {
-      throw new EntitiesNotFoundError(missingIds);
-    }
-
-    // 5. Validate: all same type
+    // 4. Validate: all same type
     this.validateSameEntityType(entities);
 
-    // 6. Validate: target has no resolved_to (is not an alias)
+    // 5. Validate: target has no resolved_to (is not an alias)
     const targetEntity = entities.get(targetId)!;
     const targetResolvedTo = targetEntity[RESOLVED_TO_FIELD] as string | undefined;
     if (targetResolvedTo) {
       throw new ChainResolutionError(targetId, targetResolvedTo);
     }
 
-    // 7. Check which entities among entity_ids have aliases pointing to them
+    // 6. Check which entities among entity_ids have aliases pointing to them
     const entitiesWithAliases = await this.findEntitiesWithAliases(entityIds);
 
-    // 8. Categorize each entity_id
+    // 7. Categorize each entity_id
     const linked: string[] = [];
     const skipped: string[] = [];
 
@@ -120,7 +114,7 @@ export class ResolutionClient {
       return { linked: [], skipped, target_id: targetId };
     }
 
-    // 9. Batch updateByQuery: set resolved_to on all entities to link
+    // 8. Batch updateByQuery: set resolved_to on all entities to link
     this.logger.debug(`Linking ${linked.length} entities to target '${targetId}'`);
 
     const linkResult = await this.esClient.updateByQuery({
@@ -157,19 +151,11 @@ export class ResolutionClient {
   public async unlinkEntities(rawEntityIds: string[]): Promise<UnlinkResult> {
     const index = getLatestEntitiesIndexName(this.namespace);
 
-    // 1. Deduplicate entity_ids
+    // 1. Deduplicate and fetch all entities
     const entityIds = [...new Set(rawEntityIds)];
+    const entities = await this.fetchAndValidateEntities(entityIds);
 
-    // 2. Fetch all entities
-    const entities = await this.fetchEntitiesByIds(entityIds);
-
-    // 3. Validate: all exist
-    const missingIds = entityIds.filter((id) => !entities.has(id));
-    if (missingIds.length > 0) {
-      throw new EntitiesNotFoundError(missingIds);
-    }
-
-    // 4. Categorize: aliases to unlink vs non-aliases to skip
+    // 2. Categorize: aliases to unlink vs non-aliases to skip
     const toUnlink: string[] = [];
     const skipped: string[] = [];
 
@@ -187,7 +173,7 @@ export class ResolutionClient {
       return { unlinked: [], skipped };
     }
 
-    // 5. Batch updateByQuery: remove resolved_to field
+    // 3. Batch updateByQuery: remove resolved_to field
     this.logger.debug(`Unlinking ${toUnlink.length} entities`);
 
     const unlinkResult = await this.esClient.updateByQuery({
@@ -222,14 +208,11 @@ export class ResolutionClient {
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Fetch the requested entity
-    const entities = await this.fetchEntitiesByIds([entityId]);
-    const entity = entities.get(entityId);
-    if (!entity) {
-      throw new EntitiesNotFoundError([entityId]);
-    }
+    const entities = await this.fetchAndValidateEntities([entityId]);
+    const inputEntity = entities.get(entityId)!;
 
     // 2. Determine the target ID
-    const resolvedTo = entity[RESOLVED_TO_FIELD] as string | undefined;
+    const resolvedTo = inputEntity[RESOLVED_TO_FIELD] as string | undefined;
     const targetId = resolvedTo ?? entityId;
 
     // 3. Query for target + all aliases in one search
@@ -265,9 +248,11 @@ export class ResolutionClient {
       }
     }
 
+    // If no target was found in the query, and the input entity has no
+    // resolveTo, it's the target entity
     if (!target) {
       if (!resolvedTo) {
-        target = entity;
+        target = inputEntity;
       } else {
         throw new EntitiesNotFoundError([targetId]);
       }
@@ -281,7 +266,10 @@ export class ResolutionClient {
   }
 
   /**
-   * Throws if the search response was truncated by MAX_RESOLUTION_SEARCH_SIZE.
+   * Validates that the search response was not truncated.
+   * Truncation means we received fewer results than exist, which would lead to
+   * incomplete resolution groups or missed alias checks — failing closed prevents
+   * inconsistent link/unlink decisions.
    */
   private throwIfTruncated(response: SearchResponse, context: string): void {
     const total =
@@ -295,9 +283,10 @@ export class ResolutionClient {
   }
 
   /**
-   * Fetches entities by their entity.id values from the LATEST index.
+   * Fetches entities by their entity.id values and validates that all exist.
+   * Throws EntitiesNotFoundError if any IDs are missing.
    */
-  private async fetchEntitiesByIds(
+  private async fetchAndValidateEntities(
     entityIds: string[]
   ): Promise<Map<string, Record<string, unknown>>> {
     const index = getLatestEntitiesIndexName(this.namespace);
@@ -312,13 +301,19 @@ export class ResolutionClient {
       _source: true,
     });
 
-    const result = new Map<string, Record<string, unknown>>();
+    const entities = new Map<string, Record<string, unknown>>();
     for (const hit of response.hits.hits) {
       const source = hit._source as Record<string, unknown>;
-      const entityId = source[ENTITY_ID_FIELD] as string;
-      result.set(entityId, source);
+      const id = source[ENTITY_ID_FIELD] as string;
+      entities.set(id, source);
     }
-    return result;
+
+    const missingIds = entityIds.filter((id) => !entities.has(id));
+    if (missingIds.length > 0) {
+      throw new EntitiesNotFoundError(missingIds);
+    }
+
+    return entities;
   }
 
   /**

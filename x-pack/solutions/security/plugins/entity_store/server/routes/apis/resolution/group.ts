@@ -51,7 +51,7 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
             return res.customError({ statusCode: 404, body: error });
           }
           if (error instanceof ResolutionSearchTruncatedError) {
-            return res.customError({ statusCode: 409, body: error });
+            return res.badRequest({ body: error });
           }
 
           logger.error(error);
