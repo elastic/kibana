@@ -45,10 +45,6 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
   },
 }));
 
-jest.mock('./use_metrics_info', () => ({
-  useMetricsInfo: jest.fn(),
-}));
-
 jest.mock('../../../../../application/main/state_management/redux', () => ({
   internalStateActions: {
     updateAppState: jest.fn(),
@@ -65,7 +61,10 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
   const fetch$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1) as UnifiedHistogramFetch$;
 
   return {
-    services: {} as unknown as UnifiedHistogramServices,
+    services: {
+      data: { search: { search: jest.fn() } },
+      uiSettings: {},
+    } as unknown as UnifiedHistogramServices,
     renderToggleActions: () => undefined,
     fetchParams: {} as unknown as UnifiedHistogramFetchParams,
     fetch$,
