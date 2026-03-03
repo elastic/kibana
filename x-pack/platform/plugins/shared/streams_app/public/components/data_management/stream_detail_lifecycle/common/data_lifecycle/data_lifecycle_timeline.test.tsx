@@ -102,6 +102,25 @@ describe('DataLifecycleTimeline', () => {
       expect(screen.queryByTestId('dataLifecycleTimeline-value-15h')).not.toBeInTheDocument();
     });
 
+    it('should not mark other phases invalid when labels have the same value', () => {
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },
+        { grow: true, color: '#FFA500', name: 'warm', min_age: '0d', label: 'warm' },
+      ];
+
+      render(
+        <DataLifecycleTimeline
+          {...defaultProps}
+          phases={phases}
+          gridTemplateColumns="1fr 1fr"
+          invalidPhases={['warm'] as PhaseName[]}
+        />
+      );
+
+      expect(screen.getAllByTestId('dataLifecycleTimeline-value-0d')).toHaveLength(1);
+      expect(screen.getAllByTestId('dataLifecycleTimeline-value-0d-invalid')).toHaveLength(1);
+    });
+
     it('should mark invalid step indices using DSL segment stepIndex mapping', () => {
       const phases: LifecyclePhase[] = [
         { grow: true, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },

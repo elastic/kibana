@@ -18,50 +18,6 @@ import type { PhaseName } from '@kbn/streams-schema';
 import type { LifecyclePhase } from './lifecycle_types';
 import type { TimelineSegment } from './data_lifecycle_segments';
 
-const buildInvalidLeftValuesSet = ({
-  invalidPhases,
-  invalidStepIndices,
-  segments,
-  phases,
-}: {
-  invalidPhases?: PhaseName[];
-  invalidStepIndices?: number[];
-  segments: TimelineSegment[];
-  phases: LifecyclePhase[];
-}): Set<string> => {
-  if (
-    (!invalidPhases || invalidPhases.length === 0) &&
-    (!invalidStepIndices || invalidStepIndices.length === 0)
-  ) {
-    return new Set<string>();
-  }
-
-  const invalidPhasesSet = new Set<string>(invalidPhases ?? []);
-  const invalidStepIndicesSet = new Set(invalidStepIndices ?? []);
-  const leftValuesSet = new Set<string>();
-
-  for (let i = 0; i < phases.length; i++) {
-    const phase = phases[i];
-    const phaseName = phase.name;
-    if (!invalidPhasesSet.has(phaseName)) continue;
-
-    // "hot" can render a custom left label (e.g. "0d"), so prefer the segment's leftValue.
-    const leftValue =
-      phaseName === 'hot' ? segments[i]?.leftValue ?? segments[0]?.leftValue : phase.min_age;
-    if (leftValue) leftValuesSet.add(leftValue);
-  }
-
-  if (invalidStepIndicesSet.size > 0) {
-    for (const segment of segments) {
-      if (segment.stepIndex === undefined) continue;
-      if (!invalidStepIndicesSet.has(segment.stepIndex)) continue;
-      if (segment.leftValue) leftValuesSet.add(segment.leftValue);
-    }
-  }
-
-  return leftValuesSet;
-};
-
 export const DataLifecycleTimeline = ({
   phases,
   isRetentionInfinite,
@@ -89,10 +45,8 @@ export const DataLifecycleTimeline = ({
     [phases, timelineSegments]
   );
 
-  const invalidLeftValuesSet = useMemo(
-    () => buildInvalidLeftValuesSet({ invalidPhases, invalidStepIndices, segments, phases }),
-    [invalidPhases, invalidStepIndices, phases, segments]
-  );
+  const invalidPhasesSet = new Set<string>(invalidPhases ?? []);
+  const invalidStepIndicesSet = new Set<number>(invalidStepIndices ?? []);
 
   return (
     <EuiPanel
@@ -119,6 +73,12 @@ export const DataLifecycleTimeline = ({
             const isFirstPhase = index === 0;
             const isLastPhase = index === segments.length - 1;
             const showInfinite = isRetentionInfinite && isLastPhase;
+            const isPhaseAligned = phases.length === segments.length;
+            const phaseNameAtIndex = isPhaseAligned ? phases[index]?.name : undefined;
+            const isInvalidPhasePoint =
+              phaseNameAtIndex !== undefined && invalidPhasesSet.has(phaseNameAtIndex);
+            const isInvalidStepPoint =
+              segment.stepIndex !== undefined && invalidStepIndicesSet.has(segment.stepIndex);
 
             return (
               <EuiFlexItem key={index} grow={segment.grow} css={{ flexBasis: 0, minWidth: 0 }}>
@@ -127,9 +87,7 @@ export const DataLifecycleTimeline = ({
                   leftValue={segment.leftValue}
                   showInfinite={showInfinite}
                   isFirstPhase={isFirstPhase}
-                  isInvalidPoint={Boolean(
-                    segment.leftValue && invalidLeftValuesSet.has(segment.leftValue)
-                  )}
+                  isInvalidPoint={isInvalidPhasePoint || isInvalidStepPoint}
                 />
               </EuiFlexItem>
             );
