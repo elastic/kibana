@@ -8,29 +8,25 @@
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FormValues } from './types';
-import { RuleForm, type RuleFormServices } from './rule_form';
+import { RuleForm } from './rule_form';
+import type { RuleFormServices } from './contexts';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface StandaloneRuleFormProps {
-  /* Initial query for the rule */
+  /** Initial query for the rule */
   query: string;
   services: RuleFormServices;
-  /* Called with form values when form is submitted.
-   * Only used when includeSubmission is false. */
-  onSubmit?: (values: FormValues) => void;
-  /* Called after successful rule creation (only used when includeSubmission is true) */
-  onSuccess?: () => void;
+  onSubmit: (values: FormValues) => void;
   onCancel?: () => void;
-  /* Whether to include YAML editor toggle (default: false). Requires services.application. */
+  /** Whether to include YAML editor toggle (default: false). Requires services.application. */
   includeYaml?: boolean;
-  /* Whether the form is in a loading/disabled state */
+  /** Whether the form is in a loading/disabled state */
   isDisabled?: boolean;
-  /* Whether to include submit/cancel buttons (default: false).
-   * When true, the form handles the API call internally. */
+  /** Whether the form is currently submitting (controls button loading state) */
+  isSubmitting?: boolean;
+  /** Whether to show submit/cancel buttons (default: false) */
   includeSubmission?: boolean;
-  /* Custom label for the submit button */
   submitLabel?: React.ReactNode;
-  /* Custom label for the cancel button */
   cancelLabel?: React.ReactNode;
 }
 
@@ -49,8 +45,8 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   onSubmit,
   includeYaml = false,
   isDisabled = false,
+  isSubmitting = false,
   includeSubmission = false,
-  onSuccess,
   onCancel,
   submitLabel,
   cancelLabel,
@@ -69,8 +65,8 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
         onSubmit={onSubmit}
         includeYaml={includeYaml}
         isDisabled={isDisabled}
+        isSubmitting={isSubmitting}
         includeSubmission={includeSubmission}
-        onSuccess={onSuccess}
         onCancel={onCancel}
         submitLabel={submitLabel}
         cancelLabel={cancelLabel}

@@ -39,7 +39,7 @@ const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData =
     evaluation: {
       query: {
         base: evaluation.query.base,
-        condition: evaluation.query.condition,
+        ...(evaluation.query.condition ? { condition: evaluation.query.condition } : {}),
       },
     },
     ...(grouping?.fields?.length ? { grouping: { fields: grouping.fields } } : {}),

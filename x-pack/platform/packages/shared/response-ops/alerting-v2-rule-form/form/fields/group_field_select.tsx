@@ -9,17 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FormValues } from '../types';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
+import { useRuleFormServices } from '../contexts';
 
-interface GroupBySelectProps {
-  services: {
-    data: DataPublicPluginStart;
-  };
-}
-
-export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => {
+export const GroupFieldSelect: React.FC = () => {
+  const { data } = useRuleFormServices();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });
   const groupByRowId = 'ruleV2FormGroupByField';
@@ -41,7 +36,7 @@ export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => 
 
   const { data: columns, isLoading } = useQueryColumns({
     query,
-    search: services.data.search.search,
+    search: data.search.search,
     onSuccess: handleColumnsSuccess,
   });
 

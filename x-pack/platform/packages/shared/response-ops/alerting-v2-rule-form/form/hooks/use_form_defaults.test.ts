@@ -19,7 +19,7 @@ describe('useFormDefaults', () => {
         enabled: true,
         description: '',
       },
-      timeField: '', // Auto-selected by TimeFieldSelect component
+      timeField: '@timestamp', // Default to @timestamp; TimeFieldSelect may update if not available
       schedule: { every: '5m', lookback: '1m' },
       evaluation: {
         query: {

@@ -6,26 +6,19 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { HttpStart } from '@kbn/core/public';
 import { Controller, useWatch, useFormContext } from 'react-hook-form';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
 import { firstFieldOption, getTimeFieldOptions } from '../../flyout/utils';
 import { useDataFields } from '../hooks/use_data_fields';
+import { useRuleFormServices } from '../contexts';
 
 const PREFERRED_TIME_FIELD = '@timestamp';
 
-interface TimeFieldSelectProps {
-  services: {
-    http: HttpStart;
-    dataViews: DataViewsPublicPluginStart;
-  };
-}
-
-export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) => {
+export const TimeFieldSelect: React.FC = () => {
+  const { http, dataViews } = useRuleFormServices();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });
 
@@ -52,8 +45,8 @@ export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) =>
 
   const { data, isLoading } = useDataFields({
     query,
-    http: services.http,
-    dataViews: services.dataViews,
+    http,
+    dataViews,
     onSuccess: handleAutoSelect,
   });
 

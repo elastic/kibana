@@ -8,7 +8,14 @@
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import type { FormValues } from './form/types';
+import { RuleFormServicesProvider, type RuleFormServices } from './form/contexts';
 
 /**
  * Creates a QueryClient configured for testing (no retries, silent logger).
@@ -25,6 +32,17 @@ export const createTestQueryClient = () =>
       error: () => {},
     },
   });
+
+/**
+ * Creates mock services for testing.
+ */
+export const createMockServices = (): RuleFormServices => ({
+  http: httpServiceMock.createStartContract(),
+  data: dataPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
+  application: applicationServiceMock.createStartContract(),
+});
 
 /**
  * Creates a wrapper component with QueryClientProvider for testing hooks.
@@ -56,10 +74,14 @@ export const defaultTestFormValues: FormValues = {
 };
 
 /**
- * Creates a wrapper component with QueryClientProvider and FormProvider for testing components.
- * Use this for component tests that need both React Query and react-hook-form context.
+ * Creates a wrapper component with QueryClientProvider, FormProvider, and RuleFormServicesProvider
+ * for testing components. Use this for component tests that need React Query, react-hook-form,
+ * and services context.
  */
-export const createFormWrapper = (defaultValues: Partial<FormValues> = {}) => {
+export const createFormWrapper = (
+  defaultValues: Partial<FormValues> = {},
+  services: RuleFormServices = createMockServices()
+) => {
   const queryClient = createTestQueryClient();
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -71,9 +93,13 @@ export const createFormWrapper = (defaultValues: Partial<FormValues> = {}) => {
     });
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <FormProvider {...form}>{children}</FormProvider>
-      </QueryClientProvider>
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormServicesProvider services={services}>{children}</RuleFormServicesProvider>
+          </FormProvider>
+        </QueryClientProvider>
+      </IntlProvider>
     );
   };
 
