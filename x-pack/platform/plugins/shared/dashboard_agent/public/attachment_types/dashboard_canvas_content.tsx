@@ -123,7 +123,8 @@ export const buildPanelFromRawConfig = ({
   if (isLensEmbeddableType(embeddableType, rawConfig)) {
     const lensAttributes = rawConfig;
     const width =
-      preferredGrid?.w ?? (getLensPanelWidth ? getLensPanelWidth(lensAttributes) : layout.largePanelWidth);
+      preferredGrid?.w ??
+      (getLensPanelWidth ? getLensPanelWidth(lensAttributes) : layout.largePanelWidth);
     const height = preferredGrid?.h ?? layout.defaultPanelHeight;
 
     let x = currentX;
