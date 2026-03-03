@@ -1,5 +1,5 @@
 {
-  "sha1": "65f75ae3f6a21cc3a89a582d5f56d6ac595b91bc",
+  "sha1": "18f9bd9a16d2acb4fc990241d165a8d8643deca8",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -15,7 +15,7 @@
     {
       "id": "6abec00b7295e6e-b421a7b50b12d02",
       "title": "Entity analytics dashboard page enables risk score followed by the store",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/dashboard.spec.ts",
-        "line": 27,
+        "line": 26,
         "column": 14
       }
     },

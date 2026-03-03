@@ -1,0 +1,60 @@
+{
+  "sha1": "085cd5484fbff9ffdeec167b002706463ff6b91b",
+  "tests": [
+    {
+      "id": "0bd833d14af6db0-a31fe83b716de1d",
+      "title": "Ingest trace data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/global.setup.ts",
+        "line": 14,
+        "column": 16
+      }
+    },
+    {
+      "id": "1fc49cae3fceba9-f7ea7b97d8861e4",
+      "title": "Traces in Discover - Profile enablement should load Discover with trace data in Classic mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_enablement.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "1fc49cae3fceba9-72023adad38c608",
+      "title": "Traces in Discover - Profile enablement should load Discover with trace data in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_enablement.spec.ts",
+        "line": 52,
+        "column": 14
+      }
+    }
+  ]
+}

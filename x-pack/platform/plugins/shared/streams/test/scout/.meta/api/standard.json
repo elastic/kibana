@@ -1,5 +1,5 @@
 {
-  "sha1": "d9adb39d43a613275404451bd50b87eb8872392b",
+  "sha1": "16c69b8fd9463e6adb9f90c88e1a68da3786ea0f",
   "tests": [
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 105,
+        "line": 107,
         "column": 12
       }
     },
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 126,
+        "line": 128,
         "column": 12
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 147,
+        "line": 149,
         "column": 12
       }
     },
@@ -72,7 +72,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 188,
+        "line": 190,
         "column": 12
       }
     },
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 227,
+        "line": 229,
         "column": 12
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 262,
+        "line": 264,
         "column": 12
       }
     },
@@ -120,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 297,
+        "line": 299,
         "column": 12
       }
     },
@@ -136,7 +136,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 336,
+        "line": 338,
         "column": 12
       }
     },
@@ -152,7 +152,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 396,
+        "line": 398,
         "column": 12
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 454,
+        "line": 456,
         "column": 12
       }
     },
@@ -184,7 +184,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 477,
+        "line": 479,
         "column": 12
       }
     },
@@ -200,7 +200,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 521,
+        "line": 523,
         "column": 12
       }
     },
@@ -216,7 +216,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 537,
+        "line": 539,
         "column": 12
       }
     },
@@ -232,7 +232,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 566,
+        "line": 568,
         "column": 12
       }
     },
@@ -248,7 +248,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 596,
+        "line": 598,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-f1f767d0ba58fb4",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 30 days and downsampling steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 652,
         "column": 12
       }
     },
@@ -264,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 83,
+        "line": 86,
         "column": 12
       }
     },
@@ -280,7 +296,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 130,
+        "line": 133,
         "column": 12
       }
     },
@@ -296,7 +312,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 173,
+        "line": 176,
         "column": 12
       }
     },
@@ -312,7 +328,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 228,
+        "line": 231,
         "column": 12
       }
     },
@@ -328,7 +344,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 300,
+        "line": 303,
         "column": 12
       }
     },
@@ -344,7 +360,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 364,
+        "line": 367,
         "column": 12
       }
     },
@@ -360,7 +376,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 416,
+        "line": 419,
         "column": 12
       }
     },
@@ -376,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 483,
+        "line": 486,
         "column": 12
       }
     },
@@ -392,7 +408,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 552,
+        "line": 555,
         "column": 12
       }
     },
@@ -408,7 +424,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 611,
+        "line": 614,
         "column": 12
       }
     },
@@ -424,7 +440,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 645,
+        "line": 648,
         "column": 12
       }
     },
@@ -440,7 +456,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 18,
+        "line": 21,
         "column": 12
       }
     },
@@ -456,7 +472,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 61,
+        "line": 64,
         "column": 12
       }
     },
@@ -472,7 +488,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 90,
+        "line": 93,
         "column": 12
       }
     },
@@ -488,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 129,
+        "line": 132,
         "column": 12
       }
     },
@@ -504,7 +520,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 165,
+        "line": 168,
         "column": 12
       }
     },
@@ -520,7 +536,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 198,
+        "line": 201,
         "column": 12
       }
     },
@@ -536,7 +552,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 223,
+        "line": 229,
         "column": 12
       }
     },
@@ -552,7 +568,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 255,
+        "line": 261,
         "column": 12
       }
     },
@@ -568,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 287,
+        "line": 296,
         "column": 12
       }
     },
@@ -584,7 +600,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 311,
+        "line": 323,
         "column": 12
       }
     },
@@ -600,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 336,
+        "line": 351,
         "column": 12
       }
     },
@@ -616,7 +632,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 365,
+        "line": 383,
         "column": 12
       }
     },
@@ -632,7 +648,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 397,
+        "line": 418,
         "column": 12
       }
     },
@@ -648,7 +664,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 428,
+        "line": 452,
         "column": 12
       }
     },
@@ -664,7 +680,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 453,
+        "line": 480,
         "column": 12
       }
     },
@@ -680,7 +696,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 476,
+        "line": 506,
         "column": 12
       }
     },
@@ -696,7 +712,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 499,
+        "line": 532,
         "column": 12
       }
     },
@@ -712,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 527,
+        "line": 563,
         "column": 12
       }
     },
@@ -728,7 +744,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 551,
+        "line": 590,
         "column": 12
       }
     },
@@ -744,7 +760,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 575,
+        "line": 617,
         "column": 12
       }
     },
@@ -760,7 +776,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 603,
+        "line": 648,
         "column": 12
       }
     },
@@ -776,7 +792,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 628,
+        "line": 676,
         "column": 12
       }
     },
@@ -792,7 +808,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 658,
+        "line": 709,
         "column": 12
       }
     },
@@ -808,7 +824,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 701,
+        "line": 752,
         "column": 12
       }
     },
@@ -824,7 +840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 732,
+        "line": 786,
         "column": 12
       }
     },
@@ -840,7 +856,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 757,
+        "line": 814,
         "column": 12
       }
     },
@@ -856,7 +872,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 779,
+        "line": 839,
         "column": 12
       }
     },
@@ -872,7 +888,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 806,
+        "line": 866,
         "column": 12
       }
     },
@@ -888,7 +904,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
-        "line": 828,
+        "line": 888,
         "column": 12
       }
     },
@@ -904,7 +920,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 30,
+        "line": 32,
         "column": 12
       }
     },
@@ -920,7 +936,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 63,
+        "line": 65,
         "column": 12
       }
     },
@@ -936,7 +952,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 81,
+        "line": 83,
         "column": 12
       }
     },
@@ -952,7 +968,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 102,
+        "line": 104,
         "column": 12
       }
     },
@@ -968,7 +984,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 123,
+        "line": 125,
         "column": 12
       }
     },
@@ -984,7 +1000,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 12
       }
     },
@@ -1000,7 +1016,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 165,
+        "line": 167,
         "column": 12
       }
     },
@@ -1016,7 +1032,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 187,
+        "line": 189,
         "column": 12
       }
     },
@@ -1032,7 +1048,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 216,
+        "line": 218,
         "column": 12
       }
     },
@@ -1048,7 +1064,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 249,
+        "line": 251,
         "column": 12
       }
     },
@@ -1064,7 +1080,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 295,
+        "line": 300,
         "column": 12
       }
     },
@@ -1080,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 334,
+        "line": 339,
         "column": 12
       }
     },
@@ -1096,7 +1112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 367,
+        "line": 372,
         "column": 12
       }
     },
@@ -1112,7 +1128,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 390,
+        "line": 395,
         "column": 12
       }
     },
@@ -1128,7 +1144,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 413,
+        "line": 418,
         "column": 12
       }
     },
@@ -1144,7 +1160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 433,
+        "line": 438,
         "column": 12
       }
     },
@@ -1160,7 +1176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 461,
+        "line": 466,
         "column": 12
       }
     },
@@ -1176,7 +1192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 479,
+        "line": 484,
         "column": 12
       }
     },
@@ -1192,7 +1208,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 508,
+        "line": 513,
         "column": 12
       }
     },
@@ -1208,7 +1224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 530,
+        "line": 535,
         "column": 12
       }
     },
@@ -1224,7 +1240,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 546,
+        "line": 551,
         "column": 12
       }
     },
@@ -1240,7 +1256,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 576,
+        "line": 581,
         "column": 12
       }
     },
@@ -1256,7 +1272,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 596,
+        "line": 601,
         "column": 12
       }
     },
@@ -1272,7 +1288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 612,
+        "line": 617,
         "column": 12
       }
     },
@@ -1288,7 +1304,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 629,
+        "line": 634,
         "column": 12
       }
     },
@@ -1304,7 +1320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 697,
+        "line": 702,
         "column": 12
       }
     },
@@ -1320,7 +1336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 762,
+        "line": 767,
         "column": 12
       }
     },
@@ -1336,7 +1352,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 856,
+        "line": 861,
         "column": 12
       }
     },
@@ -1352,7 +1368,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 83,
+        "line": 86,
         "column": 12
       }
     },
@@ -1368,7 +1384,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 126,
+        "line": 129,
         "column": 12
       }
     },
@@ -1384,7 +1400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 165,
+        "line": 168,
         "column": 12
       }
     },
@@ -1400,7 +1416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 204,
+        "line": 207,
         "column": 12
       }
     },
@@ -1416,7 +1432,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 243,
+        "line": 246,
         "column": 12
       }
     },
@@ -1432,7 +1448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 282,
+        "line": 285,
         "column": 12
       }
     },
@@ -1448,7 +1464,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 321,
+        "line": 324,
         "column": 12
       }
     },
@@ -1464,7 +1480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 367,
+        "line": 370,
         "column": 12
       }
     },
@@ -1480,7 +1496,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 439,
+        "line": 442,
         "column": 12
       }
     },
@@ -1496,7 +1512,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 505,
+        "line": 508,
         "column": 12
       }
     },
@@ -1512,7 +1528,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 571,
+        "line": 574,
         "column": 12
       }
     },
@@ -1528,7 +1544,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 613,
+        "line": 616,
         "column": 12
       }
     },
@@ -1544,7 +1560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 645,
+        "line": 648,
         "column": 12
       }
     }
