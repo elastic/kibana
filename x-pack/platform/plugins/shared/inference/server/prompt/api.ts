@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type { PromptOptions, PromptAPI } from '@kbn/inference-common';
-import { getConnectorProvider, getConnectorFamily, getConnectorModel } from '@kbn/inference-common';
-import { type ChatCompleteApiWithCallback } from '../chat_complete/callback_api';
+import {
+  createInferenceRequestError,
+  isConnectorApiCall,
+  isInferenceIdApiCall,
+  type PromptOptions,
+  type PromptAPI,
+} from '@kbn/inference-common';
+import type { ChatCompleteApiWithCallbackCallback, ChatCompleteApiWithCallback } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 
 export function createPromptApi(opts: { callbackApi: ChatCompleteApiWithCallback }): PromptAPI;
 export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiWithCallback }) {
   return (options: PromptOptions) => {
     const {
-      connectorId,
       stream,
       abortSignal,
       prompt,
@@ -24,44 +28,42 @@ export function createPromptApi({ callbackApi }: { callbackApi: ChatCompleteApiW
       maxRetries,
       ...rest
     } = options;
-    return callbackApi(
-      {
-        connectorId,
-        stream,
-        abortSignal,
-        maxRetries,
-        retryConfiguration,
-      },
-      (executor) => {
-        const connector = executor.getConnector();
-        const family = getConnectorFamily(connector);
-        const provider = getConnectorProvider(connector);
-        const id = getConnectorModel(connector);
 
-        const { match, options: nextOptions } = promptToMessageOptions(prompt, input, {
-          family,
-          provider,
-          id,
-        });
+    const initBase = { stream, abortSignal, retryConfiguration, maxRetries };
 
-        const template =
-          'mustache' in match.template ? match.template.mustache.template : undefined;
+    const callback: ChatCompleteApiWithCallbackCallback = ({ model }) => {
+      const { match, options: nextOptions } = promptToMessageOptions(prompt, input, model ?? {});
 
-        return {
-          ...rest,
-          ...nextOptions,
-          messages: nextOptions.messages.concat(prevMessages ?? []),
-          metadata: {
-            ...rest.metadata,
-            attributes: {
-              ...rest.metadata?.attributes,
-              'gen_ai.prompt.id': prompt.name,
-              'gen_ai.prompt.template.template': template,
-              'gen_ai.prompt.template.variables': JSON.stringify(input),
-            },
+      const template =
+        'mustache' in match.template ? match.template.mustache.template : undefined;
+
+      return {
+        ...rest,
+        ...nextOptions,
+        messages: nextOptions.messages.concat(prevMessages ?? []),
+        metadata: {
+          ...rest.metadata,
+          attributes: {
+            ...rest.metadata?.attributes,
+            'gen_ai.prompt.id': prompt.name,
+            'gen_ai.prompt.template.template': template,
+            'gen_ai.prompt.template.variables': JSON.stringify(input),
           },
-        };
-      }
+        },
+      };
+    };
+
+    if (isConnectorApiCall(options)) {
+      return callbackApi({ ...initBase, connectorId: options.connectorId }, callback);
+    }
+
+    if (isInferenceIdApiCall(options)) {
+      return callbackApi({ ...initBase, inferenceId: options.inferenceId }, callback);
+    }
+
+    throw createInferenceRequestError(
+      'Either connectorId or inferenceId must be provided',
+      400
     );
   };
 }

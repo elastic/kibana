@@ -11,6 +11,12 @@ export {
   type InferenceInvokeResult,
   type InferenceExecutor,
 } from './inference_executor';
+export {
+  createInferenceEndpointExecutor,
+  type InferenceEndpointExecutor,
+  type InferenceEndpointInvokeOptions,
+} from './inference_endpoint_executor';
+export { resolveInferenceEndpoint, type InferenceEndpointMeta } from './resolve_inference_endpoint';
 export { chunksIntoMessage } from './chunks_into_message';
 export { streamToResponse } from './stream_to_response';
 export { handleCancellation } from './handle_cancellation';

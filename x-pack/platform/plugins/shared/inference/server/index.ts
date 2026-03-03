@@ -21,6 +21,7 @@ import type {
 import { InferencePlugin } from './plugin';
 
 export type { InferenceServerSetup, InferenceServerStart };
+export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 export {
   naturalLanguageToEsql,

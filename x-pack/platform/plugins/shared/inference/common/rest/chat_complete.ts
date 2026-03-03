@@ -6,11 +6,12 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import type {
-  ChatCompleteAPI,
-  ChatCompleteCompositeResponse,
-  ChatCompleteOptions,
-  ChatCompleteResponse,
+import {
+  isConnectorApiCall,
+  type ChatCompleteAPI,
+  type ChatCompleteCompositeResponse,
+  type ChatCompleteOptions,
+  type ChatCompleteResponse,
 } from '@kbn/inference-common';
 import { defer, from, lastValueFrom } from 'rxjs';
 import type { ChatCompleteRequestBody } from '../http_apis';
@@ -31,24 +32,25 @@ export function createChatCompleteRestApi({
   fetch: HttpHandler;
   signal?: AbortSignal;
 }): ChatCompleteAPI;
+
 export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCompleteOptions) {
-  return ({
-    connectorId,
-    messages,
-    system,
-    toolChoice,
-    tools,
-    temperature,
-    modelName,
-    functionCalling,
-    stream,
-    abortSignal,
-    maxRetries,
-    metadata,
-    retryConfiguration,
-  }: ChatCompleteOptions): ChatCompleteCompositeResponse => {
-    const body: ChatCompleteRequestBody = {
-      connectorId,
+  return (options: ChatCompleteOptions): ChatCompleteCompositeResponse => {
+    const {
+      messages,
+      system,
+      toolChoice,
+      tools,
+      temperature,
+      modelName,
+      functionCalling,
+      stream,
+      abortSignal,
+      maxRetries,
+      metadata,
+      retryConfiguration,
+    } = options;
+
+    const commonBody = {
       system,
       messages,
       toolChoice,
@@ -60,6 +62,10 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       maxRetries,
       metadata,
     };
+
+    const body: ChatCompleteRequestBody = isConnectorApiCall(options)
+      ? { ...commonBody, connectorId: options.connectorId }
+      : { ...commonBody, inferenceId: options.inferenceId };
 
     function retry<T>() {
       return retryWithExponentialBackoff<T>({

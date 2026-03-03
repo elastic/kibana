@@ -7,7 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
+import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -15,6 +15,8 @@ import {
   getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
   MessageRole,
+  isInferenceIdApiCall,
+  isConnectorApiCall,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
@@ -22,10 +24,12 @@ import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { getInferenceAdapter } from './adapters';
-import type { InferenceExecutor } from './utils';
+import { inferenceEndpointAdapter } from './adapters/inference_endpoint';
 import {
   chunksIntoMessage,
   getInferenceExecutor,
+  createInferenceEndpointExecutor,
+  resolveInferenceEndpoint,
   handleCancellation,
   handleLifecycleCallbacks,
   streamToResponse,
@@ -52,7 +56,6 @@ interface CreateChatCompleteApiOptions {
 }
 
 type CreateChatCompleteApiOptionsKey =
-  | 'connectorId'
   | 'abortSignal'
   | 'stream'
   | 'retryConfiguration'
@@ -61,11 +64,15 @@ type CreateChatCompleteApiOptionsKey =
 type ChatCompleteApiWithCallbackInitOptions = Pick<
   ChatCompleteOptions,
   CreateChatCompleteApiOptionsKey
->;
+> & ({ connectorId: string } | { inferenceId: string });
+
+export interface ChatCompleteCallbackContext {
+  model?: Partial<Model>;
+}
 
 export type ChatCompleteApiWithCallbackCallback = (
-  connector: InferenceExecutor
-) => Omit<ChatCompleteOptions, CreateChatCompleteApiOptionsKey>;
+  context: ChatCompleteCallbackContext
+) => Omit<ChatCompleteOptions, CreateChatCompleteApiOptionsKey | 'connectorId' | 'inferenceId'>;
 
 export type ChatCompleteApiWithCallback = (
   options: ChatCompleteApiWithCallbackInitOptions,
@@ -89,139 +96,56 @@ export function createChatCompleteCallbackApi({
 }: CreateChatCompleteApiOptions) {
   return (
     {
-      connectorId,
       abortSignal,
       stream,
       maxRetries = 3,
       retryConfiguration = {},
+      ...params
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
-    const inference$ = defer(() =>
-      forkJoin({
-        executor: from(getInferenceExecutor({ connectorId, request, actions })),
-        anonymizationRules: from(anonymizationRulesPromise),
-      })
-    )
-      .pipe(
-        switchMap(({ executor, anonymizationRules }) => {
-          const {
-            system,
-            messages: givenMessages,
-            functionCalling,
-            metadata,
-            modelName,
-            temperature,
-            toolChoice,
-            tools,
-            timeout,
-          } = callback(executor);
+    const inference$ = defer(() => {
+      if (isInferenceIdApiCall(params)) {
+        return createInferenceEndpointPipeline({
+          inferenceId: params.inferenceId,
+          esClient,
+          logger,
+          anonymizationRulesPromise,
+          regexWorker,
+          callback,
+          abortSignal,
+          stream,
+        });
+      }
 
-          const messages = givenMessages.map((message) => {
-            // remove empty toolCalls array, spec doesn't like it
-            if (
-              message.role === MessageRole.Assistant &&
-              message.toolCalls !== undefined &&
-              message.toolCalls.length === 0
-            ) {
-              return omit(message, 'toolCalls');
-            }
-            return message;
-          });
+      if (!isConnectorApiCall(params)) {
+        return throwError(() =>
+          createInferenceRequestError('Either connectorId or inferenceId must be provided', 400)
+        );
+      }
 
-          return from(
-            prepareAnonymization({
-              namespace,
-              logger,
-              anonymizationRules,
-              regexWorker,
-              esClient,
-              replacementsEsClient: anonymization?.replacements?.esClient,
-              replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
-              usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
-              requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
-              saltPromise: anonymization?.saltPromise,
-              resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
-              metadata,
-              system,
-              messages,
-            })
-          ).pipe(
-            switchMap(
-              ({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
-                const connector = executor.getConnector();
-                const connectorType = connector.type;
-                const inferenceAdapter = getInferenceAdapter(connectorType);
-
-                if (!inferenceAdapter) {
-                  return throwError(() =>
-                    createInferenceRequestError(
-                      `Adapter for type ${connectorType} not implemented`,
-                      400
-                    )
-                  );
-                }
-                const systemWithAnonymizationInstructions = preparedAnonymization.system
-                  ? addAnonymizationInstruction(
-                      preparedAnonymization.system,
-                      anonymizationRules,
-                      effectivePolicy
-                    )
-                  : system;
-
-                return withChatCompleteSpan(
-                  {
-                    system: systemWithAnonymizationInstructions,
-                    messages: preparedAnonymization.messages,
-                    tools,
-                    toolChoice,
-                    model: {
-                      id: modelName ?? getConnectorDefaultModel(connector),
-                      family: getConnectorFamily(connector),
-                      provider: getConnectorProvider(connector),
-                    },
-                    ...metadata?.attributes,
-                  },
-                  () => {
-                    return inferenceAdapter
-                      .chatComplete({
-                        system: systemWithAnonymizationInstructions,
-                        executor,
-                        messages: preparedAnonymization.messages,
-                        toolChoice,
-                        tools,
-                        temperature,
-                        logger,
-                        functionCalling,
-                        modelName,
-                        abortSignal,
-                        metadata,
-                        timeout,
-                        stream,
-                      })
-                      .pipe(
-                        chunksIntoMessage({
-                          toolOptions: { toolChoice, tools },
-                          logger,
-                        })
-                      );
-                  }
-                ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
-              }
-            )
-          );
-        })
-      )
-      .pipe(
-        retryWithExponentialBackoff({
-          maxRetry: maxRetries,
-          backoffMultiplier: retryConfiguration.backoffMultiplier,
-          initialDelay: retryConfiguration.initialDelay,
-          errorFilter: getRetryFilter(retryConfiguration.retryOn),
-        }),
-        callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
-        abortSignal ? handleCancellation(abortSignal) : identity
-      );
+      return createConnectorPipeline({
+        connectorId: params.connectorId,
+        request,
+        actions,
+        esClient,
+        logger,
+        anonymizationRulesPromise,
+        regexWorker,
+        callback,
+        abortSignal,
+        stream,
+      });
+    }).pipe(
+      retryWithExponentialBackoff({
+        maxRetry: maxRetries,
+        backoffMultiplier: retryConfiguration.backoffMultiplier,
+        initialDelay: retryConfiguration.initialDelay,
+        errorFilter: getRetryFilter(retryConfiguration.retryOn),
+      }),
+      callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
+      abortSignal ? handleCancellation(abortSignal) : identity
+    );
 
     if (stream) {
       return inference$.pipe(share());
@@ -229,4 +153,215 @@ export function createChatCompleteCallbackApi({
       return streamToResponse(inference$);
     }
   };
+}
+
+function createConnectorPipeline({
+  connectorId,
+  request,
+  actions,
+  esClient,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  callback,
+  abortSignal,
+  stream,
+}: {
+  connectorId: string;
+  request: KibanaRequest;
+  actions: ActionsPluginStart;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  callback: ChatCompleteApiWithCallbackCallback;
+  abortSignal?: AbortSignal;
+  stream?: boolean;
+}) {
+  return forkJoin({
+    executor: from(getInferenceExecutor({ connectorId, request, actions })),
+    anonymizationRules: from(anonymizationRulesPromise),
+  }).pipe(
+    switchMap(({ executor, anonymizationRules }) => {
+      const connector = executor.getConnector();
+      const connectorType = connector.type;
+
+      const {
+        system,
+        messages: givenMessages,
+        functionCalling,
+        metadata,
+        modelName,
+        temperature,
+        toolChoice,
+        tools,
+        timeout,
+      } = callback({
+        model: {
+          family: getConnectorFamily(connector),
+          provider: getConnectorProvider(connector),
+          id: getConnectorDefaultModel(connector),
+        },
+      });
+
+      const messages = sanitizeMessages(givenMessages);
+
+      return from(
+        anonymizeMessages({ system, messages, anonymizationRules, regexWorker, esClient })
+      ).pipe(
+        switchMap((anonymization) => {
+          const inferenceAdapter = getInferenceAdapter(connectorType);
+
+          if (!inferenceAdapter) {
+            return throwError(() =>
+              createInferenceRequestError(`Adapter for type ${connectorType} not implemented`, 400)
+            );
+          }
+
+          const systemWithAnonymizationInstructions = anonymization.system
+            ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
+            : system;
+
+          return withChatCompleteSpan(
+            {
+              system: systemWithAnonymizationInstructions,
+              messages: anonymization.messages,
+              tools,
+              toolChoice,
+              model: {
+                id: modelName ?? getConnectorDefaultModel(connector),
+                family: getConnectorFamily(connector),
+                provider: getConnectorProvider(connector),
+              },
+              ...metadata?.attributes,
+            },
+            () => {
+              return inferenceAdapter
+                .chatComplete({
+                  system: systemWithAnonymizationInstructions,
+                  executor,
+                  messages: anonymization.messages,
+                  toolChoice,
+                  tools,
+                  temperature,
+                  logger,
+                  functionCalling,
+                  modelName,
+                  abortSignal,
+                  metadata,
+                  timeout,
+                  stream,
+                })
+                .pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
+            }
+          ).pipe(deanonymizeMessage(anonymization));
+        })
+      );
+    })
+  );
+}
+
+function createInferenceEndpointPipeline({
+  inferenceId,
+  esClient,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  callback,
+  abortSignal,
+  stream,
+}: {
+  inferenceId: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  callback: ChatCompleteApiWithCallbackCallback;
+  abortSignal?: AbortSignal;
+  stream?: boolean;
+}) {
+  return forkJoin({
+    endpointMeta: from(resolveInferenceEndpoint({ inferenceId, esClient, logger })),
+    anonymizationRules: from(anonymizationRulesPromise),
+  }).pipe(
+    switchMap(({ endpointMeta, anonymizationRules }) => {
+      const {
+        system,
+        messages: givenMessages,
+        functionCalling,
+        metadata,
+        modelName,
+        temperature,
+        toolChoice,
+        tools,
+        timeout,
+      } = callback({
+        model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+      });
+
+      const messages = sanitizeMessages(givenMessages);
+
+      const executor = createInferenceEndpointExecutor({ inferenceId, esClient });
+
+      return from(
+        anonymizeMessages({ system, messages, anonymizationRules, regexWorker, esClient })
+      ).pipe(
+        switchMap((anonymization) => {
+          const systemWithAnonymizationInstructions = anonymization.system
+            ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
+            : system;
+
+          return withChatCompleteSpan(
+            {
+              system: systemWithAnonymizationInstructions,
+              messages: anonymization.messages,
+              tools,
+              toolChoice,
+              ...(endpointMeta.provider
+                ? {
+                    model: {
+                      id: modelName ?? endpointMeta.modelId,
+                      provider: endpointMeta.provider,
+                    } as Parameters<typeof withChatCompleteSpan>[0]['model'],
+                  }
+                : {}),
+              ...metadata?.attributes,
+            },
+            () => {
+              return inferenceEndpointAdapter
+                .chatComplete({
+                  system: systemWithAnonymizationInstructions,
+                  executor,
+                  messages: anonymization.messages,
+                  toolChoice,
+                  tools,
+                  temperature,
+                  logger,
+                  functionCalling,
+                  modelName,
+                  abortSignal,
+                  metadata,
+                  timeout,
+                  stream,
+                })
+                .pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
+            }
+          ).pipe(deanonymizeMessage(anonymization));
+        })
+      );
+    })
+  );
+}
+
+function sanitizeMessages(messages: ChatCompleteOptions['messages']) {
+  return messages.map((message) => {
+    if (
+      message.role === MessageRole.Assistant &&
+      message.toolCalls !== undefined &&
+      message.toolCalls.length === 0
+    ) {
+      return omit(message, 'toolCalls');
+    }
+    return message;
+  });
 }

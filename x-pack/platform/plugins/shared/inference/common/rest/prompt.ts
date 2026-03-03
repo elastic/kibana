@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type {
-  ChatCompleteResponse,
-  ChatCompletionEvent,
-  PromptAPI,
-  PromptOptions,
+import {
+  isConnectorApiCall,
+  type ChatCompleteResponse,
+  type ChatCompletionEvent,
+  type PromptAPI,
+  type PromptOptions,
 } from '@kbn/inference-common';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { defer, from, lastValueFrom, throwError } from 'rxjs';
@@ -38,14 +39,12 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
       temperature,
       prompt: { input: inputSchema, ...prompt },
       input,
-      connectorId,
       functionCalling,
       prevMessages,
       toolChoice,
     } = options;
 
-    const body: PromptRequestBody = {
-      connectorId,
+    const commonBody = {
       functionCalling,
       modelName,
       temperature,
@@ -57,6 +56,10 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
       metadata,
       toolChoice,
     };
+
+    const body: PromptRequestBody = isConnectorApiCall(options)
+      ? { ...commonBody, connectorId: options.connectorId }
+      : { ...commonBody, inferenceId: options.inferenceId };
 
     const validationResult = inputSchema.safeParse(input);
 

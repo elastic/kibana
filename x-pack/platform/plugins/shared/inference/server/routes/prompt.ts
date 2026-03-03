@@ -12,7 +12,13 @@ import type {
   Logger,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { InferenceTaskEventType, isInferenceError } from '@kbn/inference-common';
+import {
+  createInferenceRequestError,
+  InferenceTaskEventType,
+  isConnectorApiCall,
+  isInferenceError,
+  isInferenceIdApiCall,
+} from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { z } from '@kbn/zod/v4';
 import type { PromptRequestBody } from '../../common/http_apis';
@@ -44,7 +50,6 @@ export function registerPromptRoute({
     const client = inferenceStart.getClient({ request, actions, logger });
 
     const {
-      connectorId,
       prompt,
       input,
       functionCalling,
@@ -57,8 +62,25 @@ export function registerPromptRoute({
       toolChoice,
     } = request.body;
 
+    const params = isConnectorApiCall(request.body)
+      ? {
+          connectorId: request.body.connectorId,
+        }
+      : isInferenceIdApiCall(request.body)
+      ? {
+          inferenceId: request.body.inferenceId,
+        }
+      : undefined;
+
+    if (!params) {
+      throw createInferenceRequestError(
+        'Either connectorId or inferenceId must be provided',
+        400
+      );
+    }
+
     return client.prompt({
-      connectorId,
+      ...params,
       prompt: {
         ...prompt,
         // validation should have happened on the client

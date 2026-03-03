@@ -8,7 +8,8 @@ import type { FunctionCallingMode } from '../chat_complete';
 
 export interface BoundOptions {
   functionCalling?: FunctionCallingMode;
-  connectorId: string;
+  connectorId?: string;
+  inferenceId?: string;
 }
 
 type BoundOptionKey = keyof BoundOptions;
@@ -34,12 +35,13 @@ export function bindApi<T extends BindableAPI, U extends BoundOptions>(
 ): BoundAPI<T>;
 
 export function bindApi(api: BindableAPI, boundParams: BoundOptions) {
-  const { functionCalling, connectorId } = boundParams;
+  const { functionCalling, connectorId, inferenceId } = boundParams;
   return (params: UnboundOptions<BoundOptions>) => {
     return api({
       ...params,
       functionCalling,
       connectorId,
+      inferenceId,
     });
   };
 }

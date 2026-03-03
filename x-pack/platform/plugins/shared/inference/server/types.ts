@@ -22,6 +22,7 @@ import type {
   AnonymizationPluginStart,
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
+import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -151,6 +152,31 @@ export interface InferenceServerStart {
    * @throws Error if the connector with the specified ID does not exist
    */
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Lists available Elasticsearch inference endpoints, optionally filtered by task type.
+   *
+   * @param request - The Kibana request to scope the operation to
+   * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
+   * @returns A promise that resolves to an array of inference endpoints
+   */
+  getInferenceEndpoints: (
+    request: KibanaRequest,
+    taskType?: string
+  ) => Promise<InferenceEndpoint[]>;
+
+  /**
+   * Retrieves a specific Elasticsearch inference endpoint by its ID.
+   *
+   * @param inferenceId - The unique identifier of the inference endpoint
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the inference endpoint metadata
+   * @throws Error if the endpoint does not exist
+   */
+  getInferenceEndpointById: (
+    inferenceId: string,
+    request: KibanaRequest
+  ) => Promise<InferenceEndpoint>;
 }
 
 /**

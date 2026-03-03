@@ -59,6 +59,14 @@ import type { AnonymizationResponseMetadata } from './anonymization';
  * ```
  */
 
+export function isConnectorApiCall<T>(params: T): params is T & { connectorId: string; inferenceId?: never } {
+  return typeof params === 'object' && params !== null && 'connectorId' in params;
+}
+
+export function isInferenceIdApiCall<T>(params: T): params is T & { inferenceId: string; connectorId?: never } {
+  return typeof params === 'object' && params !== null && 'inferenceId' in params;
+}
+
 export interface DefaultChatCompleteOptions {
   stream: false;
   tools: {};
@@ -80,14 +88,9 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
- * Options used to call the {@link ChatCompleteAPI}
+ * Common options shared by both connector-based and inference-endpoint-based chat completion.
  */
-export type ChatCompleteOptions = {
-  /**
-   * The ID of the connector to use.
-   * Must be an inference connector, or an error will be thrown.
-   */
-  connectorId: string;
+export type ChatCompleteOptionsBase = {
   /**
    * Optional system message for the LLM.
    */
@@ -145,6 +148,30 @@ export type ChatCompleteOptions = {
    */
   timeout?: number;
 } & ToolOptions;
+
+/**
+ * Options used to call the {@link ChatCompleteAPI}.
+ *
+ * Exactly one of `connectorId` or `inferenceId` must be provided.
+ * - `connectorId`: routes through Kibana stack connectors (OpenAI, Bedrock, Gemini, etc.)
+ * - `inferenceId`: routes through the Elasticsearch Inference API directly
+ *
+ * Use {@link isConnectorApiCall} or {@link isInferenceIdApiCall} to narrow.
+ */
+export type ChatCompleteOptions = ChatCompleteOptionsBase & {
+  /**
+   * The ID of the connector to use.
+   * Must be an inference connector, or an error will be thrown.
+   * Mutually exclusive with `inferenceId`.
+   */
+  connectorId?: string;
+  /**
+   * The ID of the Elasticsearch inference endpoint to use.
+   * Must be a `chat_completion` type endpoint.
+   * Mutually exclusive with `connectorId`.
+   */
+  inferenceId?: string;
+};
 
 export interface ChatCompleteRetryConfiguration {
   /**

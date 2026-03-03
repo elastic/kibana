@@ -32,6 +32,8 @@ import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById } from './util/get_connector_by_id';
+import { getInferenceEndpoints } from './util/get_inference_endpoints';
+import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -234,6 +236,15 @@ export class InferencePlugin
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
         return getConnectorById({ connectorId: id, actions: pluginsStart.actions, request });
+      },
+
+      getInferenceEndpoints: async (request: KibanaRequest, taskType?: string) => {
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        return getInferenceEndpoints({ esClient, taskType });
+      },
+      getInferenceEndpointById: async (inferenceId: string, request: KibanaRequest) => {
+        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        return getInferenceEndpointById({ inferenceId, esClient });
       },
     };
   }

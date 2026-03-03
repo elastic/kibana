@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getInferenceExecutorMock, getInferenceAdapterMock } from './api.test.mocks';
+import {
+  getInferenceExecutorMock,
+  getInferenceAdapterMock,
+  resolveInferenceEndpointMock,
+  createInferenceEndpointExecutorMock,
+  inferenceEndpointAdapterMock,
+} from './api.test.mocks';
 
 import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -92,6 +98,9 @@ describe('createChatCompleteApi', () => {
     mockEsClient.get.mockClear();
     mockEsClient.index.mockClear();
     mockEsClient.update.mockClear();
+    resolveInferenceEndpointMock.mockReset();
+    createInferenceEndpointExecutorMock.mockReset();
+    inferenceEndpointAdapterMock.chatComplete.mockReset();
   });
 
   it('calls `getInferenceExecutor` with the right parameters', async () => {
@@ -426,6 +435,124 @@ describe('createChatCompleteApi', () => {
         expect(caughtError).toBeInstanceOf(Error);
         expect(caughtError.message).toContain('Request was aborted');
       });
+    });
+  });
+
+  describe('inference endpoint path (inferenceId)', () => {
+    const mockEndpointExecutor = { invoke: jest.fn() };
+
+    beforeEach(() => {
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue(mockEndpointExecutor);
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+    });
+
+    it('does NOT call actionsClient or getInferenceExecutor when inferenceId is provided', async () => {
+      await chatComplete({
+        inferenceId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+      expect(getInferenceAdapterMock).not.toHaveBeenCalled();
+    });
+
+    it('calls resolveInferenceEndpoint with the correct parameters', async () => {
+      await chatComplete({
+        inferenceId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(resolveInferenceEndpointMock).toHaveBeenCalledWith({
+        inferenceId: 'my-endpoint',
+        esClient: mockEsClient,
+        logger,
+      });
+    });
+
+    it('calls createInferenceEndpointExecutor with the correct parameters', async () => {
+      await chatComplete({
+        inferenceId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+        inferenceId: 'my-endpoint',
+        esClient: mockEsClient,
+      });
+    });
+
+    it('calls the inference endpoint adapter with the correct parameters', async () => {
+      await chatComplete({
+        inferenceId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.5,
+        modelName: 'gpt-4o-mini',
+        maxRetries: 0,
+      });
+
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          executor: mockEndpointExecutor,
+          temperature: 0.5,
+          modelName: 'gpt-4o-mini',
+          logger,
+        })
+      );
+    });
+
+    it('returns a promise with the response in non-stream mode', async () => {
+      const response = await chatComplete({
+        inferenceId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response).toEqual({
+        content: 'endpoint-chunk',
+        toolCalls: [],
+      });
+    });
+
+    it('returns an observable in stream mode', async () => {
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(
+        of(chunkEvent('chunk-1'), chunkEvent('chunk-2'))
+      );
+
+      const events$ = chatComplete({
+        stream: true,
+        inferenceId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(isObservable(events$)).toBe(true);
+
+      const events = await firstValueFrom(
+        events$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+      expect(events).toHaveLength(2);
+      expect(events[0].content).toBe('chunk-1');
+      expect(events[1].content).toBe('chunk-2');
+    });
+
+    it('throws when neither connectorId nor inferenceId is provided', () => {
+      expect(() =>
+        chatComplete({
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        } as any)
+      ).toThrow('Either connectorId or inferenceId must be provided');
     });
   });
 });
