@@ -15,6 +15,7 @@ import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from '.
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
+import { dashboardTitleExists } from './check_duplicate_title';
 
 export async function create(
   requestCtx: RequestHandlerContext,
@@ -32,6 +33,16 @@ export async function create(
   } = transformDashboardIn(restOfData, isDashboardAppRequest);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
+  }
+
+  const title = soAttributes?.title ?? '';
+  if (title.trim() !== '') {
+    const duplicate = await dashboardTitleExists(core.savedObjects.client, title);
+    if (duplicate) {
+      throw Boom.conflict(
+        `A dashboard with the title "${title}" already exists. Use a unique title or update the existing dashboard.`
+      );
+    }
   }
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(

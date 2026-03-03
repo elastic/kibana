@@ -122,6 +122,12 @@ describe('DashboardPlugin', () => {
         references: [],
       };
 
+      mockCoreContext.savedObjects.client.find = jest.fn().mockResolvedValue({
+        saved_objects: [],
+        page: 1,
+        per_page: 20,
+        total: 0,
+      });
       mockCoreContext.savedObjects.client.create = jest.fn().mockResolvedValue(mockSavedObject);
 
       const createBody: DashboardCreateRequestBody = {
@@ -132,6 +138,45 @@ describe('DashboardPlugin', () => {
       await pluginStart.client.create(mockRequestHandlerContext, createBody);
 
       expect(mockCoreContext.savedObjects.client.create).toHaveBeenCalled();
+    });
+
+    test('client.create should throw conflict when dashboard title already exists', async () => {
+      mockCoreContext.savedObjects.client.find = jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-id',
+            type: 'dashboard',
+            attributes: { title: 'Markdown embeddable schema demo' },
+            references: [],
+          },
+        ],
+        page: 1,
+        per_page: 20,
+        total: 1,
+      });
+
+      const createBody: DashboardCreateRequestBody = {
+        title: 'Markdown embeddable schema demo',
+        panels: [
+          {
+            type: 'DASHBOARD_MARKDOWN',
+            grid: { x: 0, y: 0 },
+            config: { content: '### Hello world' },
+          },
+        ],
+      };
+
+      await expect(
+        pluginStart.client.create(mockRequestHandlerContext, createBody)
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 409,
+          payload: expect.objectContaining({
+            message: expect.stringContaining('already exists'),
+          }),
+        },
+      });
+      expect(mockCoreContext.savedObjects.client.create).not.toHaveBeenCalled();
     });
 
     test('client.read should call the read function', async () => {
