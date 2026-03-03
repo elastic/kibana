@@ -64,11 +64,7 @@ export const getTableTabColumns: ColumnsProvider = ({ browserFields, attackId })
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
 
       return (
-        <CellActions
-          field={data.field}
-          value={values}
-          isObjectArray={(data as EventFieldsData).isObjectArray}
-        >
+        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <TableFieldValueCell
             data={data as EventFieldsData}
             attackId={attackId}
