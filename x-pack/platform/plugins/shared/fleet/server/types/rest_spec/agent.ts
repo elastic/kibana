@@ -241,6 +241,7 @@ export const AgentResponseSchema = schema.object({
             error_msg: schema.maybe(schema.string()),
             retry_error_msg: schema.maybe(schema.string()),
             retry_until: schema.maybe(schema.string()),
+            reason: schema.maybe(schema.string()),
           })
         ),
       }),

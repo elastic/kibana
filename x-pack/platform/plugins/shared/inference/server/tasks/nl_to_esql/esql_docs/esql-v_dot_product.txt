@@ -1,0 +1,27 @@
+# V_DOT_PRODUCT
+
+Calculates the dot product between two dense_vectors.
+
+## Syntax
+
+`V_DOT_PRODUCT(left, right)`
+
+### Parameters
+
+#### left
+
+The first dense_vector used to calculate the dot product similarity.
+
+#### right
+
+The second dense_vector used to calculate the dot product similarity.
+
+## Examples
+
+Calculates the dot product similarity between the `rgb_vector` column and the vector `[0, 255, 255]`, then sorts the results by similarity in descending order and color in ascending order.
+
+```esql
+from colors
+| eval similarity = v_dot_product(rgb_vector, [0, 255, 255])
+| sort similarity desc, color asc
+```

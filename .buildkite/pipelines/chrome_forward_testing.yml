@@ -23,7 +23,7 @@ steps:
     id: store_cache
     soft_fail: true
     agents:
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       diskSizeGb: 95
 
   - wait
@@ -70,7 +70,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2-standard-4
@@ -79,7 +79,7 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'
@@ -93,7 +93,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -163,7 +163,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
@@ -182,6 +182,7 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
+
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     label: 'AI Assistant - Security Solution Cypress Tests'
@@ -233,7 +234,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '-1'

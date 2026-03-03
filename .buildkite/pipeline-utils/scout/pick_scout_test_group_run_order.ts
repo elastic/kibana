@@ -35,7 +35,6 @@ if (process.env.SERVERLESS_TESTS_ONLY) {
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
   if (!Fs.existsSync(scoutConfigsPath)) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
@@ -48,6 +47,13 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     // no scout configs found, nothing to need to upload steps
     return;
   }
+
+  const SCOUT_CONFIGS_DEPS =
+    process.env.SCOUT_CONFIGS_DEPS !== undefined
+      ? process.env.SCOUT_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build_scout_tests'];
 
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
@@ -67,7 +73,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       {
         group: 'Scout Configs',
         key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
+        depends_on: SCOUT_CONFIGS_DEPS,
         steps: scoutCiRunGroups.map(
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,

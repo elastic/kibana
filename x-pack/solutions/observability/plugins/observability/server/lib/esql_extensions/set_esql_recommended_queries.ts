@@ -108,14 +108,33 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
+const SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY = {
+  name: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.name', {
+    defaultMessage: 'Search all metrics',
+  }),
+  query: `TS ${METRICS_INDEX_PATTERN}`,
+  description: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.description', {
+    defaultMessage: 'Searches all available metrics',
+  }),
+};
+
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
+  const observabilityRecommendedQueries = [
+    ...TRACES_ESQL_RECOMMENDED_QUERIES,
+    ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
+    SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY,
+  ];
 
-  // Register recommended queries
+  // Register full observability-specific recommendations for observability solution view.
+  esqlExtensionsRegistry.setRecommendedQueries(observabilityRecommendedQueries, 'oblt');
+
+  // Register only the "Search all metrics" recommendation for security and search solution views.
   esqlExtensionsRegistry.setRecommendedQueries(
-    [...TRACES_ESQL_RECOMMENDED_QUERIES, ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES],
-    'oblt'
+    [SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY],
+    'security'
   );
+  esqlExtensionsRegistry.setRecommendedQueries([SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY], 'es');
 
   // Register recommended fields
   esqlExtensionsRegistry.setRecommendedFields(ALL_RECOMMENDED_FIELDS_FOR_ESQL, 'oblt');
