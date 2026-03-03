@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 
-type AiopsEmbeddableType = 'aiopsLogRateAnalysisEmbeddable' | 'aiopsChangePointChart';
+type AiopsEmbeddableType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE | typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
 export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');
@@ -99,8 +101,8 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
 
     async openEmbeddableInitializer(mlEmbeddableType: AiopsEmbeddableType) {
       const name = {
-        aiopsLogRateAnalysisEmbeddable: 'Log rate analysis',
-        aiopsChangePointChart: 'Change point detection',
+        [EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE]: 'Log rate analysis',
+        [EMBEDDABLE_CHANGE_POINT_CHART_TYPE]: 'Change point detection',
       };
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.openAddPanelFlyout();
@@ -115,8 +117,8 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
 
     async assertEmbeddableControlsExist(mlEmbeddableType: AiopsEmbeddableType) {
       const controlSelectors = {
-        aiopsLogRateAnalysisEmbeddable: 'aiopsLogRateAnalysisControls',
-        aiopsChangePointChart: 'aiopsChangePointDetectionControls',
+        [EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE]: 'aiopsLogRateAnalysisControls',
+        [EMBEDDABLE_CHANGE_POINT_CHART_TYPE]: 'aiopsChangePointDetectionControls',
       };
       await testSubjects.existOrFail(controlSelectors[mlEmbeddableType], { timeout: 2000 });
     },
