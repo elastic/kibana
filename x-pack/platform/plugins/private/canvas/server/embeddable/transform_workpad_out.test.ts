@@ -93,7 +93,7 @@ describe('transformWorkpadOut', () => {
       );
 
       const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'savedObjectRef', type: 'visualization' },
+        { id: 'lens-id', name: 'element-id:savedObjectRef', type: 'lens' },
       ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
@@ -106,7 +106,7 @@ describe('transformWorkpadOut', () => {
       const workpad = makeWorkpad('savedVisualization id="vis-id" title="My Viz"');
 
       const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'savedObjectRef', type: 'visualization' },
+        { id: 'vis-id', name: 'element-id:savedObjectRef', type: 'visualization' },
       ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
@@ -122,7 +122,7 @@ describe('transformWorkpadOut', () => {
       const workpad = makeWorkpad('savedMap id="map-id" title="My Map"');
 
       const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'map-id', name: 'savedObjectRef', type: 'map' },
+        { id: 'map-id', name: 'element-id:savedObjectRef', type: 'map' },
       ]);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
