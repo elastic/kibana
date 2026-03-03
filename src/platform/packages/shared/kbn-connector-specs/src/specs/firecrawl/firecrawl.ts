@@ -13,6 +13,63 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
+/** Max characters of markdown to include per page in crawlAndWait output. */
+const MARKDOWN_SNIPPET_LENGTH = 500;
+/** Max number of page entries to return in crawlAndWait output (keeps payload agent-safe). */
+const MAX_PAGES_IN_OUTPUT = 30;
+
+interface CrawlPageRaw {
+  metadata?: {
+    sourceURL?: string;
+    url?: string;
+    canonical?: string;
+    title?: string;
+    ogTitle?: string;
+  };
+  markdown?: string;
+}
+
+interface CrawlPageSlim {
+  url: string;
+  title: string;
+  markdownSnippet: string;
+}
+
+/**
+ * Slims raw Firecrawl crawl status response for agent use: url, title, markdownSnippet per page;
+ * caps number of pages and snippet length to avoid oversized responses.
+ */
+function slimCrawlResult(raw: {
+  status?: string;
+  total?: number;
+  data?: CrawlPageRaw[] | null;
+  error?: string;
+}): { status: string; total: number; data: CrawlPageSlim[]; error?: string } {
+  const status = raw.status ?? 'unknown';
+  const total = typeof raw.total === 'number' ? raw.total : 0;
+  const items = Array.isArray(raw.data) ? raw.data : [];
+  const slim: CrawlPageSlim[] = items.slice(0, MAX_PAGES_IN_OUTPUT).map((page) => {
+    const meta = page.metadata ?? {};
+    const url = meta.sourceURL ?? meta.url ?? meta.canonical ?? '';
+    const title = meta.title ?? meta.ogTitle ?? '';
+    const fullMarkdown = typeof page.markdown === 'string' ? page.markdown : '';
+    const markdownSnippet =
+      fullMarkdown.length <= MARKDOWN_SNIPPET_LENGTH
+        ? fullMarkdown
+        : fullMarkdown.slice(0, MARKDOWN_SNIPPET_LENGTH) + '...';
+    return { url, title, markdownSnippet };
+  });
+  const result: { status: string; total: number; data: CrawlPageSlim[]; error?: string } = {
+    status,
+    total,
+    data: slim,
+  };
+  if (raw.error !== undefined) {
+    result.error = raw.error;
+  }
+  return result;
+}
+
 export const FirecrawlConnector: ConnectorSpec = {
   metadata: {
     id: '.firecrawl',
@@ -104,7 +161,7 @@ export const FirecrawlConnector: ConnectorSpec = {
       }),
       input: z.object({
         url: z.string().url().describe('Base URL to start crawling from'),
-        limit: z.number().int().min(1).optional().default(100),
+        limit: z.number().int().min(1).max(100).optional().default(20),
         maxDiscoveryDepth: z.number().int().min(0).optional(),
         allowExternalLinks: z.boolean().optional().default(false),
       }),
@@ -116,6 +173,58 @@ export const FirecrawlConnector: ConnectorSpec = {
           allowExternalLinks: input.allowExternalLinks,
         });
         return response.data;
+      },
+    },
+
+    crawlAndWait: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.firecrawl.actions.crawlAndWait.description',
+        {
+          defaultMessage:
+            'Start a crawl of a website and poll until complete or failed; returns final status and results',
+        }
+      ),
+      input: z.object({
+        url: z.string().url().describe('Base URL to start crawling from'),
+        limit: z.number().int().min(1).max(100).optional().default(20),
+        maxDiscoveryDepth: z.number().int().min(0).optional(),
+        allowExternalLinks: z.boolean().optional().default(false),
+        pollIntervalMs: z.number().int().min(1000).max(60_000).optional().default(3000),
+        maxWaitMs: z.number().int().min(5000).max(3_600_000).optional().default(1_800_000),
+      }),
+      handler: async (ctx, input) => {
+        const startResponse = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, {
+          url: input.url,
+          limit: input.limit,
+          maxDiscoveryDepth: input.maxDiscoveryDepth,
+          allowExternalLinks: input.allowExternalLinks,
+        });
+        const startData = startResponse.data as { id?: string; data?: { id?: string } };
+        const jobId = startData?.id ?? startData?.data?.id;
+        if (!jobId || typeof jobId !== 'string') {
+          throw new Error('Crawl start response did not contain a job ID');
+        }
+
+        const deadline = Date.now() + input.maxWaitMs;
+
+        const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        while (Date.now() < deadline) {
+          const statusResponse = await ctx.client.get(`${FIRECRAWL_API_BASE}/v2/crawl/${jobId}`);
+          const statusData = statusResponse.data as { status?: string };
+          const status = statusData?.status?.toLowerCase();
+
+          if (status === 'completed' || status === 'failed') {
+            return slimCrawlResult(statusResponse.data as Parameters<typeof slimCrawlResult>[0]);
+          }
+
+          await sleep(input.pollIntervalMs);
+        }
+
+        throw new Error(
+          `Crawl did not complete within ${input.maxWaitMs / 1000}s; last job ID: ${jobId}`
+        );
       },
     },
 

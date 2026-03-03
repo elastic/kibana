@@ -135,6 +135,163 @@ describe('FirecrawlConnector', () => {
     });
   });
 
+  describe('crawlAndWait action', () => {
+    it('should start crawl, poll until completed, and return slimmed result', async () => {
+      const jobId = '550e8400-e29b-41d4-a716-446655440000';
+      mockClient.post.mockResolvedValue({
+        data: { success: true, id: jobId },
+      });
+      mockClient.get
+        .mockResolvedValueOnce({
+          data: { status: 'active', current: 2, total: 10 },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            status: 'completed',
+            total: 10,
+            data: [
+              {
+                metadata: { url: 'https://example.com', title: 'Example' },
+                markdown: '# Hello',
+              },
+            ],
+          },
+        });
+
+      const result = await FirecrawlConnector.actions.crawlAndWait.handler(mockContext, {
+        url: 'https://example.com',
+        limit: 100,
+        pollIntervalMs: 10,
+        maxWaitMs: 5000,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.firecrawl.dev/v2/crawl',
+        expect.objectContaining({ url: 'https://example.com', limit: 100 })
+      );
+      expect(mockClient.get).toHaveBeenCalledTimes(2);
+      expect(mockClient.get).toHaveBeenCalledWith(`https://api.firecrawl.dev/v2/crawl/${jobId}`);
+      expect(result).toEqual({
+        status: 'completed',
+        total: 10,
+        data: [
+          {
+            url: 'https://example.com',
+            title: 'Example',
+            markdownSnippet: '# Hello',
+          },
+        ],
+      });
+    });
+
+    it('should return immediately when first status is completed', async () => {
+      const jobId = '660e8400-e29b-41d4-a716-446655440001';
+      mockClient.post.mockResolvedValue({ data: { id: jobId } });
+      mockClient.get.mockResolvedValue({
+        data: { status: 'completed', total: 1, data: [] },
+      });
+
+      const result = await FirecrawlConnector.actions.crawlAndWait.handler(mockContext, {
+        url: 'https://example.org',
+        pollIntervalMs: 1000,
+        maxWaitMs: 10_000,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ status: 'completed', total: 1, data: [] });
+    });
+
+    it('should return when status is failed and preserve error', async () => {
+      const jobId = '770e8400-e29b-41d4-a716-446655440002';
+      mockClient.post.mockResolvedValue({ data: { id: jobId } });
+      mockClient.get.mockResolvedValue({
+        data: { status: 'failed', error: 'Crawl failed' },
+      });
+
+      const result = await FirecrawlConnector.actions.crawlAndWait.handler(mockContext, {
+        url: 'https://example.net',
+        pollIntervalMs: 10,
+        maxWaitMs: 5000,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        status: 'failed',
+        total: 0,
+        data: [],
+        error: 'Crawl failed',
+      });
+    });
+
+    it('should throw when start response has no job ID', async () => {
+      mockClient.post.mockResolvedValue({ data: { success: false } });
+
+      await expect(
+        FirecrawlConnector.actions.crawlAndWait.handler(mockContext, {
+          url: 'https://example.com',
+          pollIntervalMs: 10,
+          maxWaitMs: 1000,
+        })
+      ).rejects.toThrow('did not contain a job ID');
+    });
+
+    it('should throw when maxWaitMs exceeded', async () => {
+      const jobId = '880e8400-e29b-41d4-a716-446655440003';
+      mockClient.post.mockResolvedValue({ data: { id: jobId } });
+      mockClient.get.mockResolvedValue({ data: { status: 'active', current: 1, total: 100 } });
+
+      await expect(
+        FirecrawlConnector.actions.crawlAndWait.handler(mockContext, {
+          url: 'https://example.com',
+          pollIntervalMs: 50,
+          maxWaitMs: 100,
+        })
+      ).rejects.toThrow('did not complete within');
+    });
+
+    it('should slim output: truncate markdown snippet and cap page count', async () => {
+      const jobId = '990e8400-e29b-41d4-a716-446655440004';
+      const longMarkdown = 'x'.repeat(1000);
+      mockClient.post.mockResolvedValue({ data: { id: jobId } });
+      mockClient.get.mockResolvedValue({
+        data: {
+          status: 'completed',
+          total: 2,
+          data: [
+            {
+              metadata: { sourceURL: 'https://a.example.com', title: 'Page A' },
+              markdown: longMarkdown,
+            },
+            {
+              metadata: { canonical: 'https://b.example.com', ogTitle: 'Page B' },
+              markdown: 'short',
+            },
+          ],
+        },
+      });
+
+      const result = await FirecrawlConnector.actions.crawlAndWait.handler(mockContext, {
+        url: 'https://example.com',
+        pollIntervalMs: 10,
+        maxWaitMs: 5000,
+      });
+
+      expect(result.status).toBe('completed');
+      expect(result.total).toBe(2);
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).toEqual({
+        url: 'https://a.example.com',
+        title: 'Page A',
+        markdownSnippet: 'x'.repeat(500) + '...',
+      });
+      expect(result.data[1]).toEqual({
+        url: 'https://b.example.com',
+        title: 'Page B',
+        markdownSnippet: 'short',
+      });
+    });
+  });
+
   describe('getCrawlStatus action', () => {
     it('should get crawl status by id and return response data', async () => {
       const crawlId = '550e8400-e29b-41d4-a716-446655440000';

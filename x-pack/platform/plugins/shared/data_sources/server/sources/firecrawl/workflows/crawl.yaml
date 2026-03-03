@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.firecrawl.crawl'
-description: 'Start a crawl of a website. Returns a job ID; use get_crawl_status to check progress and get results. Inputs: url (string), limit (number, optional), maxDiscoveryDepth (number, optional), allowExternalLinks (boolean, optional).'
+description: 'Crawl a website and wait until complete; returns url, title, and a short markdown snippet per page (up to 30 pages). For full content of one page use the scrape tool. Inputs: url (string), limit (number, optional, default 20, max 100), maxDiscoveryDepth (number, optional), allowExternalLinks (boolean, optional).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,23 +8,27 @@ triggers:
 inputs:
   - name: url
     type: string
+    description: 'Starting URL to crawl (e.g. https://example.com or https://docs.example.com).'
   - name: limit
     type: number
     required: false
-    default: 100
+    default: 20
+    description: 'Maximum number of pages to crawl (1–100). Default 20. Lower values are faster and use fewer credits.'
   - name: maxDiscoveryDepth
     type: number
     required: false
+    description: 'Maximum depth to follow links from the start URL. Omit for default behavior.'
   - name: allowExternalLinks
     type: boolean
     required: false
     default: false
+    description: 'If true, follow links to other domains; if false, stay on the same domain.'
 steps:
-  - name: start-crawl
-    type: firecrawl.crawl
+  - name: crawl-and-wait
+    type: firecrawl.crawlAndWait
     connector-id: <%= firecrawl-stack-connector-id %>
     with:
-      url: "${{inputs.url}}"
-      limit: ${{inputs.limit}}
-      maxDiscoveryDepth: ${{inputs.maxDiscoveryDepth}}
-      allowExternalLinks: ${{inputs.allowExternalLinks}}
+      url: "${{ inputs.url }}"
+      limit: ${{ inputs.limit }}
+      maxDiscoveryDepth: ${{ inputs.maxDiscoveryDepth }}
+      allowExternalLinks: ${{ inputs.allowExternalLinks }}
