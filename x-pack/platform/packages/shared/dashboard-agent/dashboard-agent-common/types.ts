@@ -15,7 +15,7 @@ import type {
 } from './constants';
 
 /**
- * Optional grid dimensions (in dashboard grid units) for layout.
+ * Grid dimensions (in dashboard grid units) for layout.
  * Dashboard grid is 48 columns wide; height is in same units.
  */
 export const panelGridSchema = z.object({
