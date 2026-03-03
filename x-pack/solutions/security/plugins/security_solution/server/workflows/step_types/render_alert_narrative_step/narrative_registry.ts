@@ -41,6 +41,9 @@ const strategies: NarrativeStrategy[] = [
  */
 export const buildNarrative = (source: AlertSource): string => {
   const strategy = strategies.find((s) => s.match(source));
+  if (!strategy) {
+    throw new Error('No strategy found for alert source');
+  }
   // processStrategy.match always returns true, so this is guaranteed
-  return strategy!.build(source);
+  return strategy.build(source);
 };
