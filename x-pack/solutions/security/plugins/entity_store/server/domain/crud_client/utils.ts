@@ -29,7 +29,8 @@ export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
   doc: Entity,
-  force: boolean
+  force: boolean,
+  timestampGenerator?: () => string
 ): Record<string, unknown> {
   const definition = getEntityDefinition(entityType, namespace);
   if (!force) {
@@ -37,7 +38,7 @@ export function validateAndTransformDocForUpsert(
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return transformDocForUpsert(entityType, doc);
+  return transformDocForUpsert(entityType, doc, timestampGenerator);
 }
 
 function getFieldDescriptions(
@@ -97,10 +98,14 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<string, unknown> {
+function transformDocForUpsert(
+  type: EntityType,
+  data: Partial<Entity>,
+  timestampGenerator?: () => string
+): Record<string, unknown> {
   const doc: Record<string, unknown> = {
-    '@timestamp': new Date().toISOString(),
     ...data,
+    '@timestamp': timestampGenerator ? timestampGenerator() : new Date().toISOString(),
   };
 
   if (type === GENERIC_TYPE) {
