@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ToolUiEvent } from '@kbn/agent-builder-common/chat';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
@@ -15,19 +15,32 @@ import type {
 } from './constants';
 
 /**
+ * Grid dimensions (in dashboard grid units) for layout.
+ * Dashboard grid is 48 columns wide; height is in same units.
+ */
+export const panelGridSchema = z.object({
+  w: z.number().int().min(1).max(48),
+  h: z.number().int().min(1).max(24),
+  x: z.number().int().min(0).max(47),
+  y: z.number().int().min(0),
+});
+
+/**
  * Zod schema for Lens panel entries.
  */
 export const lensAttachmentPanelSchema = z.object({
   type: z.literal('lens'),
   panelId: z.string(),
   /** The visualization configuration in Lens API format (LensApiSchemaType) */
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   /** Panel title */
   title: z.string().optional(),
   /** Natural language query that created this (if agent-generated) */
   query: z.string().optional(),
   /** ES|QL query used (if applicable) */
   esql: z.string().optional(),
+  /** Layout hint: width and height in grid units. When set, the renderer uses this instead of calculated defaults. */
+  grid: panelGridSchema.optional(),
 });
 
 /**
@@ -46,9 +59,11 @@ export const genericAttachmentPanelSchema = z.object({
   type: z.string(),
   panelId: z.string(),
   /** The raw panel configuration for recreating the panel */
-  rawConfig: z.record(z.unknown()),
+  rawConfig: z.record(z.string(), z.unknown()),
   /** Panel title if available */
   title: z.string().optional(),
+  /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
+  grid: panelGridSchema.optional(),
 });
 
 /**
