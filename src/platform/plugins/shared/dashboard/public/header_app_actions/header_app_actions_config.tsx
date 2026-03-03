@@ -9,6 +9,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
@@ -79,6 +80,12 @@ const DashboardSaveSplitButton: React.FC = () => {
     height: 28px !important;
     margin-left: 0;
   `;
+
+  const saveTextButtonCss = css`
+    height: 28px !important;
+    min-height: 28px !important;
+  `;
+
   const panels = [
     {
       id: 0,
@@ -90,46 +97,60 @@ const DashboardSaveSplitButton: React.FC = () => {
     },
   ];
   return (
-    <EuiSplitButton
-      css={primaryActionButtonCss}
+    <EuiButtonEmpty
+      css={saveTextButtonCss}
       size="s"
       color="text"
-      fill={false}
-      data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
+      iconType="save"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
         defaultMessage: 'Save',
       })}
+      data-test-subj="headerGlobalNav-appActionsSaveIconButton"
     >
-      <EuiSplitButton.ActionPrimary
-        css={primaryActionButtonCss}
-        iconType="save"
-        data-test-subj="headerGlobalNav-appActionsSaveButton"
-        minWidth={false}
-      >
-        {i18n.translate('core.ui.chrome.headerGlobalNav.saveButton', {
-          defaultMessage: 'Save',
-        })}
-      </EuiSplitButton.ActionPrimary>
-      <EuiPopover
-        button={React.cloneElement(
-          <EuiSplitButton.ActionSecondary
-            css={secondaryActionButtonCss}
-            iconType="arrowDown"
-            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
-              defaultMessage: 'Save options',
-            })}
-            data-test-subj="headerGlobalNav-appActionsSaveDropdown"
-          />,
-          { onClick: () => setIsOpen(true) }
-        )}
-        isOpen={isOpen}
-        closePopover={() => setIsOpen(false)}
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-      >
-        <EuiContextMenu css={saveOverflowMenuCss} panels={panels} initialPanelId={0} />
-      </EuiPopover>
-    </EuiSplitButton>
+      {i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+        defaultMessage: 'Save',
+      })}
+    </EuiButtonEmpty>
+    // <EuiSplitButton
+    //   css={primaryActionButtonCss}
+    //   size="s"
+    //   color="text"
+    //   fill={false}
+    //   data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
+    //   aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+    //     defaultMessage: 'Save',
+    //   })}
+    // >
+    //   <EuiSplitButton.ActionPrimary
+    //     css={primaryActionButtonCss}
+    //     iconType="save"
+    //     data-test-subj="headerGlobalNav-appActionsSaveButton"
+    //     minWidth={false}
+    //   >
+    //     {i18n.translate('core.ui.chrome.headerGlobalNav.saveButton', {
+    //       defaultMessage: 'Save',
+    //     })}
+    //   </EuiSplitButton.ActionPrimary>
+    //   <EuiPopover
+    //     button={React.cloneElement(
+    //       <EuiSplitButton.ActionSecondary
+    //         css={secondaryActionButtonCss}
+    //         iconType="arrowDown"
+    //         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
+    //           defaultMessage: 'Save options',
+    //         })}
+    //         data-test-subj="headerGlobalNav-appActionsSaveDropdown"
+    //       />,
+    //       { onClick: () => setIsOpen(true) }
+    //     )}
+    //     isOpen={isOpen}
+    //     closePopover={() => setIsOpen(false)}
+    //     anchorPosition="downLeft"
+    //     panelPaddingSize="none"
+    //   >
+    //     <EuiContextMenu css={saveOverflowMenuCss} panels={panels} initialPanelId={0} />
+    //   </EuiPopover>
+    // </EuiSplitButton>
   );
 };
 
@@ -206,7 +227,7 @@ const DashboardPrimaryActions: React.FC = () => {
     );
   }
   return (
-    <EuiButton
+    <EuiButtonEmpty
       css={primaryActionButtonCss}
       size="s"
       color="text"
@@ -222,7 +243,7 @@ const DashboardPrimaryActions: React.FC = () => {
       {i18n.translate('core.ui.chrome.headerGlobalNav.editButton', {
         defaultMessage: 'Edit',
       })}
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 };
 

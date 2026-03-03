@@ -28,6 +28,7 @@ import {
   EuiSplitButton,
   EuiToolTip,
   useGeneratedHtmlId,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -164,6 +165,24 @@ const DiscoverEsqlButton: React.FC<DiscoverEsqlButtonProps> = ({ onClick }) => {
   );
 };
 
+const saveButtonGroupCss = css`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const saveIconButtonCss = css`
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+`;
+
+const saveTextButtonCss = css`
+  height: 28px !important;
+  min-height: 28px !important;
+`;
+
 const DiscoverSaveButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const saveSplitButtonCss = css`
@@ -186,44 +205,71 @@ const DiscoverSaveButton: React.FC = () => {
     },
   ];
   return (
-    <EuiSplitButton
-      css={saveSplitButtonCss}
-      size="s"
-      color="text"
-      fill={false}
-      data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
-      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
-        defaultMessage: 'Save',
-      })}
-    >
-      <EuiSplitButton.ActionPrimary
-        css={saveSplitButtonCss}
+    <div css={saveButtonGroupCss}>
+      {/* <EuiButtonIcon
+        css={saveIconButtonCss}
+        size="s"
+        color="text"
+        display="empty"
         iconType="save"
-        data-test-subj="headerGlobalNav-appActionsSaveButton"
-        minWidth={false}
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+          defaultMessage: 'Save',
+        })}
+        data-test-subj="headerGlobalNav-appActionsSaveIconButton"
+      /> */}
+      <EuiButtonEmpty
+        css={saveTextButtonCss}
+        size="s"
+        color="text"
+        iconType="save"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+          defaultMessage: 'Save',
+        })}
+        data-test-subj="headerGlobalNav-appActionsSaveIconButton"
       >
-        Save
-      </EuiSplitButton.ActionPrimary>
-      <EuiPopover
-        button={React.cloneElement(
-          <EuiSplitButton.ActionSecondary
-            css={saveSplitButtonSecondaryCss}
-            iconType="arrowDown"
-            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
-              defaultMessage: 'Save options',
-            })}
-            data-test-subj="headerGlobalNav-appActionsSaveDropdown"
-          />,
-          { onClick: () => setIsOpen(true) }
-        )}
-        isOpen={isOpen}
-        closePopover={() => setIsOpen(false)}
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
+        {i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+          defaultMessage: 'Save',
+        })}
+      </EuiButtonEmpty>
+      {/* <EuiSplitButton
+        css={saveSplitButtonCss}
+        size="s"
+        color="text"
+        fill={false}
+        data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+          defaultMessage: 'Save',
+        })}
       >
-        <EuiContextMenu css={saveOverflowMenuCss} panels={panels} initialPanelId={0} />
-      </EuiPopover>
-    </EuiSplitButton>
+        <EuiSplitButton.ActionPrimary
+          css={saveSplitButtonCss}
+          iconType="save"
+          data-test-subj="headerGlobalNav-appActionsSaveButton"
+          minWidth={false}
+        >
+          Save
+        </EuiSplitButton.ActionPrimary>
+        <EuiPopover
+          button={React.cloneElement(
+            <EuiSplitButton.ActionSecondary
+              css={saveSplitButtonSecondaryCss}
+              iconType="arrowDown"
+              aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
+                defaultMessage: 'Save options',
+              })}
+              data-test-subj="headerGlobalNav-appActionsSaveDropdown"
+            />,
+            { onClick: () => setIsOpen(true) }
+          )}
+          isOpen={isOpen}
+          closePopover={() => setIsOpen(false)}
+          anchorPosition="downLeft"
+          panelPaddingSize="none"
+        >
+          <EuiContextMenu css={saveOverflowMenuCss} panels={panels} initialPanelId={0} />
+        </EuiPopover>
+      </EuiSplitButton> */}
+    </div>
   );
 };
 
