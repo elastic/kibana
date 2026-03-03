@@ -226,7 +226,7 @@ export function QueryStreamFlyout({
                       <EuiFlexItem grow={false} data-test-subj="streamsAppQueryStreamPreviewPanel">
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
                           <EuiFlexGroup component="span" gutterSize="s">
-                            <EuiIcon type="inspect" />
+                            <EuiIcon type="inspect" aria-hidden={true} />
                             <strong>
                               {i18n.translate('xpack.streams.queryStreamFlyout.previewHeader', {
                                 defaultMessage: 'Data Preview for query stream',
