@@ -15,6 +15,17 @@ import type {
 } from './constants';
 
 /**
+ * Grid dimensions (in dashboard grid units) for layout.
+ * Dashboard grid is 48 columns wide; height is in same units.
+ */
+export const panelGridSchema = z.object({
+  w: z.number().int().min(1).max(48),
+  h: z.number().int().min(1).max(24),
+  x: z.number().int().min(0).max(47).optional(),
+  y: z.number().int().min(0).optional(),
+});
+
+/**
  * Zod schema for Lens panel entries.
  */
 export const lensAttachmentPanelSchema = z.object({
@@ -28,6 +39,8 @@ export const lensAttachmentPanelSchema = z.object({
   query: z.string().optional(),
   /** ES|QL query used (if applicable) */
   esql: z.string().optional(),
+  /** Layout hint: width and height in grid units. When set, the renderer uses this instead of calculated defaults. */
+  grid: panelGridSchema.optional(),
 });
 
 /**
@@ -49,6 +62,8 @@ export const genericAttachmentPanelSchema = z.object({
   rawConfig: z.record(z.unknown()),
   /** Panel title if available */
   title: z.string().optional(),
+  /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
+  grid: panelGridSchema.optional(),
 });
 
 /**

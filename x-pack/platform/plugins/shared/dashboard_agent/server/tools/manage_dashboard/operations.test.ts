@@ -48,7 +48,7 @@ describe('executeDashboardOperations', () => {
       { operation: 'remove_panels', panelIds: ['existing-panel'] },
       {
         operation: 'add_panels_from_attachments',
-        attachmentIds: ['viz-1'],
+        items: [{ attachmentId: 'viz-1', grid: { w: 24, h: 9 } }],
       },
       {
         operation: 'upsert_markdown',
@@ -76,7 +76,7 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
       }),
-      expect.objectContaining({ panelId: 'from-attachment-panel' }),
+      expect.objectContaining({ panelId: 'from-attachment-panel', grid: { w: 24, h: 9 } }),
     ]);
 
     expect(events).toHaveLength(3);
@@ -102,11 +102,14 @@ describe('executeDashboardOperations', () => {
       operations: [
         {
           operation: 'add_panels_from_attachments',
-          attachmentIds: ['viz-1', 'missing-viz-1'],
+          items: [
+            { attachmentId: 'viz-1', grid: { w: 24, h: 9 } },
+            { attachmentId: 'missing-viz-1', grid: { w: 24, h: 9 } },
+          ],
         },
         {
           operation: 'add_panels_from_attachments',
-          attachmentIds: ['missing-viz-2'],
+          items: [{ attachmentId: 'missing-viz-2', grid: { w: 12, h: 5 } }],
         },
       ],
       logger,
@@ -157,7 +160,7 @@ describe('executeDashboardOperations', () => {
       operations: [
         {
           operation: 'add_panels_from_attachments',
-          attachmentIds: ['viz-1'],
+          items: [{ attachmentId: 'viz-1', grid: { w: 12, h: 5 } }],
         },
       ],
       logger,

@@ -152,10 +152,11 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                   content: {
                     ...updatedDashboardData,
                     panels: updatedDashboardData.panels.map(
-                      ({ type, panelId, title: panelTitle }) => ({
+                      ({ type, panelId, title: panelTitle, grid }) => ({
                         type,
                         panelId,
                         title: panelTitle ?? '',
+                        ...(grid ? { grid } : {}),
                       })
                     ),
                   },
