@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
 
+import type { SavedObjectReference } from '@kbn/core/types';
 import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import type { EmbeddableExpression } from '../../expression_types';
 import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';

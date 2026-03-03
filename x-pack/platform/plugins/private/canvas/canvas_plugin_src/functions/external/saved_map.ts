@@ -6,6 +6,7 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import type { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import type { EmbeddableExpression } from '../../expression_types';

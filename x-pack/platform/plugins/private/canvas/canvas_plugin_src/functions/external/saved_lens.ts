@@ -9,6 +9,7 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Filter as DataFilter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import type { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
