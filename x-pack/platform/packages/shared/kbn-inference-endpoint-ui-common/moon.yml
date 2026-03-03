@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-endpoint-ui-common'
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-kibana'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/inference-endpoint-ui-common'
   description: Moon project for @kbn/inference-endpoint-ui-common
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common
 dependsOn:

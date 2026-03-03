@@ -9,20 +9,20 @@
 
 import type { HasSupportedTriggers } from '@kbn/presentation-publishing';
 import {
-  APPLY_FILTER_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export function getEmbeddableTriggers(embeddable: HasSupportedTriggers) {
-  return [CONTEXT_MENU_TRIGGER, ...ensureNestedTriggers(embeddable.supportedTriggers())];
+  return [ON_OPEN_PANEL_MENU, ...ensureNestedTriggers(embeddable.supportedTriggers())];
 }
 
 /**
- * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.
- * This function appends APPLY_FILTER_TRIGGER to the list of triggers if either VALUE_CLICK_TRIGGER
- * or SELECT_RANGE_TRIGGER was executed.
+ * We know that ON_CLICK_VALUE and ON_SELECT_RANGE are also triggering ON_APPLY_FILTER.
+ * This function appends ON_APPLY_FILTER to the list of triggers if either ON_CLICK_VALUE
+ * or ON_SELECT_RANGE was executed.
  *
  * TODO: this probably should be part of uiActions infrastructure,
  * but dynamic implementation of nested trigger doesn't allow to statically express such relations
@@ -31,10 +31,10 @@ export function getEmbeddableTriggers(embeddable: HasSupportedTriggers) {
  */
 function ensureNestedTriggers(triggers: string[]): string[] {
   if (
-    !triggers.includes(APPLY_FILTER_TRIGGER) &&
-    (triggers.includes(VALUE_CLICK_TRIGGER) || triggers.includes(SELECT_RANGE_TRIGGER))
+    !triggers.includes(ON_APPLY_FILTER) &&
+    (triggers.includes(ON_CLICK_VALUE) || triggers.includes(ON_SELECT_RANGE))
   ) {
-    return [...triggers, APPLY_FILTER_TRIGGER];
+    return [...triggers, ON_APPLY_FILTER];
   }
 
   return triggers;

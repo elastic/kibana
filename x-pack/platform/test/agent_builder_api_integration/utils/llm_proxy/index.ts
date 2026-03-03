@@ -7,6 +7,7 @@
 
 export {
   createToolCallMessage,
+  createMultiToolCallMessage,
   createInterceptors,
   createLlmProxy,
   type LlmProxy,

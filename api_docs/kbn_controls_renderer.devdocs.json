@@ -208,7 +208,7 @@
         "label": "ControlsLayout",
         "description": [],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-        "lineNumber": 29,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -232,7 +232,7 @@
               "; }"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -302,7 +302,7 @@
           "<object>) => void; isCompressed?: (() => boolean) | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

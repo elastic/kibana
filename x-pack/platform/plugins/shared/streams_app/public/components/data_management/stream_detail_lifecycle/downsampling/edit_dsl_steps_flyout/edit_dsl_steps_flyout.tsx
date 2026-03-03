@@ -31,6 +31,8 @@ import {
   createDslStepsFlyoutSerializer,
   type DslStepsFlyoutFormInternal,
   OnStepFieldErrorsChangeProvider,
+  parseInterval,
+  toMilliseconds,
   useDslStepsFlyoutTabErrors,
 } from './form';
 import { DslStepsFlyoutArrayView } from './sections';
@@ -65,6 +67,15 @@ export const EditDslStepsFlyout = ({
   const expectedInitialStepsCountRef = useRef<number>(
     initialStepsRef.current.dsl?.downsample?.length ?? 0
   );
+
+  const dataRetentionInfo = useMemo(() => {
+    const retention = initialStepsRef.current.dsl?.data_retention;
+    const parsed = parseInterval(retention);
+    if (!parsed) return;
+    const ms = toMilliseconds(parsed.value, parsed.unit);
+    if (!Number.isFinite(ms) || ms < 0) return;
+    return { ms, esFormat: `${parsed.value}${parsed.unit}` };
+  }, []);
 
   const serializer = useMemo(() => createDslStepsFlyoutSerializer(initialStepsRef.current), []);
   const deserializer = useMemo(() => createDslStepsFlyoutDeserializer(), []);
@@ -206,6 +217,8 @@ export const EditDslStepsFlyout = ({
                 tabHasErrors={tabHasErrors}
                 pruneToStepPaths={pruneToStepPaths}
                 reindexErrorsAfterRemoval={reindexErrorsAfterRemoval}
+                dataRetentionMs={dataRetentionInfo?.ms}
+                dataRetentionEsFormat={dataRetentionInfo?.esFormat}
               />
             )}
           </UseArray>

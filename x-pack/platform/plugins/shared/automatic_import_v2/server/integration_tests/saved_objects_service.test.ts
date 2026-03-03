@@ -755,6 +755,66 @@ describe('AutomaticImportSavedObjectService', () => {
             .catch(() => {});
         }
       });
+
+      it('should return data streams sorted by updated_at descending (most recent first)', async () => {
+        const integrationId = 'getall-sort-integration';
+
+        const dataStreamParams1: DataStreamParams = {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'test-sort-ds-1',
+          title: 'First Created',
+          jobInfo: {
+            jobId: 'job-1',
+            jobType: 'import',
+            status: TASK_STATUSES.pending,
+          },
+          metadata: { sampleCount: 100, createdAt: new Date().toISOString() },
+        };
+
+        const dataStreamParams2: DataStreamParams = {
+          ...mockDataStreamParams,
+          integrationId,
+          dataStreamId: 'test-sort-ds-2',
+          title: 'Second Created',
+          jobInfo: {
+            jobId: 'job-2',
+            jobType: 'import',
+            status: TASK_STATUSES.pending,
+          },
+          metadata: { sampleCount: 200, createdAt: new Date().toISOString() },
+        };
+
+        try {
+          await savedObjectService.insertDataStream(dataStreamParams1, authenticatedUser);
+          // Small delay to ensure different updated_at timestamps
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          await savedObjectService.insertDataStream(dataStreamParams2, authenticatedUser);
+
+          const result = await savedObjectService.getAllDataStreams(integrationId);
+
+          expect(result.length).toBe(2);
+
+          expect(result[0].data_stream_id).toBe('test-sort-ds-2');
+          expect(result[1].data_stream_id).toBe('test-sort-ds-1');
+        } finally {
+          await savedObjectsClient
+            .delete(
+              DATA_STREAM_SAVED_OBJECT_TYPE,
+              getDataStreamSoId(integrationId, 'test-sort-ds-1')
+            )
+            .catch(() => {});
+          await savedObjectsClient
+            .delete(
+              DATA_STREAM_SAVED_OBJECT_TYPE,
+              getDataStreamSoId(integrationId, 'test-sort-ds-2')
+            )
+            .catch(() => {});
+          await savedObjectsClient
+            .delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId)
+            .catch(() => {});
+        }
+      });
     });
 
     describe('findAllDataStreamsByIntegrationId', () => {

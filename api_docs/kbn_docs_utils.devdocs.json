@@ -128,7 +128,7 @@
           "() => void"
         ],
         "path": "packages/kbn-docs-utils/src/check_package_docs_cli.ts",
-        "lineNumber": 171,
+        "lineNumber": 180,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

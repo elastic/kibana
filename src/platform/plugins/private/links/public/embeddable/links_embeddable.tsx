@@ -50,12 +50,14 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const titleManager = initializeTitleManager(initialState);
-
       const savedObjectId = (initialState as LinksByReferenceState).savedObjectId;
       const intialLinksState = savedObjectId
         ? await loadFromLibrary(savedObjectId)
         : (initialState as LinksState);
+
+      const titleManager = initializeTitleManager(initialState, {
+        borderlessByDefault: intialLinksState.layout === LINKS_HORIZONTAL_LAYOUT,
+      });
 
       const isByReference = savedObjectId !== undefined;
 
@@ -254,7 +256,7 @@ export const getLinksEmbeddableFactory = () => {
         return (
           <EuiPanel
             className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
-            paddingSize="xs"
+            paddingSize="none"
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
@@ -282,6 +284,7 @@ export const getLinksEmbeddableFactory = () => {
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
+    padding: 0,
     '.linksPanelLink': {
       maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
     },

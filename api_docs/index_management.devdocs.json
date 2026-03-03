@@ -2948,7 +2948,7 @@
         "label": "Mappings",
         "description": [],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/mappings.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2964,7 +2964,39 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/mappings.ts",
-            "lineNumber": 11,
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.MappingsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "MappingsResponse",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/index_management/common/types/mappings.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.MappingsResponse.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "MappingTypeMapping"
+            ],
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/mappings.ts",
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3896,7 +3928,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
+          "\"system\" | \"default\" | \"managed\" | \"cloudManaged\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "lineNumber": 76,

@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -32,6 +33,7 @@ import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
+import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
 
@@ -41,7 +43,7 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient, getClassicStatus },
+        streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
       },
     },
     core,
@@ -69,6 +71,9 @@ export function StreamListView() {
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
     useState<boolean>(false);
+  const [wiredStreamsStatus, setWiredStreamsStatus] = useState<WiredStreamsStatus | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const fetchClassicStatus = async () => {
@@ -85,6 +90,23 @@ export function StreamListView() {
     };
     fetchClassicStatus();
   }, [getClassicStatus, core.notifications.toasts]);
+
+  const refreshWiredStatus = React.useCallback(async () => {
+    try {
+      const status = await getWiredStatus();
+      setWiredStreamsStatus(status);
+    } catch (error) {
+      core.notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
+          defaultMessage: 'Error fetching wired streams status',
+        }),
+      });
+    }
+  }, [getWiredStatus, core.notifications.toasts]);
+
+  useEffect(() => {
+    refreshWiredStatus();
+  }, [refreshWiredStatus]);
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
@@ -213,10 +235,16 @@ export function StreamListView() {
               hasClassicStreams={hasClassicStreams}
               firstClassicStreamName={firstClassicStreamName}
             />
+            <LegacyLogsDeprecationCallout
+              streamsStatus={wiredStreamsStatus}
+              openFlyout={() => setIsSettingsFlyoutOpen(true)}
+            />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
+              wiredStreamsStatus={wiredStreamsStatus}
+              openFlyout={() => setIsSettingsFlyoutOpen(true)}
             />
           </>
         )}
@@ -225,6 +253,8 @@ export function StreamListView() {
         <StreamsSettingsFlyout
           onClose={() => setIsSettingsFlyoutOpen(false)}
           refreshStreams={streamsListFetch.refresh}
+          streamsStatus={wiredStreamsStatus}
+          onRefreshStatus={refreshWiredStatus}
         />
       )}
       {isClassicStreamCreationFlyoutOpen && (

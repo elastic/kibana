@@ -66,6 +66,7 @@ async function importMcpTools(
   connectorId: string,
   tools: Array<ImportedTool>,
   name: string,
+  namespace: string,
   logger: Logger
 ): Promise<string[]> {
   if (tools.length === 0) {
@@ -82,10 +83,6 @@ async function importMcpTools(
     logger,
   });
 
-  if (mcpTools === undefined) {
-    throw new Error(`No imported connector tools found for ${name}`);
-  }
-
   const dataSourceTools = mcpTools.map((tool) => ({
     name: tool.name,
     description: tool.description + ' ' + tools.find((t) => t.name === tool.name)!.description,
@@ -100,7 +97,7 @@ async function importMcpTools(
         request,
         connectorId,
         tools: dataSourceTools,
-        namespace: name,
+        namespace,
       });
       importedToolIds = results.map((result) => result.toolId);
       logger.info(`Imported tools for Data Source '${name}': ${JSON.stringify(importedToolIds)}`);
@@ -174,6 +171,7 @@ export async function createDataSourceAndRelatedResources(
         finalStackConnectorId,
         stackConnectorConfig.importedTools,
         name,
+        `${type}.${slugify(name)}`,
         logger
       );
       toolIds.push(...importedToolIds);
@@ -191,10 +189,12 @@ export async function createDataSourceAndRelatedResources(
 
   const workflowAndToolResults = await Promise.all(
     workflowInfos.map(async (workflowInfo) => {
-      // Extract original workflow name from YAML and prefix it with the data source name
+      // Extract workflow name from YAML; use convention source.<type>.<action> to avoid collisions
       const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
       const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
-      const prefixedName = `${slugify(name)}.${originalName}`;
+      const workflowBaseName = originalName.split('.').pop() || originalName;
+      const canonicalName = `source.${type}.${workflowBaseName}`;
+      const prefixedName = `${slugify(name)}.${canonicalName}`;
       const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
 
       const workflow = await workflowManagement.management.createWorkflow(
@@ -212,9 +212,6 @@ export async function createDataSourceAndRelatedResources(
           typeof parsedWorkflow?.description === 'string'
             ? parsedWorkflow.description
             : `Workflow tool for ${type} data source`;
-
-        // e.g., "sources.github.search_issues" -> "search_issues"
-        const workflowBaseName = originalName.split('.').pop() || originalName;
 
         // Tool ID structure: type.data_source_name.workflow_base_name
         const tool = await toolRegistry.create({
