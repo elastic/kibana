@@ -86,3 +86,12 @@ if (!Object.hasOwn(global, 'MessagePort')) {
 
 // Required from ts decorators support in tests
 import 'reflect-metadata/lite';
+
+// Monaco's Safari workaround (added in 0.45.0) uses ClipboardItem, which doesn't exist in JSDOM
+if (!Object.hasOwn(global, 'ClipboardItem')) {
+  global.ClipboardItem = class ClipboardItem {
+    constructor(data) {
+      this.data = data;
+    }
+  };
+}

@@ -10,12 +10,12 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class FieldEditorService extends FtrService {
-  private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly flyout = this.ctx.getService('flyout');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -55,28 +55,16 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
   }
   public async clearScript() {
-    const editor = await (
-      await this.testSubjects.find('valueRow')
-    ).findByClassName('react-monaco-editor-container');
-    const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
-    await textarea.click();
-    const input = await this.find.activeElement();
-    await input.clearValueWithKeyboard();
+    await this.monacoEditor.clearCodeEditorValueByCssSelector(
+      '[data-test-subj="valueRow"] .react-monaco-editor-container'
+    );
   }
+
   public async typeScript(script: string) {
-    const editor = await (
-      await this.testSubjects.find('valueRow')
-    ).findByClassName('react-monaco-editor-container');
-    const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
-
-    await textarea.click();
-
-    // To avoid issue with the timing needed for Selenium to write the script and the monaco editor
-    // syntax validation kicking in, we loop through all the chars of the script and enter
-    // them one by one (instead of calling "await this.browser.pressKeys(script);").
-    for (const letter of script.split('')) {
-      await this.browser.pressKeys(letter);
-    }
+    await this.monacoEditor.setCodeEditorValueByCssSelector(
+      '[data-test-subj="valueRow"] .react-monaco-editor-container',
+      script
+    );
   }
   public async save() {
     await this.testSubjects.click('fieldSaveButton');

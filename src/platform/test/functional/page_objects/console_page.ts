@@ -9,6 +9,7 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import { copyToClipboard } from '@elastic/eui';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -18,6 +19,7 @@ export class ConsolePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly browser = this.ctx.getService('browser');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public async getTextArea() {
     const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
@@ -37,9 +39,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearEditorText() {
-    const textArea = await this.getTextArea();
-    await textArea.clickMouseButton();
-    await textArea.clearValueWithKeyboard();
+    await this.monacoEditor.clearCodeEditorValue('consoleMonacoEditor');
   }
 
   public async focusInputEditor() {
@@ -71,9 +71,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getOutputText() {
-    const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
-    const outputViewDiv = await outputPanel.findByClassName('monaco-scrollable-element');
-    return await outputViewDiv.getVisibleText();
+    return await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoOutput');
   }
 
   public async pressEnter() {
@@ -82,13 +80,15 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async enterText(text: string) {
-    const textArea = await this.getTextArea();
-    await textArea.type(text);
+    await this.monacoEditor.typeCodeEditorValue(text, 'consoleMonacoEditor', false);
+  }
+
+  public async appendText(text: string) {
+    await this.monacoEditor.appendToCodeEditor('consoleMonacoEditor', text);
   }
 
   public async promptAutocomplete(letter = 'b') {
-    const textArea = await this.getTextArea();
-    await textArea.type(letter);
+    await this.monacoEditor.typeCodeEditorValue(letter, 'consoleMonacoEditor', true);
     await this.retry.waitFor(
       'autocomplete to be visible',
       async () => await this.isAutocompleteVisible()
@@ -199,9 +199,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async selectAllRequests() {
-    const textArea = await this.getTextArea();
-    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-    await textArea.pressKeys([selectionKey, 'a']);
+    await this.monacoEditor.selectAllCodeEditorValue('consoleMonacoEditor');
   }
 
   public async getEditor() {
@@ -234,9 +232,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async copyRequestsToClipboard() {
-    const textArea = await this.getTextArea();
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
-    await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    // Get content via Monaco API and write to clipboard
+    const content = await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoEditor');
+    await this.browser.execute((text: string) => {
+      copyToClipboard(text);
+    }, content);
   }
 
   public async isA11yOverlayVisible() {
