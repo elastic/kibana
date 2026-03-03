@@ -589,6 +589,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkUpdatedRuleParamsState();
       await checkUpdatedDataViewState('search-s*');
     });
-
   });
 }

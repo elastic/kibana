@@ -419,11 +419,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       log.debug('wait for rule to fire and produce output docs');
       await retry.waitFor('output docs to appear', async () => {
-        const { body: result } = await es.transport.request({
+        const { body: result } = (await es.transport.request({
           path: `/${OUTPUT_DATA_VIEW}/_search`,
           method: 'POST',
           body: { query: { match_all: {} } },
-        }) as { body: { hits: { total: { value: number } } } };
+        })) as { body: { hits: { total: { value: number } } } };
         return result.hits.total.value > 0;
       });
 
