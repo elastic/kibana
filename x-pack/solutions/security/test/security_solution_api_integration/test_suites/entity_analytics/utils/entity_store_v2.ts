@@ -22,34 +22,43 @@ export const getEntityStoreV2LatestIndex = (namespace = 'default') =>
 export const getEntityStoreV2UpdatesIndex = (namespace = 'default') =>
   `${ENTITY_STORE_V2_UPDATES_INDEX_PREFIX}${namespace}`;
 
-/**
- * Documents in the LATEST index use flat dot-notation keys in _source
- * because they're ingested from ES|QL columnar format via ingestEntities.
- * E.g. `'entity.id': 'host:host-0'` rather than `{ entity: { id: 'host:host-0' } }`.
- */
 export interface EntityStoreEntity {
   '@timestamp'?: string;
-  'entity.id'?: string;
-  'entity.name'?: string;
-  'entity.type'?: string;
-  'entity.EngineMetadata.Type'?: string;
-  'entity.risk.calculated_score'?: number;
-  'entity.risk.calculated_score_norm'?: number;
-  'entity.risk.calculated_level'?: string;
-  'host.name'?: string;
-  'host.entity.id'?: string;
-  'user.name'?: string;
-  'user.entity.id'?: string;
+  entity?: {
+    id?: string;
+    name?: string;
+    type?: string;
+    EngineMetadata?: {
+      Type?: string;
+    };
+    risk?: {
+      calculated_score?: number;
+      calculated_score_norm?: number;
+      calculated_level?: string;
+    };
+  };
+  host?: {
+    name?: string;
+    entity?: {
+      id?: string;
+    };
+  };
+  user?: {
+    name?: string;
+    entity?: {
+      id?: string;
+    };
+  };
   [key: string]: unknown;
 }
 
-export const getEntityId = (entity: EntityStoreEntity): string | undefined => entity['entity.id'];
+export const getEntityId = (entity: EntityStoreEntity): string | undefined => entity.entity?.id;
 
 export const getEntityRisk = (
   entity: EntityStoreEntity
 ): { calculated_score_norm?: number; calculated_level?: string } | undefined => {
-  const scoreNorm = entity['entity.risk.calculated_score_norm'] as number | undefined;
-  const level = entity['entity.risk.calculated_level'] as string | undefined;
+  const scoreNorm = entity.entity?.risk?.calculated_score_norm;
+  const level = entity.entity?.risk?.calculated_level;
   if (scoreNorm == null && level == null) return undefined;
   return { calculated_score_norm: scoreNorm, calculated_level: level };
 };
@@ -135,7 +144,7 @@ export const waitForEntityStoreEntitiesToBePresent = async ({
   );
 };
 
-// Entity store score fields are mapped as float (IEEE 754 single-precision).
+// Entity store score fields are mapped as float
 // Values written as double-precision in _source get truncated to float when
 // read back via ES|QL during log extraction. Convert to float for comparison.
 const toFloat32 = (v: number): number => Math.fround(v);
@@ -144,14 +153,12 @@ export const waitForEntityStoreFieldValues = async ({
   es,
   log,
   entityIds,
-  fieldName,
   expectedValuesByEntityId,
   namespace = 'default',
 }: {
   es: Client;
   log: ToolingLog;
   entityIds: string[];
-  fieldName: string;
   expectedValuesByEntityId: Record<string, number>;
   namespace?: string;
 }): Promise<void> => {
@@ -165,12 +172,16 @@ export const waitForEntityStoreFieldValues = async ({
       const converged =
         entities.length >= entityIds.length &&
         entities.every((entity) => {
-          const entityId = entity['entity.id'];
+          const entityId = getEntityId(entity);
           if (typeof entityId !== 'string' || !(entityId in floatExpected)) return true;
-          return (entity[fieldName] as number | undefined) === floatExpected[entityId];
+          const fieldValue = entity.entity?.risk?.calculated_score_norm;
+          return fieldValue === floatExpected[entityId];
         });
       const snapshot = JSON.stringify(
-        entities.map((e) => ({ id: e['entity.id'], [fieldName]: e[fieldName] }))
+        entities.map((entity) => ({
+          id: getEntityId(entity),
+          calculated_score_norm: entity.entity?.risk?.calculated_score_norm,
+        }))
       );
       if (snapshot !== lastSnapshot) {
         lastSnapshot = snapshot;
@@ -333,7 +344,6 @@ export const assertRiskScoresWrittenToEntityStore = async ({
     log,
     entityIds,
     namespace,
-    fieldName: 'entity.risk.calculated_score_norm',
     expectedValuesByEntityId,
   });
 
