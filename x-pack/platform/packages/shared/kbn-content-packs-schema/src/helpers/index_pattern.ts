@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import type { Writable } from 'utility-types';
 import type {
-  DashboardAttributes,
+  DashboardSavedObjectAttributes,
   SavedDashboardPanel,
-} from '@kbn/dashboard-plugin/common/content_management/v2';
+} from '@kbn/dashboard-plugin/server';
 import { cloneDeep, mapValues } from 'lodash';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
 import type {
+  IndexPatternRef,
+  TextBasedLayerColumn,
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import type { ContentPackSavedObject } from '../models';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
@@ -27,7 +28,7 @@ export const isIndexPlaceholder = (index: string) => index.startsWith(INDEX_PLAC
 
 interface TraverseOptions {
   esqlQuery(query: string): string;
-  indexPattern<T extends { name?: string; title?: string }>(pattern: T): T;
+  indexPattern<T extends { title?: string }>(pattern: T): T;
   field<T extends GenericIndexPatternColumn | TextBasedLayerColumn>(field: T): T;
 }
 
@@ -82,10 +83,17 @@ export function replaceIndexPatterns(
         .map((index) => patternReplacements[index] ?? index)
         .join(',');
 
+      // data view references may be named after the index patterns they represent,
+      // so we attempt to replace index patterns to avoid wrongly named data views
+      const updatedName = pattern.name
+        ?.split(',')
+        .map((index) => patternReplacements[index] ?? index)
+        .join(',');
+
       return {
         ...pattern,
-        name: updatedPattern,
         title: updatedPattern,
+        name: updatedName,
       };
     },
     field(field: any) {
@@ -103,7 +111,7 @@ function locateConfiguration(
   }
 
   if (content.type === 'dashboard') {
-    const attributes = content.attributes as DashboardAttributes;
+    const attributes = content.attributes as Writable<DashboardSavedObjectAttributes>;
     const panels = (JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[]).map((panel) =>
       traversePanel(panel, options)
     );

@@ -1,52 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DeleteRuleModal renders as delete button after opening and closing modal 1`] = `
-<Fragment>
-  <EuiLink
-    color="danger"
-    onClick={[Function]}
-  >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete rule"
-      id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
-    />
-  </EuiLink>
-</Fragment>
+<button
+  class="euiLink emotion-euiLink-danger"
+  data-test-subj="deleteRuleModalLink"
+  type="button"
+>
+  Delete rule
+</button>
 `;
 
 exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
-<Fragment>
-  <EuiLink
-    color="danger"
-    onClick={[Function]}
-  >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete rule"
-      id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
-    />
-  </EuiLink>
-</Fragment>
+<button
+  class="euiLink emotion-euiLink-danger"
+  data-test-subj="deleteRuleModalLink"
+  type="button"
+>
+  Delete rule
+</button>
 `;
 
 exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
-<Fragment>
-  <EuiLink
-    color="danger"
-    onClick={[Function]}
-  >
-    <MemoizedFormattedMessage
-      defaultMessage="Delete rule"
-      id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
-    />
-  </EuiLink>
-  <EuiConfirmModal
-    buttonColor="danger"
-    cancelButtonText="Cancel"
-    confirmButtonText="Delete"
-    defaultFocusedButton="confirm"
-    onCancel={[Function]}
-    onConfirm={[Function]}
-    title="Delete rule?"
-  />
-</Fragment>
+<button
+  class="euiLink emotion-euiLink-danger"
+  data-test-subj="deleteRuleModalLink"
+  type="button"
+>
+  Delete rule
+</button>
 `;

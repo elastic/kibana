@@ -149,7 +149,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -166,7 +165,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -191,7 +189,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
@@ -218,7 +215,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -254,9 +250,7 @@ describe('SecurityWorkflowInsightsService', () => {
         insight, // intentional dupe to confirm de-duping
       ];
 
-      const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
-
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
 
@@ -278,16 +272,24 @@ describe('SecurityWorkflowInsightsService', () => {
       });
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
         defendInsights,
-        request
+        insight.events.map((e) => e.endpointId),
+        workflowInsights[0].type,
+        workflowInsights[0].source.id,
+        workflowInsights[0].source.type
       );
 
-      // three since it calls securityWorkflowInsightsService.create + fetch
-      expect(isInitializedSpy).toHaveBeenCalledTimes(3);
+      // four since it calls fetch + update + fetch + create
+      expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
-        request,
         endpointMetadataService: expect.any(Object),
         esClient,
+        options: {
+          insightType: workflowInsights[0].type,
+          endpointIds: insight.events.map((e) => e.endpointId),
+          connectorId: workflowInsights[0].source.id,
+          model: workflowInsights[0].source.type,
+        },
       });
       expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
     });
@@ -315,7 +317,7 @@ describe('SecurityWorkflowInsightsService', () => {
       });
     });
 
-    it('should not index the doc if remediation exists', async () => {
+    it('should mark insight as remediated if remediation exists', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
         registerDefendInsightsCallback: jest.fn(),
@@ -330,8 +332,17 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(remediationExistsMock).toHaveBeenCalledTimes(1);
 
       // two since it calls fetch as well
-      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
-      expect(esClient.index).toHaveBeenCalledTimes(0);
+      expect(isInitializedSpy).toHaveBeenCalledTimes(2);
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            action: expect.objectContaining({
+              type: ActionType.Remediated,
+            }),
+          }),
+        })
+      );
     });
 
     it('should call update instead if insight already exists', async () => {
@@ -434,7 +445,7 @@ describe('SecurityWorkflowInsightsService', () => {
               },
               {
                 terms: {
-                  types: ['incompatible_antivirus'],
+                  type: ['incompatible_antivirus'],
                 },
               },
               {
@@ -500,16 +511,11 @@ describe('SecurityWorkflowInsightsService', () => {
     let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
 
     const setupWithMockFleet = () => {
-      // @ts-expect-error write to readonly property
-      mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
 
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -526,16 +532,6 @@ describe('SecurityWorkflowInsightsService', () => {
     });
 
     describe('ensureAgentIdsInCurrentSpace', () => {
-      it('should not call fleetServices.ensureInCurrentSpace when the experimental feature is disabled', async () => {
-        // @ts-expect-error write to readonly property
-        mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-          false;
-
-        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, ['agent-1']);
-
-        expect(mockEndpointAppContextService.getInternalFleetServices).not.toHaveBeenCalled();
-      });
-
       it('should call fleetServices.ensureInCurrentSpace with correct agent IDs when feature is enabled', async () => {
         const { ensureInCurrentSpace } = setupWithMockFleet();
 

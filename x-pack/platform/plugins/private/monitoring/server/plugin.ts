@@ -6,12 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   CoreSetup,
   CoreStart,
   CustomHttpResponseOptions,
+  IClusterClient,
   ICustomClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
@@ -22,9 +23,8 @@ import {
 } from '@kbn/core/server';
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { RouteMethod } from '@kbn/core/server';
+import type { RouteMethod } from '@kbn/core/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
@@ -34,15 +34,17 @@ import {
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { RulesFactory } from './rules';
-import { configSchema, createConfig, MonitoringConfig } from './config';
+import type { configSchema, MonitoringConfig } from './config';
+import { createConfig } from './config';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader } from './kibana_monitoring';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { LicenseService } from './license_service';
 import { requireUIRoutes } from './routes';
-import { EndpointTypes, Globals } from './static_globals';
+import type { EndpointTypes } from './static_globals';
+import { Globals } from './static_globals';
 import { registerMonitoringTelemetryCollection } from './telemetry_collection';
-import {
+import type {
   IBulkUploader,
   LegacyRequest,
   LegacyShimDependencies,
@@ -75,7 +77,12 @@ export class MonitoringPlugin
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  /**
+   * Internal elasticsearch client used for monitoring purposes.
+   * It can be Kibana's internal client (`core.elasticsearch.client`), or a custom client, depending on the configuration.
+   * @private
+   */
+  private cluster: IClusterClient | ICustomClusterClient = {} as IClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -165,7 +172,7 @@ export class MonitoringPlugin
     };
   }
 
-  init(cluster: ICustomClusterClient, coreStart: CoreStart) {
+  init(cluster: IClusterClient, coreStart: CoreStart) {
     const config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
     const coreSetup = this.coreSetup!;
     const plugins = this.setupPlugins!;
@@ -209,11 +216,7 @@ export class MonitoringPlugin
 
   start(coreStart: CoreStart, { licensing }: PluginsStart) {
     const config = this.config!;
-    this.cluster = instantiateClient(
-      config.ui.elasticsearch,
-      this.log,
-      coreStart.elasticsearch.createClient
-    );
+    this.cluster = instantiateClient(config.ui.elasticsearch, this.log, coreStart.elasticsearch);
 
     this.init(this.cluster, coreStart);
 
@@ -257,7 +260,7 @@ export class MonitoringPlugin
   }
 
   stop() {
-    if (this.cluster && this.cluster.close) {
+    if (this.cluster && 'close' in this.cluster) {
       this.cluster.close().catch(() => {});
     }
     if (this.licenseService && this.licenseService.stop) {
@@ -278,7 +281,6 @@ export class MonitoringPlugin
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
@@ -316,7 +318,7 @@ export class MonitoringPlugin
   getLegacyShim(
     config: MonitoringConfig,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
-    cluster: ICustomClusterClient,
+    cluster: IClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;

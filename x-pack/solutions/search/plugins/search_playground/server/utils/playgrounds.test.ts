@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 import { type PlaygroundSavedObject } from '../types';
 import { validatePlayground, parsePlaygroundSO, parsePlaygroundSOList } from './playgrounds';
@@ -66,7 +66,7 @@ describe('Playground utils', () => {
         elasticsearchQueryJSON: '{invalidJson}',
       };
       expect(validatePlayground(playground)).toContain(
-        "Elasticsearch query JSON is invalid\nExpected property name or '}' in JSON at position 1"
+        "Elasticsearch query JSON is invalid\nExpected property name or '}' in JSON at position 1 (line 1 column 2)"
       );
       playground.elasticsearchQueryJSON = 'invalidJson';
       expect(validatePlayground(playground)).toContain(

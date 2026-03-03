@@ -6,10 +6,10 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
@@ -19,7 +19,7 @@ import { LinuxEventCollectionCard } from './components/cards/linux_event_collect
 import { MacEventCollectionCard } from './components/cards/mac_event_collection_card';
 import { WindowsEventCollectionCard } from './components/cards/windows_event_collection_card';
 import { AttackSurfaceReductionCard } from './components/cards/attack_surface_reduction_card';
-import { BehaviourProtectionCard } from './components/cards/protection_seetings_card/behaviour_protection_card';
+import { BehaviourProtectionCard } from './components/cards/protection_settings_card/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/cards/memory_protection_card';
 import { RelatedDetectionRulesCallout } from './components/related_detection_rules_callout';
 import { RansomwareProtectionCard } from './components/cards/ransomware_protection_card';
@@ -27,6 +27,8 @@ import { MalwareProtectionsCard } from './components/cards/malware_protections_c
 import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
+import { DeviceControlCard } from './components/cards/device_control_card';
 
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
@@ -43,13 +45,31 @@ export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
 export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const getTestId = useTestIdGenerator(props['data-test-subj']);
   const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
+  const DeviceControlUpSellingComponent = useGetDeviceControlUpsellComponent();
 
   const { storage } = useKibana().services;
 
-  const { eventCollectionDataReductionBannerEnabled } = useEnableExperimental();
+  const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
+
+  const renderDeviceControlSection = () => {
+    if (!trustedDevices) {
+      return null;
+    }
+
+    return (
+      <>
+        {DeviceControlUpSellingComponent ? (
+          <DeviceControlUpSellingComponent />
+        ) : (
+          <DeviceControlCard {...props} data-test-subj={getTestId('deviceControl')} />
+        )}
+        <EuiSpacer size="l" />
+      </>
+    );
+  };
+
   const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    eventCollectionDataReductionBannerEnabled &&
-      (storage.get('securitySolution.showEventMergingBanner') ?? true)
+    storage.get('securitySolution.showEventMergingBanner') ?? true
   );
   const onBannerDismiss = useCallback(() => {
     setShowEventMergingBanner(false);
@@ -103,6 +123,8 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
           <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attackSurface')} />
           <EuiSpacer size="l" />
+
+          {renderDeviceControlSection()}
         </>
       )}
 

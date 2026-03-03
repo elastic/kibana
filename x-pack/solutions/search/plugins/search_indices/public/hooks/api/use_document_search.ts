@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Pagination } from '@elastic/eui';
-import { SearchHit } from '@kbn/es-types';
-import { pageToPagination, Paginate } from '@kbn/search-index-documents';
-import { useQuery } from '@tanstack/react-query';
+import type { Pagination } from '@elastic/eui';
+import type { SearchHit } from '@kbn/es-types';
+import type { Paginate } from '@kbn/search-index-documents';
+import { pageToPagination } from '@kbn/search-index-documents';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../use_kibana';
 import { QueryKeys, DEFAULT_DOCUMENT_PAGE_SIZE } from '../../constants';
 
@@ -22,15 +23,12 @@ const DEFAULT_PAGINATION = {
   size: DEFAULT_DOCUMENT_PAGE_SIZE,
   total: 0,
 };
-export const INDEX_SEARCH_POLLING = 30000;
 export const useIndexDocumentSearch = (indexName: string) => {
   const {
     services: { http },
   } = useKibana();
-  const { data, isInitialLoading } = useQuery({
+  const { data, isInitialLoading, refetch } = useQuery({
     queryKey: [QueryKeys.SearchDocuments, indexName],
-    refetchInterval: INDEX_SEARCH_POLLING,
-    refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
     queryFn: async ({ signal }) =>
       http.post<IndexDocuments>(`/internal/search_indices/${indexName}/documents/search`, {
@@ -47,6 +45,7 @@ export const useIndexDocumentSearch = (indexName: string) => {
   });
   return {
     data,
+    refetch,
     isInitialLoading,
     meta: pageToPagination(data?.results?._meta?.page ?? DEFAULT_PAGINATION),
   };

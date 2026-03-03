@@ -9,7 +9,11 @@
 
 import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
-import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
+import type {
+  ConfigDeprecation,
+  ConfigDeprecationContext,
+  ConfigDeprecationWithContext,
+} from './types';
 import { configDeprecationFactory as deprecations } from './deprecation_factory';
 
 describe('applyDeprecations', () => {

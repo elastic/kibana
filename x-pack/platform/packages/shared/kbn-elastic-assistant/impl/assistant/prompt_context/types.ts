@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Replacements } from '@kbn/elastic-assistant-common';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ReactNode } from 'react';
 
 /**

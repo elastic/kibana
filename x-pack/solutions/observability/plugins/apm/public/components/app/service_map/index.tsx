@@ -6,32 +6,23 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
-import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
-import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
-import { Subscription } from 'rxjs';
+import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import { cx } from '@emotion/css';
+import {
+  useServiceMapFullScreen,
+  applyServiceMapFullScreenBodyClasses,
+} from './use_service_map_fullscreen';
+import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
-import { Controls } from './controls';
-import { Cytoscape } from './cytoscape';
-import { getCytoscapeDivStyle } from './cytoscape_options';
-import { EmptyBanner } from './empty_banner';
 import { EmptyPrompt } from './empty_prompt';
-import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { SearchBar } from '../../shared/search_bar/search_bar';
@@ -40,11 +31,8 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { useServiceMap } from './use_service_map';
-import { TryItButton } from '../../shared/try_it_button';
+import { ServiceMapGraph } from './graph';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -92,14 +80,7 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { serviceEntitySummary } = useApmServiceContext();
 
-  const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="serviceMap" />;
-  }
   return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
@@ -116,37 +97,11 @@ export function ServiceMap({
   end: string;
   serviceGroupId?: string;
 }) {
-  const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
   const serviceName = useServiceName();
 
-  const { config, core } = useApmPluginContext();
+  const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
-
-  const subscriptions = useRef<Subscription>(new Subscription());
-  const [isServiceMapApiV2Enabled, setIsServiceMapApiV2Enabled] = useState<boolean>(
-    core.settings.client.get(apmEnableServiceMapApiV2)
-  );
-
-  useEffect(() => {
-    subscriptions.current.add(
-      core.settings.client.get$<boolean>(apmEnableServiceMapApiV2).subscribe((value) => {
-        setIsServiceMapApiV2Enabled(value);
-      })
-    );
-  }, [core.settings]);
-
-  useEffect(() => {
-    const currentSubscriptions = subscriptions.current;
-    return () => {
-      currentSubscriptions.unsubscribe();
-    };
-  }, []);
-
-  const { fields, isSaving, saveSingleSetting } = useEditableSettings([apmEnableServiceMapApiV2]);
-
-  const settingsField = fields[apmEnableServiceMapApiV2];
-  const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
 
   const { data, status, error } = useServiceMap({
     environment,
@@ -155,14 +110,51 @@ export function ServiceMap({
     end,
     serviceGroupId,
     serviceName,
-    isServiceMapApiV2Enabled,
   });
 
   const { ref, height } = useRefDimensions();
+  const windowHeight = useWindowSize().height;
+  const { euiTheme } = useEuiTheme();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { styles, bodyClassesToToggle } = useServiceMapFullScreen();
+  const fullScreenContainerStyles = styles[SERVICE_MAP_FULL_SCREEN_CLASS];
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
+
+  /** Store height when entering fullscreen; use it when exiting so zoom/actions don't corrupt measurement */
+  const heightBeforeFullscreenRef = useRef(heightWithPadding);
+  const [useStoredHeight, setUseStoredHeight] = useState(false);
+
+  if (!isFullscreen && !useStoredHeight) {
+    heightBeforeFullscreenRef.current = heightWithPadding;
+  }
+
+  const mapHeight = isFullscreen
+    ? windowHeight - PADDING_BOTTOM
+    : useStoredHeight
+    ? heightBeforeFullscreenRef.current
+    : heightWithPadding;
+
+  const onToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      if (prev) {
+        setUseStoredHeight(true);
+      }
+      return !prev;
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isFullscreen) {
+      applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
+      return () => {
+        applyServiceMapFullScreenBodyClasses(false, bodyClassesToToggle);
+        setUseStoredHeight(false);
+      };
+    }
+  }, [isFullscreen, bodyClassesToToggle]);
 
   if (!license) {
     return null;
@@ -184,7 +176,9 @@ export function ServiceMap({
     );
   }
 
-  if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
+  const isEmpty = data.nodes.length === 0;
+
+  if (status === FETCH_STATUS.SUCCESS && isEmpty) {
     return (
       <PromptContainer>
         <EmptyPrompt />
@@ -221,60 +215,39 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-        <TryItButton
-          isFeatureEnabled={isServiceMapV2Enabled}
-          linkLabel={
-            isServiceMapV2Enabled
-              ? i18n.translate('xpack.apm.serviceMap.disableServiceMapApiV2', {
-                  defaultMessage: 'Disable the new service map API',
-                })
-              : i18n.translate('xpack.apm.serviceMap.enableServiceMapApiV2', {
-                  defaultMessage: 'Enable the new service map API',
-                })
-          }
-          onClick={() => {
-            saveSingleSetting(apmEnableServiceMapApiV2, !isServiceMapV2Enabled);
-          }}
-          isLoading={isSaving}
-          popoverContent={
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.serviceMap.serviceMapApiV2PopoverContent', {
-                  defaultMessage: 'The new service map API is faster, try it out!',
-                })}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          hideThisContent={i18n.translate('xpack.apm.serviceMap.hideThisContent', {
-            defaultMessage:
-              'Hide this. The setting can be enabled or disabled in Advanced Settings.',
-          })}
-          calloutId="showServiceMapV2Callout"
-        />
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-          <Cytoscape
-            elements={data.elements}
-            height={heightWithPadding}
-            serviceName={serviceName}
-            style={getCytoscapeDivStyle(euiTheme, status)}
+      <div
+        className={cx({
+          [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
+        })}
+        css={isFullscreen ? fullScreenContainerStyles : undefined}
+      >
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div
+            data-test-subj="serviceMap"
+            style={{
+              height: isFullscreen ? '100%' : mapHeight,
+              zIndex: Number(euiTheme.levels.content) + 1,
+              ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
+            }}
+            ref={ref}
           >
-            <Controls />
-            {serviceName && <EmptyBanner />}
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover
-              focusedServiceName={serviceName}
+            <ServiceMapGraph
+              height={mapHeight}
+              nodes={data.nodes}
+              edges={data.edges}
+              serviceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}
               end={end}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={onToggleFullscreen}
             />
-          </Cytoscape>
-        </div>
-      </EuiPanel>
+          </div>
+        </EuiPanel>
+      </div>
     </>
   );
 }

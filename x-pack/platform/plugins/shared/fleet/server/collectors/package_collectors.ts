@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import _ from 'lodash';
 
 import { getPackageSavedObjects } from '../services/epm/packages/get';
@@ -18,6 +18,7 @@ export interface PackageUsage {
   name: string;
   version: string;
   enabled: boolean;
+  agent_based?: boolean;
 }
 
 export interface AgentlessUsage {
@@ -25,7 +26,9 @@ export interface AgentlessUsage {
   agentlessAgents: AgentUsage;
 }
 
-export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<PackageUsage[]> => {
+export const getPackageUsage = async (
+  soClient?: SavedObjectsClientContract
+): Promise<PackageUsage[]> => {
   if (!soClient) {
     return [];
   }

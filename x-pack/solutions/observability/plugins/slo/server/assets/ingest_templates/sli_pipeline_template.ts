@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
   SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
   SLO_RESOURCES_VERSION,
 } from '../../../common/constants';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 
-export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => {
+export const getSLIPipelineTemplate = (
+  slo: SLODefinition,
+  spaceId: string
+): IngestPutPipelineRequest => {
   // remove empty string
   const groupByFields = [slo.groupBy].flat().filter((field) => !!field);
 
@@ -41,6 +45,18 @@ export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => {
       },
       {
         set: {
+          field: 'slo.name',
+          value: slo.name,
+        },
+      },
+      {
+        set: {
+          field: 'slo.tags',
+          value: slo.tags,
+        },
+      },
+      {
+        set: {
           field: 'slo.revision',
           value: slo.revision,
         },
@@ -55,7 +71,7 @@ export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => {
         date_index_name: {
           field: '@timestamp',
           index_name_prefix: SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-          date_rounding: 'M',
+          date_rounding: 'd',
           date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
         },
       },
@@ -75,6 +91,14 @@ export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => {
             groupByFields.includes(ALL_VALUE) || groupByFields.length === 0
               ? ALL_VALUE
               : groupByFields.map((field) => `{{{slo.groupings.${field}}}}`).join(','),
+        },
+      },
+      {
+        pipeline: {
+          description: 'Global custom pipeline for all SLO rollup data',
+          ignore_missing_pipeline: true,
+          ignore_failure: true,
+          name: 'slo-rollup-global@custom',
         },
       },
       {

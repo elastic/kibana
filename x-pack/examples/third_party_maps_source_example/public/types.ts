@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { MapsPluginSetup, MapsPluginStart } from '@kbn/maps-plugin/public/plugin';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { MapsPluginSetup, MapsPluginStart } from '@kbn/maps-plugin/public/plugin';
 
 export interface MapsCustomRasterSourcePluginSetup {
   developerExamples: DeveloperExamplesSetup;

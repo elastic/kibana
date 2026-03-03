@@ -8,10 +8,12 @@
 import React from 'react';
 
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ProcessorsEditorContextProvider, Props, PipelineEditor } from '..';
+import type { Props } from '..';
+import { ProcessorsEditorContextProvider, PipelineEditor } from '..';
 
 import {
   breadcrumbService,
@@ -36,10 +38,12 @@ const appServices = {
 
 export const ProcessorsEditorWithDeps: React.FunctionComponent<Props> = (props) => {
   return (
-    <KibanaContextProvider services={appServices}>
-      <ProcessorsEditorContextProvider {...props}>
-        <PipelineEditor onLoadJson={jest.fn()} />
-      </ProcessorsEditorContextProvider>
-    </KibanaContextProvider>
+    <I18nProvider>
+      <KibanaContextProvider services={appServices}>
+        <ProcessorsEditorContextProvider {...props}>
+          <PipelineEditor onLoadJson={jest.fn()} />
+        </ProcessorsEditorContextProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 };

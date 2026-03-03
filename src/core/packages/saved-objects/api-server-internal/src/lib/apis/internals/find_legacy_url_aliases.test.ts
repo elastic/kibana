@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
   type LegacyUrlAlias,
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsPointInTimeFinderMock } from '../../../mocks';
-import { CreatePointInTimeFinderFn, PointInTimeFinder } from '../../point_in_time_finder';
+import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../../point_in_time_finder';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 
 describe('findLegacyUrlAliases', () => {

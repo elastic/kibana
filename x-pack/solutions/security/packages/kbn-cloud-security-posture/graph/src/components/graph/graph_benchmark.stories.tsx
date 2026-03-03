@@ -6,17 +6,19 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css, ThemeProvider } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
+import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { GraphPopover } from './graph_popover';
-import { ExpandButtonClickCallback } from '../types';
-import { useGraphPopover } from './use_graph_popover';
-import { ExpandPopoverListItem } from '../styles';
-import largeGraph from '../mock/large_graph.json';
+import { GraphPopover } from '../popovers/primitives/graph_popover';
+import type { ExpandButtonClickCallback } from '../types';
+import { useGraphPopoverState } from '../popovers/primitives/use_graph_popover_state';
+import { PopoverListItem } from '../popovers/primitives/popover_list_item';
+import largeGraph700n from '../mock/large_graph_700n_900e.json';
+import largeGraph2000n from '../mock/large_graph_2000n_2000e.json';
 import { GraphPerfMonitor } from './graph_perf_monitor';
 
 export default {
@@ -26,7 +28,7 @@ export default {
 } satisfies Meta<typeof Graph>;
 
 const useExpandButtonPopover = () => {
-  const { id, state, actions } = useGraphPopover('node-expand-popover');
+  const { id, state, actions } = useGraphPopoverState('node-expand-popover');
   const { openPopover, closePopover } = actions;
 
   const selectedNode = useRef<NodeProps | null>(null);
@@ -84,23 +86,19 @@ const useExpandButtonPopover = () => {
       closePopover={closePopoverHandler}
     >
       <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
-        <ExpandPopoverListItem
+        <PopoverListItem
           iconType="visTagCloud"
           label="Explore related entities"
           onClick={() => {}}
         />
-        <ExpandPopoverListItem
-          iconType="users"
-          label="Show actions by this entity"
-          onClick={() => {}}
-        />
-        <ExpandPopoverListItem
+        <PopoverListItem iconType="users" label="Show actions by this entity" onClick={() => {}} />
+        <PopoverListItem
           iconType="storage"
           label="Show actions on this entity"
           onClick={() => {}}
         />
         <EuiHorizontalRule margin="xs" />
-        <ExpandPopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
+        <PopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
       </EuiListGroup>
     </GraphPopover>
   ));
@@ -126,7 +124,7 @@ const useExpandButtonPopover = () => {
 };
 
 const useNodePopover = () => {
-  const { id, state, actions } = useGraphPopover('node-popover');
+  const { id, state, actions } = useGraphPopoverState('node-popover');
 
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
@@ -153,7 +151,7 @@ const useNodePopover = () => {
   );
 };
 
-const Template = () => {
+const Template = ({ nodes, edges }: GraphResponse) => {
   const expandNodePopover = useExpandButtonPopover();
   const nodePopover = useNodePopover();
   const popovers = [expandNodePopover, nodePopover];
@@ -180,9 +178,8 @@ const Template = () => {
     []
   );
 
-  const nodes = useMemo(() => {
-    return largeGraph.nodes.map((node) => {
-      // @ts-expect-error
+  const nodesWithHandlers = useMemo(() => {
+    return nodes.map((node) => {
       const nodeViewModel: NodeViewModel = { ...node };
       if (nodeViewModel.shape !== 'group') {
         nodeViewModel.nodeClick = nodeClickHandler;
@@ -191,27 +188,30 @@ const Template = () => {
 
       return nodeViewModel;
     });
-  }, [expandButtonClickHandler, nodeClickHandler]);
+  }, [expandButtonClickHandler, nodeClickHandler, nodes]);
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <GraphPerfMonitor />
       <Graph
         css={css`
           height: 100%;
           width: 100%;
         `}
-        nodes={nodes}
-        // @ts-expect-error
-        edges={largeGraph.edges}
+        nodes={nodesWithHandlers}
+        edges={edges}
         interactive={true}
         isLocked={isPopoverOpen}
       />
       {popovers?.map((popover) => popover.Popover && <popover.Popover key={popover.id} />)}
-    </ThemeProvider>
+    </>
   );
 };
 
-export const LargeGraphWithPopovers: StoryObj = {
-  render: Template,
+export const GraphOf700NodesAnd900Edges: StoryObj = {
+  render: () => Template(largeGraph700n as GraphResponse),
+};
+
+export const GraphOf2000NodesAnd2000Edges: StoryObj = {
+  render: () => Template(largeGraph2000n as GraphResponse),
 };

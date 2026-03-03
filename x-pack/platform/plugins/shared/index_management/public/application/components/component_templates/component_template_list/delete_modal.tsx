@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -21,6 +21,8 @@ export const ComponentTemplatesDeleteModal = ({
 }) => {
   const { toasts, api } = useComponentTemplatesContext();
   const numComponentTemplatesToDelete = componentTemplatesToDelete.length;
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const handleDeleteComponentTemplates = () => {
     api
@@ -82,6 +84,8 @@ export const ComponentTemplatesDeleteModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="deleteComponentTemplatesConfirmation"
       title={

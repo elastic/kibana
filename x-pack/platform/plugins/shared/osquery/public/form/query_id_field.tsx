@@ -27,6 +27,7 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   });
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
+  const { isDisabled, ...restEuiFieldProps } = euiFieldProps ?? {};
 
   return (
     <EuiFormRow
@@ -44,7 +45,8 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
         name={fieldName}
         fullWidth
         data-test-subj="input"
-        {...euiFieldProps}
+        disabled={!!isDisabled}
+        {...restEuiFieldProps}
       />
     </EuiFormRow>
   );

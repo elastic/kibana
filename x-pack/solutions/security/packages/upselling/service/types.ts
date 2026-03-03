@@ -16,6 +16,7 @@ export type UpsellingSectionId =
   | 'endpointPolicyProtections'
   | 'osquery_automated_response_actions'
   | 'endpoint_protection_updates'
+  | 'endpoint_device_control'
   | 'endpoint_agent_tamper_protection'
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'

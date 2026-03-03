@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionTypeModel } from '../../../..';
+import type { ActionTypeModel } from '../../../..';
 
 export const ReadOnlyConnectorMessage: React.FC<{
   connectorId: string;

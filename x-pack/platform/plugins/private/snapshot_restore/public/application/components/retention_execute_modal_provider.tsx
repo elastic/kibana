@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { executeRetention as executeRetentionRequest } from '../services/http';
@@ -23,6 +23,7 @@ export const RetentionExecuteModalProvider: React.FunctionComponent<Props> = ({ 
   const toastNotifications = useToastNotifications();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   const executeRetentionPrompt: ExecuteRetention = () => {
     setIsModalOpen(true);
@@ -59,6 +60,8 @@ export const RetentionExecuteModalProvider: React.FunctionComponent<Props> = ({ 
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.executeRetention.confirmModal.executeRetentionTitle"

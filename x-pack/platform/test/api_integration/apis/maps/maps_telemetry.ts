@@ -11,7 +11,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -36,8 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
           return fieldStat.name === 'geo_point';
         }
       );
-      expect(geoPointFieldStats.count).to.be(55);
-      expect(geoPointFieldStats.index_count).to.be(12);
+      expect(geoPointFieldStats.count).to.be(71);
+      expect(geoPointFieldStats.index_count).to.be(14);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: estypes.ClusterStatsFieldTypes) => {

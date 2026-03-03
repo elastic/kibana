@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { i18n } from '@kbn/i18n';
 import {
@@ -104,7 +104,9 @@ export const createDetectionRuleFromBenchmarkRule = async (
       },
       index: [FINDINGS_INDEX_PATTERN],
       query: generateFindingsRuleQuery(benchmarkRule),
-      references: convertReferencesLinksToArray(benchmarkRule.references),
+      references: convertReferencesLinksToArray(
+        benchmarkRule.reference || benchmarkRule.references
+      ),
       name: benchmarkRule.name,
       description: benchmarkRule.rationale,
       tags: generateBenchmarkRuleTags(benchmarkRule),

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/dataset-quality-plugin",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-onboarding-team"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -16,25 +16,29 @@
       "datasetQuality"
     ],
     "requiredPlugins": [
+      "controls",
       "data",
+      "dataViews",
+      "dataViewEditor",
+      "embeddable",
+      "fieldFormats",
+      "fieldsMetadata",
+      "fleet",
       "kibanaReact",
       "kibanaUtils",
-      "controls",
-      "embeddable",
+      "lens",
       "share",
-      "fleet",
-      "fieldFormats",
-      "dataViews",
-      "fieldsMetadata",
-      "taskManager",
-      "usageCollection"
+      "triggersActionsUi",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
-      "telemetry",
-      "lens"
+      "alerting",
     ],
     "requiredBundles": [
-      "discover"
+      "charts",
+      "discover",
+      "esUiShared",
+      "stackAlerts",
     ],
     "extraPublicDirs": [
       "common"

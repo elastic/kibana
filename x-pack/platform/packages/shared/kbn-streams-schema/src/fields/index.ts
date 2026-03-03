@@ -5,7 +5,27 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingBooleanProperty,
+  MappingByteNumberProperty,
+  MappingDateNanosProperty,
+  MappingDateProperty,
+  MappingDoubleNumberProperty,
+  MappingFloatNumberProperty,
+  MappingGeoPointProperty,
+  MappingHalfFloatNumberProperty,
+  MappingIntegerNumberProperty,
+  MappingIpProperty,
+  MappingKeywordProperty,
+  MappingLongNumberProperty,
+  MappingMatchOnlyTextProperty,
+  MappingProperty,
+  MappingShortNumberProperty,
+  MappingTextProperty,
+  MappingUnsignedLongNumberProperty,
+  MappingVersionProperty,
+  MappingWildcardProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { recursiveRecord } from '../shared/record_types';
@@ -18,6 +38,17 @@ export const FIELD_DEFINITION_TYPES = [
   'date',
   'boolean',
   'ip',
+  'geo_point',
+  'integer',
+  'short',
+  'byte',
+  'float',
+  'half_float',
+  'text',
+  'wildcard',
+  'version',
+  'unsigned_long',
+  'date_nanos',
 ] as const;
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
@@ -55,6 +86,32 @@ export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;
 }
 
+export type AllowedMappingProperty =
+  | MappingKeywordProperty
+  | MappingMatchOnlyTextProperty
+  | MappingLongNumberProperty
+  | MappingDoubleNumberProperty
+  | MappingDateProperty
+  | MappingBooleanProperty
+  | MappingIpProperty
+  | MappingGeoPointProperty
+  | MappingIntegerNumberProperty
+  | MappingShortNumberProperty
+  | MappingByteNumberProperty
+  | MappingFloatNumberProperty
+  | MappingHalfFloatNumberProperty
+  | MappingTextProperty
+  | MappingWildcardProperty
+  | MappingVersionProperty
+  | MappingUnsignedLongNumberProperty
+  | MappingDateNanosProperty;
+
+export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
+
+export function isMappingProperties(value: FieldDefinition): value is StreamsMappingProperties {
+  return Object.values(value).every((prop) => prop.type !== 'system');
+}
+
 export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
   z.string(),
   fieldDefinitionConfigSchema
@@ -62,6 +119,7 @@ export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
 
 export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
   from: string;
+  alias_for?: string;
 };
 
 export interface InheritedFieldDefinition {
@@ -70,7 +128,10 @@ export interface InheritedFieldDefinition {
 
 export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z.record(
   z.string(),
-  z.intersection(fieldDefinitionConfigSchema, z.object({ from: NonEmptyString }))
+  z.intersection(
+    fieldDefinitionConfigSchema,
+    z.object({ from: NonEmptyString, alias_for: z.optional(NonEmptyString) })
+  )
 );
 
 export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {

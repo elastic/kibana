@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ApmApiError } from '../../../common/apm_api_supertest';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmApiError } from '../../../common/apm_api_supertest';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { expectToReject } from '../../../common/utils/expect_to_reject';
 
 export default function apiTest({ getService }: FtrProviderContext) {

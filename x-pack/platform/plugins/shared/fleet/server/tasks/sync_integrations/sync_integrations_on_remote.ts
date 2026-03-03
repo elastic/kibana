@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElasticsearchClient,
-  SavedObjectsClient,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
@@ -26,6 +21,10 @@ import { getInstallation, removeInstallation } from '../../services/epm/packages
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
 
+import { createOrUpdateFailedInstallStatus } from '../../services/epm/packages/install_errors_helpers';
+
+import type { InstallSource } from '../../types';
+
 import { installCustomAsset } from './custom_assets';
 import type { CustomAssetsData, SyncIntegrationsData } from './model';
 
@@ -39,6 +38,7 @@ export const getFollowerIndex = async (
   const indices = await esClient.indices.get(
     {
       index: FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX,
+      expand_wildcards: 'all',
     },
     { signal: abortController.signal }
   );
@@ -58,7 +58,8 @@ export const getFollowerIndex = async (
 
 const getSyncedIntegrationsCCRDoc = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController
+  abortController: AbortController,
+  logger: Logger
 ): Promise<SyncIntegrationsData | undefined> => {
   const index = await getFollowerIndex(esClient, abortController);
 
@@ -69,16 +70,16 @@ const getSyncedIntegrationsCCRDoc = async (
     { signal: abortController.signal }
   );
   if (response.hits.hits.length === 0) {
+    logger.warn(`getSyncedIntegrationsCCRDoc - Sync integration doc not found`);
     return undefined;
   }
   return response.hits.hits[0]._source as SyncIntegrationsData;
 };
 
 async function getSyncIntegrationsEnabled(
-  soClient: SavedObjectsClient,
   remoteEsHosts: SyncIntegrationsData['remote_es_hosts'] | undefined
 ): Promise<boolean> {
-  const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list();
   const esHosts = outputs.items
     .filter((output) => output.type === 'elasticsearch')
     .flatMap((output) => output.hosts);
@@ -92,7 +93,13 @@ async function getSyncIntegrationsEnabled(
 }
 
 async function installPackageIfNotInstalled(
-  pkg: { package_name: string; package_version: string },
+  savedObjectsClient: SavedObjectsClientContract,
+  pkg: {
+    package_name: string;
+    package_version: string;
+    install_source?: InstallSource;
+    rolled_back?: boolean;
+  },
   packageClient: PackageClient,
   logger: Logger,
   abortController: AbortController
@@ -100,7 +107,8 @@ async function installPackageIfNotInstalled(
   const installation = await packageClient.getInstallation(pkg.package_name);
   if (
     installation?.install_status === 'installed' &&
-    semverGte(installation.version, pkg.package_version)
+    semverGte(installation.version, pkg.package_version) &&
+    !pkg.rolled_back
   ) {
     logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} already installed`);
     return;
@@ -122,15 +130,35 @@ async function installPackageIfNotInstalled(
     }
     const lastRetryAttemptTime = installation.latest_install_failed_attempts?.[0].created_at;
     // retry install if backoff time has passed since the last attempt
+    // excluding custom and upload packages from retries
     const shouldRetryInstall =
       attempt > 0 &&
       lastRetryAttemptTime &&
       Date.now() - Date.parse(lastRetryAttemptTime) >
-        RETRY_BACKOFF_MINUTES[attempt - 1] * 60 * 1000;
-
+        RETRY_BACKOFF_MINUTES[attempt - 1] * 60 * 1000 &&
+      (pkg.install_source === 'registry' || pkg.install_source === 'bundled');
     if (!shouldRetryInstall) {
+      logger.debug(`installPackageIfNotInstalled - Max retry attempts reached`);
       return;
     }
+  }
+
+  try {
+    if (pkg.rolled_back) {
+      const rollbackResult = await packageClient.rollbackPackage({
+        pkgName: pkg.package_name,
+      });
+      if (rollbackResult.success) {
+        logger.info(
+          `Package ${pkg.package_name} rolled back to previous version ${rollbackResult.version}`
+        );
+      } else {
+        logger.warn(`Package ${pkg.package_name} rollback not successful`);
+      }
+      return;
+    }
+  } catch (error) {
+    logger.error(`Failed to rollback package ${pkg.package_name}, error: ${error}`);
   }
 
   try {
@@ -164,17 +192,28 @@ async function installPackageIfNotInstalled(
     logger.error(
       `Failed to install package ${pkg.package_name} with version ${pkg.package_version}, error: ${error}`
     );
+    if (error instanceof PackageNotFoundError && error.message.includes('not found in registry')) {
+      await createOrUpdateFailedInstallStatus({
+        logger,
+        savedObjectsClient,
+        pkgName: pkg.package_name,
+        pkgVersion: pkg.package_version,
+        error,
+        installSource: pkg?.install_source,
+      });
+    }
   }
 }
 
 async function uninstallPackageIfInstalled(
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   pkg: { package_name: string; package_version: string },
   logger: Logger
 ) {
   const installation = await getInstallation({ savedObjectsClient, pkgName: pkg.package_name });
   if (!installation) {
+    logger.warn(`uninstallPackageIfInstalled - Installation for ${pkg.package_name} not found`);
     return;
   }
   if (
@@ -183,6 +222,9 @@ async function uninstallPackageIfInstalled(
       semverEq(installation.version, pkg.package_version)
     )
   ) {
+    logger.warn(
+      `uninstallPackageIfInstalled - Package ${pkg.package_name} cannot be uninstalled - Found status: ${installation.install_status}, version: ${installation.version} `
+    );
     return;
   }
 
@@ -206,19 +248,19 @@ async function uninstallPackageIfInstalled(
 
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   packageClient: PackageClient,
   abortController: AbortController,
   logger: Logger
 ) => {
-  const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController);
+  const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController, logger);
 
   const isSyncIntegrationsEnabled = await getSyncIntegrationsEnabled(
-    soClient,
     syncIntegrationsDoc?.remote_es_hosts
   );
 
   if (!isSyncIntegrationsEnabled) {
+    logger.debug(`Sync integration not enabled because of remote outputs configuration`);
     return;
   }
 
@@ -230,7 +272,7 @@ export const syncIntegrationsOnRemote = async (
     if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
     }
-    await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
+    await installPackageIfNotInstalled(soClient, pkg, packageClient, logger, abortController);
   }
 
   const uninstalledIntegrations =

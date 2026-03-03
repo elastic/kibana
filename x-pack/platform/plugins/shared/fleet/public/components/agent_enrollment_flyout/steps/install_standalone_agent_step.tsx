@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { EuiSwitchProps } from '@elastic/eui';
-
 import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
 
 import { InstallSection } from '../../enrollment_instructions/install_section';
@@ -26,8 +24,7 @@ export const InstallStandaloneAgentStep = ({
   fullCopyButton,
   onCopy,
   rootIntegrations,
-  showCompleteAgentInstructions,
-  onChangeShowCompleteAgentInstructions,
+  nonFipsIntegrations,
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
@@ -36,8 +33,7 @@ export const InstallStandaloneAgentStep = ({
   fullCopyButton?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
-  showCompleteAgentInstructions: boolean;
-  onChangeShowCompleteAgentInstructions: EuiSwitchProps['onChange'];
+  nonFipsIntegrations?: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
@@ -52,8 +48,7 @@ export const InstallStandaloneAgentStep = ({
         fullCopyButton={fullCopyButton}
         isManaged={false}
         rootIntegrations={rootIntegrations}
-        showCompleteAgentInstructions={showCompleteAgentInstructions}
-        onChangeShowCompleteAgentInstructions={onChangeShowCompleteAgentInstructions}
+        nonFipsIntegrations={nonFipsIntegrations}
       />
     ),
     status: isComplete ? 'complete' : undefined,

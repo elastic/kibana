@@ -7,16 +7,18 @@
 
 import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExperimentalBadge } from '../../../../shared_components';
-import {
-  Visualization,
-  FramePublicAPI,
-  VisualizationType,
-  VisualizationMap,
+import type {
   DatasourceMap,
-  Suggestion,
   DatasourcePublicAPI,
-} from '../../../../types';
+  FramePublicAPI,
+  Visualization,
+  VisualizationMap,
+  VisualizationState,
+  VisualizationType,
+  DatasourceStates,
+  Suggestion,
+} from '@kbn/lens-common';
+import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
 import {
@@ -24,15 +26,15 @@ import {
   removeLayers,
   useLensDispatch,
   useLensSelector,
-  VisualizationState,
-  DatasourceStates,
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
 } from '../../../../state_management';
 import { generateId } from '../../../../id_generator/id_generator';
-import { ChartSwitchSelectable, SelectableEntry } from './chart_switch_selectable';
+import type { SelectableEntry } from './chart_switch_selectable';
+import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
+import { useEditorFrameService } from '../../../editor_frame_service_context';
 
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
@@ -51,9 +53,8 @@ interface VisualizationSelection {
 }
 
 export interface ChartSwitchProps {
+  filteredVisualizationMap: VisualizationMap;
   framePublicAPI: FramePublicAPI;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   layerId: string;
   onChartSelect: () => void;
 }
@@ -83,12 +84,13 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
 }
 
 export const ChartSwitch = memo(function ChartSwitch({
+  filteredVisualizationMap,
   framePublicAPI,
-  visualizationMap,
-  datasourceMap,
   layerId,
   onChartSelect,
 }: ChartSwitchProps) {
+  const visualizationMap = filteredVisualizationMap;
+  const { datasourceMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);

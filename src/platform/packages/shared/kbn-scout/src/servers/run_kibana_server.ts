@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import Os from 'os';
-import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { parseRawFlags, getArgValue, remapPluginPaths, DedicatedTaskRunner } from '@kbn/test';
-import { Config } from '../config';
+import { DedicatedTaskRunner, getArgValue, parseRawFlags, remapPluginPaths } from '@kbn/test';
+import Os from 'os';
+import Path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import type { Config } from './configs';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;
@@ -28,6 +28,15 @@ export async function runKibanaServer(options: {
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
   const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
+  const env = {
+    ...process.env,
+    ...options.config.get('kbnTestServer.env'),
+  };
+  if (env.NO_COLOR !== undefined) {
+    delete env.FORCE_COLOR;
+  } else if (env.FORCE_COLOR === undefined) {
+    env.FORCE_COLOR = '1';
+  }
 
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
@@ -36,11 +45,7 @@ export async function runKibanaServer(options: {
         ? Path.resolve(installDir, 'bin/kibana.bat')
         : Path.resolve(installDir, 'bin/kibana')
       : process.execPath,
-    env: {
-      FORCE_COLOR: 1,
-      ...process.env,
-      ...options.config.get('kbnTestServer.env'),
-    },
+    env,
     wait: runOptions.wait,
     onEarlyExit: options.onEarlyExit,
   };

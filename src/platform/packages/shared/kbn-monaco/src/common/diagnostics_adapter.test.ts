@@ -9,10 +9,10 @@
 
 import '../__jest__/jest.mocks'; // Make sure this is the first import
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
-import { MockIModel } from '../__jest__/types';
-import { LangValidation } from '../types';
+import type { MockIModel } from '../__jest__/types';
+import type { LangValidation } from '../types';
 import { monaco } from '../monaco_imports';
 
 import { DiagnosticsAdapter } from './diagnostics_adapter';

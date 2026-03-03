@@ -85,4 +85,92 @@ describe('LoadingMessages', () => {
       'AI is analyzing up to 30 alerts in the last 24 hours to generate discoveries.'
     );
   });
+
+  describe('terminal states', () => {
+    const defaultProps = {
+      alertsContextCount: 10,
+      localStorageAttackDiscoveryMaxAlerts: '15',
+      start: 'now-24h',
+      end: 'now',
+    };
+
+    it('renders the success result message when status is succeeded', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages
+            {...defaultProps}
+            status="succeeded"
+            discoveries={2}
+            generationEndTime="2025-05-23T08:00:00.000Z"
+          />
+        </TestProviders>
+      );
+      const aiCurrentlyAnalyzing = screen.getByTestId('aisCurrentlyAnalyzing');
+
+      expect(aiCurrentlyAnalyzing.textContent).toMatch(/ran successfully/);
+    });
+
+    it('renders the failure result message and FailureAccordion when status is failed and reason is provided', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages {...defaultProps} status="failed" reason="Some error occurred" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('aisCurrentlyAnalyzing').textContent).toMatch(/failed/);
+      expect(screen.getByText('Some error occurred')).toBeInTheDocument();
+    });
+
+    it('renders the canceled result message when status is canceled', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages {...defaultProps} status="canceled" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('aisCurrentlyAnalyzing').textContent).toMatch(/canceled/);
+    });
+
+    it('renders the progress message when status is started', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages {...defaultProps} status="started" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('attackDiscoveryGenerationInProgress')).toBeInTheDocument();
+    });
+
+    it('renders with connectorName', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages {...defaultProps} connectorName="Test Connector" />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('attackDiscoveryGenerationInProgress').textContent).toMatch(
+        /Test Connector/
+      );
+    });
+
+    it('does not render FailureAccordion when status is failed but reason is empty', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages {...defaultProps} status="failed" reason="" />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('failuresAccordion')).not.toBeInTheDocument();
+    });
+
+    it('does not render FailureAccordion when status is failed but reason is undefined', () => {
+      render(
+        <TestProviders>
+          <LoadingMessages {...defaultProps} status="failed" />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('failuresAccordion')).not.toBeInTheDocument();
+    });
+  });
 });

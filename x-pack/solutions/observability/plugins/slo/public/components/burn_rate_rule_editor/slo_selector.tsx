@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
@@ -16,9 +17,10 @@ interface Props {
   initialSlo?: SLODefinitionResponse;
   errors?: string[];
   onSelected: (slo: SLODefinitionResponse | undefined) => void;
+  onBlur?: () => void;
 }
 
-function SloSelector({ initialSlo, onSelected, errors }: Props) {
+function SloSelector({ initialSlo, onSelected, errors, onBlur }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -66,6 +68,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
         selectedOptions={selectedOptions}
         async
         isLoading={isLoading}
+        onBlur={onBlur}
         onChange={onChange}
         fullWidth
         onSearchChange={onSearchChange}

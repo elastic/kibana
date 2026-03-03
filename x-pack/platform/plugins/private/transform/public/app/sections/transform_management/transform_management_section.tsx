@@ -14,7 +14,9 @@ import {
   EuiPageTemplate,
   EuiSkeletonText,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,6 +57,19 @@ import {
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
 
+const CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY = 'transform.cpsUnsupportedCalloutDismissed';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    dialog: css`
+      width: calc(${euiTheme.size.l} * 30);
+      min-height: calc(${euiTheme.size.l} * 25);
+    `,
+  };
+};
+
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -90,11 +105,22 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { dataViewEditor } = useAppDependencies();
+  const { dataViewEditor, cps, storage } = useAppDependencies();
+  const styles = useStyles();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
   );
+
+  const isCpsEnabled = Boolean(cps?.cpsManager);
+  const [isCpsUnsupportedCalloutDismissed, setIsCpsUnsupportedCalloutDismissed] = useState(() => {
+    return isCpsEnabled ? storage.get(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY) === true : false;
+  });
+
+  const onDismissCpsUnsupportedCallout = useCallback(() => {
+    setIsCpsUnsupportedCalloutDismissed(true);
+    storage.set(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY, true);
+  }, [storage]);
 
   const {
     isInitialLoading: transformNodesInitialLoading,
@@ -226,8 +252,11 @@ export const TransformManagement: FC = () => {
     <EuiButtonEmpty
       href={esTransform}
       target="_blank"
-      iconType="help"
+      iconType="question"
       data-test-subj="documentationLink"
+      aria-label={i18n.translate('xpack.transform.transformList.transformDocsLinkAriaLabel', {
+        defaultMessage: 'Transform documentation link',
+      })}
     >
       <FormattedMessage
         id="xpack.transform.transformList.transformDocsLinkText"
@@ -304,6 +333,30 @@ export const TransformManagement: FC = () => {
             ) : null}
             <EuiSpacer size="s" />
 
+            {isCpsEnabled && !isCpsUnsupportedCalloutDismissed && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  title={i18n.translate('xpack.transform.cpsUnsupportedCallout.title', {
+                    defaultMessage: 'Cross-project search for transforms coming soon',
+                  })}
+                  iconType="info"
+                  onDismiss={onDismissCpsUnsupportedCallout}
+                  dismissButtonProps={{ 'data-test-subj': 'transformCpsUnsupportedCalloutDismiss' }}
+                  data-test-subj="transformCpsUnsupportedCallout"
+                  announceOnMount
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.transform.cpsUnsupportedCallout.description"
+                      defaultMessage="While we're working on this feature, all transform search scope will be limited to the current project."
+                    />
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
 
@@ -330,7 +383,13 @@ export const TransformManagement: FC = () => {
       {isSearchSelectionVisible && (
         <EuiModal
           onClose={onCloseModal}
-          className="transformCreateTransformSearchDialog"
+          css={styles.dialog}
+          aria-label={i18n.translate(
+            'xpack.transform.transformList.createTransformSearchModalTitle',
+            {
+              defaultMessage: 'Create Transform - Select Data Source',
+            }
+          )}
           data-test-subj="transformSelectSourceModal"
         >
           <SearchSelection

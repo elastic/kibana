@@ -10,8 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
-
-import './edit_policy.scss';
+import { css } from '@emotion/react';
 
 import {
   EuiButton,
@@ -24,6 +23,7 @@ import {
   EuiSwitch,
   EuiPageHeader,
   EuiTimeline,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import {
@@ -55,11 +55,32 @@ import {
   getSchema,
 } from './form';
 import { useEditPolicyContext } from './edit_policy_context';
-import { FormInternal } from './types';
+import type { FormInternal } from './types';
 
 const policyNamePath = 'name';
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    // offset the vertical line and the phase icons to align with the phase toggle
+    phases: css`
+      [class*='euiTimelineItemIcon-top'] {
+        padding-top: ${euiTheme.size.base};
+      }
+      [class*='euiTimelineItemIcon-top']::before {
+        margin-top: ${euiTheme.size.xl};
+      }
+    `,
+    fullWidth: css`
+      max-width: 100%;
+    `,
+  };
+};
+
 export const EditPolicy: React.FunctionComponent = () => {
+  const styles = useStyles();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -141,13 +162,14 @@ export const EditPolicy: React.FunctionComponent = () => {
 
     const name = getPolicyName();
     setHasSubmittedForm(true);
-    const success = await savePolicy(
-      {
-        ...policy,
-        name,
-      },
-      isNewPolicy || isClonedPolicy
-    );
+
+    const policyWithName = { ...policy, name };
+
+    if (isClonedPolicy) {
+      delete policyWithName._meta?.managed;
+    }
+
+    const success = await savePolicy(policyWithName, isNewPolicy || isClonedPolicy);
 
     if (success) {
       backToPolicyList(name);
@@ -190,7 +212,11 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
+          <EuiButtonEmpty
+            href={docLinks.links.elasticsearch.ilm}
+            target="_blank"
+            iconType="question"
+          >
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
               defaultMessage="Documentation"
@@ -210,7 +236,7 @@ export const EditPolicy: React.FunctionComponent = () => {
             <EuiFormRow>
               <EuiSwitch
                 data-test-subj="saveAsNewSwitch"
-                style={{ maxWidth: '100%' }}
+                css={styles.fullWidth}
                 checked={isClonedPolicy}
                 onChange={(e) => {
                   setIsClonedPolicy(e.target.checked);
@@ -260,7 +286,7 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <EuiTimeline className="ilmPhases">
+        <EuiTimeline css={styles.phases}>
           <HotPhase />
 
           <WarmPhase />

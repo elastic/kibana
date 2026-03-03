@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export interface MapsConfigType {
   showMapsInspectorAdapter: boolean;
@@ -13,7 +14,6 @@ export interface MapsConfigType {
 }
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   // flag used in functional testing
   showMapsInspectorAdapter: schema.boolean({ defaultValue: false }),
   // flag used in functional testing

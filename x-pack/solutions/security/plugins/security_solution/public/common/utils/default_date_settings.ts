@@ -55,8 +55,15 @@ export const getTimeRangeSettings = (uiSettings = true) => {
   const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
 
   const socTrends = getPreviousTimeRange({ to, from });
+  const valueReport = {
+    kind: 'relative' as const,
+    fromStr: 'now-1M',
+    toStr: 'now',
+    from: parseDateWithDefault('now-1M', moment().subtract(1, 'month')).toISOString(),
+    to: parseDateWithDefault('now', DEFAULT_TO_MOMENT, true).toISOString(),
+  };
 
-  return { from, fromStr, to, toStr, socTrends };
+  return { from, fromStr, to, toStr, valueReport, socTrends };
 };
 
 /**

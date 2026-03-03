@@ -7,32 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
-import { EmbeddableFactory } from './types';
+import type { EmbeddableFactory } from './types';
 
 const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
       serializeState: () => ({
-        rawState: {
-          name: initialState.rawState.name,
-          bork: initialState.rawState.bork,
-        },
+        name: initialState.name,
+        bork: initialState.bork,
       }),
     });
     return {
       Component: () => (
         <div data-test-subj="superTestEmbeddable">
-          SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
-          {initialState.rawState.bork}
+          SUPER TEST COMPONENT, name: {initialState.name} bork: {initialState.bork}
         </div>
       ),
       api,
@@ -57,16 +55,15 @@ describe('embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
+            bork: 'blorp?',
           }),
         })}
       />
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initializeDrilldownsManager: expect.any(Function),
+        initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
         finalizeApi: expect.any(Function),
@@ -82,16 +79,15 @@ describe('embeddable renderer', () => {
         maybeId={'12345'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
+            bork: 'blorp?',
           }),
         })}
       />
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initializeDrilldownsManager: expect.any(Function),
+        initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
         finalizeApi: expect.any(Function),
@@ -104,15 +100,14 @@ describe('embeddable renderer', () => {
     const parentApi = {
       ...getMockPresentationContainer(),
       getSerializedStateForChild: () => ({
-        rawState: {
-          bork: 'blorp?',
-        },
+        bork: 'blorp?',
       }),
     };
     render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
-        initialState: { rawState: { bork: 'blorp?' } },
+        initializeDrilldownsManager: expect.any(Function),
+        initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),
         finalizeApi: expect.any(Function),
@@ -126,7 +121,8 @@ describe('embeddable renderer', () => {
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu', bork: 'Dara' },
+            name: 'Kuni Garu',
+            bork: 'Dara',
           }),
         })}
       />
@@ -147,7 +143,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -161,6 +157,10 @@ describe('embeddable renderer', () => {
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
+        isCustomizable: true,
+        isDuplicable: true,
+        isExpandable: true,
+        isPinnable: false,
       })
     );
   });
@@ -173,7 +173,7 @@ describe('embeddable renderer', () => {
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -186,7 +186,6 @@ describe('embeddable renderer', () => {
   });
 
   it('catches error when thrown in buildEmbeddable', async () => {
-    const buildEmbeddable = jest.fn();
     const errorInInitializeFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
       type: 'errorInBuildEmbeddable',
@@ -200,22 +199,22 @@ describe('embeddable renderer', () => {
     setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
+    // EuiThemeProvider is necessary to get around the complex way the error panel is rendered
     const embeddable = render(
-      <EmbeddableRenderer
-        type={'errorInBuildEmbeddable'}
-        maybeId={'12345'}
-        onApiAvailable={onApiAvailable}
-        getParentApi={() => ({
-          getSerializedStateForChild: () => ({
-            rawState: {},
-          }),
-        })}
-      />
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'errorInBuildEmbeddable'}
+          maybeId={'12345'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => ({
+            getSerializedStateForChild: () => ({}),
+          })}
+        />
+      </EuiThemeProvider>
     );
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
     expect(onApiAvailable).not.toBeCalled();
-    expect(buildEmbeddable).not.toBeCalled();
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
       'error in buildEmbeddable'
     );
@@ -247,7 +246,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />
@@ -263,10 +262,8 @@ describe('reactEmbeddable phase events', () => {
         const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
         const api = finalizeApi({
           serializeState: () => ({
-            rawState: {
-              name: initialState.rawState.name,
-              bork: initialState.rawState.bork,
-            },
+            name: initialState.name,
+            bork: initialState.bork,
           }),
           dataLoading$,
         });
@@ -274,8 +271,7 @@ describe('reactEmbeddable phase events', () => {
           Component: () => (
             <>
               <div data-test-subj="superTestEmbeddable">
-                SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
-                {initialState.rawState.bork}
+                SUPER TEST COMPONENT, name: {initialState.name} bork: {initialState.bork}
               </div>
               <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading
@@ -303,7 +299,7 @@ describe('reactEmbeddable phase events', () => {
         }}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
-            rawState: { name: 'Kuni Garu' },
+            name: 'Kuni Garu',
           }),
         })}
       />

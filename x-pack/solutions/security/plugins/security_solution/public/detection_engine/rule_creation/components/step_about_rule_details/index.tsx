@@ -8,6 +8,7 @@
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -28,6 +29,7 @@ import type { AboutStepRule, AboutStepRuleDetails } from '../../../common/types'
 import * as i18n from './translations';
 import { fullHeight } from './styles';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
 
 const detailsOption: EuiButtonGroupOptionProps = {
   id: 'details',
@@ -44,7 +46,6 @@ const setupOption: EuiButtonGroupOptionProps = {
   label: i18n.ABOUT_PANEL_SETUP_TAB,
   'data-test-subj': 'stepAboutDetailsToggle-setup',
 };
-
 interface StepPanelProps {
   stepData: AboutStepRule | null;
   stepDataDetails: AboutStepRuleDetails | null;
@@ -76,7 +77,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       ...(notesExist ? [notesOption] : []),
       ...(setupExists ? [setupOption] : []),
     ];
-  }, [stepDataDetails]);
+  }, [stepDataDetails?.note, stepDataDetails?.setup]);
 
   return (
     <EuiPanel
@@ -88,13 +89,13 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       {loading && (
         <>
           <EuiProgress size="xs" color="accent" position="absolute" />
-          <HeaderSection title={i18n.ABOUT_TEXT} />
+          <HeaderSection title={i18n.ABOUT_TEXT} border hideSubtitle />
         </>
       )}
       {stepData != null && stepDataDetails != null && (
         <EuiFlexGroup gutterSize="xs" direction="column" className={fullHeight}>
           <EuiFlexItem grow={false} key="header">
-            <HeaderSection title={i18n.ABOUT_TEXT}>
+            <HeaderSection title={i18n.ABOUT_TEXT} border hideSubtitle>
               {toggleOptions.length > 0 && (
                 <EuiButtonGroup
                   options={toggleOptions}
@@ -114,14 +115,9 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                 {(resizeRef) => (
                   <div ref={resizeRef} className={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
-                      <VerticalOverflowContent maxHeight={120}>
-                        <EuiText
-                          size="s"
-                          data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
-                        >
-                          {stepDataDetails.description}
-                        </EuiText>
-                      </VerticalOverflowContent>
+                      <OverflowContent maxHeight={120}>
+                        <RuleDescription description={stepDataDetails.description} />
+                      </OverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
                     <RuleAboutSection rule={rule} hideName hideDescription />
@@ -130,23 +126,17 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
               </EuiResizeObserver>
             )}
             {selectedToggleOption === 'notes' && (
-              <VerticalOverflowContainer
-                data-test-subj="stepAboutDetailsNoteContent"
-                maxHeight={aboutPanelHeight}
-              >
-                <VerticalOverflowContent maxHeight={aboutPanelHeight}>
-                  <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
-                </VerticalOverflowContent>
+              <VerticalOverflowContainer maxHeight={aboutPanelHeight}>
+                <OverflowContent maxHeight={aboutPanelHeight}>
+                  <RuleInvestigationGuide note={stepDataDetails.note} />
+                </OverflowContent>
               </VerticalOverflowContainer>
             )}
             {selectedToggleOption === 'setup' && (
-              <VerticalOverflowContainer
-                data-test-subj="stepAboutDetailsSetupContent"
-                maxHeight={aboutPanelHeight}
-              >
-                <VerticalOverflowContent maxHeight={aboutPanelHeight}>
-                  <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
-                </VerticalOverflowContent>
+              <VerticalOverflowContainer maxHeight={aboutPanelHeight}>
+                <OverflowContent maxHeight={aboutPanelHeight}>
+                  <RuleSetupGuide setup={stepDataDetails.setup} />
+                </OverflowContent>
               </VerticalOverflowContainer>
             )}
           </EuiFlexItem>
@@ -160,12 +150,10 @@ export const StepAboutRuleToggleDetails = memo(StepAboutRuleToggleDetailsCompone
 
 interface VerticalOverflowContainerProps {
   maxHeight: number;
-  'data-test-subj'?: string;
 }
 
 function VerticalOverflowContainer({
   maxHeight,
-  'data-test-subj': dataTestSubject,
   children,
 }: PropsWithChildren<VerticalOverflowContainerProps>): JSX.Element {
   return (
@@ -175,24 +163,23 @@ function VerticalOverflowContainer({
         overflow-y: hidden;
         word-break: break-word;
       `}
-      data-test-subj={dataTestSubject}
     >
       {children}
     </div>
   );
 }
 
-interface VerticalOverflowContentProps {
+interface OverflowContentProps {
   maxHeight: number;
 }
 
-function VerticalOverflowContent({
+function OverflowContent({
   maxHeight,
   children,
-}: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
+}: PropsWithChildren<OverflowContentProps>): JSX.Element {
   return (
     <div
-      className={`eui-yScroll ${css`
+      className={`eui-yScroll eui-xScroll ${css`
         max-height: ${maxHeight}px;
       `}`}
     >
@@ -200,3 +187,42 @@ function VerticalOverflowContent({
     </div>
   );
 }
+
+const RuleDescription = ({ description }: { description: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: <RuleFieldName label={i18n.ABOUT_PANEL_DESCRIPTION_LABEL} fieldName="description" />,
+        description: (
+          <EuiText size="s" data-test-subj="stepAboutRuleDetailsToggleDescriptionText">
+            {description}
+          </EuiText>
+        ),
+      },
+    ]}
+  />
+);
+
+const RuleInvestigationGuide = ({ note }: { note: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: <RuleFieldName fieldName="note" />,
+        description: <MarkdownRenderer>{note}</MarkdownRenderer>,
+      },
+    ]}
+    descriptionProps={{ 'data-test-subj': 'stepAboutDetailsNoteContent' }}
+  />
+);
+
+const RuleSetupGuide = ({ setup }: { setup: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: <RuleFieldName fieldName="setup" />,
+        description: <MarkdownRenderer>{setup}</MarkdownRenderer>,
+      },
+    ]}
+    descriptionProps={{ 'data-test-subj': 'stepAboutDetailsSetupContent' }}
+  />
+);

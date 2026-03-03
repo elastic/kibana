@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import equal from 'fast-deep-equal';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const server = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const headers: Record<string, string> = {
+    [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+  };
 
   describe('scroll_count', () => {
     describe('with less than 10k objects', () => {
@@ -35,69 +39,89 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the count for each included types', async () => {
-        const res = await supertest
+        const { body: actualCount } = await server
           .post(apiUrl)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(headers)
           .send({
             typesToInclude: defaultTypes,
           })
           .expect(200);
 
-        expect(res.body).to.eql({
-          dashboard: 2,
-          'index-pattern': 1,
-          search: 1,
-          visualization: 2,
+        await expectCountMatches({
+          expectedCount: {
+            dashboard: 2,
+            'index-pattern': 1,
+            search: 1,
+            visualization: 2,
+          },
+          actualCount,
+          server,
+          headers,
         });
       });
 
       it('only returns count for types to include', async () => {
-        const res = await supertest
+        const { body: actualCount } = await server
           .post(apiUrl)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(headers)
           .send({
             typesToInclude: ['dashboard', 'search'],
           })
           .expect(200);
 
-        expect(res.body).to.eql({
-          dashboard: 2,
-          search: 1,
+        await expectCountMatches({
+          expectedCount: {
+            dashboard: 2,
+            search: 1,
+          },
+          actualCount,
+          server,
+          headers,
         });
       });
 
       it('filters on title when `searchString` is provided', async () => {
-        const res = await supertest
+        const { body: actualCount } = await server
           .post(apiUrl)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(headers)
           .send({
             typesToInclude: defaultTypes,
             searchString: 'Amazing',
           })
           .expect(200);
 
-        expect(res.body).to.eql({
-          dashboard: 1,
-          visualization: 1,
-          'index-pattern': 0,
-          search: 0,
+        await expectCountMatches({
+          expectedCount: {
+            dashboard: 1,
+            visualization: 1,
+            'index-pattern': 0,
+            search: 0,
+          },
+          actualCount,
+          server,
+          headers,
         });
       });
 
       it('includes all requested types even when none match the search', async () => {
-        const res = await supertest
+        const { body: actualCount } = await server
           .post(apiUrl)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(headers)
           .send({
             typesToInclude: ['dashboard', 'search', 'visualization'],
             searchString: 'nothing-will-match',
           })
           .expect(200);
 
-        expect(res.body).to.eql({
-          dashboard: 0,
-          visualization: 0,
-          search: 0,
+        await expectCountMatches({
+          expectedCount: {
+            dashboard: 0,
+            visualization: 0,
+            search: 0,
+          },
+          actualCount,
+          server,
+          headers,
         });
       });
     });
@@ -127,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         }
 
-        await supertest
+        await server
           .post(`/api/saved_objects/_import`)
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(200);
@@ -142,18 +166,59 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct count for each included types', async () => {
-        const res = await supertest
+        const { body: actualCount } = await server
           .post(apiUrl)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(headers)
           .send({
             typesToInclude: ['visualization'],
           })
           .expect(200);
 
-        expect(res.body).to.eql({
-          visualization: 12000,
+        await expectCountMatches({
+          expectedCount: {
+            visualization: 12000,
+          },
+          actualCount,
+          server,
+          headers,
         });
       });
     });
   });
+}
+
+interface ExpectCountMatchesParams {
+  expectedCount: Record<string, number>;
+  actualCount: Record<string, number>;
+  server: TestAgent;
+  headers: Record<string, string>;
+}
+
+async function expectCountMatches({
+  expectedCount,
+  actualCount,
+  server,
+  headers,
+}: ExpectCountMatchesParams) {
+  if (!equal(actualCount, expectedCount)) {
+    const mismatchingTypes = Object.keys(expectedCount).filter(
+      (key) => expectedCount[key] !== actualCount[key]
+    );
+    const { body: savedObjects } = await server
+      .get(`/api/kibana/management/saved_objects/_find?type=${mismatchingTypes}&perPage=100`)
+      .set(headers)
+      .send();
+
+    const msg = `The counts for the following object types do not match:
+
+      ${mismatchingTypes
+        .map((type) => `- ${type}. Expected: ${expectedCount[type]}; Found: ${actualCount[type]}`)
+        .join('\n')}
+
+    Objects on SO index:
+
+${JSON.stringify(savedObjects, null, 2)}`;
+
+    throw new Error(msg);
+  }
 }

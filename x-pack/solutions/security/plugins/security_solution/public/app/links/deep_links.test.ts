@@ -24,7 +24,7 @@ describe('solutionFormatter', () => {
   it('should convert a flat navItem using normalizedLinks', () => {
     const id = 'page-1' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [{ type: 'navItem', id }],
+      body: [{ id }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -42,12 +42,85 @@ describe('solutionFormatter', () => {
     ]);
   });
 
+  it('should not include missing links', () => {
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [{ id }, { id: id2 }],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'sideNav'],
+      },
+    ]);
+  });
+
+  it('should not include unauthorized links', () => {
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [{ id }, { id: id2 }],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+      [id2]: createMockLink(id2, { unauthorized: true }),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'sideNav'],
+      },
+    ]);
+  });
+
+  it('should include unavailable links with sideNav visibility only', () => {
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [{ id }, { id: id2 }],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+      [id2]: createMockLink(id2, { unavailable: true }),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'sideNav'],
+      },
+      {
+        id: id2,
+        path: `/path/${id2}`,
+        title: `Title for ${id2}`,
+        visibleIn: ['sideNav'],
+      },
+    ]);
+  });
+
   it('should handle navGroup and include its children', () => {
     const id = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           id: 'group-1',
           children: [{ id }],
         },
@@ -76,7 +149,6 @@ describe('solutionFormatter', () => {
         {
           // No id — should recurse into children
           title: 'Group 1',
-          type: 'navGroup',
           children: [{ id }],
         },
       ],
@@ -104,7 +176,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           children: [
             {
               id: groupId,
@@ -141,7 +212,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           children: [
             {
               id: parentId,
@@ -192,7 +262,7 @@ describe('solutionFormatter', () => {
 
   it('should skip nodes that are not in normalizedLinks or SecurityLinkGroup', () => {
     const tree: NavigationTreeDefinition = {
-      body: [{ type: 'navItem', id: 'unknown-id' }],
+      body: [{ id: 'unknown-id' }],
     };
 
     const normalizedLinks: NormalizedLinks = {};

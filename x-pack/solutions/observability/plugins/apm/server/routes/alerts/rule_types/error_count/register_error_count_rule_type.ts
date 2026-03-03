@@ -26,6 +26,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -251,6 +252,7 @@ export function registerErrorCountRuleType({
             [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
             [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
             [ALERT_REASON]: alertReason,
+            [ALERT_INDEX_PATTERN]: indices.error,
             ...sourceFields,
             ...groupByFields,
           };
@@ -286,10 +288,8 @@ export function registerErrorCountRuleType({
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-        const ruleParamsOfRecoveredAlert = alertHits?.[
-          ALERT_RULE_PARAMETERS
-        ] as ErrorCountRuleTypeParams;
-        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const ruleParamsOfRecoveredAlert = alertHits?.[ALERT_RULE_PARAMETERS];
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert?.groupBy ?? [];
         const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
           ApmRuleType.ErrorCount,
           groupByFieldsOfRecoveredAlert

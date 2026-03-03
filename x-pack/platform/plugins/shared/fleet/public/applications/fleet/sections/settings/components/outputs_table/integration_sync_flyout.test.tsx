@@ -37,6 +37,7 @@ describe('IntegrationSyncFlyout', () => {
         package_name: 'elastic_agent',
         package_version: '2.2.1',
         sync_status: SyncStatus.COMPLETED,
+        install_status: { main: 'installed', remote: 'installed' },
         updated_at: '2025-04-14T11:53:00.925Z',
       },
       {
@@ -44,13 +45,36 @@ describe('IntegrationSyncFlyout', () => {
         package_version: '1.25.1',
         sync_status: SyncStatus.FAILED,
         updated_at: '2025-04-14T11:53:00.925Z',
+        install_status: { main: 'installed', remote: 'not_installed' },
         error: 'Nginx failed to install',
       },
       {
         package_name: 'system',
         package_version: '1.68.0',
         sync_status: SyncStatus.SYNCHRONIZING,
+        install_status: { main: 'installed', remote: 'not_installed' },
         updated_at: '2025-04-14T11:53:04.106Z',
+      },
+      {
+        package_name: '1password',
+        package_version: '1.32.0',
+        install_status: {
+          main: 'not_installed',
+          remote: 'installed',
+        },
+        updated_at: '2025-05-19T15:40:26.554Z',
+        sync_status: SyncStatus.WARNING,
+        warning: { message: 'Unable to remove package 1password:1.32.0', title: 'warning' },
+      },
+      {
+        package_name: 'apache',
+        package_version: '1.0.0',
+        install_status: {
+          main: 'not_installed',
+          remote: 'not_installed',
+        },
+        updated_at: '2025-05-19T15:40:26.554Z',
+        sync_status: SyncStatus.COMPLETED,
       },
     ],
     custom_assets: {
@@ -127,6 +151,8 @@ describe('IntegrationSyncFlyout', () => {
     expect(component.getByTestId('elastic_agent-accordion').textContent).toContain('Completed');
     expect(component.getByTestId('nginx-accordion').textContent).toContain('Failed');
     expect(component.getByTestId('system-accordion').textContent).toContain('Syncing...');
+    expect(component.getByTestId('1password-accordion').textContent).toContain('Warning');
+    expect(component.queryByTestId('apache-accordion')).not.toBeInTheDocument();
 
     await userEvent.click(component.getByTestId('nginx-accordion-openCloseToggle'));
     expect(component.getByTestId('integrationSyncIntegrationErrorCallout').textContent).toEqual(

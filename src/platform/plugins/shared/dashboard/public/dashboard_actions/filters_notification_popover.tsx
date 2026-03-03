@@ -22,21 +22,22 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
-  EmbeddableApiContext,
   apiCanLockHoverActions,
   getViewModeSubject,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { type ActionExecutionMeta, triggers } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import type { FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -51,7 +52,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
       const action = await uiActionsService.getAction(ACTION_EDIT_PANEL);
       action.execute({
         embeddable: api,
-        trigger: { id: CONTEXT_MENU_TRIGGER },
+        trigger: triggers[ON_OPEN_PANEL_MENU],
       } as EmbeddableApiContext & ActionExecutionMeta);
     } catch (error) {
       // eslint-disable-next-line no-console

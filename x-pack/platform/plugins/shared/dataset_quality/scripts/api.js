@@ -63,7 +63,7 @@ const cmd = [
   'node',
   `${REPO_ROOT}/scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
-  `--config ${REPO_ROOT}/x-pack/test/dataset_quality_api_integration/${license}/config.ts`,
+  `--config ${REPO_ROOT}/x-pack/solutions/observability/test/dataset_quality_api_integration/${license}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

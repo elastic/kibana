@@ -11,7 +11,6 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyDetectionPanel } from './anomaly_detection_panel';
 import { AnalyticsPanel } from './analytics_panel';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../services/results_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -40,9 +39,7 @@ export const OverviewContent: FC<Props> = ({
   const [anomalyTimelineService, setAnomalyTimelineService] = useState<AnomalyTimelineService>();
 
   useEffect(() => {
-    setAnomalyTimelineService(
-      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApi))
-    );
+    setAnomalyTimelineService(new AnomalyTimelineService(timefilter, uiSettings, mlApi));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

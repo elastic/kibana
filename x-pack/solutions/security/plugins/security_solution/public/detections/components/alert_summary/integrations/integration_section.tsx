@@ -9,7 +9,6 @@ import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import { useIntegrationsLastActivity } from '../../../hooks/alert_summary/use_integrations_last_activity';
 import { IntegrationCard } from './integration_card';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
@@ -25,19 +24,18 @@ export const ADD_INTEGRATIONS_BUTTON_TEST_ID = 'alert-summary-add-integrations-b
 
 export interface IntegrationSectionProps {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
 
 /**
- * Section rendered at the top of the alert summary page. It displays all the AI for SOC installed integrations
+ * Section rendered at the top of the alert summary page. It displays all EASE installed integrations
  * and allow the user to add more integrations by clicking on a button that links to a Fleet page.
  * Each integration card is also displaying the last time the sync happened (using streams).
  */
 export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) => {
   const navigateToIntegrationsPage = useNavigateToIntegrationsPage();
-  const { isLoading, lastActivities } = useIntegrationsLastActivity({ packages });
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -45,12 +43,7 @@ export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) =
         <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
           {packages.map((pkg) => (
             <EuiFlexItem grow={false} key={pkg.name}>
-              <IntegrationCard
-                data-test-subj={`${CARD_TEST_ID}${pkg.name}`}
-                integration={pkg}
-                isLoading={isLoading}
-                lastActivity={lastActivities[pkg.name]}
-              />
+              <IntegrationCard data-test-subj={`${CARD_TEST_ID}${pkg.name}`} integration={pkg} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

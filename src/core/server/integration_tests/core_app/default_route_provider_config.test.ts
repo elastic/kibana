@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -39,8 +39,8 @@ describe('default route provider', () => {
     });
 
     afterAll(async () => {
-      await esServer.stop();
-      await root.shutdown();
+      await esServer?.stop();
+      await root?.shutdown();
     });
 
     it('redirects to the configured default route respecting basePath', async function () {

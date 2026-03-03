@@ -13,17 +13,21 @@ import { useBreadcrumbs } from '../../../../../hooks';
 import { NoPackagePolicies } from './no_package_policies';
 import { PackagePoliciesTable } from './package_policies_table';
 
-export const PackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
+export const PackagePoliciesView = memo<{
+  agentPolicy: AgentPolicy;
+  refreshAgentPolicy: () => void;
+}>(({ agentPolicy, refreshAgentPolicy }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
 
   if (!agentPolicy.package_policies || agentPolicy.package_policies.length === 0) {
-    return <NoPackagePolicies policyId={agentPolicy.id} />;
+    return <NoPackagePolicies agentPolicy={agentPolicy} refreshAgentPolicy={refreshAgentPolicy} />;
   }
 
   return (
     <PackagePoliciesTable
       agentPolicy={agentPolicy}
       packagePolicies={agentPolicy.package_policies}
+      refreshAgentPolicy={refreshAgentPolicy}
     />
   );
 });

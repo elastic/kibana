@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
 import { GROUPED_TABLE_TEST_ID, TableSection } from './table_section';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-const dataView: DataView = createStubDataView({ spec: {} });
+const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
+const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 const packages: PackageListItem[] = [
   {
     id: 'splunk',
@@ -25,16 +26,12 @@ const packages: PackageListItem[] = [
     version: '0.1.0',
   },
 ];
-const ruleResponse = {
-  rules: [],
-  isLoading: false,
-};
 
 describe('<TableSection />', () => {
   it('should render all components', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
+        <TableSection dataView={dataView} packages={packages} />
       </TestProviders>
     );
 

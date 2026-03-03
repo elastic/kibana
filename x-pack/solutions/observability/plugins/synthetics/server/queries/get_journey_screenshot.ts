@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsEsClient } from '../lib';
-import { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsEsClient } from '../lib';
+import type { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
   _source: RefResult | FullScreenshot;

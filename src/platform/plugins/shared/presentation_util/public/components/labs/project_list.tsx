@@ -11,8 +11,9 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiCallOut, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { SolutionName, ProjectID, Project } from '../../../common';
-import { ProjectListItem, Props as ProjectListItemProps } from './project_list_item';
+import type { SolutionName, ProjectID, Project } from '../../../common';
+import type { Props as ProjectListItemProps } from './project_list_item';
+import { ProjectListItem } from './project_list_item';
 
 import { LabsStrings } from '../../i18n';
 

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
+import type { RangeValues } from '@kbn/vis-default-editor-plugin/public';
 import { heatmapVisType } from '@kbn/vis-type-heatmap-plugin/public';
 
-import { ColorSchemaParams } from '@kbn/charts-plugin/public';
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { ValueAxis } from '@kbn/vis-type-xy-plugin/public';
+import type { ColorSchemaParams } from '@kbn/charts-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { ValueAxis } from '@kbn/vis-type-xy-plugin/public';
 
-import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams } from './types';
+import type { TimeMarker } from './vislib/visualizations/time_marker';
+import type { CommonVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {

@@ -8,13 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  TabItem,
-  GetTabMenuItems,
-  TabMenuItemWithClick,
-  TabMenuItem,
-  TabMenuItemName,
-} from '../types';
+import type { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
+import { TabMenuItemName } from '../types';
 import { isLastTab, hasSingleTab, type TabsState } from './manage_tabs';
 
 const DividerMenuItem = 'divider';
@@ -44,6 +39,8 @@ export interface GetTabMenuItemsFnProps {
   onDuplicate: (item: TabItem) => void;
   onCloseOtherTabs: (item: TabItem) => void;
   onCloseTabsToTheRight: (item: TabItem) => void;
+  /** Optional function to provide additional menu items for tabs */
+  getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
 }
 
 export const getTabMenuItemsFn = ({
@@ -52,6 +49,7 @@ export const getTabMenuItemsFn = ({
   onDuplicate,
   onCloseOtherTabs,
   onCloseTabsToTheRight,
+  getAdditionalTabMenuItems,
 }: GetTabMenuItemsFnProps): GetTabMenuItems => {
   return (item) => {
     const closeOtherTabsItem = hasSingleTab(tabsState)
@@ -112,6 +110,15 @@ export const getTabMenuItemsFn = ({
       if (closeTabsToTheRightItem) {
         items.push(closeTabsToTheRightItem);
       }
+    }
+
+    // Add any additional menu items provided by the consumer
+    const additionalItems = getAdditionalTabMenuItems?.(item);
+    if (additionalItems && additionalItems.length > 0) {
+      if (items.length > 0) {
+        items.push(DividerMenuItem);
+      }
+      items.push(...additionalItems);
     }
 
     return items;

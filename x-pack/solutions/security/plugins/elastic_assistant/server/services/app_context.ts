@@ -6,13 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { defaultAssistantFeatures, AssistantFeatures } from '@kbn/elastic-assistant-common';
-import { AssistantTool } from '../types';
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type { AssistantTool } from '../types';
 
 export type PluginName = string;
 export type RegisteredToolsStorage = Map<PluginName, Set<AssistantTool>>;
 export type RegisteredFeaturesStorage = Map<PluginName, AssistantFeatures>;
-export type GetRegisteredTools = (pluginName: string) => AssistantTool[];
+export type GetRegisteredTools = (pluginName: string | string[]) => AssistantTool[];
 export type GetRegisteredFeatures = (pluginName: string) => AssistantFeatures;
 export interface ElasticAssistantAppContext {
   logger: Logger;
@@ -67,8 +68,16 @@ class AppContextService {
    *
    * @param pluginName
    */
-  public getRegisteredTools(pluginName: string): AssistantTool[] {
-    const tools = Array.from(this.registeredTools?.get(pluginName) ?? new Set<AssistantTool>());
+  public getRegisteredTools(pluginName: string | string[]): AssistantTool[] {
+    const pluginNames = Array.isArray(pluginName) ? pluginName : [pluginName];
+
+    const tools = [
+      ...new Set(
+        pluginNames
+          .map((name) => this.registeredTools?.get(name) ?? new Set<AssistantTool>())
+          .flatMap((set) => [...set])
+      ),
+    ];
 
     this.logger?.debug('AppContextService:getRegisteredTools');
     this.logger?.debug(`pluginName: ${pluginName}`);

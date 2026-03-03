@@ -13,6 +13,11 @@ import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 import { createEnableColumn } from './enable';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../../common/constants';
+import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+
+jest.mock('../../../../../../common/lib/kibana');
 
 const onSwitchChangeMock = jest.fn();
 
@@ -33,6 +38,18 @@ const renderEnabledSchedule = (enabled = true) => {
 describe('Enable Column', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [ATTACK_DISCOVERY_FEATURE_ID]: {
+              updateAttackDiscoverySchedule: true,
+            },
+          },
+        },
+      },
+    });
   });
 
   it('should render enable button', () => {
@@ -53,8 +70,8 @@ describe('Enable Column', () => {
   it('should invoke `onSwitchChange` with correct parameters for the enabled schedule', async () => {
     renderEnabledSchedule(true);
 
-    const deleteButton = screen.getByTestId('scheduleSwitch');
-    fireEvent.click(deleteButton);
+    const scheduleSwitch = screen.getByTestId('scheduleSwitch');
+    fireEvent.click(scheduleSwitch);
 
     expect(onSwitchChangeMock).toHaveBeenCalledWith(mockAttackDiscoverySchedule.id, false);
   });
@@ -66,5 +83,46 @@ describe('Enable Column', () => {
     fireEvent.click(deleteButton);
 
     expect(onSwitchChangeMock).toHaveBeenCalledWith(mockAttackDiscoverySchedule.id, true);
+  });
+
+  describe('when disabled update capability', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              [ATTACK_DISCOVERY_FEATURE_ID]: {
+                updateAttackDiscoverySchedule: false,
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should render disabled delete button', () => {
+      renderEnabledSchedule();
+      expect(screen.getByTestId('scheduleSwitch')).toBeDisabled();
+    });
+
+    it('should not invoke `deleteSchedule` when the delete button is clicked', async () => {
+      renderEnabledSchedule();
+
+      const deleteButton = screen.getByTestId('scheduleSwitch');
+      fireEvent.click(deleteButton);
+
+      expect(onSwitchChangeMock).not.toHaveBeenCalled();
+    });
+
+    it('should render missing privileges tooltip', async () => {
+      renderEnabledSchedule();
+
+      const scheduleSwitch = screen.getByTestId('scheduleSwitch');
+      fireEvent.mouseOver(scheduleSwitch.parentElement as Node);
+      await waitForEuiToolTipVisible();
+
+      const tooltip = screen.getByRole('tooltip');
+      expect(tooltip).toHaveTextContent('Missing privileges');
+    });
   });
 });

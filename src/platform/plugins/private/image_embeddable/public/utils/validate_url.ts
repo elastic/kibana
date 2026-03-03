@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IExternalUrl } from '@kbn/core-http-browser';
+import type { IExternalUrl } from '@kbn/core-http-browser';
 
 const SAFE_URL_PATTERN = /^(?:(?:https?):|[^&:/?#]*(?:[/?#]|$))/gi;
 const generalFormatError = i18n.translate(

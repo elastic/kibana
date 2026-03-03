@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
@@ -29,6 +30,12 @@ export const DELETE_NOTE_ERROR = i18n.translate(
     defaultMessage: 'Error deleting note',
   }
 );
+const DELETE_NOTE_FAILURE = i18n.translate(
+  'xpack.securitySolution.notes.deleteNote.failureMessage',
+  {
+    defaultMessage: 'Failed to delete note',
+  }
+);
 
 export interface DeleteNoteButtonIconProps {
   /**
@@ -44,10 +51,14 @@ export interface DeleteNoteButtonIconProps {
 /**
  * Renders a button to delete a note.
  * This button works in combination with the DeleteConfirmModal.
+ * There should be a DeleteConfirmModal component as an ancestor of this component with visibility based on the redux state.
  */
 export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconProps) => {
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
+
+  const { notesPrivileges } = useUserPrivileges();
+  const canDeleteNotes = notesPrivileges.crud;
 
   const deleteStatus = useSelector((state: State) => selectDeleteNotesStatus(state));
   const deleteError = useSelector((state: State) => selectDeleteNotesError(state));
@@ -63,11 +74,17 @@ export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconP
 
   useEffect(() => {
     if (deleteStatus === ReqStatus.Failed && deleteError) {
-      addErrorToast(null, {
+      const errorMessage =
+        'message' in deleteError && deleteError.message ? deleteError.message : DELETE_NOTE_FAILURE;
+      addErrorToast(new Error(errorMessage), {
         title: DELETE_NOTE_ERROR,
       });
     }
   }, [addErrorToast, deleteError, deleteStatus]);
+
+  if (!canDeleteNotes) {
+    return null;
+  }
 
   return (
     <EuiButtonIcon

@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/ink",
+  "owner": "@elastic/streams-program-team",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

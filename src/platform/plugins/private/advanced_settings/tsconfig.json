@@ -1,11 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
   "include": [
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -16,10 +17,10 @@
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
     "@kbn/management-settings-section-registry",
-    "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
     "@kbn/spaces-plugin",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

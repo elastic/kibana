@@ -7,8 +7,9 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ReportingCore } from '../../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
+import type { ReportingCore } from '../../..';
+import type { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
+import type { ReportingUser } from '../../../types';
 import {
   createMockPluginSetup,
   createMockPluginStart,
@@ -30,7 +31,7 @@ const mockCounters = {
   usageCounter: jest.fn(),
   errorCounter: jest.fn(),
 };
-const mockUser = { username: 'joeuser' };
+const mockUser = { username: 'joeuser' } as ReportingUser;
 const options = { isInternal: false };
 
 beforeEach(async () => {

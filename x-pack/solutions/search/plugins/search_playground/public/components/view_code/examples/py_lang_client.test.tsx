@@ -8,9 +8,10 @@
 import { render } from '@testing-library/react';
 import { PY_LANG_CLIENT } from './py_lang_client'; // Adjust the import path according to your project structure
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { PlaygroundForm } from '../../../types';
+import type { PlaygroundForm } from '../../../types';
 
 describe('PY_LANG_CLIENT function', () => {
+  const formErrors = {};
   test('renders with correct content', () => {
     // Mocking necessary values for your function
     const formValues = {
@@ -25,7 +26,7 @@ describe('PY_LANG_CLIENT function', () => {
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
-    const { container } = render(PY_LANG_CLIENT(formValues, clientDetails));
+    const { container } = render(PY_LANG_CLIENT(formValues, formErrors, clientDetails));
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
   });
@@ -43,7 +44,7 @@ describe('PY_LANG_CLIENT function', () => {
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
-    const { container } = render(PY_LANG_CLIENT(formValues, clientDetails));
+    const { container } = render(PY_LANG_CLIENT(formValues, formErrors, clientDetails));
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
   });

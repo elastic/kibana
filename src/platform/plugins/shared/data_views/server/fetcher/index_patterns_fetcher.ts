@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import { defer, from } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
@@ -84,6 +84,7 @@ export class IndexPatternsFetcher {
     includeEmptyFields?: boolean;
     abortSignal?: AbortSignal;
     runtimeMappings?: estypes.MappingRuntimeFields;
+    projectRouting?: string;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const {
       pattern,
@@ -97,6 +98,7 @@ export class IndexPatternsFetcher {
       includeEmptyFields,
       abortSignal,
       runtimeMappings,
+      projectRouting,
     } = options;
     const allowNoIndices = fieldCapsOptions?.allow_no_indices || this.allowNoIndices;
 
@@ -118,6 +120,7 @@ export class IndexPatternsFetcher {
       includeEmptyFields,
       runtimeMappings,
       abortSignal,
+      projectRouting,
     });
 
     if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {

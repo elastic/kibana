@@ -35,8 +35,8 @@ import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   createNewAPIKeySet,
-  migrateLegacyActions,
   updateMetaAttributes,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -177,6 +177,7 @@ const bulkEnableRulesWithOCC = async (
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
   let scheduleValidationError = '';
 
   await withSpan(
@@ -203,11 +204,15 @@ const bulkEnableRulesWithOCC = async (
         });
       }
 
+      await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
+
       await pMap(
         rulesFinderRules,
         async (rule) => {
           const ruleName = rule.attributes.name;
 
+          const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+          const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
           try {
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
@@ -223,12 +228,12 @@ const bulkEnableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
-            const migratedActions = await migrateLegacyActions(context, {
-              ruleId: rule.id,
-              actions: rule.attributes.actions,
-              references: rule.references,
-              attributes: rule.attributes,
-            });
+            if (isLifecycleAlert) {
+              rulesToClearFlapping.push({
+                id: rule.id,
+                ruleTypeId: ruleType.id,
+              });
+            }
 
             const updatedAttributes = updateMetaAttributes(context, {
               ...rule.attributes,
@@ -239,13 +244,6 @@ const bulkEnableRulesWithOCC = async (
                   username,
                   shouldUpdateApiKey: true,
                 }))),
-              ...(migratedActions.hasLegacyActions
-                ? {
-                    actions: migratedActions.resultedActions,
-                    throttle: undefined,
-                    notifyWhen: undefined,
-                  }
-                : {}),
               enabled: true,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -287,9 +285,6 @@ const bulkEnableRulesWithOCC = async (
             rulesToEnable.push({
               ...rule,
               attributes: updatedAttributes,
-              ...(migratedActions.hasLegacyActions
-                ? { references: migratedActions.resultedReferences }
-                : {}),
             });
 
             context.auditLogger?.log(
@@ -351,6 +346,46 @@ const bulkEnableRulesWithOCC = async (
         },
       })
   );
+
+  // Get a map of all rules that failed to enable so we do not clear their flapping
+  const ruleIdsFailedToEnable: Record<string, boolean> = {};
+
+  result.saved_objects.forEach((rule) => {
+    if (rule.error) {
+      ruleIdsFailedToEnable[rule.id] = true;
+    }
+  });
+
+  // Remove all failed to enable rule ids and rule type ids
+  const ruleIdsToClearFlapping: string[] = [];
+  const ruleTypeIdsToClearFlapping: Record<string, boolean> = {};
+
+  rulesToClearFlapping.forEach(({ id, ruleTypeId }) => {
+    if (!ruleIdsFailedToEnable[id]) {
+      ruleIdsToClearFlapping.push(id);
+      ruleTypeIdsToClearFlapping[ruleTypeId] = true;
+    }
+  });
+
+  // Attempt to clear flapping from those rule ids
+  if (context.alertsService && ruleIdsToClearFlapping.length) {
+    try {
+      await context.alertsService.clearAlertFlappingHistory({
+        indices: context.getAlertIndicesAlias(
+          Object.keys(ruleTypeIdsToClearFlapping),
+          context.spaceId
+        ),
+        ruleIds: ruleIdsToClearFlapping,
+      });
+    } catch (error) {
+      // Don't throw if we can't clear the flapping history for whatever reason
+      context.logger.error(
+        `Failure to clear flapping history from rule ${JSON.stringify(ruleIdsToClearFlapping)} - ${
+          error.message
+        }`
+      );
+    }
+  }
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const taskIdsToEnable: string[] = [];

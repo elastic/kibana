@@ -21,8 +21,8 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
-  getSeverityColor,
   getSeverityWithLow,
+  getThemeResolvedSeverityColor,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
@@ -31,6 +31,8 @@ import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalie
 
 import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../components/rule_editor';
+import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from '../../components/anomalies_table/build_alert_params_from_anomaly';
 import { formatValue } from '../../formatters/format_value';
 import {
   getChartType,
@@ -65,17 +67,24 @@ export class ExplorerChartDistribution extends React.Component {
 
   static propTypes = {
     seriesConfig: PropTypes.object,
-    severity: PropTypes.number,
+    severity: PropTypes.array,
     tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
+    euiTheme: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.chartScales = undefined;
     this.cursorStateSubscription = undefined;
-    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+    this.state = {
+      popoverData: null,
+      popoverCoords: [0, 0],
+      showRuleEditorFlyout: () => {},
+      alertFlyoutVisible: false,
+      alertFlyoutParams: undefined,
+    };
   }
 
   componentDidMount() {
@@ -115,6 +124,7 @@ export class ExplorerChartDistribution extends React.Component {
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
+    const euiTheme = this.props.euiTheme;
 
     if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
       // just return so the empty directive renders without an error later on
@@ -313,7 +323,7 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('y', 0)
         .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
-        .style('stroke', '#cccccc')
+        .style('stroke', euiTheme.colors.lightestShade)
         .style('fill', 'none')
         .style('stroke-width', 1);
 
@@ -514,9 +524,16 @@ export class ExplorerChartDistribution extends React.Component {
         .attr('cy', (d) => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
         .attr('class', (d) => {
           let markerClass = 'metric-value';
-          if (d.anomalyScore !== undefined && Number(d.anomalyScore) >= severity) {
-            markerClass += ' anomaly-marker ';
-            markerClass += getSeverityWithLow(d.anomalyScore).id;
+          if (d.anomalyScore !== undefined) {
+            // Check if the anomaly score falls within any of the selected severity ranges
+            const anomalyScore = Number(d.anomalyScore);
+            const isInSelectedRange = severity.some((s) => {
+              return anomalyScore >= s.min && (s.max === undefined || anomalyScore <= s.max);
+            });
+            if (isInSelectedRange) {
+              markerClass += ' anomaly-marker ';
+              markerClass += getSeverityWithLow(anomalyScore).id;
+            }
           }
           return markerClass;
         });
@@ -606,7 +623,7 @@ export class ExplorerChartDistribution extends React.Component {
             defaultMessage: 'anomaly score',
           }),
           value: displayScore,
-          color: getSeverityColor(score),
+          color: getThemeResolvedSeverityColor(score, euiTheme),
           seriesIdentifier: {
             key: seriesKey,
           },
@@ -729,6 +746,14 @@ export class ExplorerChartDistribution extends React.Component {
     });
   };
 
+  handleShowAnomalyAlertFlyout = (anomaly) => {
+    const initialParams = buildAlertParamsFromAnomaly(anomaly);
+    this.setState({
+      alertFlyoutParams: initialParams,
+      alertFlyoutVisible: true,
+    });
+  };
+
   render() {
     const { seriesConfig } = this.props;
 
@@ -746,6 +771,12 @@ export class ExplorerChartDistribution extends React.Component {
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
+        {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => this.setState({ alertFlyoutVisible: false })}
+            initialParams={this.state.alertFlyoutParams}
+          />
+        )}
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -771,6 +802,7 @@ export class ExplorerChartDistribution extends React.Component {
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                showAnomalyAlertFlyout={this.handleShowAnomalyAlertFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />

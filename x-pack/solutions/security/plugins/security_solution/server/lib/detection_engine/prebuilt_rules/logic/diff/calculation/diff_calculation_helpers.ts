@@ -7,17 +7,17 @@
 
 import { mapValues } from 'lodash';
 import type {
-  FieldsDiff,
-  FieldsDiffAlgorithmsFor,
+  ThreeWayFieldsDiff,
+  ThreeWayFieldsDiffAlgorithmsFor,
   ThreeVersionsOf,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const calculateFieldsDiffFor = <TObject extends object>(
   ruleVersions: ThreeVersionsOf<TObject>,
-  fieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<TObject>,
+  fieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<TObject>,
   isRuleCustomized: boolean
-): FieldsDiff<TObject> => {
+): ThreeWayFieldsDiff<TObject> => {
   const result = mapValues(fieldsDiffAlgorithms, (calculateFieldDiff, fieldName) => {
     const fieldVersions = pickField(fieldName as keyof TObject, ruleVersions);
     const fieldDiff = calculateFieldDiff(fieldVersions, isRuleCustomized);
@@ -25,7 +25,7 @@ export const calculateFieldsDiffFor = <TObject extends object>(
   });
 
   // TODO: try to improve strict typing and get rid of this "as" operator.
-  return result as FieldsDiff<TObject>;
+  return result as ThreeWayFieldsDiff<TObject>;
 };
 
 const pickField = <TObject extends object>(

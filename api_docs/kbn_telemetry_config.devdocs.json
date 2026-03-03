@@ -1,0 +1,144 @@
+{
+  "id": "@kbn/telemetry-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/telemetry-config",
+        "id": "def-common.TelemetryConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryConfig",
+        "description": [
+          "\nConfiguration for OpenTelemetry"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry-config",
+            "id": "def-common.TelemetryConfig.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nWhether telemetry collection is enabled."
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/telemetry-config",
+            "id": "def-common.TelemetryConfig.tracing",
+            "type": "Object",
+            "tags": [],
+            "label": "tracing",
+            "description": [
+              "\nTracing config. See {@link TracingConfig}."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/tracing-config",
+                "scope": "common",
+                "docId": "kibKbnTracingConfigPluginApi",
+                "section": "def-common.TracingConfig",
+                "text": "TracingConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/telemetry-config",
+            "id": "def-common.TelemetryConfig.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [
+              "\nMetrics config. See {@link MetricsConfig}."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics-config",
+                "scope": "common",
+                "docId": "kibKbnMetricsConfigPluginApi",
+                "section": "def-common.MetricsConfig",
+                "text": "MetricsConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/telemetry-config",
+        "id": "def-common.telemetryConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "telemetryConfigSchema",
+        "description": [
+          "\nSchema for the OpenTelemetry configuration"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/telemetry-config",
+            "scope": "common",
+            "docId": "kibKbnTelemetryConfigPluginApi",
+            "section": "def-common.TelemetryConfig",
+            "text": "TelemetryConfig"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry-config/src/config_schema.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

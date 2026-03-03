@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { ValueLabelConfig } from '../../common/types';
+import type { ValueLabelConfig } from '@kbn/lens-common';
 
 const valueLabelsOptions: Array<{
   id: string;

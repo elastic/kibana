@@ -7,9 +7,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { FileLayer } from '@elastic/ems-client';
-import { ChoroplethChartState } from './types';
+import type { ChoroplethChartState } from './types';
 import { EMSFileSelect } from '../../components/ems_file_select';
 import { getEmsFileLayers } from '../../util';
 
@@ -100,14 +101,15 @@ export function RegionKeyEditor(props: Props) {
   return isLoading ? (
     <EuiSelect isLoading />
   ) : (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EMSFileSelect
         isColumnCompressed
         value={props.state.emsLayerId ? props.state.emsLayerId : null}
         onChange={onEmsLayerSelect}
+        fullWidth
       />
       {emsFieldSelect}
-    </>
+    </div>
   );
 }
 

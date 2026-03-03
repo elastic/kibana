@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import {
-  ActionType,
-  AsApiContract,
-  Rule,
-  transformRule,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
-import { ActionConnector } from '../../../../common/rules/types';
+import type { ActionConnector } from '../../../../common/rules/types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import { apiService } from './utils';
 
-import { AlertsResult, MonitorIdParam } from '../actions/types';
+import type { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
-import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
+import type { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
-import { Ping } from '../../../../common/runtime_types/ping';
-import { DefaultEmail } from '../../../../common/runtime_types';
+import type { RuleAction } from '../../../../common/rules/alert_actions';
+import { populateAlertActions } from '../../../../common/rules/alert_actions';
+import type { Ping } from '../../../../common/runtime_types/ping';
+import type { DefaultEmail } from '../../../../common/runtime_types';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
@@ -39,6 +36,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       is_deprecated: isDeprecated,
       is_missing_secrets: isMissingSecrets,
       is_system_action: isSystemAction,
+      is_connector_type_deprecated: isConnectorTypeDeprecated,
       ...res
     }) => ({
       ...res,
@@ -48,6 +46,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       isPreconfigured,
       isMissingSecrets,
       isSystemAction,
+      isConnectorTypeDeprecated,
     })
   );
 };
@@ -173,6 +172,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       supported_feature_ids: supportedFeatureIds,
       is_system_action_type: isSystemActionType,
       sub_feature: subFeature,
+      is_deprecated: isDeprecated,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
@@ -182,6 +182,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       supportedFeatureIds,
       isSystemActionType,
       subFeature,
+      isDeprecated,
     })
   );
 };

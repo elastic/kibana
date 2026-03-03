@@ -19,7 +19,6 @@ describe('LazyTimelineTabRenderer', () => {
   const defaultProps = {
     dataTestSubj: 'test',
     shouldShowTab: true,
-    isOverflowYScroll: false,
     timelineId: TimelineId.test,
   };
 

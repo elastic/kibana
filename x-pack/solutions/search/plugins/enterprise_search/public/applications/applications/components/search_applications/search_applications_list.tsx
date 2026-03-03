@@ -25,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
+import { SEARCH_APPS_TITLE } from '../../../../../common/constants';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { docLinks } from '../../../shared/doc_links';
 
@@ -164,7 +165,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.searchApplications.list.description"
-              defaultMessage="Search Applications help make your Elasticsearch data easily searchable for end users. Create, build, and manage all your search applications here. To learn more, {documentationUrl}."
+              defaultMessage="Search applications help make your Elasticsearch data easily searchable for end users. Create, build, and manage all your search applications here. To learn more, {documentationUrl}."
               values={{
                 documentationUrl: (
                   <EuiLink
@@ -176,7 +177,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
                     {i18n.translate(
                       'xpack.enterpriseSearch.searchApplications.list.documentation',
                       {
-                        defaultMessage: 'explore our Search Applications documentation',
+                        defaultMessage: 'explore our search applications documentation',
                       }
                     )}
                   </EuiLink>
@@ -184,9 +185,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
               }}
             />
           ),
-          pageTitle: i18n.translate('xpack.enterpriseSearch.searchApplications.list.title', {
-            defaultMessage: 'Search Applications',
-          }),
+          pageTitle: SEARCH_APPS_TITLE,
           rightSideItems: isLoading
             ? []
             : !hasNoSearchApplications
@@ -212,13 +211,13 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
                 placeholder={i18n.translate(
                   'xpack.enterpriseSearch.searchApplications.list.searchBar.placeholder',
                   {
-                    defaultMessage: 'Search Applications',
+                    defaultMessage: 'Search applications',
                   }
                 )}
                 aria-label={i18n.translate(
                   'xpack.enterpriseSearch.searchApplications.list.searchBar.ariaLabel',
                   {
-                    defaultMessage: 'Search Applications',
+                    defaultMessage: 'Search applications',
                   }
                 )}
                 fullWidth

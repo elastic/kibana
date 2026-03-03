@@ -7,7 +7,7 @@
 
 import type { HttpResponse } from '@kbn/core/public';
 
-import { ErrorCode } from './error_codes';
+import type { ErrorCode } from './error_codes';
 
 export interface APIKeyResponse {
   apiKey: {

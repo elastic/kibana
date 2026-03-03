@@ -12,13 +12,15 @@ import { parse as parseCookie } from 'tough-cookie';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpService } from '@kbn/core-http-server-mocks';
+import type { HttpService } from '@kbn/core-http-server-internal';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { createInternalHttpService } from '../utilities';
 
 let server: HttpService;
 
@@ -29,14 +31,18 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
-  server = createHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  server = createInternalHttpService({ logger });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {
@@ -1659,10 +1665,10 @@ describe('runs with default preResponse handlers', () => {
     expect(response.header.foo).toBe('bar');
     expect(response.header['kbn-name']).toBe('kibana');
     expect(response.header['content-security-policy']).toBe(
-      `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+      `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
     );
     expect(response.header['content-security-policy-report-only']).toBe(
-      `form-action 'report-sample' 'self'; object-src 'report-sample' 'none'`
+      `form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co; script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
     );
   });
 });

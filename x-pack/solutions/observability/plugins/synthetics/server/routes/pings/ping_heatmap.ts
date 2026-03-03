@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MonitorStatusHeatmapBucket } from '../../../common/runtime_types';
+import type { MonitorStatusHeatmapBucket } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { queryMonitorHeatmap } from '../../common/pings/monitor_status_heatmap';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 
 export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

@@ -16,6 +16,8 @@ import { OtelKubernetesFlowPage } from '../pom/pages/otel_kubernetes_flow.page';
 import { OtelKubernetesOverviewDashboardPage } from '../pom/pages/otel_kubernetes_overview_dashboard.page';
 import { OtelHostFlowPage } from '../pom/pages/otel_host_flow.page';
 import { HostsOverviewPage } from '../pom/pages/hosts_overview.page';
+import { FirehoseFlowPage } from '../pom/pages/firehose_flow.page';
+import { FleetAgentsOverviewPage } from '../pom/pages/fleet_agents_overview.page';
 
 export const test = base.extend<{
   headerBar: HeaderBar;
@@ -28,6 +30,8 @@ export const test = base.extend<{
   otelKubernetesOverviewDashboardPage: OtelKubernetesOverviewDashboardPage;
   otelHostFlowPage: OtelHostFlowPage;
   hostsOverviewPage: HostsOverviewPage;
+  firehoseFlowPage: FirehoseFlowPage;
+  fleetAgentsOverviewPage: FleetAgentsOverviewPage;
 }>({
   headerBar: async ({ page }, use) => {
     await use(new HeaderBar(page));
@@ -67,5 +71,13 @@ export const test = base.extend<{
 
   hostsOverviewPage: async ({ page }, use) => {
     await use(new HostsOverviewPage(page));
+  },
+
+  firehoseFlowPage: async ({ page }, use) => {
+    await use(new FirehoseFlowPage(page));
+  },
+
+  fleetAgentsOverviewPage: async ({ page }, use) => {
+    await use(new FleetAgentsOverviewPage(page));
   },
 });

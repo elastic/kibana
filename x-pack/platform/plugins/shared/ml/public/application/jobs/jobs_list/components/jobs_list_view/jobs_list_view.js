@@ -79,7 +79,7 @@ export class JobsListViewUI extends Component {
     /**
      * Indicates if the filters has been initialized by {@link JobFilterBar} component
      * @type {boolean}
-     * @private
+     * @internal
      */
     this._isFiltersSet = false;
   }
@@ -452,7 +452,7 @@ export class JobsListViewUI extends Component {
 
         <>
           <SpaceManagementContextWrapper>
-            {noJobsFound ? <AnomalyDetectionEmptyState showDocsLink /> : null}
+            {noJobsFound ? <AnomalyDetectionEmptyState showDocsLink iconSize="s" /> : null}
 
             {jobIds.length > 0 ? (
               <>

@@ -5,42 +5,43 @@
  * 2.0.
  */
 
-import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
+import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
 import type { StartServices } from '../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import {
+  getActiveIntegrationList,
   getCompleteBadgeText,
-  getAgentsData,
-  getIntegrationList,
-} from '../common/integrations/integrations_check_complete';
-import { INTEGRATION_TABS } from './integration_tabs_configs';
+} from '../common/integrations/integrations_check_complete_helpers';
+
+export interface ExternalIntegrationCardMetadata {
+  activeIntegrations: GetInstalledPackagesResponse['items'];
+}
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
-  IntegrationCardMetadata
+  ExternalIntegrationCardMetadata
 > = async (services: StartServices) => {
-  const { isComplete, installedPackages } = await getIntegrationList(
+  const { isComplete, activePackages: activeIntegrations } = await getActiveIntegrationList(
     services,
-    INTEGRATION_TABS[0].featuredCardIds
+    SEARCH_AI_LAKE_PACKAGES
   );
 
-  const { isAgentRequired } = await getAgentsData(services, isComplete);
+  const activeIntegrationsCount = activeIntegrations.length;
 
   if (!isComplete) {
     return {
       isComplete,
       metadata: {
-        installedIntegrationsCount: 0,
-        isAgentRequired: false,
+        activeIntegrations,
       },
     };
   }
 
   return {
     isComplete,
-    completeBadgeText: getCompleteBadgeText(installedPackages.length),
+    completeBadgeText: getCompleteBadgeText(activeIntegrationsCount),
     metadata: {
-      installedIntegrationsCount: installedPackages.length,
-      isAgentRequired,
+      activeIntegrations,
     },
   };
 };

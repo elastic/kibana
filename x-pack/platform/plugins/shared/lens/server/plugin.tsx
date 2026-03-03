@@ -5,31 +5,44 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import {
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
+import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LENS_CONTENT_TYPE,
+  LENS_ITEM_LATEST_VERSION,
+} from '@kbn/lens-common/content_management/constants';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
+import { registerLensAPIRoutes } from './api/routes';
+import { fetchLensFeatureFlags } from '../common';
+import { registerLensEmbeddableTransforms } from './transforms';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -51,7 +64,7 @@ export interface LensServerPluginSetup {
   /**
    * Server side embeddable definition which provides migrations to run if Lens state is embedded into another saved object somewhere
    */
-  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory> | undefined;
+  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory>;
   /**
    * Register custom migration functions for custom third party Lens visualizations
    */
@@ -65,8 +78,11 @@ export class LensServerPlugin
   implements Plugin<LensServerPluginSetup, {}, PluginSetupContract, PluginStartContract>
 {
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
+  private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
@@ -80,13 +96,13 @@ export class LensServerPlugin
     }
 
     plugins.contentManagement.register({
-      id: CONTENT_ID,
+      id: LENS_CONTENT_TYPE,
       storage: new LensStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.initializerContext.logger.get('storage'),
       }),
       version: {
-        latest: LATEST_VERSION,
+        latest: LENS_ITEM_LATEST_VERSION,
       },
     });
 
@@ -95,7 +111,36 @@ export class LensServerPlugin
       DataViewPersistableStateService.getAllMigrations.bind(DataViewPersistableStateService),
       this.customVisualizationMigrations
     );
-    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
+
+    plugins.embeddable.registerEmbeddableFactory(
+      lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
+    );
+    const builder = new LensConfigBuilder();
+
+    registerLensAPIRoutes({
+      http: core.http,
+      contentManagement: plugins.contentManagement,
+      builder,
+      logger: this.logger,
+    });
+
+    core
+      .getStartServices()
+      .then(async ([{ featureFlags }]) => {
+        const flags = await fetchLensFeatureFlags(featureFlags);
+        builder.setEnabled(flags.apiFormat);
+
+        // Need to wait for feature flags to be set before registering transforms
+        registerLensEmbeddableTransforms(plugins.embeddable, builder);
+
+        flags.apiFormat$.subscribe((value) => {
+          builder.setEnabled(value);
+        });
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
+
     return {
       lensEmbeddableFactory,
       registerVisualizationMigration: (

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { Timeline as ViewComponent } from '../../edit_policy/components/timeline/timeline';
 
 export const Timeline = ({ policy }: { policy: PolicyFromES }) => {

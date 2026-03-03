@@ -6,7 +6,8 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useKnowledgeBaseStatus, UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
+import type { UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
+import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
 import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from './api';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
@@ -20,7 +21,7 @@ jest.mock('./api', () => {
   };
 });
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
     try {
       const res = await fn({});

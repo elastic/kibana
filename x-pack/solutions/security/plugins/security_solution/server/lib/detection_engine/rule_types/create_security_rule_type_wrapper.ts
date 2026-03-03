@@ -9,7 +9,7 @@ import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -48,6 +48,7 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
+import { sendGapDetectedTelemetryEvent } from './utils/telemetry/send_gap_detected_telemetry_event';
 import type { RuleParams } from '../rule_schema';
 import {
   SECURITY_FROM,
@@ -63,6 +64,7 @@ import {
   SECURITY_RULE_ID,
   SECURITY_TO,
 } from './utils/apm_field_names';
+import { checkErrorDetails } from './utils/check_error_details';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -215,7 +217,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
+          ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatusEnum.running,
@@ -277,13 +279,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Data View not found ${exc}`,
+                  message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
                 });
               } else {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed ${exc}`,
+                  message: `Check for indices to search failed.\nError: ${exc}`,
                 });
               }
 
@@ -379,6 +381,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
             gap,
+            originalFrom,
+            originalTo,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -398,6 +402,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
             const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
+            if (analytics) {
+              sendGapDetectedTelemetryEvent({
+                analytics,
+                interval,
+                gapDuration: remainingGap,
+                originalFrom,
+                originalTo,
+                ruleParams: params,
+              });
+            }
             wrapperErrors.push(gapErrorMessage);
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
@@ -421,6 +435,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const exceptionItems = await getExceptions({
               client: exceptionsClient,
               lists: params.exceptionsList,
+              shouldFilterOutEndpointExceptions:
+                experimentalFeatures.endpointExceptionsMovedUnderManagement,
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -497,6 +513,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
+                  totalEventsFound:
+                    (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
                   errors: result.errors.concat(runResult.errors),
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
@@ -528,7 +546,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
+            if (result.totalEventsFound != null) {
+              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
+            }
+            const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
+            if (suppressedAlertsCount > 0) {
+              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
+            }
+
             const createdSignalsCount = result.createdSignals.length;
+
+            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
+              const unaccountedEvents =
+                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
+              if (unaccountedEvents > 0) {
+                ruleExecutionLogger.info(
+                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
+                );
+              }
+            }
+
+            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -567,16 +605,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                   frozenIndicesQueriedCount,
                 },
-                userError: result.userError,
+                userError:
+                  result.userError ||
+                  result.errors.every((err) => checkErrorDetails(err).isUserError),
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
+                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )} ${
+                )}".${
                   !isEmpty(tuples)
-                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    ? ` Searched between date ranges: ${JSON.stringify(tuples, null, 2)}.`
                     : ''
                 }`
               );
@@ -596,7 +636,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
-              message: `An error occurred during rule execution: message: "${errorMessage}"`,
+              message: `An error occurred during rule execution. ${errorMessage}`,
+              userError: checkErrorDetails(errorMessage).isUserError,
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,

@@ -9,68 +9,121 @@ import {
   Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
+  getInheritedSettings,
+  findInheritedFailureStore,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { partition } from 'lodash';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
-import { StreamsClient } from '../../../lib/streams/client';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
+import type {
+  DataStreamWithFailureStore,
+  WiredIngestStreamEffectiveFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
+import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getFailureStore,
+  getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
-import { DashboardLink } from '../../../../common/assets';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
+import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 
 export async function readStream({
   name,
-  assetClient,
+  queryClient,
+  attachmentClient,
   streamsClient,
   scopedClusterClient,
+  logger,
 }: {
   name: string;
-  assetClient: AssetClient;
+  queryClient: QueryClient;
+  attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
+  logger: Logger;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, dashboardsAndQueries] = await Promise.all([
+  const [streamDefinition, { [name]: queryLinks }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    await assetClient.getAssetLinks(name, ['dashboard', 'query']),
+    queryClient.getStreamToQueryLinksMap([name]),
+    attachmentClient.getAttachments(name),
   ]);
 
-  const [dashboardLinks, queryLinks] = partition(
-    dashboardsAndQueries,
-    (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
+  const { dashboards, rules } = attachments.reduce(
+    (acc, attachment) => {
+      if (attachment.type === 'dashboard') {
+        acc.dashboards.push(attachment.id);
+      } else if (attachment.type === 'rule') {
+        acc.rules.push(attachment.id);
+      }
+      return acc;
+    },
+    { dashboards: [] as string[], rules: [] as string[] }
   );
 
-  const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
   const queries = queryLinks.map((query) => {
     return query.query;
   });
 
-  if (Streams.GroupStream.Definition.is(streamDefinition)) {
-    return {
-      stream: streamDefinition,
+  if (Streams.QueryStream.Definition.is(streamDefinition)) {
+    // Fetch the actual ES|QL from the view (source of truth)
+    const esqlView = await getEsqlView({
+      esClient: scopedClusterClient.asCurrentUser,
+      logger,
+      name: streamDefinition.query.view,
+    });
+
+    // Build response with both view reference and resolved esql
+    // query_streams is already part of the stream definition (from BaseStream.Definition)
+    const queryStreamResponse: Streams.QueryStream.GetResponse = {
+      stream: {
+        ...streamDefinition,
+        query: {
+          view: streamDefinition.query.view,
+          esql: esqlView.query,
+        },
+      },
       dashboards,
+      rules,
       queries,
+      inherited_fields: {},
     };
+
+    return queryStreamResponse;
   }
 
+  const privileges = await streamsClient.getPrivileges(name);
+
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, privileges] = await Promise.all([
+  const [ancestors, dataStream, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name).catch((e) => {
-      if (e.statusCode === 404) {
-        return null;
-      }
-      throw e;
-    }),
-    streamsClient.getPrivileges(name),
+    privileges.view_index_metadata
+      ? streamsClient.getDataStream(name).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
+    privileges.view_index_metadata
+      ? scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
   ]);
 
-  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
+  if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
+      index_mode: dataStream?.index_mode,
       elasticsearch_assets:
         dataStream && privileges.manage
           ? await getUnmanagedElasticsearchAssets({
@@ -80,19 +133,45 @@ export async function readStream({
           : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_settings: getDataStreamSettings(dataStreamSettings?.data_streams[0]),
       dashboards,
+      rules,
       queries,
-    } satisfies Streams.UnwiredStream.GetResponse;
+      effective_failure_store: getFailureStore({
+        dataStream: dataStream as DataStreamWithFailureStore,
+      }),
+    } satisfies Streams.ClassicStream.GetResponse;
   }
+
+  // For OTEL-based streams (logs, logs.otel), process inherited fields to add OTEL aliases
+  // For ECS streams (logs.ecs), use inherited fields directly without OTEL-specific processing
+  const rootStream = getRoot(streamDefinition.name);
+  const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
+
+  const inheritedFields = isEcsStream
+    ? getInheritedFieldsFromAncestors(ancestors)
+    : addAliasesForNamespacedFields(streamDefinition, getInheritedFieldsFromAncestors(ancestors));
+
+  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
+
+  const effectiveFailureStore: WiredIngestStreamEffectiveFailureStore = dataStream
+    ? {
+        ...getFailureStore({ dataStream: dataStream as DataStreamWithFailureStore }),
+        from: inheritedFailureStore.from,
+      }
+    : inheritedFailureStore;
 
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
+    rules,
     privileges,
     queries,
+    index_mode: dataStream?.index_mode,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
+    inherited_fields: inheritedFields,
+    effective_failure_store: effectiveFailureStore,
   };
-
   return body;
 }

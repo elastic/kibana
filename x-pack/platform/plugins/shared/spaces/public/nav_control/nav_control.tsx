@@ -11,7 +11,7 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initTour } from './solution_view_tour';
@@ -27,6 +27,15 @@ export function initSpacesNavControl(
 ) {
   const { showTour$, onFinishTour } = initTour(core, spacesManager);
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 0,
+        networkMode: 'always',
+      },
+    },
+  });
+
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
@@ -41,32 +50,36 @@ export function initSpacesNavControl(
       );
 
       ReactDOM.render(
-        <KibanaRenderContextProvider {...core}>
-          <Suspense
-            fallback={
-              <EuiSkeletonRectangle
-                css={css`
-                  margin-inline: ${euiThemeVars.euiSizeS};
-                `}
-                borderRadius="m"
-                contentAriaLabel="Loading navigation"
+        core.rendering.addContext(
+          <QueryClientProvider client={queryClient}>
+            <Suspense
+              fallback={
+                <EuiSkeletonRectangle
+                  css={css`
+                    margin-inline: ${euiThemeVars.euiSizeS};
+                  `}
+                  borderRadius="m"
+                  contentAriaLabel="Loading navigation"
+                />
+              }
+            >
+              <LazyNavControlPopover
+                spacesManager={spacesManager}
+                serverBasePath={core.http.basePath.serverBasePath}
+                anchorPosition="downLeft"
+                capabilities={core.application.capabilities}
+                navigateToApp={core.application.navigateToApp}
+                navigateToUrl={core.application.navigateToUrl}
+                allowSolutionVisibility={config.allowSolutionVisibility}
+                eventTracker={eventTracker}
+                showTour$={showTour$}
+                onFinishTour={onFinishTour}
+                manageSpacesDocsLink={core.docLinks.links.spaces.kibanaManageSpaces}
+                manageSpacesLink={core.http.basePath.prepend('/app/management/kibana/spaces')}
               />
-            }
-          >
-            <LazyNavControlPopover
-              spacesManager={spacesManager}
-              serverBasePath={core.http.basePath.serverBasePath}
-              anchorPosition="downLeft"
-              capabilities={core.application.capabilities}
-              navigateToApp={core.application.navigateToApp}
-              navigateToUrl={core.application.navigateToUrl}
-              allowSolutionVisibility={config.allowSolutionVisibility}
-              eventTracker={eventTracker}
-              showTour$={showTour$}
-              onFinishTour={onFinishTour}
-            />
-          </Suspense>
-        </KibanaRenderContextProvider>,
+            </Suspense>
+          </QueryClientProvider>
+        ),
         targetDomElement
       );
 

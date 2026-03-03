@@ -8,8 +8,10 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
+
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
@@ -27,8 +29,18 @@ export class DiscoverPageObject extends FtrService {
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
+  private readonly toasts = this.ctx.getService('toasts');
+  private readonly log = this.ctx.getService('log');
+  private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+
+  public readonly APP_ID = 'discover';
+
+  public async navigateToApp() {
+    await this.common.navigateToApp(this.APP_ID);
+  }
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
@@ -36,15 +48,33 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.existOrFail('discoverOpenButton');
   }
 
+  public async isOnDashboardsEditMode() {
+    const [newButton, openButton] = await Promise.all([
+      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
+      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
+    ]);
+
+    return !newButton && !openButton;
+  }
+
   public async getChartTimespan() {
-    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
+    const getHistogramChartDataTimeRange = async () =>
+      await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
+
+    await this.retry.waitFor('chart timespan to finish loading', async () => {
+      const timespan = await getHistogramChartDataTimeRange();
+      return !timespan?.includes('Loading');
+    });
+
+    return await getHistogramChartDataTimeRange();
   }
 
   public async saveSearch(
     searchName: string,
     saveAsNew?: boolean,
-    options: { tags: string[] } = { tags: [] }
+    { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -56,12 +86,24 @@ export class DiscoverPageObject extends FtrService {
       }
     );
 
-    if (options.tags.length) {
+    if (tags.length) {
       await this.testSubjects.click('savedObjectTagSelector');
-      for (const tagName of options.tags) {
+      for (const tagName of tags) {
         await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
       }
       await this.testSubjects.click('savedObjectTitle');
+    }
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
     }
 
     if (saveAsNew !== undefined) {
@@ -78,9 +120,14 @@ export class DiscoverPageObject extends FtrService {
     // that the next action wouldn't have to retry.  But it doesn't really solve
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
-    await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
-      return (await this.getCurrentQueryName()) === searchName;
-    });
+
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+        const last = await this.getCurrentQueryName();
+
+        return last === searchName;
+      });
+    }
   }
 
   public async inputSavedSearchTitle(searchName: string) {
@@ -99,8 +146,20 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('addFilter');
   }
 
+  public async isDataGridUpdating() {
+    return await this.testSubjects.exists('discoverDataGridUpdating');
+  }
+
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
+      timeout: this.defaultFindTimeout * 10,
+    });
+  }
+
+  public async waitUntilTabIsLoaded() {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+    await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
       timeout: this.defaultFindTimeout * 10,
     });
   }
@@ -135,8 +194,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getSavedSearchTitle() {
-    const breadcrumb = await this.find.byCssSelector('[data-test-subj="breadcrumb last"]');
-    return await breadcrumb.getVisibleText();
+    if (await this.testSubjects.exists('breadcrumb last')) {
+      const breadcrumb = await this.testSubjects.find('breadcrumb last');
+      return await breadcrumb.getVisibleText();
+    }
   }
 
   public async loadSavedSearch(searchName: string) {
@@ -153,7 +214,18 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSaveSearchButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
+  }
+
+  public async clickCancelButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
+    });
+    await this.testSubjects.moveMouseTo('discoverCancelButton');
+    await this.testSubjects.click('discoverCancelButton');
   }
 
   public async clickLoadSavedSearchButton() {
@@ -161,11 +233,15 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
+  public async hasUnsavedChangesIndicator() {
+    return await this.testSubjects.exists('split-button-notification-indicator');
+  }
+
   public async revertUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
     await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
     });
     await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -173,12 +249,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
-    await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
-    });
-    await this.testSubjects.click('saveUnsavedChangesButton');
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
+    await this.testSubjects.click('discoverSaveButton');
     await this.retry.waitFor('modal is open', async () => {
       return Boolean(await this.testSubjects.find('confirmSaveSavedObjectButton'));
     });
@@ -220,20 +292,77 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
     });
 
-    await (
-      await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
-
-    const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${
-        value ?? field
-      }"]`
+    const searchInput = await this.testSubjects.find(
+      'unifiedHistogramBreakdownSelectorSelectorSearch'
     );
-    await option.click();
+
+    await searchInput.type(field, { charByChar: true });
+
+    await this.retry.waitFor('options to be filtered', async () => {
+      const isSearching = await this.testSubjects.getAttribute(
+        'unifiedHistogramBreakdownSelectorSelectable',
+        'data-is-searching'
+      );
+      return isSearching === 'false';
+    });
+
+    const optionValue = value ?? field;
+
+    await this.find.clickDisplayedByCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
+    );
+
+    await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
+
+    await this.retry.waitFor('the value to be selected', async () => {
+      const breakdownButton = await this.testSubjects.find(
+        'unifiedHistogramBreakdownSelectorButton'
+      );
+      return (
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
+        (await breakdownButton.getVisibleText()) === field
+      );
+    });
   }
 
   public async clearBreakdownField() {
     await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
+  }
+
+  public async isLensEditFlyoutOpen() {
+    return await this.testSubjects.exists('lnsChartSwitchPopover');
+  }
+
+  public async openLensEditFlyout() {
+    await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
+    await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await this.retry.waitFor('flyout', async () => {
+      return await this.isLensEditFlyoutOpen();
+    });
+  }
+
+  public async changeVisShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    await this.testSubjects.click('lnsChartSwitchPopover');
+    await this.testSubjects.setValue('lnsChartSwitchSearch', seriesType, {
+      clearWithKeyboard: true,
+    });
+    await this.testSubjects.click(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('lnsChartSwitchPopover')).to.be(seriesType);
+    });
+
+    await this.toasts.dismissAll();
+    await this.testSubjects.scrollIntoView('applyFlyoutButton');
+    await this.testSubjects.click('applyFlyoutButton');
+  }
+
+  public async getCurrentVisTitle() {
+    await this.toasts.dismissAll();
+    await this.openLensEditFlyout();
+    const seriesType = await this.testSubjects.getVisibleText('lnsChartSwitchPopover');
+    await this.testSubjects.click('cancelFlyoutButton');
+    return seriesType;
   }
 
   public async chooseLensSuggestion(suggestionType: string) {
@@ -304,6 +433,16 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getHistogramHeight() {
+    const histogram = await this.testSubjects.find('unifiedHistogramResizablePanelFixed');
+    return (await histogram.getSize()).height;
+  }
+
+  public async resizeHistogramBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('unifiedHistogramResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
+  }
+
   public async getChartInterval() {
     const button = await this.testSubjects.find('unifiedHistogramTimeIntervalSelectorButton');
     return await button.getAttribute('data-selected-value');
@@ -342,6 +481,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async getSavedSearchDocumentCount() {
     return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
+  }
+
+  public async getAllSavedSearchDocumentCount() {
+    return await this.testSubjects.getVisibleTextAll('savedSearchTotalDocuments');
   }
 
   public async getDocHeader() {
@@ -389,13 +532,30 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
   }
 
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
+  }
+
+  public async expectDocTableToBeLoaded() {
+    const renderComplete = await this.testSubjects.getAttribute(
+      'discoverDocTable',
+      'data-render-complete'
+    );
+
+    expect(renderComplete).to.be('true');
+  }
+
   public async findFieldByNameOrValueInDocViewer(name: string) {
-    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
-    await fieldSearch.type(name);
+    await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
+      const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+      await fieldSearch.clearValue();
+      await fieldSearch.type(name);
+      return (await fieldSearch.getAttribute('value')) === name;
+    });
   }
 
   public async openFilterByFieldTypeInDocViewer() {
@@ -438,6 +598,16 @@ export class DiscoverPageObject extends FtrService {
       (await this.testSubjects.exists('fieldList')) &&
       (await this.testSubjects.exists('unifiedFieldListSidebar__toggle-collapse'))
     );
+  }
+
+  public async getSidebarWidth() {
+    const sidebar = await this.testSubjects.find('discover-sidebar');
+    return (await sidebar.getSize()).width;
+  }
+
+  public async resizeSidebarBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('discoverLayoutResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: distance, y: 0 } });
   }
 
   public async editField(field: string) {
@@ -530,10 +700,63 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
+    // First check if the button is directly visible
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
       await this.waitUntilSearchingHasFinished();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.moveMouseTo('kbnQueryBar');
+        } catch {
+          // Ignore if query bar is not present
+        }
+        await this.testSubjects.click('app-menu-overflow-button');
+      });
+
+      if (await this.testSubjects.exists('select-text-based-language-btn')) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+      }
+
+      // Close the popover if open
+      if (await this.testSubjects.exists('app-menu-popover')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
+    }
+  }
+
+  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+    // Find the selected tab and open its menu
+    const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        const menuButton = await tabElement.findByCssSelector(
+          '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+        );
+        await menuButton.click();
+        await this.retry.waitFor('tab menu to open', async () => {
+          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+        });
+        await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+        if (options?.discardModal) {
+          await this.testSubjects.exists('discover-esql-to-dataview-modal');
+          await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+          await this.retry.waitFor('the modal to close', async () => {
+            return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
+          });
+        }
+        return;
+      }
     }
   }
 
@@ -702,6 +925,7 @@ export class DiscoverPageObject extends FtrService {
       await this.fieldEditor.setPopularity(popularity);
     }
     await this.fieldEditor.save();
+    await this.fieldEditor.waitUntilClosed();
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -750,5 +974,107 @@ export class DiscoverPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.waitForDropToFinish();
+  }
+
+  /**
+   * Saves the Discover chart to a new dashboard
+   * It doesn't save to library
+   * @param title
+   */
+  public async saveHistogramToDashboard(title: string) {
+    await this.timeToVisualize.setSaveModalValues(title, {
+      saveAsNew: true,
+      redirectToOrigin: false,
+      addToDashboard: 'new',
+      saveToLibrary: false,
+    });
+
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.testSubjects.missingOrFail('confirmSaveSavedObjectButton');
+  }
+
+  public async isShowingCascadeLayout() {
+    return await this.retry.try(async () => {
+      const [exists1, exists2] = await Promise.all([
+        this.testSubjects.exists('data-cascade'),
+        this.testSubjects.exists('discoverEnableCascadeLayoutSwitch'),
+      ]);
+      return exists1 && exists2;
+    });
+  }
+
+  private resetRequestCount = -1;
+
+  public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
+    await this.retry.tryWithRetries(
+      `expect the request to match count ${requestCount}`,
+      async () => {
+        if (requestCount === this.resetRequestCount) {
+          await this.browser.execute(async () => {
+            performance.clearResourceTimings();
+          });
+        }
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+        await this.elasticChart.canvasExists();
+        const requests = await this.browser.execute(() =>
+          performance
+            .getEntries()
+            .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
+        );
+        const result = requests.filter((entry) => endpointRegexp.test(entry.name));
+        const count = result.length;
+        if (requestCount === this.resetRequestCount) {
+          expect(count).to.be(0);
+        } else {
+          if (count !== requestCount) {
+            this.log.warning('Request count differs:', result);
+          }
+          expect(count).to.be(requestCount);
+        }
+      },
+      { retryCount: 5, retryDelay: 500 }
+    );
+  }
+
+  public async expectFieldsForWildcardRequestCount(expectedCount: number, cb: Function) {
+    const endpointRegExp = new RegExp('/internal/data_views/_fields_for_wildcard');
+    await this.expectRequestCount(endpointRegExp, this.resetRequestCount);
+    await cb();
+    await this.expectRequestCount(endpointRegExp, expectedCount);
+  }
+
+  public async expectSearchRequestCount(
+    type: 'ese' | 'esql',
+    expectedCount: number,
+    cb?: Function
+  ) {
+    const searchType = type === 'esql' ? `${type}_async` : type;
+    const endpointRegExp = new RegExp(`/internal/search/${searchType}$`);
+    if (cb) {
+      await this.expectRequestCount(endpointRegExp, this.resetRequestCount);
+      await cb();
+    }
+    await this.expectRequestCount(endpointRegExp, expectedCount);
+  }
+
+  public async ensureHasUnsavedChangesIndicator() {
+    await this.testSubjects.existOrFail('split-button-notification-indicator');
+  }
+
+  public async ensureNoUnsavedChangesIndicator() {
+    await this.testSubjects.missingOrFail('split-button-notification-indicator');
+  }
+
+  public resetQueryMode() {
+    return this.browser.removeLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public getQueryMode() {
+    return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public setQueryMode(mode: string) {
+    return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
 }

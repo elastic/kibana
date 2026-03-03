@@ -11,12 +11,21 @@ import { type CustomPaletteState } from '@kbn/charts-plugin/common';
 import { type PaletteOutput, CUSTOM_PALETTE } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getFormatService, getPaletteService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
-function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
+export interface FormatOverrides {
+  number?: { alwaysShowSign?: boolean };
+  percent?: { alwaysShowSign?: boolean };
+  bytes?: { alwaysShowSign?: boolean };
+}
+
+function enhanceFieldFormat(
+  serializedFieldFormat: SerializedFieldFormat | undefined,
+  formatOverrides: FormatOverrides | undefined
+): SerializedFieldFormat {
   const formatId = serializedFieldFormat?.id || 'number';
   if (formatId === 'duration' && !serializedFieldFormat?.params?.formatOverride) {
     return {
@@ -31,17 +40,28 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
       },
     };
   }
+  if (formatOverrides && formatId in formatOverrides) {
+    return {
+      ...serializedFieldFormat,
+      params: {
+        ...serializedFieldFormat?.params,
+        ...formatOverrides[formatId as keyof FormatOverrides],
+      },
+    };
+  }
+
   return serializedFieldFormat ?? { id: formatId };
 }
 
 export const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
-  columns: Datatable['columns']
+  columns: Datatable['columns'],
+  formatOverrides?: FormatOverrides | undefined
 ) => {
   const type = getColumnByAccessor(accessor, columns)?.meta.type;
   const defaultFormat = type ? { id: type } : undefined;
   const serializedFieldFormat = getFormatByAccessor(accessor, columns, defaultFormat);
-  const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
+  const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat, formatOverrides);
   return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
 

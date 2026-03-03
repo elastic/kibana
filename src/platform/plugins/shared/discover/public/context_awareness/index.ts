@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
-export { ProfilesManager } from './profiles_manager';
+export {
+  ProfilesManager,
+  ScopedProfilesManager,
+  ContextualProfileLevel,
+  type GetProfilesOptions,
+} from './profiles_manager';
+export { type ProfileProviderSharedServices } from './profile_providers';
 export {
   useProfileAccessor,
   useRootProfile,

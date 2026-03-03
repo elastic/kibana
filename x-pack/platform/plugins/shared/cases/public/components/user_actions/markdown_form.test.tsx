@@ -155,8 +155,9 @@ describe('UserActionMarkdown ', () => {
       await userEvent.click(screen.getByTestId('test-button'));
 
       // this is the correct behaviour. The textarea holds the new content
-      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).toEqual(newContent);
-      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).not.toEqual(oldContent);
+      const textarea = screen.getByTestId('euiMarkdownEditorTextArea') as HTMLTextAreaElement;
+      expect(textarea.value).toEqual(newContent);
+      expect(textarea.value).not.toEqual(oldContent);
     });
   });
 });

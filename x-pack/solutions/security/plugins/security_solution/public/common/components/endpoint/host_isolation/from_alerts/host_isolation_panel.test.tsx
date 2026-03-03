@@ -9,7 +9,7 @@ import React from 'react';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { HostIsolationPanel } from '.';
 import { useKibana as mockUseKibana } from '../../../../lib/kibana/__mocks__';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { endpointAlertDataMock } from '../../../../mock/endpoint';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 

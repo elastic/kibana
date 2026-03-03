@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 
 import type {
   ElasticsearchClient,
@@ -33,6 +33,8 @@ import type {
   RemoteSyncedCustomAssetsRecord,
 } from '../../../common/types';
 import { SyncStatus } from '../../../common/types';
+
+import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
 
 import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
 import { getPipeline, getComponentTemplate, CUSTOM_ASSETS_PREFIX } from './custom_assets';
@@ -102,10 +104,11 @@ export const fetchAndCompareSyncedIntegrations = async (
       };
     }
     const ccrIndex = searchRes.hits.hits[0]?._source;
-    const { integrations: ccrIntegrations, custom_assets: ccrCustomAssets } = ccrIndex;
-    const installedCCRIntegrations = ccrIntegrations?.filter(
-      (integration) => integration.install_status !== 'not_installed'
-    );
+    const {
+      integrations: ccrIntegrations,
+      custom_assets: ccrCustomAssets,
+      remote_es_hosts: remoteEsHosts,
+    } = ccrIndex;
 
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
@@ -125,9 +128,13 @@ export const fetchAndCompareSyncedIntegrations = async (
       ccrCustomAssets,
       installedIntegrationsByName
     );
+    const isSyncUninstalledEnabled = remoteEsHosts?.some(
+      (host) => host.sync_uninstalled_integrations
+    );
     const integrationsStatus = compareIntegrations(
-      installedCCRIntegrations,
-      installedIntegrationsByName
+      ccrIntegrations,
+      installedIntegrationsByName,
+      isSyncUninstalledEnabled
     );
     const result = {
       ...integrationsStatus,
@@ -146,50 +153,141 @@ export const fetchAndCompareSyncedIntegrations = async (
 
 const compareIntegrations = (
   ccrIntegrations: IntegrationsData[],
-  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>
+  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>,
+  isSyncUninstalledEnabled: boolean
 ): { integrations: RemoteSyncedIntegrationsStatus[] } => {
   const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
     (ccrIntegration) => {
+      const baseIntegrationData = {
+        package_name: ccrIntegration.package_name,
+        package_version: ccrIntegration.package_version,
+        install_status: ccrIntegration.install_status,
+      };
       const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
-      if (!localIntegrationSO) {
+      // Handle case of integration uninstalled from both clusters
+      if (
+        isSyncUninstalledEnabled &&
+        !localIntegrationSO?.attributes &&
+        ccrIntegration.install_status === 'not_installed'
+      ) {
         return {
-          package_name: ccrIntegration.package_name,
-          package_version: ccrIntegration.package_version,
-          updated_at: ccrIntegration.updated_at,
-          sync_status: SyncStatus.SYNCHRONIZING,
+          ...baseIntegrationData,
+          install_status: {
+            main: 'not_installed',
+            remote: 'not_installed',
+          },
+          sync_status: SyncStatus.COMPLETED,
+          updated_at: ccrIntegration?.updated_at,
         };
       }
-      if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
+
+      if (!localIntegrationSO) {
         return {
-          package_name: ccrIntegration.package_name,
-          package_version: ccrIntegration.package_version,
+          ...baseIntegrationData,
+          updated_at: ccrIntegration.updated_at,
+          sync_status: SyncStatus.SYNCHRONIZING,
+          install_status: { main: ccrIntegration.install_status },
+        };
+      }
+      if (
+        ccrIntegration.install_status !== 'not_installed' &&
+        ccrIntegration.package_version !== localIntegrationSO?.attributes.version
+      ) {
+        return {
+          ...baseIntegrationData,
           updated_at: ccrIntegration.updated_at,
           sync_status: SyncStatus.FAILED,
+          install_status: {
+            main: ccrIntegration.install_status,
+            remote: localIntegrationSO?.attributes.install_status,
+          },
           error: `Found incorrect installed version ${localIntegrationSO?.attributes.version}`,
         };
       }
-      if (localIntegrationSO?.attributes.install_status === 'install_failed') {
-        const latestFailedAttemptTime = localIntegrationSO?.attributes
-          ?.latest_install_failed_attempts?.[0].created_at
-          ? `at ${new Date(
-              localIntegrationSO?.attributes?.latest_install_failed_attempts?.[0].created_at
-            ).toUTCString()}`
-          : '';
-        const latestFailedAttempt = localIntegrationSO?.attributes
-          ?.latest_install_failed_attempts?.[0]?.error?.message
-          ? `- reason: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
-          : '';
+      if (
+        ccrIntegration.install_status !== 'not_installed' &&
+        localIntegrationSO?.attributes.install_status === 'install_failed'
+      ) {
+        let latestFailedAttemptTime = '';
+        let latestFailedAttempt = '';
+
+        if (localIntegrationSO?.attributes?.latest_install_failed_attempts?.[0]) {
+          const latestInstallFailedAttempts =
+            localIntegrationSO.attributes.latest_install_failed_attempts[0];
+          latestFailedAttemptTime = `at ${new Date(
+            latestInstallFailedAttempts.created_at
+          ).toUTCString()}`;
+
+          // handling special case for those integrations that cannot be found in registry
+          if (latestInstallFailedAttempts.error?.name === 'PackageNotFoundError') {
+            return {
+              ...baseIntegrationData,
+              install_status: {
+                main: ccrIntegration.install_status,
+                remote: 'not_installed',
+              },
+              updated_at: ccrIntegration.updated_at,
+              sync_status: SyncStatus.WARNING,
+              warning: {
+                title: `Integration can't be automatically synced`,
+                message: `This integration must be manually installed on the remote cluster. Automatic updates and remote installs are not supported.`,
+              },
+            };
+          } else {
+            latestFailedAttempt = latestInstallFailedAttempts.error?.message ?? '';
+          }
+        }
         return {
-          package_name: ccrIntegration.package_name,
-          package_version: ccrIntegration.package_version,
+          ...baseIntegrationData,
+          install_status: {
+            main: ccrIntegration.install_status,
+            remote: localIntegrationSO?.attributes.install_status,
+          },
           updated_at: ccrIntegration.updated_at,
           sync_status: SyncStatus.FAILED,
           error: `Installation status: ${localIntegrationSO?.attributes.install_status} ${latestFailedAttempt} ${latestFailedAttemptTime}`,
         };
       }
+      if (
+        isSyncUninstalledEnabled &&
+        ccrIntegration.install_status === 'not_installed' &&
+        localIntegrationSO?.attributes.install_status === 'installed'
+      ) {
+        let latestUninstallFailedAttemptTime = '';
+        let latestUninstallFailedAttempt = '';
+
+        if (localIntegrationSO?.attributes?.latest_uninstall_failed_attempts?.[0]) {
+          const latestInstallFailedAttempts =
+            localIntegrationSO.attributes.latest_uninstall_failed_attempts[0];
+          latestUninstallFailedAttemptTime = `at ${new Date(
+            latestInstallFailedAttempts.created_at
+          ).toUTCString()}`;
+          latestUninstallFailedAttempt = latestInstallFailedAttempts.error?.message ?? '';
+        }
+        return {
+          ...baseIntegrationData,
+          install_status: {
+            main: ccrIntegration.install_status,
+            remote: localIntegrationSO?.attributes.install_status,
+          },
+          updated_at: ccrIntegration.updated_at,
+          sync_status: SyncStatus.WARNING,
+          ...(localIntegrationSO?.attributes.latest_uninstall_failed_attempts !== undefined
+            ? {
+                warning: {
+                  message: `${latestUninstallFailedAttempt} ${latestUninstallFailedAttemptTime}`,
+                  title: 'Integration was uninstalled, but removal from remote cluster failed.',
+                },
+              }
+            : {}),
+        };
+      }
       return {
-        package_name: ccrIntegration.package_name,
-        package_version: ccrIntegration.package_version,
+        ...baseIntegrationData,
+        install_status: {
+          main: ccrIntegration.install_status,
+          remote: localIntegrationSO?.attributes.install_status,
+        },
         sync_status:
           localIntegrationSO?.attributes.install_status === 'installed'
             ? SyncStatus.COMPLETED
@@ -294,6 +392,21 @@ const compareCustomAssets = ({
 
   if (ccrCustomAsset.type === 'ingest_pipeline') {
     const installedPipeline = ingestPipelines?.[ccrCustomAsset.name];
+
+    const installedPipelineWithoutTimestamps = omit(installedPipeline, [
+      'created_date',
+      'created_date_millis',
+      'modified_date',
+      'modified_date_millis',
+    ]);
+
+    const ccrCustomPipelineWithoutTimestamps = omit(ccrCustomAsset?.pipeline, [
+      'created_date',
+      'created_date_millis',
+      'modified_date',
+      'modified_date_millis',
+    ]);
+
     if (!installedPipeline) {
       if (ccrCustomAsset.is_deleted === true) {
         return {
@@ -343,7 +456,7 @@ const compareCustomAssets = ({
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
       };
-    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
+    } else if (isEqual(installedPipelineWithoutTimestamps, ccrCustomPipelineWithoutTimestamps)) {
       return {
         ...result,
         sync_status: SyncStatus.COMPLETED,
@@ -398,6 +511,16 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
+      if (ccrCustomAsset?.template.settings?.index?.lifecycle?.name) {
+        return {
+          ...result,
+          sync_status: SyncStatus.WARNING,
+          warning: {
+            title: `Component template references ILM policy`,
+            message: `${ccrCustomAsset.name} references "${ccrCustomAsset?.template.settings?.index?.lifecycle?.name}" that might not exist on the remote cluster. Please create it manually.`,
+          },
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.COMPLETED,
@@ -423,10 +546,9 @@ export const getRemoteSyncedIntegrationsStatus = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return { integrations: [] };
   }
 

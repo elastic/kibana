@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
 import { validateRouteSpaceName } from '../../common';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
+import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const RequestParamsSchema = schema.object({
   id: schema.string(),
@@ -48,8 +50,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async (routeContext) => {
-    const { savedObjectsClient, request, response, spaceId, server, syntheticsMonitorClient } =
-      routeContext;
+    const { savedObjectsClient, request, response, spaceId, server } = routeContext;
     const { invalidResponse } = await validateRouteSpaceName(routeContext);
     if (invalidResponse) return invalidResponse;
 
@@ -74,7 +75,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       };
 
       // value from data since we aren't using encrypted client
-      const { value } = existingParam.attributes;
+      const { value, key: existingKey } = existingParam.attributes;
       const {
         id: responseId,
         attributes: { key, tags, description },
@@ -85,12 +86,13 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         newParam
       )) as SavedObject<SyntheticsParams>;
 
-      void syncSpaceGlobalParams({
-        spaceId,
-        logger: server.logger,
-        encryptedSavedObjects: server.encryptedSavedObjects,
-        savedObjects: server.coreStart.savedObjects,
-        syntheticsMonitorClient,
+      // Include both old and new key if the key was renamed
+      const modifiedParamKeys = existingKey !== key ? [existingKey, key] : [key];
+
+      await asyncGlobalParamsPropagation({
+        server,
+        paramsSpacesToSync: existingParam.namespaces || [spaceId],
+        modifiedParamKeys,
       });
 
       return { id: responseId, key, tags, description, namespaces, value };

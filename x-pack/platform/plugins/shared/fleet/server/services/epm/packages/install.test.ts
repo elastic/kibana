@@ -16,29 +16,30 @@ import { sendTelemetryEvents } from '../../upgrade_sender';
 import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
 import { appContextService } from '../../app_context';
-import { ConcurrentInstallOperationError, FleetError, PackageNotFoundError } from '../../../errors';
+import { ConcurrentInstallOperationError, FleetError } from '../../../errors';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import * as Registry from '../registry';
-import { dataStreamService } from '../../data_streams';
 
 import {
   createInstallation,
   handleInstallPackageFailure,
-  installAssetsForInputPackagePolicy,
   installPackage,
   isPackageVersionOrLaterInstalled,
 } from './install';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
-import { getInstalledPackageWithAssets, getInstallationObject } from './get';
-import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+import { getInstallationObject } from './get';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
 jest.mock('./install_index_template_pipeline');
 jest.mock('./es_assets_reference');
+jest.mock('./exclude_datastreams_helper', () => ({
+  shouldIncludePackageWithDatastreamTypes: jest.fn(() => true),
+}));
 jest.mock('../../app_context', () => {
   const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
   const mockedSavedObjectTagging = {
@@ -205,6 +206,7 @@ describe('install', () => {
         newVersion: '1.1.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -227,6 +229,33 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
+      });
+    });
+
+    it('should send telemetry on install failure, datastream type exclusion', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(shouldIncludePackageWithDatastreamTypes).mockReturnValueOnce(false);
+
+      await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.3.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
+        currentVersion: 'not_installed',
+        dryRun: false,
+        errorMessage:
+          'Installation package: apache is not allowed due to data stream type exclusions',
+        eventType: 'package-install',
+        installType: 'install',
+        newVersion: '1.3.0',
+        packageName: 'apache',
+        status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -248,6 +277,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -273,6 +303,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -299,6 +330,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -488,6 +520,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -509,6 +542,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -535,98 +569,9 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
-  });
-});
-
-describe('installAssetsForInputPackagePolicy', () => {
-  beforeEach(() => {
-    jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
-  });
-  it('should do nothing for non input package', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-    await installAssetsForInputPackagePolicy({
-      pkgInfo: {
-        type: 'integration',
-      } as any,
-      soClient: savedObjectsClientMock.create(),
-      esClient: {} as ElasticsearchClient,
-      force: false,
-      logger: mockedLogger,
-      packagePolicy: {} as any,
-    });
-  });
-  const TEST_PKG_INFO_INPUT = {
-    type: 'input',
-    name: 'test',
-    version: '1.0.0',
-    policy_templates: [
-      {
-        name: 'log',
-        type: 'log',
-      },
-    ],
-  };
-  it('should throw for input package if package is not installed', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue(undefined);
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-
-    await expect(() =>
-      installAssetsForInputPackagePolicy({
-        pkgInfo: TEST_PKG_INFO_INPUT as any,
-        soClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-        force: false,
-        logger: mockedLogger,
-        packagePolicy: {
-          inputs: [{ type: 'log', streams: [{ type: 'log', vars: { dataset: 'test.tata' } }] }],
-        } as any,
-      })
-    ).rejects.toThrowError(PackageNotFoundError);
-  });
-
-  it('should install es index patterns for input package if package is installed', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
-      installation: {
-        name: 'test',
-        version: '1.0.0',
-      },
-      packageInfo: TEST_PKG_INFO_INPUT,
-      assetsMap: new Map(),
-      paths: [],
-    } as any);
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-
-    await installAssetsForInputPackagePolicy({
-      pkgInfo: TEST_PKG_INFO_INPUT as any,
-
-      soClient: savedObjectsClientMock.create(),
-      esClient: {} as ElasticsearchClient,
-      force: false,
-      logger: mockedLogger,
-      packagePolicy: {
-        inputs: [
-          {
-            name: 'log',
-            type: 'log',
-            streams: [{ type: 'log', vars: { 'data_stream.dataset': { value: 'test.tata' } } }],
-          },
-        ],
-      } as any,
-    });
-
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toBeCalledWith(
-      expect.anything(),
-      expect.anything(),
-      expect.anything(),
-      {
-        'test.tata': 'log-test.tata-*',
-      }
-    );
   });
 });
 

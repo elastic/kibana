@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { EuiIcon, EuiPageHeaderProps } from '@elastic/eui';
+import type { useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MonitorDetailsAlerts } from './monitor_alerts/monitor_detail_alerts';
 import { MonitorAlertsIcon } from './monitor_alerts/alerts_icon';
-import { RefreshButton } from '../common/components/refresh_button';
 import { MonitorNotFoundPage } from './monitor_not_found_page';
 import { MonitorDetailsPageTitle } from './monitor_details_page_title';
-import { RunTestManually } from './run_test_manually';
 import { MonitorDetailsLastRun } from './monitor_details_last_run';
 import { MonitorDetailsStatus } from './monitor_details_status';
 import { MonitorDetailsLocation } from './monitor_details_location';
@@ -23,7 +23,7 @@ import { MonitorErrors } from './monitor_errors/monitor_errors';
 import { MonitorErrorsIcon } from './monitor_errors/errors_icon';
 import { MonitorHistory } from './monitor_history/monitor_history';
 import { MonitorSummary } from './monitor_summary/monitor_summary';
-import { EditMonitorLink } from './monitor_summary/edit_monitor_link';
+import { Actions } from './actions';
 import {
   MONITOR_ALERTS_ROUTE,
   MONITOR_ERRORS_ROUTE,
@@ -32,7 +32,7 @@ import {
   MONITOR_ROUTE,
   MONITORS_ROUTE,
 } from '../../../../../common/constants';
-import { RouteProps } from '../../routes';
+import type { RouteProps } from '../../routes';
 
 export const getMonitorDetailsRoute = (
   history: ReturnType<typeof useHistory>,
@@ -126,17 +126,11 @@ const getMonitorSummaryHeader = (
   const monitorId = match.params.monitorId;
 
   const rightSideItems = [
-    <RefreshButton />,
-    <EditMonitorLink />,
-    <RunTestManually />,
+    <Actions />,
     <MonitorDetailsLastRun />,
     <MonitorDetailsStatus />,
     <MonitorDetailsLocation />,
   ];
-  if (selectedTab === 'alerts' || selectedTab === 'history' || selectedTab === 'errors') {
-    // remove first item refresh button
-    rightSideItems.shift();
-  }
 
   return {
     pageTitle: <MonitorDetailsPageTitle />,

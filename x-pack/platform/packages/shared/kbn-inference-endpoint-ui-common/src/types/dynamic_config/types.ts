@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ServiceProviderKeys } from '../../constants';
+import type { FieldsConfiguration } from '../types';
+
 export interface SelectOption {
   label: string;
   value: string;
@@ -20,6 +23,7 @@ export enum FieldType {
   STRING = 'str',
   INTEGER = 'int',
   BOOLEAN = 'bool',
+  MAP = 'map',
 }
 
 export interface ConfigCategoryProperties {
@@ -53,3 +57,15 @@ export interface ConfigEntryView extends ConfigEntry {
   validationErrors: string[];
   value: string | number | boolean | null;
 }
+
+type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
+export interface OverrideFieldsContentType {
+  serverlessOnly?: boolean;
+  hidden?: string[];
+  additional?: FieldsConfiguration[];
+  /** Default values to apply to existing provider configuration fields (e.g., model_id default values) */
+  defaultValues?: Record<string, string | number | boolean | null>;
+}
+export type InternalOverrideFieldsType = {
+  [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;
+};

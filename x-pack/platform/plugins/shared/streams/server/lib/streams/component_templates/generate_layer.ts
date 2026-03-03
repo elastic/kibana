@@ -5,33 +5,173 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterPutComponentTemplateRequest,
   MappingDateProperty,
-  MappingProperty,
+  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AllowedMappingProperty,
+  StreamsMappingProperties,
+} from '@kbn/streams-schema/src/fields';
+import type { Streams } from '@kbn/streams-schema';
 import {
-  Streams,
   getAdvancedParameters,
-  isDslLifecycle,
-  isIlmLifecycle,
   isRoot,
+  getRoot,
+  namespacePrefixes,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { logsSettings } from './logs_layer';
+import {
+  baseMappings,
+  NAMESPACE_PRIORITIES,
+  otelEquivalentLookupMap,
+  REQUIRED_RESOURCE_ATTRIBUTES_FIELDS,
+} from './logs_layer';
+import { ecsLogsSettings } from './logs_ecs_layer';
 import { getComponentTemplateName } from './name';
+import { otelLogsSettings } from './logs_otel_layer';
+
+function buildNamespaceStructure(
+  prefix: string,
+  properties: MappingTypeMapping['properties']
+): MappingTypeMapping['properties'] {
+  const priority = NAMESPACE_PRIORITIES[prefix] || 10;
+
+  switch (prefix) {
+    case 'body.structured.':
+      return {
+        body: {
+          type: 'object',
+          properties: {
+            structured: {
+              type: 'passthrough',
+              priority,
+              properties,
+            },
+          },
+        },
+      };
+    case 'attributes.':
+      return {
+        attributes: {
+          type: 'passthrough',
+          priority,
+          properties,
+        },
+      };
+    case 'resource.attributes.':
+      return {
+        resource: {
+          type: 'object',
+          properties: {
+            attributes: {
+              type: 'passthrough',
+              priority,
+              // Always include required fields (used for index sorting) plus stream-specific fields
+              properties: { ...REQUIRED_RESOURCE_ATTRIBUTES_FIELDS, ...properties },
+            },
+          },
+        },
+      };
+    case 'scope.attributes.':
+      return {
+        scope: {
+          type: 'object',
+          properties: {
+            attributes: {
+              type: 'passthrough',
+              priority,
+              properties,
+            },
+          },
+        },
+      };
+    default:
+      return {};
+  }
+}
+
+/**
+ * Builds OTel-to-ECS equivalent aliases.
+ * For fields with namespace prefixes, checks if there's an ECS equivalent
+ * and creates an explicit alias for it.
+ *
+ * Example: attributes.http.request.size -> http.request.bytes alias
+ */
+function buildOtelEquivalentAliases(
+  properties: StreamsMappingProperties
+): MappingTypeMapping['properties'] {
+  const aliases: MappingTypeMapping['properties'] = {};
+
+  Object.keys(properties).forEach((fieldName) => {
+    const matchingPrefix = namespacePrefixes.find((prefix) => fieldName.startsWith(prefix));
+    if (matchingPrefix) {
+      const aliasName = fieldName.substring(matchingPrefix.length);
+      const otelEquivalent = otelEquivalentLookupMap[aliasName];
+      if (otelEquivalent) {
+        aliases[otelEquivalent] = {
+          type: 'alias',
+          path: fieldName,
+        };
+      }
+    }
+  });
+
+  return aliases;
+}
+
+/**
+ * Builds namespace passthrough objects containing fields.
+ * Groups fields by their namespace prefix and creates passthrough objects
+ * that will automatically generate aliases in Elasticsearch.
+ */
+function buildPassthroughProperties(
+  properties: StreamsMappingProperties
+): MappingTypeMapping['properties'] {
+  // Group fields by their namespace prefix
+  const fieldsByNamespace: Record<string, MappingTypeMapping['properties']> = {};
+  const nonNamespacedFields: MappingTypeMapping['properties'] = {};
+
+  Object.entries(properties).forEach(([fieldName, fieldDef]) => {
+    const matchingPrefix = namespacePrefixes.find((prefix) => fieldName.startsWith(prefix));
+    if (matchingPrefix) {
+      // Strip the prefix to get the field name within the namespace
+      const fieldNameWithinNamespace = fieldName.substring(matchingPrefix.length);
+      if (!fieldsByNamespace[matchingPrefix]) {
+        fieldsByNamespace[matchingPrefix] = {};
+      }
+      fieldsByNamespace[matchingPrefix]![fieldNameWithinNamespace] = fieldDef;
+    } else {
+      // Non-namespaced fields go at root level
+      nonNamespacedFields[fieldName] = fieldDef;
+    }
+  });
+
+  // Build the final properties object
+  // Each namespace produces a unique top-level key, so simple spreading works
+  let result: MappingTypeMapping['properties'] = { ...nonNamespacedFields };
+
+  Object.entries(fieldsByNamespace).forEach(([prefix, namespaceFields]) => {
+    result = { ...result, ...buildNamespaceStructure(prefix, namespaceFields) };
+  });
+
+  return result;
+}
 
 export function generateLayer(
   name: string,
   definition: Streams.WiredStream.Definition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
-  const properties: Record<string, MappingProperty> = {};
+  const properties: StreamsMappingProperties = {};
+
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
     if (props.type === 'system') {
       return;
     }
-    const property: MappingProperty = {
+    const property: AllowedMappingProperty = {
       type: props.type,
     };
 
@@ -52,15 +192,36 @@ export function generateLayer(
     properties[field] = property;
   });
 
-  return {
+  // Determine if this is an OTel-based stream or ECS stream
+  const rootStream = getRoot(name);
+  const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
+
+  let mappingProperties: MappingTypeMapping['properties'];
+
+  if (isEcsStream) {
+    // For ECS streams, use raw properties directly without OTel passthrough or alias logic
+    mappingProperties = properties;
+  } else {
+    // For OTel-based streams, apply OTel-specific processing
+    const passthroughProperties = buildPassthroughProperties(properties);
+    const otelAliases = buildOtelEquivalentAliases(properties);
+
+    // For root streams, include baseMappings (passthrough definitions + static aliases)
+    // For child streams, just use the built passthrough properties
+    // OTel aliases are added to both
+    mappingProperties = isRoot(name)
+      ? { ...baseMappings, ...passthroughProperties, ...otelAliases }
+      : { ...passthroughProperties, ...otelAliases };
+  }
+
+  const result = {
     name: getComponentTemplateName(name),
     template: {
-      lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
-        subobjects: false,
         dynamic: false,
-        properties,
+        properties: mappingProperties,
+        ...(isEcsStream && { subobjects: false as const }),
       },
     },
     version: ASSET_VERSION,
@@ -69,55 +230,16 @@ export function generateLayer(
       description: `Default settings for the ${name} stream`,
     },
   };
-}
 
-function getTemplateLifecycle(definition: Streams.WiredStream.Definition, isServerless: boolean) {
-  const lifecycle = definition.ingest.lifecycle;
-  if (isServerless) {
-    // dlm cannot be disabled in serverless
-    return {
-      data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-    };
-  }
-
-  if (isIlmLifecycle(lifecycle)) {
-    return { enabled: false };
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return {
-      enabled: true,
-      data_retention: lifecycle.dsl.data_retention,
-    };
-  }
-
-  return undefined;
+  return result;
 }
 
 function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
-  const baseSettings = isRoot(definition.name) ? logsSettings : {};
-  const lifecycle = definition.ingest.lifecycle;
-
-  if (isServerless) {
-    return baseSettings;
+  if (!isRoot(definition.name)) {
+    return {};
   }
 
-  if (isIlmLifecycle(lifecycle)) {
-    return {
-      ...baseSettings,
-      'index.lifecycle.prefer_ilm': true,
-      'index.lifecycle.name': lifecycle.ilm.policy,
-    };
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return {
-      ...baseSettings,
-      'index.lifecycle.prefer_ilm': false,
-      'index.lifecycle.name': undefined,
-    };
-  }
-
-  // don't specify any lifecycle property when lifecyle is disabled or inherited
-  return baseSettings;
+  // Use ECS settings for logs.ecs (sorts by host.name), OTel settings for others (sorts by resource.attributes.host.name)
+  const rootStream = getRoot(definition.name);
+  return rootStream === LOGS_ECS_STREAM_NAME ? ecsLogsSettings : otelLogsSettings;
 }

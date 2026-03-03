@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -30,7 +29,6 @@ export const VERSION = '1.0.0';
 
 export class SecurityUsageReportingTask {
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private readonly cloudSetup: CloudSetup;
   private readonly taskType: string;
   private readonly version: string;
@@ -76,10 +74,16 @@ export class SecurityUsageReportingTask {
           title: taskTitle,
           timeout: this.config.usageReportingTaskTimeout,
           stateSchemaByVersion,
-          createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          createTaskRunner: ({
+            taskInstance,
+            abortController,
+          }: {
+            taskInstance: ConcreteTaskInstance;
+            abortController: AbortController;
+          }) => {
             return {
               run: async () => {
-                return this.runTask(taskInstance, core, meteringCallback);
+                return this.runTask(taskInstance, core, meteringCallback, abortController);
               },
               cancel: async () => {},
             };
@@ -116,10 +120,12 @@ export class SecurityUsageReportingTask {
     }
   };
 
+  // eslint-disable-next-line complexity
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    meteringCallback: MeteringCallback
+    meteringCallback: MeteringCallback,
+    abortController: AbortController
   ) => {
     this.logger.info('Usage reporting task is running.');
 
@@ -160,7 +166,7 @@ export class SecurityUsageReportingTask {
         logger: this.logger,
         taskId: this.taskId,
         lastSuccessfulReport,
-        abortController: this.abortController,
+        abortController,
         config: this.config,
       });
       usageRecords = meteringCallbackResponse.records ?? [];

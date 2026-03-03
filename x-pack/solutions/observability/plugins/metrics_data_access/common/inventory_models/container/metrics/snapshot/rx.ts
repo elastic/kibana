@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
+import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic';
 export const rx = networkTrafficWithInterfaces(
   'rx',
   'docker.network.inbound.bytes',

@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EsqlQueryExpression } from './esql_query_expression';
-import { EsQueryRuleParams, SearchType } from '../types';
+import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
+import type { EsQueryRuleParams } from '../types';
+import { SearchType } from '../types';
 
 jest.mock('../validation', () => ({
   hasExpressionValidationErrors: jest.fn(),
 }));
 const { hasExpressionValidationErrors } = jest.requireMock('../validation');
 
-jest.mock('@kbn/esql-editor', () => ({
-  fetchFieldsFromESQL: jest.fn(),
-}));
+jest.mock('@kbn/data-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/data-plugin/public');
+  return {
+    ...actual,
+    getEsQueryConfig: jest.fn().mockReturnValue({
+      allowLeadingWildcards: true,
+      queryStringOptions: {},
+      ignoreFilterIfFieldNotInIndex: false,
+    }),
+  };
+});
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const module = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -57,7 +67,6 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
-const { fetchFieldsFromESQL } = jest.requireMock('@kbn/esql-editor');
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
@@ -85,10 +94,13 @@ const defaultEsqlQueryExpressionParams: EsQueryRuleParams<SearchType.esqlQuery> 
 };
 
 describe('EsqlQueryRuleTypeExpression', () => {
+  const fakeNow = new Date('2020-02-09T23:15:41.941Z');
+
   beforeEach(() => {
     jest.clearAllMocks();
 
     hasExpressionValidationErrors.mockReturnValue(false);
+    global.Date.now = jest.fn(() => fakeNow.getTime());
   });
 
   test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {
@@ -186,20 +198,18 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show success message if Test Query is successful', async () => {
-    fetchFieldsFromESQL.mockResolvedValue({
-      type: 'datatable',
-      columns: [
-        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
-        { id: 'ecs.version', name: 'ecs.version', meta: { type: 'string' } },
-        { id: 'error.code', name: 'error.code', meta: { type: 'string' } },
-      ],
-      rows: [
-        {
-          '@timestamp': '2023-07-12T13:32:04.174Z',
-          'ecs.version': '1.8.0',
-          'error.code': null,
-        },
-      ],
+    const { getESQLResults } = jest.requireMock('@kbn/esql-utils');
+
+    getESQLResults.mockResolvedValue({
+      response: {
+        type: 'datatable',
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'ecs.version', type: 'string' },
+          { name: 'error.code', type: 'string' },
+        ],
+        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
+      },
     });
     getFields.mockResolvedValue([]);
 
@@ -226,7 +236,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(fetchFieldsFromESQL).toBeCalled());
+    await waitFor(() => expect(getESQLResults).toBeCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query matched 1 documents in the last 15s.')).toBeInTheDocument();
@@ -234,20 +244,18 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show grouped success message if Test Query is successful', async () => {
-    fetchFieldsFromESQL.mockResolvedValue({
-      type: 'datatable',
-      columns: [
-        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
-        { id: 'ecs.version', name: 'ecs.version', meta: { type: 'string' } },
-        { id: 'error.code', name: 'error.code', meta: { type: 'string' } },
-      ],
-      rows: [
-        {
-          '@timestamp': '2023-07-12T13:32:04.174Z',
-          'ecs.version': '1.8.0',
-          'error.code': null,
-        },
-      ],
+    const { getESQLResults } = jest.requireMock('@kbn/esql-utils');
+
+    getESQLResults.mockResolvedValue({
+      response: {
+        type: 'datatable',
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'ecs.version', type: 'string' },
+          { name: 'error.code', type: 'string' },
+        ],
+        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
+      },
     });
     getFields.mockResolvedValue([]);
 
@@ -274,7 +282,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(fetchFieldsFromESQL).toBeCalled());
+    await waitFor(() => expect(getESQLResults).toBeCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query returned 1 rows in the last 15s.')).toBeInTheDocument();
@@ -282,7 +290,10 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show error message if Test Query is throws error', async () => {
-    fetchFieldsFromESQL.mockRejectedValue('Error getting test results.!');
+    const { getESQLResults } = jest.requireMock('@kbn/esql-utils');
+
+    getESQLResults.mockRejectedValue('Error getting test results.!');
+
     const result = render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
@@ -306,9 +317,30 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(result.getByTestId('testQuery'));
-    await waitFor(() => expect(fetchFieldsFromESQL).toBeCalled());
+    await waitFor(() => expect(getESQLResults).toBeCalled());
 
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.getByTestId('testQueryError')).toBeInTheDocument();
+  });
+
+  test('getTimeFilter should return the correct filters', async () => {
+    expect(getTimeFilter('@timestamp', '3h')).toEqual({
+      timeFilter: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  format: 'strict_date_optional_time',
+                  gt: '2020-02-09T20:15:41.941Z',
+                  lte: '2020-02-09T23:15:41.941Z',
+                },
+              },
+            },
+          ],
+        },
+      },
+      timeRange: { from: '2020-02-09T20:15:41.941Z', to: '2020-02-09T23:15:41.941Z' },
+    });
   });
 });

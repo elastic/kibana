@@ -38,7 +38,7 @@ describe('getDefaultGraphState', () => {
   it('returns the expected default empty collection of anonymizedEvents', () => {
     const state = getDefaultGraphState({ prompts });
 
-    expect(state.anonymizedEvents?.default?.()).toHaveLength(0);
+    expect(state.anonymizedDocuments?.default?.()).toHaveLength(0);
   });
 
   it('returns the expected default combinedGenerations state', () => {

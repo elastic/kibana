@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -100,6 +100,12 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
       if (await this.isSyncTooltipsEnabled) {
         await testSubjects.setEuiSwitch(this.SYNC_TOOLTIPS_DATA_SUBJ, status);
       }
+    }
+
+    public async toggleAutoApplyFilters(value: boolean) {
+      const status = value ? 'check' : 'uncheck';
+      log.debug(`toggleAutoApplyFilters::${status}`);
+      await testSubjects.setEuiSwitch('dashboardAutoApplyFiltersCheckbox', status);
     }
 
     public async isShowingDuplicateTitleWarning() {

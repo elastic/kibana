@@ -20,11 +20,11 @@ import { prepareKQLParam, prepareKQLStringParam } from '../../../../common/utils
 import { assertUnreachable } from '../../../../common/utility_types';
 import type { BrowserFields } from '../../../common/containers/source';
 import {
-  convertDateFieldToQuery,
   checkIfFieldTypeIsDate,
-  convertNestedFieldToQuery,
-  convertNestedFieldToExistQuery,
   checkIfFieldTypeIsNested,
+  convertDateFieldToQuery,
+  convertNestedFieldToExistQuery,
+  convertNestedFieldToQuery,
   type PrimitiveOrArrayOfPrimitives,
 } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
@@ -91,38 +91,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
 
-export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
-  graphEventId != null && graphEventId !== '';
-
-export const showGlobalFilters = ({
-  globalFullScreen,
-  graphEventId,
-}: {
-  globalFullScreen: boolean;
-  graphEventId: string | undefined;
-}): boolean => (globalFullScreen && resolverIsShowing(graphEventId) ? false : true);
-
-/**
- * The `aria-colindex` of the Timeline actions column
- */
-export const ACTIONS_COLUMN_ARIA_COL_INDEX = '1';
-
-/**
- * Every column index offset by `2`, because, per https://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html
- * the `aria-colindex` attribute starts at `1`, and the "actions column" is always the first column
- */
-export const ARIA_COLUMN_INDEX_OFFSET = 2;
-
 export const EVENTS_COUNT_BUTTON_CLASS_NAME = 'local-events-count-button';
-
-/** Calculates the total number of pages in a (timeline) events view */
-export const calculateTotalPages = ({
-  itemsCount,
-  itemsPerPage,
-}: {
-  itemsCount: number;
-  itemsPerPage: number;
-}): number => (itemsCount === 0 || itemsPerPage === 0 ? 0 : Math.ceil(itemsCount / itemsPerPage));
 
 /** Returns true if the events table has focus */
 export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>

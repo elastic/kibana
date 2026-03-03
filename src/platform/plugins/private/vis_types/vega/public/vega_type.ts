@@ -11,14 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { parse } from 'hjson';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import {
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
-  VisTypeDefinition,
-} from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/public';
 
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
+import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
 import { createInspectorAdapters } from './vega_inspector';
 import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
@@ -62,6 +60,16 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
       // spec is invalid
     }
     return [];
+  },
+  getProjectRoutingOverrides: async (visParams) => {
+    try {
+      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+
+      return extractProjectRoutingOverrides(spec);
+    } catch (e) {
+      // spec is invalid
+    }
+    return undefined;
   },
   inspectorAdapters: createInspectorAdapters,
   /**

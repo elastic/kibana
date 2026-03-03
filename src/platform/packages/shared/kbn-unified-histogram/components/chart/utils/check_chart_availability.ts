@@ -8,7 +8,7 @@
  */
 
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
-import { UnifiedHistogramChartContext } from '../../../types';
+import type { UnifiedHistogramChartContext } from '../../../types';
 
 export function checkChartAvailability({
   chart,
@@ -16,11 +16,12 @@ export function checkChartAvailability({
   isPlainRecord,
 }: {
   chart?: UnifiedHistogramChartContext;
-  dataView: DataView;
+  dataView: DataView | undefined;
   isPlainRecord?: boolean;
 }): boolean {
   return Boolean(
     chart &&
+      dataView &&
       dataView.id &&
       dataView.type !== DataViewType.ROLLUP &&
       (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))

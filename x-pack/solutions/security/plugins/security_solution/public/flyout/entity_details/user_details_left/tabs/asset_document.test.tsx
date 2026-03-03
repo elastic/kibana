@@ -13,14 +13,11 @@ import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { DocumentDetailsContext } from '../../../document_details/shared/context';
 import { mockContextValue } from '../../../document_details/shared/mocks/mock_context';
 import userEvent from '@testing-library/user-event';
-import {
-  JSON_TAB_CONTENT_TEST_ID,
-  TABLE_TAB_CONTENT_TEST_ID,
-} from '../../../document_details/right/tabs/test_ids';
+import { TABLE_TAB_CONTENT_TEST_ID } from '../../../document_details/right/tabs/test_ids';
+import { JSON_TAB_CONTENT_TEST_ID } from '../../../shared/components/json_tab';
+import { PREFIX } from '../../../shared/test_ids';
 
-// FLAKY: https://github.com/elastic/kibana/issues/216735
-// FLAKY: https://github.com/elastic/kibana/issues/216815
-describe.skip('AssetDocumentTab', () => {
+describe('AssetDocumentTab', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -56,7 +53,7 @@ describe.skip('AssetDocumentTab', () => {
 
     await userEvent.click(getByTitle('JSON'));
 
-    expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREFIX + JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should select table tab when path tab is table', async () => {

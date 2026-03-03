@@ -12,7 +12,8 @@ import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import React, { useMemo } from 'react';
 
 import { getAttackDiscoveryLoadingMessage } from '@kbn/elastic-assistant-common';
-import { useDateFormat, useKibana } from '../../../../common/lib/kibana';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { useDateFormat } from '../../../../common/lib/kibana';
 import { getCanceledResultMessage } from './get_canceled_result_message';
 import { getFormattedDate } from './get_formatted_time';
 import { getIsTerminalState } from '../get_is_terminal_state';
@@ -49,7 +50,7 @@ const LoadingMessagesComponent: React.FC<Props> = ({
   start,
   status,
 }) => {
-  const { theme } = useKibana().services;
+  const isDarkMode = useKibanaIsDarkMode();
   const dateFormat = useDateFormat();
 
   const formattedStart = useMemo(
@@ -75,8 +76,6 @@ const LoadingMessagesComponent: React.FC<Props> = ({
     defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
     localStorageAttackDiscoveryMaxAlerts,
   });
-
-  const isDarkMode = theme.getTheme().darkMode === true;
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
 

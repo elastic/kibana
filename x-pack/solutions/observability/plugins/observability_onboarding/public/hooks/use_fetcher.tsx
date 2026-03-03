@@ -8,12 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import {
-  AutoAbortedObservabilityClient,
-  callObservabilityOnboardingApi,
-} from '../services/rest/create_call_api';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibana } from './use_kibana';
+import type { AutoAbortedObservabilityClient } from '../services/rest/create_call_api';
+import { callObservabilityOnboardingApi } from '../services/rest/create_call_api';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -86,7 +85,9 @@ export function useFetcher<TReturn>(
     showToastOnError?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useKibana();
+  const {
+    services: { notifications, rendering },
+  } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
@@ -139,12 +140,12 @@ export function useFetcher<TReturn>(
           const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.danger({
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.observability_onboarding.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              body: (
+              text: toMountPoint(
                 <div>
                   <h5>
                     {i18n.translate('xpack.observability_onboarding.fetcher.error.status', {
@@ -153,7 +154,8 @@ export function useFetcher<TReturn>(
                   </h5>
 
                   {errorDetails}
-                </div>
+                </div>,
+                rendering
               ),
             });
           }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+
 import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -34,6 +35,9 @@ import type {
   PersistableStateAttachment,
   Configuration,
   CustomFieldTypes,
+  EventAttachment,
+  UnifiedAttachment,
+  AttachmentV2,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -52,8 +56,16 @@ import type {
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    sync?: boolean;
+    enabled?: boolean;
+    isExperimental?: boolean;
+    read?: boolean;
+    all?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
+  observables?: { enabled: boolean; autoExtract?: boolean };
+  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -69,6 +81,12 @@ export interface CasesUiConfigType {
     allowedMimeTypes: string[];
   };
   stack: {
+    enabled: boolean;
+  };
+  incrementalId: {
+    enabled: boolean;
+  };
+  templates: {
     enabled: boolean;
   };
 }
@@ -91,6 +109,9 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
+export type AttachmentUIV2 = SnakeToCamelCase<AttachmentV2>;
+
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
@@ -98,6 +119,7 @@ export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
+export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
   latestAttachments: AttachmentUI[];
@@ -124,9 +146,9 @@ export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export type CasesConfigurationUI = Pick<
@@ -178,6 +200,8 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
@@ -340,4 +364,8 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
+}
+
+export interface CaseViewEventsTableProps {
+  events: { eventId: string | string[]; index: string | string[] }[];
 }

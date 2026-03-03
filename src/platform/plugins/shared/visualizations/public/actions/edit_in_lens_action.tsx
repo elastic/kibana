@@ -9,30 +9,31 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanAccessViewMode,
-  apiHasUniqueId,
+import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasUniqueId,
   PublishesUnifiedSearch,
   PublishesDescription,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import {
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs';
+import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasVisualizeConfig,
   type HasVisualizeConfig,
 } from '../embeddable/interfaces/has_visualize_config';
-import {
-  apiHasExpressionVariables,
-  HasExpressionVariables,
-} from '../embeddable/interfaces/has_expression_variables';
+import type { HasExpressionVariables } from '../embeddable/interfaces/has_expression_variables';
+import { apiHasExpressionVariables } from '../embeddable/interfaces/has_expression_variables';
 import {
   getApplication,
   getCapabilities,
@@ -40,7 +41,6 @@ import {
   getUiActions,
   getUsageCollection,
 } from '../services';
-import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 import { ACTION_EDIT_IN_LENS } from './constants';
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
@@ -124,7 +124,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
         );
       }
       getEmbeddable().getStateTransfer().isTransferInProgress = true;
-      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+      getUiActions().executeTriggerActions(DASHBOARD_VISUALIZATION_PANEL_TRIGGER, updatedWithMeta);
     }
   }
 

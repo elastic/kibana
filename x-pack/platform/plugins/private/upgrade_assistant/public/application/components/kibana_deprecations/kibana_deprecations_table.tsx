@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } from '@elastic/eui';
+import type { EuiBasicTableColumn, Search } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiLink } from '@elastic/eui';
 
 import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
@@ -98,6 +99,9 @@ const i18nTexts = {
       defaultMessage: 'Filter',
     }
   ),
+  tableCaption: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.table.tableCaption', {
+    defaultMessage: 'List of Kibana deprecations',
+  }),
 };
 
 interface Props {
@@ -268,6 +272,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       })}
       data-test-subj="kibanaDeprecationsTable"
       tableLayout="auto"
+      tableCaption={i18nTexts.tableCaption}
     />
   );
 };

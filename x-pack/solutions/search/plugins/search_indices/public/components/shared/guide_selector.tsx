@@ -14,9 +14,10 @@ import {
   EuiFlexItem,
   EuiTourStep,
   EuiTextColor,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
 import { workflows } from '../../code_examples/workflows';
 import { useGuideTour } from './hooks/use_guide_tour';
 
@@ -36,6 +37,7 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
 
   return showTour ? (
     <EuiTourStep
+      data-test-subj="searchIngestTour"
       content={
         <EuiText>
           <p>
@@ -54,6 +56,19 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
         defaultMessage: 'New guides available!',
       })}
       anchorPosition="rightUp"
+      footerAction={
+        <EuiButtonEmpty
+          data-test-subj="searchIngestTourCloseButton"
+          color="text"
+          flush="right"
+          onClick={() => setTourIsOpen(false)}
+          size="xs"
+        >
+          {i18n.translate('xpack.searchIndices.closeTourAction', {
+            defaultMessage: 'Close tour',
+          })}
+        </EuiButtonEmpty>
+      }
     >
       <GuideSelectorTiles selectedWorkflowId={selectedWorkflowId} onChange={onChange} />
     </EuiTourStep>

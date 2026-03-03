@@ -7,8 +7,14 @@
 
 import Path from 'path';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
+import {
+  Client as ElasticsearchClient8,
+  HttpConnection as Elasticsearch8HttpConnection,
+} from 'elasticsearch-8.x';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   // checkConnectivity,
   createTargetIndex,
@@ -21,18 +27,28 @@ import {
   processDocuments,
 } from './tasks';
 import type { TaskConfig } from './types';
+import { getSemanticTextMapping } from './tasks/create_index';
 
 const getSourceClient = (config: TaskConfig) => {
-  return new Client({
+  const auth = config.sourceClusterApiKey
+    ? { apiKey: config.sourceClusterApiKey }
+    : config.sourceClusterUsername && config.sourceClusterPassword
+    ? {
+        username: config.sourceClusterUsername,
+        password: config.sourceClusterPassword,
+      }
+    : undefined;
+
+  return new ElasticsearchClient8({
     compression: true,
     nodes: [config.sourceClusterUrl],
     sniffOnStart: false,
-    auth: {
-      username: config.sourceClusterUsername,
-      password: config.sourceClusterPassword,
-    },
-    Connection: HttpConnection,
+    ...(auth ? { auth } : {}),
+    Connection: Elasticsearch8HttpConnection,
     requestTimeout: 30_000,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
@@ -47,6 +63,9 @@ const getEmbeddingClient = (config: TaskConfig) => {
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
     Connection: HttpConnection,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
@@ -77,8 +96,10 @@ export const buildArtifacts = async (config: TaskConfig) => {
       buildFolder: config.buildFolder,
       targetFolder: config.targetFolder,
       sourceClient,
+      sourceClusterIndex: config.sourceClusterIndex,
       embeddingClient,
       log,
+      inferenceId: config.inferenceId ?? defaultInferenceEndpoints.ELSER,
     });
   }
 
@@ -93,22 +114,47 @@ const buildArtifact = async ({
   embeddingClient,
   sourceClient,
   log,
+  inferenceId,
+  sourceClusterIndex = 'connector-prod-s3-doc-content-v1',
 }: {
   productName: ProductName;
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;
-  sourceClient: Client;
+  sourceClient: ElasticsearchClient8;
   embeddingClient: Client;
   log: ToolingLog;
+  inferenceId: string;
+  sourceClusterIndex?: string;
 }) => {
-  log.info(`Starting building artifact for product [${productName}] and version [${stackVersion}]`);
+  log.info(
+    `Starting building artifact for product [${productName}] and version [${stackVersion}] with inference id [${inferenceId}]`
+  );
 
-  const targetIndex = getTargetIndexName({ productName, stackVersion });
+  const semanticTextMapping = getSemanticTextMapping(inferenceId);
+
+  log.info(
+    `Detected semantic text mapping for Inference ID ${inferenceId}:\n ${JSON.stringify(
+      semanticTextMapping,
+      null,
+      2
+    )}`
+  );
+
+  const targetIndex = getTargetIndexName({
+    productName,
+    stackVersion,
+    inferenceId: semanticTextMapping?.inference_id,
+  });
+  await deleteIndex({
+    indexName: targetIndex,
+    client: embeddingClient,
+    log,
+  });
 
   let documents = await extractDocumentation({
     client: sourceClient,
-    index: 'search-docs-1',
+    index: sourceClusterIndex ?? 'connector-prod-s3-doc-content-v1',
     log,
     productName,
     stackVersion,
@@ -119,6 +165,7 @@ const buildArtifact = async ({
   await createTargetIndex({
     client: embeddingClient,
     indexName: targetIndex,
+    semanticTextMapping,
   });
 
   await indexDocuments({
@@ -142,12 +189,7 @@ const buildArtifact = async ({
     productName,
     stackVersion,
     log,
-  });
-
-  await deleteIndex({
-    indexName: targetIndex,
-    client: embeddingClient,
-    log,
+    semanticTextMapping,
   });
 
   log.info(`Finished building artifact for product [${productName}] and version [${stackVersion}]`);
@@ -156,9 +198,13 @@ const buildArtifact = async ({
 const getTargetIndexName = ({
   productName,
   stackVersion,
+  inferenceId,
 }: {
   productName: string;
   stackVersion: string;
+  inferenceId?: string;
 }) => {
-  return `kb-artifact-builder-${productName}-${stackVersion}`.toLowerCase();
+  return `kb-artifact-builder-${productName}-${stackVersion}${
+    inferenceId ? `-${inferenceId}` : ''
+  }`.toLowerCase();
 };

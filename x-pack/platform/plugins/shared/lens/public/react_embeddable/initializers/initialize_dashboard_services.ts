@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import {
+import type {
   HasLibraryTransforms,
   PublishesWritableTitle,
   PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
   initializeTitleManager,
-  titleComparators,
 } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
-import { BehaviorSubject, Observable, map, merge } from 'rxjs';
-import { isTextBasedLanguage } from '../helper';
+import { titleComparators } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
   LensComponentProps,
   LensPanelProps,
   LensRuntimeState,
-  LensEmbeddableStartServices,
   LensOverrides,
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
-  LensApi,
-  LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
+
+import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
-import { StateManagementConfig } from './initialize_state_management';
+import type { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
@@ -51,17 +53,18 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
   style: 'skip',
   className: 'skip',
   forceDSL: 'skip',
+  esqlVariables: 'skip',
 };
 
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 /**
@@ -78,9 +81,7 @@ export function initializeDashboardServices(
 ): DashboardServicesConfig {
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(
-    initialState.title || internalApi.attributes$.getValue().title
-  );
+  const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
     initialState.savedObjectId
       ? internalApi.attributes$.getValue().description || initialState.description
@@ -131,12 +132,14 @@ export function initializeDashboardServices(
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
-        currentState.savedObjectId = newId;
-        return attributeService.extractReferences(currentState);
+        return {
+          ...currentState,
+          savedObjectId: newId,
+        };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return attributeService.extractReferences(byValueRuntimeState);
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(
@@ -165,7 +168,7 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
       internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
       internalApi.updateOverrides(lastSaved?.overrides);

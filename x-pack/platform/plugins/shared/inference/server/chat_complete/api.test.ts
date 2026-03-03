@@ -21,9 +21,11 @@ import {
   createInferenceConnectorAdapterMock,
   createInferenceConnectorMock,
   createInferenceExecutorMock,
+  createRegexWorkerServiceMock,
   chunkEvent,
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
+import { createChatCompleteCallbackApi } from './callback_api';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -32,15 +34,30 @@ describe('createChatCompleteApi', () => {
   let inferenceAdapter: ReturnType<typeof createInferenceConnectorAdapterMock>;
   let inferenceConnector: ReturnType<typeof createInferenceConnectorMock>;
   let inferenceExecutor: ReturnType<typeof createInferenceExecutorMock>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
 
   let chatComplete: ChatCompleteAPI;
-
+  const mockEsClient = {
+    ml: {
+      inferTrainedModel: jest.fn(),
+    },
+  } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
-
-    chatComplete = createChatCompleteApi({ request, actions, logger });
+    regexWorker = createRegexWorkerServiceMock();
+    const callbackApi = createChatCompleteCallbackApi({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+    });
+    chatComplete = createChatCompleteApi({
+      callbackApi,
+    });
 
     inferenceAdapter = createInferenceConnectorAdapterMock();
     inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));

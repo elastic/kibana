@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaErrorService } from './src/services/error_service';
+import type { KibanaErrorService } from './src/services/error_service';
 
 /**
  * Services that are consumed internally in this component.

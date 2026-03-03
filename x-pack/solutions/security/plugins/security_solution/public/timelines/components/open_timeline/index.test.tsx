@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { fireEvent, render, waitFor, renderHook } from '@testing-library/react';
+import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/formatted_relative';
@@ -15,14 +15,14 @@ import { SecurityPageName } from '../../../app/types';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types';
 import {
-  TestProviders,
-  mockOpenTimelineQueryResults,
   createMockStore,
   mockGlobalState,
+  mockOpenTimelineQueryResults,
+  TestProviders,
 } from '../../../common/mock';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
-import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
+import { getAllTimeline, useGetAllTimeline } from '../../containers/all';
 
 import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
@@ -35,7 +35,7 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
-} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+} from '../../../detections/hooks/use_rule_from_timeline';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');

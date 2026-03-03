@@ -36,13 +36,14 @@ export const GridHeader = memo<GridHeaderProps>(
             {
               defaultMessage: '{action} all cards',
               values: {
+                // @ts-expect-error upgrade typescript v5.9.3
                 action: 'unfold' ? 'Expand' : 'Collapse',
               },
             }
           )}
           iconType={expandAllIconType}
           onClick={() => onExpandCollapseAll()}
-          style={{ marginLeft: '-5px' }}
+          css={{ marginLeft: '-5px' }}
         />
       ),
       [getTestId, expandAllIconType, onExpandCollapseAll]

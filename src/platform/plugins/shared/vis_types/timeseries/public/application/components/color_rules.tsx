@@ -8,6 +8,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import type { EuiComboBoxOptionOption, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -15,17 +16,16 @@ import {
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBoxOptionOption,
   withEuiTheme,
-  WithEuiThemeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
-import { ColorPicker, ColorPickerProps } from './color_picker';
-import { TimeseriesVisParams } from '../../types';
+import type { ColorPickerProps } from './color_picker';
+import { ColorPicker } from './color_picker';
+import type { TimeseriesVisParams } from '../../types';
 import { Operator } from '../../../common/operators_utils';
 import { tsvbEditorRowStyles } from '../styles/common.styles';
 
@@ -145,6 +145,8 @@ class ColorRulesUI extends Component<ColorRulesProps> {
       collectionActions.handleChange(this.props, { ...model, ...part });
     };
     const htmlId = htmlIdGenerator(model.id);
+    const metricSelectId = htmlId('ifMetricIs');
+    const metricLabelId = htmlId('ifMetricIsLabel');
     const selectedOperatorOption = operatorOptions.find(
       (option) => model.operator === option.value
     );
@@ -216,7 +218,7 @@ class ColorRulesUI extends Component<ColorRulesProps> {
         {secondary}
 
         <EuiFlexItem grow={false}>
-          <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>
+          <EuiFormLabel style={labelStyle} htmlFor={metricSelectId} id={metricLabelId}>
             <FormattedMessage
               id="visTypeTimeseries.colorRules.ifMetricIsLabel"
               defaultMessage="if metric is"
@@ -227,7 +229,8 @@ class ColorRulesUI extends Component<ColorRulesProps> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiComboBox
-            id={htmlId('ifMetricIs')}
+            id={metricSelectId}
+            aria-labelledby={metricLabelId}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
             onChange={this.handleOperatorChange(model)}

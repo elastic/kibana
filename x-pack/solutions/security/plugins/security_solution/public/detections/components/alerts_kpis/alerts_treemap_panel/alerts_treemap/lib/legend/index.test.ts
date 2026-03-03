@@ -75,18 +75,6 @@ describe('legend', () => {
       ).toEqual(34);
     });
 
-    it('returns the expected dataProviderId', () => {
-      expect(
-        getLegendItemFromRawBucket({
-          bucket: bucketsWithStackByField1[0],
-          colorPalette,
-          maxRiskSubAggregations,
-          showColor: true,
-          stackByField0: 'kibana.alert.rule.name',
-        }).dataProviderId
-      ).toContain('draggable-legend-item-treemap-kibana_alert_rule_name-matches everything-');
-    });
-
     it('renders the expected label', () => {
       const item = getLegendItemFromRawBucket({
         bucket: bucketsWithStackByField1[0],
@@ -188,20 +176,6 @@ describe('legend', () => {
       });
 
       expect(legendItem.render != null && legendItem.render()).toEqual('Host-k8iyfzraq9');
-    });
-
-    it('returns the expected dataProviderId', () => {
-      const legendItem = getLegendItemFromFlattenedBucket({
-        colorPalette,
-        flattenedBucket,
-        maxRiskSubAggregations,
-        stackByField0: 'kibana.alert.rule.name',
-        stackByField1: 'host.name',
-      });
-
-      expect(legendItem.dataProviderId).toContain(
-        'draggable-legend-item-treemap-matches everything-Host-k8iyfzraq9-'
-      );
     });
   });
 

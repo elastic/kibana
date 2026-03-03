@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { createLogSourcesService } from './log_sources_service';
+import { createLogDataService } from './log_data_service';
 
 export interface RegisterServicesParams {
   deps: {
     uiSettings: IUiSettingsClient;
+    search: ISearchStart;
   };
 }
 
 export function registerServices(params: RegisterServicesParams) {
+  const logSourcesService = createLogSourcesService(params);
+
+  const logDataService = createLogDataService({ ...params, logSourcesService });
+
   return {
-    logSourcesService: createLogSourcesService(params),
+    logSourcesService,
+    logDataService,
   };
 }

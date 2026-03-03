@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, IToasts } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
@@ -32,11 +32,13 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
 import type { canUseCases } from './client/helpers/can_use_cases';
 import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import type { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
@@ -47,6 +49,7 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import type {
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
@@ -61,6 +64,7 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
+  EventAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -70,6 +74,7 @@ export interface CasesPublicSetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface CasesPublicStartDependencies {
@@ -79,10 +84,7 @@ export interface CasesPublicStartDependencies {
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
-  /**
-   * Lens is not supported in all serverless tiers
-   */
-  lens?: LensPublicStart;
+  lens: LensPublicStart;
   /**
    * Cases in used by other plugins. Plugins pass the
    * service to their KibanaContext. ML does not pass
@@ -97,6 +99,7 @@ export interface CasesPublicStartDependencies {
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  toastNotifications: IToasts;
 }
 
 /**
@@ -115,6 +118,7 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }
 
 export interface CasesPublicSetup {
@@ -175,11 +179,13 @@ export interface CasesPublicStart {
     getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
     groupAlertsByRule: GroupAlertsByRule;
+    getObservablesFromEcs: typeof getObservablesFromEcs;
   };
 }
 
 export type SupportedCaseAttachment =
   | AlertAttachmentPayload
+  | EventAttachmentPayload
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload
@@ -188,6 +194,6 @@ export type SupportedCaseAttachment =
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
-export type { LensProps } from './components/visualizations/types';
+export type { LensProps } from './components/attachments/lens/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

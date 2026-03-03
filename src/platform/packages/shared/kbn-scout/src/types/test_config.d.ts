@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 
 export interface ScoutTestConfig {
   serverless: boolean;
+  uiam: boolean;
   projectType?: ServerlessProjectType;
+  organizationId?: string;
   isCloud: boolean;
   cloudHostName?: string;
   cloudUsersFilePath: string;

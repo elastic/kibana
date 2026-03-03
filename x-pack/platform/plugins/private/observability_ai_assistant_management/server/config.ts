@@ -6,10 +6,9 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
-  visibilityEnabled: schema.boolean({ defaultValue: true }),
   spacesEnabled: schema.boolean({ defaultValue: true }),
   logSourcesEnabled: schema.boolean({ defaultValue: true }),
 });
@@ -18,5 +17,8 @@ export type ObservabilityAIAssistantManagementConfig = TypeOf<typeof configSchem
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: { logSourcesEnabled: true, spacesEnabled: true, visibilityEnabled: true },
+  exposeToBrowser: {
+    logSourcesEnabled: true,
+    spacesEnabled: true,
+  },
 };

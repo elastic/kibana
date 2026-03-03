@@ -8,22 +8,22 @@
  */
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
 
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiProvider,
   EuiPageTemplate,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiButton,
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { MyFilePicker } from './file_picker';
 import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';

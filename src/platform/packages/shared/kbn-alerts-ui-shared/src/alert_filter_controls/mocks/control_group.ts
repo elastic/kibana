@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 
@@ -23,7 +23,7 @@ export const getControlGroupMock = () => {
     updateInput: jest.fn(),
     getInput$: getInput$Mock,
     openAddDataControlFlyout: jest.fn(),
-    filters$: controlGroupFilterOutputMock$,
+    appliedFilters$: controlGroupFilterOutputMock$,
     setChainingSystem: jest.fn(),
     getInput: jest.fn(),
   };

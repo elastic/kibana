@@ -74,6 +74,7 @@ export const deleteFoundExceptionListItems = async ({
   await asyncForEach(ids, async (id) => {
     try {
       await savedObjectsClient.delete(savedObjectType, id);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // This can happen from race conditions or networking issues so deleting the id's
       // like this is considered "best effort" and it is possible to get dangling pieces

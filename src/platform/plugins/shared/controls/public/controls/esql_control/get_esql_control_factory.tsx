@@ -7,105 +7,111 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, merge } from 'rxjs';
-import { css } from '@emotion/react';
-import { EuiComboBox } from '@elastic/eui';
-import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
-import { ESQL_CONTROL } from '../../../common';
-import type { ESQLControlApi } from './types';
-import { ControlFactory } from '../types';
-import { uiActionsService } from '../../services/kibana_services';
+import React, { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import {
-  defaultControlComparators,
-  initializeDefaultControlApi,
-} from '../initialize_default_control_api';
-import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
+  type PublishingSubject,
+  apiCanPinPanels,
+  initializeStateManager,
+  initializeUnsavedChanges,
+} from '@kbn/presentation-publishing';
+import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
-const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
-  defaultMessage: 'Static values list',
-});
+import { uiActionsService } from '../../services/kibana_services';
+import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
+import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
+import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
+import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
+import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
+import { VariableControlsStrings } from './constants';
+import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
-export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLControlApi> => {
+export const getESQLControlFactory = (): EmbeddableFactory<
+  OptionsListESQLControlState,
+  ESQLControlApi
+> => {
   return {
     type: ESQL_CONTROL,
-    order: 3,
-    getIconType: () => 'editorChecklist',
-    getDisplayName: () => displayName,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
-      const defaultControl = initializeDefaultControlApi(initialState);
-      const selections = initializeESQLControlSelections(initialState);
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState;
 
-      const closeOverlay = () => {
-        if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-          controlGroupApi.parentApi.clearOverlays();
-        }
-      };
-      const onSaveControl = (updatedState: ESQLControlState) => {
-        controlGroupApi?.replacePanel(uuid, {
-          panelType: 'esqlControl',
-          serializedState: {
-            rawState: updatedState,
-          },
-        });
-        closeOverlay();
-      };
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+      const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
+
+      const selections = initializeESQLControlManager(uuid, parentApi, state, setDataLoading);
+      const labelManager = initializeLabelManager(
+        { title: initialState.title, variableName: initialState.variable_name },
+        selections.internalApi,
+        'variableName'
+      );
 
       function serializeState() {
-        const { rawState: defaultControlState } = defaultControl.getLatestState();
         return {
-          rawState: {
-            ...defaultControlState,
-            ...selections.getLatestState(),
-          },
-          references: [],
+          ...selections.getLatestState(),
+          ...labelManager.getLatestState(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ESQLControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListESQLControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
-        anyStateChange$: merge(defaultControl.anyStateChange$, selections.anyStateChange$),
+        anyStateChange$: selections.anyStateChange$,
         getComparators: () => {
           return {
-            ...defaultControlComparators,
             ...selectionComparators,
+            ...defaultControlLabelComparators,
+            display_settings: 'skip',
           };
         },
         onReset: (lastSaved) => {
-          defaultControl.reinitializeState(lastSaved?.rawState);
-          selections.reinitializeState(lastSaved?.rawState);
+          selections.reinitializeState(lastSaved);
+          labelManager.reinitializeState(lastSaved);
         },
       });
 
       const api = finalizeApi({
         ...unsavedChangesApi,
-        ...defaultControl.api,
         ...selections.api,
-        defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
+        ...labelManager.api,
+        dataLoading$,
+        isExpandable: false,
+        isCustomizable: false,
+        /**
+         * TODO: Remove isDuplicable: false once duplicating ES|QL controls has been implemented
+         * ES|QL controls can only output unique variable names, so in order to duplicate the control,
+         * we would need to add a number or other uniquifying character to the end of the variable name.
+         * The problem with this is that the user cannot edit variable names after the control is created.
+         * Once we come up with a good UX solution to this, we can remove this
+         */
+        isDuplicable: false,
+        isPinnable: true,
         isEditingEnabled: () => true,
-        getTypeDisplayName: () => displayName,
+        getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
-          const state = {
-            ...initialState,
-            ...defaultControl.getLatestState().rawState,
+          const nextState = {
+            ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
+          const onSaveControl = async (updatedState: OptionsListESQLControlState) => {
+            selections.reinitializeState(updatedState);
+            labelManager.reinitializeState(updatedState);
+          };
           try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-              queryString: initialState.esqlQuery,
-              variableType: initialState.variableType,
-              controlType: initialState.controlType,
+            await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
+              queryString: nextState.esql_query,
+              variableType: nextState.variable_type,
+              controlType: nextState.control_type,
               esqlVariables: variablesInParent,
               onSaveControl,
-              onCancelControl: closeOverlay,
-              initialState: state,
+              initialState: nextState,
             });
           } catch (e) {
             // eslint-disable-next-line no-console
@@ -115,48 +121,121 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         serializeState,
       });
 
-      const inputCss = css`
-        .euiComboBox__inputWrap {
-          box-shadow: none;
-        }
-      `;
+      const componentStaticState = {
+        single_select: state.single_select ?? true,
+        exclude: false,
+        exists_selected: false,
+        requestSize: 0,
+        sort: undefined,
+        run_past_timeout: false,
+        invalidSelections: new Set<OptionsListSelection>(),
+        field_name: state.variable_name,
+        use_global_filters: false,
+        ignore_validations: false,
+        data_view_id: '',
+        blockingError: undefined,
+        filtersLoading: false,
+        appliedFilters: undefined,
+        dataViews: undefined,
+      };
+      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
+      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
+        componentStaticState,
+        componentStaticState
+      );
+
+      const componentApi: OptionsListComponentApi = {
+        ...api,
+        ...selections.internalApi,
+        ...labelManager.api,
+        isExpandable: false,
+        isCustomizable: false,
+        isDuplicable: false,
+        isPinnable: true,
+        uuid,
+        setDataLoading,
+        makeSelection(key?: string) {
+          const singleSelect = selections.api.singleSelect$.value ?? true;
+          if (singleSelect && key) {
+            selections.internalApi.setSelectedOptions([key]);
+          } else if (key) {
+            // Get current selection state, not initial state
+            const current = componentApi.selectedOptions$.value || [];
+            const isSelected = current.includes(key);
+            // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+            if (isSelected && current.length === 1) {
+              return;
+            }
+            const newSelection = isSelected ? current.filter((k) => k !== key) : [...current, key];
+            selections.internalApi.setSelectedOptions(newSelection);
+          }
+        },
+        // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
+        ...componentStaticStateManager.api,
+        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
+        invalidSelections$: selections.internalApi.invalidSelections$,
+        deselectOption: (key?: string) => {
+          const incompatibleSelections = selections.internalApi.invalidSelections$.value;
+          const isIncompatible = key ? incompatibleSelections.has(key) : false;
+          if (isIncompatible) {
+            // remove from incompatible selections
+            const newIncompatibleSelections = new Set(incompatibleSelections);
+            newIncompatibleSelections.delete(key!);
+            selections.internalApi.setInvalidSelections(newIncompatibleSelections);
+
+            // remove from selected options
+            const currentSelected = componentApi.selectedOptions$.value || [];
+            const newSelected = currentSelected.filter((option) => option !== key);
+            selections.internalApi.setSelectedOptions(newSelected);
+          }
+        },
+        selectAll: (keys: string[]) => {
+          selections.internalApi.setSelectedOptions(keys);
+        },
+        deselectAll: () => {
+          // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+        },
+        loadMoreSubject: new BehaviorSubject<void>(undefined),
+        fieldFormatter: new BehaviorSubject((v: string) => v),
+        dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
+      };
+
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
-        Component: ({ className: controlPanelClassName }) => {
-          const [availableOptions, selectedOptions] = useBatchedPublishingSubjects(
-            selections.internalApi.availableOptions$,
-            selections.internalApi.selectedOptions$
-          );
+        Component: () => {
+          useEffect(() => {
+            return () => {
+              selections.cleanup();
+              labelManager.cleanup();
+            };
+          }, []);
 
           return (
-            <div className={controlPanelClassName}>
-              <EuiComboBox
-                aria-label={i18n.translate('controls.controlGroup.manageControl.esql.ariaLabel', {
-                  defaultMessage: 'ES|QL variable control',
-                })}
-                placeholder={i18n.translate(
-                  'controls.controlGroup.manageControl.esql.placeholder',
-                  {
-                    defaultMessage: 'Select a single value',
-                  }
-                )}
-                inputPopoverProps={{
-                  css: inputCss,
-                  className: 'esqlControlValuesCombobox',
-                }}
-                data-test-subj="esqlControlValuesDropdown"
-                singleSelection={{ asPlainText: true }}
-                options={availableOptions.map((option) => ({ label: option }))}
-                selectedOptions={selectedOptions.map((option) => ({ label: option }))}
-                compressed
-                fullWidth
-                isClearable={false}
-                onChange={(options) => {
-                  const selectedValues = options.map((option) => option.label);
-                  selections.internalApi.setSelectedOptions(selectedValues);
-                }}
+            <OptionsListControlContext.Provider
+              value={{
+                componentApi,
+                displaySettings: {
+                  hide_action_bar: false,
+                  hide_exclude: true,
+                  hide_exists: true,
+                  hide_sort: true,
+                  placeholder: VariableControlsStrings.emptySelectionPlaceholder,
+                },
+                customStrings: {
+                  invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
+                    componentApi.invalidSelections$.value.size
+                  ),
+                },
+              }}
+            >
+              <OptionsListControl
+                // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+                disableMultiValueEmptySelection={true}
+                isPinned={isPinned}
               />
-            </div>
+            </OptionsListControlContext.Provider>
           );
         },
       };

@@ -96,7 +96,7 @@
         "label": "NavigationID",
         "description": [],
         "signature": [
-          "\"data_frame_analytics\" | \"anomaly_detection\" | \"root\" | \"rootNav:ml\" | \"model_management\" | \"data_visualizer\" | \"aiops_labs\""
+          "\"root\" | \"data_frame_analytics\" | \"anomaly_detection\" | \"rootNav:ml\" | \"model_management\" | \"data_visualizer\" | \"aiops_labs\""
         ],
         "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
         "deprecated": false,

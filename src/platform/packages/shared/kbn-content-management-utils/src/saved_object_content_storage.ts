@@ -32,65 +32,9 @@ import type {
 } from './types';
 import { tagsToFindOptions } from './utils';
 
-const savedObjectClientFromRequest = async (ctx: StorageContext) => {
-  if (!ctx.requestHandlerContext) {
-    throw new Error('Storage context.requestHandlerContext missing.');
-  }
-
-  const { savedObjects } = await ctx.requestHandlerContext.core;
-  return savedObjects.client;
-};
-
-type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
+export type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
-
-function savedObjectToItem<Attributes extends object, Item extends SOWithMetadata>(
-  savedObject: SavedObject<Attributes>,
-  allowedSavedObjectAttributes: string[],
-  partial: false
-): Item;
-
-function savedObjectToItem<Attributes extends object, PartialItem extends SOWithMetadata>(
-  savedObject: PartialSavedObject<Attributes>,
-  allowedSavedObjectAttributes: string[],
-  partial: true
-): PartialItem;
-
-function savedObjectToItem<Attributes extends object>(
-  savedObject: SavedObject<Attributes> | PartialSavedObject<Attributes>,
-  allowedSavedObjectAttributes: string[]
-): SOWithMetadata | SOWithMetadataPartial {
-  const {
-    id,
-    type,
-    updated_at: updatedAt,
-    updated_by: updatedBy,
-    created_at: createdAt,
-    created_by: createdBy,
-    attributes,
-    references,
-    error,
-    namespaces,
-    version,
-    managed,
-  } = savedObject;
-
-  return {
-    id,
-    type,
-    managed,
-    updatedBy,
-    updatedAt,
-    createdAt,
-    createdBy,
-    attributes: pick(attributes, allowedSavedObjectAttributes),
-    references,
-    error,
-    namespaces,
-    version,
-  };
-}
 
 export interface SearchArgsToSOFindOptionsOptionsDefault {
   fields?: string[];
@@ -138,7 +82,7 @@ export interface SOContentStorageConstructorParams<Types extends CMCrudTypes> {
   savedObjectType: string;
   cmServicesDefinition: ServicesDefinitionSet;
   // this is necessary since unexpected saved object attributes could cause schema validation to fail
-  allowedSavedObjectAttributes: string[];
+  allowedSavedObjectAttributes: Array<keyof Types['Attributes']>;
   createArgsToSoCreateOptions?: CreateArgsToSoCreateOptions<Types>;
   updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
   searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
@@ -193,10 +137,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
         toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): Types['Item'] => {
           const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
 
-          const contentItem = savedObjectToItem(
-            savedObject as SavedObjectsFindResult<Types['Attributes']>,
-            this.allowedSavedObjectAttributes,
-            false
+          const contentItem = this.savedObjectToItem(
+            savedObject as SavedObjectsFindResult<Types['Attributes']>
           );
 
           const validationError = transforms.mSearch.out.result.validate(contentItem);
@@ -228,14 +170,62 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     }
   }
 
-  private throwOnResultValidationError: boolean;
-  private logger: Logger;
-  private savedObjectType: SOContentStorageConstructorParams<Types>['savedObjectType'];
-  private cmServicesDefinition: SOContentStorageConstructorParams<Types>['cmServicesDefinition'];
-  private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
-  private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
-  private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
-  private allowedSavedObjectAttributes: string[];
+  protected static getSOClientFromRequest = async (ctx: StorageContext) => {
+    if (!ctx.requestHandlerContext) {
+      throw new Error('Storage context.requestHandlerContext missing.');
+    }
+
+    const { savedObjects } = await ctx.requestHandlerContext.core;
+    return savedObjects.client;
+  };
+
+  protected readonly throwOnResultValidationError: boolean;
+  protected readonly logger: Logger;
+  protected readonly savedObjectType: SOContentStorageConstructorParams<Types>['savedObjectType'];
+  protected readonly cmServicesDefinition: SOContentStorageConstructorParams<Types>['cmServicesDefinition'];
+  protected readonly createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
+  protected readonly updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
+  protected readonly searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
+  protected readonly allowedSavedObjectAttributes: Array<keyof Types['Attributes']>;
+
+  protected savedObjectToItem(savedObject: SavedObject<Types['Attributes']>): Types['Item'];
+  protected savedObjectToItem(
+    savedObject: PartialSavedObject<Types['Attributes']>,
+    partial: true
+  ): Types['PartialItem'];
+  protected savedObjectToItem(
+    savedObject: SavedObject<Types['Attributes']> | PartialSavedObject<Types['Attributes']>
+  ): SOWithMetadata | SOWithMetadataPartial {
+    const {
+      id,
+      type,
+      updated_at: updatedAt,
+      updated_by: updatedBy,
+      created_at: createdAt,
+      created_by: createdBy,
+      attributes,
+      references,
+      error,
+      namespaces,
+      version,
+      managed,
+    } = savedObject;
+
+    return {
+      id,
+      type,
+      managed,
+      updatedBy,
+      updatedAt,
+      createdAt,
+      createdBy,
+      attributes: pick(attributes, this.allowedSavedObjectAttributes),
+      references,
+      error,
+      namespaces,
+      version,
+    };
+  }
 
   mSearch?: {
     savedObjectType: string;
@@ -245,7 +235,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
   async get(ctx: StorageContext, id: string): Promise<Types['GetOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
+    const soClient = await SOContentStorage.getSOClientFromRequest(ctx);
 
     // Save data in DB
     const {
@@ -256,7 +246,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
     const response: Types['GetOut'] = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+      item: this.savedObjectToItem(savedObject),
       meta: {
         aliasPurpose,
         aliasTargetId,
@@ -301,7 +291,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     options: Types['CreateOptions']
   ): Promise<Types['CreateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
+    const soClient = await SOContentStorage.getSOClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
@@ -330,7 +320,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     );
 
     const result = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
+      item: this.savedObjectToItem(savedObject),
     };
 
     const validationError = transforms.create.out.result.validate(result);
@@ -366,7 +356,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     options: Types['UpdateOptions']
   ): Promise<Types['UpdateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
+    const soClient = await SOContentStorage.getSOClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
@@ -396,7 +386,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     );
 
     const result = {
-      item: savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true),
+      item: this.savedObjectToItem(partialSavedObject, true),
     };
 
     const validationError = transforms.update.out.result.validate(result);
@@ -431,7 +421,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     // force is necessary to delete saved objects that exist in multiple namespaces
     options?: { force: boolean }
   ): Promise<Types['DeleteOut']> {
-    const soClient = await savedObjectClientFromRequest(ctx);
+    const soClient = await SOContentStorage.getSOClientFromRequest(ctx);
     await soClient.delete(this.savedObjectType, id, { force: options?.force ?? false });
     return { success: true };
   }
@@ -442,7 +432,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     options: Types['SearchOptions'] = {}
   ): Promise<Types['SearchOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
+    const soClient = await SOContentStorage.getSOClientFromRequest(ctx);
 
     // Validate and UP transform the options
     const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
@@ -461,9 +451,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     // Execute the query in the DB
     const soResponse = await soClient.find<Types['Attributes']>(soQuery);
     const response = {
-      hits: soResponse.saved_objects.map((so) =>
-        savedObjectToItem(so, this.allowedSavedObjectAttributes, false)
-      ),
+      hits: soResponse.saved_objects.map((so) => this.savedObjectToItem(so)),
       pagination: {
         total: soResponse.total,
       },

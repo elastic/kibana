@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { LayerControl } from './layer_control';
-import { ILayer } from '../../../classes/layers/layer';
+import type { ILayer } from '../../../classes/layers/layer';
 
 const defaultProps = {
   isReadOnly: false,

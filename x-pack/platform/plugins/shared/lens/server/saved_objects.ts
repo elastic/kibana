@@ -5,13 +5,29 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CoreSetup } from '@kbn/core/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
-import { CustomVisualizationMigrations } from './migrations/types';
+import type { CustomVisualizationMigrations } from './migrations/types';
+import { lensItemAttributesSchemaV0 } from './content_management/v0';
+
+/**
+ * Extending V0 Lens attributes schema to match existing. Adds loose `version` property.
+ */
+const lensSOSchemaV1 = lensItemAttributesSchemaV0.extends(
+  {
+    visState: undefined,
+    uiStateJSON: undefined,
+    savedSearchRefName: undefined,
+    version: schema.maybe(schema.number()),
+  },
+  { unknowns: 'forbid' }
+);
 
 export function setupSavedObjects(
   core: CoreSetup,
@@ -40,7 +56,23 @@ export function setupSavedObjects(
         DataViewPersistableStateService.getAllMigrations(),
         customVisualizationMigrations
       ),
+    modelVersions: {
+      [1]: {
+        changes: [
+          {
+            // needed to trigger change from dynamic strict to dynamic false
+            type: 'mappings_addition',
+            addedMappings: {},
+          },
+        ],
+        schemas: {
+          forwardCompatibility: lensSOSchemaV1.extendsDeep({ unknowns: 'ignore' }),
+          create: lensSOSchemaV1,
+        },
+      },
+    },
     mappings: {
+      dynamic: false,
       properties: {
         title: {
           type: 'text',

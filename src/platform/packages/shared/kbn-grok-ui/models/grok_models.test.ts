@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PATTERN_MAP } from '../constants/pattern_map';
 import { DraftGrokExpression } from './draft_grok_expression';
 import { GrokCollection } from './grok_collection_and_pattern';
 
@@ -15,12 +14,9 @@ let grokCollection: GrokCollection;
 let draftGrokExpression: DraftGrokExpression;
 
 describe('Grok models', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     grokCollection = new GrokCollection();
-    Object.entries(PATTERN_MAP).forEach(([key, value]) => {
-      grokCollection.addPattern(key, String.raw`${value}`);
-    });
-    grokCollection.resolvePatterns();
+    await grokCollection.setup();
     draftGrokExpression = new DraftGrokExpression(grokCollection);
   });
 

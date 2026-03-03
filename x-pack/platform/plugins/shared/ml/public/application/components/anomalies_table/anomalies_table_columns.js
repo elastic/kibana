@@ -68,7 +68,8 @@ export function getColumns(
   toggleRow,
   filter,
   influencerFilter,
-  sourceIndicesWithGeoFields
+  sourceIndicesWithGeoFields,
+  showAnomalyAlertFlyout
 ) {
   const columns = [
     {
@@ -118,13 +119,13 @@ export function getColumns(
       name: (
         <span>
           {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-            defaultMessage: 'Severity',
+            defaultMessage: 'Score',
           })}
           &nbsp;
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
               defaultMessage:
@@ -207,7 +208,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
               defaultMessage: 'The actual values in the anomaly record results.',
@@ -247,7 +248,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
               defaultMessage: 'The typical values in the anomaly record results.',
@@ -366,6 +367,7 @@ export function getColumns(
               interval={interval}
               showRuleEditorFlyout={showRuleEditorFlyout}
               sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+              showAnomalyAlertFlyout={showAnomalyAlertFlyout}
             />
           );
         } else {

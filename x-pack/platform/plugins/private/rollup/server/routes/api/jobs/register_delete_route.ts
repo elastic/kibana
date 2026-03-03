@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 export const registerDeleteRoute = ({
   router,
@@ -25,7 +25,7 @@ export const registerDeleteRoute = ({
       },
       validate: {
         body: schema.object({
-          jobIds: schema.arrayOf(schema.string()),
+          jobIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
       },
     },

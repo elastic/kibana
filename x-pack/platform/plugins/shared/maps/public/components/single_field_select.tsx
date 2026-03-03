@@ -8,9 +8,10 @@
 import _ from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption, EuiToolTip } from '@elastic/eui';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiToolTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { MIDDLE_TRUNCATION_PROPS } from '../../common/constants';

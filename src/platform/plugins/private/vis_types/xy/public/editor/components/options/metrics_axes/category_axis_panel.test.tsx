@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
-import { CategoryAxis } from '../../../../types';
+import type { CategoryAxisPanelProps } from './category_axis_panel';
+import { CategoryAxisPanel } from './category_axis_panel';
+import type { CategoryAxis } from '../../../../types';
 import { LabelOptions } from './label_options';
 import { TruncateLabelsOption } from '../../common';
 import { categoryAxis } from './mocks';
@@ -31,7 +32,7 @@ describe('CategoryAxisPanel component', () => {
       axis,
       onPositionChanged,
       setCategoryAxis,
-      useMultiLayerAxis: false,
+      disableAxisControls: false,
     };
   });
 
@@ -59,8 +60,8 @@ describe('CategoryAxisPanel component', () => {
     expect(onPositionChanged).toBeCalledWith(value);
   });
 
-  it('should disable label options with multilayer axis', () => {
-    const comp = shallow(<CategoryAxisPanel {...defaultProps} useMultiLayerAxis={true} />);
+  it('should disable label options with disableAxisControls prop', () => {
+    const comp = shallow(<CategoryAxisPanel {...defaultProps} disableAxisControls={true} />);
     const labelOptions = comp.find(LabelOptions).dive();
     const rotateLabelsOption = labelOptions.find({ paramName: 'rotate' });
     const filterLabelOption = labelOptions.find({ paramName: 'filter' });

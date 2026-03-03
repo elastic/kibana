@@ -565,6 +565,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -574,14 +575,15 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
+        'getGapAutoFillScheduler',
+        'findGapAutoFillSchedulerLogs',
       ],
       ...[
         'create',
         'delete',
         'update',
         'updateApiKey',
-        'enable',
-        'disable',
         'muteAll',
         'unmuteAll',
         'muteAlert',
@@ -589,14 +591,14 @@ describe('features', () => {
         'snooze',
         'bulkEdit',
         'bulkDelete',
-        'bulkEnable',
-        'bulkDisable',
         'unsnooze',
         'runSoon',
-        'scheduleBackfill',
-        'deleteBackfill',
-        'fillGaps',
+        'createGapAutoFillScheduler',
+        'updateGapAutoFillScheduler',
+        'deleteGapAutoFillScheduler',
       ],
+      ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
+      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [
@@ -741,6 +743,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -750,14 +753,15 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
+        'getGapAutoFillScheduler',
+        'findGapAutoFillSchedulerLogs',
       ],
       ...[
         'create',
         'delete',
         'update',
         'updateApiKey',
-        'enable',
-        'disable',
         'muteAll',
         'unmuteAll',
         'muteAlert',
@@ -765,14 +769,14 @@ describe('features', () => {
         'snooze',
         'bulkEdit',
         'bulkDelete',
-        'bulkEnable',
-        'bulkDisable',
         'unsnooze',
         'runSoon',
-        'scheduleBackfill',
-        'deleteBackfill',
-        'fillGaps',
+        'createGapAutoFillScheduler',
+        'updateGapAutoFillScheduler',
+        'deleteGapAutoFillScheduler',
       ],
+      ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
+      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [

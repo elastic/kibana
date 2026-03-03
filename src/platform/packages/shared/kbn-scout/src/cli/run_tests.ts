@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { TEST_FLAG_OPTIONS } from '../playwright/runner';
 import { parseTestFlags, runTests } from '../playwright/runner';
 
@@ -36,13 +36,19 @@ export const runTestsCmd: Command<void> = {
     This also handles server starts. Make sure a Scout test server is not already running before invoking this command.
 
   Common usage:
-    Running tests against local servers:
-    node scripts/scout run-tests --stateful --config <playwright_config_path>
-    node scripts/scout run-tests --serverless=es --headed --config <playwright_config_path>
+    On local stateful:
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path>
 
-    Running tests against Cloud deployment / MKI project:
-    node scripts/scout run-tests --stateful --testTarget=cloud --config <playwright_config_path>
-    node scripts/scout run-tests --serverless=es --testTarget=cloud --config <playwright_config_path>
+    On local serverless:
+    node scripts/scout run-tests --arch serverless --domain search --headed --config <playwright_config_path>
+    node scripts/scout run-tests --arch serverless --domain search --testFiles <spec_path1,spec_path2>
+    node scripts/scout run-tests --arch serverless --domain search --testFiles <spec_directory_path>
+
+    On Elastic Cloud Hosted deployment (ECH):
+    node scripts/scout run-tests --location cloud --arch stateful --domain classic --config <playwright_config_path>
+
+    On Elastic Cloud projects (MKI):
+    node scripts/scout run-tests --location cloud --arch serverless --domain search --config <playwright_config_path>
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

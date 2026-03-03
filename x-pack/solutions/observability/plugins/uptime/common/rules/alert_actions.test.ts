@@ -6,7 +6,7 @@
  */
 
 import { populateAlertActions } from './alert_actions';
-import { ActionConnector } from './types';
+import type { ActionConnector } from './types';
 import { MONITOR_STATUS } from '../constants/uptime_alerts';
 import { MonitorStatusTranslations } from './legacy_uptime/translations';
 
@@ -183,18 +183,15 @@ describe('Legacy Alert Actions factory', () => {
     ]);
   });
 
-  it('generate expected action for slack action connector', async () => {
+  it('generate expected action for slack webhook action connector', async () => {
     const resp = populateAlertActions({
       groupId: MONITOR_STATUS.id,
       defaultActions: [
         {
-          actionTypeId: '.pagerduty',
+          actionTypeId: '.slack',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
-            dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
-            eventAction: 'trigger',
-            severity: 'error',
-            summary:
+            message:
               'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
@@ -207,14 +204,13 @@ describe('Legacy Alert Actions factory', () => {
         defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
     });
+
     expect(resp).toEqual([
       {
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: expect.any(String),
-          eventAction: 'resolve',
-          summary:
+          message:
             'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
         },
       },
@@ -222,10 +218,61 @@ describe('Legacy Alert Actions factory', () => {
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: expect.any(String),
-          eventAction: 'trigger',
-          severity: 'error',
-          summary: MonitorStatusTranslations.defaultActionMessage,
+          message: MonitorStatusTranslations.defaultActionMessage,
+        },
+      },
+    ]);
+  });
+
+  it('generate expected action for slack webapi webhook action connector', async () => {
+    const resp = populateAlertActions({
+      groupId: MONITOR_STATUS.id,
+      defaultActions: [
+        {
+          actionTypeId: '.slack_api',
+          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+          config: {
+            allowedChannels: [
+              { name: '#channel-name' },
+              { id: 'channel-id' },
+              { name: 'another-channel', id: 'another-id' },
+            ],
+          },
+          params: {
+            text: 'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
+          },
+          id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        },
+      ] as unknown as ActionConnector[],
+      translations: {
+        defaultActionMessage: MonitorStatusTranslations.defaultActionMessage,
+        defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
+        defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
+      },
+    });
+
+    expect(resp).toEqual([
+      {
+        group: 'recovered',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          subAction: 'postMessage',
+          subActionParams: {
+            channels: ['#channel-name', 'channel-id', 'another-channel', 'another-id'],
+            text: 'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
+          },
+        },
+      },
+      {
+        group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+        id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
+        params: {
+          subAction: 'postMessage',
+          subActionParams: {
+            channels: ['#channel-name', 'channel-id', 'another-channel', 'another-id'],
+            text: MonitorStatusTranslations.defaultActionMessage,
+          },
         },
       },
     ]);

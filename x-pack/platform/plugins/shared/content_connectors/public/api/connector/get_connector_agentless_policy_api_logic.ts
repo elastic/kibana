@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Agent } from '@kbn/fleet-plugin/common';
+import type { Agent } from '@kbn/fleet-plugin/common';
 
-import { HttpSetup } from '@kbn/core/public';
-import { Actions, createApiLogic } from '../api_logic/create_api_logic';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Actions } from '../api_logic/create_api_logic';
+import { createApiLogic } from '../api_logic/create_api_logic';
 
 export interface GetConnectorAgentlessPolicyApiArgs {
   connectorId: string;

@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useAppToasts } from '../../hooks/use_app_toasts';
@@ -55,6 +56,7 @@ export const ImportDataModalComponent = <T,>({
   const { addError } = useAppToasts();
 
   const descriptionElementId = useMemo(() => htmlIdGenerator()(), []);
+  const modalTitleId = useGeneratedHtmlId();
 
   const cleanupAndCloseModal = useCallback(() => {
     closeModal();
@@ -94,9 +96,9 @@ export const ImportDataModalComponent = <T,>({
   return (
     <>
       {isModalVisible && (
-        <EuiModal onClose={cleanupAndCloseModal} maxWidth={'750px'}>
+        <EuiModal onClose={cleanupAndCloseModal} maxWidth={'750px'} aria-labelledby={modalTitleId}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>

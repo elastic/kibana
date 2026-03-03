@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const packetbeatIndexCreateRequest: IndicesCreateRequest = {
   index: 'packetbeat-[environment].evaluations.[date]',

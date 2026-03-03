@@ -19,7 +19,7 @@ import {
 } from '../../../common/constants.mock';
 import { getShardMock } from '../common/get_shard.mock';
 
-import { SearchEsListItemSchema } from './search_es_list_item_schema';
+import type { SearchEsListItemSchema } from './search_es_list_item_schema';
 
 export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema => ({
   '@timestamp': DATE_NOW,
@@ -31,7 +31,6 @@ export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema
   date: undefined,
   date_nanos: undefined,
   date_range: undefined,
-  deserializer: undefined,
   double: undefined,
   double_range: undefined,
   float: undefined,
@@ -48,7 +47,6 @@ export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema
   long: undefined,
   long_range: undefined,
   meta: META,
-  serializer: undefined,
   shape: undefined,
   short: undefined,
   text: undefined,

@@ -1,23 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/observability-ui"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observability",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
-      "aiops",
       "alerting",
-      "cases",
       "charts",
       "contentManagement",
       "controls",
@@ -28,48 +21,56 @@
       "fieldFormats",
       "uiActions",
       "presentationUtil",
-      "exploratoryView",
       "features",
       "files",
       "inspector",
+      "lens",
       "observabilityShared",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
       "share",
       "unifiedSearch",
+      "visualizations",
       "dashboard",
       "expressions",
-      "logsShared",
+      "logsDataAccess",
       "licensing",
       "navigation",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "esql",
+      "savedObjectsTagging",
+      "streams",
+      "kql"
     ],
     "optionalPlugins": [
+      "observabilityAgentBuilder",
+      "agentBuilder",
+      "aiops",
+      "cases",
       "discover",
+      "exploratoryView",
       "home",
-      "lens",
       "usageCollection",
       "cloud",
       "spaces",
       "serverless",
-      "guidedOnboarding",
       "observabilityAIAssistant",
-      "investigate",
-      "streams",
-      "visualizations"
+      "investigate"
     ],
     "requiredBundles": [
+      "aiops",
+      "cases",
       "data",
       "discover",
+      "fleet",
+      "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "observabilityAgentBuilder"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

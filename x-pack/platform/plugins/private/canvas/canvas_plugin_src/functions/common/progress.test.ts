@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/test_helpers';
 import { errors } from '../../../i18n/functions/dict/progress';
 import { progress } from './progress';

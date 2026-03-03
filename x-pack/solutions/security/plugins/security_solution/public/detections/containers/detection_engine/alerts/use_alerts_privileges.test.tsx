@@ -75,9 +75,10 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     canAccessEndpointManagement: false,
     canAccessFleet: false,
   }),
-  kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+  siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
+  rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, edit: false } },
 };
 
 describe('useAlertsPrivileges', () => {
@@ -100,8 +101,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexMaintenance: null,
         hasIndexWrite: null,
         hasIndexUpdateDelete: null,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: false,
+        hasAlertsRead: false,
+        hasAlertsAll: false,
         isAuthenticated: null,
         loading: false,
       })
@@ -122,8 +123,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: false,
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
-        hasKibanaCRUD: true,
-        hasKibanaREAD: true,
+        hasAlertsRead: true,
+        hasAlertsAll: true,
         isAuthenticated: false,
         loading: false,
       })
@@ -148,8 +149,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: true,
-        hasKibanaREAD: true,
+        hasAlertsRead: true,
+        hasAlertsAll: true,
         isAuthenticated: true,
         loading: false,
       })
@@ -171,18 +172,21 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: true,
-        hasKibanaREAD: true,
+        hasAlertsRead: true,
+        hasAlertsAll: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasKibanaCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
+  test('returns "hasAlertsAll" as false if user does not have SecurityRules "all" privilege', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.kibanaSecuritySolutionsPrivileges = { crud: false, read: true };
+      draft.rulesPrivileges = {
+        rules: { edit: false, read: true },
+        exceptions: { read: true, edit: false },
+      };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -195,18 +199,21 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: true,
+        hasAlertsAll: false,
+        hasAlertsRead: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasKibanaREAD" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
+  test('returns "hasAlertsRead" as false if user does not have the SecurityRules "read" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.kibanaSecuritySolutionsPrivileges = { crud: false, read: false };
+      draft.rulesPrivileges = {
+        rules: { edit: false, read: false },
+        exceptions: { read: false, edit: false },
+      };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -219,8 +226,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: false,
+        hasAlertsAll: false,
+        hasAlertsRead: false,
         isAuthenticated: true,
         loading: false,
       })

@@ -24,6 +24,7 @@ export const fetchDurationRanges = async ({
   query,
   chartType,
   searchMetrics,
+  isOtel = false,
 }: {
   rangeSteps: number[];
   apmEventClient: APMEventClient;
@@ -34,6 +35,7 @@ export const fetchDurationRanges = async ({
   query: estypes.QueryDslQueryContainer;
   chartType: LatencyDistributionChartType;
   searchMetrics: boolean;
+  isOtel?: boolean;
 }): Promise<{
   totalDocCount: number;
   durationRanges: Array<{ key: number; doc_count: number }>;
@@ -59,28 +61,32 @@ export const fetchDurationRanges = async ({
     ranges.push({ from: ranges[ranges.length - 1].to });
   }
 
-  const resp = await apmEventClient.search('get_duration_ranges', {
-    apm: {
-      events: [getEventType(chartType, searchMetrics)],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: getCommonCorrelationsQuery({
-      start,
-      end,
-      environment,
-      kuery,
-      query: filteredQuery,
-    }),
-    aggs: {
-      logspace_ranges: {
-        range: {
-          field: getDurationField(chartType, searchMetrics),
-          ranges,
+  const resp = await apmEventClient.search(
+    'get_duration_ranges',
+    {
+      apm: {
+        events: [getEventType(chartType, searchMetrics)],
+      },
+      track_total_hits: false,
+      size: 0,
+      query: getCommonCorrelationsQuery({
+        start,
+        end,
+        environment,
+        kuery,
+        query: filteredQuery,
+      }),
+      aggs: {
+        logspace_ranges: {
+          range: {
+            field: getDurationField(chartType, searchMetrics, isOtel),
+            ranges,
+          },
         },
       },
     },
-  });
+    { skipProcessorEventFilter: isOtel }
+  );
 
   const durationRanges =
     resp.aggregations?.logspace_ranges.buckets

@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 
 export enum TimeoutErrorMode {

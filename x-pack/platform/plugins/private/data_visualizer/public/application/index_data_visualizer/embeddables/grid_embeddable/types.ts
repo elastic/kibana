@@ -10,7 +10,6 @@ import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject, Observable } from 'rxjs';
-import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
@@ -20,6 +19,13 @@ import type { DataVisualizerStartDependencies } from '../../../common/types/data
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { DataVisualizerTableItem } from '../../../common/components/stats_table/types';
 import type { FieldStatsComponentType } from '../../constants/field_stats_component_type';
+import type { FieldStatisticsTableEmbeddableState } from '../../../../../common/embeddables/types';
+
+export { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
+export type {
+  FieldStatsInitialState,
+  FieldStatisticsTableEmbeddableState,
+} from '../../../../../common/embeddables/types';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**
@@ -109,21 +115,6 @@ export type ESQLDataVisualizerGridEmbeddableState = Omit<
   FieldStatisticTableEmbeddableProps,
   'query'
 > & { query?: ESQLQuery };
-
-export enum FieldStatsInitializerViewType {
-  DATA_VIEW = 'dataview',
-  ESQL = 'esql',
-}
-
-export interface FieldStatsInitialState {
-  dataViewId?: string;
-  viewType?: FieldStatsInitializerViewType;
-  query?: AggregateQuery;
-  showDistributions?: boolean;
-}
-export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState &
-  SerializedTitles &
-  SerializedTimeRange & {};
 
 export type OnAddFilter = (field: DataViewField | string, value: string, type: '+' | '-') => void;
 export interface FieldStatisticsTableEmbeddableParentApi {

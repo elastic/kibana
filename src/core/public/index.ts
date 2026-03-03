@@ -25,9 +25,8 @@
  * @packageDocumentation
  */
 
+import 'reflect-metadata/lite';
 import './index.scss';
-
-import 'reflect-metadata';
 
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
@@ -35,7 +34,7 @@ export type { I18nStart } from '@kbn/core-i18n-browser';
 export type {
   FatalErrorsSetup,
   FatalErrorsStart,
-  FatalErrorInfo,
+  FatalError,
 } from '@kbn/core-fatal-errors-browser';
 export type {
   EvaluationContext,
@@ -48,8 +47,12 @@ export type {
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
-export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
-export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
+  NotificationsSetup,
+  NotificationsStart,
+  FeedbackStart,
+  ToursStart,
+} from '@kbn/core-notifications-browser';
 export type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -57,9 +60,7 @@ export type {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,
@@ -169,23 +170,7 @@ export type {
 } from '@kbn/core-application-browser';
 export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
-export type {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  SavedObjectsCreateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsBatchResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsUpdateOptions,
-  ResolvedSimpleSavedObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResponse,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkCreateObject,
-} from '@kbn/core-saved-objects-api-browser';
+export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
   SavedObjectTypeIdTuple,
@@ -201,6 +186,7 @@ export type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
@@ -281,6 +267,8 @@ export type {
   ErrorToastOptions,
 } from '@kbn/core-notifications-browser';
 
+export type { PricingServiceStart } from '@kbn/core-pricing-browser';
+
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
@@ -294,8 +282,6 @@ export type {
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
 
-export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
-
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 export type {
@@ -308,5 +294,3 @@ export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-life
 export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
 export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';
-
-export { kibanaFullBodyHeightCss, fullScreenGraphicsMixinStyles } from './cssUtils';

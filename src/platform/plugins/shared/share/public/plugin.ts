@@ -8,17 +8,20 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import { ShareRegistry, ShareMenuRegistrySetup } from './services';
+import type { Subscription } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-types';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ShareMenuManagerStart } from './services';
+import { ShareMenuManager } from './services';
+import type { ShareMenuRegistrySetup } from './services';
+import { ShareRegistry } from './services';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
-import {
-  BrowserShortUrlClientFactory,
-  BrowserShortUrlClientFactoryCreateParams,
-} from './url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
+import { BrowserShortUrlClientFactory } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
-import { AnonymousAccessServiceContract } from '../common';
+import type { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import { registrations } from './lib/registrations';
@@ -55,6 +58,11 @@ export type SharePublicStart = ShareMenuManagerStart & {
    * the locator, then using the locator to navigate.
    */
   navigate(options: RedirectOptions): void;
+
+  /**
+   * method to get all available integrations
+   */
+  availableIntegrations: ShareRegistry['availableIntegrations'];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -77,6 +85,7 @@ export class SharePlugin
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  private licenseSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -134,12 +143,23 @@ export class SharePlugin
     };
   }
 
-  public start(core: CoreStart): SharePublicStart {
+  public start(
+    core: CoreStart,
+    { licensing }: { licensing?: LicensingPluginStart }
+  ): SharePublicStart {
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    const { resolveShareItemsForShareContext } = this.shareRegistry.start({
+    let license: ILicense | undefined;
+
+    this.licenseSubscription = licensing?.license$?.subscribe((_license) => {
+      license = _license;
+    });
+
+    const { resolveShareItemsForShareContext, availableIntegrations } = this.shareRegistry.start({
       urlService: this.url!,
       anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+      capabilities: core.application.capabilities,
+      getLicense: () => license,
     });
 
     const sharingContextMenuStart = this.shareContextMenu.start({
@@ -152,6 +172,11 @@ export class SharePlugin
       ...sharingContextMenuStart,
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
+      availableIntegrations,
     };
+  }
+
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
   }
 }

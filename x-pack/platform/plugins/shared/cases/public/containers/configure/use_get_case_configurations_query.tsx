@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import * as i18n from './translations';
 import { getCaseConfigure } from './api';
 import type { ServerError } from '../../types';
@@ -16,8 +16,10 @@ import { initialConfiguration } from './utils';
 
 export const useGetCaseConfigurationsQuery = <T,>({
   select,
+  keepPreviousData,
 }: {
   select: (data: CasesConfigurationUI[] | null) => T;
+  keepPreviousData?: boolean;
 }) => {
   const { showErrorToast } = useCasesToast();
 
@@ -30,6 +32,7 @@ export const useGetCaseConfigurationsQuery = <T,>({
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
       initialData: [initialConfiguration],
+      keepPreviousData: Boolean(keepPreviousData),
     }
   );
 };

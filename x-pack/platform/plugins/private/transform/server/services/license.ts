@@ -15,7 +15,8 @@ import type {
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
 
-import type { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 

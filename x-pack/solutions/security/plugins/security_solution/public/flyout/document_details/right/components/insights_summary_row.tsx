@@ -64,7 +64,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   expandedSubTab,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { navigateToLeftPanel: onClick, isEnabled: isLinkEnabled } = useNavigateToLeftPanel({
+  const onClick = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
     subTab: expandedSubTab,
   });
@@ -85,7 +85,6 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
               onClick={onClick}
               flush={'both'}
               size="xs"
-              disabled={!isLinkEnabled}
               data-test-subj={buttonDataTestSubj}
             >
               <FormattedCount count={value} />
@@ -96,7 +95,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         )}
       </>
     );
-  }, [dataTestSubj, onClick, value, isLinkEnabled]);
+  }, [dataTestSubj, onClick, value]);
 
   if (loading) {
     return (

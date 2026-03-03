@@ -23,8 +23,16 @@ export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: Aiops
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
-      const { field, dataView, originatingApp, additionalFilter } = context;
+      const { field, dataView, originatingApp, additionalFilter, focusTrapProps } = context;
       const { showCategorizeFlyout } = await import('./show_flyout');
-      showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp, additionalFilter);
+      showCategorizeFlyout(
+        field,
+        dataView,
+        coreStart,
+        plugins,
+        originatingApp,
+        additionalFilter,
+        focusTrapProps
+      );
     },
   });

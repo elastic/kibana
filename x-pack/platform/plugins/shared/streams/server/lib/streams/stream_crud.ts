@@ -5,147 +5,98 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterComponentTemplate,
+  DocStats,
+  EpochTime,
   IndicesDataStream,
-  IndicesDataStreamLifecycleWithRollover,
+  IndicesGetDataStreamSettingsDataStreamSettings,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
+  UnitMillis,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { deleteComponent } from './component_templates/manage_component_templates';
-import { getComponentTemplateName } from './component_templates/name';
-import { deleteDataStream } from './data_streams/manage_data_streams';
-import { deleteTemplate } from './index_templates/manage_index_templates';
-import { getIndexTemplateName } from './index_templates/name';
-import { deleteIngestPipeline } from './ingest_pipelines/manage_ingest_pipelines';
-import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type {
+  EffectiveFailureStore,
+  FailureStoreStatsResponse,
+  DataStreamWithFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import { parseError } from './errors/parse_error';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
 }
 
-interface DeleteStreamParams extends BaseParams {
-  name: string;
-  logger: Logger;
-}
-
 export function getDataStreamLifecycle(
   dataStream: IndicesDataStream | null
-): UnwiredIngestStreamEffectiveLifecycle {
+): ClassicIngestStreamEffectiveLifecycle {
   if (!dataStream) {
-    return {
-      error: {
-        message: 'Data stream not found',
-      },
-    };
-  }
-  if (
-    dataStream.ilm_policy &&
-    (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
-  ) {
-    return { ilm: { policy: dataStream.ilm_policy } };
+    return { error: { message: 'Data stream not found' } };
   }
 
-  const lifecycle = dataStream.lifecycle as
-    | (IndicesDataStreamLifecycleWithRollover & {
-        enabled: boolean;
-      })
-    | undefined;
-  if (lifecycle && lifecycle.enabled) {
+  if (dataStream.next_generation_managed_by === 'Index Lifecycle Management') {
+    return { ilm: { policy: dataStream.ilm_policy! } };
+  }
+
+  if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
+    const retention = dataStream.lifecycle?.data_retention;
+    // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
+    // The expected type is already updated in the elasticsearch-specification repo:
+    // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
+    const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
+
     return {
       dsl: {
-        data_retention: lifecycle.data_retention ? String(lifecycle.data_retention) : undefined,
+        data_retention: retention ? String(retention) : undefined,
+        downsample: downsampling?.map((step) => ({
+          after: step.after,
+          fixed_interval: step.fixed_interval,
+        })),
       },
     };
   }
 
-  return { disabled: {} };
-}
-
-export async function deleteUnmanagedStreamObjects({
-  name,
-  scopedClusterClient,
-  logger,
-}: DeleteStreamParams) {
-  const dataStream = await getDataStream({ name, scopedClusterClient });
-  const unmanagedAssets = await getUnmanagedElasticsearchAssets({
-    dataStream,
-    scopedClusterClient,
-  });
-  const pipelineName = unmanagedAssets.ingestPipeline;
-  if (pipelineName) {
-    const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
-      await findStreamManagedPipelineReference(scopedClusterClient, pipelineName, name);
-    if (referencesStreamManagedPipeline) {
-      const streamManagedPipelineName = getProcessingPipelineName(name);
-      const updatedProcessors = targetPipeline.processors!.filter(
-        (processor) =>
-          !(processor.pipeline && processor.pipeline.name === streamManagedPipelineName)
-      );
-      await scopedClusterClient.asCurrentUser.ingest.putPipeline({
-        id: targetPipelineName,
-        processors: updatedProcessors,
-      });
-    }
+  if (dataStream.next_generation_managed_by === 'Unmanaged') {
+    return { disabled: {} };
   }
-  await deleteDataStream({
-    esClient: scopedClusterClient.asCurrentUser,
-    name,
-    logger,
-  });
-  try {
-    await deleteIngestPipeline({
-      esClient: scopedClusterClient.asCurrentUser,
-      id: getProcessingPipelineName(name),
-      logger,
-    });
-  } catch (e) {
-    // if the pipeline doesn't exist, we don't need to delete it
-    if (!(e.meta?.statusCode === 404)) {
-      throw e;
-    }
+
+  return {
+    error: {
+      message: `Unknown data stream lifecycle state [${dataStream.next_generation_managed_by}]`,
+    },
+  };
+}
+
+export function getDataStreamSettings(dataStream?: IndicesGetDataStreamSettingsDataStreamSettings) {
+  const settings: IngestStreamSettings = {};
+
+  if (dataStream?.effective_settings.index?.number_of_replicas) {
+    settings['index.number_of_replicas'] = {
+      value: Number(dataStream.effective_settings.index.number_of_replicas),
+    };
   }
-}
 
-export async function deleteStreamObjects({
-  name,
-  scopedClusterClient,
-  logger,
-}: DeleteStreamParams) {
-  await deleteDataStream({
-    esClient: scopedClusterClient.asCurrentUser,
-    name,
-    logger,
-  });
-  await deleteTemplate({
-    esClient: scopedClusterClient.asCurrentUser,
-    name: getIndexTemplateName(name),
-    logger,
-  });
-  await deleteComponent({
-    esClient: scopedClusterClient.asCurrentUser,
-    name: getComponentTemplateName(name),
-    logger,
-  });
-  await deleteIngestPipeline({
-    esClient: scopedClusterClient.asCurrentUser,
-    id: getProcessingPipelineName(name),
-    logger,
-  });
-  await deleteIngestPipeline({
-    esClient: scopedClusterClient.asCurrentUser,
-    id: getReroutePipelineName(name),
-    logger,
-  });
-}
+  if (dataStream?.effective_settings.index?.number_of_shards) {
+    settings['index.number_of_shards'] = {
+      value: Number(dataStream.effective_settings.index.number_of_shards),
+    };
+  }
 
-interface ReadStreamParams extends BaseParams {
-  id: string;
-  skipAccessCheck?: boolean;
+  if (dataStream?.effective_settings.index?.refresh_interval) {
+    settings['index.refresh_interval'] = {
+      value: dataStream.effective_settings.index.refresh_interval,
+    };
+  }
+
+  return settings;
 }
 
 interface ReadUnmanagedAssetsParams extends BaseParams {
@@ -170,7 +121,7 @@ export async function getUnmanagedElasticsearchAssets({
     name: templateName,
   });
   if (template.index_templates.length) {
-    template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+    template.index_templates[0].index_template.composed_of?.forEach((componentTemplateName) => {
       componentTemplates.push(componentTemplateName);
     });
   }
@@ -181,7 +132,8 @@ export async function getUnmanagedElasticsearchAssets({
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline;
 
   return {
-    ingestPipeline: ingestPipelineId,
+    // Normalize empty string to undefined - empty string is not a valid pipeline reference
+    ingestPipeline: ingestPipelineId || undefined,
     componentTemplates,
     indexTemplate: templateName,
     dataStream: dataStream.name,
@@ -218,7 +170,8 @@ async function fetchComponentTemplate(
       }
     );
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return { name, component_template: undefined };
     }
     throw e;
@@ -244,7 +197,7 @@ async function fetchComponentTemplates(
     .map((componentTemplate) => ({
       ...componentTemplate,
       used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .filter((template) => template.index_template.composed_of?.includes(componentTemplate.name))
         .map((template) => template.name),
     }));
 }
@@ -324,58 +277,6 @@ export async function checkAccessBulk({
   );
 }
 
-async function findStreamManagedPipelineReference(
-  scopedClusterClient: IScopedClusterClient,
-  pipelineName: string,
-  streamId: string
-): Promise<{
-  targetPipelineName: string;
-  targetPipeline: IngestPipeline;
-  referencesStreamManagedPipeline: boolean;
-}> {
-  const streamManagedPipelineName = getProcessingPipelineName(streamId);
-  const pipeline = (await tryGettingPipeline({ scopedClusterClient, id: pipelineName })) || {
-    processors: [],
-  };
-  const streamProcessor = pipeline.processors?.find(
-    (processor) => processor.pipeline && processor.pipeline.name === streamManagedPipelineName
-  );
-  const customProcessor = pipeline.processors?.findLast(
-    (processor) => processor.pipeline && processor.pipeline.name.endsWith('@custom')
-  );
-  if (streamProcessor) {
-    return {
-      targetPipelineName: pipelineName,
-      targetPipeline: pipeline,
-      referencesStreamManagedPipeline: true,
-    };
-  }
-  if (customProcessor) {
-    // go one level deeper, find the latest @custom leaf pipeline
-    return await findStreamManagedPipelineReference(
-      scopedClusterClient,
-      customProcessor.pipeline!.name,
-      streamId
-    );
-  }
-  return {
-    targetPipelineName: pipelineName,
-    targetPipeline: pipeline,
-    referencesStreamManagedPipeline: false,
-  };
-}
-
-async function tryGettingPipeline({ scopedClusterClient, id }: ReadStreamParams) {
-  try {
-    return (await scopedClusterClient.asCurrentUser.ingest.getPipeline({ id }))[id];
-  } catch (e) {
-    if (e.meta?.statusCode === 404) {
-      return;
-    }
-    throw e;
-  }
-}
-
 export async function getDataStream({
   name,
   scopedClusterClient,
@@ -388,7 +289,8 @@ export async function getDataStream({
     const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
     dataStream = response.data_streams[0];
   } catch (e) {
-    if (e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       // fall through and throw not found
     } else {
       throw e;
@@ -399,4 +301,177 @@ export async function getDataStream({
     throw new DefinitionNotFoundError(`Stream definition for ${name} not found.`);
   }
   return dataStream;
+}
+
+export async function getClusterDefaultFailureStoreRetentionValue({
+  scopedClusterClient,
+  isServerless,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+}): Promise<string | undefined> {
+  let defaultRetention: string | undefined;
+  try {
+    if (!isServerless) {
+      const { persistent, defaults } = await scopedClusterClient.asCurrentUser.cluster.getSettings({
+        include_defaults: true,
+      });
+      const persistentDSRetention =
+        persistent?.data_streams?.lifecycle?.retention?.failures_default;
+      const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
+      defaultRetention = persistentDSRetention ?? defaultsDSRetention;
+    }
+  } catch (e) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 403) {
+      // if user doesn't have permissions to read cluster settings, we just return undefined
+    } else {
+      throw e;
+    }
+  }
+  return defaultRetention;
+}
+
+export function getFailureStore({
+  dataStream,
+}: {
+  dataStream: DataStreamWithFailureStore | null;
+}): EffectiveFailureStore {
+  if (!dataStream) {
+    return { disabled: {} };
+  }
+
+  if (dataStream.failure_store?.enabled) {
+    const lifecycle = dataStream.failure_store?.lifecycle;
+
+    if (lifecycle?.enabled) {
+      const isDefaultRetention = lifecycle.retention_determined_by === 'default_failures_retention';
+      const dataRetention = isDefaultRetention
+        ? lifecycle.effective_retention
+        : lifecycle.data_retention;
+
+      return {
+        lifecycle: {
+          enabled: {
+            ...(dataRetention ? { data_retention: dataRetention } : {}),
+            is_default_retention: isDefaultRetention,
+          },
+        },
+      };
+    }
+
+    return {
+      lifecycle: { disabled: {} },
+    };
+  }
+
+  return { disabled: {} };
+}
+
+export async function getFailureStoreStats({
+  name,
+  scopedClusterClient,
+  isServerless,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+}): Promise<FailureStoreStatsResponse> {
+  const failureStoreDocs = isServerless
+    ? await getFailureStoreMeteringSize({ name, scopedClusterClient })
+    : await getFailureStoreSize({ name, scopedClusterClient });
+  const creationDate = await getFailureStoreCreationDate({ name, scopedClusterClient });
+
+  return {
+    size: failureStoreDocs?.total_size_in_bytes,
+    count: failureStoreDocs?.count,
+    creationDate,
+  };
+}
+
+export async function getFailureStoreSize({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<DocStats | undefined> {
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.stats({
+      index: `${name}${FAILURE_STORE_SELECTOR}`,
+      metric: ['docs'],
+      forbid_closed_indices: false,
+    });
+    const docsStats = response?._all?.total?.docs;
+    return {
+      count: docsStats?.count || 0,
+      total_size_in_bytes: docsStats?.total_size_in_bytes || 0,
+    };
+  } catch (e) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function getFailureStoreMeteringSize({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<DocStats | undefined> {
+  try {
+    const response = await scopedClusterClient.asSecondaryAuthUser.transport.request<{
+      _total: { num_docs: number; size_in_bytes: number };
+    }>({
+      method: 'GET',
+      path: `/_metering/stats/${name}${FAILURE_STORE_SELECTOR}`,
+    });
+
+    return {
+      count: response._total?.num_docs || 0,
+      total_size_in_bytes: response._total?.size_in_bytes || 0,
+    };
+  } catch (e) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function getFailureStoreCreationDate({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<number | undefined> {
+  let age: number | undefined;
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.explainDataLifecycle({
+      index: `${name}${FAILURE_STORE_SELECTOR}`,
+    });
+    const indices = response.indices;
+    if (indices && typeof indices === 'object') {
+      const firstIndex = Object.values(indices)[0] as {
+        index_creation_date_millis?: EpochTime<UnitMillis>;
+      };
+      age = firstIndex?.index_creation_date_millis;
+    }
+    return age || undefined;
+  } catch (e) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
 }

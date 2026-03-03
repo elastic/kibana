@@ -8,9 +8,10 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -20,11 +21,10 @@ import {
   EuiTitle,
   EuiLoadingSpinner,
   useEuiMinBreakpoint,
-  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   useKibana,
   overviewPageActions,
@@ -32,12 +32,9 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
-import {
-  RedirectAppLinksContainer as RedirectAppLinks,
-  RedirectAppLinksKibanaProvider,
-} from '@kbn/shared-ux-link-redirect-app';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
-import {
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import type {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
@@ -45,7 +42,7 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import classNames from 'classnames';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
-import { AppPluginStartDependencies } from '../../types';
+import type { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';
@@ -66,20 +63,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const {
-    http,
-    docLinks,
-    dataViews,
-    share,
-    application,
-    chrome,
-    dataViewEditor,
-    customBranding,
-    theme,
-  } = services;
+  const { http, docLinks, dataViews, share, application, chrome, dataViewEditor, customBranding } =
+    services;
   const addBasePath = http.basePath.prepend;
-  const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
   const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   const minBreakpointM = useEuiMinBreakpoint('m');
 
   // Home does not have a locator implemented, so hard-code it here.
@@ -135,33 +123,19 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
     return app ? (
       <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
-        <RedirectAppLinksKibanaProvider
-          coreStart={{
-            application: {
-              currentAppId$: application.currentAppId$,
-              navigateToUrl: application.navigateToUrl,
-            },
+        <EuiCard
+          description={app?.subtitle || ''}
+          href={addBasePath(app.path)}
+          onClick={() => {
+            trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
           }}
-          {...application}
-        >
-          <RedirectAppLinks>
-            <EuiCard
-              description={app?.subtitle || ''}
-              href={addBasePath(app.path)}
-              onClick={() => {
-                trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
-              }}
-              image={addBasePath(
-                `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
-                  currentTheme.darkMode ? 'dark' : 'light'
-                }.svg`
-              )}
-              title={app.title}
-              titleElement="h3"
-              titleSize="s"
-            />
-          </RedirectAppLinks>
-        </RedirectAppLinksKibanaProvider>
+          image={addBasePath(
+            `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${isDarkMode ? 'dark' : 'light'}.svg`
+          )}
+          title={app.title}
+          titleElement="h3"
+          titleSize="s"
+        />
       </EuiFlexItem>
     ) : null;
   };
@@ -320,31 +294,19 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                       key={id}
                       className="kbnOverviewItemSolution"
                     >
-                      <RedirectAppLinksKibanaProvider
-                        coreStart={{
-                          application: {
-                            currentAppId$: application.currentAppId$,
-                            navigateToUrl: application.navigateToUrl,
-                          },
+                      <EuiCard
+                        className={`kbnOverviewSolution--${id} kbnRedirectAppLinkImage`}
+                        description={description ? description : ''}
+                        href={addBasePath(path)}
+                        icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
+                        image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
+                        title={title}
+                        titleElement="h3"
+                        titleSize="xs"
+                        onClick={() => {
+                          trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
                         }}
-                        {...application}
-                      >
-                        <RedirectAppLinks className="kbnRedirectAppLinkImage">
-                          <EuiCard
-                            className={`kbnOverviewSolution--${id}`}
-                            description={description ? description : ''}
-                            href={addBasePath(path)}
-                            icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
-                            image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
-                            title={title}
-                            titleElement="h3"
-                            titleSize="xs"
-                            onClick={() => {
-                              trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
-                            }}
-                          />
-                        </RedirectAppLinks>
-                      </RedirectAppLinksKibanaProvider>
+                      />
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>

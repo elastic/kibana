@@ -6,16 +6,16 @@
  */
 
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+  CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+  SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import { keyBy } from 'lodash';
 import type {
   MicrosoftDefenderEndpointAgentListResponse,
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import pMap from 'p-map';
 import { stringify } from '../../../../utils/stringify';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -100,7 +100,9 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
             },
           });
 
-          if (hostLastSuccessfulMachineAction?.value?.[0].type === 'Isolate') {
+          // Only check the first action if the array is not empty
+          const [firstAction] = hostLastSuccessfulMachineAction?.value || [];
+          if (firstAction?.type === 'Isolate') {
             response[agentId] = true;
           }
         } catch (err) {

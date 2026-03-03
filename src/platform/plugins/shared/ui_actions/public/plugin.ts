@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  rowClickTrigger,
-  visualizeFieldTrigger,
-  visualizeGeoFieldTrigger,
-  addPanelMenuTrigger,
-} from '@kbn/ui-actions-browser/src/triggers';
+import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UiActionsService } from './service';
 import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } from './services';
 
@@ -26,7 +20,6 @@ export type UiActionsPublicSetup = Pick<
   | 'detachAction'
   | 'registerAction'
   | 'registerActionAsync'
-  | 'registerTrigger'
   | 'unregisterAction'
 >;
 
@@ -52,10 +45,6 @@ export class UiActionsPlugin
   constructor(_initializerContext: PluginInitializerContext) {}
 
   public setup(_core: CoreSetup): UiActionsPublicSetup {
-    this.service.registerTrigger(addPanelMenuTrigger);
-    this.service.registerTrigger(rowClickTrigger);
-    this.service.registerTrigger(visualizeFieldTrigger);
-    this.service.registerTrigger(visualizeGeoFieldTrigger);
     return this.service;
   }
 

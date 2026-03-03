@@ -8,14 +8,17 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import type { VisToExpressionAst, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import {
-  PIE_VIS_EXPRESSION_NAME,
-  PARTITION_LABELS_FUNCTION,
+import type {
   PieVisExpressionFunctionDefinition,
   PartitionVisParams,
   LabelsParams,
+} from '@kbn/expression-partition-vis-plugin/common';
+import {
+  PIE_VIS_EXPRESSION_NAME,
+  PARTITION_LABELS_FUNCTION,
 } from '@kbn/expression-partition-vis-plugin/common';
 
 const prepareDimension = (params: SchemaConfig) => {

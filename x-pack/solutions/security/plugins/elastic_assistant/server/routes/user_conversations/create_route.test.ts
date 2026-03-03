@@ -17,6 +17,7 @@ import {
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
+import type { Message } from '@kbn/elastic-assistant-common';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
 
 describe('Create conversation route', () => {
@@ -132,6 +133,97 @@ describe('Create conversation route', () => {
       expect(result.badRequest).toHaveBeenCalledWith(
         `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'test_thing'`
       );
+    });
+  });
+  describe('telemetry for duplicate conversations', () => {
+    const duplicateTitle = '[Duplicate] Conversation';
+    const userMessage: Message = {
+      role: 'user',
+      content: 'test content',
+      timestamp: '2019-12-13T16:40:33.400Z',
+      user: { name: authenticatedUser.username, id: authenticatedUser.profile_uid },
+    };
+    const otherUserMessage: Message = {
+      role: 'user',
+      content: 'test content',
+      timestamp: '2019-12-13T16:40:33.400Z',
+      user: { name: 'other', id: 'other-id' },
+    };
+    let telemetryReportEventSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      telemetryReportEventSpy = jest.spyOn(context.elasticAssistant.telemetry, 'reportEvent');
+    });
+
+    afterEach(() => {
+      telemetryReportEventSpy.mockRestore();
+    });
+
+    test('calls telemetry.reportEvent with isSourceConversationOwner=true for duplicate title and owner', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
+        {
+          ...getConversationMock(getQueryConversationParams()),
+          title: duplicateTitle,
+          messages: [userMessage],
+        }
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+        body: {
+          ...getCreateConversationSchemaMock(),
+          title: duplicateTitle,
+          messages: [userMessage],
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      expect(telemetryReportEventSpy).toHaveBeenCalledWith('conversation_duplicated', {
+        isSourceConversationOwner: true,
+      });
+    });
+
+    test('calls telemetry.reportEvent with isSourceConversationOwner=false for duplicate title and non-owner', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
+        {
+          ...getConversationMock(getQueryConversationParams()),
+          title: duplicateTitle,
+          messages: [otherUserMessage],
+        }
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+        body: {
+          ...getCreateConversationSchemaMock(),
+          title: duplicateTitle,
+          messages: [otherUserMessage],
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      expect(telemetryReportEventSpy).toHaveBeenCalledWith('conversation_duplicated', {
+        isSourceConversationOwner: false,
+      });
+    });
+
+    test('does not call telemetry.reportEvent for non-duplicate title', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
+        {
+          ...getConversationMock(getQueryConversationParams()),
+          title: 'Regular Conversation',
+          messages: [userMessage],
+        }
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+        body: {
+          ...getCreateConversationSchemaMock(),
+          title: 'Regular Conversation',
+          messages: [userMessage],
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      expect(telemetryReportEventSpy).not.toHaveBeenCalled();
     });
   });
 });

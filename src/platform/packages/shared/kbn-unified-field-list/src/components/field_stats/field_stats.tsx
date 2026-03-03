@@ -28,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PartialTheme } from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -38,11 +39,11 @@ import {
   Settings,
   TooltipType,
   Tooltip,
-  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,
@@ -495,6 +496,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 id={specId}
                 xAccessor={'key'}
                 yAccessors={['count']}
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 timeZone={getTimeZone(uiSettings)}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiFlexGroup } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiLink, useEuiTheme } from '@elastic/eui';
 import { useTruncateText } from '@kbn/react-hooks';
 import { readLess, readMore } from '../../../../common/translations';
 
@@ -23,6 +23,7 @@ export const ExpandableTruncatedText = ({
   truncatedTextLength = 35,
   codeLanguage,
 }: TruncatedTextWithToggleProps) => {
+  const { euiTheme } = useEuiTheme();
   const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
     text,
     maxCharLength,
@@ -30,21 +31,26 @@ export const ExpandableTruncatedText = ({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" style={{ width: '100%' }}>
-      <EuiCode language={codeLanguage} style={{ fontWeight: 'normal' }}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      style={{ width: '100%' }}
+      justifyContent="flexStart"
+    >
+      <EuiCode
+        language={codeLanguage}
+        style={{
+          fontWeight: 'normal',
+          color: euiTheme.colors.textParagraph,
+          overflowWrap: 'break-word',
+        }}
+      >
         {displayText}
       </EuiCode>
       {shouldTruncate && (
-        <EuiCode>
-          <button
-            data-test-subj="truncatedTextToggle"
-            onClick={toggleExpanded}
-            color="primary"
-            css={{ fontWeight: 'bold', textDecoration: 'underline' }}
-          >
-            {isExpanded ? readLess : readMore}
-          </button>
-        </EuiCode>
+        <EuiLink data-test-subj="truncatedTextToggle" onClick={toggleExpanded}>
+          {isExpanded ? readLess : readMore}
+        </EuiLink>
       )}
     </EuiFlexGroup>
   );

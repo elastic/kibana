@@ -17,7 +17,6 @@ import {
 } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
@@ -83,7 +82,7 @@ export async function reassignAgent(
 
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'POLICY_REASSIGN',
@@ -127,6 +126,7 @@ export async function reassignAgents(
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,

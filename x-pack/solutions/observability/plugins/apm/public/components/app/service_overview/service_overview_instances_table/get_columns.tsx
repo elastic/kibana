@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiButtonIcon, RIGHT_ALIGNMENT, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -254,6 +254,15 @@ export function getColumns({
       },
     },
     {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.apm.getColumns.actionsMenu.srName', {
+              defaultMessage: 'Actions menu',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
       width: '40px',
       render: (instanceItem: MainStatsServiceInstanceItem) => {
         return (
@@ -284,6 +293,15 @@ export function getColumns({
       },
     },
     {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.apm.getColumns.rightAlignment.srName', {
+              defaultMessage: 'Expanded menu',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,

@@ -8,20 +8,22 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { SerializedSearchSourceFields } from './types';
+import type { SerializedSearchSourceFields } from './types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../..';
 
 export const extractReferences = (
-  state: SerializedSearchSourceFields
+  state: SerializedSearchSourceFields,
+  options?: { refNamePrefix?: string }
 ): [SerializedSearchSourceFields, SavedObjectReference[]] => {
+  const refNamePrefix = options?.refNamePrefix ? `${options.refNamePrefix}.` : '';
   let searchSourceFields: SerializedSearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
     if (typeof searchSourceFields.index === 'string') {
       const indexId = searchSourceFields.index;
-      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      const refName = `${refNamePrefix}kibanaSavedObjectMeta.searchSourceJSON.index`;
       references.push({
         name: refName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -47,7 +49,7 @@ export const extractReferences = (
         if (!filterRow.meta || !filterRow.meta.index) {
           return filterRow;
         }
-        const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+        const refName = `${refNamePrefix}kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
         references.push({
           name: refName,
           type: DATA_VIEW_SAVED_OBJECT_TYPE,

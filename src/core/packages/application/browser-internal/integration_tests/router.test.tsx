@@ -9,14 +9,15 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { createMemoryHistory, History, createHashHistory } from 'history';
+import type { History } from 'history';
+import { createMemoryHistory, createHashHistory } from 'history';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { AppStatus } from '@kbn/core-application-browser';
 
 import { AppRouter } from '../src/ui';
-import { MockedMounterMap, MockedMounterTuple } from '../src/test_helpers/test_types';
+import type { MockedMounterMap, MockedMounterTuple } from '../src/test_helpers/test_types';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
 
 describe('AppRouter', () => {

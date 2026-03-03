@@ -9,4 +9,4 @@
 
 export { getSearchParamsFromRequest, getEsPreference } from './get_search_params';
 export { RequestFailure } from './request_error';
-export * from './types';
+export type * from './types';

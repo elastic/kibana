@@ -6,9 +6,9 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import { RestoreSettings } from '../../../../common/types';
+import type { RestoreSettings } from '../../../../common/types';
 import { UIM_RESTORE_CREATE } from '../../constants';
-import { UiMetricService } from '../ui_metric';
+import type { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';
 
 // Temporary hack to provide the uiMetricService instance to this file.

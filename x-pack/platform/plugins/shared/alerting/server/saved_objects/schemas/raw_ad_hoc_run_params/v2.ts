@@ -90,7 +90,7 @@ const rawAdHocRunParamsRuleActionSchema = schema.object({
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
-const rawAdHocRunParamsRuleSchema = rawAdHocRunParamsRuleSchemaV1.extends({
+export const rawAdHocRunParamsRuleSchema = rawAdHocRunParamsRuleSchemaV1.extends({
   actions: schema.maybe(schema.arrayOf(rawAdHocRunParamsRuleActionSchema)),
 });
 

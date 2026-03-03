@@ -4,40 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
-import { isEqual } from 'lodash';
+import { useMemo } from 'react';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { createEmptyLensState } from '../../../react_embeddable/helper';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
 export const useCurrentAttributes = ({
   textBasedMode,
   initialAttributes,
-  datasourceMap,
-  visualizationMap,
 }: {
   initialAttributes?: TypedLensSerializedState['attributes'];
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   textBasedMode?: boolean;
 }) => {
+  const { visualizationMap, datasourceMap } = useEditorFrameService();
+
   const { datasourceStates, visualization, activeDatasourceId } = useLensSelector(
     (state) => state.lens
   );
-
-  const [currentAttributes, setCurrentAttributes] = useState<
-    TypedLensSerializedState['attributes'] | undefined
-  >(initialAttributes);
 
   // use the latest activeId, but fallback to attributes
   const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
   const activeVisualization = visualizationType ? visualizationMap[visualizationType] : undefined;
 
-  useEffect(() => {
+  const currentAttributes = useMemo(() => {
     if (!activeVisualization) {
-      return;
+      return initialAttributes;
     }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
@@ -73,18 +66,14 @@ export const useCurrentAttributes = ({
       references,
       visualizationType: activeVisualization.id,
     };
-    if (!isEqual(attrs, currentAttributes)) {
-      setCurrentAttributes(attrs);
-    }
+    return attrs;
   }, [
     activeDatasourceId,
     activeVisualization,
-    initialAttributes,
     datasourceMap,
     datasourceStates,
-    currentAttributes,
+    initialAttributes,
     textBasedMode,
-    visualization.activeId,
     visualization.state,
   ]);
 

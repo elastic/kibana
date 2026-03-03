@@ -8,18 +8,19 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { ObservedSize } from 'use-resize-observer/polyfilled';
-import {
-  ActivePanel,
-  ActiveRowEvent,
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { ObservedSize } from 'use-resize-observer/polyfilled';
+
+import type { ActivePanelEvent } from '../grid_panel';
+import type { ActiveSectionEvent } from '../grid_section';
+import type {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
-  PanelInteractionEvent,
+  OrderedLayout,
   RuntimeGridSettings,
 } from '../types';
-import { getSampleLayout } from './sample_layout';
+import { getSampleOrderedLayout } from './sample_layout';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -36,24 +37,24 @@ export const mockRenderPanelContents = jest.fn((panelId) => (
 
 export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStateManager>) => {
   return {
-    layoutRef: { current: {} },
+    accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
+    activePanelEvent$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
+    activeSectionEvent$: new BehaviorSubject<ActiveSectionEvent | undefined>(undefined),
     expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+    gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
+    gridLayout$: new BehaviorSubject<OrderedLayout>(getSampleOrderedLayout()),
+    headerRefs: { current: {} },
     isMobileView$: new BehaviorSubject<boolean>(false),
-    gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),
+    layoutRef: { current: {} },
+    layoutUpdated$: new Subject<void>(),
+    panelRefs: { current: {} },
     proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
     runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
-      columnPixelWidth: 0,
+      columnPixelWidth: 10,
       keyboardDragTopLimit: 0,
     }),
-    panelRefs: { current: {} },
-    rowRefs: { current: {} },
-    headerRefs: { current: {} },
-    accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
-    interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
-    activePanel$: new BehaviorSubject<ActivePanel | undefined>(undefined),
-    activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
-    gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
+    sectionRefs: { current: {} },
     ...overrides,
   } as GridLayoutStateManager;
 };

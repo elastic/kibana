@@ -15,20 +15,23 @@ import {
   parseCommentString,
   getLensVisualizations,
 } from '../../../../../common/utils/markdown_plugins/utils';
-import { OPEN_IN_VISUALIZATION } from '../../../visualizations/translations';
+import { OPEN_IN_VISUALIZATION } from '../../../attachments/lens/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
   const lensVisualization = getLensVisualizations(parsedComment?.children ?? []);
 
-  const { lens } = useKibana().services;
-  const hasLensPermissions = lens?.canUseEditor();
+  const {
+    lens: { navigateToPrefilledEditor, canUseEditor },
+  } = useKibana().services;
+
+  const hasLensPermissions = canUseEditor();
 
   const handleClick = useCallback(() => {
-    lens?.navigateToPrefilledEditor(
+    navigateToPrefilledEditor(
       {
         id: '',
-        timeRange: lensVisualization[0].timeRange,
+        time_range: lensVisualization[0].timeRange,
         attributes: lensVisualization[0]
           .attributes as unknown as TypedLensByValueInput['attributes'],
       },
@@ -36,7 +39,7 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
         openInNewTab: true,
       }
     );
-  }, [lens, lensVisualization]);
+  }, [lensVisualization, navigateToPrefilledEditor]);
 
   if (!lensVisualization.length || lensVisualization?.[0]?.attributes == null) {
     return { canUseEditor: hasLensPermissions, actionConfig: null };

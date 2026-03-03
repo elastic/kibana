@@ -17,7 +17,7 @@ import { isFunction, mapValues } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 import { AttachmentType } from '../../../common/types/domain';
 import type {
   PersistableStateAttachmentAttributes,
@@ -98,7 +98,7 @@ export const getLensMigrations = <T>({
   lensEmbeddableFactory,
   migratorFactory,
 }: GetLensMigrationsArgs<T>) => {
-  const lensMigrations = lensEmbeddableFactory?.().migrations;
+  const lensMigrations = lensEmbeddableFactory().migrations;
   const lensMigrationObject = isFunction(lensMigrations) ? lensMigrations() : lensMigrations || {};
 
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationParams<T, T>>(

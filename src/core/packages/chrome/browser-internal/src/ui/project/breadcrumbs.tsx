@@ -8,11 +8,12 @@
  */
 
 import { EuiBreadcrumbs } from '@elastic/eui';
-import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import { prepareBreadcrumbs } from '../breadcrumb_utils';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -20,34 +21,15 @@ interface Props {
 
 export function Breadcrumbs({ breadcrumbs$ }: Props) {
   const breadcrumbs = useObservable(breadcrumbs$, []);
-  let crumbs = breadcrumbs;
-
-  if (breadcrumbs.length === 0) {
-    crumbs = [{ text: 'Kibana' }];
-  }
-
-  crumbs = crumbs.map((breadcrumb, i) => {
-    const isLast = i === breadcrumbs.length - 1;
-    const { deepLinkId, ...rest } = breadcrumb;
-
-    return {
-      ...rest,
-      href: isLast ? undefined : breadcrumb.href,
-      onClick: isLast ? undefined : breadcrumb.onClick,
-      'data-test-subj': classNames(
-        'breadcrumb',
-        deepLinkId && `breadcrumb-deepLinkId-${deepLinkId}`,
-        breadcrumb['data-test-subj'],
-        i === 0 && 'first',
-        isLast && 'last'
-      ),
-    };
-  });
+  const crumbs = prepareBreadcrumbs(breadcrumbs);
 
   return (
     <EuiBreadcrumbs
       breadcrumbs={crumbs}
       data-test-subj="breadcrumbs"
+      aria-label={i18n.translate('core.ui.chrome.breadcrumbs.ariaLabel', {
+        defaultMessage: 'Breadcrumbs',
+      })}
       // reduce number of visible breadcrumbs due to increased max-width of the root breadcrumbs
       responsive={{
         xs: 1,

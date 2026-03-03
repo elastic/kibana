@@ -14,7 +14,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
-import { Command } from './types';
+import type { Command } from './types';
 
 export const snapshot: Command = {
   description: 'Downloads and run from a nightly snapshot',
@@ -33,16 +33,23 @@ export const snapshot: Command = {
       --password.[user] Sets password for native realm user [default: ${password}]
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
+      --docker          Run in a Docker container instead of downloading the snapshot locally.
+                        Supports the same options (--license, -E, --ssl, --password, etc.)
+                        and maps -E path.data=<path> to a Docker volume mount.
+      --port            The port to bind to on 127.0.0.1 [default: 9200] (Docker mode only)
+      --kill            Kill running ES Docker containers before starting (Docker mode only)
       --ssl             Sets up SSL on Elasticsearch
       --use-cached      Skips cache verification and use cached ES snapshot.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
       --plugins         Comma seperated list of Elasticsearch plugins to install
       --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
     Example:
 
       es snapshot --version 5.6.8 -E cluster.name=test -E path.data=/tmp/es-data
+      es snapshot --docker --license=trial -E path.data=../my-data
   `;
   },
   run: async (defaults = {}) => {
@@ -63,17 +70,33 @@ export const snapshot: Command = {
         useCached: 'use-cached',
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
+        esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
       },
 
-      string: ['version', 'ready-timeout'],
-      boolean: ['download-only', 'use-cached', 'skip-ready-check'],
+      string: ['version', 'ready-timeout', 'es-log-level'],
+      boolean: ['download-only', 'use-cached', 'skip-ready-check', 'docker', 'kill'],
 
       default: defaults,
     });
 
     const cluster = new Cluster({ ssl: options.ssl });
-    if (options['download-only']) {
+
+    if (options.docker) {
+      await cluster.runDockerSnapshot({
+        reportTime,
+        startTime: runStartTime,
+        license: options.license,
+        version: options.version,
+        password: options.password,
+        port: options.port ? Number(options.port) : undefined,
+        ssl: options.ssl,
+        kill: options.kill,
+        esArgs: options.esArgs,
+        skipReadyCheck: options.skipReadyCheck,
+        readyTimeout: parseTimeoutToMs(options.readyTimeout),
+      });
+    } else if (options['download-only']) {
       await cluster.downloadSnapshot({
         version: options.version,
         license: options.license,
@@ -115,6 +138,7 @@ export const snapshot: Command = {
         reportTime,
         startTime: runStartTime,
         ...options,
+        esStdoutLogLevel: options.esLogLevel || 'info',
         readyTimeout: parseTimeoutToMs(options.readyTimeout),
       });
     }

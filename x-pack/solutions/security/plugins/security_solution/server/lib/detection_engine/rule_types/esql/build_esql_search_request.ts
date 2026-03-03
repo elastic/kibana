@@ -13,6 +13,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
+import type { ExcludedDocument } from './types';
 
 export interface BuildEqlSearchRequestParams {
   query: string;
@@ -23,6 +24,7 @@ export interface BuildEqlSearchRequestParams {
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
   exceptionFilter: Filter | undefined;
+  excludedDocuments: Record<string, ExcludedDocument[]>;
   ruleExecutionTimeout: string | undefined;
 }
 
@@ -35,6 +37,7 @@ export const buildEsqlSearchRequest = ({
   secondaryTimestamp,
   exceptionFilter,
   size,
+  excludedDocuments,
   ruleExecutionTimeout,
 }: BuildEqlSearchRequestParams) => {
   const esFilter = getQueryFilter({
@@ -55,15 +58,59 @@ export const buildEsqlSearchRequest = ({
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
 
   return {
-    // we limit size of the response to maxAlertNumber + 1
-    // ES|QL currently does not support pagination and returns 10,000 results
-    query: `${query} | limit ${size + 1}`,
+    query: `${query} | limit ${size}`,
     filter: {
       bool: {
         filter: requestFilter,
+        ...(Object.keys(excludedDocuments).length > 0
+          ? {
+              must_not: convertExternalIdsToDSL(excludedDocuments),
+            }
+          : {}),
       },
     },
     wait_for_completion_timeout: '4m', // hard limit request timeout is 5m set by ES proxy and alerting framework. So, we should be fine to wait 4m for async query completion. If rule execution is shorter than 4m and query was not completed, it will be aborted.
     ...(ruleExecutionTimeout ? { keep_alive: ruleExecutionTimeout } : {}),
   };
+};
+
+export const convertExternalIdsToDSL = (
+  excludedDocuments: Record<string, ExcludedDocument[]>,
+  idsToInclude?: Set<string>
+): estypes.QueryDslQueryContainer[] => {
+  const indices = Object.keys(excludedDocuments);
+  const queries: estypes.QueryDslQueryContainer[] = [];
+
+  for (const index of indices) {
+    const documents = excludedDocuments[index];
+
+    const filteredDocuments = idsToInclude
+      ? documents.filter((doc) => idsToInclude.has(doc.id))
+      : documents;
+
+    if (filteredDocuments.length > 0) {
+      queries.push({
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: filteredDocuments.map((doc) => doc.id),
+              },
+            },
+            ...(index
+              ? [
+                  {
+                    term: {
+                      _index: index,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+      });
+    }
+  }
+
+  return queries;
 };

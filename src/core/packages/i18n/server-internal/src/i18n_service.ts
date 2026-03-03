@@ -9,7 +9,8 @@
 
 import { firstValueFrom } from 'rxjs';
 import { createHash } from 'crypto';
-import { i18n, Translation } from '@kbn/i18n';
+import type { Translation } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -18,7 +19,8 @@ import type {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
+import type { I18nConfigType } from './i18n_config';
+import { config as i18nConfigDef } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';

@@ -15,15 +15,22 @@ import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../.
 
 type ReinstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
   installSource: string;
+  isCustomPackage: boolean;
 };
 export function ReinstallButton(props: ReinstallationButtonProps) {
-  const { name, title, version, installSource } = props;
+  const { name, title, version, installSource, isCustomPackage } = props;
   const canInstallPackages = useAuthz().integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
-
   const isReinstalling = installationStatus === InstallStatus.reinstalling;
+
+  const isStatusInProgress = [
+    InstallStatus.installing,
+    InstallStatus.rollingBack,
+    InstallStatus.uninstalling,
+  ].includes(installationStatus);
+
   const isUploadedPackage = installSource === 'upload';
 
   const handleClickReinstall = useCallback(() => {
@@ -32,10 +39,11 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
 
   const reinstallButton = (
     <EuiButton
+      data-test-subj="reinstallButton"
       iconType="refresh"
       isLoading={isReinstalling}
       onClick={handleClickReinstall}
-      disabled={isUploadedPackage}
+      disabled={isUploadedPackage || isCustomPackage || isStatusInProgress}
     >
       {isReinstalling ? (
         <FormattedMessage

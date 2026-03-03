@@ -9,8 +9,8 @@
 
 import { has } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { LogMeta } from '@kbn/logging';
-import { GlobalContext } from './types';
+import type { LogMeta } from '@kbn/logging';
+import type { GlobalContext } from './types';
 
 /**
  * Takes a flattened object of {@link GlobalContext} and applies it to the

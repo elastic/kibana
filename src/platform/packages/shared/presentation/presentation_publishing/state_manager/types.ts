@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { PublishingSubject } from '../publishing_subject';
+import type { Observable } from 'rxjs';
+import type { PublishingSubject } from '../publishing_subject';
+import type { SnakeToCamelCase } from '../utils/types';
 
 export type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
 
@@ -35,19 +36,24 @@ export type CustomComparators<StateType> = {
   [KeyType in keyof StateType]?: ComparatorFunction<StateType, KeyType>;
 };
 
-type SubjectsOf<T extends object> = {
-  [KeyType in keyof Required<T> as `${string & KeyType}$`]: PublishingSubject<T[KeyType]>;
+export type SubjectsOf<T extends object> = {
+  [KeyType in keyof Required<T> as `${SnakeToCamelCase<string & KeyType>}$`]: PublishingSubject<
+    T[KeyType]
+  >;
 };
 
-type SettersOf<T extends object> = {
-  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: (
+export type SettersOf<T extends object> = {
+  [KeyType in keyof Required<T> as `set${Capitalize<SnakeToCamelCase<string & KeyType>>}`]: (
     value: T[KeyType]
   ) => void;
 };
 
 export interface StateManager<StateType extends object> {
   getLatestState: () => WithAllKeys<StateType>;
-  reinitializeState: (newState?: Partial<StateType>) => void;
+  reinitializeState: (
+    newState?: Partial<StateType>,
+    comparators?: StateComparators<StateType>
+  ) => void;
   api: SettersOf<StateType> & SubjectsOf<StateType>;
   anyStateChange$: Observable<void>;
 }

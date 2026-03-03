@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -150,9 +150,11 @@ export const registerExportRoute = (
         summary: `Export saved objects`,
         tags: ['oas-tag:saved objects'],
         access: 'public',
-        description: `Retrieve sets of saved objects that you want to import into Kibana. You must include \`type\` or \`objects\` in the request body.
+        description: `Retrieve sets of saved objects that you want to import into Kibana. You must include \`type\` or \`objects\` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+NOTE: The exported saved objects include \`coreMigrationVersion\` and \`typeMigrationVersion\` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
 
 NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
         oasOperationObject: () => path.resolve(__dirname, './export.examples.yaml'),
@@ -173,7 +175,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
               schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
                 meta: {
                   description:
-                    'The saved object types to include in the export. Use `*` to export all the types.',
+                    'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
                 },
               })
             ),
@@ -187,7 +189,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
                   maxSize: maxImportExportSize,
                   meta: {
                     description:
-                      'A list of objects to export. NOTE: this optiona cannot be combined with `types` option',
+                      'A list of objects to export. NOTE: this optional parameter cannot be combined with the `types` option',
                   },
                 }
               )
@@ -264,7 +266,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,
           createMapStream((obj: unknown) => {
-            return stringify(obj);
+            return stableStringify(obj);
           }),
           createConcatStream([]),
         ]);

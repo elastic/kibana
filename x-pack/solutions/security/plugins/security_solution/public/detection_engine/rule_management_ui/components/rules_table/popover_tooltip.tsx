@@ -59,7 +59,7 @@ const PopoverTooltipComponent = ({
           onClick={onClick}
           onKeyDown={onKeyDown}
           color={anchorColor}
-          type="questionInCircle"
+          type="question"
         />
       }
     >

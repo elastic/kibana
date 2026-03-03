@@ -50,6 +50,7 @@ describe('requestOAuthJWTToken', () => {
       Array [
         "https://test",
         Object {
+          "beforeRedirect": [Function],
           "data": "assertion=someJWTvalueishere&client_id=client-id-1&client_secret=some-client-secret&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&scope=test",
           "headers": Object {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -66,6 +67,7 @@ describe('requestOAuthJWTToken', () => {
               "list": Array [],
               "map": Object {},
             },
+            "agentKeepAliveTimeoutBuffer": 1000,
             "defaultPort": 443,
             "freeSockets": Object {},
             "keepAlive": false,
@@ -75,8 +77,10 @@ describe('requestOAuthJWTToken', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "defaultPort": 443,
               "noDelay": true,
               "path": null,
+              "protocol": "https:",
               "rejectUnauthorized": true,
             },
             "protocol": "https:",

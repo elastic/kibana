@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/logging';
-import {
-  isSSEError,
-  ServerSentErrorEvent,
-  ServerSentEventErrorCode,
-} from '@kbn/sse-utils/src/errors';
-import { ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
-import { catchError, map, Observable, of, Subject, throttleTime } from 'rxjs';
+import { repeat } from 'lodash';
+import type { Logger } from '@kbn/logging';
+import type { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
+import { isSSEError, ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
+import { ServerSentEventType } from '@kbn/sse-utils/src/events';
+import type { Observable } from 'rxjs';
+import { catchError, map, of, Subject, throttleTime } from 'rxjs';
 import { PassThrough } from 'stream';
 import type { Zlib } from 'zlib';
 
@@ -28,12 +28,15 @@ class ResponseStream extends PassThrough {
   }
 }
 
+export const cloudProxyBufferSize = 4096;
+
 export function observableIntoEventSourceStream(
   source$: Observable<ServerSentEvent>,
   {
     logger,
     signal,
     flushThrottleMs = 100,
+    flushMinBytes,
   }: {
     logger: Pick<Logger, 'debug' | 'error'>;
     signal: AbortSignal;
@@ -44,6 +47,12 @@ export function observableIntoEventSourceStream(
      * @default 100
      */
     flushThrottleMs?: number;
+    /**
+     * The Cloud proxy currently buffers 4kb or 8kb of data until flushing.
+     * This decreases the responsiveness of the streamed response,
+     * so we manually insert some data during stream flushes to force the proxy to flush too.
+     */
+    flushMinBytes?: number;
   }
 ) {
   const withSerializedErrors$ = source$.pipe(
@@ -77,15 +86,24 @@ export function observableIntoEventSourceStream(
     })
   );
 
+  let currentBufferSize = 0;
+
   const stream = new ResponseStream();
   const flush$ = new Subject<void>();
   flush$
     // Using `leading: true` and `trailing: true` to avoid holding the flushing for too long,
     // but still avoid flushing too often (it will emit at the beginning of the throttling process, and at the end).
     .pipe(throttleTime(flushThrottleMs, void 0, { leading: true, trailing: true }))
-    .subscribe(() => stream.flush());
+    .subscribe(() => {
+      if (currentBufferSize > 0 && flushMinBytes && currentBufferSize <= flushMinBytes) {
+        const forceFlushContent = repeat('0', flushMinBytes * 2);
+        stream.write(`: ${forceFlushContent}\n`);
+      }
+      stream.flush();
+      currentBufferSize = 0;
+    });
 
-  const intervalId = setInterval(() => {
+  const keepAliveIntervalId = setInterval(() => {
     // `:` denotes a comment - this is to keep the connection open
     // it will be ignored by the SSE parser on the client
     stream.write(': keep-alive\n');
@@ -95,16 +113,17 @@ export function observableIntoEventSourceStream(
   const subscription = withSerializedErrors$.subscribe({
     next: (line) => {
       stream.write(line);
+      currentBufferSize += line.length;
       // Make sure to flush the written lines to emit them immediately (instead of waiting for buffer to fill)
       flush$.next();
     },
     complete: () => {
       flush$.complete();
       stream.end();
-      clearTimeout(intervalId);
+      clearTimeout(keepAliveIntervalId);
     },
     error: (error) => {
-      clearTimeout(intervalId);
+      clearTimeout(keepAliveIntervalId);
       stream.write(
         createLine({
           event: 'error',

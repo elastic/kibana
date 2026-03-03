@@ -8,11 +8,13 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
+import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import type {
-  UploadActionApiRequestBody,
   ActionStatusRequestSchema,
   KillProcessRequestBody,
+  RunScriptActionRequestBody,
   SuspendProcessRequestBody,
+  UploadActionApiRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -41,6 +43,11 @@ export interface ProcessesEntry {
 export interface GetProcessesActionOutputContent {
   code: string;
   entries: ProcessesEntry[];
+  /**
+   * The relative API path to download the output file for this response action.
+   * Only supported by some `agentType`'s
+   */
+  downloadUri?: string;
 }
 
 export interface SuspendProcessActionOutputContent {
@@ -69,6 +76,10 @@ export interface ResponseActionGetFileOutputContent {
     file_name: string;
     type: string;
   }>;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionExecuteOutputContent {
@@ -90,6 +101,10 @@ export interface ResponseActionExecuteOutputContent {
    * */
   output_file_stdout_truncated: boolean;
   output_file_stderr_truncated: boolean;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
 }
 
 export interface ResponseActionScanOutputContent {
@@ -99,6 +114,16 @@ export interface ResponseActionScanOutputContent {
 export interface ResponseActionRunScriptOutputContent {
   stdout: string;
   stderr: string;
+  code: string;
+  /**
+   * The relative API path to download the output file for this response action
+   */
+  downloadUri?: string;
+}
+
+export type ResponseActionEndpointRunScriptOutputContent = ResponseActionExecuteOutputContent;
+
+export interface ResponseActionCancelOutputContent {
   code: string;
 }
 
@@ -146,6 +171,8 @@ export interface LogsEndpointAction<
    *        initializing the Response Actions Client to process pending actions.
    */
   originSpaceId: string;
+  /** Tags assigned to the action */
+  tags: string[];
   agent: {
     id: string | string[];
     /**
@@ -250,20 +277,23 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-// Currently reflecting CrowdStrike's RunScript parameters
-interface ActionsRunScriptParametersBase {
-  Raw?: string;
-  HostPath?: string;
-  CloudFile?: string;
-  CommandLine?: string;
-  Timeout?: number;
+export interface ResponseActionCancelParameters {
+  id: string;
 }
 
-// Enforce at least one of the script parameters is required
-export type ResponseActionRunScriptParameters = AtLeastOne<
-  ActionsRunScriptParametersBase,
-  'Raw' | 'HostPath' | 'CloudFile'
->;
+export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
+
+export type ResponseActionMemoryDumpParameters = MemoryDumpActionRequestBody['parameters'];
+
+export interface ResponseActionMemoryDumpOutputContent {
+  code: string;
+  /** The zip file size */
+  file_size: number;
+  /** The full path of the file on the host machine */
+  path: string;
+  /** The remaining free disk space in bytes (after creating memory dump) */
+  disk_free_space: number;
+}
 
 export type EndpointActionDataParameterTypes =
   | undefined
@@ -272,7 +302,9 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters
+  | ResponseActionMemoryDumpParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -284,7 +316,8 @@ export type EndpointActionResponseDataOutput =
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
   | ResponseActionScanOutputContent
-  | ResponseActionRunScriptOutputContent;
+  | ResponseActionRunScriptOutputContent
+  | ResponseActionCancelOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -623,6 +656,33 @@ export interface ResponseActionUploadOutputContent {
   disk_free_space: number;
 }
 
-type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
-  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
-  : never;
+/**
+ * A Response Action script
+ */
+export interface ResponseActionScript<TMeta extends {} = {}> {
+  /**
+   * Unique identifier for the script
+   */
+  id: string;
+  /**
+   * Display name of the script
+   */
+  name: string;
+  /**
+   * Description of what the script does
+   */
+  description: string;
+
+  /**
+   * Additional meta info. about the script. Can be used to store EDR specific
+   * information about the script for use in the UI
+   */
+  meta?: TMeta;
+}
+
+/**
+ * API response with list of Response Actions scripts available on the system
+ */
+export interface ResponseActionScriptsApiResponse<TMeta extends {} = {}> {
+  data: ResponseActionScript<TMeta>[];
+}

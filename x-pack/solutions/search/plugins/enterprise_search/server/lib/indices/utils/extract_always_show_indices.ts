@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchIndex } from '@kbn/search-connectors';
+import type { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchIndex } from '@kbn/search-connectors';
 
-import { AlwaysShowPattern } from '../../../../common/types/indices';
+import type { AlwaysShowPattern } from '../../../../common/types/indices';
 
 export const getAlwaysShowAliases = (indexAndAliasNames: string[], alwaysShowNames: string[]) => {
   if (alwaysShowNames.length === 0) return [];

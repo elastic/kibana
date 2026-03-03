@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { getLogLevelColor } from './get_log_level_color';
 import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
@@ -20,10 +20,10 @@ const euiTheme = {
 describe('getLogLevelColor', () => {
   test('should work correctly', () => {
     expect(getLogLevelColor(LogLevelCoalescedValue.debug, euiTheme as EuiThemeComputed)).toBe(
-      '#bdd7ff'
+      '#e8f1ff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.info, euiTheme as EuiThemeComputed)).toBe(
-      '#90bdff'
+      '#a8caff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.notice, euiTheme as EuiThemeComputed)).toBe(
       '#61a2ff'

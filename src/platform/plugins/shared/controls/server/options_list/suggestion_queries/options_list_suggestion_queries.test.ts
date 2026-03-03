@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { OptionsListRequestBody } from '../../../common/options_list/types';
 import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
@@ -35,7 +35,7 @@ describe('options list suggestion queries', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: '@timestamp',
-      allowExpensiveQueries: true,
+
       sort: { by: '_key', direction: 'desc' },
       fieldSpec: { type: 'date' } as unknown as FieldSpec,
     };
@@ -49,7 +49,7 @@ describe('options list suggestion queries', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
-      allowExpensiveQueries: true,
+
       searchTechnique: 'exact',
       searchString: 'searchForMe',
       sort: { by: '_key', direction: 'asc' },
@@ -61,27 +61,11 @@ describe('options list suggestion queries', () => {
     expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
   });
 
-  test('returns generic exact match search query when allowExpensiveQueries is `false`', () => {
+  test('returns type-specific search query when search technique is not `exact`', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
-      allowExpensiveQueries: false,
-      searchTechnique: 'prefix',
-      searchString: 'searchForMe',
-      sort: { by: '_key', direction: 'asc' },
-      fieldSpec: { type: 'number' } as unknown as FieldSpec,
-    };
-    getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-    expect(getAllSuggestionsAggregationBuilder).not.toBeCalled();
-    expect(getExactMatchAggregationBuilder).toBeCalled();
-    expect(getSearchSuggestionsAggregationBuilder).not.toBeCalled();
-  });
 
-  test('returns type-specific search query only when absolutely necessary', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
-      size: 10,
-      fieldName: 'bytes',
-      allowExpensiveQueries: true,
       searchTechnique: 'prefix',
       searchString: 'searchForMe',
       sort: { by: '_key', direction: 'asc' },

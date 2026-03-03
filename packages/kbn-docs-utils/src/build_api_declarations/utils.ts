@@ -9,8 +9,9 @@
 
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
-import { BuildApiDecOpts } from './types';
+import type { ParameterDeclaration, ClassMemberTypes } from 'ts-morph';
+import { Node } from 'ts-morph';
+import type { BuildApiDecOpts } from './types';
 import { isNamedNode } from '../tsmorph_utils';
 
 // Collect any paths encountered that are not in the correct scope folder.
@@ -36,6 +37,20 @@ export function getRelativePath(fullPath: string): string {
 export function getSourceForNode(node: Node): string {
   const path = getRelativePath(node.getSourceFile().getFilePath());
   return path;
+}
+
+export function getSourceLocationForNode(node: Node): {
+  path: string;
+  lineNumber: number;
+  columnNumber: number;
+} {
+  const path = getRelativePath(node.getSourceFile().getFilePath());
+  const { line, column } = node.getSourceFile().getLineAndColumnAtPos(node.getNonWhitespaceStart());
+  return {
+    path,
+    lineNumber: line,
+    columnNumber: column,
+  };
 }
 
 export function buildApiId(id: string, parentId?: string): string {

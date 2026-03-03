@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiIconTip,
+  EuiToolTip,
+  RIGHT_ALIGNMENT,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
@@ -27,7 +34,6 @@ import type {
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ErrorGroupItem } from './use_error_group_list_data';
 import { useErrorGroupListData } from './use_error_group_list_data';
@@ -62,6 +68,7 @@ interface Props {
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
   onLoadTable?: () => void;
+  tableCaption?: string;
 }
 
 const defaultSorting = {
@@ -77,6 +84,7 @@ export function ErrorGroupList({
   saveTableOptionsToUrl,
   showPerPageOptions = true,
   onLoadTable,
+  tableCaption,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -85,7 +93,7 @@ export function ErrorGroupList({
 
   const { core } = useApmPluginContext();
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const { offset, rangeFrom, rangeTo } = query;
 
@@ -137,11 +145,8 @@ export function ErrorGroupList({
           })}{' '}
           <EuiIconTip
             size="s"
-            type="questionInCircle"
+            type="question"
             color="subdued"
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
             content={i18n.translate('xpack.apm.errorsTable.groupIdColumnDescription', {
               defaultMessage:
                 'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
@@ -182,7 +187,7 @@ export function ErrorGroupList({
               serviceName={serviceName}
               query={{
                 ...query,
-                kuery: `error.exception.type:"${type}"`,
+                kuery: `error.exception.type:"${type}" OR error.type:"${type}"`,
               }}
             >
               {type}
@@ -224,7 +229,15 @@ export function ErrorGroupList({
         ? []
         : [
             {
-              name: '',
+              name: (
+                <EuiScreenReaderOnly>
+                  <span>
+                    {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
+                      defaultMessage: 'Unhandled',
+                    })}
+                  </span>
+                </EuiScreenReaderOnly>
+              ),
               field: 'handled',
               sortable: false,
               align: RIGHT_ALIGNMENT,
@@ -247,7 +260,11 @@ export function ErrorGroupList({
         width: `${unit * 6}px`,
         align: RIGHT_ALIGNMENT,
         render: (_, { lastSeen }) =>
-          lastSeen ? <TimestampTooltip time={lastSeen} timeUnit="minutes" /> : NOT_AVAILABLE_LABEL,
+          lastSeen ? (
+            <Timestamp timestamp={lastSeen} timeUnit="minutes" renderMode="tooltip" />
+          ) : (
+            NOT_AVAILABLE_LABEL
+          ),
       },
       {
         field: 'occurrences',
@@ -312,14 +329,20 @@ export function ErrorGroupList({
 
   return (
     <ManagedTable
+      rowHeader="groupId"
+      tableCaption={tableCaption}
       noItemsMessage={
-        isMainStatsLoading
-          ? i18n.translate('xpack.apm.errorsTable.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+        isMainStatsLoading ? (
+          i18n.translate('xpack.apm.errorsTable.loading', {
+            defaultMessage: 'Loading...',
+          })
+        ) : (
+          <span data-test-subj="apmErrorGroupListEmptyState">
+            {i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
               defaultMessage: 'No errors found',
-            })
+            })}
+          </span>
+        )
       }
       items={mainStatistics.errorGroups}
       columns={columns}

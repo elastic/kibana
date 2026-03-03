@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { cloneDeep } from 'lodash';
 
-import { SerializedPolicy } from '../../../../../common/types';
+import type { SerializedPolicy } from '../../../../../common/types';
 import { splitSizeAndUnits } from '../../../lib/policies';
 import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
 import { getDefaultRepository } from '../lib';
-import { FormInternal } from '../types';
+import type { FormInternal } from '../types';
 import { CLOUD_DEFAULT_REPO } from '../constants';
 
 export const createDeserializer =
@@ -78,116 +78,114 @@ export const createDeserializer =
       },
     };
 
-    return produce<FormInternal>(
-      {
-        ...policy,
-        _meta,
-      },
-      (draft: FormInternal) => {
-        if (draft.phases.hot?.actions?.rollover) {
-          if (draft.phases.hot.actions.rollover.max_size) {
-            const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
-            draft.phases.hot.actions.rollover.max_size = maxSize.size;
-            draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
-          }
-
-          if (draft.phases.hot.actions.rollover.max_primary_shard_size) {
-            const maxPrimaryShardSize = splitSizeAndUnits(
-              draft.phases.hot.actions.rollover.max_primary_shard_size
-            );
-            draft.phases.hot.actions.rollover.max_primary_shard_size = maxPrimaryShardSize.size;
-            draft._meta.hot.customRollover.maxPrimaryShardSizeUnit = maxPrimaryShardSize.units;
-          }
-
-          if (draft.phases.hot.actions.rollover.max_age) {
-            const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
-            draft.phases.hot.actions.rollover.max_age = maxAge.size;
-            draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
-          }
-        }
-        if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
-          const primaryShardSize = splitSizeAndUnits(
-            draft.phases.hot.actions.shrink.max_primary_shard_size!
-          );
-          draft.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
-          draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
-        }
-
-        if (draft.phases.hot?.actions.downsample?.fixed_interval) {
-          const downsampleInterval = splitSizeAndUnits(
-            draft.phases.hot.actions.downsample.fixed_interval
-          );
-          draft._meta.hot.downsample.fixedIntervalUnits = downsampleInterval.units;
-          draft._meta.hot.downsample.fixedIntervalSize = downsampleInterval.size;
-        }
-
-        if (draft.phases.warm) {
-          if (draft.phases.warm.actions?.allocate?.require) {
-            Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
-              draft._meta.warm.allocationNodeAttribute = entry.join(':');
-            });
-          }
-
-          if (draft.phases.warm.min_age) {
-            const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
-            draft.phases.warm.min_age = minAge.size;
-            draft._meta.warm.minAgeUnit = minAge.units;
-          }
-
-          if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
-            const primaryShardSize = splitSizeAndUnits(
-              draft.phases.warm.actions.shrink.max_primary_shard_size!
-            );
-            draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
-            draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
-          }
-
-          if (draft.phases.warm?.actions.downsample?.fixed_interval) {
-            const downsampleInterval = splitSizeAndUnits(
-              draft.phases.warm.actions.downsample.fixed_interval
-            );
-            draft._meta.warm.downsample.fixedIntervalUnits = downsampleInterval.units;
-            draft._meta.warm.downsample.fixedIntervalSize = downsampleInterval.size;
-          }
-        }
-
-        if (draft.phases.cold) {
-          if (draft.phases.cold.actions?.allocate?.require) {
-            Object.entries(draft.phases.cold.actions.allocate.require).forEach((entry) => {
-              draft._meta.cold.allocationNodeAttribute = entry.join(':');
-            });
-          }
-
-          if (draft.phases.cold.min_age) {
-            const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
-            draft.phases.cold.min_age = minAge.size;
-            draft._meta.cold.minAgeUnit = minAge.units;
-          }
-
-          if (draft.phases.cold?.actions.downsample?.fixed_interval) {
-            const downsampleInterval = splitSizeAndUnits(
-              draft.phases.cold.actions.downsample.fixed_interval
-            );
-            draft._meta.cold.downsample.fixedIntervalUnits = downsampleInterval.units;
-            draft._meta.cold.downsample.fixedIntervalSize = downsampleInterval.size;
-          }
-        }
-
-        if (draft.phases.frozen) {
-          if (draft.phases.frozen.min_age) {
-            const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
-            draft.phases.frozen.min_age = minAge.size;
-            draft._meta.frozen.minAgeUnit = minAge.units;
-          }
-        }
-
-        if (draft.phases.delete) {
-          if (draft.phases.delete.min_age) {
-            const minAge = splitSizeAndUnits(draft.phases.delete.min_age);
-            draft.phases.delete.min_age = minAge.size;
-            draft._meta.delete.minAgeUnit = minAge.units;
-          }
-        }
+    const result = cloneDeep<FormInternal>({
+      ...policy,
+      _meta,
+    });
+    if (result.phases.hot?.actions?.rollover) {
+      if (result.phases.hot.actions.rollover.max_size) {
+        const maxSize = splitSizeAndUnits(result.phases.hot.actions.rollover.max_size);
+        result.phases.hot.actions.rollover.max_size = maxSize.size;
+        result._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
       }
-    );
+
+      if (result.phases.hot.actions.rollover.max_primary_shard_size) {
+        const maxPrimaryShardSize = splitSizeAndUnits(
+          result.phases.hot.actions.rollover.max_primary_shard_size
+        );
+        result.phases.hot.actions.rollover.max_primary_shard_size = maxPrimaryShardSize.size;
+        result._meta.hot.customRollover.maxPrimaryShardSizeUnit = maxPrimaryShardSize.units;
+      }
+
+      if (result.phases.hot.actions.rollover.max_age) {
+        const maxAge = splitSizeAndUnits(result.phases.hot.actions.rollover.max_age);
+        result.phases.hot.actions.rollover.max_age = maxAge.size;
+        result._meta.hot.customRollover.maxAgeUnit = maxAge.units;
+      }
+    }
+    if (result.phases.hot?.actions.shrink?.max_primary_shard_size) {
+      const primaryShardSize = splitSizeAndUnits(
+        result.phases.hot.actions.shrink.max_primary_shard_size!
+      );
+      result.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+      result._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
+    }
+
+    if (result.phases.hot?.actions.downsample?.fixed_interval) {
+      const downsampleInterval = splitSizeAndUnits(
+        result.phases.hot.actions.downsample.fixed_interval
+      );
+      result._meta.hot.downsample.fixedIntervalUnits = downsampleInterval.units;
+      result._meta.hot.downsample.fixedIntervalSize = downsampleInterval.size;
+    }
+
+    if (result.phases.warm) {
+      if (result.phases.warm.actions?.allocate?.require) {
+        Object.entries(result.phases.warm.actions.allocate.require).forEach((entry) => {
+          result._meta.warm.allocationNodeAttribute = entry.join(':');
+        });
+      }
+
+      if (result.phases.warm.min_age) {
+        const minAge = splitSizeAndUnits(result.phases.warm.min_age);
+        result.phases.warm.min_age = minAge.size;
+        result._meta.warm.minAgeUnit = minAge.units;
+      }
+
+      if (result.phases.warm.actions.shrink?.max_primary_shard_size) {
+        const primaryShardSize = splitSizeAndUnits(
+          result.phases.warm.actions.shrink.max_primary_shard_size!
+        );
+        result.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+        result._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
+      }
+
+      if (result.phases.warm?.actions.downsample?.fixed_interval) {
+        const downsampleInterval = splitSizeAndUnits(
+          result.phases.warm.actions.downsample.fixed_interval
+        );
+        result._meta.warm.downsample.fixedIntervalUnits = downsampleInterval.units;
+        result._meta.warm.downsample.fixedIntervalSize = downsampleInterval.size;
+      }
+    }
+
+    if (result.phases.cold) {
+      if (result.phases.cold.actions?.allocate?.require) {
+        Object.entries(result.phases.cold.actions.allocate.require).forEach((entry) => {
+          result._meta.cold.allocationNodeAttribute = entry.join(':');
+        });
+      }
+
+      if (result.phases.cold.min_age) {
+        const minAge = splitSizeAndUnits(result.phases.cold.min_age);
+        result.phases.cold.min_age = minAge.size;
+        result._meta.cold.minAgeUnit = minAge.units;
+      }
+
+      if (result.phases.cold?.actions.downsample?.fixed_interval) {
+        const downsampleInterval = splitSizeAndUnits(
+          result.phases.cold.actions.downsample.fixed_interval
+        );
+        result._meta.cold.downsample.fixedIntervalUnits = downsampleInterval.units;
+        result._meta.cold.downsample.fixedIntervalSize = downsampleInterval.size;
+      }
+    }
+
+    if (result.phases.frozen) {
+      if (result.phases.frozen.min_age) {
+        const minAge = splitSizeAndUnits(result.phases.frozen.min_age);
+        result.phases.frozen.min_age = minAge.size;
+        result._meta.frozen.minAgeUnit = minAge.units;
+      }
+    }
+
+    if (result.phases.delete) {
+      if (result.phases.delete.min_age) {
+        const minAge = splitSizeAndUnits(result.phases.delete.min_age);
+        result.phases.delete.min_age = minAge.size;
+        result._meta.delete.minAgeUnit = minAge.units;
+      }
+    }
+
+    return result;
   };

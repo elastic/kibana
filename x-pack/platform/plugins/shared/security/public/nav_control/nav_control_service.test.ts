@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SecurityNavControlService } from './nav_control_service';
@@ -81,10 +81,8 @@ describe('SecurityNavControlService', () => {
         >
           <div
             class="euiPopover emotion-euiPopover-inline-block"
-            id="headerUserMenu"
           >
             <button
-              aria-controls="headerUserMenu"
               aria-expanded="false"
               aria-haspopup="true"
               aria-label="Account menu"
@@ -97,7 +95,7 @@ describe('SecurityNavControlService', () => {
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   <span
                     class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"

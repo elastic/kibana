@@ -8,24 +8,20 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../..';
-import { MovingAverageParams } from '../../types';
+import type { SchemaConfig } from '../../..';
+import type { AnyMetricColumnAndMeta, MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
-import {
-  convertMetricAggregationColumnWithoutSpecialParams,
-  MetricAggregationColumnWithoutSpecialParams,
-} from './metric';
+import { convertMetricAggregationColumnWithoutSpecialParams } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
-import {
+import type {
   MovingAverageColumn,
   DerivativeColumn,
   CumulativeSumColumn,
   FormulaColumn,
   ExtendedColumnConverterArgs,
   OtherParentPipelineAggs,
-  AggBasedColumn,
 } from './types';
 import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
 import { getMetricFromParentPipelineAgg } from '../utils';
@@ -41,7 +37,7 @@ export const convertToMovingAverageParams = (
 export const convertToOtherParentPipelineAggColumns = (
   { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<OtherParentPipelineAggs>,
   reducedTimeRange?: string
-): FormulaColumn | [ParentPipelineAggColumn, AggBasedColumn] | null => {
+): FormulaColumn | [ParentPipelineAggColumn, AnyMetricColumnAndMeta] | null => {
   const { aggType } = agg;
   const op = SUPPORTED_METRICS[aggType];
   if (!op) {
@@ -93,10 +89,7 @@ export const convertToOtherParentPipelineAggColumns = (
 export const convertToCumulativeSumAggColumn = (
   { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
   reducedTimeRange?: string
-):
-  | FormulaColumn
-  | [ParentPipelineAggColumn, MetricAggregationColumnWithoutSpecialParams]
-  | null => {
+): FormulaColumn | [ParentPipelineAggColumn, AnyMetricColumnAndMeta] | null => {
   const { aggParams, aggType } = agg;
   if (!aggParams) {
     return null;

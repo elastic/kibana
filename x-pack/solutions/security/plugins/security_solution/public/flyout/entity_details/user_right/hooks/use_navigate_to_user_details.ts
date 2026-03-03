@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
 import { EntityType } from '../../../../../common/search_strategy';
@@ -11,7 +12,6 @@ import type { EntityDetailsPath } from '../../shared/components/left_panel/left_
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { UserDetailsPanelKey } from '../../user_details_left';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { UserPanelKey } from '../../shared/constants';
 
 interface UseNavigateToUserDetailsParams {
@@ -22,18 +22,7 @@ interface UseNavigateToUserDetailsParams {
   isRiskScoreExist: boolean;
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
-  isPreviewMode?: boolean;
-}
-
-interface UseNavigateToUserDetailsResult {
-  /**
-   * Opens the user details panel
-   */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
-  /**
-   * Whether the link is enabled
-   */
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
 }
 
 export const useNavigateToUserDetails = ({
@@ -45,16 +34,11 @@ export const useNavigateToUserDetails = ({
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
   isPreviewMode,
-}: UseNavigateToUserDetailsParams): UseNavigateToUserDetailsResult => {
+}: UseNavigateToUserDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
 
-  const isLinkEnabled = !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
-
-  const openDetailsPanel = useCallback(
+  return useCallback(
     (path: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: EntityType.user,
@@ -84,12 +68,9 @@ export const useNavigateToUserDetails = ({
         },
       };
 
-      // When new navigation is enabled, nevigation in preview is enabled and open a new flyout
-      if (isNewNavigationEnabled && isPreviewMode) {
+      if (isPreviewMode) {
         openFlyout({ right, left });
-      }
-      // When not in preview mode, open left panel as usual
-      else if (!isPreviewMode) {
+      } else {
         openLeftPanel(left);
       }
     },
@@ -102,12 +83,9 @@ export const useNavigateToUserDetails = ({
       email,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
-      isNewNavigationEnabled,
       isPreviewMode,
       openFlyout,
       contextID,
     ]
   );
-
-  return { openDetailsPanel, isLinkEnabled };
 };

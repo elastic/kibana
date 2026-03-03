@@ -1,9 +1,9 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts", "../../../../../typings/emotion.d.ts"],
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/data-views-plugin",
@@ -22,7 +22,6 @@
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-types",
-    "@kbn/ui-actions-browser",
     "@kbn/data-service",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/dom-drag-drop",
@@ -34,7 +33,10 @@
     "@kbn/visualization-utils",
     "@kbn/search-types",
     "@kbn/fields-metadata-plugin",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/restorable-state",
+    "@kbn/css-utils",
+    "@kbn/field-formats-common",
   ],
   "exclude": ["target/**/*"]
 }

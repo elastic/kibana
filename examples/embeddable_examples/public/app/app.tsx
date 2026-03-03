@@ -11,14 +11,14 @@ import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
 import { PresentationContainerExample } from './presentation_container_example/components/presentation_container_example';
-import { StartDeps } from '../plugin';
+import type { StartDeps } from '../plugin';
 import { Sidebar } from './sidebar';
 import { StateManagementExample } from './state_management_example/state_management_example';
 

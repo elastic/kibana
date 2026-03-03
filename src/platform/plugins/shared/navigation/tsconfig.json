@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -8,7 +8,8 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts"
+    "server/**/*.ts",
+    "test/**/*.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -19,7 +20,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-internal",
-    "@kbn/shared-ux-chrome-navigation",
     "@kbn/cloud-plugin",
     "@kbn/config",
     "@kbn/spaces-plugin",
@@ -28,6 +28,8 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/router-utils",
+    "@kbn/split-button",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

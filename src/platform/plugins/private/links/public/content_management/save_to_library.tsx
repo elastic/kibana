@@ -9,40 +9,32 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
   showSaveModal,
-  OnSaveProps,
-  SavedObjectSaveModal,
-  SaveResult,
+  SavedObjectSaveModalWithSaveResult,
 } from '@kbn/saved-objects-plugin/public';
-import { CONTENT_ID } from '../../common';
+import { LINKS_EMBEDDABLE_TYPE, CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { linksClient } from './links_content_management_client';
-import { LinksRuntimeState } from '../types';
-import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { serializeResolvedLinks } from '../lib/resolve_links';
+import type { EditorState } from '../editor/get_editor_flyout';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
   values: {
-    contentId: CONTENT_ID,
+    contentId: LINKS_EMBEDDABLE_TYPE,
   },
 });
 
-export const runSaveToLibrary = async (
-  newState: LinksRuntimeState
-): Promise<LinksRuntimeState | undefined> => {
-  return new Promise<LinksRuntimeState | undefined>((resolve, reject) => {
+export const runSaveToLibrary = async (newState: EditorState): Promise<EditorState | undefined> => {
+  return new Promise<EditorState | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,
       newDescription,
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
     }: OnSaveProps): Promise<SaveResult> => {
-      const stateFromSaveModal = {
-        title: newTitle,
-        description: newDescription,
-      };
-
       if (
         !(await checkForDuplicateTitle({
           title: newTitle,
@@ -55,24 +47,23 @@ export const runSaveToLibrary = async (
         return {};
       }
 
-      const { attributes, references } = serializeLinksAttributes(newState);
-
       const newAttributes = {
-        ...attributes,
-        ...stateFromSaveModal,
+        ...newState,
+        links: serializeResolvedLinks(newState.links ?? []),
+        title: newTitle,
+        description: newDescription,
       };
 
       try {
         const {
           item: { id },
         } = await linksClient.create({
-          data: { ...newAttributes, title: newTitle },
-          options: { references },
+          data: newAttributes,
         });
         resolve({
           ...newState,
-          defaultTitle: newTitle,
-          defaultDescription: newDescription,
+          title: newTitle,
+          description: newDescription,
           savedObjectId: id,
         });
         return { id };
@@ -83,7 +74,7 @@ export const runSaveToLibrary = async (
     };
 
     const saveModal = (
-      <SavedObjectSaveModal
+      <SavedObjectSaveModalWithSaveResult
         onSave={onSave}
         onClose={() => resolve(undefined)}
         title={newState.title ?? ''}

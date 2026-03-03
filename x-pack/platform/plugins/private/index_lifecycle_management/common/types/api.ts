@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyDataRole } from '.';
+import type { AnyDataRole } from '.';
 
 export interface ListNodesRouteResponse {
   nodesByAttributes: { [attributePair: string]: string[] };

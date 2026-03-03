@@ -15,7 +15,7 @@ import { type IEsError, isEsError } from '@kbn/search-errors';
 import type { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';
 
-export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning' | 'remove'> & {
+export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning' | 'addInfo' | 'remove'> & {
   api: ToastsStart;
   addError: (error: unknown, options: ErrorToastOptions) => Toast;
 };
@@ -32,6 +32,8 @@ export const useAppToasts = (): UseAppToasts => {
   const addError = useRef(toasts.addError.bind(toasts)).current;
   const addSuccess = useRef(toasts.addSuccess.bind(toasts)).current;
   const addWarning = useRef(toasts.addWarning.bind(toasts)).current;
+  const addInfo = useRef(toasts.addInfo.bind(toasts)).current;
+
   const remove = useRef(toasts.remove.bind(toasts)).current;
 
   const _addError = useCallback(
@@ -43,8 +45,8 @@ export const useAppToasts = (): UseAppToasts => {
   );
 
   return useMemo(
-    () => ({ api: toasts, addError: _addError, addSuccess, addWarning, remove }),
-    [_addError, addSuccess, addWarning, remove, toasts]
+    () => ({ api: toasts, addError: _addError, addSuccess, addWarning, addInfo, remove }),
+    [_addError, addSuccess, addWarning, addInfo, remove, toasts]
   );
 };
 

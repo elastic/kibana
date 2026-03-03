@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevelId } from '@kbn/logging';
+import type { LogLevelId } from '@kbn/logging';
 
 /**
  * Describes the configuration of a given logger.

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { KibanaClient, createKibanaClient } from '@kbn/kibana-api-cli';
-import { InferenceCliClient } from './client';
+import { InferenceChatModel } from '@kbn/inference-langchain';
+import { createRestClient } from '@kbn/inference-plugin/common';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import { createKibanaClient, toHttpHandler } from '@kbn/kibana-api-cli';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { InferenceCliClient } from './client';
 import { selectConnector } from './select_connector';
 
 class InvalidLicenseLevelError extends Error {
@@ -20,7 +23,7 @@ export async function createInferenceClient({
   log,
   prompt,
   signal,
-  kibanaClient,
+  kibanaClient: givenKibanaClient,
   connectorId,
 }: {
   log: ToolingLog;
@@ -29,7 +32,7 @@ export async function createInferenceClient({
   kibanaClient?: KibanaClient;
   connectorId?: string;
 }): Promise<InferenceCliClient> {
-  kibanaClient = kibanaClient || (await createKibanaClient({ log, signal }));
+  const kibanaClient = givenKibanaClient || (await createKibanaClient({ log, signal }));
 
   const license = await kibanaClient.es.license.get();
 
@@ -45,10 +48,23 @@ export async function createInferenceClient({
     preferredConnectorId: connectorId,
   });
 
-  return new InferenceCliClient({
-    log,
-    kibanaClient,
-    connector,
+  const client = createRestClient({
+    fetch: toHttpHandler(kibanaClient),
     signal,
+    bindTo: {
+      connectorId: connector.connectorId,
+      functionCalling: 'auto',
+    },
   });
+
+  return {
+    ...client,
+    getLangChainChatModel: (): InferenceChatModel => {
+      return new InferenceChatModel({
+        connector,
+        chatComplete: client.chatComplete,
+        signal,
+      });
+    },
+  };
 }

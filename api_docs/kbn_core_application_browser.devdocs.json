@@ -17,6 +17,8 @@
           "AppNavOptions"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "\nThe unique identifier of the application.\n\nCan only be composed of alphanumeric characters, `-`, `:` and `_`"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -43,6 +47,8 @@
               "\nThe title of the application."
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,6 +66,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,6 +85,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +107,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -113,6 +125,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,6 +146,8 @@
               "> | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -150,6 +166,8 @@
               "> | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,6 +184,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -188,6 +208,8 @@
               ">"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -204,6 +226,8 @@
                   "<HistoryLocationState>"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -222,6 +246,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -238,6 +264,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,6 +282,8 @@
               "string[] | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -271,6 +301,8 @@
               "<string>[] | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 205,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -287,6 +319,8 @@
           "\nFactory provided when invoking a {@link AppLeaveHandler} to retrieve the {@link AppLeaveAction} to execute."
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,10 +334,12 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined) => ",
               "AppLeaveConfirmAction"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -320,6 +356,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
+                "lineNumber": 95,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -337,6 +375,8 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
+                "lineNumber": 96,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -354,6 +394,8 @@
                   "(() => void) | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
+                "lineNumber": 97,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -371,6 +413,8 @@
                   "string | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -382,12 +426,14 @@
                 "tags": [],
                 "label": "buttonColor",
                 "description": [
-                  "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
+                  "(optional) color for the confirmation button"
                 ],
                 "signature": [
-                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_leave.ts",
+                "lineNumber": 99,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -409,6 +455,8 @@
               "AppLeaveDefaultAction"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -427,6 +475,8 @@
           "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,6 +492,8 @@
               ".confirm"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -453,6 +505,8 @@
             "label": "text",
             "description": [],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -467,6 +521,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -481,6 +537,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -492,9 +550,11 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -509,6 +569,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -527,6 +589,8 @@
           "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -542,6 +606,8 @@
               ".default"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -556,6 +622,8 @@
         "label": "ApplicationSetup",
         "description": [],
         "path": "src/core/packages/application/browser/src/contracts.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -574,6 +642,8 @@
               "<HistoryLocationState>) => void"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -584,13 +654,15 @@
                 "tags": [],
                 "label": "app",
                 "description": [
-                  "- an {@link App }"
+                  "- an {@link App}"
                 ],
                 "signature": [
                   "App",
                   "<HistoryLocationState>"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 22,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -615,6 +687,8 @@
               ">) => void"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -632,6 +706,8 @@
                   ">"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 51,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -650,6 +726,8 @@
         "label": "ApplicationStart",
         "description": [],
         "path": "src/core/packages/application/browser/src/contracts.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -666,6 +744,8 @@
               "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; readonly discover?: Readonly<{}> | undefined; readonly dashboard?: Readonly<{}> | undefined; readonly maps?: Readonly<{}> | undefined; readonly visualize?: Readonly<{}> | undefined; }"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -685,6 +765,8 @@
               ">>"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -703,6 +785,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -719,6 +803,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 79,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -737,6 +823,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 79,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -751,7 +839,7 @@
             "tags": [],
             "label": "navigateToUrl",
             "description": [
-              "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.\n"
+              "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\n**Important**: This method always uses `history.push()` and creates a NEW entry in the browser history stack.\nThis is appropriate for user-initiated navigation (e.g., clicking links or buttons), but NOT for:\n- **In-app navigation** within the same React Router instance - use React Router's `history.replace()` instead\n- **Conditional redirects** in components - use `navigateToApp(appId, { replace: true })` for cross-app redirects\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.\n"
             ],
             "signature": [
               "(url: string, options?: ",
@@ -759,6 +847,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -775,6 +865,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 123,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -793,6 +885,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 123,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -813,6 +907,8 @@
               "(appId: string) => boolean"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -829,6 +925,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 131,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -851,6 +949,8 @@
               "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -865,6 +965,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 146,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -877,6 +979,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/application/browser/src/contracts.ts",
+                "lineNumber": 147,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -886,11 +990,15 @@
                     "type": "string",
                     "tags": [],
                     "label": "path",
-                    "description": [],
+                    "description": [
+                      "- optional path inside application to deep link to"
+                    ],
                     "signature": [
                       "string | undefined"
                     ],
                     "path": "src/core/packages/application/browser/src/contracts.ts",
+                    "lineNumber": 147,
+                    "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -900,11 +1008,15 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
-                    "description": [],
+                    "description": [
+                      "- if true, will returns an absolute url instead of a relative one"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/application/browser/src/contracts.ts",
+                    "lineNumber": 147,
+                    "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -919,6 +1031,8 @@
                       "string | undefined"
                     ],
                     "path": "src/core/packages/application/browser/src/contracts.ts",
+                    "lineNumber": 147,
+                    "columnNumber": 52,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -941,6 +1055,8 @@
               "<string | undefined>"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -958,6 +1074,8 @@
               "<string>"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -976,6 +1094,8 @@
           "<HistoryLocationState>"
         ],
         "path": "src/core/packages/application/browser/src/app_mount.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -992,6 +1112,8 @@
               "HTMLElement"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1009,6 +1131,8 @@
               "<HistoryLocationState>"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,6 +1148,8 @@
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -1044,6 +1170,10 @@
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/public/application.tsx"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/public/authentication/logout/logout_app.test.ts"
               },
@@ -1058,10 +1188,6 @@
               {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/application.tsx"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/public/mocks.ts"
               }
             ]
           },
@@ -1080,6 +1206,8 @@
               ") => void"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1094,6 +1222,8 @@
                   "AppLeaveHandler"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
+                "lineNumber": 175,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1105,19 +1235,263 @@
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-public.AppMountParameters.setHeaderActionMenu",
             "type": "Function",
-            "tags": [],
-            "label": "setHeaderActionMenu",
-            "description": [
-              "\nA function that can be used to set the mount point used to populate the application action container\nin the chrome header.\n\nCalling the handler multiple time will erase the current content of the action menu with the mount from the latest call.\nCalling the handler with `undefined` will unmount the current mount point.\nCalling the handler after the application has been unmounted will have no effect.\n"
+            "tags": [
+              "deprecated"
             ],
+            "label": "setHeaderActionMenu",
+            "description": [],
             "signature": [
               "(menuMount: ",
               "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
-            "deprecated": false,
+            "lineNumber": 177,
+            "columnNumber": 3,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-internal/src/ui/app_container.tsx"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/public/visualize_app/types.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/types.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/types.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/mounter.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/map_app/map_app.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/map_page.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/public/render_app.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/types.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/components/ml_page/ml_page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/routing/router.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/app.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/components/header/header_portal.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/components/header/header.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/index.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/index.tsx"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/components/workspace_layout/workspace_top_nav_menu.tsx"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/public/application.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/platform/plugins/private/monitoring/public/types.ts"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/platform/plugins/private/monitoring/public/application/contexts/header_action_menu_context.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/platform/plugins/private/monitoring/public/application/index.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "observabilityShared",
+                "path": "x-pack/solutions/observability/plugins/observability_shared/public/types.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/obsv_exploratory_view.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/pages/overview/components/header_menu/header_menu.tsx"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/solutions/observability/plugins/profiling/public/app.tsx"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/solutions/observability/plugins/profiling/public/plugin.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/solutions/observability/plugins/slo/public/components/header_menu/header_menu.tsx"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/solutions/observability/plugins/apm/public/components/routing/app_root/index.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/containers/header_action_menu_provider.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/common_providers.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/logs_app.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/logs_app.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/metrics_app.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/apps/metrics_app.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/shared/header_action_menu.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/app.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/common/header/action_menu.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/public/legacy_uptime/components/common/header/action_menu.tsx"
+              },
+              {
+                "plugin": "ux",
+                "path": "x-pack/solutions/observability/plugins/ux/public/components/app/rum_dashboard/action_menu/index.tsx"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/plugin_services.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/types.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1131,6 +1505,8 @@
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
+                "lineNumber": 180,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1154,6 +1530,8 @@
               ">"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1170,6 +1548,8 @@
           "\nApp navigation menu options"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1186,6 +1566,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1202,6 +1584,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1218,6 +1602,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1234,6 +1620,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1250,6 +1638,8 @@
           "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
         ],
         "path": "src/core/packages/application/browser/src/contracts.ts",
+        "lineNumber": 161,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1266,6 +1656,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1282,6 +1674,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1298,6 +1692,8 @@
               "unknown"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1314,6 +1710,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1330,6 +1728,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1346,6 +1746,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1362,6 +1764,8 @@
           "\nOptions for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}"
         ],
         "path": "src/core/packages/application/browser/src/contracts.ts",
+        "lineNumber": 196,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1378,6 +1782,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 201,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1394,6 +1800,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 205,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1410,6 +1818,8 @@
               "unknown"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1432,6 +1842,8 @@
           "<HistoryLocationState>"
         ],
         "path": "src/core/packages/application/browser/src/scoped_history.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1450,6 +1862,8 @@
               "<unknown>"
             ],
             "path": "src/core/packages/application/browser/src/scoped_history.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1466,6 +1880,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/application/browser/src/scoped_history.ts",
+                "lineNumber": 33,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1488,6 +1904,8 @@
               "<HistoryLocationState>, options?: { prependBasePath?: boolean | undefined; } | undefined) => string"
             ],
             "path": "src/core/packages/application/browser/src/scoped_history.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1503,6 +1921,8 @@
                   "<HistoryLocationState>"
                 ],
                 "path": "src/core/packages/application/browser/src/scoped_history.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1515,6 +1935,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/application/browser/src/scoped_history.ts",
+                "lineNumber": 44,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1529,6 +1951,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/application/browser/src/scoped_history.ts",
+                    "lineNumber": 44,
+                    "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1552,6 +1976,8 @@
           "\nPossible type of actions on application leave.\n"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1566,6 +1992,8 @@
           "\nAccessibility status of an application.\n"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1595,6 +2023,8 @@
           "<Id>[]; })"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 259,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1609,9 +2039,11 @@
           "The places in the UI where a deepLink can be shown"
         ],
         "signature": [
-          "\"home\" | \"kibanaOverview\" | \"globalSearch\" | \"sideNav\""
+          "\"home\" | \"globalSearch\" | \"sideNav\" | \"kibanaOverview\""
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 256,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1631,6 +2063,8 @@
           "AppLeaveConfirmAction"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1651,6 +2085,8 @@
           "AppLeaveAction"
         ],
         "path": "src/core/packages/application/browser/src/app_leave.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1666,6 +2102,8 @@
               "AppLeaveActionFactory"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1680,6 +2118,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/application/browser/src/app_leave.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1705,6 +2145,8 @@
           ">"
         ],
         "path": "src/core/packages/application/browser/src/app_mount.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -1725,6 +2167,8 @@
               "<HistoryLocationState>"
             ],
             "path": "src/core/packages/application/browser/src/app_mount.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1744,6 +2188,8 @@
           "() => void"
         ],
         "path": "src/core/packages/application/browser/src/app_mount.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1769,6 +2215,8 @@
           "<string>[] | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1790,6 +2238,8 @@
           "> | undefined"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1806,6 +2256,8 @@
               "<unknown>"
             ],
             "path": "src/core/packages/application/browser/src/application.ts",
+            "lineNumber": 64,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1831,6 +2283,8 @@
           "[]; }"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 245,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1856,6 +2310,8 @@
           "[]; }"
         ],
         "path": "src/core/packages/application/browser/src/application.ts",
+        "lineNumber": 300,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,18 +7,17 @@
 
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
-import {
-  formulaOperation,
-  type GenericOperationDefinition,
-  type GenericIndexPatternColumn,
-} from '..';
-import type { FormulaIndexPatternColumn } from './formula';
+import { formulaOperation, type GenericOperationDefinition } from '..';
+import type {
+  FormulaIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  TermsIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { insertOrReplaceFormulaColumn } from './parse';
-import type { FormBasedLayer } from '../../../types';
-import { IndexPattern } from '../../../../../types';
-import { TermsIndexPatternColumn } from '../terms';
-import type { MovingAverageIndexPatternColumn } from '../calculations';
-import { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
@@ -69,7 +68,6 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
-      scale: 'ratio',
       timeScale: undefined,
       params: { window: 5 },
       references: referenceIds,
@@ -125,7 +123,6 @@ describe('[Lens] formula', () => {
             dataType: 'number',
             operationType: 'average',
             isBucketed: false,
-            scale: 'ratio',
             sourceField: 'bytes',
           },
         },
@@ -148,7 +145,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: {},
         references: [],
       });
@@ -166,7 +162,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: { isFormulaBroken: false, formula: 'average(bytes)' },
         references: [],
       });
@@ -190,7 +185,6 @@ describe('[Lens] formula', () => {
         isBucketed: false,
         filter: undefined,
         timeScale: undefined,
-        scale: 'ratio',
         params: {},
         references: [],
       });
@@ -218,7 +212,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: {
           isFormulaBroken: false,
           formula: 'average(bytes)',
@@ -252,7 +245,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: {
           isFormulaBroken: false,
           formula: `average(bytes, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
@@ -281,7 +273,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: {
           isFormulaBroken: false,
           formula: `count(lucene='*')`,
@@ -299,7 +290,6 @@ describe('[Lens] formula', () => {
               dataType: 'number',
               operationType: 'moving_average',
               isBucketed: false,
-              scale: 'ratio',
               references: ['col2'],
               timeScale: 'd',
               params: { window: 3 },
@@ -313,7 +303,6 @@ describe('[Lens] formula', () => {
                   dataType: 'number',
                   operationType: 'moving_average',
                   isBucketed: false,
-                  scale: 'ratio',
                   references: ['col2'],
                   timeScale: 'd',
                   params: { window: 3 },
@@ -323,7 +312,6 @@ describe('[Lens] formula', () => {
                   isBucketed: false,
                   label: 'col1X0',
                   operationType: 'average',
-                  scale: 'ratio',
                   sourceField: 'bytes',
                   timeScale: 'd',
                 },
@@ -339,7 +327,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: {
           isFormulaBroken: false,
           formula: 'moving_average(average(bytes), window=3)',
@@ -393,7 +380,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: {},
         references: [],
       });
@@ -420,7 +406,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: { isFormulaBroken: false, formula: '0' },
         references: [],
       });
@@ -481,7 +466,6 @@ describe('[Lens] formula', () => {
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: { formula: '', isFormulaBroken: false },
         references: [],
       };
@@ -525,7 +509,6 @@ describe('[Lens] formula', () => {
             isBucketed: false,
             label: 'Part of average(bytes)',
             operationType: 'average',
-            scale: 'ratio',
             sourceField: 'bytes',
             timeScale: undefined,
           },
@@ -575,7 +558,6 @@ describe('[Lens] formula', () => {
               tinymathAst: 0,
             },
             references: [],
-            scale: 'ratio',
           },
         },
       });
@@ -929,7 +911,6 @@ describe('[Lens] formula', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { formula, isFormulaBroken },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -963,7 +944,6 @@ describe('[Lens] formula', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { formula, isFormulaBroken: false },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -996,7 +976,6 @@ describe('[Lens] formula', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { formula: '', isFormulaBroken },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1031,7 +1010,6 @@ describe('[Lens] formula', () => {
             dataType: 'number',
             operationType: 'formula',
             isBucketed: false,
-            scale: 'ratio',
             params: { formula, isFormulaBroken: isBroken },
             references: [],
             ...columnParams,

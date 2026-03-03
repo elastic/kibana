@@ -10,7 +10,13 @@
 export const PLUGIN_ID = 'expressionXy';
 export const PLUGIN_NAME = 'expressionXy';
 
-export { LayerTypes, XYCurveTypes, FittingFunctions } from './constants';
+export {
+  LayerTypes,
+  XYCurveTypes,
+  FillStyles,
+  FittingFunctions,
+  PointVisibilityOptions,
+} from './constants';
 
 export type {
   AllowedXYOverrides,
@@ -73,4 +79,5 @@ export type {
   LegendConfigFn,
   EventAnnotationResultFn,
   LayeredXyVisFn,
+  PointVisibility,
 } from './types';

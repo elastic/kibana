@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { useAppContext } from '../../app_context';
-import { IndexMode } from '../../../../common/types/data_streams';
+import type { IndexMode } from '../../../../common/types/data_streams';
 import {
   DocumentFields,
   RuntimeFieldsList,
@@ -18,7 +18,7 @@ import {
   ConfigurationForm,
   MultipleMappingsWarning,
 } from './components';
-import {
+import type {
   OnUpdateHandler,
   IndexSettings,
   Field,
@@ -30,7 +30,7 @@ import {
 import { useDispatch, useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
 import { useConfig } from './config_context';
-import { DocLinksStart } from './shared_imports';
+import type { DocLinksStart } from './shared_imports';
 import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
 import { SearchResult } from './components/document_fields/search_fields';
 import { parseMappings } from '../../shared/parse_mappings';
@@ -179,12 +179,12 @@ export const MappingsEditor = React.memo(
         {multipleMappingsDeclared ? (
           <MultipleMappingsWarning />
         ) : (
-          <div className="mappingsEditor">
+          <div>
             <EuiTabs>
               <EuiTab
                 onClick={() => changeTab('fields')}
                 isSelected={selectedTab === 'fields'}
-                data-test-subj="formTab"
+                data-test-subj="fieldsTab"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
                   defaultMessage: 'Mapped fields',
@@ -193,7 +193,7 @@ export const MappingsEditor = React.memo(
               <EuiTab
                 onClick={() => changeTab('runtimeFields')}
                 isSelected={selectedTab === 'runtimeFields'}
-                data-test-subj="formTab"
+                data-test-subj="runtimeTab"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeFieldsTabLabel', {
                   defaultMessage: 'Runtime fields',
@@ -202,7 +202,7 @@ export const MappingsEditor = React.memo(
               <EuiTab
                 onClick={() => changeTab('templates')}
                 isSelected={selectedTab === 'templates'}
-                data-test-subj="formTab"
+                data-test-subj="templatesTab"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
                   defaultMessage: 'Dynamic templates',
@@ -211,7 +211,7 @@ export const MappingsEditor = React.memo(
               <EuiTab
                 onClick={() => changeTab('advanced')}
                 isSelected={selectedTab === 'advanced'}
-                data-test-subj="formTab"
+                data-test-subj="advancedOptionsTab"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
                   defaultMessage: 'Advanced options',

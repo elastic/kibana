@@ -7,58 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
-import {
+import { BehaviorSubject, combineLatest, debounceTime, map, type Subject } from 'rxjs';
+
+import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
+import type {
   PublishesSavedObjectId,
   PublishingSubject,
-  apiHasSerializableState,
+  ViewMode,
 } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
+
+import { of } from 'rxjs';
+import type { DashboardState } from '../../common';
 import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  debounceTime,
-  map,
-  skipWhile,
-  switchMap,
-  tap,
-} from 'rxjs';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { initializePanelsManager } from './panels_manager';
-import { initializeSettingsManager } from './settings_manager';
-import { DashboardCreationOptions } from './types';
-import { DashboardState } from '../../common';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeViewModeManager } from './view_mode_manager';
-import {
-  CONTROL_GROUP_EMBEDDABLE_ID,
-  initializeControlGroupManager,
-} from './control_group_manager';
+  getDashboardBackupService,
+  type DashboardBackupState,
+} from '../services/dashboard_backup_service';
+import type { initializeLayoutManager } from './layout_manager';
+import type { initializeProjectRoutingManager } from './project_routing_manager';
+import type { initializeSettingsManager } from './settings_manager';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
 
 export function initializeUnsavedChangesManager({
-  panelsManager,
+  layoutManager,
   savedObjectId$,
   lastSavedState,
   settingsManager,
-  viewModeManager,
-  creationOptions,
-  controlGroupManager,
-  getReferences,
+  viewMode$,
+  storeUnsavedChanges,
   unifiedSearchManager,
+  projectRoutingManager,
+  forcePublishOnReset$,
 }: {
   lastSavedState: DashboardState;
-  creationOptions?: DashboardCreationOptions;
-  getReferences: (id: string) => Reference[];
+  storeUnsavedChanges?: boolean;
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
-  controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
-  panelsManager: ReturnType<typeof initializePanelsManager>;
-  viewModeManager: ReturnType<typeof initializeViewModeManager>;
+  layoutManager: ReturnType<typeof initializeLayoutManager>;
+  viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
+  projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
+  forcePublishOnReset$: Subject<void>;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -67,113 +57,60 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState, references: Reference[]) => void;
+    onSave: (savedState: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-  // lastSavedState contains filters with injected references
-  // references injected while loading dashboard saved object in loadDashboardState
+
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
-  const hasPanelChanges$ = childrenUnsavedChanges$(panelsManager.api.children$).pipe(
-    tap((childrenWithChanges) => {
-      // propagate the latest serialized state back to the panels manager.
-      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
-        const childApi = panelsManager.api.children$.value[uuid];
-        if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-
-        panelsManager.internalApi.setChildState(uuid, childApi.serializeState());
-      }
-    }),
-    map((childrenWithChanges) => {
-      return childrenWithChanges.some(({ hasUnsavedChanges }) => hasUnsavedChanges);
-    })
-  );
-
-  const dashboardStateChanges$: Observable<Partial<DashboardState>> = combineLatest([
-    settingsManager.internalApi.startComparing$(lastSavedState$),
-    unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
-    panelsManager.internalApi.startComparing$(lastSavedState$),
+  const dashboardStateChanges$ = combineLatest([
+    settingsManager.internalApi.startComparing(lastSavedState$),
+    unifiedSearchManager.internalApi.startComparing(lastSavedState$),
+    layoutManager.internalApi.startComparing(lastSavedState$),
+    projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
   ]).pipe(
-    map(([settings, unifiedSearch, panels]) => {
-      return { ...settings, ...unifiedSearch, ...panels };
+    map(([settings, unifiedSearch, layout, projectRouting]) => {
+      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
     })
   );
 
-  const unsavedChangesSubscription = combineLatest([
-    viewModeManager.api.viewMode$,
-    dashboardStateChanges$,
-    hasPanelChanges$,
-    controlGroupManager.api.controlGroupApi$.pipe(
-      skipWhile((controlGroupApi) => !controlGroupApi),
-      switchMap((controlGroupApi) => {
-        return controlGroupApi!.hasUnsavedChanges$;
-      })
-    ),
-  ])
+  const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
-      const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
-      const hasUnsavedChanges = hasDashboardChanges || hasPanelChanges || hasControlGroupChanges;
+    .subscribe(([viewMode, dashboardChanges]) => {
+      const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
 
-      // backup unsaved changes if configured to do so
-      if (creationOptions?.useSessionStorageIntegration) {
-        const dashboardStateToBackup: Partial<DashboardState> = omit(dashboardChanges ?? {}, [
-          'timeRange',
-          'refreshInterval',
-        ]);
-
-        // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
-        dashboardStateToBackup.viewMode = viewMode;
-
-        // Backup latest state from children that have unsaved changes
-        if (hasPanelChanges || hasControlGroupChanges) {
-          const { panels, references } = panelsManager.internalApi.serializePanels();
-          const { controlGroupInput, controlGroupReferences } =
-            controlGroupManager.internalApi.serializeControlGroup();
-          // dashboardStateToBackup.references will be used instead of savedObjectResult.references
-          // To avoid missing references, make sure references contains all references
-          // even if panels or control group does not have unsaved changes
-          dashboardStateToBackup.references = [...references, ...controlGroupReferences];
-          if (hasPanelChanges) dashboardStateToBackup.panels = panels;
-          if (hasControlGroupChanges) dashboardStateToBackup.controlGroupInput = controlGroupInput;
-        }
-
-        getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
+      if (storeUnsavedChanges) {
+        const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
+        const dashboardBackupState: DashboardBackupState = {
+          // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
+          viewMode,
+          ...restOfDashboardChanges,
+        };
+        getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
     });
 
-  const getLastSavedStateForChild = (childId: string) => {
-    const lastSavedDashboardState = lastSavedState$.value;
-
-    if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
-      return lastSavedDashboardState.controlGroupInput
-        ? {
-            rawState: lastSavedDashboardState.controlGroupInput,
-            references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
-          }
-        : undefined;
-    }
-
-    if (!lastSavedDashboardState.panels[childId]) return;
-    return {
-      rawState: lastSavedDashboardState.panels[childId].explicitInput,
-      references: getReferences(childId),
-    };
-  };
+  const getLastSavedStateForChild = (childId: string) =>
+    layoutManager.internalApi.getLastSavedStateForPanel(childId);
 
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        panelsManager.internalApi.resetPanels(lastSavedState$.value.panels);
-        unifiedSearchManager.internalApi.reset(lastSavedState$.value);
-        settingsManager.internalApi.reset(lastSavedState$.value);
+        const savedState = lastSavedState$.value;
+        layoutManager.internalApi.reset();
+        unifiedSearchManager.internalApi.reset(savedState);
+        projectRoutingManager?.internalApi.reset(savedState);
+        settingsManager.internalApi.reset(savedState);
 
-        await controlGroupManager.api.controlGroupApi$.value?.resetUnsavedChanges();
+        // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
+        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+          forcePublishOnReset$.next();
+        }
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -185,12 +122,8 @@ export function initializeUnsavedChangesManager({
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState, references: Reference[]) => {
-        // savedState contains filters with extracted references
-        // lastSavedState$ should contain filters with injected references
-        lastSavedState$.next(
-          unifiedSearchManager.internalApi.injectReferences(savedState, references)
-        );
+      onSave: (savedState: DashboardState) => {
+        lastSavedState$.next(savedState);
       },
     },
   };

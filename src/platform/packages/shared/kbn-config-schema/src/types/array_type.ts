@@ -9,7 +9,8 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import { Type } from './type';
 
 export type ArrayOptions<T> = TypeOptions<T[]> &
   UnknownOptions & {
@@ -36,6 +37,10 @@ export class ArrayType<T> extends Type<T[]> {
     const { unknowns } = options;
     if (unknowns) {
       schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+    }
+
+    if (options.meta?.id) {
+      schema = schema.id(options.meta.id);
     }
 
     super(schema, options);

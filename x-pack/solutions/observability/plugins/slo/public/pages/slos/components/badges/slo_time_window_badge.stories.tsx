@@ -10,7 +10,8 @@ import type { StoryFn } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloTimeWindowBadge as Component, Props } from './slo_time_window_badge';
+import type { Props } from './slo_time_window_badge';
+import { SloTimeWindowBadge as Component } from './slo_time_window_badge';
 import { buildSlo } from '../../../../data/slo/slo';
 
 export default {

@@ -7,17 +7,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiComboBox, EuiTitle, EuiIconTip, EuiLink } from '@elastic/eui';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiTitle,
-  EuiIconTip,
-  EuiLink,
-} from '@elastic/eui';
-import {
-  FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
   useFormContext,
@@ -30,7 +23,7 @@ import {
   SelectField,
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -42,6 +35,7 @@ import {
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as translations from './translations';
+import { indexNameValidator } from './validation';
 
 interface TimeFieldOptions {
   value: string;
@@ -54,11 +48,6 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
   label: translations.INDEX_LABEL,
   helpText: (
     <>
-      <FormattedMessage
-        id="xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription"
-        defaultMessage="Use * to broaden your query."
-      />
-      <EuiSpacer size="s" />
       <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
         <FormattedMessage
           id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
@@ -73,7 +62,9 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
     },
     {
       validator: indexPatternField(i18n),
-      type: VALIDATION_TYPES.ARRAY_ITEM,
+    },
+    {
+      validator: indexNameValidator(),
     },
   ],
 });
@@ -176,11 +167,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               error={errorMessage}
               helpText={
                 <>
-                  <FormattedMessage
-                    id="xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription"
-                    defaultMessage="Use * to broaden your query."
-                  />
-                  <EuiSpacer size="s" />
                   <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
                     <FormattedMessage
                       id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
@@ -200,6 +186,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 options={indexOptions}
                 data-test-subj="connectorIndexesComboBox"
                 data-testid="connectorIndexesComboBox"
+                placeholder={translations.INDEX_NAME_PLACEHOLDER}
                 selectedOptions={
                   index
                     ? [
@@ -234,7 +221,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                   />
                   <EuiIconTip
                     position="right"
-                    type="questionInCircle"
+                    type="question"
                     content={translations.SHOW_TIME_FIELD_TOGGLE_TOOLTIP}
                   />
                 </>

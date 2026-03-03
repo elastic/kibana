@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -13,14 +14,13 @@ import {
   useEuiShadow,
   EuiPanel,
   EuiLoadingSpinner,
-  EuiContextMenuPanelItemDescriptor,
   EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
@@ -30,7 +30,8 @@ import {
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import { ConfigKey, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
@@ -116,9 +117,9 @@ export function ActionsPopover({
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
     locationId: locationId ?? monitor.locationId,
-    spaceId: monitor.spaceId,
+    spaces: monitor.spaces,
   });
-  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaceId: monitor.spaceId });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
   const canEditSynthetics = useCanEditSynthetics();
 
@@ -187,10 +188,10 @@ export function ActionsPopover({
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     embeddableInput: {
       filters: {
-        monitorIds: [{ label: monitor.name, value: monitor.configId }],
+        monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
         locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
-        monitorTypes: [],
+        monitor_types: [],
         projects: [],
       },
       view,
@@ -213,10 +214,13 @@ export function ActionsPopover({
     {
       name: testInProgress ? (
         <EuiToolTip content={TEST_SCHEDULED_LABEL}>
-          <span>{runTestManually}</span>
+          <span tabIndex={0}>{runTestManually}</span>
         </EuiToolTip>
       ) : (
-        <NoPermissionsTooltip canUsePublicLocations={canUsePublicLocations}>
+        <NoPermissionsTooltip
+          canUsePublicLocations={canUsePublicLocations}
+          canEditSynthetics={canEditSynthetics}
+        >
           {runTestManually}
         </NoPermissionsTooltip>
       ),

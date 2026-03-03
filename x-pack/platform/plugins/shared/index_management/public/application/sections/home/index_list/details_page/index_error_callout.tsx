@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NormalizedField } from '../../../../components/mappings_editor/types';
+import type { NormalizedField } from '../../../../components/mappings_editor/types';
 
 interface IndexErrorCalloutProps {
   errors: Array<{

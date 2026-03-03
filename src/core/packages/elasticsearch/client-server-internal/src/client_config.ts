@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectionOptions as TlsConnectionOptions } from 'tls';
+import type { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
-import { Duration } from 'moment';
+import type { Duration } from 'moment';
 import type { ClientOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { AgentOptions } from 'https';
+import type { AgentOptions } from 'https';
 import { getDefaultHeaders } from './headers';
 
 export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: AgentOptions };
@@ -53,9 +53,6 @@ export function parseClientOptions(
     clientOptions.maxCompressedResponseSize = config.maxResponseSize.getValueInBytes();
   }
 
-  if (config.pingTimeout != null) {
-    clientOptions.pingTimeout = getDurationAsMs(config.pingTimeout);
-  }
   if (config.requestTimeout != null) {
     clientOptions.requestTimeout = getDurationAsMs(config.requestTimeout);
   }

@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from '../filter_manager';
+import type { Subscription } from 'rxjs';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { BaseStateContainer, createStateContainer, Storage } from '@kbn/kibana-utils-plugin/public';
-import { QueryService, QueryStart } from '../query_service';
+import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer, Storage } from '@kbn/kibana-utils-plugin/public';
+import type { QueryStart } from '../query_service';
+import { QueryService } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { connectToQueryState } from './connect_to_query_state';
-import { TimefilterContract } from '../timefilter';
-import { QueryState } from '../query_state';
+import type { TimefilterContract } from '../timefilter';
+import type { QueryState } from '../query_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { DataStreamStatType } from '../data_streams_stats';
-import { Integration } from '../data_streams_stats/integration';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { DataStreamStatType } from '../data_streams_stats';
+import type { Integration } from '../data_streams_stats/integration';
 
 export type SortDirection = 'asc' | 'desc';
 

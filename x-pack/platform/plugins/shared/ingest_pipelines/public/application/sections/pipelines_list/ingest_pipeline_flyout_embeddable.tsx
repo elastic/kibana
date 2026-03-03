@@ -12,8 +12,8 @@
  */
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ComponentType } from 'react';
-import { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
+import type { ComponentType } from 'react';
+import type { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
 
 export const IngestPipelineFlyout = dynamic<ComponentType<IngestPipelineFlyoutWithContextProps>>(
   () =>

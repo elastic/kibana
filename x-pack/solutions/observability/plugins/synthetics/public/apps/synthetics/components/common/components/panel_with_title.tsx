@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle, useEuiTheme, EuiPanelProps } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 
 export const PanelWithTitle: React.FC<

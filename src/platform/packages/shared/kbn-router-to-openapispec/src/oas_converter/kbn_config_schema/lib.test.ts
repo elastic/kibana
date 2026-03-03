@@ -26,6 +26,22 @@ describe('convert', () => {
         additionalProperties: false,
         properties: {
           any: {},
+          array: {
+            items: {
+              additionalProperties: false,
+              properties: {
+                foo: {
+                  type: 'string',
+                },
+              },
+              required: ['foo'],
+              type: 'object',
+            },
+            type: 'array',
+          },
+          arrayWithId: {
+            $ref: '#/components/schemas/myArray',
+          },
           booleanDefault: {
             default: true,
             description: 'defaults to to true',
@@ -75,16 +91,58 @@ describe('convert', () => {
               },
             ],
           },
+          unionWithId: {
+            $ref: '#/components/schemas/myUnion',
+          },
           uri: {
             default: 'prototest://something',
             format: 'uri',
             type: 'string',
           },
         },
-        required: ['string', 'ipType', 'literalType', 'map', 'record', 'union', 'any'],
+        required: [
+          'string',
+          'ipType',
+          'literalType',
+          'map',
+          'record',
+          'union',
+          'unionWithId',
+          'array',
+          'arrayWithId',
+          'any',
+        ],
         type: 'object',
       },
-      shared: {},
+      shared: {
+        myArray: {
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              foo: { type: 'string' },
+            },
+            required: ['foo'],
+          },
+          type: 'array',
+          title: 'myArray',
+        },
+        myUnion: {
+          anyOf: [
+            {
+              description: 'Union string',
+              maxLength: 1,
+              type: 'string',
+            },
+            {
+              description: 'Union number',
+              minimum: 0,
+              type: 'number',
+            },
+          ],
+          title: 'myUnion',
+        },
+      },
     });
   });
 
@@ -104,6 +162,7 @@ describe('convert', () => {
       },
       shared: {
         myId: {
+          title: 'myId',
           additionalProperties: false,
           properties: {
             a: {

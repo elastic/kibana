@@ -70,7 +70,7 @@ export async function unenrollAgent(
   }
   const now = new Date().toISOString();
   const currentSpaceId = getCurrentNamespace(soClient);
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: now,
     type: 'UNENROLL',
@@ -106,6 +106,7 @@ export async function unenrollAgents(
   const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
   const res = await getAgentsByKuery(esClient, soClient, {
     kuery,
+    showAgentless: options.showAgentless,
     showInactive: options.showInactive ?? false,
     page: 1,
     perPage: batchSize,

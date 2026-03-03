@@ -10,7 +10,7 @@
 import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
-} from '@kbn/controls-plugin/public';
+} from '@kbn/control-group-renderer';
 import { createContext } from 'react';
 import type { FilterControlConfig } from './types';
 

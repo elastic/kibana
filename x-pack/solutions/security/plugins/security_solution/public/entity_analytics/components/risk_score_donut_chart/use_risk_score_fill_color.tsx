@@ -10,8 +10,6 @@ import { emptyDonutColor } from '../../../common/components/charts/donutchart_em
 import { RISK_SEVERITY_COLOUR } from '../../common';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 
-// TODO: Borealis theme migration, when severity palette agreed, update RISK_SEVERITY_COLOUR to use shared hook from security colors:
-// https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
 export const useRiskScoreFillColor = () =>
   useCallback(
     (dataName: string) =>

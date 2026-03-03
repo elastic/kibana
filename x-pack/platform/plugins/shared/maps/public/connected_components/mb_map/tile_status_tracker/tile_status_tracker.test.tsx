@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { TileStatusTracker } from './tile_status_tracker';
-import { ILayer } from '../../../classes/layers/layer';
+import type { ILayer } from '../../../classes/layers/layer';
 import type { IVectorSource } from '../../../classes/sources/vector_source';
 
 class MockMbMap {

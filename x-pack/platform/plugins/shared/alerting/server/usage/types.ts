@@ -33,6 +33,8 @@ export interface AlertingUsage {
     warning: number;
   };
   count_rules_with_tags: number;
+  count_rules_with_elasticagent_tag: number;
+  count_rules_with_elasticagent_tag_by_type: Record<string, number>;
   count_rules_by_notify_when: {
     on_action_group_change: number;
     on_active_alert: number;
@@ -47,6 +49,7 @@ export interface AlertingUsage {
   count_mw_with_repeat_toggle_on: number;
   count_mw_with_filter_alert_toggle_on: number;
   count_rules_with_muted_alerts: number;
+  count_rules_with_api_key_created_by_user: number;
   count_rules_by_execution_status_per_day: Record<string, number>;
   percentile_num_generated_actions_per_day: {
     p50: number;
@@ -101,4 +104,23 @@ export interface AlertingUsage {
   };
   count_alerts_total: number;
   count_alerts_by_rule_type: Record<string, number>;
+  count_rules_snoozed_by_type: Record<string, number>;
+  count_rules_muted_by_type: Record<string, number>;
+  count_ignored_fields_by_rule_type: Record<string, number>;
+  count_backfill_executions: number;
+  count_backfills_by_execution_status_per_day: Record<string, number>;
+  count_gaps: number;
+  total_unfilled_gap_duration_ms: number;
+  total_filled_gap_duration_ms: number;
+  gap_auto_fill_scheduler_runs_per_day: number;
+  gap_auto_fill_scheduler_runs_by_status_per_day: Record<string, number>;
+  gap_auto_fill_scheduler_duration_ms_per_day: {
+    min: number;
+    max: number;
+    avg: number;
+    sum: number;
+  };
+  gap_auto_fill_scheduler_unique_rule_count_per_day: number;
+  gap_auto_fill_scheduler_processed_gaps_total_per_day: number;
+  gap_auto_fill_scheduler_results_by_status_per_day: Record<string, number>;
 }

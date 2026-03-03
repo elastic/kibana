@@ -35,6 +35,7 @@ export const AssetCriticalityResultStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          announceOnMount
           data-test-subj="asset-criticality-result-step-error"
           title={
             <FormattedMessage
@@ -60,6 +61,7 @@ export const AssetCriticalityResultStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          announceOnMount
           data-test-subj="asset-criticality-result-step-success"
           title={
             <FormattedMessage

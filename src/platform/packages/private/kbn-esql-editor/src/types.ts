@@ -8,27 +8,25 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  ESQLQueryStats,
+  ESQLControlsContext,
+  ESQLCallbacks,
+  ESQLTelemetryCallbacks,
+} from '@kbn/esql-types';
 
-export interface ControlsContext {
-  /** The editor supports the creation of controls,
-   * This flag should be set to true to display the "Create control" suggestion
-   **/
-  supportsControls: boolean;
-  /** Function to be called after the control creation **/
-  onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  /** Function to be called after cancelling the control creation **/
-  onCancelControl: () => void;
+export interface DataErrorsControl {
+  enabled: boolean;
+  onChange: (value: boolean) => void;
 }
 
 export interface ESQLEditorProps {
@@ -41,11 +39,6 @@ export interface ESQLEditorProps {
     query?: AggregateQuery,
     abortController?: AbortController
   ) => Promise<void>;
-  /** If it is true, the editor displays the message @timestamp found
-   * The text based queries are relying on adhoc dataviews which
-   * can have an @timestamp timefield or nothing
-   */
-  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -57,8 +50,6 @@ export interface ESQLEditorProps {
   /** Disables the editor */
   isDisabled?: boolean;
   dataTestSubj?: string;
-  /** Hide the Run query information which appears on the footer*/
-  hideRunQueryText?: boolean;
   /** Hide the Run query button which appears when editor is inlined*/
   hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)
@@ -70,10 +61,10 @@ export interface ESQLEditorProps {
   disableSubmitAction?: boolean;
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
-  /** hide @timestamp info **/
-  hideTimeFilterInfo?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
+  /** hide quick search **/
+  hideQuickSearch?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
@@ -81,45 +72,55 @@ export interface ESQLEditorProps {
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
-  controlsContext?: ControlsContext;
+  controlsContext?: ESQLControlsContext;
+  /** Opens the given query in a new Discover tab **/
+  onOpenQueryInNewTab?: (tabName: string, esqlQuery: string) => Promise<void>;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
-}
-
-export interface JoinIndicesAutocompleteResult {
-  indices: JoinIndexAutocompleteItem[];
-}
-
-export interface JoinIndexAutocompleteItem {
-  name: string;
-  mode: 'lookup' | string;
-  aliases: string[];
+  /** Resize the editor to fit the initially passed query on mount */
+  expandToFitQueryOnMount?: boolean;
+  /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
+  dataErrorsControl?: DataErrorsControl;
+  /** Optional form field label to show above the query editor */
+  /** Whether to merge external messages into the editor's message list */
+  mergeExternalMessages?: boolean;
+  /** Enable data source browser suggestion & command integration */
+  enableResourceBrowser?: boolean;
+  /** Stats about the last request made */
+  queryStats?: ESQLQueryStats;
+  /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
+  openVisorOnSourceCommands?: boolean;
 }
 
 interface ESQLVariableService {
-  areSuggestionsEnabled: boolean;
+  isCreateControlSuggestionEnabled: boolean;
   esqlVariables: ESQLControlVariable[];
-  enableSuggestions: () => void;
-  disableSuggestions: () => void;
+  enableCreateControlSuggestion: () => void;
+  disableCreateControlSuggestion: () => void;
   clearVariables: () => void;
   addVariable: (variable: ESQLControlVariable) => void;
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
+  isServerless: boolean;
 }
 
 export interface ESQLEditorDeps {
   core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  kql: KqlPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
 }
+
+export enum HistoryTabId {
+  recentQueries = 'history-queries-tab',
+  standardQueries = 'starred-queries-tab',
+}
+
+export type EsqlLanguageDeps = ESQLCallbacks & Partial<{ telemetry: ESQLTelemetryCallbacks }>;

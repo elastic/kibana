@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { render, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 
-import { MockedMounterTuple, Mountable } from '../src/test_helpers/test_types';
+import type { MockedMounterTuple, Mountable } from '../src/test_helpers/test_types';
 
 type Dom = ReturnType<typeof render> | null;
 type Renderer = () => Dom | Promise<Dom>;

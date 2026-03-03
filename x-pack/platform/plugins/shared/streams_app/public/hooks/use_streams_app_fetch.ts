@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
+import type { TimeState } from '@kbn/es-query';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { AbortableAsyncState, useAbortableAsync } from '@kbn/react-hooks';
-import { TimeState } from '@kbn/es-query';
-import { useKibana } from './use_kibana';
+import { omit } from 'lodash';
+import { useEffect, useRef } from 'react';
+import { useFetchErrorToast } from './use_fetch_error_toast';
 import { useTimefilter } from './use_timefilter';
 
 interface StreamsAppFetchOptions {
@@ -34,49 +34,18 @@ export function useStreamsAppFetch<
   TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
 >(
   callback: ({}: ParametersFromOptions<TOptions>) => T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deps: any[],
   options?: TOptions
 ): AbortableAsyncState<T> {
-  const {
-    core: { notifications },
-  } = useKibana();
-
   const { disableToastOnError = false, withRefresh = false, withTimeRange = false } = options || {};
 
   const { timeState, timeState$ } = useTimefilter();
+  const showFetchErrorToast = useFetchErrorToast();
 
   const onError = (error: Error) => {
-    let requestUrl: string | undefined;
-
     if (!disableToastOnError && !isRequestAbortedError(error)) {
-      if (
-        'body' in error &&
-        typeof error.body === 'object' &&
-        !!error.body &&
-        'message' in error.body &&
-        typeof error.body.message === 'string'
-      ) {
-        error.message = error.body.message;
-      }
-
-      if (
-        'request' in error &&
-        typeof error.request === 'object' &&
-        !!error.request &&
-        'url' in error.request &&
-        typeof error.request.url === 'string'
-      ) {
-        requestUrl = error.request.url;
-      }
-
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.streams.failedToFetchError', {
-          defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
-          values: {
-            requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',
-          },
-        }),
-      });
+      showFetchErrorToast(error);
 
       // log to console to get the actual stack trace
       // eslint-disable-next-line no-console

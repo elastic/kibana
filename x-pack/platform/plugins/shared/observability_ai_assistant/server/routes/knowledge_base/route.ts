@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import pLimit from 'p-limit';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import {
+import type {
   InferenceInferenceEndpointInfo,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import pRetry from 'p-retry';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import {
-  Instruction,
-  KnowledgeBaseEntry,
-  KnowledgeBaseEntryRole,
-  KnowledgeBaseState,
-} from '../../../common/types';
+import type { Instruction, KnowledgeBaseEntry } from '../../../common/types';
+import { KnowledgeBaseEntryRole, InferenceModelState } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -29,20 +24,20 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async ({
-    service,
-    request,
-  }): Promise<{
+  handler: async (
+    resources
+  ): Promise<{
     errorMessage?: string;
     enabled: boolean;
-    endpoint?: Partial<InferenceInferenceEndpointInfo>;
+    endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
-    kbState: KnowledgeBaseState;
-    currentInferenceId: string | undefined;
+    inferenceModelState: InferenceModelState;
+    currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
+    productDocStatus: InstallationStatus;
   }> => {
-    const client = await service.getClient({ request });
+    const client = await resources.service.getClient({ request: resources.request });
     return client.getKnowledgeBaseStatus();
   },
 });
@@ -165,7 +160,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
   params: t.type({
     body: t.type({
       id: t.string,
-      text: t.string,
+      text: nonEmptyStringRt,
       public: toBooleanRt,
     }),
   }),
@@ -217,8 +212,6 @@ const knowledgeBaseEntryRt = t.intersection([
     text: nonEmptyStringRt,
   }),
   t.partial({
-    confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-    is_correction: toBooleanRt,
     public: toBooleanRt,
     labels: t.record(t.string, t.string),
     role: t.union([
@@ -245,8 +238,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
     const entry = resources.params.body;
     return client.addKnowledgeBaseEntry({
       entry: {
-        confidence: 'high',
-        is_correction: false,
         public: true,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,
@@ -289,38 +280,22 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    const { kbState } = await client.getKnowledgeBaseStatus();
+    const { inferenceModelState } = await client.getKnowledgeBaseStatus();
 
-    if (kbState !== KnowledgeBaseState.READY) {
+    if (inferenceModelState !== InferenceModelState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 
-    const limiter = pLimit(5);
-    const promises = resources.params.body.entries.map(async (entry) => {
-      return limiter(async () => {
-        return pRetry(
-          () => {
-            return client.addKnowledgeBaseEntry({
-              entry: {
-                confidence: 'high',
-                is_correction: false,
-                public: true,
-                labels: {},
-                role: KnowledgeBaseEntryRole.UserEntry,
-                ...entry,
-              },
-            });
-          },
-          { retries: 10 }
-        );
-      });
-    });
+    const entries = resources.params.body.entries.map((entry) => ({
+      public: true,
+      labels: {},
+      role: KnowledgeBaseEntryRole.UserEntry,
+      ...entry,
+    }));
 
-    await Promise.all(promises);
+    await client.addKnowledgeBaseBulkEntries({ entries });
 
-    resources.logger.info(
-      `Imported ${resources.params.body.entries.length} knowledge base entries`
-    );
+    resources.logger.info(`Imported ${entries.length} knowledge base entries`);
   },
 });
 

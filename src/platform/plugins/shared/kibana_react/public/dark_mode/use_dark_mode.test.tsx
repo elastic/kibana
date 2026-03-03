@@ -12,9 +12,9 @@ import * as ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { useDarkMode } from './use_dark_mode';
 import { createKibanaReactContext } from '../context';
-import { KibanaServices } from '../context/types';
+import type { KibanaServices } from '../context/types';
 import { BehaviorSubject } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('useDarkMode', () => {
@@ -37,7 +37,7 @@ describe('useDarkMode', () => {
 
   const mock = (): [KibanaServices, BehaviorSubject<CoreTheme>] => {
     const core = coreMock.createStart();
-    const subject = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'amsterdam' });
+    const subject = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'borealis' });
     core.theme.theme$ = subject.asObservable();
 
     return [core, subject];
@@ -73,7 +73,7 @@ describe('useDarkMode', () => {
     expect(div!.textContent).toBe('false');
 
     act(() => {
-      subject.next({ darkMode: true, name: 'amsterdam' });
+      subject.next({ darkMode: true, name: 'borealis' });
     });
 
     div = container!.querySelector('div');

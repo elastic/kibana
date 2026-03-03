@@ -101,7 +101,7 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         &nbsp;
         <EuiIconTip
           size="s"
-          type="questionInCircle"
+          type="question"
           content={
             <FormattedMessage
               id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
@@ -116,6 +116,12 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         pagination={false}
         data-test-subj="mlModalForecastTable"
         rowProps={getRowProps}
+        tableCaption={i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTableCaption',
+          {
+            defaultMessage: 'Previously run forecasts',
+          }
+        )}
       />
     </EuiText>
   );

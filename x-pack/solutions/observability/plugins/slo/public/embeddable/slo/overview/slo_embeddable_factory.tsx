@@ -5,34 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { WithAllKeys } from '@kbn/presentation-publishing';
 import {
-  WithAllKeys,
   fetch$,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
 import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
-import {
+import type {
   GroupSloCustomInput,
   SloOverviewApi,
   SloOverviewEmbeddableState,
@@ -64,17 +63,17 @@ export const getOverviewEmbeddableFactory = ({
   sloClient: SLORepositoryClient;
 }): EmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
-  buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+  buildEmbeddable: async ({
+    initializeDrilldownsManager,
+    initialState,
+    finalizeApi,
+    uuid,
+    parentApi,
+  }) => {
     const deps = { ...coreStart, ...pluginsStart };
-    const state = initialState.rawState;
+    const state = initialState;
 
-    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      state
-    );
-
-    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
     const sloStateManager = initializeStateManager(state, defaultSloEmbeddableState);
@@ -83,11 +82,9 @@ export const getOverviewEmbeddableFactory = ({
 
     function serializeState() {
       return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...sloStateManager.getLatestState(),
-          ...dynamicActionsManager?.getLatestState(),
-        },
+        ...titleManager.getLatestState(),
+        ...sloStateManager.getLatestState(),
+        ...drilldownsManager.getLatestState(),
       };
     }
 
@@ -96,7 +93,7 @@ export const getOverviewEmbeddableFactory = ({
       parentApi,
       serializeState,
       anyStateChange$: merge(
-        ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+        drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
         sloStateManager.anyStateChange$
       ),
@@ -108,23 +105,23 @@ export const getOverviewEmbeddableFactory = ({
         remoteName: 'referenceEquality',
         overviewMode: 'referenceEquality',
         ...titleComparators,
-        ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+        ...drilldownsManager.comparators,
       }),
       onReset: (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        titleManager.reinitializeState(lastSaved?.rawState);
-        sloStateManager.reinitializeState(lastSaved?.rawState);
+        drilldownsManager.reinitializeState(lastSaved ?? {});
+        titleManager.reinitializeState(lastSaved);
+        sloStateManager.reinitializeState(lastSaved);
       },
     });
 
     const api = finalizeApi({
       ...unsavedChangesApi,
       ...titleManager.api,
-      ...(dynamicActionsManager?.api ?? {}),
+      ...drilldownsManager.api,
       ...sloStateManager.api,
       defaultTitle$,
-      hideTitle$: titleManager.api.hidePanelTitles$,
-      setHideTitle: titleManager.api.setHidePanelTitles,
+      hideTitle$: titleManager.api.hideTitle$,
+      setHideTitle: titleManager.api.setHideTitle,
       supportedTriggers: () => [],
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -184,8 +181,8 @@ export const getOverviewEmbeddableFactory = ({
 
         useEffect(() => {
           return () => {
+            drilldownsManager.cleanup();
             fetchSubscription.unsubscribe();
-            maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);
         const renderOverview = () => {
@@ -237,31 +234,36 @@ export const getOverviewEmbeddableFactory = ({
         };
 
         const queryClient = new QueryClient();
-
         return (
-          <Router history={createBrowserHistory()}>
-            <EuiThemeProvider darkMode={true}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    {showAllGroupByInstances ? (
-                      <SloCardChartList sloId={sloId!} />
-                    ) : (
-                      renderOverview()
-                    )}
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </EuiThemeProvider>
-          </Router>
+          <EuiThemeProvider darkMode={true}>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  {overviewMode === 'groups' ? (
+                    renderOverview()
+                  ) : showAllGroupByInstances ? (
+                    <div
+                      data-test-subj="sloSingleOverviewPanel"
+                      data-shared-item=""
+                      style={{ width: '100%' }}
+                    >
+                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
+                    </div>
+                  ) : (
+                    renderOverview()
+                  )}
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </EuiThemeProvider>
         );
       },
     };

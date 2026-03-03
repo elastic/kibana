@@ -7,45 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server, Request } from '@hapi/hapi';
+import type { Request, Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
+import { createServer, getRequestId, getServerOptions, setTlsConfig } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
-import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
+import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
-  IRouter,
-  RouteConfigOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  RouterRoute,
   AuthenticationHandler,
-  OnPreAuthHandler,
-  OnPostAuthHandler,
-  OnPreRoutingHandler,
-  OnPreResponseHandler,
-  SessionStorageCookieOptions,
-  HttpServiceSetup,
-  HttpServerInfo,
   HttpAuth,
+  HttpServerInfo,
+  HttpServiceSetup,
   IAuthHeadersStorage,
-  RouterDeprecatedApiDetails,
+  IRouter,
+  KibanaRequest,
+  KibanaRequestState,
+  KibanaRouteOptions,
+  OnPostAuthHandler,
+  OnPreAuthHandler,
+  OnPreResponseHandler,
+  OnPreRoutingHandler,
+  RouteConfigOptions,
   RouteMethod,
+  RouterDeprecatedApiDetails,
+  RouterRoute,
+  SessionStorageCookieOptions,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
-import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
-import { Env } from '@kbn/config';
-import { CoreContext } from '@kbn/core-base-server-internal';
-import { HttpConfig } from './http_config';
+import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { Env } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
+import type { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
@@ -56,7 +63,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { StaticAssets, type InternalStaticAssets } from './static_assets';
+import { type InternalStaticAssets, StaticAssets } from './static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -167,6 +174,7 @@ export type LifecycleRegistrar = Pick<
 export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
+  userActivity?: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -191,6 +199,7 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly env: Env;
+  private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
 
   constructor(
     private readonly coreContext: CoreContext,
@@ -208,6 +217,13 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  /** @internal */
+  public setRedactedSessionIdGetter(
+    getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) {
+    this.redactedSessionIdGetter = getter;
   }
 
   private registerRouter(router: IRouter) {
@@ -232,6 +248,7 @@ export class HttpServer {
   public async setup({
     config$,
     executionContext,
+    userActivity,
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
@@ -274,7 +291,7 @@ export class HttpServer {
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext);
+    this.setupRequestStateAssignment(config, executionContext, userActivity);
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
@@ -524,7 +541,8 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
+    executionContext?: InternalExecutionContextSetup,
+    userActivity?: InternalUserActivityServiceSetup
   ) {
     this.server!.ext('onPreResponse', (request, responseToolkit) => {
       const stop = (request.app as KibanaRequestState).measureElu;
@@ -551,6 +569,18 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
+      let spaceId: string | undefined;
+      // try to getspace from URL (`/s/<id>`); fall back to `x-kbn-context` when parsing fails/missing.
+      try {
+        spaceId = getSpaceIdFromPath(request.url.pathname, config.basePath).spaceId;
+      } catch {
+        spaceId = parentContext?.space;
+      }
+
+      userActivity?.setInjectedContext({
+        kibana: { space: { id: spaceId } },
+      });
+
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
         apm.addLabels(executionContext.getAsLabels());
@@ -558,15 +588,159 @@ export class HttpServer {
 
       executionContext?.setRequestId(requestId);
 
-      request.app = {
-        ...(request.app ?? {}),
-        requestId,
-        requestUuid: uuidv4(),
-        measureElu: stop,
-        // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
-        // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: apm.currentTraceIds['trace.id'],
-      } as KibanaRequestState;
+      const app: KibanaRequestState = request.app as KibanaRequestState;
+      app.startTime = performance.now();
+      app.requestId = requestId;
+      app.requestUuid = uuidv4();
+      app.measureElu = stop;
+      // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
+      // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
+      app.traceId = apm.currentTraceIds['trace.id'];
+      app.span = apm.startSpan('pre-route handler middlewares');
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPostAuth', async (request, responseToolkit) => {
+      if (this.redactedSessionIdGetter) {
+        // Store the redacted session ID on the request state so the user
+        // activity service can read it later. We cannot call the service
+        // directly here because this handler is async and would use its
+        // own user-activity
+        try {
+          const kibanaRequest = CoreKibanaRequest.from(request);
+          const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
+          (request.app as KibanaRequestState).redactedSessionId = redactedSessionId;
+        } catch {
+          // just leave the session id as undefined
+        }
+      }
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPreHandler', (request, responseToolkit) => {
+      (request.app as KibanaRequestState).span?.end();
+      (request.app as KibanaRequestState).span = null;
+
+      const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
+      const { redactedSessionId } = request.app as KibanaRequestState;
+      const remoteAddress = request.info.remoteAddress;
+      userActivity?.setInjectedContext({
+        client: remoteAddress
+          ? {
+              ip: remoteAddress,
+              address: remoteAddress,
+            }
+          : undefined,
+        user: user
+          ? {
+              id: user.profile_uid,
+              name: user.username,
+              email: user.email,
+              roles: user.roles ? [...user.roles] : undefined,
+            }
+          : undefined,
+        session: {
+          id: redactedSessionId,
+        },
+        http: {
+          request: {
+            referrer: request.info.referrer,
+          },
+        },
+      });
+
+      return responseToolkit.continue;
+    });
+
+    this.instrumentMetrics();
+  }
+
+  private instrumentMetrics() {
+    const meter = metrics.getMeter('kibana.http.server');
+
+    // https://opentelemetry.io/docs/specs/semconv/http/http-metrics/
+    const requestTotalServed = meter.createCounter('http.server.request.served', {
+      description: 'Number of HTTP server requests handled.',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
+    const activeRequestsCounter = meter.createUpDownCounter('http.server.request.active', {
+      description: 'Number of concurrent HTTP server requests.',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
+    const requestDuration = meter.createHistogram('http.server.request.duration', {
+      description: 'Duration of HTTP server requests.',
+      unit: 's',
+      valueType: ValueType.DOUBLE,
+    });
+    const requestTotalDisconnects = meter.createCounter('http.server.request.aborted', {
+      description: 'Number of HTTP server requests that errored or were aborted unexpectedly.',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
+    meter
+      .createObservableUpDownCounter('http.server.connections.usage', {
+        description: 'Number of active HTTP server connections.',
+        unit: '1',
+        valueType: ValueType.INT,
+      })
+      .addCallback((result) => {
+        this.server!.listener.getConnections((err, count) => {
+          if (!err) {
+            result.observe(count);
+          }
+        });
+      });
+
+    function getBaseAttributes(request: Request): Attributes {
+      // https://opentelemetry.io/docs/specs/semconv/registry/attributes/http/
+      return {
+        'http.request.method': request.method.toUpperCase(),
+        'http.route': request.route.path,
+      };
+    }
+
+    // Using onPreAuth instead of onRequest because we want the request.route.path
+    this.server!.ext('onPreAuth', (request, responseToolkit) => {
+      const attributes = getBaseAttributes(request);
+
+      requestTotalServed.add(1, attributes);
+      activeRequestsCounter.add(1, attributes);
+
+      // We need to handle 'disconnect' and 'onPostResponse' events separately because onPostResponse is not called when disconnect happens.
+      // And we cannot use request.events.once('finish') here because it doesn't have the request.response info.
+      request.events.once('disconnect', () => {
+        const startTime = (request.app as KibanaRequestState).startTime;
+        const stopTime = performance.now();
+        requestTotalDisconnects.add(1, attributes);
+        activeRequestsCounter.add(-1, attributes);
+        requestDuration.record(stopTime - startTime, {
+          ...attributes,
+          'error.type': 'aborted',
+        });
+      });
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPostResponse', (request, responseToolkit) => {
+      const startTime = (request.app as KibanaRequestState).startTime;
+      const stopTime = performance.now();
+
+      const attributes = getBaseAttributes(request);
+
+      activeRequestsCounter.add(-1, attributes);
+
+      const statusCode: number = isBoom(request.response)
+        ? request.response.output.statusCode
+        : request.response.statusCode;
+
+      requestDuration.record(stopTime - startTime, {
+        ...attributes,
+        'http.response.status_code': statusCode,
+      });
       return responseToolkit.continue;
     });
   }
@@ -737,7 +911,16 @@ export class HttpServer {
         },
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Route serves static assets',
+            },
+          },
+          excludeFromRateLimiter: true,
+        },
         auth: false,
         cache: {
           privacy: 'public',

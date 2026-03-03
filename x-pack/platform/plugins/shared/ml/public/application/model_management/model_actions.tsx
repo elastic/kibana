@@ -62,7 +62,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApi, httpService, trainedModelsService },
+      mlServices: { mlApi, httpService, trainedModelsService, mlCapabilities },
       ...startServices
     },
   } = useMlKibana();
@@ -128,7 +128,8 @@ export function useModelActions({
         showNodeInfo,
         nlpSettings,
         httpService,
-        trainedModelsService
+        trainedModelsService,
+        mlCapabilities
       ),
     [
       overlays,
@@ -139,6 +140,7 @@ export function useModelActions({
       nlpSettings,
       httpService,
       trainedModelsService,
+      mlCapabilities,
     ]
   );
 
@@ -201,6 +203,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
           defaultMessage: 'Start deployment',
@@ -213,7 +216,6 @@ export function useModelActions({
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
         icon: 'play',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         color: 'success',
@@ -222,6 +224,13 @@ export function useModelActions({
             (deployment) => deployment.modelId === item.model_id
           );
 
+          if (
+            isModelDownloadItem(item) &&
+            item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+          ) {
+            return false;
+          }
+
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
@@ -229,7 +238,8 @@ export function useModelActions({
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
               isModelDownloadItem(item) &&
-              item.state === MODEL_STATE.NOT_DOWNLOADED)
+              (item.state === MODEL_STATE.NOT_DOWNLOADED ||
+                item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE))
           );
         },
         onClick: async (item) => {
@@ -357,6 +367,7 @@ export function useModelActions({
           return canStartStopTrainedModels;
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test',
@@ -366,7 +377,6 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         available: (item) => isTestable(item, true),
@@ -416,6 +426,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: (model) => {
           return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
@@ -462,7 +473,6 @@ export function useModelActions({
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,

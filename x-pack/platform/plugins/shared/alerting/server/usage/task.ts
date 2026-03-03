@@ -12,6 +12,7 @@ import type {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import {
   getTotalCountAggregations,
@@ -23,9 +24,10 @@ import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
+import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
+import { getGapAutoFillSchedulerTelemetryPerDay } from './lib/get_gap_auto_fill_scheduler_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -119,6 +121,8 @@ export function telemetryTaskRunner(
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
           getMWTelemetry({ logger, savedObjectsClient }),
           getTotalAlertsCountAggregations({ esClient, logger }),
+          getBackfillTelemetryPerDay({ esClient, eventLogIndex, logger }),
+          getGapAutoFillSchedulerTelemetryPerDay({ esClient, eventLogIndex, logger }),
         ])
           .then(
             ([
@@ -129,6 +133,8 @@ export function telemetryTaskRunner(
               dailyFailedAndUnrecognizedTasks,
               MWTelemetry,
               totalAlertsCountAggregations,
+              dailyBackfillCounts,
+              dailyGapAutoFillSchedulerCounts,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
@@ -137,7 +143,9 @@ export function telemetryTaskRunner(
                 dailyExecutionTimeoutCounts.hasErrors ||
                 dailyFailedAndUnrecognizedTasks.hasErrors ||
                 MWTelemetry.hasErrors ||
-                totalAlertsCountAggregations.hasErrors;
+                totalAlertsCountAggregations.hasErrors ||
+                dailyBackfillCounts.hasErrors ||
+                dailyGapAutoFillSchedulerCounts.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -147,6 +155,8 @@ export function telemetryTaskRunner(
                 dailyFailedAndUnrecognizedTasks.errorMessage,
                 MWTelemetry.errorMessage,
                 totalAlertsCountAggregations.errorMessage,
+                dailyBackfillCounts.errorMessage,
+                dailyGapAutoFillSchedulerCounts.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -166,13 +176,21 @@ export function telemetryTaskRunner(
                 count_rules_by_execution_status:
                   totalCountAggregations.count_rules_by_execution_status,
                 count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
+                count_rules_with_elasticagent_tag:
+                  totalCountAggregations.count_rules_with_elasticagent_tag,
+                count_rules_with_elasticagent_tag_by_type:
+                  totalCountAggregations.count_rules_with_elasticagent_tag_by_type,
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
+                count_rules_snoozed_by_type: totalCountAggregations.count_rules_snoozed_by_type,
+                count_rules_muted_by_type: totalCountAggregations.count_rules_muted_by_type,
                 count_rules_with_linked_dashboards:
                   totalCountAggregations.count_rules_with_linked_dashboards,
                 count_rules_with_investigation_guide:
                   totalCountAggregations.count_rules_with_investigation_guide,
+                count_rules_with_api_key_created_by_user:
+                  totalCountAggregations.count_rules_with_api_key_created_by_user,
                 count_mw_total: MWTelemetry.count_mw_total,
                 count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:
@@ -218,6 +236,25 @@ export function telemetryTaskRunner(
                 percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
                 count_alerts_total: totalAlertsCountAggregations.count_alerts_total,
                 count_alerts_by_rule_type: totalAlertsCountAggregations.count_alerts_by_rule_type,
+                count_backfill_executions: dailyBackfillCounts.countExecutions,
+                count_backfills_by_execution_status_per_day:
+                  dailyBackfillCounts.countBackfillsByExecutionStatus,
+                count_gaps: dailyBackfillCounts.countGaps,
+                total_unfilled_gap_duration_ms: dailyBackfillCounts.totalUnfilledGapDurationMs,
+                total_filled_gap_duration_ms: dailyBackfillCounts.totalFilledGapDurationMs,
+                gap_auto_fill_scheduler_runs_per_day: dailyGapAutoFillSchedulerCounts.runsTotal,
+                gap_auto_fill_scheduler_runs_by_status_per_day:
+                  dailyGapAutoFillSchedulerCounts.runsByStatus,
+                gap_auto_fill_scheduler_duration_ms_per_day:
+                  dailyGapAutoFillSchedulerCounts.durationMs,
+                gap_auto_fill_scheduler_unique_rule_count_per_day:
+                  dailyGapAutoFillSchedulerCounts.uniqueRuleCount,
+                gap_auto_fill_scheduler_processed_gaps_total_per_day:
+                  dailyGapAutoFillSchedulerCounts.processedGapsTotal,
+                gap_auto_fill_scheduler_results_by_status_per_day:
+                  dailyGapAutoFillSchedulerCounts.resultsByStatus,
+                count_ignored_fields_by_rule_type:
+                  totalAlertsCountAggregations.count_ignored_fields_by_rule_type,
               };
 
               return {

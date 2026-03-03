@@ -10,148 +10,115 @@
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
+  Subject,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
   map,
   merge,
+  of,
   skip,
-  Subject,
 } from 'rxjs';
 
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OPTIONS_LIST_CONTROL } from '../../../../common';
-import type {
-  OptionsListControlState,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-  OptionsListSuccessResponse,
-  OptionsListSuggestions,
-} from '../../../../common/options_list';
-import { getSelectionAsFieldType, isValidSearch } from '../../../../common/options_list';
-import { defaultDataControlComparators, initializeDataControl } from '../initialize_data_control';
-import type { DataControlFactory } from '../types';
-import { OptionsListControl } from './components/options_list_control';
-import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
-  MIN_OPTIONS_LIST_REQUEST_SIZE,
+  OPTIONS_LIST_CONTROL,
   OPTIONS_LIST_DEFAULT_SORT,
-} from './constants';
+} from '@kbn/controls-constants';
+import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  apiHasPinnedPanels,
+  apiHasSections,
+  initializeUnsavedChanges,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
+
+import type { OptionsListSuccessResponse } from '../../../../common/options_list';
+import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
+import {
+  defaultDataControlComparators,
+  initializeDataControlManager,
+  type DataControlStateManager,
+} from '../data_control_manager';
+import { OptionsListControl } from './components/options_list_control';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
+import {
+  editorComparators,
+  initializeEditorStateManager,
+  type EditorState,
+} from './editor_state_manager';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
-import {
-  initializeOptionsListSelections,
-  selectionComparators,
-} from './options_list_control_selections';
 import { OptionsListStrings } from './options_list_strings';
-import type { OptionsListControlApi } from './types';
+import { initializeSelectionsManager, selectionComparators } from './selections_manager';
+import { initializeTemporayStateManager } from './temporay_state_manager';
+import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import { buildFilter } from './utils/filter_utils';
+import {
+  clearSelections,
+  deselectAll,
+  deselectOption,
+  makeSelection,
+  selectAll,
+} from './utils/selection_utils';
 
-export const getOptionsListControlFactory = (): DataControlFactory<
+export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
-    order: 3, // should always be first, since this is the most popular control
-    getIconType: () => 'editorChecklist',
-    getDisplayName: OptionsListStrings.control.getDisplayName,
-    isFieldCompatible: (field) => {
-      return (
-        !field.spec.scripted &&
-        field.aggregatable &&
-        ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState;
+
+      if (isOptionsListESQLControlState(state)) {
+        throw new Error('ES|QL control state handling not yet implemented');
+      }
+      const editorStateManager = initializeEditorStateManager(state);
+      const temporaryStateManager = initializeTemporayStateManager();
+      const selectionsManager = initializeSelectionsManager(state);
+
+      const dataControlManager: DataControlStateManager =
+        await initializeDataControlManager<EditorState>({
+          controlId: uuid,
+          controlType: OPTIONS_LIST_CONTROL,
+          typeDisplayName: OptionsListStrings.control.getDisplayName(),
+          state,
+          parentApi,
+          willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
+          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+          editorStateManager,
+        });
+
+      const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
+        dataControlManager.internalApi.onSelectionChange
       );
-    },
-    CustomOptionsComponent: OptionsListEditorOptions,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
-      /** Serializable state - i.e. the state that is saved with the control */
-      const searchTechnique$ = new BehaviorSubject<OptionsListSearchTechnique | undefined>(
-        initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
-      );
-      const runPastTimeout$ = new BehaviorSubject<boolean | undefined>(initialState.runPastTimeout);
-      const singleSelect$ = new BehaviorSubject<boolean | undefined>(initialState.singleSelect);
-      const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
-        initialState.sort ?? OPTIONS_LIST_DEFAULT_SORT
-      );
-
-      const placeholder = initialState.placeholder;
-      const hideActionBar = initialState.hideActionBar;
-      const hideExclude = initialState.hideExclude;
-      const hideExists = initialState.hideExists;
-      const hideSort = initialState.hideSort;
-
-      /** Runtime / component state - none of this is serialized */
-      const searchString$ = new BehaviorSubject<string>('');
-      const searchStringValid$ = new BehaviorSubject<boolean>(true);
-      const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
-
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-      const availableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(undefined);
-      const invalidSelections$ = new BehaviorSubject<Set<OptionsListSelection>>(new Set());
-      const totalCardinality$ = new BehaviorSubject<number>(0);
-
-      const dataControl = initializeDataControl<
-        Pick<OptionsListControlState, 'searchTechnique' | 'singleSelect' | 'runPastTimeout'>
-      >(
-        uuid,
-        OPTIONS_LIST_CONTROL,
-        'optionsListDataView',
-        initialState,
-        {
-          searchTechnique: searchTechnique$,
-          singleSelect: singleSelect$,
-          runPastTimeout: runPastTimeout$,
-        },
-        controlGroupApi
-      );
-
-      const selections = initializeOptionsListSelections(
-        initialState,
-        dataControl.setters.onSelectionChange
-      );
-
-      const stateManager = {
-        ...dataControl.stateManager,
-        ...selections.stateManager,
-        searchTechnique: searchTechnique$,
-        singleSelect: singleSelect$,
-        sort: sort$,
-        searchString: searchString$,
-        searchStringValid: searchStringValid$,
-        runPastTimeout: runPastTimeout$,
-        requestSize: requestSize$,
-      };
-
       /** Handle loading state; since suggestion fetching and validation are tied, only need one loading subject */
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
       const dataLoadingSubscription = combineLatest([
         loadingSuggestions$,
-        dataControl.api.dataLoading$,
+        dataControlManager.api.dataLoading$,
       ])
         .pipe(
           debounceTime(100), // debounce set loading so that it doesn't flash as the user types
           map((values) => values.some((value) => value))
         )
         .subscribe((isLoading) => {
-          dataLoading$.next(isLoading);
+          temporaryStateManager.api.setDataLoading(isLoading);
         });
 
       /** Debounce the search string changes to reduce the number of fetch requests */
-      const debouncedSearchString = stateManager.searchString.pipe(debounceTime(100));
+      const debouncedSearchString = temporaryStateManager.api.searchString$.pipe(debounceTime(100));
 
       /** Validate the search string as the user types */
       const validSearchStringSubscription = combineLatest([
         debouncedSearchString,
-        dataControl.api.field$,
-        searchTechnique$,
+        dataControlManager.api.field$,
+        editorStateManager.api.searchTechnique$,
       ]).subscribe(([newSearchString, field, searchTechnique]) => {
-        searchStringValid$.next(
+        temporaryStateManager.api.setSearchStringValid(
           isValidSearch({
             searchString: newSearchString,
             fieldType: field?.type,
@@ -162,70 +129,77 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       /** Clear state when the field changes */
       const fieldChangedSubscription = combineLatest([
-        dataControl.stateManager.fieldName,
-        dataControl.stateManager.dataViewId,
+        dataControlManager.api.fieldName$,
+        dataControlManager.api.dataViewId$,
       ])
         .pipe(
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {
-          searchString$.next('');
-          selections.internalApi.setSelectedOptions(undefined);
-          selections.internalApi.setExistsSelected(false);
-          selections.internalApi.setExclude(false);
-          requestSize$.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
-          sort$.next(OPTIONS_LIST_DEFAULT_SORT);
+          temporaryStateManager.api.setSearchString('');
+          selectionsManager.api.setSelectedOptions(undefined);
+          selectionsManager.api.setExistsSelected(false);
+          selectionsManager.api.setExclude(false);
+          selectionsManager.api.setSort(OPTIONS_LIST_DEFAULT_SORT);
+          temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
         });
 
       /** Fetch the suggestions and perform validation */
+      const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
-          ...dataControl.api,
+          ...dataControlManager.api,
           loadMoreSubject,
           loadingSuggestions$,
           debouncedSearchString,
-          parentApi: controlGroupApi,
+          parentApi,
+          uuid,
         },
-        stateManager,
-        controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
+        requestSize$: temporaryStateManager.api.requestSize$,
+        runPastTimeout$: editorStateManager.api.runPastTimeout$,
+        selectedOptions$: selectionsManager.api.selectedOptions$,
+        searchTechnique$: editorStateManager.api.searchTechnique$,
+        sort$: selectionsManager.api.sort$,
       }).subscribe((result) => {
-        // if there was an error during fetch, set blocking error and return early
+        // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
-          dataControl.api.setBlockingError((result as { error: Error }).error);
+          suggestionLoadError$.next((result as { error: Error }).error);
           return;
-        } else if (dataControl.api.blockingError$.getValue()) {
+        } else if (suggestionLoadError$.getValue()) {
           // otherwise,  if there was a previous error, clear it
-          dataControl.api.setBlockingError(undefined);
+          suggestionLoadError$.next(undefined);
         }
 
         // fetch was successful so set all attributes from result
         const successResponse = result as OptionsListSuccessResponse;
-        availableOptions$.next(successResponse.suggestions);
-        totalCardinality$.next(successResponse.totalCardinality ?? 0);
-        invalidSelections$.next(new Set(successResponse.invalidSelections ?? []));
+        temporaryStateManager.api.setAvailableOptions(successResponse.suggestions);
+        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality);
+        temporaryStateManager.api.setInvalidSelections(
+          new Set(successResponse.invalidSelections ?? [])
+        );
 
         // reset the request size back to the minimum (if it's not already)
-        if (stateManager.requestSize.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
-          stateManager.requestSize.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
+        if (temporaryStateManager.api.requestSize$.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
+          temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
         }
       });
 
       /** Remove all other selections if this control becomes a single select */
-      const singleSelectSubscription = singleSelect$
+      const singleSelectSubscription = editorStateManager.api.singleSelect$
         .pipe(filter((singleSelect) => Boolean(singleSelect)))
         .subscribe(() => {
-          const currentSelections = stateManager.selectedOptions.getValue() ?? [];
+          const currentSelections = selectionsManager.api.selectedOptions$.getValue() ?? [];
           if (currentSelections.length > 1)
-            selections.internalApi.setSelectedOptions([currentSelections[0]]);
+            selectionsManager.api.setSelectedOptions([currentSelections[0]]);
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
-        Boolean(initialState.selectedOptions?.length || initialState.existsSelected)
+        Boolean(state.selected_options?.length || state.exists_selected)
       );
       const hasSelectionsSubscription = combineLatest([
-        stateManager.selectedOptions,
-        stateManager.existsSelected,
+        selectionsManager.api.selectedOptions$,
+        selectionsManager.api.existsSelected$,
       ])
         .pipe(
           map(([selectedOptions, existsSelected]) => {
@@ -236,201 +210,131 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         .subscribe((hasSelections) => {
           hasSelections$.next(hasSelections);
         });
-      /** Output filters when selections change */
+
+      /** Output filters when selections and/or filter meta data changes */
+      const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
+
       const outputFilterSubscription = combineLatest([
-        dataControl.api.dataViews$,
-        dataControl.stateManager.fieldName,
-        stateManager.selectedOptions,
-        stateManager.existsSelected,
-        stateManager.exclude,
+        dataControlManager.api.dataViews$,
+        dataControlManager.api.fieldName$,
+        selectionsManager.api.selectedOptions$,
+        selectionsManager.api.existsSelected$,
+        selectionsManager.api.exclude$,
+        sectionId$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
-          const dataView = dataViews?.[0];
-          const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        .subscribe(
+          ([dataViews, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
+            const dataView = dataViews?.[0];
+            if (!dataView) return;
 
-          let newFilter: Filter | undefined;
-          if (dataView && field) {
-            if (existsSelected) {
-              newFilter = buildExistsFilter(field, dataView);
-            } else if (selectedOptions && selectedOptions.length > 0) {
-              newFilter =
-                selectedOptions.length === 1
-                  ? buildPhraseFilter(field, selectedOptions[0], dataView)
-                  : buildPhrasesFilter(field, selectedOptions, dataView);
-            }
+            const newFilter = buildFilter(dataView, uuid, {
+              field_name: fieldName,
+              selected_options: selectedOptions,
+              exists_selected: existsSelected,
+              exclude,
+              sectionId,
+            });
+            dataControlManager.internalApi.setOutputFilter(newFilter);
           }
-          if (newFilter) {
-            newFilter.meta.key = field?.name;
-            if (exclude) newFilter.meta.negate = true;
-          }
-          dataControl.setters.setOutputFilter(newFilter);
-        });
+        );
 
-      function serializeState() {
-        const { rawState: dataControlState, references } = dataControl.getLatestState();
+      function serializeState(): OptionsListDSLControlState {
         return {
-          rawState: {
-            ...dataControlState,
-            ...selections.getLatestState(),
-            searchTechnique: searchTechnique$.getValue(),
-            runPastTimeout: runPastTimeout$.getValue(),
-            singleSelect: singleSelect$.getValue(),
-            sort: sort$.getValue(),
-            exclude: stateManager.exclude.getValue(),
+          ...dataControlManager.getLatestState(),
+          ...selectionsManager.getLatestState(),
+          ...editorStateManager.getLatestState(),
 
-            // serialize state that cannot be changed to keep it consistent
-            placeholder,
-            hideActionBar,
-            hideExclude,
-            hideExists,
-            hideSort,
-          },
-          references, // does not have any references other than those provided by the data control serializer
+          // serialize state that cannot be changed to keep it consistent
+          display_settings: state.display_settings,
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
         anyStateChange$: merge(
-          dataControl.anyStateChange$,
-          selections.anyStateChange$,
-          runPastTimeout$,
-          searchTechnique$,
-          singleSelect$,
-          sort$
+          dataControlManager.anyStateChange$,
+          selectionsManager.anyStateChange$,
+          editorStateManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
             ...defaultDataControlComparators,
             ...selectionComparators,
-            runPastTimeout: 'referenceEquality',
-            searchTechnique: 'referenceEquality',
-            singleSelect: 'referenceEquality',
-            sort: 'deepEquality',
+            ...editorComparators,
             // This state cannot currently be changed after the control is created
-            placeholder: 'skip',
-            hideActionBar: 'skip',
-            hideExclude: 'skip',
-            hideExists: 'skip',
-            hideSort: 'skip',
+            display_settings: 'skip',
           };
         },
         defaultState: {
-          searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+          search_technique: DEFAULT_SEARCH_TECHNIQUE,
           sort: OPTIONS_LIST_DEFAULT_SORT,
           exclude: false,
-          existsSelected: false,
+          exists_selected: false,
         },
         onReset: (lastSaved) => {
-          dataControl.reinitializeState(lastSaved?.rawState);
-          selections.reinitializeState(lastSaved?.rawState);
-          runPastTimeout$.next(lastSaved?.rawState.runPastTimeout);
-          searchTechnique$.next(lastSaved?.rawState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE);
-          singleSelect$.next(lastSaved?.rawState.singleSelect);
-          sort$.next(lastSaved?.rawState.sort ?? OPTIONS_LIST_DEFAULT_SORT);
+          if (isOptionsListESQLControlState(lastSaved)) {
+            throw new Error('ES|QL control state handling not yet implemented');
+          }
+          dataControlManager.reinitializeState(lastSaved);
+          selectionsManager.reinitializeState(lastSaved);
+          editorStateManager.reinitializeState(lastSaved);
         },
       });
+
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+      const errorsSubscription = combineLatest([
+        dataControlManager.api.blockingError$,
+        suggestionLoadError$,
+      ])
+        .pipe(
+          map(([controlError, suggestionError]) => {
+            return controlError ?? suggestionError;
+          })
+        )
+        .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
         ...unsavedChangesApi,
-        ...dataControl.api,
-        dataLoading$,
+        ...dataControlManager.api,
+        blockingError$,
+        dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         serializeState,
-        clearSelections: () => {
-          if (stateManager.selectedOptions.getValue()?.length)
-            selections.internalApi.setSelectedOptions([]);
-          if (stateManager.existsSelected.getValue())
-            selections.internalApi.setExistsSelected(false);
-          if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
-        },
+        clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
-        setSelectedOptions: (options: OptionsListSelection[] | undefined) => {
-          selections.internalApi.setSelectedOptions(options);
-        },
+        setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
-      const componentApi = {
+      const componentApi: OptionsListComponentApi = {
         ...api,
+        ...dataControlManager.api,
+        ...editorStateManager.api,
+        ...selectionsManager.api,
+        ...temporaryStateManager.api,
         loadMoreSubject,
-        totalCardinality$,
-        availableOptions$,
-        invalidSelections$,
-        setExclude: selections.internalApi.setExclude,
-        deselectOption: (key: string | undefined) => {
-          const field = api.field$.getValue();
-          if (!key || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
-            return;
-          }
-
-          const keyAsType = getSelectionAsFieldType(field, key);
-
-          // delete from selections
-          const selectedOptions = stateManager.selectedOptions.getValue() ?? [];
-          const itemIndex = (stateManager.selectedOptions.getValue() ?? []).indexOf(keyAsType);
-          if (itemIndex !== -1) {
-            const newSelections = [...selectedOptions];
-            newSelections.splice(itemIndex, 1);
-            selections.internalApi.setSelectedOptions(newSelections);
-          }
-          // delete from invalid selections
-          const currentInvalid = invalidSelections$.getValue();
-          if (currentInvalid.has(keyAsType)) {
-            currentInvalid.delete(keyAsType);
-            invalidSelections$.next(new Set(currentInvalid));
-          }
-        },
-        makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
-          const field = api.field$.getValue();
-          if (!key || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
-            return;
-          }
-
-          const existsSelected = Boolean(stateManager.existsSelected.getValue());
-          const selectedOptions = stateManager.selectedOptions.getValue() ?? [];
-          const singleSelect = singleSelect$.getValue();
-
-          // the order of these checks matters, so be careful if rearranging them
-          const keyAsType = getSelectionAsFieldType(field, key);
-          if (key === 'exists-option') {
-            // if selecting exists, then deselect everything else
-            selections.internalApi.setExistsSelected(!existsSelected);
-            if (!existsSelected) {
-              selections.internalApi.setSelectedOptions([]);
-              invalidSelections$.next(new Set([]));
-            }
-          } else if (showOnlySelected || selectedOptions.includes(keyAsType)) {
-            componentApi.deselectOption(key);
-          } else if (singleSelect) {
-            // replace selection
-            selections.internalApi.setSelectedOptions([keyAsType]);
-            if (existsSelected) selections.internalApi.setExistsSelected(false);
-          } else {
-            // select option
-            if (existsSelected) selections.internalApi.setExistsSelected(false);
-            selections.internalApi.setSelectedOptions(
-              selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]
-            );
-          }
-        },
+        deselectOption: (key) =>
+          deselectOption({ api, selectionsManager, temporaryStateManager, key }),
+        makeSelection: (key: string | undefined, showOnlySelected: boolean) =>
+          makeSelection({
+            api,
+            selectionsManager,
+            temporaryStateManager,
+            editorStateManager,
+            key,
+            showOnlySelected,
+          }),
+        selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
+        deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
       };
 
-      if (selections.internalApi.hasInitialSelections) {
-        await dataControl.api.untilFiltersReady();
-      }
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
-        Component: ({ className: controlPanelClassName }) => {
+        Component: () => {
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -441,18 +345,21 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               singleSelectSubscription.unsubscribe();
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
+              selectionsSubscription.unsubscribe();
+              errorsSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
           return (
             <OptionsListControlContext.Provider
               value={{
-                stateManager,
-                api: componentApi,
-                displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
+                componentApi,
+                displaySettings: state.display_settings ?? {},
               }}
             >
-              <OptionsListControl controlPanelClassName={controlPanelClassName} />
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },

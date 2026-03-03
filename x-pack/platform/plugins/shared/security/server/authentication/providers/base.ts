@@ -17,6 +17,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
 import type { AuthenticationInfo } from '../../elasticsearch';
+import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
 import type { Tokens } from '../tokens';
@@ -35,6 +36,7 @@ export interface AuthenticationProviderOptions {
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  uiam?: UiamServicePublic;
   urls: {
     loggedOut: (request: KibanaRequest) => string;
   };
@@ -80,6 +82,18 @@ export abstract class BaseAuthenticationProvider {
   }
 
   /**
+   * Determines whether intermediate session should be invalidated after a successful login.
+   * Some providers need to have their state checked to make sure all pending login attempts have
+   * completed before invalidating the session. This is particularly important for the SAML Provider,
+   * which may have pending login requests pending
+   * @param [state] Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated, `false` otherwise.
+   */
+  shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    return true;
+  }
+
+  /**
    * Performs initial login request and creates user session. Provider isn't required to implement
    * this method if it doesn't support initial login request.
    * @param request Request instance.
@@ -122,11 +136,13 @@ export abstract class BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
-  protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+  protected async getUser(request: KibanaRequest, authHeaders?: Headers) {
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
       await this.options.client
-        .asScoped({ headers: { ...request.headers, ...authHeaders } })
+        // Use original request if no additional auth headers are provided, otherwise fall back to
+        // the "fake" request with combined headers.
+        .asScoped(authHeaders ? { headers: { ...request.headers, ...authHeaders } } : request)
         .asCurrentUser.security.authenticate()
     );
   }

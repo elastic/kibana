@@ -33,6 +33,7 @@ Object {
       "id": "test-logs-package-policy-using-output",
       "meta": Object {
         "package": Object {
+          "agentVersion": undefined,
           "name": "test_package",
           "version": "0.0.0",
         },
@@ -59,6 +60,7 @@ Object {
       "id": "test-logs-package-policy-no-output",
       "meta": Object {
         "package": Object {
+          "agentVersion": undefined,
           "name": "system",
           "version": "1.0.0",
         },
@@ -86,6 +88,14 @@ Object {
           "monitor",
         ],
       },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [],
+            "privileges": Array [],
+          },
+        ],
+      },
       "package-policy-no-output": Object {
         "indices": Array [
           Object {
@@ -104,14 +114,6 @@ Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [
-          Object {
-            "names": Array [],
-            "privileges": Array [],
-          },
         ],
       },
       "package-policy-using-output": Object {
@@ -187,6 +189,7 @@ Object {
       "id": "test-logs-package-policy-using-output",
       "meta": Object {
         "package": Object {
+          "agentVersion": undefined,
           "name": "test_package",
           "version": "0.0.0",
         },
@@ -213,6 +216,7 @@ Object {
       "id": "test-logs-package-policy-no-output",
       "meta": Object {
         "package": Object {
+          "agentVersion": undefined,
           "name": "system",
           "version": "1.0.0",
         },
@@ -240,6 +244,14 @@ Object {
           "monitor",
         ],
       },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [],
+            "privileges": Array [],
+          },
+        ],
+      },
       "package-policy-no-output": Object {
         "indices": Array [
           Object {
@@ -250,21 +262,6 @@ Object {
               "auto_configure",
               "create_doc",
             ],
-          },
-        ],
-      },
-    },
-    "default": Object {
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [
-          Object {
-            "names": Array [],
-            "privileges": Array [],
           },
         ],
       },
@@ -294,13 +291,6 @@ Object {
     "data-output-id": Object {
       "hosts": Array [
         "http://es-data.co:9201",
-      ],
-      "preset": "balanced",
-      "type": "elasticsearch",
-    },
-    "default": Object {
-      "hosts": Array [
-        "http://127.0.0.1:9201",
       ],
       "preset": "balanced",
       "type": "elasticsearch",
@@ -338,7 +328,7 @@ Object {
       "metrics": true,
       "namespace": "default",
       "traces": false,
-      "use_output": "default",
+      "use_output": "data-output-id",
     },
     "protection": Object {
       "enabled": false,
@@ -360,13 +350,6 @@ Object {
           "monitor",
         ],
       },
-    },
-    "default": Object {
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
       "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
@@ -383,13 +366,6 @@ Object {
     "data-output-id": Object {
       "hosts": Array [
         "http://es-data.co:9201",
-      ],
-      "preset": "balanced",
-      "type": "elasticsearch",
-    },
-    "default": Object {
-      "hosts": Array [
-        "http://127.0.0.1:9201",
       ],
       "preset": "balanced",
       "type": "elasticsearch",

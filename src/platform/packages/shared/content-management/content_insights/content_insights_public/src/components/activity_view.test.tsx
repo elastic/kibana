@@ -11,8 +11,9 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { ActivityView as ActivityViewComponent, ActivityViewProps } from './activity_view';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
+import type { ActivityViewProps } from './activity_view';
+import { ActivityView as ActivityViewComponent } from './activity_view';
 
 const mockGetUserProfile = jest.fn(async (uid: string) => ({
   uid,

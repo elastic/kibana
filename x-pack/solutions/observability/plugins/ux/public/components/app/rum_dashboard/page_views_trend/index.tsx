@@ -10,13 +10,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import type { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export function PageViewsTrend() {
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   return (
-    <div className="pageViewsChart">
+    <div data-test-subj="uxPageViewsChart" className="pageViewsChart">
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">

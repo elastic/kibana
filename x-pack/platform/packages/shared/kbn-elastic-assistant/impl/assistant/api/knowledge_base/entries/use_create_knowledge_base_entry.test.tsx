@@ -6,17 +6,15 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import {
-  useCreateKnowledgeBaseEntry,
-  UseCreateKnowledgeBaseEntryParams,
-} from './use_create_knowledge_base_entry';
+import type { UseCreateKnowledgeBaseEntryParams } from './use_create_knowledge_base_entry';
+import { useCreateKnowledgeBaseEntry } from './use_create_knowledge_base_entry';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 
 jest.mock('./use_knowledge_base_entries', () => ({
   useInvalidateKnowledgeBaseEntries: jest.fn(),
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn().mockImplementation((queryKey, fn, opts) => {
     return {
       mutate: async (variables: unknown) => {

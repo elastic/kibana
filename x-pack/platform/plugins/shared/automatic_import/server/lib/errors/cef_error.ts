@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from '@kbn/core/server';
-import {
+import type { KibanaResponseFactory } from '@kbn/core/server';
+import type {
   GenerationErrorAttributes,
   GenerationErrorBody,
 } from '../../../common/api/generation_error';
-import { ErrorThatHandlesItsOwnResponse } from './types';
+import type { ErrorThatHandlesItsOwnResponse } from './types';
 import { GenerationErrorCode } from '../../../common/constants';
 
 export class CefError extends Error implements ErrorThatHandlesItsOwnResponse {

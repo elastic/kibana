@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './services/log_sources_service/types';
+export type * from './services/log_sources_service/types';

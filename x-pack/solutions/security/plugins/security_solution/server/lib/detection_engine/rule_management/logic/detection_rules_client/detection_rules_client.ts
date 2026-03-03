@@ -10,7 +10,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -18,6 +18,8 @@ import type { ProductFeaturesService } from '../../../../product_features_servic
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
+  BulkDeleteRulesArgs,
+  BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
@@ -25,16 +27,19 @@ import type {
   ImportRuleArgs,
   ImportRulesArgs,
   PatchRuleArgs,
+  RevertPrebuiltRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
+import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
+import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
 interface DetectionRulesClientParams {
@@ -137,6 +142,12 @@ export const createDetectionRulesClient = ({
       });
     },
 
+    async bulkDeleteRules({ ruleIds }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
+      return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
+        return bulkDeleteRules({ rulesClient, ruleIds });
+      });
+    },
+
     async upgradePrebuiltRule({ ruleAsset }: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
         return upgradePrebuiltRule({
@@ -145,6 +156,22 @@ export const createDetectionRulesClient = ({
           ruleAsset,
           mlAuthz,
           prebuiltRuleAssetClient,
+        });
+      });
+    },
+
+    async revertPrebuiltRule({
+      ruleAsset,
+      existingRule,
+    }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
+      return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
+        return revertPrebuiltRule({
+          actionsClient,
+          rulesClient,
+          ruleAsset,
+          mlAuthz,
+          prebuiltRuleAssetClient,
+          existingRule,
         });
       });
     },

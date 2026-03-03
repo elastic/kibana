@@ -10,6 +10,15 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { CONNECTOR_ID as SLACK_CONNECTOR_ID } from '@kbn/connector-schemas/slack/constants';
+import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
+import type {
+  PostBlockkitParams,
+  PostMessageParams,
+  SlackApiActionParams,
+  SlackApiConfig,
+  SlackApiSecrets,
+} from '@kbn/connector-schemas/slack_api';
 import {
   ACTION_TYPE_TITLE,
   CHANNEL_REQUIRED,
@@ -17,27 +26,47 @@ import {
   SELECT_MESSAGE,
   JSON_REQUIRED,
   BLOCKS_REQUIRED,
+  CHANNEL_NAME_ERROR,
 } from './translations';
-import type {
-  SlackApiActionParams,
-  SlackApiSecrets,
-  PostMessageParams,
-  SlackApiConfig,
-  PostBlockkitParams,
-} from '../../../common/slack_api/types';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
-import { SlackActionParams } from '../types';
+import type { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
+import { serializer } from './form_serializer';
+import { deserializer } from './form_deserializer';
 
-const isChannelValid = (channels?: string[], channelIds?: string[]) => {
-  if (
-    (channels === undefined && !channelIds?.length) ||
-    (channelIds === undefined && !channels?.length) ||
-    (!channelIds?.length && !channels?.length)
-  ) {
+const DEFAULT_PARAMS = { subAction: 'postMessage' as const, subActionParams: { text: undefined } };
+
+const getChannelErrors = (channels?: string[], channelIds?: string[], channelNames?: string[]) => {
+  const isUndefinedOrEmptyArray = (arr?: string[]) => {
+    if (!arr || arr.length === 0) {
+      return true;
+    }
+
     return false;
+  };
+
+  const isChannelNamesEmpty = isUndefinedOrEmptyArray(channelNames);
+  const isChannelIdsEmpty = isUndefinedOrEmptyArray(channelIds);
+  const isChannelsEmpty = isUndefinedOrEmptyArray(channels);
+
+  const allEmpty = isChannelNamesEmpty && isChannelIdsEmpty && isChannelsEmpty;
+
+  if (allEmpty) {
+    return [CHANNEL_REQUIRED];
   }
-  return true;
+
+  if (
+    channelNames &&
+    channelNames.length > 0 &&
+    channelNames.some((channelName) => !channelName.startsWith('#'))
+  ) {
+    return [CHANNEL_NAME_ERROR];
+  }
+
+  if (!allEmpty) {
+    return [];
+  }
+
+  return [];
 };
 
 export const getConnectorType = (): ConnectorTypeModel<
@@ -47,7 +76,10 @@ export const getConnectorType = (): ConnectorTypeModel<
 > => ({
   id: SLACK_API_CONNECTOR_ID,
   subtype,
-  hideInUi: true,
+  // Hide slack api connector in UI when when slack connector is enabled in config
+  getHideInUi: (actionTypes) =>
+    actionTypes.find((actionType) => actionType.id === SLACK_CONNECTOR_ID)?.enabledInConfig ===
+    true,
   modalWidth: 675,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,
@@ -59,18 +91,22 @@ export const getConnectorType = (): ConnectorTypeModel<
       text: new Array<string>(),
       channels: new Array<string>(),
     };
+
     const validationResult = { errors };
+
     if (actionParams.subAction === 'postMessage' || actionParams.subAction === 'postBlockkit') {
       if (!actionParams.subActionParams.text) {
         errors.text.push(MESSAGE_REQUIRED);
       }
-      if (
-        !isChannelValid(
-          actionParams.subActionParams.channels,
-          actionParams.subActionParams.channelIds
-        )
-      ) {
-        errors.channels.push(CHANNEL_REQUIRED);
+
+      const channelErrors = getChannelErrors(
+        actionParams.subActionParams.channels,
+        actionParams.subActionParams.channelIds,
+        actionParams.subActionParams.channelNames
+      );
+
+      if (channelErrors.length > 0) {
+        errors.channels.push(...channelErrors);
       }
 
       if (actionParams.subAction === 'postBlockkit' && actionParams.subActionParams.text) {
@@ -84,6 +120,7 @@ export const getConnectorType = (): ConnectorTypeModel<
         }
       }
     }
+
     return validationResult;
   },
   actionConnectorFields: lazy(() => import('./slack_connectors')),
@@ -104,4 +141,10 @@ export const getConnectorType = (): ConnectorTypeModel<
     }
     return {};
   },
+  connectorForm: {
+    serializer,
+    deserializer,
+  },
+  defaultActionParams: DEFAULT_PARAMS,
+  defaultRecoveredActionParams: DEFAULT_PARAMS,
 });

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
 export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewPicker } from './dataview_picker/data_view_picker';
 export { DataViewSelector } from './dataview_picker/data_view_selector';
@@ -21,6 +19,4 @@ export { FilterItem } from './filter_bar/filter_item/filter_item';
 export { FilterItems } from './filter_bar/filter_item/filter_items';
 export { IndexPatternSelect } from './index_pattern_select/index_pattern_select';
 export { QueryBarTopRow } from './query_string_input/query_bar_top_row';
-export { QueryStringInput } from './query_string_input/query_string_input';
-export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { default as SearchBar } from './search_bar/search_bar';

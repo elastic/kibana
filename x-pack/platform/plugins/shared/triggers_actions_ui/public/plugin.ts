@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin as CorePlugin,
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -16,6 +22,7 @@ import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -23,8 +30,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -34,6 +40,10 @@ import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plug
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -65,6 +75,7 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
 
 import type {
   ActionTypeModel,
@@ -84,6 +95,7 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import type { RuleSettingsLinkProps } from './application/components/rules_setting/rules_settings_link';
 import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
@@ -127,7 +139,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
-  getRulesSettingsLink: () => ReactElement;
+  getRulesSettingsLink: (props: RuleSettingsLinkProps) => ReactElement<RuleSettingsLinkProps>;
   getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
     isRuleSnoozed: boolean;
     getNextRuleSnoozeSchedule: {
@@ -153,7 +165,6 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -166,6 +177,10 @@ interface PluginsStart {
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  uiActions: UiActionsStart;
+  contentManagement?: ContentManagementPublicStart;
+  share: SharePluginStart;
+  cps?: CPSPluginStart;
 }
 
 export class Plugin
@@ -182,19 +197,25 @@ export class Plugin
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
+  private readonly isServerless: boolean;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+    const isServerless = this.isServerless;
+    const experimentalFeatures = this.experimentalFeatures;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      enabledEmailServices: plugins.actions.enabledEmailServices,
+      isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -255,6 +276,69 @@ export class Plugin
     }
 
     if (this.config.rules.enabled) {
+      if (this.experimentalFeatures.unifiedRulesPage) {
+        core.application.register({
+          id: 'rules',
+          appRoute: '/app/rules',
+          title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
+            defaultMessage: 'Rules',
+          }),
+          category: DEFAULT_APP_CATEGORIES.management,
+          visibleIn: ['sideNav'],
+          async mount(params: AppMountParameters) {
+            const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+              CoreStart,
+              PluginsStart,
+              unknown
+            ];
+
+            const { renderRulesPageApp } = await import('./application/rules_page_app');
+
+            // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+            // subset of this privilege are not authorized to access this endpoint and will receive a 404
+            // error that causes the Alerting view to fail to load.
+            let kibanaFeatures: KibanaFeature[];
+            try {
+              kibanaFeatures = await pluginsStart.features.getFeatures();
+            } catch (err) {
+              kibanaFeatures = [];
+            }
+
+            return renderRulesPageApp({
+              ...coreStart,
+              actions: plugins.actions,
+              cloud: plugins.cloud,
+              data: pluginsStart.data,
+              dataViews: pluginsStart.dataViews,
+              dataViewEditor: pluginsStart.dataViewEditor,
+              charts: pluginsStart.charts,
+              alerting: pluginsStart.alerting,
+              spaces: pluginsStart.spaces,
+              unifiedSearch: pluginsStart.unifiedSearch,
+              isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+              element: params.element,
+              theme: coreStart.theme,
+              storage: new Storage(window.localStorage),
+              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              history: params.history,
+              actionTypeRegistry,
+              ruleTypeRegistry,
+              kibanaFeatures,
+              licensing: pluginsStart.licensing,
+              expressions: pluginsStart.expressions,
+              isServerless,
+              fieldFormats: pluginsStart.fieldFormats,
+              lens: pluginsStart.lens,
+              fieldsMetadata: pluginsStart.fieldsMetadata,
+              contentManagement: pluginsStart.contentManagement,
+              share: pluginsStart.share,
+              cps: pluginsStart.cps,
+              uiActions: pluginsStart.uiActions,
+            });
+          },
+        });
+      }
+
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
@@ -266,6 +350,29 @@ export class Plugin
             unknown
           ];
 
+          if (experimentalFeatures.unifiedRulesPage) {
+            const currentLocation = params.history.location;
+            const search = currentLocation.search;
+
+            const [, page, id] = currentLocation.pathname.split('/');
+
+            switch (page) {
+              case 'rule':
+                await coreStart.application.navigateToApp('rules', {
+                  path: getRulesAppDetailsRoute(id),
+                  replace: true,
+                });
+                break;
+              default:
+                await coreStart.application.navigateToApp('rules', {
+                  path: currentLocation.pathname + search,
+                  replace: true,
+                });
+                break;
+            }
+
+            return () => {};
+          }
           const { renderApp } = await import('./application/rules_app');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
@@ -281,7 +388,6 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            dashboard: pluginsStart.dashboard,
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -305,6 +411,10 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            contentManagement: pluginsStart.contentManagement,
+            share: pluginsStart.share,
+            uiActions: pluginsStart.uiActions,
+            cps: pluginsStart.cps,
           });
         },
       });
@@ -336,7 +446,6 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
-          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -352,7 +461,10 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
+          share: pluginsStart.share,
           kibanaFeatures,
+          isServerless,
+          uiActions: pluginsStart.uiActions,
         });
       },
     });
@@ -380,7 +492,6 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
@@ -399,10 +510,11 @@ export class Plugin
             kibanaFeatures,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
-            isServerless: !!pluginsStart.serverless,
+            isServerless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            uiActions: pluginsStart.uiActions,
           });
         },
       });
@@ -426,6 +538,26 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const createAlertRuleAction = async () => {
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
+        coreStart: core,
+        ...plugins,
+      });
+      return action;
+    };
+
+    plugins.uiActions.addTriggerActionAsync(
+      ALERT_RULE_TRIGGER,
+      ALERT_RULE_TRIGGER,
+      createAlertRuleAction
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ALERT_RULE_TRIGGER,
+      createAlertRuleAction
+    );
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
@@ -448,6 +580,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
         });
       },
       getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
@@ -455,6 +588,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
         });
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
@@ -512,8 +646,8 @@ export class Plugin
       getUntrackModal: (props: UntrackAlertsModalProps) => {
         return getUntrackModalLazy(props);
       },
-      getRulesSettingsLink: () => {
-        return getRulesSettingsLinkLazy();
+      getRulesSettingsLink: (props: RuleSettingsLinkProps) => {
+        return getRulesSettingsLinkLazy(props);
       },
       getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
         return {

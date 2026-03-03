@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiToolTip,
+  EuiSwitch,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
 
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
 import { SelectedActions } from './selected_actions';
 import { SummaryCount } from './summary_count';
-import { SHOW_REAL_VALUES, SHOW_ANONYMIZED_LABEL } from '../../translations';
+import { ANONYMIZATION_ARIAL_LABEL, SHOW_ANONYMIZED_LABEL } from '../../translations';
 
 interface Props {
   alertsCount: number;
@@ -48,63 +49,87 @@ const SummaryComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
+  const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
+  const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
+
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      data-test-subj="summary"
-      justifyContent="spaceBetween"
-      responsive={false}
-      wrap={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <SummaryCount
-              alertsCount={alertsCount}
-              attackDiscoveriesCount={attackDiscoveriesCount}
-              lastUpdated={lastUpdated}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <SelectedActions
-              refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
-              selectedConnectorAttackDiscoveries={selectedConnectorAttackDiscoveries}
-              selectedAttackDiscoveries={selectedAttackDiscoveries}
-              setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
-            />
-          </EuiFlexItem>
-
-          {isLoading && (
+    <>
+      <EuiFlexGroup
+        alignItems="center"
+        data-test-subj="summary"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={true}>
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner
-                css={css`
-                  margin-left: ${euiTheme.size.s};
-                `}
-                size="s"
+              <SummaryCount
+                alertsCount={alertsCount}
+                attackDiscoveriesCount={attackDiscoveriesCount}
+                lastUpdated={lastUpdated}
               />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
-          data-test-subj="toggleAnonymizedToolTip"
-        >
-          <EuiButtonIcon
-            aria-label={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
-            css={css`
-              border-radius: 50%;
-            `}
-            data-test-subj="toggleAnonymized"
-            iconType={showAnonymized ? 'eye' : 'eyeClosed'}
-            onClick={onToggleShowAnonymized}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <SelectedActions
+                refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
+                selectedConnectorAttackDiscoveries={selectedConnectorAttackDiscoveries}
+                selectedAttackDiscoveries={selectedAttackDiscoveries}
+                setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+              />
+            </EuiFlexItem>
+
+            {isLoading && (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner
+                  css={css`
+                    margin-left: ${euiTheme.size.s};
+                  `}
+                  size="s"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            data-test-subj="anonymizationGroup"
+            gutterSize="s"
+            responsive={false}
+            wrap={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={showAnonymized}
+                compressed={true}
+                data-test-subj="toggleAnonymized"
+                label={SHOW_ANONYMIZED_LABEL}
+                onChange={onToggleShowAnonymized}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={ANONYMIZATION_ARIAL_LABEL}
+                data-test-subj="anonymizationSettings"
+                iconType="gear"
+                onClick={showAnonymizationModal}
+                size="s"
+                color="text"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isAnonymizationModalVisible && (
+        <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />
+      )}
+    </>
   );
 };
 

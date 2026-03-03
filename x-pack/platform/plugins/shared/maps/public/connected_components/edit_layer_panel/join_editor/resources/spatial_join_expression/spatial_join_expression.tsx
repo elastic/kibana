@@ -8,15 +8,12 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ESDistanceSourceDescriptor,
-  JoinSourceDescriptor,
-} from '../../../../../../common/descriptor_types';
+import type { ESDistanceSourceDescriptor } from '../../../../../../common/descriptor_types';
 import { SpatialJoinPopoverContent } from './spatial_join_popover_content';
 
 interface Props {
   sourceDescriptor: Partial<ESDistanceSourceDescriptor>;
-  onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
+  onSourceDescriptorChange: (sourceDescriptor: Partial<ESDistanceSourceDescriptor>) => void;
 }
 
 export function SpatialJoinExpression(props: Props) {

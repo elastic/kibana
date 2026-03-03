@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/server';
+import type { Plugin } from '@kbn/core/server';
 
 export class GlobalSearchBarPlugin implements Plugin {
   setup() {}

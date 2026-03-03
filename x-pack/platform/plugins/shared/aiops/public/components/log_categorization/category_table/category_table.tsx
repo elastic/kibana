@@ -152,7 +152,7 @@ export const CategoryTable: FC<Props> = ({
             {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
               defaultMessage: 'Tokens',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -298,6 +298,9 @@ export const CategoryTable: FC<Props> = ({
               }
             : undefined;
         }}
+        tableCaption={i18n.translate('xpack.aiops.logCategorization.categoryTable.tableCaption', {
+          defaultMessage: 'Log pattern categories',
+        })}
       />
     </div>
   );

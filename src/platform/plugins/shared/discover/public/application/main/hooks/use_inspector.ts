@@ -10,17 +10,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {
   InspectorSession,
-  RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
-import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
-
-export interface InspectorAdapters {
-  requests: RequestAdapter;
-  lensRequests?: RequestAdapter;
-}
+import {
+  internalStateActions,
+  useInternalStateSelector,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+  useCurrentTabRuntimeState,
+} from '../state_management/redux';
+import { useActiveContexts } from '../../../context_awareness/hooks';
 
 export function useInspector({
   inspector,
@@ -29,31 +30,68 @@ export function useInspector({
   inspector: InspectorPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }) {
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+
   const dispatch = useInternalStateDispatch();
+  const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
+
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const onOpenInspector = useCallback(() => {
-    // prevent overlapping
-    dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
+  );
 
-    const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
+  const getContextsAdapter = useActiveContexts({
+    dataDocuments$: stateContainer.dataState.data$.documents$,
+  });
 
-    const requestAdapters = inspectorAdapters.lensRequests
-      ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
-      : [inspectorAdapters.requests];
+  const onOpenInspector = useCallback(
+    (onClose?: () => void) => {
+      // prevent overlapping
+      dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
-    const session = inspector.open(
-      { requests: new AggregateRequestAdapter(requestAdapters) },
-      { title: stateContainer.savedSearchState.getTitle() }
-    );
+      const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
-    setInspectorSession(session);
-  }, [
-    dispatch,
-    stateContainer.dataState.inspectorAdapters,
-    stateContainer.savedSearchState,
-    inspector,
-  ]);
+      const requestAdapters = [
+        inspectorAdapters.requests,
+        inspectorAdapters.lensRequests,
+        cascadedDocumentsFetcher.getRequestAdapter(),
+      ].filter((adapter) => !!adapter);
+
+      const session = inspector.open(
+        {
+          requests: new AggregateRequestAdapter(requestAdapters),
+          contexts: getContextsAdapter({
+            onOpenDocDetails: (record) => {
+              session?.close();
+              dispatch(setExpandedDoc({ expandedDoc: record }));
+            },
+          }),
+        },
+        { title: persistedDiscoverSession?.title }
+      );
+
+      setInspectorSession(session);
+
+      if (onClose) {
+        session?.onClose.then(() => {
+          onClose();
+        });
+      }
+    },
+    [
+      dispatch,
+      setExpandedDoc,
+      cascadedDocumentsFetcher,
+      stateContainer.dataState.inspectorAdapters,
+      inspector,
+      getContextsAdapter,
+      persistedDiscoverSession?.title,
+    ]
+  );
 
   useEffect(() => {
     return () => {

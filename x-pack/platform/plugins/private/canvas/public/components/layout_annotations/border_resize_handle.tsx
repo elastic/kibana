@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   transformMatrix: TransformMatrix3d;
@@ -25,6 +26,7 @@ export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }
 );
 
 BorderResizeHandle.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   zoomScale: PropTypes.number,
 };

@@ -24,7 +24,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   IndexSettingAction,
   ResponseError,
@@ -129,6 +129,7 @@ export const RemoveIndexSettingsFlyout = ({
         {statusType === 'error' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.errorTitle}
               color="danger"
               iconType="warning"

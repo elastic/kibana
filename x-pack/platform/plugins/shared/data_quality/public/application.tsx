@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -15,7 +15,7 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { KbnUrlStateStorageFromRouterProvider } from './utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
-import { AppPluginStartDependencies, DataQualityPluginStart } from './types';
+import type { AppPluginStartDependencies, DataQualityPluginStart } from './types';
 import { DatasetQualityRoute, DatasetQualityDetailsRoute } from './routes';
 import { PLUGIN_ID } from '../common';
 

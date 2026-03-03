@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_INDEX_TYPES_MAP, HASH_TO_VERSION_MAP, REMOVED_TYPES } from './src/constants';
+export { DEFAULT_INDEX_TYPES_MAP, HASH_TO_VERSION_MAP } from './src/constants';
 export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
   getProperty,
@@ -15,6 +15,7 @@ export {
   getRootPropertiesObjects,
   getTypes,
   type IndexMapping,
+  type IndexMappingSafe,
   type IndexMappingMeta,
   type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
@@ -35,6 +36,7 @@ export {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
 } from './src/saved_objects_config';
+export type { ISavedObjectTypeRegistryInternal } from './src/saved_objects_type_registry';
 export { SavedObjectTypeRegistry } from './src/saved_objects_type_registry';
 export type {
   IKibanaMigrator,
@@ -56,6 +58,7 @@ export {
 } from './src/utils';
 export {
   modelVersionVirtualMajor,
+  initialModelVersion,
   globalSwitchToModelVersionAt,
   assertValidModelVersion,
   isVirtualModelVersion,
@@ -64,7 +67,6 @@ export {
   getModelVersionMapForTypes,
   getLatestModelVersion,
   getCurrentVirtualVersion,
-  getLatestMigrationVersion,
   getVirtualVersionMap,
   getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,

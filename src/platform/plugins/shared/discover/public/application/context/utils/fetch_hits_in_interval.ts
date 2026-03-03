@@ -19,6 +19,7 @@ import { convertTimeValueToIso } from './date_conversion';
 import type { IntervalValue } from './generate_intervals';
 import type { SurrDocType } from '../services/context';
 import type { DiscoverServices } from '../../../build_services';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 interface RangeQuery {
   format: string;
@@ -44,12 +45,12 @@ export async function fetchHitsInInterval(
   nanosValue: string,
   anchorId: string,
   type: SurrDocType,
-  services: DiscoverServices
+  services: DiscoverServices,
+  scopedProfilesManager: ScopedProfilesManager
 ): Promise<{
   rows: DataTableRecord[];
   interceptedWarnings: SearchResponseWarning[];
 }> {
-  const { profilesManager } = services;
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };
@@ -103,7 +104,7 @@ export async function fetchHitsInInterval(
   const rows = buildDataTableRecordList({
     records: rawResponse.hits?.hits,
     dataView,
-    processRecord: (record) => profilesManager.resolveDocumentProfile({ record }),
+    processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
   });
   const interceptedWarnings: SearchResponseWarning[] = [];
   services.data.search.showWarnings(adapter, (warning) => {

@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { LicensingCallout } from '../../../shared/licensing_callout/licensing_callout';
 

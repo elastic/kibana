@@ -11,19 +11,15 @@ import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  DEFAULT_LOGS_DATA_VIEW,
-  DEGRADED_DOCS_QUERY,
-  FAILURE_STORE_SELECTOR,
-} from '../../common/constants';
+import { DEFAULT_LOGS_DATA_VIEW, FAILURE_STORE_SELECTOR } from '../../common/constants';
 import { getLensAttributes as getDegradedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
 import { getLensAttributes as getFailedLensAttributes } from '../components/dataset_quality_details/overview/document_trends/failed_docs/lens_attributes';
-import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
+import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { useCreateDataView } from './use_create_dataview';
 import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import { useRedirectLink } from './use_redirect_link';
+import { useEsqlRedirectLink } from './use_esql_redirect_link';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
 
 const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
@@ -45,22 +41,15 @@ export const useQualityIssuesDocsChart = () => {
     docsTrendChart,
     breakdownField,
     integrationDetails,
-    isBreakdownFieldAsserted,
   } = useDatasetQualityDetailsState();
 
-  const {
-    trackDatasetDetailsBreakdownFieldChanged,
-    trackDetailsNavigated,
-    navigationTargets,
-    navigationSources,
-  } = useDatasetDetailsTelemetry();
+  const { trackDetailsNavigated, navigationTargets, navigationSources } =
+    useDatasetDetailsTelemetry();
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<
     ReturnType<typeof getDegradedLensAttributes | typeof getFailedLensAttributes> | undefined
   >(undefined);
-
-  const query = docsTrendChart === 'degraded' ? DEGRADED_DOCS_QUERY : '';
 
   const { dataView } = useCreateDataView({
     indexPatternString: getDataViewIndexPattern(
@@ -98,10 +87,6 @@ export const useQualityIssuesDocsChart = () => {
   );
 
   useEffect(() => {
-    if (isBreakdownFieldAsserted) trackDatasetDetailsBreakdownFieldChanged();
-  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldAsserted]);
-
-  useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
     const datasetTitle =
       integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ??
@@ -110,13 +95,13 @@ export const useQualityIssuesDocsChart = () => {
     const lensAttributes =
       docsTrendChart === 'degraded'
         ? getDegradedLensAttributes({
-            color: euiTheme.colors.danger,
+            color: euiTheme.colors.vis.euiColorVis6,
             dataStream: dataStreamName,
             datasetTitle,
             breakdownFieldName: breakdownDataViewField?.name,
           })
         : getFailedLensAttributes({
-            color: euiTheme.colors.danger,
+            color: euiTheme.colors.vis.euiColorVis6,
             dataStream: dataStreamName,
             datasetTitle,
             breakdownFieldName: breakdownDataViewField?.name,
@@ -130,6 +115,7 @@ export const useQualityIssuesDocsChart = () => {
     docsTrendChart,
     integrationDetails?.integration?.integration?.datasets,
     datasetDetails.name,
+    euiTheme.colors.vis.euiColorVis6,
   ]);
 
   const openInLensCallback = useCallback(() => {
@@ -137,7 +123,7 @@ export const useQualityIssuesDocsChart = () => {
       trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
       lens.navigateToPrefilledEditor({
         id: '',
-        timeRange,
+        time_range: timeRange,
         attributes,
       });
     }
@@ -170,18 +156,20 @@ export const useQualityIssuesDocsChart = () => {
     };
   }, [openInLensCallback]);
 
+  const degradedEsqlQuery = `FROM ${datasetDetails.rawName} METADATA _ignored | WHERE _ignored IS NOT NULL`;
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures`;
+
+  const esqlQuery = docsTrendChart === 'degraded' ? degradedEsqlQuery : failedEsqlQuery;
+
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query },
+    query: { esql: esqlQuery },
     navigationSource: navigationSources.Chart,
   });
 
-  const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
-    query: { language: 'kuery', query },
+  const redirectLinkProps = useEsqlRedirectLink({
+    esqlQuery,
     timeRangeConfig: timeRange,
-    breakdownField: breakdownDataViewField?.name,
     sendTelemetry,
-    selector: docsTrendChart === 'failed' ? FAILURE_STORE_SELECTOR : undefined,
   });
 
   const extraActions: Action[] = [getOpenInLensAction];

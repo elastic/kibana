@@ -1,15 +1,15 @@
-{
-  "a514e5f6-1d0d-4fe9-85a9-f7ba40665033": {
+[
+  {
     "type": "visualization",
-    "gridData": {
+    "grid": {
       "x": 0,
       "y": 0,
       "w": 28,
       "h": 10,
       "i": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033"
     },
-    "explicitInput": {
-      "id": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+    "uid": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+    "config": {
       "savedVis": {
         "id": "",
         "title": "",
@@ -35,17 +35,17 @@
       "enhancements": {}
     }
   },
-  "b06b849e-f4fd-423c-a582-5c4bfec812c9": {
+  {
     "type": "lens",
-    "gridData": {
+    "grid": {
       "x": 30,
       "y": 0,
       "w": 20,
       "h": 21,
       "i": "b06b849e-f4fd-423c-a582-5c4bfec812c9"
     },
-    "explicitInput": {
-      "id": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+    "uid": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+    "config": {
       "title": "Destinations",
       "attributes": {
         "title": "",
@@ -142,17 +142,17 @@
       "enhancements": {}
     }
   },
-  "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a": {
+  {
     "type": "lens",
-    "gridData": {
+    "grid": {
       "x": 0,
       "y": 9,
       "w": 28,
       "h": 11,
       "i": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a"
     },
+    "uid": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
     "explicitInput": {
-      "id": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
       "enhancements": {},
       "attributes": {
         "visualizationType": "lnsXY",
@@ -332,4 +332,4 @@
       "title": "[Logs] Bytes distribution"
     }
   }
-}
+]

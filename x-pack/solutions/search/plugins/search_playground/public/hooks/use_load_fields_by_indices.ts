@@ -6,16 +6,18 @@
  */
 
 import { useEffect } from 'react';
-import { UseFormReturn } from 'react-hook-form/dist/types';
-import { useUsageTracker } from './use_usage_tracker';
-import { PlaygroundForm, PlaygroundFormFields } from '../types';
-import { useIndicesFields } from './use_indices_fields';
+import type { UseFormReturn } from 'react-hook-form/dist/types';
+import type { IndexFields } from '@kbn/search-queries';
 import {
-  createQuery,
+  generateSearchQuery,
   getDefaultQueryFields,
   getDefaultSourceFields,
-  IndexFields,
-} from '../utils/create_query';
+} from '@kbn/search-queries';
+
+import { useUsageTracker } from './use_usage_tracker';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields } from '../types';
+import { useIndicesFields } from './use_indices_fields';
 import { AnalyticsEvents } from '../analytics/constants';
 
 const mergeDefaultAndCurrentValues = (
@@ -52,7 +54,7 @@ export const useLoadFieldsByIndices = ({
 
     setValue(
       PlaygroundFormFields.elasticsearchQuery,
-      createQuery(mergedQueryFields, mergedSourceFields, fields)
+      generateSearchQuery(mergedQueryFields, mergedSourceFields, fields)
     );
     setValue(PlaygroundFormFields.queryFields, mergedQueryFields);
     setValue(PlaygroundFormFields.sourceFields, mergedSourceFields);

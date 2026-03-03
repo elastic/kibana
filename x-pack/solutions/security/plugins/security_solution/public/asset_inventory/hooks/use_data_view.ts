@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 /**
@@ -33,6 +33,7 @@ export const useDataView = (indexPattern?: string) => {
       return dataView;
     },
     {
+      retry: false,
       enabled: !!indexPattern,
     }
   );

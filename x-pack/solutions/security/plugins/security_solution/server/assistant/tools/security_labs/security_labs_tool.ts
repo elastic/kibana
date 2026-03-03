@@ -10,8 +10,19 @@ import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { knowledgeBaseReference, contentReferenceString } from '@kbn/elastic-assistant-common';
+import type { ContentReference } from '@kbn/elastic-assistant-common';
+import { contentReferenceString } from '@kbn/elastic-assistant-common';
+import yaml from 'js-yaml';
+import {
+  hrefReference,
+  knowledgeBaseReference,
+} from '@kbn/elastic-assistant-common/impl/content_references/references';
+import { Document } from 'langchain/document';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
+import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';
+
+export type SecurityLabsKnowledgeBaseToolParams = Require<AssistantToolParams, 'kbDataClient'>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -22,18 +33,20 @@ const toolDetails = {
   id: 'security-labs-knowledge-base-tool',
   name: 'SecurityLabsKnowledgeBaseTool',
 };
+
+const SECURITY_LABS_BASE_URL = 'https://www.elastic.co/security-labs/';
+
 export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+  isSupported: (params: AssistantToolParams): params is SecurityLabsKnowledgeBaseToolParams => {
     const { kbDataClient, isEnabledKnowledgeBase } = params;
     return isEnabledKnowledgeBase && kbDataClient != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient, contentReferencesStore } = params as AssistantToolParams;
-    if (kbDataClient == null) return null;
+    const { kbDataClient, contentReferencesStore } = params as SecurityLabsKnowledgeBaseToolParams;
 
     return tool(
       async (input) => {
@@ -42,15 +55,48 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           query: input.question,
         });
 
-        const reference = contentReferencesStore.add((p) =>
-          knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
-        );
+        if (docs.length === 0) {
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+          if (!isKnowledgeBaseInstalled) {
+            // prompt to help user install knowledge base
+            return 'The "AI Assistant knowledge base" needs to be installed, containing the Security Labs content. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.';
+          }
+        }
+
+        const citedDocs = docs.map((doc) => {
+          let reference: ContentReference | undefined;
+          try {
+            const yamlString = doc.pageContent.split('---')[1];
+            const parsed = yaml.load(yamlString) as {
+              slug: string | undefined;
+              title: string | undefined;
+            };
+            const slug = parsed.slug;
+            const title = parsed.title;
+
+            if (!slug || !title) {
+              throw new Error('Slug or title not found in YAML');
+            }
+
+            reference = contentReferencesStore.add((p) =>
+              hrefReference(p.id, `${SECURITY_LABS_BASE_URL}${slug}`, `Security Labs: ${title}`)
+            );
+          } catch (_error) {
+            reference = contentReferencesStore.add((p) =>
+              knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
+            );
+          }
+          return new Document({
+            id: doc.id,
+            pageContent: `${contentReferenceString(reference)}\n${doc.pageContent}`,
+            metadata: doc.metadata,
+          });
+        });
 
         // TODO: Token pruning
-        const result = JSON.stringify(docs).substring(0, 20000);
+        const result = JSON.stringify(citedDocs).substring(0, 20000);
 
-        const citation = contentReferenceString(reference);
-        return `${result}\n${citation}`;
+        return result;
       },
       {
         name: toolDetails.name,

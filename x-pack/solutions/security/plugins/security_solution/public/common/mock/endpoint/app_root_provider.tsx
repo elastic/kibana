@@ -10,15 +10,15 @@ import React, { memo, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
-import useObservable from 'react-use/lib/useObservable';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { UpsellingProvider } from '../../components/upselling_provider';
 import { ConsoleManager } from '../../../management/components/console';
 import { MockAssistantProvider } from '../mock_assistant_provider';
@@ -37,9 +37,7 @@ export const AppRootProvider = memo<{
   queryClient: QueryClient;
   children: ReactNode | ReactNode[];
 }>(({ store, history, coreStart, depsStart, queryClient, startServices, children }) => {
-  const { theme: themeStart } = coreStart;
-  const theme = useObservable(themeStart.theme$, themeStart.getTheme());
-  const isDarkMode = theme.darkMode;
+  const isDarkMode = useKibanaIsDarkMode();
   const services = useMemo(() => {
     return {
       ...depsStart,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const postgresLogsIndexCreateRequest: IndicesCreateRequest = {
   index: 'postgres-logs-[environment].evaluations.[date]',

@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,13 +18,14 @@ import {
   EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   JsonEditorWithMessageVariables,
   useSubAction,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SUB_ACTION } from '../../../common/tines/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/tines/constants';
 import type {
   TinesStoryObject,
   TinesWebhookObject,
@@ -32,7 +33,7 @@ import type {
   TinesStoriesActionResponse,
   TinesWebhooksActionResponse,
   TinesStoriesActionParams,
-} from '../../../common/tines/types';
+} from '@kbn/connector-schemas/tines';
 import type { TinesExecuteActionParams, TinesExecuteSubActionParams } from './types';
 import * as i18n from './translations';
 
@@ -72,7 +73,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   executionMode,
   errors,
 }) => {
-  const { toasts } = useKibana().notifications;
+  const { toasts } = useKibana().services.notifications;
   const { subAction, subActionParams } = actionParams;
   const { body, webhook, webhookUrl } = subActionParams ?? {};
 
@@ -130,10 +131,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 
   useEffect(() => {
     if (storiesError) {
-      toasts.danger({ title: i18n.STORIES_ERROR, body: storiesError.message });
+      toasts.addDanger({ title: i18n.STORIES_ERROR, text: storiesError.message });
     }
     if (webhooksError) {
-      toasts.danger({ title: i18n.WEBHOOKS_ERROR, body: webhooksError.message });
+      toasts.addDanger({ title: i18n.WEBHOOKS_ERROR, text: webhooksError.message });
     }
   }, [toasts, storiesError, webhooksError]);
 
@@ -168,7 +169,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       if (selectedStory) {
         setSelectedStoryOption(createOption(selectedStory));
       } else {
-        toasts.warning({ title: i18n.STORY_NOT_FOUND_WARNING });
+        toasts.addWarning({ title: i18n.STORY_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: undefined });
       }
     }
@@ -188,7 +189,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       if (selectedWebhook) {
         setSelectedWebhookOption(createOption(selectedWebhook));
       } else {
-        toasts.warning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
+        toasts.addWarning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: { storyId: webhook?.storyId } });
       }
     }
@@ -236,6 +237,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           helpText={i18n.STORY_HELP}
         >
           <EuiComboBox
+            isInvalid={!!errors.story?.length && selectedStoryOption !== undefined}
             aria-label={i18n.STORY_PLACEHOLDER}
             placeholder={
               webhookUrl ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER : i18n.STORY_ARIA_LABEL
@@ -259,6 +261,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           helpText={i18n.WEBHOOK_HELP}
         >
           <EuiComboBox
+            isInvalid={!!errors.webhook?.length && selectedWebhookOption !== undefined}
             aria-label={i18n.WEBHOOK_ARIA_LABEL}
             placeholder={
               webhookUrl
@@ -284,6 +287,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           {showFallbackFrom === 'error' && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.WEBHOOK_URL_ERROR_FALLBACK_TITLE}
                 color="primary"
                 data-test-subj="tines-fallbackCallout"
@@ -296,6 +300,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           {(showFallbackFrom === 'Story' || showFallbackFrom === 'Webhook') && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.WEBHOOK_URL_FALLBACK_TITLE}
                 color="primary"
                 data-test-subj="tines-fallbackCallout"
@@ -313,6 +318,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             helpText={i18n.WEBHOOK_URL_HELP}
           >
             <EuiFieldText
+              isInvalid={!!errors.webhookUrl?.length}
               placeholder={i18n.WEBHOOK_URL_PLACEHOLDER}
               value={webhookUrl}
               onChange={(ev) => {

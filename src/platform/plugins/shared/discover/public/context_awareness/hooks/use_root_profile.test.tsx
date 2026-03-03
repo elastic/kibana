@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { waitFor, act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { useRootProfile } from './use_root_profile';
 import { BehaviorSubject } from 'rxjs';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+import { SolutionType } from '../profiles';
 
-const mockSolutionNavId$ = new BehaviorSubject('solutionNavId');
+const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(SolutionType.Search);
 
 jest
   .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
@@ -23,14 +25,14 @@ jest
 const render = () => {
   return renderHook(() => useRootProfile(), {
     wrapper: ({ children }) => (
-      <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+      <DiscoverTestProvider services={discoverServiceMock}>{children}</DiscoverTestProvider>
     ),
   });
 };
 
 describe('useRootProfile', () => {
   beforeEach(() => {
-    mockSolutionNavId$.next('solutionNavId');
+    mockSolutionNavId$.next(SolutionType.Search);
   });
 
   it('should return rootProfileLoading as true', async () => {
@@ -38,6 +40,7 @@ describe('useRootProfile', () => {
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeUndefined();
     // avoid act warning
     await waitFor(() => new Promise((resolve) => resolve(null)));
   });
@@ -48,6 +51,7 @@ describe('useRootProfile', () => {
       expect(result.current.rootProfileLoading).toBe(false);
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
   });
 
@@ -57,16 +61,19 @@ describe('useRootProfile', () => {
       expect(result.current.rootProfileLoading).toBe(false);
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
-    act(() => mockSolutionNavId$.next('newSolutionNavId'));
+    act(() => mockSolutionNavId$.next(SolutionType.Observability));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeUndefined();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
       expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultEsqlQuery).toBeDefined();
     });
   });
 });

@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { ELSER_ON_ML_NODE_INFERENCE_ID } from '../../../common';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { createOrUpdateConversationIndexAssets } from './create_or_update_conversation_index_assets';
 import { createOrUpdateKnowledgeBaseIndexAssets } from './create_or_update_knowledge_base_index_assets';
@@ -31,7 +30,7 @@ export async function updateExistingIndexAssets({
   });
 
   if (!doesKbIndexExist && !doesConversationIndexExist) {
-    logger.warn('Index assets do not exist. Aborting updating index assets');
+    logger.debug('Index assets do not exist. Aborting updating index assets');
     return;
   }
 
@@ -43,13 +42,9 @@ export async function updateExistingIndexAssets({
   if (doesKbIndexExist) {
     logger.debug('Found index for knowledge base. Updating index assets.');
 
-    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
-      logger.debug(
-        `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
-      );
-      return ELSER_ON_ML_NODE_INFERENCE_ID;
-    });
-
-    await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId: currentInferenceId });
+    const inferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+    if (inferenceId) {
+      await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId });
+    }
   }
 }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 import { Settings } from '../models/settings';
 import { Watch } from '../models/watch';
 import { WatchHistoryItem } from '../models/watch_history_item';
 import { WatchStatus } from '../models/watch_status';
 
-import { BaseWatch, ExecutedWatchDetails } from '../../../common/types/watch_types';
+import type { BaseWatch, ExecutedWatchDetails } from '../../../common/types/watch_types';
 import { useRequest, sendRequest } from './use_request';
 
 import { ROUTES } from '../../../common/constants';
@@ -29,33 +29,16 @@ export const getHttpClient = () => {
 
 const basePath = ROUTES.API_ROOT;
 
-const loadWatchesDeserializer = ({
-  watches = [],
-  watchCount,
-}: {
-  watches: any[];
-  watchCount: number;
-}) => {
-  return {
-    watches: watches.map((watch: any) => Watch.fromUpstreamJson(watch)),
-    watchCount,
-  };
+const loadWatchesDeserializer = ({ watches = [] }: { watches: any[] }) => {
+  return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
 };
 
-export const useLoadWatches = (
-  pollIntervalMs: number,
-  pageSize: number,
-  pageIndex: number,
-  sortField?: string,
-  sortDirection?: string,
-  query?: string
-) => {
+export const useLoadWatches = (pollIntervalMs: number) => {
   return useRequest({
     path: `${basePath}/watches`,
     method: 'get',
     pollIntervalMs,
     deserializer: loadWatchesDeserializer,
-    query: { pageSize, pageIndex, sortField, sortDirection, query },
   });
 };
 

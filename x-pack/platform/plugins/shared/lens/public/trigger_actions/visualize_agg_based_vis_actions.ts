@@ -12,7 +12,7 @@ import {
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from '@kbn/visualizations-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import type { VisualizeEditorContext } from '../types';
+import type { VisualizeEditorContext } from '@kbn/lens-common';
 
 export const visualizeAggBasedVisAction = (application: ApplicationStart) =>
   createAction<{ [key: string]: VisualizeEditorContext }>({
@@ -22,7 +22,7 @@ export const visualizeAggBasedVisAction = (application: ApplicationStart) =>
       i18n.translate('xpack.lens.visualizeAggBasedLegend', {
         defaultMessage: 'Visualize agg based chart',
       }),
-    isCompatible: async () => !!application.capabilities.visualize_v2?.show,
+    isCompatible: async () => !!application.capabilities.visualize_v2.show,
     execute: async (context: { [key: string]: VisualizeEditorContext }) => {
       const table = Object.values(context.layers);
       const payload = {

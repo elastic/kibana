@@ -10,7 +10,7 @@
   "plugin": {
     "id": "imageEmbeddable",
     "browser": true,
-    "server": false,
+    "server": true,
     "requiredPlugins": [
       "embeddable",
       "files",
@@ -20,8 +20,8 @@
     "optionalPlugins": [
       "security",
       "screenshotMode",
-      "embeddableEnhanced"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

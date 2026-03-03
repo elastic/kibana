@@ -8,25 +8,25 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
+import type { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> => ({
-  getAllDeprecations: jest.fn().mockResolvedValue([]),
-  getDeprecations: jest.fn().mockResolvedValue([]),
-  isDeprecationResolvable: jest.fn().mockReturnValue(false),
-  resolveDeprecation: jest.fn().mockResolvedValue({ status: 'ok', payload: {} }),
-});
+const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> =>
+  lazyObject({
+    getAllDeprecations: jest.fn().mockResolvedValue([]),
+    getDeprecations: jest.fn().mockResolvedValue([]),
+    isDeprecationResolvable: jest.fn().mockReturnValue(false),
+    resolveDeprecation: jest.fn().mockResolvedValue({ status: 'ok', payload: {} }),
+  });
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<DeprecationsService>> = {
-    setup: jest.fn(),
-    start: jest.fn(),
+  const mocked: jest.Mocked<PublicMethodsOf<DeprecationsService>> = lazyObject({
+    setup: jest.fn().mockReturnValue(void 0),
+    start: jest.fn().mockReturnValue(createServiceMock()),
     stop: jest.fn(),
-  };
+  });
 
-  mocked.setup.mockReturnValue(void 0);
-  mocked.start.mockReturnValue(createServiceMock());
   return mocked;
 };
 

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   IPercentileRanksAggConfig,
-  getPercentileRanksMetricAgg,
   PercentileRanksMetricAggDependencies,
 } from './percentile_ranks';
-import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { getPercentileRanksMetricAgg } from './percentile_ranks';
+import type { IAggConfigs } from '../agg_configs';
+import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 

@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { overlayServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
-import { TagBulkAction } from '../types';
+import type { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
 
 describe('bulkDeleteAction', () => {

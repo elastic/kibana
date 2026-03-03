@@ -13,6 +13,8 @@
         "label": "PlaygroundPageMode",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25,6 +27,8 @@
         "label": "PlaygroundPageMode",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+        "lineNumber": 272,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40,6 +44,8 @@
       "label": "SearchPlaygroundPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+      "lineNumber": 49,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -54,6 +60,8 @@
       "label": "SearchPlaygroundPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+      "lineNumber": 51,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -76,6 +84,8 @@
       "label": "SearchPlaygroundPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_playground/server/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -90,6 +100,8 @@
       "label": "SearchPlaygroundPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_playground/server/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -100,8 +112,206 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
+    "interfaces": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PlaygroundSavedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "PlaygroundSavedObject",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+        "lineNumber": 117,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.queryFields",
+            "type": "Object",
+            "tags": [],
+            "label": "queryFields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[] | undefined; }"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.elasticsearchQueryJSON",
+            "type": "string",
+            "tags": [],
+            "label": "elasticsearchQueryJSON",
+            "description": [],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.userElasticsearchQueryJSON",
+            "type": "string",
+            "tags": [],
+            "label": "userElasticsearchQueryJSON",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.prompt",
+            "type": "string",
+            "tags": [],
+            "label": "prompt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.citations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "citations",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "{ sourceFields: Record<string, string[] | undefined>; docSize: number; } | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.summarizationModel",
+            "type": "Object",
+            "tags": [],
+            "label": "summarizationModel",
+            "description": [],
+            "signature": [
+              "{ connectorId: string; modelId?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.APIRoutes",
+        "type": "Enum",
+        "tags": [],
+        "label": "APIRoutes",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.SearchPlaygroundMutationKeys",
+        "type": "Enum",
+        "tags": [],
+        "label": "SearchPlaygroundMutationKeys",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/query_keys.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.SearchPlaygroundQueryKeys",
+        "type": "Enum",
+        "tags": [],
+        "label": "SearchPlaygroundQueryKeys",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/query_keys.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "searchPlayground",
@@ -111,6 +321,25 @@
         "label": "ContextModelLimitError",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.DEFAULT_CONTEXT_DOCUMENTS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_CONTEXT_DOCUMENTS",
+        "description": [],
+        "signature": [
+          "3"
+        ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -126,6 +355,8 @@
           "\"search_playground\""
         ],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -141,6 +372,8 @@
           "\"searchPlayground\""
         ],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +386,8 @@
         "label": "PLUGIN_NAME",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -168,6 +403,8 @@
           "\"/app/search_playground\""
         ],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -180,6 +417,8 @@
         "label": "ROUTE_VERSIONS",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -195,6 +434,8 @@
           "\"searchPlayground:searchModeEnabled\""
         ],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -209,6 +450,8 @@
         "label": "DEFAULT_PAGINATION",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -220,6 +463,8 @@
             "label": "from",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,6 +476,8 @@
             "label": "size",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -242,6 +489,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

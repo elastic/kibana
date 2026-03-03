@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEqual } from 'lodash';
 
 import type { AgentTargetVersion } from '../../../common/types';
 
-import { AgentPolicyInvalidError } from '../../errors';
-import { appContextService } from '..';
+import { AgentPolicyInvalidError, FleetUnauthorizedError } from '../../errors';
+import { appContextService, licenseService } from '..';
 import { checkTargetVersionsValidity } from '../../../common/services/agent_utils';
 
 export function validateRequiredVersions(
   name: string,
-  requiredVersions?: AgentTargetVersion[] | null
+  requiredVersions?: AgentTargetVersion[] | null,
+  previousRequiredVersions?: AgentTargetVersion[] | null,
+  isAuthorized?: boolean
 ): void {
   if (!requiredVersions) {
     return;
@@ -23,10 +26,27 @@ export function validateRequiredVersions(
       `Policy "${name}" failed validation: required_versions are not allowed when automatic upgrades feature is disabled`
     );
   }
+  if (requiredVersions && !licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError(
+      'Agents auto upgrades feature requires at least Enterprise license'
+    );
+  }
   const error = checkTargetVersionsValidity(requiredVersions);
   if (error) {
     throw new AgentPolicyInvalidError(
       `Policy "${name}" failed required_versions validation: ${error}`
+    );
+  }
+
+  if (isAuthorized === undefined) {
+    return;
+  }
+
+  const isChange = !isEqual(requiredVersions, previousRequiredVersions);
+
+  if (isChange && !isAuthorized) {
+    throw new FleetUnauthorizedError(
+      `updating 'required_versions' requires Agents 'All' privilege`
     );
   }
 }

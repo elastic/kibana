@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -19,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
@@ -29,12 +31,20 @@ export interface Props {
 }
 
 export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="policyDetailsFlyout" size="m" maxWidth={550}>
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="policyDetailsFlyout"
+      size="m"
+      maxWidth={550}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle id="policyDetailsFlyoutTitle" data-test-subj="title">
+            <EuiTitle id={flyoutTitleId} data-test-subj="title">
               <h2>{policy.name}</h2>
             </EuiTitle>
           </EuiFlexItem>

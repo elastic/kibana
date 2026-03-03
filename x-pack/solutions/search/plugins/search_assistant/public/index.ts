@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { PublicConfigType, SearchAssistantPlugin } from './plugin';
-import {
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { PublicConfigType } from './plugin';
+import { SearchAssistantPlugin } from './plugin';
+import type {
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
   SearchAssistantPluginStartDependencies,

@@ -1,0 +1,12 @@
+Here is the example to evaluate:
+
+**Input**  
+{{{input}}}
+
+**Output**  
+{{{output}}}
+
+**Metadata**  
+{{{metadata}}}
+
+Please review the output against each of the criteria provided in the system instructions and respond by invoking the `score` tool.

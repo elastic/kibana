@@ -7,17 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Filter } from '@kbn/es-query';
-import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
+import type { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
 import { hasESAggSourceMethod } from '../es_agg_source/types';
-import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
+import type { BoundsRequestMeta } from '../vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -30,17 +31,16 @@ import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
-import {
+import type {
   AbstractESSourceDescriptor,
-  AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { IVectorStyle } from '../../styles/vector/vector_style';
-import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { IField } from '../../fields/field';
-import { FieldFormatter } from '../../../../common/constants';
+import type { IVectorStyle } from '../../styles/vector/vector_style';
+import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import type { IField } from '../../fields/field';
+import type { FieldFormatter } from '../../../../common/constants';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { mergeExecutionContext } from '../execution_context_utils';
 import type { IESSource } from './types';
@@ -65,7 +65,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
-      type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
@@ -73,7 +72,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
       applyForceRefresh:
         typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
-    };
+    } as AbstractESSourceDescriptor;
   }
 
   constructor(descriptor: AbstractESSourceDescriptor) {
@@ -90,22 +89,22 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getApplyGlobalQuery(): boolean {
-    return this._descriptor.applyGlobalQuery;
+    return this._descriptor.applyGlobalQuery ?? true;
   }
 
   getApplyGlobalTime(): boolean {
-    return this._descriptor.applyGlobalTime;
+    return this._descriptor.applyGlobalTime ?? true;
   }
 
   getApplyForceRefresh(): boolean {
-    return this._descriptor.applyForceRefresh;
+    return this._descriptor.applyForceRefresh ?? true;
   }
 
   isQueryAware(): boolean {
     return true;
   }
 
-  cloneDescriptor(): AbstractSourceDescriptor {
+  cloneDescriptor() {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuidv4();
@@ -121,6 +120,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     executionContext,
     requestsAdapter,
     onWarning,
+    fetchOptions,
   }: {
     registerCancelCallback: (callback: () => void) => void;
     requestId: string;
@@ -130,6 +130,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     executionContext: KibanaExecutionContext;
     requestsAdapter: RequestAdapter | undefined;
     onWarning?: (warning: SearchResponseWarning) => void;
+    fetchOptions?: { projectRouting?: ProjectRouting };
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -149,6 +150,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           },
           executionContext,
           disableWarningToasts,
+          ...fetchOptions,
         })
       );
 
@@ -172,7 +174,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     requestMeta: VectorSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
-  ): Promise<ISearchSource> {
+  ): Promise<{ searchSource: ISearchSource; fetchOptions: { projectRouting?: ProjectRouting } }> {
     const indexPattern = await this.getIndexPattern();
     const globalFilters: Filter[] = requestMeta.applyGlobalQuery ? requestMeta.filters : [];
     const allFilters: Filter[] = [...globalFilters];
@@ -245,14 +247,19 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       searchSource.setParent(parents[1]);
     }
 
-    return searchSource;
+    return {
+      searchSource,
+      fetchOptions: {
+        projectRouting: requestMeta.projectRouting,
+      },
+    };
   }
 
   async getBoundsForFilters(
     boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
-    const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(boundsFilters, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       fitToBounds: {
@@ -274,6 +281,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             { description: 'es_source:bounds' },
             boundsFilters.executionContext
           ),
+          ...fetchOptions,
         })
       );
 
@@ -332,10 +340,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getGeoFieldName(): string {
-    if (!this._descriptor.geoField) {
-      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
-    }
-    return this._descriptor.geoField;
+    throw new Error('Must implement IESSource#getGeoFieldName');
   }
 
   async getIndexPattern(): Promise<DataView> {

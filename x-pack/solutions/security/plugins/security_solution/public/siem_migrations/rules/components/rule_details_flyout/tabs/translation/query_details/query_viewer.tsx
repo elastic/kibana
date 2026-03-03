@@ -39,7 +39,13 @@ export const QueryViewer: React.FC<QueryViewerProps> = React.memo(
         {onEdit ? (
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="pencil" onClick={onEdit} size="xs">
+              <EuiButtonEmpty
+                aria-label={i18n.EDIT}
+                data-test-subj="editTranslatedRuleButton"
+                iconType="pencil"
+                onClick={onEdit}
+                size="xs"
+              >
                 {i18n.EDIT}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -47,12 +53,13 @@ export const QueryViewer: React.FC<QueryViewerProps> = React.memo(
         ) : (
           <EuiSpacer size="l" />
         )}
-        <EuiTitle size="xxs">
+        <EuiTitle data-test-subj="queryViewerTitle" size="xxs">
           <h3>{ruleName}</h3>
         </EuiTitle>
         <EuiSpacer size="m" />
         {query.length ? (
           <EuiCodeBlock
+            data-test-subj="translatedRuleQueryViewer"
             language={codeBlockLanguage}
             fontSize="s"
             paddingSize="s"
@@ -61,7 +68,7 @@ export const QueryViewer: React.FC<QueryViewerProps> = React.memo(
             {query}
           </EuiCodeBlock>
         ) : (
-          <EuiText size="xs" color="subdued">
+          <EuiText data-test-subj="queryViewerQueryPlaceholder" size="xs" color="subdued">
             {queryPlaceholder}
           </EuiText>
         )}

@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Execution, ExecutionResult } from './execution';
-import { ExpressionValueError } from '../expression_types/specs';
-import { ExpressionAstExpression } from '../ast';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { Execution, ExecutionResult } from './execution';
+import type { ExpressionValueError } from '../expression_types/specs';
+import type { ExpressionAstExpression } from '../ast';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
@@ -40,8 +42,8 @@ export class ExecutionContract<
    * (available in execution context) to aborted state, letting expression
    * functions to stop their execution.
    */
-  cancel = () => {
-    this.execution.cancel();
+  cancel = (reason?: AbortReason) => {
+    this.execution.cancel(reason);
   };
 
   /**

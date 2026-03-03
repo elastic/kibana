@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { ExperimentalFeaturesService } from '../../../../services';
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
 import type { Agent, AgentPolicy } from '../../../../types';
@@ -57,12 +61,15 @@ export interface SearchAndFilterBarProps {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
   onClickAddFleetServer: () => void;
+  onClickAddCollector: () => void;
   agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
-  showAgentActivityTour: { isOpen: boolean };
+  shouldShowAgentActivityTour?: boolean;
   latestAgentActionErrors: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+  unsupportedMigrateAgents: Agent[];
+  unsupportedPrivilegeLevelChangeAgents: Agent[];
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -88,22 +95,89 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   refreshAgents,
   onClickAddAgent,
   onClickAddFleetServer,
+  onClickAddCollector,
   agentsOnCurrentPage,
   onClickAgentActivity,
-  showAgentActivityTour,
+  shouldShowAgentActivityTour,
   latestAgentActionErrors,
   sortField,
   sortOrder,
+  unsupportedMigrateAgents,
+  unsupportedPrivilegeLevelChangeAgents,
 }) => {
   const authz = useAuthz();
-
+  const { enableOpAMP } = ExperimentalFeaturesService.get();
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const { cloud } = useStartServices();
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+
+  const closeAddMenu = useCallback(() => setIsAddMenuOpen(false), []);
+
+  const addMenuItems = useMemo(() => {
+    const items = [];
+    if (authz.fleet.addFleetServers && !cloud?.isServerlessEnabled) {
+      items.push(
+        <EuiContextMenuItem
+          key="addFleetServer"
+          onClick={() => {
+            closeAddMenu();
+            onClickAddFleetServer();
+          }}
+          data-test-subj="addFleetServerButton"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.addFleetServerButton"
+            defaultMessage="Fleet Server"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+    if (authz.fleet.addAgents) {
+      items.push(
+        <EuiContextMenuItem
+          key="addAgent"
+          onClick={() => {
+            closeAddMenu();
+            onClickAddAgent();
+          }}
+          data-test-subj="addAgentButton"
+        >
+          <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Agent" />
+        </EuiContextMenuItem>
+      );
+      items.push(
+        <EuiContextMenuItem
+          key="addCollector"
+          onClick={() => {
+            closeAddMenu();
+            onClickAddCollector();
+          }}
+          data-test-subj="addCollectorButton"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.addCollectorButton"
+            defaultMessage="Collector (OpAMP)"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+    return items;
+  }, [
+    authz.fleet.addAgents,
+    authz.fleet.addFleetServers,
+    cloud?.isServerlessEnabled,
+    closeAddMenu,
+    onClickAddAgent,
+    onClickAddCollector,
+    onClickAddFleetServer,
+  ]);
+
   const NO_TAGS_VALUE = i18n.translate('xpack.fleet.agentList.noTagsValue', {
     defaultMessage: 'No Tags',
   });
   const tagsWithNoTagsIncluded = [...tags, NO_TAGS_VALUE];
+  const hasAddOptions = addMenuItems.length > 0;
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -122,47 +196,85 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
-                showAgentActivityTour={showAgentActivityTour}
+                shouldShowTour={shouldShowAgentActivityTour}
               />
             </EuiFlexItem>
-            {authz.fleet.addFleetServers && !cloud?.isServerlessEnabled ? (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addFleetServerButton.tooltip"
-                      defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
-                    />
-                  }
-                >
-                  <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addFleetServerButton"
-                      defaultMessage="Add Fleet Server"
-                    />
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-            ) : null}
-            {authz.fleet.addAgents ? (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addAgentButton.tooltip"
-                      defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
-                    />
-                  }
-                >
-                  <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addButton"
-                      defaultMessage="Add agent"
-                    />
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-            ) : null}
+            {enableOpAMP ? (
+              <>
+                {hasAddOptions ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      anchorPosition="downRight"
+                      panelPaddingSize="none"
+                      button={
+                        <EuiButton
+                          fill
+                          iconType="plusCircle"
+                          iconSide="left"
+                          onClick={() => setIsAddMenuOpen((open) => !open)}
+                          data-test-subj="addAgentMenuButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.addMenuButton"
+                            defaultMessage="Add"
+                          />
+                        </EuiButton>
+                      }
+                      isOpen={isAddMenuOpen}
+                      closePopover={closeAddMenu}
+                    >
+                      <EuiContextMenuPanel size="s" items={addMenuItems} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                ) : null}
+              </>
+            ) : (
+              <>
+                {authz.fleet.addFleetServers && !cloud?.isServerlessEnabled ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                          defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                        />
+                      }
+                    >
+                      <EuiButton
+                        onClick={onClickAddFleetServer}
+                        data-test-subj="addFleetServerButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.addFleetServerButton"
+                          defaultMessage="Add Fleet Server"
+                        />
+                      </EuiButton>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+                {authz.fleet.addAgents ? (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.addAgentButton.tooltip"
+                            defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
+                          />
+                        }
+                      >
+                        <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
+                          <FormattedMessage
+                            id="xpack.fleet.agentList.addButton"
+                            defaultMessage="Add agent"
+                          />
+                        </EuiButton>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </>
+                ) : null}
+              </>
+            )}
           </EuiFlexGroup>
         </EuiFlexGroup>
         {/* Search and filters */}
@@ -201,6 +313,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                 />
                 <EuiFilterButton
+                  isToggle
+                  isSelected={showUpgradeable}
                   hasActiveFilters={showUpgradeable}
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
@@ -229,6 +343,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                   sortField={sortField}
                   sortOrder={sortOrder}
+                  unsupportedMigrateAgents={unsupportedMigrateAgents}
+                  unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
                 />
               </EuiFlexItem>
             ) : null}

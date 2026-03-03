@@ -17,9 +17,11 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
   RouterDeprecatedApiDetails,
+  KibanaRequest,
 } from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
+import type { GenerateOpenApiDocumentOptionsFilters } from '@kbn/router-to-openapispec';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
@@ -81,6 +83,17 @@ export interface InternalHttpServiceSetup
 /** @internal */
 export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'staticAssets'> {
   staticAssets: InternalStaticAssets;
+  generateOas: (args: GenerateOasArgs) => Promise<object>;
   /** Indicates if the http server is listening on the configured port */
   isListening: () => boolean;
+  setRedactedSessionIdGetter: (
+    getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) => void;
+}
+
+/** @internal */
+export interface GenerateOasArgs {
+  pluginId?: string;
+  baseUrl: string;
+  filters?: GenerateOpenApiDocumentOptionsFilters;
 }

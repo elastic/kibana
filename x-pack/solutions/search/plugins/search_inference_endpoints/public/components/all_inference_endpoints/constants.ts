@@ -5,33 +5,22 @@
  * 2.0.
  */
 
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import {
-  SortFieldInferenceEndpoint,
-  QueryParams,
-  AllInferenceEndpointsTableState,
-  SortOrder,
-  FilterOptions,
-} from './types';
-
-export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 25;
-
-export const DEFAULT_QUERY_PARAMS: QueryParams = {
-  page: DEFAULT_TABLE_ACTIVE_PAGE,
-  perPage: DEFAULT_TABLE_LIMIT,
-  sortField: SortFieldInferenceEndpoint.inference_id,
-  sortOrder: SortOrder.asc,
-};
+  TOKEN_BASED_BILLING_DESCRIPTION,
+  RESOURCE_BASED_BILLING_DESCRIPTION,
+} from '../../../common/translations';
+import type { FilterOptions } from '../../types';
 
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   provider: [],
   type: [],
 };
 
-export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTableState = {
-  filterOptions: DEFAULT_FILTER_OPTIONS,
-  queryParams: DEFAULT_QUERY_PARAMS,
-};
-
 export const PIPELINE_URL = 'ingest/ingest_pipelines';
 export const SERVERLESS_INDEX_MANAGEMENT_URL = 'index_details';
+
+export const SERVICE_PROVIDER_DESCRIPTIONS: Record<string, string> = {
+  [ServiceProviderKeys.elastic]: TOKEN_BASED_BILLING_DESCRIPTION,
+  [ServiceProviderKeys.elasticsearch]: RESOURCE_BASED_BILLING_DESCRIPTION,
+};

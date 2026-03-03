@@ -15,6 +15,8 @@ import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   ConnectorMappings,
+  EventAttachmentPayload,
+  UnifiedAttachmentAttributes,
   UserActionAttributes,
   UserCommentAttachmentPayload,
 } from '../common/types/domain';
@@ -27,6 +29,7 @@ import {
   AttachmentType,
 } from '../common/types/domain';
 import type { CasePostRequest } from '../common/types/api';
+import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import type { CasesServerStart } from './types';
 
 const lensPersistableState = {
@@ -147,10 +150,12 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
+      incremental_id: undefined,
       title: 'Super Bad Security Issue',
       status: CaseStatuses.open,
       tags: ['defacement'],
       observables: [],
+      total_observables: 0,
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
@@ -159,6 +164,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
@@ -191,6 +197,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'Oh no, a bad meanie destroying data!',
       external_service: null,
+      incremental_id: undefined,
       title: 'Damaging Data Destruction Detected',
       status: CaseStatuses.open,
       tags: ['Data Destruction'],
@@ -202,8 +209,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -235,6 +244,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
+      incremental_id: undefined,
       title: 'Another bad one',
       status: CaseStatuses.open,
       tags: ['LOLBins'],
@@ -246,8 +256,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -283,6 +295,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
+      incremental_id: undefined,
       status: CaseStatuses.closed,
       title: 'Another bad one',
       tags: ['LOLBins'],
@@ -294,8 +307,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -557,6 +572,28 @@ export const mockCaseComments: Array<SavedObject<AttachmentAttributes>> = [
   },
 ];
 
+export const mockCaseUnifiedAttachments: Array<SavedObject<UnifiedAttachmentAttributes>> = [
+  {
+    type: 'cases-attachments',
+    id: 'mock-attachment-1',
+    attributes: {
+      type: 'comment',
+      data: { content: 'test' },
+      created_at: '2019-11-25T21:55:00.177Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    },
+    references: [],
+  },
+];
+
 export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
   {
     type: 'cases-user-actions',
@@ -664,6 +701,7 @@ export const newCase: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
 };
@@ -700,6 +738,13 @@ export const alertComment: AlertAttachmentPayload = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
+export const eventComment: EventAttachmentPayload = {
+  eventId: 'event-id-1',
+  index: 'mock-index',
+  type: AttachmentType.event as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
 export const multipleAlert: AlertAttachmentPayload = {
   ...alertComment,
   alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
@@ -730,6 +775,34 @@ export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getExternalReferenceAttachmentTypeRegistry: jest.fn(),
   getPersistableStateAttachmentTypeRegistry: jest.fn(),
+  getUnifiedAttachmentTypeRegistry: jest.fn(),
+  config: {
+    enabled: true,
+    stack: {
+      enabled: true,
+    },
+    markdownPlugins: { lens: true },
+    files: {
+      allowedMimeTypes: ALLOWED_MIME_TYPES,
+      maxSize: 1,
+    },
+    analytics: {
+      index: {
+        enabled: true,
+      },
+    },
+    incrementalId: {
+      enabled: true,
+      taskIntervalMinutes: 10,
+      taskStartDelayMinutes: 10,
+    },
+    templates: {
+      enabled: true,
+    },
+    attachments: {
+      enabled: true,
+    },
+  },
 });
 
 export const casesPluginMock = {

@@ -9,51 +9,63 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { useAuthz, useStartServices } from '../../../../../hooks';
-import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
+import type { AgentPolicy } from '../../../../../types';
+import { useAuthz } from '../../../../../hooks';
 
-export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
-  const { application } = useStartServices();
-  const authz = useAuthz();
-  const canWriteIntegrationPolicies =
-    authz.integrations.writeIntegrationPolicies && authz.fleet.allAgentPolicies;
+import { AddIntegrationFlyout } from './add_integration_flyout';
 
-  return (
-    <EuiEmptyPrompt
-      iconType="plusInCircle"
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.fleet.policyDetailsPackagePolicies.createFirstTitle"
-            defaultMessage="Add your first integration"
-          />
-        </h3>
-      }
-      body={
-        <FormattedMessage
-          id="xpack.fleet.policyDetailsPackagePolicies.createFirstMessage"
-          defaultMessage="This policy does not have any integrations yet."
-        />
-      }
-      actions={
-        <EuiButton
+export const NoPackagePolicies = memo<{ agentPolicy: AgentPolicy; refreshAgentPolicy: () => void }>(
+  ({ agentPolicy, refreshAgentPolicy }) => {
+    const authz = useAuthz();
+    const canWriteIntegrationPolicies =
+      authz.integrations.writeIntegrationPolicies && authz.fleet.allAgentPolicies;
+    const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
+
+    return (
+      <>
+        <EuiEmptyPrompt
           iconType="plusInCircle"
-          isDisabled={!canWriteIntegrationPolicies}
-          fill
-          onClick={() =>
-            application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-              path: pagePathGetters.integrations_all({})[1],
-              state: { forAgentPolicyId: policyId },
-            })
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.fleet.policyDetailsPackagePolicies.createFirstTitle"
+                defaultMessage="Add your first integration"
+              />
+            </h3>
           }
-          data-test-subj="addPackagePolicyButton"
-        >
-          <FormattedMessage
-            id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"
-            defaultMessage="Add integration"
+          body={
+            <FormattedMessage
+              id="xpack.fleet.policyDetailsPackagePolicies.createFirstMessage"
+              defaultMessage="This policy does not have any integrations yet."
+            />
+          }
+          actions={
+            <EuiButton
+              iconType="plusInCircle"
+              isDisabled={!canWriteIntegrationPolicies}
+              fill
+              onClick={() => {
+                setShowAddIntegrationFlyout(true);
+              }}
+              data-test-subj="addPackagePolicyButton"
+            >
+              <FormattedMessage
+                id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"
+                defaultMessage="Add integration"
+              />
+            </EuiButton>
+          }
+        />
+        {showAddIntegrationFlyout && (
+          <AddIntegrationFlyout
+            onClose={() => {
+              setShowAddIntegrationFlyout(false);
+              refreshAgentPolicy();
+            }}
+            agentPolicy={agentPolicy}
           />
-        </EuiButton>
-      }
-    />
-  );
-});
+        )}
+      </>
+    );
+  }
+);

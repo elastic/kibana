@@ -15,6 +15,7 @@ import {
   createUsageCounterLabel,
   getPreviousDailyTaskTimestamp,
   newTelemetryLogger,
+  withErrorMessage,
 } from '../helpers';
 import { TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT } from '../event_based/events';
 import { telemetryConfiguration } from '../configuration';
@@ -81,12 +82,14 @@ export function createIngestStatsTaskConfig() {
         } as LogMeta);
 
         return ingestStats.length;
-      } catch (err) {
-        log.warn(`Error running ingest stats task`, {
-          error: err.message,
-          elapsed: performance.now() - start,
-        } as LogMeta);
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn(
+          `Error running ingest stats task`,
+          withErrorMessage(error, {
+            elapsed: performance.now() - start,
+          } as LogMeta)
+        );
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

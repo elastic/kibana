@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,7 +20,7 @@ import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
 
 describe('BuilderExceptionListItemComponent', () => {
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);

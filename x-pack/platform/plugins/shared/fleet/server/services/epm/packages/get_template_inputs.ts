@@ -16,7 +16,7 @@ import {
   getStreamsForInputType,
   packageToPackagePolicy,
 } from '../../../../common/services/package_to_package_policy';
-import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
+import { _compilePackagePolicyInputs } from '../../package_policy';
 import { appContextService } from '../../app_context';
 import type {
   PackageInfo,
@@ -29,6 +29,9 @@ import type {
   RegistryInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
+import { generateOtelcolConfig } from '../../agent_policies/otel_collector';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
+import { getInputsWithIds } from '../../package_policies/get_input_with_ids';
 
 import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
@@ -95,25 +98,33 @@ export async function getTemplateInputs(
   pkgName: string,
   pkgVersion: string,
   format: 'yml',
+  isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<string>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
   format: 'json',
+  isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
   format: Format,
+  isInputIncluded: (input: TemplateAgentPolicyInput) => boolean = () => true,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting: boolean = false
 ) {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName,
@@ -124,7 +135,7 @@ export async function getTemplateInputs(
 
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
 
-  const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
+  const inputsWithStreamIds = getInputsWithIds(emptyPackagePolicy, undefined, true, packageInfo);
 
   const indexedInputsAndStreams = buildIndexedPackage(packageInfo);
 
@@ -185,13 +196,43 @@ export async function getTemplateInputs(
   const inputs = templatePackagePolicyToFullInputStreams(
     packagePolicyWithInputs.inputs as PackagePolicyInput[],
     inputIdsDestinationMap
-  );
+  ).filter(isInputIncluded);
+
+  if (injectWiredStreamsRouting) {
+    for (const input of inputs) {
+      const inputStreams = input.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<Record<string, unknown>>;
+      }>;
+      if (inputStreams) {
+        for (const stream of inputStreams) {
+          if (stream.data_stream?.type === 'logs') {
+            stream.processors = stream.processors || [];
+            stream.processors.unshift({
+              add_fields: {
+                target: '@metadata',
+                fields: { raw_index: 'logs.ecs' },
+              },
+            });
+          }
+        }
+      }
+    }
+  }
+
+  let otelcolConfig;
+  if (experimentalFeature.enableOtelIntegrations) {
+    // Template inputs don't have package info cache, so pass undefined
+    otelcolConfig = generateOtelcolConfig(inputs, undefined, undefined);
+  }
+  // filter out the otelcol inputs, they will be added at the root of the config
+  const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
 
   if (format === 'json') {
-    return { inputs };
+    return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
   } else if (format === 'yml') {
     const yaml = dump(
-      { inputs },
+      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) },
       {
         skipInvalid: true,
         sortKeys: _sortYamlKeys,

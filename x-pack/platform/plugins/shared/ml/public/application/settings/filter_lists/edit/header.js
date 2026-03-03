@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
 import { MlPageHeader } from '../../../components/page_header';
+import { PageTitle } from '../../../components/page_title';
 
 export const EditFilterListHeader = ({
   canCreateFilter,
@@ -157,7 +158,9 @@ export const EditFilterListHeader = ({
 
   return (
     <React.Fragment>
-      <MlPageHeader>{title}</MlPageHeader>
+      <MlPageHeader>
+        <PageTitle title={title} />
+      </MlPageHeader>
 
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>

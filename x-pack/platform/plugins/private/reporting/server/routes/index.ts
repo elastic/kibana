@@ -6,12 +6,13 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { ReportingCore } from '..';
+import type { ReportingCore } from '..';
 import { registerDeprecationsRoutes } from './internal/deprecations/deprecations';
 import { registerDiagnosticRoutes } from './internal/diagnostic';
 import { registerHealthRoute } from './internal/health';
 import { registerGenerationRoutesInternal } from './internal/generate/generate_from_jobparams';
 import { registerJobInfoRoutesInternal } from './internal/management/jobs';
+import { registerScheduledReportsRoutesInternal } from './internal/scheduled_reports';
 import { registerGenerationRoutesPublic } from './public/generate_from_jobparams';
 import { registerJobInfoRoutesPublic } from './public/jobs';
 
@@ -21,6 +22,7 @@ export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDiagnosticRoutes(reporting, logger);
   registerGenerationRoutesInternal(reporting, logger);
   registerJobInfoRoutesInternal(reporting);
+  registerScheduledReportsRoutesInternal(reporting, logger);
   registerGenerationRoutesPublic(reporting, logger);
   registerJobInfoRoutesPublic(reporting);
 }

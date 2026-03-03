@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { EcsFieldMetadata, PartitionedFieldMetadata, SortConfig } from './types';
+import type { EcsFieldMetadata, PartitionedFieldMetadata, SortConfig } from './types';
 import * as i18n from './translations';
 
 export const EcsFlatTyped = EcsFlat as unknown as Record<string, EcsFieldMetadata>;

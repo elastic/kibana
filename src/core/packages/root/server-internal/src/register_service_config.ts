@@ -8,7 +8,7 @@
  */
 
 import { config as pathConfig } from '@kbn/utils';
-import { ConfigService } from '@kbn/config';
+import type { ConfigService } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { config as loggingConfig } from '@kbn/core-logging-server-internal';
 import { coreDeprecationProvider } from '@kbn/core-config-server-internal';
@@ -30,21 +30,27 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
 import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
+import { config as userActivityConfig } from '@kbn/core-user-activity-server-internal';
 import { statusConfig } from '@kbn/core-status-server-internal';
 import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
 import { featureFlagsConfig } from '@kbn/core-feature-flags-server-internal';
+import { pricingConfig } from '@kbn/core-pricing-server-internal';
+import { config as dataStreamsConfig } from '@kbn/core-data-streams-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
+import { airgappedConfig } from './root/airgapped_config';
 import { coreConfig } from './core_config';
 
 const rootConfigPath = '';
 
 export function registerServiceConfig(configService: ConfigService) {
   const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+    airgappedConfig,
     coreConfig,
     cspConfig,
     deprecationConfig,
+    userActivityConfig,
     elasticsearchConfig,
     coreAppConfig,
     elasticApmConfig,
@@ -59,12 +65,14 @@ export function registerServiceConfig(configService: ConfigService) {
     pathConfig,
     pidConfig,
     pluginsConfig,
+    pricingConfig,
     savedObjectsConfig,
     savedObjectsMigrationConfig,
     serverlessConfig,
     statusConfig,
     uiSettingsConfig,
     permissionsPolicyConfig,
+    dataStreamsConfig,
   ];
 
   configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

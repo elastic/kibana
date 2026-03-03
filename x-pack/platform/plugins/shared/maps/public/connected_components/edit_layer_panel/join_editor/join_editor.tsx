@@ -12,9 +12,9 @@ import { EuiSkeletonText, EuiTextAlign, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import type { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { isESSource } from '../../../classes/sources/es_source';
-import { JoinDescriptor } from '../../../../common/descriptor_types';
+import type { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { AddJoinButton } from './add_join_button';
 

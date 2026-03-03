@@ -7,18 +7,23 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import {
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type {
   FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutFooterProps,
+  FindingsVulnerabilityFlyoutContentProps,
+  FindingsVulnerabilityFlyoutFooterProps,
+  FindingsVulnerabilityFlyoutHeaderProps,
   FindingsMisconfigurationFlyoutContentProps,
   FindingsMisconfigurationFlyoutHeaderProps,
   FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
+  FindingVulnerabilityFullFlyoutContentProps,
 } from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
@@ -42,7 +47,6 @@ export interface CspClientPluginSetup {}
 export interface CspClientPluginStart {
   /** Gets the cloud security posture router component for embedding in the security solution. */
   getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
-  // getCloudSecurityPostureMisconfigurationFlyout: () => React.JSX.Element;
   getCloudSecurityPostureMisconfigurationFlyout: () => {
     Component: React.FC<
       FindingsMisconfigurationPanelExpandableFlyoutProps['params'] & {
@@ -52,6 +56,16 @@ export interface CspClientPluginStart {
     Header: React.FC<FindingsMisconfigurationFlyoutHeaderProps>;
     Body: React.FC<FindingsMisconfigurationFlyoutContentProps>;
     Footer: React.FC<FindingMisconfigurationFlyoutFooterProps>;
+  };
+  getCloudSecurityPostureVulnerabilityFlyout: () => {
+    Component: React.FC<
+      FindingsVulnerabilityPanelExpandableFlyoutProps['params'] & {
+        children?: (props: FindingVulnerabilityFullFlyoutContentProps) => ReactNode;
+      }
+    >;
+    Header: React.FC<FindingsVulnerabilityFlyoutHeaderProps>;
+    Body: React.FC<FindingsVulnerabilityFlyoutContentProps>;
+    Footer: React.FC<FindingsVulnerabilityFlyoutFooterProps>;
   };
 }
 

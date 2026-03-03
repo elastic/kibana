@@ -7,14 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TraverseDocumentNodeContext } from './document_processors/types/traverse_document_node_context';
-import { TraverseItem } from './traverse_item';
+import type { TraverseDocumentNodeContext } from './document_processors/types/traverse_document_node_context';
+import type { TraverseItem } from './traverse_item';
+
+const contextCache = new WeakMap<TraverseItem, TraverseDocumentNodeContext>();
 
 export function createNodeContext(traverseItem: TraverseItem): TraverseDocumentNodeContext {
-  return {
+  if (contextCache.has(traverseItem)) {
+    return contextCache.get(traverseItem)!;
+  }
+
+  const node = {
     ...traverseItem.context,
     isRootNode: traverseItem.node === traverseItem.parentNode,
+    parent: traverseItem.parent ? createNodeContext(traverseItem.parent) : undefined,
     parentNode: traverseItem.parentNode,
     parentKey: traverseItem.parentKey,
   };
+
+  contextCache.set(traverseItem, node);
+
+  return node;
 }

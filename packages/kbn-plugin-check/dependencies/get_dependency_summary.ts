@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { PluginInfo, DependencyState, PluginStatuses } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { PluginInfo, DependencyState, PluginStatuses } from '../types';
 
 import { PLUGIN_LAYERS, PLUGIN_LIFECYCLES } from '../const';
 

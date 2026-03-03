@@ -362,9 +362,25 @@ const getTopologicallySortedPluginNames = (plugins: Map<PluginName, PluginWrappe
   }
 
   if (pluginsDependenciesGraph.size > 0) {
+    // Identify circular dependencies
+    let cyclePaths: string[] = [];
+
+    try {
+      const circularDependencies = findCircularDependencies(pluginsDependenciesGraph);
+
+      cyclePaths = circularDependencies.map((cycle) => `\n  ${cycle.join(' -> ')} -> ${cycle[0]}`);
+    } catch (e) {
+      cyclePaths = [];
+    }
+
     const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
+
     throw new Error(
-      `Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ${edgesLeft}`
+      `Topological ordering of plugins did not complete due to circular dependencies:` +
+        `${
+          cyclePaths.length > 0 ? `\n\nDetected circular dependencies:${cyclePaths.join('')}` : ''
+        }` +
+        `\n\nPlugins with cyclic or missing dependencies: ${edgesLeft}`
     );
   }
 
@@ -404,4 +420,87 @@ const buildPluginRuntimeDependencyMap = (
     runtimeDependencies.set(pluginName, pluginRuntimeDeps);
   }
   return runtimeDependencies;
+};
+
+/**
+ * Finds all circular dependencies in the plugin graph
+ * @param dependencyGraph Map of plugin names to their unresolved dependencies
+ * @returns Array of circular dependency paths
+ */
+export const findCircularDependencies = (
+  dependencyGraph: Map<PluginName, Set<PluginName>>
+): PluginName[][] => {
+  // Store found cycles as a set of stringified paths to avoid duplicates
+  const cycleSet = new Set<string>();
+  const cycles: PluginName[][] = [];
+
+  // Find all cycles for each node in the graph
+  for (const startNode of dependencyGraph.keys()) {
+    // Track visited and recursion stack for this specific search
+    const visited = new Set<PluginName>();
+    const recursionStack = new Set<PluginName>();
+    const path: PluginName[] = [];
+
+    const dfs = (node: PluginName) => {
+      visited.add(node);
+      recursionStack.add(node);
+      path.push(node);
+
+      const dependencies = dependencyGraph.get(node) || new Set<PluginName>();
+
+      for (const dependency of dependencies) {
+        // If we haven't visited this dependency yet, explore it
+        if (!visited.has(dependency)) {
+          dfs(dependency);
+        }
+        // If the dependency is in our current recursion path, we found a cycle
+        else if (recursionStack.has(dependency)) {
+          // Extract the cycle
+          const cycleStartIndex = path.indexOf(dependency);
+          if (cycleStartIndex !== -1) {
+            const cycle = path.slice(cycleStartIndex);
+            // Create a canonical representation by starting from alphabetically first node
+            const normalizedCycle = normalizeCycle(cycle);
+
+            // Add to cycles if not already seen
+            const cycleKey = JSON.stringify(normalizedCycle);
+            if (!cycleSet.has(cycleKey)) {
+              cycleSet.add(cycleKey);
+              cycles.push(cycle);
+            }
+          }
+        }
+      }
+
+      // Backtrack
+      path.pop();
+      recursionStack.delete(node);
+    };
+
+    dfs(startNode);
+  }
+
+  return cycles;
+};
+
+/**
+ * Normalizes a cycle by rotating it to start with the alphabetically first node
+ * This helps identify duplicate cycles regardless of where we start traversing
+ */
+export const normalizeCycle = (cycle: PluginName[]): PluginName[] => {
+  if (cycle.length <= 1) return cycle;
+  if (new Set(cycle).size !== cycle.length) {
+    throw new Error(`Cycle contains duplicate plugins: ${cycle}`);
+  }
+
+  // Find the index of the alphabetically first node
+  let minIndex = 0;
+  for (let i = 1; i < cycle.length; i++) {
+    if (cycle[i].localeCompare(cycle[minIndex]) < 0) {
+      minIndex = i;
+    }
+  }
+
+  // Rotate the array to start with that node
+  return [...cycle.slice(minIndex), ...cycle.slice(0, minIndex)];
 };

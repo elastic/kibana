@@ -7,36 +7,111 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
-import React, { useState } from 'react';
-import { pick } from 'lodash';
-import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
+import React, { useCallback } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
   internalStateActions,
   selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { useAppMenuData } from './use_app_menu_data';
+import { useSwitchModesTour } from './use_switch_modes_tour';
 
-export const TabsView = (props: DiscoverSessionViewProps) => {
+const MAX_TABS_COUNT = 25;
+
+export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const allTabs = useInternalStateSelector(selectAllTabs);
+  const items = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
+  const currentDataView = useCurrentTabRuntimeState(
+    props.runtimeStateManager,
+    (tab) => tab.currentDataView$
+  );
+
+  const scopedEbtManager = useCurrentTabRuntimeState(
+    props.runtimeStateManager,
+    (state) => state.scopedEbtManager$
+  );
+
+  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
+    useAppMenuData({ currentDataView });
+
+  const switchModesTourStep = useSwitchModesTour();
+
+  const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
+    (event) => {
+      void scopedEbtManager.trackTabsEvent(event);
+    },
+    [scopedEbtManager]
+  );
+
+  const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
+    (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
+    [dispatch]
+  );
+
+  const onClearRecentlyClosed: UnifiedTabsProps['onClearRecentlyClosed'] = useCallback(
+    () => dispatch(internalStateActions.clearRecentlyClosedTabs()),
+    [dispatch]
+  );
+
+  const createItem: UnifiedTabsProps['createItem'] = useCallback(
+    () => createTabItem(items),
+    [items]
+  );
+
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
+    () => <SingleTabView key={currentTabId} {...props} />,
+    [currentTabId, props]
+  );
 
   return (
-    <UnifiedTabs
-      services={services}
-      initialItems={initialItems}
-      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
-      createItem={() => createTabItem(allTabs)}
-      getPreviewData={getPreviewData}
-      renderContent={() => <DiscoverSessionView key={currentTabId} {...props} />}
-    />
+    <>
+      {switchModesTourStep}
+      {/**
+       * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
+       * where this might not be good enough.
+       */}
+      <EuiResizeObserver onResize={onResize}>
+        {(resizeRef) => (
+          <div ref={resizeRef}>
+            <UnifiedTabs
+              services={services}
+              items={items}
+              selectedItemId={currentTabId}
+              recentlyClosedItems={recentlyClosedItems}
+              unsavedItemIds={unsavedTabIds}
+              maxItemsCount={MAX_TABS_COUNT}
+              hideTabsBar={hideTabsBar}
+              createItem={createItem}
+              getPreviewData={getPreviewData}
+              renderContent={renderContent}
+              onChanged={onChanged}
+              onEBTEvent={onEvent}
+              onClearRecentlyClosed={onClearRecentlyClosed}
+              getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+              appendRight={
+                <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              }
+            />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };

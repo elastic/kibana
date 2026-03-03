@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs';
 import { isEqual, isEmpty, debounce } from 'lodash';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import { css } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -28,8 +28,9 @@ import { PanelConfig } from './panel_config';
 import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { VisPicker } from './vis_picker';
-import { fetchFields, VisFields } from '../lib/fetch_fields';
-import { getDataStart, getCoreStart, getUnifiedSearchStart } from '../../services';
+import type { VisFields } from '../lib/fetch_fields';
+import { fetchFields } from '../lib/fetch_fields';
+import { getDataStart, getCoreStart, getKqlStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
 
@@ -189,7 +190,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
         services={{
           appName: APP_NAME,
           storage: this.localStorage,
-          unifiedSearch: getUnifiedSearchStart(),
+          kql: getKqlStart(),
           data: getDataStart(),
           ...getCoreStart(),
         }}

@@ -6,16 +6,21 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  GEMINI_REGION_DOC_LINK,
+  GEMINI_PROJECT_ID_DOC_LINK,
+} from '@kbn/inference-endpoint-ui-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import {
-  DEFAULT_GEMINI_MODEL,
-  DEFAULT_GEMINI_URL,
+  DEFAULT_MODEL,
+  DEFAULT_URL,
   DEFAULT_TOKEN_LIMIT,
   DEFAULT_GCP_REGION,
-} from '../../../common/gemini/constants';
+} from '@kbn/connector-schemas/gemini/constants';
 import * as i18n from './translations';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 
 const generationConfig = {
   temperature: 0,
@@ -43,7 +48,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
-    defaultValue: DEFAULT_GEMINI_URL,
+    defaultValue: DEFAULT_URL,
     helpText: (
       <FormattedMessage
         defaultMessage="The Google Gemini API endpoint URL. For more information on the URL, refer to the {geminiAPIUrlDocs}."
@@ -72,15 +77,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
         defaultMessage="Please provide the GCP region where the Vertex AI API(s) is enabled. For more information, refer to the {geminiVertexAIDocs}."
         id="xpack.stackConnectors.components.gemini.geminiRegionDocumentation"
         values={{
-          geminiVertexAIDocs: (
-            <EuiLink
-              data-test-subj="gemini-vertexai-api-doc"
-              href="https://cloud.google.com/vertex-ai/docs/reference/rest#rest_endpoints"
-              target="_blank"
-            >
-              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
+          geminiVertexAIDocs: GEMINI_REGION_DOC_LINK,
         }}
       />
     ),
@@ -94,15 +91,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
         defaultMessage="The GCP Project ID which has Vertex AI API(s) enabled. For more information on the URL, refer to the {geminiVertexAIDocs}."
         id="xpack.stackConnectors.components.gemini.geminiProjectDocumentation"
         values={{
-          geminiVertexAIDocs: (
-            <EuiLink
-              data-test-subj="gemini-api-doc"
-              href="https://cloud.google.com/vertex-ai/docs/start/cloud-environment"
-              target="_blank"
-            >
-              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
+          geminiVertexAIDocs: GEMINI_PROJECT_ID_DOC_LINK,
         }}
       />
     ),
@@ -127,8 +116,10 @@ export const geminiConfig: ConfigFieldSchema[] = [
         }}
       />
     ),
-    defaultValue: DEFAULT_GEMINI_MODEL,
+    defaultValue: DEFAULT_MODEL,
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const geminiSecrets: SecretsFieldSchema[] = [

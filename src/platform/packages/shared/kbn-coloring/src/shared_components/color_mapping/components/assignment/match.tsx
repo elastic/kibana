@@ -8,13 +8,15 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/common';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { ColorMapping } from '../../config';
-import { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
-import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ColorMapping } from '../../config';
+import type { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
+import type { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 import { DuplicateWarning } from './duplicate_warning';
 import { getValueKey } from '../../color/utils';
 

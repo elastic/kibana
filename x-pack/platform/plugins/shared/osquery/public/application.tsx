@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -19,13 +19,16 @@ import { PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
 import { KibanaRenderContextProvider } from './shared_imports';
+import { ExperimentalFeaturesProvider } from './common/experimental_features_context';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 export const renderApp = (
   core: CoreStart,
   services: AppPluginStartDependencies,
   { element, history }: AppMountParameters,
   storage: Storage,
-  kibanaVersion: string
+  kibanaVersion: string,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
@@ -39,12 +42,14 @@ export const renderApp = (
           storage,
         }}
       >
-        <Router history={history}>
-          <QueryClientProvider client={queryClient}>
-            <OsqueryApp />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </Router>
+        <ExperimentalFeaturesProvider value={experimentalFeatures}>
+          <Router history={history}>
+            <QueryClientProvider client={queryClient}>
+              <OsqueryApp />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
+          </Router>
+        </ExperimentalFeaturesProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element

@@ -10,9 +10,9 @@
 import { metricVisFunction } from './metric_vis_function';
 import type { MetricArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { EXPRESSION_METRIC_NAME } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#metricVis', () => {
   const fn = functionWrapper(metricVisFunction());
@@ -27,9 +27,14 @@ describe('interpreter/functions#metricVis', () => {
     maxCols: 1,
     inspectorTableId: 'random-id',
     titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
+    primaryAlign: 'right',
+    secondaryAlign: 'right',
     iconAlign: 'left',
     valueFontSize: 'default',
+    primaryPosition: 'bottom',
+    titleWeight: 'bold',
+    secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
   };
 
   it('should pass over overrides from variables', async () => {

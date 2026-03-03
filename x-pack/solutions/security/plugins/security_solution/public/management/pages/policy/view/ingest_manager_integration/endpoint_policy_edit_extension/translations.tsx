@@ -95,3 +95,49 @@ export const TRUSTED_APPS_LABELS = {
     />
   ),
 };
+
+export const TRUSTED_DEVICES_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.trustedDevicesSummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch trusted devices stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.trustedDevices.fleetIntegration.title"
+      defaultMessage="Trusted devices"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.trustedDevicesManageLabel"
+      defaultMessage="Manage trusted devices"
+    />
+  ),
+};
+
+export const ENDPOINT_EXCEPTIONS_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetIntegrationCard.endpointExceptionsSummary.error',
+      {
+        defaultMessage: 'There was an error trying to fetch endpoint exceptions stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.endpointExceptions.fleetIntegration.title"
+      defaultMessage="Endpoint exceptions"
+    />
+  ),
+  linkLabel: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.fleetIntegrationCard.endpointExceptionsManageLabel"
+      defaultMessage="Manage endpoint exceptions"
+    />
+  ),
+};

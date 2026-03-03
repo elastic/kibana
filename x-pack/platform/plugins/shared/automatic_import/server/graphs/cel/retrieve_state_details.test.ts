@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import {
   celExpectedResults,
@@ -17,10 +13,11 @@ import {
 } from '../../../__jest__/fixtures/cel';
 import type { CelInputState } from '../../types';
 import { handleGetStateDetails } from './retrieve_state_details';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 const model = new FakeLLM({
   response: JSON.stringify(celStateDetailsMockedResponse, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const state: CelInputState = celTestState;
 

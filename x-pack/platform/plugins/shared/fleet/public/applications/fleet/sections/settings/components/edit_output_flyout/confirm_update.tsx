@@ -78,6 +78,7 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount
           iconType="warning"
           color="warning"
           size="m"

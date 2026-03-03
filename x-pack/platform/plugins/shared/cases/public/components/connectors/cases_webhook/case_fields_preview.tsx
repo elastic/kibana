@@ -26,9 +26,10 @@ const CasesWebhookPreviewComponent: React.FunctionComponent<ConnectorFieldsPrevi
     <EuiSpacer />
     {(!connector.config?.createCommentUrl || !connector.config?.createCommentJson) && (
       <EuiCallOut
+        announceOnMount
         title={i18n.CREATE_COMMENT_WARNING_TITLE}
         color="warning"
-        iconType="help"
+        iconType="question"
         data-test-subj="create-comment-warning"
       >
         <p>{i18n.CREATE_COMMENT_WARNING_DESC(connector.name)}</p>

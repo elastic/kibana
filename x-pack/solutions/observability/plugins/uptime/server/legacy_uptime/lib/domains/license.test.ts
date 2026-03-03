@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseCheck } from './license';
 
 describe('license check', () => {

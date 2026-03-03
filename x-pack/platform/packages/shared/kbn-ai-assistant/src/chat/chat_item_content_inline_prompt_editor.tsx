@@ -9,12 +9,12 @@ import React from 'react';
 import { noop } from 'lodash';
 import { css } from '@emotion/css';
 import { EuiPanel } from '@elastic/eui';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
   ChatActionClickHandler,
-  MessageText,
   TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { MessageText } from '@kbn/observability-ai-assistant-plugin/public';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 
 interface Props {
@@ -26,6 +26,7 @@ interface Props {
   onActionClick: ChatActionClickHandler;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
+  anonymizedHighlightedContent?: React.ReactNode;
 }
 
 const textContainerClassName = css`
@@ -48,6 +49,7 @@ export function ChatItemContentInlinePromptEditor({
   onActionClick,
   onSendTelemetry,
   onSubmit,
+  anonymizedHighlightedContent,
 }: Props) {
   return !editing ? (
     <EuiPanel
@@ -56,7 +58,12 @@ export function ChatItemContentInlinePromptEditor({
       hasShadow={false}
       className={textContainerClassName}
     >
-      <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
+      <MessageText
+        content={content || ''}
+        anonymizedHighlightedContent={anonymizedHighlightedContent}
+        loading={loading}
+        onActionClick={onActionClick}
+      />
     </EuiPanel>
   ) : (
     <EuiPanel

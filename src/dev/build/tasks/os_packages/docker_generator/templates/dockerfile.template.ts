@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Mustache from 'mustache';
 
-import { TemplateContext } from '../template_context';
+import type { TemplateContext } from '../template_context';
 
 function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';

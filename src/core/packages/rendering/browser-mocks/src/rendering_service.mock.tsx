@@ -11,6 +11,7 @@ import React from 'react';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { lazyObject } from '@kbn/lazy-object';
 
 /**
  * This is declared internally to avoid a circular dependency issue
@@ -21,21 +22,21 @@ export interface RenderingServiceInternal {
 }
 
 const createMockInternal = () => {
-  const mocked: jest.Mocked<RenderingServiceInternal> = {
+  const mocked: jest.Mocked<RenderingServiceInternal> = lazyObject({
     start: jest.fn().mockImplementation(createMock),
     renderCore: jest.fn(),
-  };
+  });
   return mocked;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<RenderingService> = {
+  const mocked: jest.Mocked<RenderingService> = lazyObject({
     addContext: jest.fn().mockImplementation((element) => (
       <I18nProvider>
         <EuiProvider>{element}</EuiProvider>
       </I18nProvider>
     )),
-  };
+  });
   return mocked;
 };
 

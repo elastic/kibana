@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { APIEndpoint, APIReturnType } from '../server';
 
 export interface SourcesApiOptions {

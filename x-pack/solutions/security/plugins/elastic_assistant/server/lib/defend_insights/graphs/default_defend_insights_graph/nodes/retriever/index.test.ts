@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import type { GraphState } from '../../types';
+import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
+import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 import { mockAnonymizedEvents } from '../../mock/mock_anonymized_events';
 import { getRetrieveAnonymizedEventsNode } from '.';
-import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 
 const insightType = DefendInsightType.Enum.incompatible_antivirus;
-const initialGraphState: GraphState = {
+const initialGraphState: DefendInsightsGraphState = {
   insights: null,
   prompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
-  anonymizedEvents: [],
+  anonymizedDocuments: [],
   combinedGenerations: '',
   combinedRefinements: '',
   errors: [],
@@ -35,7 +36,7 @@ const initialGraphState: GraphState = {
   unrefinedResults: null,
 };
 
-jest.mock('./anonymized_events_retriever', () => ({
+jest.mock('./events_retriever', () => ({
   AnonymizedEventsRetriever: jest
     .fn()
     .mockImplementation(
@@ -75,28 +76,30 @@ describe('getRetrieveAnonymizedEventsNode', () => {
       insightType,
       endpointIds: [],
       esClient,
+      kbDataClient: null,
       logger,
     });
     expect(typeof result).toBe('function');
   });
 
   it('updates state with anonymized events', async () => {
-    const state: GraphState = { ...initialGraphState };
+    const state: DefendInsightsGraphState = { ...initialGraphState };
 
     const retrieveAnonymizedEvents = getRetrieveAnonymizedEventsNode({
       insightType,
       endpointIds: [],
       esClient,
+      kbDataClient: null,
       logger,
     });
 
     const result = await retrieveAnonymizedEvents(state);
 
-    expect(result).toHaveProperty('anonymizedEvents', mockAnonymizedEvents);
+    expect(result).toHaveProperty('anonymizedDocuments', mockAnonymizedEvents);
   });
 
   it('calls onNewReplacements with updated replacements', async () => {
-    const state: GraphState = { ...initialGraphState };
+    const state: DefendInsightsGraphState = { ...initialGraphState };
     const onNewReplacements = jest.fn();
     const replacements = { key: 'value' };
 
@@ -104,6 +107,7 @@ describe('getRetrieveAnonymizedEventsNode', () => {
       insightType,
       endpointIds: [],
       esClient,
+      kbDataClient: null,
       logger,
       onNewReplacements,
       replacements,

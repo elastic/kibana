@@ -5,33 +5,20 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
-import { SavedObjectReference } from '@kbn/core/public';
-import { isFragment } from 'react-is';
+import type { ReactElement } from 'react';
+import React from 'react';
+
+import type { Reference } from '@kbn/content-management-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { Ast } from '@kbn/interpreter';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { TinymathAST } from '@kbn/tinymath';
-import { getFormBasedDatasource, GenericIndexPatternColumn } from './form_based';
-import {
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type {
+  FormBasedPersistedState,
+  FormBasedPrivateState,
   DatasourcePublicAPI,
   Datasource,
   FramePublicAPI,
   OperationDescriptor,
   UserMessage,
-} from '../../types';
-import { getFieldByNameFactory } from './pure_helpers';
-import {
-  operationDefinitionMap,
-  getErrorMessages,
   TermsIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   MovingAverageIndexPatternColumn,
@@ -44,14 +31,27 @@ import {
   SumIndexPatternColumn,
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
-} from './operations';
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { Ast } from '@kbn/interpreter';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { TinymathAST } from '@kbn/tinymath';
+import { getFormBasedDatasource } from './form_based';
+import { getFieldByNameFactory } from './pure_helpers';
+import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { cloneDeep } from 'lodash';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -194,6 +194,10 @@ const dateRange = {
   toDate: '2022-04-17T08:25:00.000Z',
 };
 
+function isFragment(element: unknown): element is ReactElement {
+  return React.isValidElement(element) && element.type === React.Fragment;
+}
+
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
   let FormBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query>;
@@ -207,6 +211,7 @@ describe('IndexPattern Data Source', () => {
 
     FormBasedDatasource = getFormBasedDatasource({
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data,
@@ -318,7 +323,7 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
-        savedObjectReferences: [
+        references: [
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -560,6 +565,9 @@ describe('IndexPattern Data Source', () => {
                           "id": Array [
                             "1",
                           ],
+                          "includeFields": Array [
+                            false,
+                          ],
                         },
                         "function": "indexPatternLoad",
                         "type": "function",
@@ -737,7 +745,6 @@ describe('IndexPattern Data Source', () => {
                 operationType: 'date_histogram',
                 sourceField: 'order_date',
                 isBucketed: true,
-                scale: 'interval',
                 params: {
                   interval: 'auto',
                   includeEmptyRows: true,
@@ -750,7 +757,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
                 params: {
                   emptyAsNull: false,
@@ -764,7 +770,6 @@ describe('IndexPattern Data Source', () => {
                 operationType: 'sum',
                 sourceField: 'products.price',
                 isBucketed: false,
-                scale: 'ratio',
                 timeShift: '1h',
                 params: {
                   emptyAsNull: false,
@@ -778,7 +783,6 @@ describe('IndexPattern Data Source', () => {
                 operationType: 'average',
                 sourceField: 'products.price',
                 isBucketed: false,
-                scale: 'ratio',
                 filter: {
                   query: 'NOT category : * ',
                   language: 'kuery',
@@ -795,7 +799,6 @@ describe('IndexPattern Data Source', () => {
                 operationType: 'median',
                 sourceField: 'products.price',
                 isBucketed: false,
-                scale: 'ratio',
                 params: {
                   emptyAsNull: false,
                 },
@@ -807,7 +810,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'math',
                 isBucketed: false,
-                scale: 'ratio',
                 params: {
                   tinymathAst: {
                     type: 'function',
@@ -829,7 +831,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'differences',
                 isBucketed: false,
-                scale: 'ratio',
                 references: ['col2X4'],
                 filter: {
                   query: 'category : *',
@@ -843,7 +844,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'math',
                 isBucketed: false,
-                scale: 'ratio',
                 params: {
                   tinymathAst: {
                     type: 'function',
@@ -872,7 +872,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'moving_average',
                 isBucketed: false,
-                scale: 'ratio',
                 references: ['col2X6'],
                 timeShift: '3h',
                 params: {
@@ -886,7 +885,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'formula',
                 isBucketed: false,
-                scale: 'ratio',
                 params: {
                   formula:
                     "moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
@@ -1371,7 +1369,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   isBucketed: true,
-                  scale: 'interval',
                   params: {
                     interval: 'auto',
                     includeEmptyRows: true,
@@ -1384,7 +1381,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'percentile',
                   sourceField: 'bytes',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     percentile: 95,
                   },
@@ -1395,7 +1391,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'percentile',
                   sourceField: 'bytes',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     percentile: 95,
                   },
@@ -1436,7 +1431,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   isBucketed: true,
-                  scale: 'interval',
                   params: {
                     interval: 'auto',
                     includeEmptyRows: true,
@@ -1449,7 +1443,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'percentile',
                   sourceField: 'bytes',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     percentile: 95,
                   },
@@ -1739,7 +1732,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'count',
                   isBucketed: false,
-                  scale: 'ratio',
                   sourceField: '___records___',
                   customLabel: true,
                 },
@@ -1749,7 +1741,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   isBucketed: true,
-                  scale: 'interval',
                   params: {
                     interval: 'auto',
                   },
@@ -1759,7 +1750,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     formula: 'count() + count()',
                     isFormulaBroken: false,
@@ -1771,7 +1761,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'count',
                   isBucketed: false,
-                  scale: 'ratio',
                   sourceField: '___records___',
                   customLabel: true,
                 },
@@ -1780,7 +1769,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'math',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     tinymathAst: {
                       type: 'function',
@@ -2170,7 +2158,7 @@ describe('IndexPattern Data Source', () => {
           isStaticValue: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
-          scale: undefined,
+          scale: 'ordinal',
           sortingHint: undefined,
           interval: undefined,
           hasArraySupport: false,
@@ -2495,6 +2483,59 @@ describe('IndexPattern Data Source', () => {
           disabled: { kuery: [], lucene: [] },
         });
       });
+      it('should escape special characters in term values for valid KQL syntax', () => {
+        publicAPI = FormBasedDatasource.getPublicAPI({
+          state: {
+            ...baseState,
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'path.keyword',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+          indexPatterns,
+        });
+        const data = {
+          first: {
+            type: 'datatable' as const,
+            columns: [{ id: 'col1', name: 'path.keyword', meta: { type: 'string' as const } }],
+            rows: [
+              { col1: 'C:\\' },
+              { col1: 'path with "quotes"' },
+              { col1: 'backslash\\and"quote' },
+            ],
+          },
+        };
+        expect(publicAPI.getFilters(data)).toEqual({
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'path.keyword: "C:\\\\"' },
+                { language: 'kuery', query: 'path.keyword: "path with \\"quotes\\""' },
+                { language: 'kuery', query: 'path.keyword: "backslash\\\\and\\"quote"' },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
       it('should ignore top values fields if other/missing option is enabled', () => {
         publicAPI = FormBasedDatasource.getPublicAPI({
           state: {
@@ -2671,7 +2712,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'string',
                     isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [{ label: '', input: { language: 'kuery', query: 'bytes > 1000' } }],
                     },
@@ -2681,7 +2721,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'string',
                     isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [{ label: '', input: { language: 'lucene', query: 'memory' } }],
                     },
@@ -2691,7 +2730,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'string',
                     isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [
                         { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
@@ -2780,7 +2818,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'formula',
                     isBucketed: false,
-                    scale: 'ratio',
                     params: {
                       formula: "count(kql='memory > 5000') + count()",
                       isFormulaBroken: false,
@@ -2792,7 +2829,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'count',
                     isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                     filter: { language: 'kuery', query: 'memory > 5000' },
@@ -2802,7 +2838,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'count',
                     isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                   },
@@ -2811,7 +2846,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'math',
                     isBucketed: false,
-                    scale: 'ratio',
                     params: {
                       tinymathAst: {
                         type: 'function',
@@ -2853,7 +2887,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'string',
                     isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [
                         { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
@@ -2940,7 +2973,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'formula',
                     isBucketed: false,
-                    scale: 'ratio',
                     filter: { language: 'kuery', query: 'bytes > 4000' },
                     params: {
                       formula: "count(kql='memory > 5000') + count()",
@@ -2953,7 +2985,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'count',
                     isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                     filter: { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
@@ -2963,7 +2994,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'count',
                     isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                     filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2973,7 +3003,6 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     operationType: 'math',
                     isBucketed: false,
-                    scale: 'ratio',
                     params: {
                       tinymathAst: {
                         type: 'function',
@@ -3901,13 +3930,11 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
-                isStaticValue: true,
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',
                 params: { value: '0' },
                 references: [],
-                scale: 'ratio',
               },
             },
           },
@@ -3957,7 +3984,6 @@ describe('IndexPattern Data Source', () => {
                 label: 'timestampLabel',
                 operationType: 'date_histogram',
                 params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
-                scale: 'interval',
                 sourceField: 'timestamp',
               },
             },
@@ -4194,7 +4220,6 @@ describe('IndexPattern Data Source', () => {
               dataType: 'number',
               operationType: 'count',
               isBucketed: false,
-              scale: 'ratio',
               sourceField: '___records___',
             },
           },
@@ -4204,7 +4229,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const references1: SavedObjectReference[] = [
+    const references1: Reference[] = [
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -4212,7 +4237,7 @@ describe('IndexPattern Data Source', () => {
       },
     ];
 
-    const references2: SavedObjectReference[] = [
+    const references2: Reference[] = [
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -4227,7 +4252,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should be false if datasource states differ', () => {
-      const differentPersistableState = cloneDeep(persistableState);
+      const differentPersistableState = structuredClone(persistableState);
       differentPersistableState.layers[layerId].columnOrder = ['something else'];
 
       expect(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,19 +15,45 @@ import {
   DocumentCountLabelContainer,
 } from '../styles';
 
-export const QueryRuleDraggableListHeader: React.FC = () => {
+interface QueryRuleDraggableListHeaderProps {
+  tourInfo?: {
+    title: string;
+    content: string;
+  };
+}
+
+export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeaderProps> = ({
+  tourInfo,
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup css={DraggableListHeader(euiTheme)}>
+    <EuiFlexGroup css={DraggableListHeader(euiTheme)} responsive={false}>
       <EuiFlexItem grow={7}>
-        <EuiText size="xs">
-          <b>
-            <FormattedMessage
-              id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
-              defaultMessage="Rule Conditions"
-            />
-          </b>
-        </EuiText>
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="l" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+              <EuiText size="xs">
+                <b>
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
+                    defaultMessage="Order"
+                  />
+                </b>
+              </EuiText>
+              <EuiIconTip title={tourInfo?.title} content={tourInfo?.content} position="right" />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <b>
+                <FormattedMessage
+                  id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
+                  defaultMessage="Rule Conditions"
+                />
+              </b>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

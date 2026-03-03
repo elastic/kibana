@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IFieldsMetadataClient } from './types';
+import type { IFieldsMetadataClient } from './types';
 
 export const createFieldsMetadataClientMock = (): jest.Mocked<IFieldsMetadataClient> => ({
-  find: jest.fn(),
+  find: jest.fn().mockResolvedValue({ fields: {} }),
 });

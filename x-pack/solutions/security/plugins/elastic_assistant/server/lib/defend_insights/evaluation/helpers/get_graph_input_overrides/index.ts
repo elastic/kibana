@@ -6,22 +6,25 @@
  */
 
 import { pick } from 'lodash/fp';
-import { GraphState } from '../../../graphs/default_defend_insights_graph/types';
+
+import type { DefendInsightsGraphState } from '../../../../langchain/graphs';
 import { ExampleDefendInsightsInputWithOverrides } from '../../example_input';
 
 /**
  * Parses input from an LangSmith dataset example to get the graph input overrides
  */
-export const getDefendInsightsGraphInputOverrides = (inputs: unknown): Partial<GraphState> => {
+export const getDefendInsightsGraphInputOverrides = (
+  inputs: unknown
+): Partial<DefendInsightsGraphState> => {
   const validatedInput = ExampleDefendInsightsInputWithOverrides.safeParse(inputs).data ?? {}; // safeParse removes unknown properties
 
   const { overrides } = validatedInput;
 
   // return all overrides at the root level:
   return {
-    // pick extracts just the anonymizedEvents and replacements from the root level of the input,
-    // and only adds the anonymizedEvents key if it exists in the input
-    ...pick('anonymizedEvents', validatedInput),
+    // pick extracts just the anonymizedDocuments and replacements from the root level of the input,
+    // and only adds the anonymizedDocuments key if it exists in the input
+    ...pick('anonymizedDocuments', validatedInput),
     ...pick('replacements', validatedInput),
     ...overrides, // bring all other overrides to the root level
   };

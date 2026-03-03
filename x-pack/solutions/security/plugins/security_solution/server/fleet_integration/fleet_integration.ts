@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
@@ -31,6 +30,8 @@ import type {
   PostAgentPolicyUpdateCallback,
   PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { ExperimentalFeatures } from '../../common';
+import { updateDeletedPolicyResponseActions } from './handlers/update_deleted_policy_response_actions';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import type { EndpointInternalFleetServicesInterface } from '../endpoint/services/fleet';
 import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
@@ -42,6 +43,7 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeDeviceControl,
 } from '../../common/endpoint/models/policy_config_helpers';
 import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
@@ -75,7 +77,7 @@ const getEndpointPolicyForAgentPolicy = async (
 
   if (!agentPolicyIntegrations) {
     const fullAgentPolicy = await fleetServices.agentPolicy.get(
-      fleetServices.savedObjects.createInternalScopedSoClient(),
+      fleetServices.savedObjects.createInternalUnscopedSoClient(),
       agentPolicy.id,
       true
     );
@@ -123,7 +125,8 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
-  telemetryConfigProvider: TelemetryConfigProvider
+  telemetryConfigProvider: TelemetryConfigProvider,
+  experimentalFeatures: ExperimentalFeatures
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -145,7 +148,7 @@ export const getPackagePolicyCreateCallback = (
 
     logger.debug(
       () =>
-        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+        `Checking create of endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
     );
 
     if (newPackagePolicy?.inputs) {
@@ -169,23 +172,39 @@ export const getPackagePolicyCreateCallback = (
       validateIntegrationConfig(endpointIntegrationConfig, logger);
     }
 
-    // In this callback we are handling an HTTP request to the fleet plugin. Since we use
-    // code from the security_solution plugin to handle it (installPrepackagedRules),
-    // we need to build the context that is native to security_solution and pass it there.
-    const securitySolutionContext = await securitySolutionRequestContextFactory.create(
-      context,
-      request
-    );
+    const conditionallyInstallEndpointSecurityPrebuiltRule = async () => {
+      // In this callback we are handling an HTTP request to the fleet plugin. Since we use
+      // code from the security_solution plugin to handle it (installPrepackagedRules),
+      // we need to build the context that is native to security_solution and pass it there.
+      const securitySolutionContext = await securitySolutionRequestContextFactory.create(
+        context,
+        request
+      );
+
+      if (
+        !securitySolutionContext
+          .getEndpointService()
+          .getServerConfigValue('disableEndpointRuleAutoInstall')
+      ) {
+        logger.debug(`Checking if Endpoint Security prebuilt rule is installed/enabled...`);
+
+        return installEndpointSecurityPrebuiltRule({
+          logger,
+          context: securitySolutionContext,
+          request,
+          alerts,
+          soClient,
+        });
+      } else {
+        logger.debug(
+          `Server setting 'disableEndpointRuleAutoInstall' is 'true' - skipping the install of Endpoint Security prebuilt rule`
+        );
+      }
+    };
 
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
-      installEndpointSecurityPrebuiltRule({
-        logger,
-        context: securitySolutionContext,
-        request,
-        alerts,
-        soClient,
-      }),
+      conditionallyInstallEndpointSecurityPrebuiltRule(),
 
       // create the Artifact Manifest for this policy
       createPolicyArtifactManifest(logger, manifestManager),
@@ -200,7 +219,8 @@ export const getPackagePolicyCreateCallback = (
       cloud,
       esClientInfo,
       productFeatures,
-      telemetryConfigProvider
+      telemetryConfigProvider,
+      experimentalFeatures
     );
 
     return {
@@ -232,7 +252,8 @@ export const getPackagePolicyCreateCallback = (
 export const getPackagePolicyUpdateCallback = (
   endpointServices: EndpointAppContextService,
   cloud: CloudSetup,
-  productFeatures: ProductFeaturesService
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
 ): PutPackagePolicyUpdateCallback => {
   const logger = endpointServices.createLogger('endpointPackagePolicyUpdateCallback');
   const licenseService = endpointServices.getLicenseService();
@@ -249,24 +270,27 @@ export const getPackagePolicyUpdateCallback = (
 
     logger.debug(
       () =>
-        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+        `Checking update of endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
     );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
-    // Validate that Endpoint Security policy is valid against current license
-    validatePolicyAgainstLicense(
-      // The cast below is needed in order to ensure proper typing for
-      // the policy configuration specific for endpoint
-      endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
-      licenseService,
-      logger
-    );
-
     // Validate that Endpoint Security policy uses only enabled App Features
     validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
-    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
+    // Validate that Endpoint Security policy is valid against current license
+    if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+      validatePolicyAgainstLicense(
+        // The cast below is needed in order to ensure proper typing for
+        // the policy configuration specific for endpoint
+        endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
+        licenseService,
+        logger
+      );
+    }
+
+    // Make sure policy includes general expected data
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
     if (endpointIntegrationData.id) {
       await notifyProtectionFeatureUsage(
@@ -319,6 +343,13 @@ export const getPackagePolicyUpdateCallback = (
       endpointIntegrationData.inputs[0].config.policy.value =
         ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
     }
+    if (
+      !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointTrustedDevices) ||
+      !experimentalFeatures.trustedDevices
+    ) {
+      endpointIntegrationData.inputs[0].config.policy.value =
+        removeDeviceControl(newEndpointPackagePolicy);
+    }
 
     updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);
 
@@ -344,7 +375,12 @@ export const getPackagePolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for endpoint integration policy [${packagePolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     return packagePolicy;
   };
@@ -367,7 +403,12 @@ export const getPackagePolicyPostCreateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [packagePolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for agent policy [${packagePolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 
@@ -452,30 +493,43 @@ export const getAgentPolicyPostUpdateCallback = (
     createPolicyDataStreamsIfNeeded({
       endpointServices,
       endpointPolicyIds: [endpointPolicy.id],
-    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+    }).catch((e) => {
+      logger.error(
+        `Attempt to check and create DOT datastreams indexes for agent policy [${endpointPolicy.id}] failed`,
+        { error: e }
+      );
+    });
 
     return agentPolicy;
   };
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: SavedObjectsClientContract | undefined
+  endpointServices: EndpointAppContextService
 ): PostPackagePolicyPostDeleteCallback => {
+  const exceptionsClient = endpointServices.getExceptionListsClient();
+  const logger = endpointServices.createLogger('endpointPolicyDeleteCallback');
+
   return async (deletePackagePolicy): Promise<void> => {
-    if (!exceptionsClient) {
-      return;
-    }
     const policiesToRemove: Array<Promise<void>> = [];
+
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
-        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
-        if (savedObjectsClient) {
-          policiesToRemove.push(removeProtectionUpdatesNote(savedObjectsClient, policy));
-        }
+        logger.debug(`Processing deleted endpoint policy [${policy.id}]`);
+
+        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy, logger));
+        policiesToRemove.push(removeProtectionUpdatesNote(endpointServices, policy));
       }
     }
 
+    // Add processing of setting response actions to orphan for integrations (ex. Crowdstrike,
+    // SentinelOne, etc) that support response actions
+    policiesToRemove.push(
+      updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
+    );
+
     await Promise.all(policiesToRemove);
+
+    logger.debug(`Done processing deleted policies`);
   };
 };

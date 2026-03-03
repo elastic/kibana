@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createSamplePanelAction } from './sample_panel_action';
 import { createSamplePanelLink } from './sample_panel_link';
 
@@ -20,8 +20,8 @@ export class SampelPanelActionTestPlugin
     const samplePanelAction = createSamplePanelAction(core.getStartServices);
     const samplePanelLink = createSamplePanelLink();
 
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelAction);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelLink);
+    uiActions.addTriggerAction(ON_OPEN_PANEL_MENU, samplePanelAction);
+    uiActions.addTriggerAction(ON_OPEN_PANEL_MENU, samplePanelLink);
 
     return {};
   }

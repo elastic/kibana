@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const AI_CONNECTOR_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.aiConnector.title',
   {
-    defaultMessage: 'Configure AI provider',
+    defaultMessage: 'Configure AI Provider',
   }
 );
 
@@ -19,22 +19,14 @@ export const AI_CONNECTOR_CARD_DESCRIPTION_START = i18n.translate(
   { defaultMessage: 'This feature relies on an AI connector for rule translation. ' }
 );
 
-export const AI_CONNECTOR_CARD_DESCRIPTION_INFERENCE_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnector.descriptionInferenceConnector',
-  {
-    defaultMessage:
-      'The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. ',
-  }
-);
-
 export const LLM_MATRIX_LINK = i18n.translate(
   'xpack.securitySolution.onboarding.aiConnector.llmMatrixLink',
   { defaultMessage: 'model performance' }
 );
 
 export const AI_POWERED_MIGRATIONS_LINK = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnector.siemMigrationLink',
-  { defaultMessage: 'AI-powered SIEM migration' }
+  'xpack.securitySolution.onboarding.aiConnector.automaticMigrationLink',
+  { defaultMessage: 'AI-powered Automatic migration' }
 );
 
 export const LEARN_MORE_LINK = i18n.translate(

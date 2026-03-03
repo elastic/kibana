@@ -8,10 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { useInspectorContext, FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { AutoAbortedAPMClient, callApmApi } from '../services/rest/create_call_apm_api';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibanaServices } from './use_kibana_services';
+import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export interface FetcherResult<Data> {
   data?: Data;
@@ -57,7 +59,7 @@ export function useFetcher<TReturn>(
     showToastOnError?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useKibana();
+  const { notifications, rendering } = useKibanaServices();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
@@ -110,12 +112,12 @@ export function useFetcher<TReturn>(
           const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.danger({
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.ux.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              body: (
+              text: toMountPoint(
                 <div>
                   <h5>
                     {i18n.translate('xpack.ux.fetcher.error.status', {
@@ -124,7 +126,8 @@ export function useFetcher<TReturn>(
                   </h5>
 
                   {errorDetails}
-                </div>
+                </div>,
+                rendering
               ),
             });
           }

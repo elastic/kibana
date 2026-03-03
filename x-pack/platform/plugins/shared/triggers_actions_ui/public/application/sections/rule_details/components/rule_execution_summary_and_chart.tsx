@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RuleSummary, RuleType } from '../../../../types';
+import type { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
@@ -24,11 +24,9 @@ import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
-import { RefreshToken } from './types';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import type { RefreshToken } from './types';
 
 export const DEFAULT_NUMBER_OF_EXECUTIONS = 60;
 

@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLMessage,
+} from '@elastic/esql/types';
+import { isSubQuery, Walker } from '@elastic/esql';
+import type { ICommandContext, ICommandCallbacks } from '../types';
+import { validateCommandArguments } from '../../definitions/utils/validation';
+import { errors } from '../../definitions/utils';
+
+const MIN_BRANCHES = 2;
+const MAX_BRANCHES = 8;
+
+export const validate = (
+  command: ESQLAstAllCommands,
+  ast: ESQLAst,
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
+): ESQLMessage[] => {
+  const forkCommand = command as ESQLAstForkCommand;
+  const messages: ESQLMessage[] = [];
+
+  if (forkCommand.args.length < MIN_BRANCHES) {
+    messages.push(errors.forkTooFewBranches(forkCommand));
+  }
+
+  if (forkCommand.args.length > MAX_BRANCHES) {
+    messages.push(errors.forkTooManyBranches(forkCommand));
+  }
+
+  messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
+
+  const allCommands = Walker.commands(ast);
+  const forks = allCommands.filter(({ name }) => name === 'fork');
+
+  if (forks.length > 1) {
+    messages.push(errors.tooManyForks(forks[1]));
+  }
+
+  // FORK is not allowed when the query contains subqueries
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
+
+  if (hasSubqueries) {
+    messages.push(errors.forkNotAllowedWithSubqueries(forkCommand));
+  }
+
+  return messages;
+};

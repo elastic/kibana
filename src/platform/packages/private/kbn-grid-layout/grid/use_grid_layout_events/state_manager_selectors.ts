@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutStateManager } from '../types';
+import type { GridLayoutStateManager } from '../types';
 
 export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
   return (
@@ -17,7 +17,7 @@ export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManag
 };
 
 export const hasPanelInteractionStartedWithKeyboard = (manager: GridLayoutStateManager) =>
-  manager.interactionEvent$.value?.sensorType === 'keyboard';
+  manager.activePanelEvent$.value?.sensorType === 'keyboard';
 
 export const hasRowInteractionStartedWithKeyboard = (manager: GridLayoutStateManager) =>
-  manager.activeRowEvent$.value?.sensorType === 'keyboard';
+  manager.activeSectionEvent$.value?.sensorType === 'keyboard';

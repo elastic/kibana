@@ -8,12 +8,12 @@
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHealth,
-  EuiSuperSelectProps,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
@@ -24,12 +24,18 @@ import { i18n } from '@kbn/i18n';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
-export const PolicyHostsField = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
+export const PolicyHostsField = ({
+  privateLocations,
+  isDisabled,
+}: {
+  privateLocations: PrivateLocation[];
+  isDisabled?: boolean;
+}) => {
   const { data } = useSelector(selectAgentPolicies);
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -53,7 +59,7 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
       inputDisplay: (
         <EuiHealth
           color={item.status === 'active' ? 'success' : 'warning'}
-          style={{ lineHeight: 'inherit' }}
+          css={{ lineHeight: 'inherit' }}
         >
           {item.name}
         </EuiHealth>
@@ -74,7 +80,7 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
           <>
             <EuiHealth
               color={item.status === 'active' ? 'success' : 'warning'}
-              style={{ lineHeight: 'inherit' }}
+              css={{ lineHeight: 'inherit' }}
             >
               <strong>{item.name}</strong>
             </EuiHealth>
@@ -124,6 +130,7 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
           rules={{ required: true }}
           render={({ field }) => (
             <SuperSelect
+              disabled={isDisabled}
               fullWidth
               aria-label={SELECT_POLICY_HOSTS}
               placeholder={SELECT_POLICY_HOSTS}

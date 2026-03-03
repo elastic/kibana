@@ -8,7 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import { compact } from 'lodash';
 import { format, parse } from 'node:url';
 import Path from 'path';
-import { UrlWithParsedQuery } from 'url';
+import type { UrlWithParsedQuery } from 'url';
 import { FetchResponseError } from './kibana_fetch_response_error';
 import { createProxyTransport } from './proxy_transport';
 import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
@@ -99,15 +99,18 @@ export class KibanaClient {
       auth: null,
     };
 
+    const body = init?.body ? JSON.stringify(init?.body) : undefined;
+
     const response = await fetch(format(urlOptions), {
       ...init,
       headers: {
+        ['content-type']: 'application/json',
         ...getInternalKibanaHeaders(),
         Authorization: `Basic ${Buffer.from(formattedBaseUrl.auth!).toString('base64')}`,
         ...init?.headers,
       },
       signal: combineSignal(this.options.signal, init?.signal),
-      body: init?.body ? JSON.stringify(init?.body) : undefined,
+      body,
     });
 
     if (init?.asRawResponse) {

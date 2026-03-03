@@ -7,11 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  EXCEPTIONS_UI_READ_PRIVILEGES,
+  RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import {
   COVERAGE_OVERVIEW_PATH,
+  DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
+  AI_RULE_CREATION_PATH,
   RULES_PATH,
   SECURITY_FEATURE_ID,
 } from '../../common/constants';
@@ -19,6 +27,8 @@ import {
   ADD_RULES,
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
+  AI_RULE_CREATE,
+  DE_SPACE_RULES_HEALTH,
   EXCEPTIONS,
   RULES,
   SIEM_RULES,
@@ -29,7 +39,6 @@ import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
-import { siemMigrationsLinks } from '../siem_migrations/links';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -38,7 +47,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: `${SECURITY_FEATURE_ID}.show`,
+  capabilities: [RULES_UI_READ_PRIVILEGE, SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.rules,
@@ -53,7 +62,7 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
-      capabilities: `${SECURITY_FEATURE_ID}.show`,
+      capabilities: [[RULES_UI_READ_PRIVILEGE, RULES_UI_DETECTIONS_PRIVILEGE]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -61,7 +70,6 @@ export const links: LinkItem = {
           path: RULES_ADD_PATH,
           skipUrlState: true,
           hideTimeline: true,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
         {
           id: SecurityPageName.rulesCreate,
@@ -69,7 +77,21 @@ export const links: LinkItem = {
           path: RULES_CREATE_PATH,
           skipUrlState: true,
           hideTimeline: false,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
+        },
+        {
+          id: SecurityPageName.aiRuleCreation,
+          title: AI_RULE_CREATE,
+          path: AI_RULE_CREATION_PATH,
+          skipUrlState: true,
+          hideTimeline: false,
+        },
+        {
+          id: SecurityPageName.spaceRulesHealth,
+          title: DE_SPACE_RULES_HEALTH,
+          path: DE_SPACE_RULES_HEALTH_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+          globalSearchDisabled: true,
         },
       ],
     },
@@ -82,7 +104,10 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [`${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [
+        EXCEPTIONS_UI_READ_PRIVILEGES,
+        `${SECURITY_FEATURE_ID}.showEndpointExceptions`,
+      ],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -103,14 +128,13 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: `${SECURITY_FEATURE_ID}.detections`,
+      capabilities: RULES_UI_READ_PRIVILEGE,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',
         }),
       ],
     },
-    siemMigrationsLinks,
   ],
   categories: [
     {
@@ -121,7 +145,6 @@ export const links: LinkItem = {
         SecurityPageName.rules,
         SecurityPageName.cloudSecurityPostureBenchmarks,
         SecurityPageName.exceptions,
-        SecurityPageName.siemMigrationsRules,
       ],
     },
     {

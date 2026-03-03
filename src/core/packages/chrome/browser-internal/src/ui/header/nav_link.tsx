@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
-import { relativeToAbsolute } from '../../nav_links/to_nav_link';
+import { relativeToAbsolute } from '../../services/nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;

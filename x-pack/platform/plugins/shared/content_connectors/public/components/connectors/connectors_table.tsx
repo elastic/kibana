@@ -7,15 +7,8 @@
 
 import React from 'react';
 
-import {
-  CriteriaWithPagination,
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -30,7 +23,7 @@ import {
 import { ConnectorViewIndexLink } from '../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 
 import { ConnectorType } from './connector_type';
-import { ConnectorViewItem } from './connectors_logic';
+import type { ConnectorViewItem } from './connectors_logic';
 import { generateEncodedPath } from '../shared/encode_path_params';
 import { EuiLinkTo } from '../shared/react_router_helpers';
 

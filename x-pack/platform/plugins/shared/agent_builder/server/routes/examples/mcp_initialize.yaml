@@ -1,0 +1,35 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        mcpInitializeRequestExample:
+          description: "WARNING: DO NOT USE THIS ENDPOINT VIA REST API. These examples are auto-generated and should not be run. Integrate with MCP using MCP Inspector or native MCP clients (Claude Desktop, Cursor, VS Code) instead."
+          value:
+            jsonrpc: "2.0"
+            method: "initialize"
+            params:
+              protocolVersion: "2024-11-05"
+              capabilities: {}
+              clientInfo:
+                name: "test-client"
+                version: "1.0.0"
+            id: 1
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          mcpInitializeResponseExample:
+            description: "Example response showing the successful result of communication initialisation over MCP protocol"
+            value:
+              jsonrpc: "2.0"
+              id: 1
+              result:
+                protocolVersion: "2024-11-05"
+                capabilities:
+                  tools:
+                    listChanged: true
+                serverInfo:
+                  name: "elastic-mcp-server"
+                  version: "0.0.1"

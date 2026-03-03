@@ -10,11 +10,12 @@ import { Redirect, useParams } from 'react-router-dom';
 import { EuiPanel } from '@elastic/eui';
 import { AlertDefaultsForm } from './alerting_defaults/alert_defaults_form';
 import { ProjectAPIKeys } from './project_api_keys/project_api_keys';
-import { SettingsTabId } from './page_header';
+import type { SettingsTabId } from './page_header';
 import { ParamsList } from './global_params/params_list';
 import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
 import { ManagePrivateLocations } from './private_locations/manage_private_locations';
+import { AdvancedSettingsForm } from './advanced/advanced_settings_form';
 
 export const SettingsPage = () => {
   useSettingsBreadcrumbs();
@@ -35,6 +36,12 @@ export const SettingsPage = () => {
         return (
           <EuiPanel hasShadow={false} hasBorder={true}>
             <AlertDefaultsForm />
+          </EuiPanel>
+        );
+      case 'advanced':
+        return (
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <AdvancedSettingsForm />
           </EuiPanel>
         );
       default:

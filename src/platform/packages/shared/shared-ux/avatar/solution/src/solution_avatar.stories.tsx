@@ -8,24 +8,26 @@
  */
 
 import React from 'react';
-import { KibanaSolutionAvatar, IconTypeProps, KnownSolutionProps } from './solution_avatar';
+import type { StoryObj, ArgTypes } from '@storybook/react';
+import { type EuiAvatarProps } from '@elastic/eui';
+import type { IconTypeProps, KnownSolutionProps } from './solution_avatar';
+import { KibanaSolutionAvatar } from './solution_avatar';
 
 export default {
   title: 'Avatar/Solution',
   description: 'A wrapper around EuiAvatar, specifically to stylize Elastic Solutions',
 };
 
-const argTypes = {
+const argTypes: ArgTypes<Pick<EuiAvatarProps, 'size'>> = {
   size: {
     control: 'select',
     options: ['s', 'm', 'l', 'xl', 'xxl'],
-    defaultValue: 'xxl',
   },
 };
 
 type KnownSolutionParams = Pick<KnownSolutionProps, 'size' | 'name'>;
 
-export const SolutionType = {
+export const SolutionType: StoryObj<KnownSolutionParams> = {
   render: (params: KnownSolutionParams) => {
     return <KibanaSolutionAvatar {...params} />;
   },
@@ -34,15 +36,19 @@ export const SolutionType = {
     name: {
       control: 'select',
       options: ['Cloud', 'Elastic', 'Kibana', 'Observability', 'Security', 'Enterprise Search'],
-      defaultValue: 'Elastic',
     },
     ...argTypes,
+  },
+
+  args: {
+    size: 'xxl',
+    name: 'Elastic',
   },
 };
 
 type IconTypeParams = Pick<IconTypeProps, 'size' | 'name' | 'iconType'>;
 
-export const IconType = {
+export const IconType: StoryObj<IconTypeParams> = {
   render: (params: IconTypeParams) => {
     return <KibanaSolutionAvatar {...params} />;
   },
@@ -63,12 +69,16 @@ export const IconType = {
         'machineLearningApp',
         'managementApp',
       ],
-      defaultValue: 'logoElastic',
     },
     name: {
       control: 'text',
-      defaultValue: 'Solution Name',
     },
     ...argTypes,
+  },
+
+  args: {
+    size: 'xxl',
+    iconType: 'logoElastic',
+    name: 'Solution Name',
   },
 };

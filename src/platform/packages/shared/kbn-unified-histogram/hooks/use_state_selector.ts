@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { useEffect, useState } from 'react';
 

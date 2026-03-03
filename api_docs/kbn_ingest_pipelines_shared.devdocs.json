@@ -1,0 +1,167 @@
+{
+  "id": "@kbn/ingest-pipelines-shared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ingest-pipelines-shared",
+        "id": "def-common.PipelineStructureTree",
+        "type": "Function",
+        "tags": [],
+        "label": "PipelineStructureTree",
+        "description": [
+          "\nA component for a Pipeline structure tree.\nChildren pipeline nodes represent Pipeline processors that run the\ncorresponding pipelines from the children node.\nSee more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor"
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          "PipelineStructureTreeProps",
+          "> & { readonly type: ({ pipelineTree, selectedPipeline, isExtension, clickTreeNode, clickMorePipelines, goBack, }: ",
+          "PipelineStructureTreeProps",
+          ") => React.JSX.Element; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineStructureTree.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ingest-pipelines-shared",
+        "id": "def-common.PipelineTreeNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "PipelineTreeNode",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.pipelineName",
+            "type": "string",
+            "tags": [],
+            "label": "pipelineName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.isManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isManaged",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ingest-pipelines-shared",
+                "scope": "common",
+                "docId": "kibKbnIngestPipelinesSharedPluginApi",
+                "section": "def-common.PipelineTreeNode",
+                "text": "PipelineTreeNode"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ingest-pipelines-shared",
+        "id": "def-common.MAX_TREE_LEVEL",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_TREE_LEVEL",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

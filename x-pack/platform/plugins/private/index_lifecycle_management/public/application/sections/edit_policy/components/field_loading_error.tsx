@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
 
 interface Props {
@@ -23,7 +24,7 @@ export const FieldLoadingError: FunctionComponent<Props> = (props) => {
       <EuiSpacer size="m" />
       <EuiCallOut
         data-test-subj={props['data-test-subj']}
-        iconType="help"
+        iconType="question"
         color="warning"
         title={
           <>

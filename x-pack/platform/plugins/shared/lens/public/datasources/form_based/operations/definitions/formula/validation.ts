@@ -7,8 +7,14 @@
 
 import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
+import { parse } from '@kbn/tinymath';
+import type {
+  TinymathAST,
+  TinymathFunction,
+  TinymathNamedArgument,
+  TinymathLocation,
+  TinymathVariable,
+} from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { tinymathFunctions, getTypeI18n } from '@kbn/lens-formula-docs';
 import type { Query } from '@kbn/es-query';
@@ -18,8 +24,13 @@ import {
   REASON_IDS,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import type {
+  DateRange,
+  GenericIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { nonNullable } from '../../../../../utils';
-import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
   findVariables,
@@ -29,15 +40,9 @@ import {
   isMathNode,
 } from './util';
 
-import type {
-  OperationDefinition,
-  GenericIndexPatternColumn,
-  GenericOperationDefinition,
-} from '..';
-import type { FormBasedLayer } from '../../../types';
-import type { IndexPattern } from '../../../../../types';
+import type { OperationDefinition, GenericOperationDefinition } from '..';
 import type { TinymathNodeTypes } from './types';
-import { InvalidQueryError, ValidationErrors } from './validation_errors';
+import type { InvalidQueryError, ValidationErrors } from './validation_errors';
 
 export type ErrorWrapper = ValidationErrors & {
   message: string;

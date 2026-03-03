@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -30,9 +31,9 @@ import {
   getGlobalParamAction,
   selectGlobalParamState,
 } from '../../../state/global_params';
-import { ClientPluginsStart } from '../../../../../plugin';
-import { ListParamItem } from './params_list';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
+import type { ListParamItem } from './params_list';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 
@@ -128,15 +129,23 @@ export const AddParamFlyout = ({
 
   const { handleSubmit } = form;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   let flyout;
 
   if (isFlyoutVisible) {
     flyout = (
       <FormProvider {...form}>
-        <EuiFlyout ownFocus onClose={closeFlyout} size="m" style={{ minWidth: 500 }}>
+        <EuiFlyout
+          ownFocus
+          onClose={closeFlyout}
+          size="m"
+          style={{ minWidth: 500 }}
+          aria-labelledby={flyoutTitleId}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>{isEditingItem ? EDIT_PARAM : CREATE_PARAM}</h2>
+              <h2 id={flyoutTitleId}>{isEditingItem ? EDIT_PARAM : CREATE_PARAM}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>

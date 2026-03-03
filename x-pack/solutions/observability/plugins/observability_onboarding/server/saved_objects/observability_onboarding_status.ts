@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { StepProgressPayload } from '../routes/types';
+import type { StepProgressPayload } from '../routes/types';
 
 export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE = 'observability-onboarding-state';
 
@@ -45,7 +45,7 @@ const LogFilesStateSchema = schema.object({
   datasetName: schema.string(),
   serviceName: schema.maybe(schema.string()),
   customConfigurations: schema.maybe(schema.string()),
-  logFilePaths: schema.arrayOf(schema.string()),
+  logFilePaths: schema.arrayOf(schema.string(), { maxSize: 100 }),
   namespace: schema.string(),
 });
 
@@ -67,13 +67,16 @@ export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
     pkgName: schema.string(),
     pkgVersion: schema.string(),
     installSource: schema.oneOf([schema.literal('registry'), schema.literal('custom')]),
+    // codeql[js/kibana/unbounded-array-in-schema] Populated from Fleet package metadata, not user input
     inputs: schema.arrayOf(schema.any()),
+    // codeql[js/kibana/unbounded-array-in-schema] Populated from Fleet packageInfo.data_streams (registry) or hardcoded to 1 (custom)
     dataStreams: schema.arrayOf(
       schema.object({
         type: schema.string(),
         dataset: schema.string(),
       })
     ),
+    // codeql[js/kibana/unbounded-array-in-schema] Populated from Fleet pkg.installed_kibana (registry) or empty array (custom)
     kibanaAssets: schema.arrayOf(
       schema.object({
         type: schema.string(),
@@ -87,7 +90,8 @@ export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
         }),
       ])
     ),
-  })
+  }),
+  { maxSize: 100 }
 );
 
 export const observabilityOnboardingFlow: SavedObjectsType = {

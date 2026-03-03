@@ -21,6 +21,7 @@ describe('Class Report', () => {
         version: '7.14.0',
         browserTimezone: 'UTC',
       },
+      space_id: 'a_space',
       meta: { objectType: 'test' },
       timeout: 30000,
     });
@@ -36,6 +37,7 @@ describe('Class Report', () => {
       started_at: undefined,
       status: 'pending',
       timeout: 30000,
+      space_id: 'a_space',
     });
     expect(report.toReportTaskJSON()).toMatchObject({
       attempts: 0,
@@ -55,6 +57,62 @@ describe('Class Report', () => {
       meta: { objectType: 'test' },
       status: 'pending',
       timeout: 30000,
+      space_id: 'a_space',
+    });
+
+    expect(report._id).toBeDefined();
+  });
+
+  it('constructs Report instance when scheduled_task_id is defined', () => {
+    const report = new Report({
+      _index: '.reporting-test-index-12345',
+      jobtype: 'test-report',
+      created_by: 'created_by_test_string',
+      max_attempts: 50,
+      payload: {
+        headers: 'payload_test_field',
+        objectType: 'testOt',
+        title: 'cool report',
+        version: '7.14.0',
+        browserTimezone: 'UTC',
+      },
+      meta: { objectType: 'test' },
+      timeout: 30000,
+      scheduled_report_id: 'foobar',
+    });
+
+    expect(report.toReportSource()).toMatchObject({
+      attempts: 0,
+      completed_at: undefined,
+      created_by: 'created_by_test_string',
+      jobtype: 'test-report',
+      max_attempts: 50,
+      meta: { objectType: 'test' },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+      started_at: undefined,
+      status: 'pending',
+      timeout: 30000,
+      scheduled_report_id: 'foobar',
+    });
+    expect(report.toReportTaskJSON()).toMatchObject({
+      attempts: 0,
+      created_by: 'created_by_test_string',
+      index: '.reporting-test-index-12345',
+      jobtype: 'test-report',
+      meta: { objectType: 'test' },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
+    });
+    expect(report.toApiJSON()).toMatchObject({
+      attempts: 0,
+      created_by: 'created_by_test_string',
+      index: '.reporting-test-index-12345',
+      jobtype: 'test-report',
+      max_attempts: 50,
+      payload: { objectType: 'testOt' },
+      meta: { objectType: 'test' },
+      status: 'pending',
+      timeout: 30000,
+      scheduled_report_id: 'foobar',
     });
 
     expect(report._id).toBeDefined();

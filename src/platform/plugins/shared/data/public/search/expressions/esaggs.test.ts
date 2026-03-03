@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   ISearchStartSearchSource,
   KibanaContext,
@@ -69,7 +69,7 @@ describe('esaggs expression function - public', () => {
       aggs: {
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
       } as unknown as jest.Mocked<AggsStart>,
-      indexPatterns: {
+      dataViews: {
         create: jest.fn().mockResolvedValue({}),
       } as unknown as jest.Mocked<DataViewsContract>,
       searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
@@ -81,7 +81,7 @@ describe('esaggs expression function - public', () => {
   test('calls indexPatterns.create with the values provided by the subexpression arg', async () => {
     await definition().fn(null, args, mockHandlers).toPromise();
 
-    expect(startDependencies.indexPatterns.create).toHaveBeenCalledWith(args.index.value, true);
+    expect(startDependencies.dataViews.create).toHaveBeenCalledWith(args.index.value, true);
   });
 
   test('calls aggs.createAggConfigs with the values provided by the subexpression arg', async () => {

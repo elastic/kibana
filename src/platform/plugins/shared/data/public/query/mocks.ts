@@ -9,7 +9,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
-import { QueryService, QuerySetup, QueryStart } from '.';
+import type { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
 import { createFilterManagerMock } from './filter_manager/filter_manager.mock';
 import { queryStringManagerMock } from './query_string/query_string_manager.mock';
@@ -39,7 +39,12 @@ const createStartContractMock = () => {
     addToQueryLog: jest.fn(),
     filterManager: createFilterManagerMock(),
     queryString: queryStringManagerMock.createStartContract(),
-    savedQueries: { getSavedQuery: jest.fn(), getSavedQueryCount: jest.fn() } as any,
+    savedQueries: {
+      getSavedQuery: jest.fn(),
+      getSavedQueryCount: jest.fn(),
+      isDuplicateTitle: jest.fn(),
+      createQuery: jest.fn(),
+    } as any,
     state$: new Observable(),
     getState: jest.fn(),
     timefilter: timefilterServiceMock.createStartContract(),

@@ -12,50 +12,52 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-browser-internal';
-import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<SecurityServiceSetup> = {
+  const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createStartMock = () => {
-  const mock: jest.MockedObjectDeep<SecurityServiceStart> = {
-    authc: {
+  const mock: jest.MockedObjectDeep<SecurityServiceStart> = lazyObject({
+    authc: lazyObject({
       getCurrentUser: jest.fn(),
-    },
-  };
+    }),
+  });
 
   return mock;
 };
 
 const createInternalSetupMock = () => {
-  const mock: jest.Mocked<InternalSecurityServiceSetup> = {
+  const mock: jest.Mocked<InternalSecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createInternalStartMock = () => {
-  const mock: jest.MockedObjectDeep<InternalSecurityServiceStart> = {
-    authc: {
+  const mock: jest.MockedObjectDeep<InternalSecurityServiceStart> = lazyObject({
+    authc: lazyObject({
       getCurrentUser: jest.fn(),
-    },
-  };
+    }),
+  });
 
   return mock;
 };
 
 const createServiceMock = () => {
-  const mock = {
+  const mock = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
     stop: jest.fn(),
-  };
+  });
 
   return mock;
 };

@@ -9,7 +9,7 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import {
+import type {
   NoDataViewsPromptServices,
   NoDataViewsPromptProps,
 } from '@kbn/shared-ux-prompt-no-data-views-types';

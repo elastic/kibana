@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getArtifactName, parseArtifactName } from './artifact';
+import { getArtifactName, parseArtifactName, DEFAULT_ELSER } from './artifact';
 
 describe('getArtifactName', () => {
   it('builds the name based on the provided product name and version', () => {
@@ -37,6 +37,48 @@ describe('getArtifactName', () => {
       })
     ).toEqual('kb-product-doc-elasticsearch-8.17');
   });
+  it('generates a name with inference id when inference_id is not the ELSER default', () => {
+    expect(
+      getArtifactName({
+        productName: 'kibana',
+        productVersion: '8.16',
+        inferenceId: '.multilingual-e5-small-elasticsearch',
+      })
+    ).toEqual('kb-product-doc-kibana-8.16--.multilingual-e5-small-elasticsearch.zip');
+    expect(
+      getArtifactName({
+        productName: 'kibana',
+        productVersion: '8.16',
+        inferenceId: '.multilingual-e5-small-elasticsearch',
+        excludeExtension: true,
+      })
+    ).toEqual('kb-product-doc-kibana-8.16--.multilingual-e5-small-elasticsearch');
+  });
+  it('generates a name with inference id when inference_id is the ELSER default', () => {
+    expect(
+      getArtifactName({
+        productName: 'kibana',
+        productVersion: '8.16',
+        inferenceId: DEFAULT_ELSER,
+      })
+    ).toEqual('kb-product-doc-kibana-8.16.zip');
+  });
+  it('generates a name with inference id for latest', () => {
+    expect(
+      getArtifactName({
+        productName: 'kibana',
+        productVersion: 'latest',
+        inferenceId: DEFAULT_ELSER,
+      })
+    ).toEqual('kb-product-doc-kibana-latest.zip');
+    expect(
+      getArtifactName({
+        productName: 'security',
+        productVersion: 'latest',
+        inferenceId: DEFAULT_ELSER,
+      })
+    ).toEqual('kb-product-doc-security-latest.zip');
+  });
 });
 
 describe('parseArtifactName', () => {
@@ -53,6 +95,17 @@ describe('parseArtifactName', () => {
       productVersion: '8.17',
     });
   });
+  it('parses an artifact name latest', () => {
+    expect(parseArtifactName('kb-product-doc-kibana-latest')).toEqual({
+      productName: 'kibana',
+      productVersion: 'latest',
+    });
+
+    expect(parseArtifactName('kb-product-doc-security-latest')).toEqual({
+      productName: 'security',
+      productVersion: 'latest',
+    });
+  });
 
   it('returns undefined if the provided string does not match the artifact name pattern', () => {
     expect(parseArtifactName('some-wrong-name')).toEqual(undefined);
@@ -60,5 +113,23 @@ describe('parseArtifactName', () => {
 
   it('returns undefined if the provided string is not strictly lowercase', () => {
     expect(parseArtifactName('kb-product-doc-Security-8.17')).toEqual(undefined);
+  });
+  it('parses an artifact name with inference id and extension', () => {
+    expect(
+      parseArtifactName('kb-product-doc-kibana-8.16--.multilingual-e5-small-elasticsearch.zip')
+    ).toEqual({
+      productName: 'kibana',
+      productVersion: '8.16',
+      inferenceId: '.multilingual-e5-small-elasticsearch',
+    });
+  });
+  it('parses an artifact name with inference id when it is not the default', () => {
+    expect(
+      parseArtifactName('kb-product-doc-kibana-8.16--.multilingual-e5-small-elasticsearch')
+    ).toEqual({
+      productName: 'kibana',
+      productVersion: '8.16',
+      inferenceId: '.multilingual-e5-small-elasticsearch',
+    });
   });
 });

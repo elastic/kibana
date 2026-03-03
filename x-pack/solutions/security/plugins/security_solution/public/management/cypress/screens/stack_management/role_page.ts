@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { loadPage } from '../../tasks/common';
 
 /**
@@ -66,12 +67,14 @@ export const getSecuritySolutionCategoryKibanaPrivileges = (): Cypress.Chainable
  */
 export const expandEndpointSecurityFeaturePrivileges = (): Cypress.Chainable => {
   return cy
-    .getByTestSubj('featurePrivilegeControls_securitySolution_siemV2_accordionToggle')
+    .getByTestSubj(
+      `featurePrivilegeControls_securitySolution_${SECURITY_FEATURE_ID}_accordionToggle`
+    )
     .click();
 };
 
 export const getEndpointSecurityFeaturePrivileges = () => {
-  return cy.getByTestSubj('featureCategory_securitySolution_siemV2');
+  return cy.getByTestSubj(`featureCategory_securitySolution_${SECURITY_FEATURE_ID}`);
 };
 
 /**
@@ -104,7 +107,7 @@ export const setSecuritySolutionEndpointGroupPrivilege = (
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
   return getSecuritySolutionCategoryKibanaPrivileges()
-    .findByTestSubj(`siemV2_${privilege}`)
+    .findByTestSubj(`${SECURITY_FEATURE_ID}_${privilege}`)
     .click();
 };
 
@@ -136,7 +139,7 @@ export const ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS = Object.freeze([
 
 type EndpointSubFeaturePrivilegeId = (typeof ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS)[number];
 
-/* @private */
+/* @internal */
 const privilegeMapToTitle = Object.freeze({
   all: 'All',
   read: 'Read',
@@ -148,7 +151,7 @@ export const setEndpointSubFeaturePrivilege = (
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
   return getEndpointSecurityFeaturePrivileges()
-    .findByTestSubj(`securitySolution_siemV2_${feature}_privilegeGroup`)
+    .findByTestSubj(`securitySolution_${SECURITY_FEATURE_ID}_${feature}_privilegeGroup`)
     .find(`button[title="${privilegeMapToTitle[privilege]}"]`)
     .click();
 };

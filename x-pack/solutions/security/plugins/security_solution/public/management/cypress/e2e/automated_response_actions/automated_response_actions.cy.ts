@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/tasks/create_new_rule';
 import { login } from '../../tasks/login';
 import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
 import type { PolicyData } from '../../../../../common/endpoint/types';
@@ -20,20 +20,10 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/207773
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automatedProcessActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -61,7 +51,7 @@ describe.skip(
           })
         )
         .then(() => {
-          loadRule().then((data) => {
+          loadRule({ query: `agent.id: ${createdHost.agentId}` }).then((data) => {
             ruleId = data.id;
             ruleName = data.name;
           });
@@ -93,7 +83,7 @@ describe.skip(
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
+      changeAlertsFilter(`process.name: "sshd" and agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
       cy.getByTestSubj('expand-event').first().click();

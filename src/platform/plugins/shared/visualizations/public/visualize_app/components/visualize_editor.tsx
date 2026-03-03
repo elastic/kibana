@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import {
   useChromeVisibility,
   useSavedVisInstance,
@@ -21,10 +21,10 @@ import {
   useLinkedSearchUpdates,
   useDataViewUpdates,
 } from '../utils';
-import { VisualizeServices } from '../types';
+import { useProjectRouting } from '../utils/use/use_project_routing';
+import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
+import type { VisualizeAppProps } from '../app';
 import type { VisualizeInput } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
@@ -79,13 +79,18 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     eventEmitter,
     savedVisInstance
   );
+
+  // Initialize CPS project routing manager for Vega
+  const projectRoutingManager = useProjectRouting(services);
+
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
     savedVisInstance,
-    visEditorController
+    visEditorController,
+    projectRoutingManager
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);

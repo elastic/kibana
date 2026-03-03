@@ -244,6 +244,7 @@ export const RoleTemplateEditor = ({
       return (
         <EuiFlexItem grow={1} data-test-subj="roleMappingInvalidRoleTemplate">
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={
               <FormattedMessage

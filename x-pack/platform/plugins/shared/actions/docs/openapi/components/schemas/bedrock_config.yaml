@@ -7,9 +7,14 @@ properties:
   apiUrl:
     type: string
     description: The Amazon Bedrock request URL.
+  region:
+    type: string
+    description: >
+      Optional AWS region for request signing. Required when using a custom endpoint URL that does not
+      include the region in the hostname (for example, `us-west-1`).
   defaultModel:
     type: string
     description: >
       The generative artificial intelligence model for Amazon Bedrock to use.
       Current support is for the Anthropic Claude models.
-    default: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+    default: us.anthropic.claude-sonnet-4-5-20250929-v1:0

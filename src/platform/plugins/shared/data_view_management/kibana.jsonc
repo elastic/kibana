@@ -25,7 +25,8 @@
     "optionalPlugins": [
       "noDataPage",
       "share",
-      "spaces"
+      "spaces",
+      "savedObjectsTagging"
     ],
     "requiredBundles": [
       "kibanaReact",

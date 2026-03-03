@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { dateType, durationType } from '../../schema';
 
 const fixedAgePurgeVal = t.literal('fixed_age');
@@ -39,8 +39,14 @@ interface BulkPurgeRollupResponse {
   taskId?: DeleteByQueryResponse['task'];
 }
 
-type BulkPurgePolicyType = t.TypeOf<typeof bulkPurgePolicy>;
+type BulkPurgePolicyInput = t.OutputOf<typeof bulkPurgePolicy>;
+type BulkPurgeRollupInput = t.OutputOf<typeof bulkPurgeRollupSchema.props.body>; // Raw payload sent by the frontend
 type BulkPurgeRollupParams = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
 
-export type { BulkPurgeRollupResponse, BulkPurgePolicyType, BulkPurgeRollupParams };
+export type {
+  BulkPurgeRollupResponse,
+  BulkPurgePolicyInput,
+  BulkPurgeRollupInput,
+  BulkPurgeRollupParams,
+};
 export { bulkPurgeRollupSchema };

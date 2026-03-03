@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ElasticAgentVersionInfo } from '../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
@@ -14,6 +14,7 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
 
 const setupFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/otel_host/setup',
@@ -38,6 +39,7 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
     } = resources;
     const {
       elasticsearch: { client },
+      featureFlags,
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
@@ -52,16 +54,21 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
 
-    const timestamp = new Date().toISOString();
-    const { encoded: apiKeyEncoded } = config.serverless.enabled
-      ? await createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-host-${timestamp}`)
-      : await createShipperApiKey(client.asCurrentUser, `otel-host-${timestamp}`);
+    const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
+    const isManagedOtlpServiceAvailable =
+      config.serverless.enabled ||
+      ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
+        Boolean(managedOtlpServiceUrl));
+
+    const { encoded: apiKeyEncoded } = isManagedOtlpServiceAvailable
+      ? await createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-host`)
+      : await createShipperApiKey(client.asCurrentUser, `otel-host`);
 
     return {
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
       apiKeyEncoded,
-      managedOtlpServiceUrl: await getManagedOtlpServiceUrl(resources),
+      managedOtlpServiceUrl: getManagedOtlpServiceUrl(plugins),
     };
   },
 });

@@ -8,27 +8,24 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge, pairwise } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import {
-  PublishingSubject,
-  ViewMode,
-  apiHasParentApi,
   apiPublishesDataLoading,
   getViewModeSubject,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { TIME_SLIDER_CONTROL } from '../../../common';
-import {
-  defaultControlComparators,
-  initializeDefaultControlApi,
-} from '../initialize_default_control_api';
-import { ControlFactory } from '../types';
-import './components/index.scss';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
@@ -43,33 +40,45 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from './time_utils';
-import { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+import type { TimeSliderControlApi } from './types';
 import { isCompressed } from '../../control_group/utils/is_compressed';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
-export const getTimesliderControlFactory = (): ControlFactory<
-  TimesliderControlState,
-  TimesliderControlApi
+export const getTimesliderControlFactory = (): EmbeddableFactory<
+  TimeSliderControlState,
+  TimeSliderControlApi
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
-    getIconType: () => 'search',
-    getDisplayName: () => displayName,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState;
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
-        initTimeRangeSubscription(controlGroupApi);
+        initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
+      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.is_anchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
       const timeRangePercentage = initTimeRangePercentage(
-        initialState,
+        state,
         syncTimesliceWithTimeRangePercentage
       );
+
+      function getTimesliceSyncedWithTimeRangePercentage(
+        startPercentage: number,
+        endPercentage: number
+      ): [number, number] {
+        const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
+        const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
+        const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
+        return [
+          roundDownToNextStepSizeFactor(from, stepSize),
+          roundUpToNextStepSizeFactor(to, stepSize),
+        ];
+      }
 
       function syncTimesliceWithTimeRangePercentage(
         startPercentage: number | undefined,
@@ -82,19 +91,32 @@ export const getTimesliderControlFactory = (): ControlFactory<
           return;
         }
 
-        const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
+        const { timeRange, timeRangeBounds } = timeRangeMeta$.value;
+
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
         const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
-        timeslice$.next([
-          roundDownToNextStepSizeFactor(from, stepSize),
-          roundUpToNextStepSizeFactor(to, stepSize),
-        ]);
+        timeslice$.next(getTimesliceSyncedWithTimeRangePercentage(startPercentage, endPercentage));
         setSelectedRange(to - from);
       }
 
-      function setTimeslice(timeslice?: Timeslice) {
+      function setTimeslice(timeslice?: TimeSlice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        timeslice$.next(timeslice);
+        const { start_percentage_of_time_range, end_percentage_of_time_range } =
+          timeRangePercentage.getLatestState();
+
+        if (
+          start_percentage_of_time_range !== undefined &&
+          end_percentage_of_time_range !== undefined
+        ) {
+          timeslice$.next(
+            getTimesliceSyncedWithTimeRangePercentage(
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
+            )
+          );
+        } else {
+          timeslice$.next(undefined);
+        }
       }
 
       function setIsAnchored(isAnchored: boolean | undefined) {
@@ -109,7 +131,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
             : undefined;
       }
 
-      function onChange(timeslice?: Timeslice) {
+      function onChange(timeslice?: TimeSlice) {
         hasTimeSliceSelection$.next(Boolean(timeslice));
         setTimeslice(timeslice);
         const nextSelectedRange = timeslice
@@ -194,14 +216,11 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       const viewModeSubject =
-        getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
+        getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
-
-      const dashboardDataLoading$ =
-        apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
-          ? controlGroupApi.parentApi.dataLoading$
-          : new BehaviorSubject<boolean | undefined>(false);
+      const dashboardDataLoading$ = apiPublishesDataLoading(parentApi)
+        ? parentApi.dataLoading$
+        : new BehaviorSubject<boolean | undefined>(false);
       const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
         // debounce to give time for panels to start loading if they are going to load from time changes
         debounceTime(300),
@@ -216,46 +235,38 @@ export const getTimesliderControlFactory = (): ControlFactory<
       );
 
       function serializeState() {
-        const { rawState: defaultControlState } = defaultControl.getLatestState();
         return {
-          rawState: {
-            ...defaultControlState,
-            ...timeRangePercentage.getLatestState(),
-            isAnchored: isAnchored$.value,
-          },
-          references: [],
+          ...timeRangePercentage.getLatestState(),
+          isAnchored: isAnchored$.value,
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<TimesliderControlState>({
+      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
         anyStateChange$: merge(
-          defaultControl.anyStateChange$,
           timeRangePercentage.anyStateChange$,
           isAnchored$.pipe(map(() => undefined))
         ),
         getComparators: () => {
           return {
-            ...defaultControlComparators,
             ...timeRangePercentageComparators,
             width: 'skip',
-            isAnchored: 'skip',
+            is_anchored: 'skip',
           };
         },
         onReset: (lastSaved) => {
-          defaultControl.reinitializeState(lastSaved?.rawState);
-          timeRangePercentage.reinitializeState(lastSaved?.rawState);
-          setIsAnchored(lastSaved?.rawState?.isAnchored);
+          timeRangePercentage.reinitializeState(lastSaved);
+          setIsAnchored(lastSaved?.is_anchored);
         },
       });
 
       const api = finalizeApi({
         ...unsavedChangesApi,
-        ...defaultControl.api,
-        defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
-        timeslice$,
+        isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
+        label$: new BehaviorSubject<string>(displayName),
+        appliedTimeslice$: timeslice$,
         serializeState,
         clearSelections: () => {
           setTimeslice(undefined);
@@ -263,8 +274,11 @@ export const getTimesliderControlFactory = (): ControlFactory<
         },
         hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
         CustomPrependComponent: () => {
-          const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
-            controlGroupApi.autoApplySelections$,
+          const autoApplyFiltersSubject = apiPublishesSettings(parentApi)
+            ? parentApi.settings.autoApplyFilters$
+            : new BehaviorSubject<boolean>(true);
+          const [autoApplyFilters, viewMode] = useBatchedPublishingSubjects(
+            autoApplyFiltersSubject,
             viewModeSubject
           );
 
@@ -273,7 +287,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
               onNext={onNext}
               onPrevious={onPrevious}
               viewMode={viewMode}
-              disablePlayButton={!autoApplySelections}
+              disablePlayButton={!autoApplyFilters}
               setIsPopoverOpen={(value) => isPopoverOpen$.next(value)}
               waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
             />
@@ -281,14 +295,43 @@ export const getTimesliderControlFactory = (): ControlFactory<
         },
       });
 
-      const timeRangeMetaSubscription = timeRangeMeta$.subscribe((timeRangeMeta) => {
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-          timeRangePercentage.getLatestState();
-        syncTimesliceWithTimeRangePercentage(
-          timesliceStartAsPercentageOfTimeRange,
-          timesliceEndAsPercentageOfTimeRange
+      const timeRangeMetaSubscription = timeRangeMeta$
+        .pipe(pairwise())
+        .subscribe(
+          ([
+            { timeRange: prevTimeRangeLength, stepSize: prevStepSize },
+            { timeRange: nextTimeRangeLength, stepSize: nextStepSize },
+          ]) => {
+            // If auto apply filters is disabled, only sync the timeslice if the user has actually changed the timeRange.
+            // This prevents the timeslice from getting shifted forward immediately after applying the filters
+            // when using a relative time range, thus triggering another dirty state that needs to be applied.
+            // Doing a simple check of nextTimeRangeLength !== prevTimeRangeLength will give us a false positive
+            // if the relative timerange is set to "round to the nearest," which is why we compare the change to the
+            // step size.
+            const timeRangeHasChanged =
+              nextStepSize !== prevStepSize ||
+              Math.abs(nextTimeRangeLength - prevTimeRangeLength) > nextStepSize;
+            if (
+              apiPublishesSettings(parentApi) &&
+              !parentApi.settings.autoApplyFilters$.value &&
+              !timeRangeHasChanged
+            )
+              return;
+
+            const { start_percentage_of_time_range, end_percentage_of_time_range } =
+              timeRangePercentage.getLatestState();
+            syncTimesliceWithTimeRangePercentage(
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
+            );
+          }
         );
-      });
+
+      // Initialize the timeslice
+      syncTimesliceWithTimeRangePercentage(
+        state.start_percentage_of_time_range,
+        state.end_percentage_of_time_range
+      );
 
       return {
         api,
@@ -308,14 +351,22 @@ export const getTimesliderControlFactory = (): ControlFactory<
           const to = useMemo(() => {
             return timeslice ? timeslice[TO_INDEX] : timeRangeMeta.timeRangeMax;
           }, [timeslice, timeRangeMeta.timeRangeMax]);
-          const value: Timeslice = useMemo(() => {
+          const value: TimeSlice = useMemo(() => {
             return [from, to];
           }, [from, to]);
+
+          const styles = useMemoCss({
+            popover: css`
+              width: 100%;
+              height: 100%;
+              max-inline-size: 100%;
+            `,
+          });
 
           return (
             <EuiInputPopover
               {...controlPanelClassNames}
-              panelClassName="timeSlider__panelOverride"
+              css={styles.popover}
               input={
                 <TimeSliderPopoverButton
                   onClick={() => {
@@ -329,6 +380,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
               isOpen={isPopoverOpen}
               closePopover={() => isPopoverOpen$.next(false)}
               panelPaddingSize="s"
+              data-control-id={uuid}
             >
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}

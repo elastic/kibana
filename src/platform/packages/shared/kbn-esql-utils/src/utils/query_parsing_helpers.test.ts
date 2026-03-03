@@ -7,86 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLColumn } from '@elastic/esql/types';
+import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
-  getIndexPatternFromESQLQuery,
+  getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
   prettifyQuery,
-  isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
+  getCategorizeColumns,
+  getArgsFromRenameFunction,
+  getCategorizeField,
+  findClosestColumn,
+  getKqlSearchQueries,
+  convertTimeseriesCommandToFrom,
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+  hasOnlySourceCommand,
 } from './query_parsing_helpers';
-import { monaco } from '@kbn/monaco';
 
 describe('esql query helpers', () => {
-  describe('getIndexPatternFromESQLQuery', () => {
-    it('should return the index pattern string from esql queries', () => {
-      const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
-      expect(idxPattern1).toBe('foo');
-
-      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
-      expect(idxPattern3).toBe('foo');
-
-      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
-      expect(idxPattern4).toBe('foo');
-
-      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
-      expect(idxPattern5).toBe('foo');
-
-      const idxPattern6 = getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
-      expect(idxPattern6).toBe('foo-1,foo-2');
-
-      const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
-      expect(idxPattern7).toBe('foo-1,foo-2');
-
-      const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
-      expect(idxPattern8).toBe('foo-1,foo-2');
-
-      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 metadata _id');
-      expect(idxPattern9).toBe('foo-1,foo-2');
-
-      const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
-      expect(idxPattern10).toBe('foo-1,remote_cluster:foo-2,foo-3');
-
-      const idxPattern11 = getIndexPatternFromESQLQuery(
-        'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
-      );
-      expect(idxPattern11).toBe('foo-1,foo-2');
-
-      const idxPattern12 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 // from command used');
-      expect(idxPattern12).toBe('foo-1,foo-2');
-
-      const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
-      expect(idxPattern13).toBe('');
-
-      const idxPattern14 = getIndexPatternFromESQLQuery('TS tsdb');
-      expect(idxPattern14).toBe('tsdb');
-
-      const idxPattern15 = getIndexPatternFromESQLQuery('TS tsdb | STATS max(cpu) BY host');
-      expect(idxPattern15).toBe('tsdb');
-
-      const idxPattern16 = getIndexPatternFromESQLQuery(
-        'TS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
-      );
-      expect(idxPattern16).toBe('pods');
-
-      const idxPattern17 = getIndexPatternFromESQLQuery('FROM "$foo%"');
-      expect(idxPattern17).toBe('$foo%');
-
-      const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
-      expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
-
-      const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
-      expect(idxPattern19).toBe('foo-1::data');
-    });
-  });
-
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
@@ -155,6 +103,24 @@ describe('esql query helpers', () => {
     it('should return true for timeseries with aggregations', () => {
       expect(hasTransformationalCommand('ts a | stats var = avg(b)')).toBeTruthy();
     });
+
+    it('should return true for fork with all branches containing only transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (keep field2, field3)')
+      ).toBeTruthy();
+    });
+
+    it('should return false for fork with non-transformational commands in branches', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (where field1 > 0) (eval field2 = field1 * 2)')
+      ).toBeFalsy();
+    });
+
+    it('should return false for fork with mixed transformational and non-transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (where field2 > 0)')
+      ).toBeFalsy();
+    });
   });
 
   describe('getTimeFieldFromESQLQuery', () => {
@@ -195,42 +161,87 @@ describe('esql query helpers', () => {
         )
       ).toBe('date_nanos');
     });
+
+    it('should return @timestamp for PromQL if there is at least one time param', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
+        )
+      ).toBe('@timestamp');
+    });
+
+    it('should return @timestamp for PromQL if there is no time param', () => {
+      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBe('@timestamp');
+    });
+  });
+
+  describe('getKqlSearchQueries', () => {
+    it('should return an empty array for a regular ES|QL query', () => {
+      expect(getKqlSearchQueries('from a | where field == "value"')).toStrictEqual([]);
+    });
+
+    it('should return an empty array if there are no search functions', () => {
+      expect(getKqlSearchQueries('from a | eval b = 1')).toStrictEqual([]);
+    });
+
+    it("should return a KQL query when it's embedded in ES|QL query", () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """)')).toStrictEqual([
+        'field : "value"',
+      ]);
+    });
+
+    it('should correctly parse KQL full text embedded query', () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
+        'full text',
+      ]);
+    });
+
+    it('should correctly parse long queries', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories" """)'
+        )
+      ).toStrictEqual([
+        '(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories"',
+      ]);
+    });
+
+    it('should correctly parse mixed queries, omitting ES|QL valid syntax', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND KQL("""field2:value2""")'
+        )
+      ).toStrictEqual(['field1: "value1"', 'field2:value2']);
+    });
   });
 
   describe('prettifyQuery', function () {
     it('should return the code wrapped', function () {
-      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1');
       expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
     });
 
-    it('should return the code unwrapped', function () {
-      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
-    });
-
-    it('should return the code unwrapped and trimmed', function () {
+    it('should return the code wrapped with comments', function () {
       const code = prettifyQuery(
-        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
-        true
+        'FROM index1 /* cmt */ | KEEP field1, field2 /* cmt */ | SORT field1 /* cmt */'
       );
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(code).toEqual(
+        'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
     });
   });
 
-  describe('isQueryWrappedByPipes', function () {
-    it('should return false if the query is not wrapped', function () {
-      const flag = isQueryWrappedByPipes('FROM index1 | KEEP field1, field2 | SORT field1');
-      expect(flag).toBeFalsy();
+  describe('convertTimeseriesCommandToFrom', function () {
+    it('should return the query as it is if no TS command is found', function () {
+      const query = convertTimeseriesCommandToFrom(
+        'FROM index1 | KEEP field1, field2 | SORT field1'
+      );
+      expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
 
-    it('should return true if the query is wrapped', function () {
-      const flag = isQueryWrappedByPipes('FROM index1 /n| KEEP field1, field2 /n| SORT field1');
-      expect(flag).toBeTruthy();
-    });
-
-    it('should return true if the query is wrapped and prettified', function () {
-      const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
-      expect(flag).toBeTruthy();
+    it('should return the query with FROM command if TS command is found', function () {
+      const query = convertTimeseriesCommandToFrom('TS index1 | KEEP field1, field2 | SORT field1');
+      expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
   });
 
@@ -554,6 +565,107 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('findClosestColumn', () => {
+    const mockColumns: ESQLColumn[] = [
+      {
+        args: [],
+        location: { min: 10, max: 15 },
+        text: 'col1',
+        incomplete: false,
+        parts: ['col1'],
+        quoted: false,
+        name: 'col1',
+        type: 'column',
+      },
+      {
+        args: [],
+        location: { min: 20, max: 25 },
+        text: 'col2',
+        incomplete: false,
+        parts: ['col2'],
+        quoted: false,
+        name: 'col2',
+        type: 'column',
+      },
+      {
+        args: [],
+        location: { min: 30, max: 40 },
+        text: 'col3.sub',
+        incomplete: false,
+        parts: ['col3', 'sub'],
+        quoted: false,
+        name: 'col3.sub',
+        type: 'column',
+      },
+      {
+        args: [],
+        location: { min: 56, max: 63 },
+        text: 'clientip',
+        incomplete: false,
+        parts: ['clientip'],
+        quoted: false,
+        name: 'clientip',
+        type: 'column',
+      },
+    ];
+
+    it('should return undefined if the columns array is empty', () => {
+      const cursor = { lineNumber: 1, column: 5 } as monaco.Position;
+      expect(findClosestColumn([], cursor)).toBeUndefined();
+    });
+
+    it('should return the column if the cursor is exactly at its min boundary', () => {
+      const cursor = { lineNumber: 1, column: 10 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the column if the cursor is exactly at its max boundary', () => {
+      const cursor = { lineNumber: 1, column: 15 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the column if the cursor is inside its range', () => {
+      const cursor = { lineNumber: 1, column: 12 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+
+      const cursor2 = { lineNumber: 1, column: 35 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor2)).toEqual(mockColumns[2]); // col3.sub
+    });
+
+    it('should return the closest column when cursor is between two columns (closer to the first)', () => {
+      const cursor = { lineNumber: 1, column: 17 } as monaco.Position; // 2 units from col1.max, 3 units from col2.min
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the closest column when cursor is between two columns (closer to the second)', () => {
+      const cursor = { lineNumber: 1, column: 18 } as monaco.Position; // 3 units from col1.max, 2 units from col2.min
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[1]); // col2
+    });
+
+    it('should return the closest column when cursor is far to the left of all columns', () => {
+      const cursor = { lineNumber: 1, column: 5 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[0]); // col1
+    });
+
+    it('should return the closest column when cursor is far to the right of all columns', () => {
+      const cursor = { lineNumber: 1, column: 70 } as monaco.Position;
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[3]); // clientip
+    });
+
+    it('should correctly identify column when cursor is just outside max of previous column', () => {
+      const cursor = { lineNumber: 1, column: 26 } as monaco.Position; // Just past col2.max (25)
+      expect(findClosestColumn(mockColumns, cursor)).toEqual(mockColumns[1]); // col2 (closest boundary is 25)
+    });
+
+    it('should prioritize the first found if distances are exactly equal (edge case for between columns)', () => {
+      const equidistantColumns: ESQLColumn[] = [
+        { ...mockColumns[0], location: { min: 10, max: 12 } },
+        { ...mockColumns[1], location: { min: 14, max: 16 } },
+      ];
+      const cursor = { lineNumber: 1, column: 13 } as monaco.Position; // 1 unit from col1.max, 1 unit from col2.min
+      expect(findClosestColumn(equidistantColumns, cursor)).toEqual(equidistantColumns[0]);
+    });
+  });
   describe('getValuesFromQueryField', () => {
     it('should return the values from the query field', () => {
       const queryString = 'FROM my_index | WHERE my_field ==';
@@ -574,6 +686,15 @@ describe('esql query helpers', () => {
       const queryString = 'FROM my_index \n| WHERE my_field >=';
       const values = getValuesFromQueryField(queryString);
       expect(values).toEqual('my_field');
+    });
+
+    it('should return the values from the query when we have more than one columns', () => {
+      const queryString = 'FROM my_index | WHERE my_field >= 1200 AND another_field == ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 63,
+      } as monaco.Position);
+      expect(values).toEqual('another_field');
     });
 
     it('should return the values from the query field with new lines when cursor is not at the end', () => {
@@ -729,6 +850,249 @@ describe('esql query helpers', () => {
         },
       ];
       expect(fixESQLQueryWithVariables(esql, variables)).toEqual(expected);
+    });
+  });
+
+  describe('getCategorizeColumns', () => {
+    it('should return the columns used in categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1)';
+      const expected = ['categorize(field1)'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize for multiple breakdowns', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
+      const expected = ['categorize(field1)'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize for multiple breakdowns with BUCKET', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)';
+      const expected = ['Pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize if the result is stored in a new column', () => {
+      const esql = 'FROM index | STATS COUNT() BY pattern = categorize(field1)';
+      const expected = ['pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize for a complex query', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) | STATS COUNT() BY buckets, pattern = categorize(field1) | STATS Count=SUM(count_per_day), Trend=VALUES(count_per_day) BY Pattern';
+      const expected = ['Pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize if there is a rename', () => {
+      const esql =
+        'FROM index | STATS COUNT() BY CATEGORIZE(field1) | RENAME `CATEGORIZE(field1)` AS pattern';
+      const expected = ['pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+
+      const esql1 =
+        'FROM index | STATS COUNT() BY pattern = CATEGORIZE(field1) | RENAME pattern AS meow';
+      const expected1 = ['meow'];
+      expect(getCategorizeColumns(esql1)).toEqual(expected1);
+    });
+
+    it('should return an empty array if no categorize is present', () => {
+      const esql = 'FROM index | STATS COUNT() BY field1';
+      const expected: string[] = [];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getArgsFromRenameFunction', () => {
+    it('should return the args from an = rename function', () => {
+      const esql = 'FROM index | RENAME renamed = original';
+      const { root } = Parser.parse(esql);
+      let renameFunction;
+      walk(root, {
+        visitFunction: (node) => (renameFunction = node),
+      });
+
+      expect(getArgsFromRenameFunction(renameFunction!)).toMatchObject({
+        original: { name: 'original' },
+        renamed: { name: 'renamed' },
+      });
+    });
+
+    it('should return the args from an AS rename function', () => {
+      const esql = 'FROM index | RENAME original AS renamed';
+      const { root } = Parser.parse(esql);
+      let renameFunction;
+      walk(root, {
+        visitFunction: (node) => (renameFunction = node),
+      });
+
+      expect(getArgsFromRenameFunction(renameFunction!)).toMatchObject({
+        original: { name: 'original' },
+        renamed: { name: 'renamed' },
+      });
+    });
+  });
+
+  describe('getCategorizeField', () => {
+    it('should return the field used in categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1)';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for multiple breakdowns', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for multiple breakdowns with BUCKET', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)';
+      const expected = ['message'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize if the result is stored in a new column', () => {
+      const esql = 'FROM index | STATS COUNT() BY pattern = categorize(field1)';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for a complex query', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)  | STATS Count=SUM(count_per_day), Trend=VALUES(count_per_day) BY Pattern';
+      const expected = ['message'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+    it('should return an empty array if no categorize is present', () => {
+      const esql = 'FROM index | STATS COUNT() BY field1';
+      const expected: string[] = [];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getRemoteClustersFromESQLQuery', () => {
+    it('should return undefined for queries without remote clusters', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM foo')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery('FROM foo-1,foo-2')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery('FROM foo | STATS COUNT(*)')).toBeUndefined();
+    });
+
+    it('should return undefined for empty or undefined queries', () => {
+      expect(getRemoteClustersFromESQLQuery('')).toBeUndefined();
+      expect(getRemoteClustersFromESQLQuery()).toBeUndefined();
+    });
+
+    it('should extract remote clusters from FROM command', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM cluster1:index1')).toEqual(['cluster1']);
+      expect(getRemoteClustersFromESQLQuery('FROM remote_cluster:foo-2')).toEqual([
+        'remote_cluster',
+      ]);
+    });
+
+    it('should extract multiple remote clusters from mixed indices', () => {
+      expect(
+        getRemoteClustersFromESQLQuery(
+          'FROM local-index, cluster1:remote-index1, cluster2:remote-index2'
+        )
+      ).toEqual(['cluster1', 'cluster2']);
+      expect(
+        getRemoteClustersFromESQLQuery('FROM cluster1:index1, local-index, cluster2:index2')
+      ).toEqual(['cluster1', 'cluster2']);
+    });
+
+    it('should extract remote clusters from TS command', () => {
+      expect(getRemoteClustersFromESQLQuery('TS cluster1:tsdb')).toEqual(['cluster1']);
+      expect(
+        getRemoteClustersFromESQLQuery('TS remote_cluster:timeseries | STATS max(cpu) BY host')
+      ).toEqual(['remote_cluster']);
+    });
+
+    it('should handle duplicate remote clusters', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM cluster1:index1, cluster1:index2')).toEqual([
+        'cluster1',
+      ]);
+    });
+
+    it('should handle wrapped in quotes', () => {
+      expect(getRemoteClustersFromESQLQuery('FROM "cluster1:index1,cluster1:index2"')).toEqual([
+        'cluster1',
+      ]);
+
+      expect(
+        getRemoteClustersFromESQLQuery(
+          'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
+        )
+      ).toEqual(['cluster3', 'cluster1', 'cluster2']);
+    });
+  });
+
+  describe('hasLimitBeforeAggregate', () => {
+    it('should return false if the query is empty', () => {
+      expect(hasLimitBeforeAggregate('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without aggregate", () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if limit is after aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10 | STATS COUNT() BY field')).toBe(true);
+    });
+  });
+
+  describe('missingSortBeforeLimit', () => {
+    it('should return false if the query is empty', () => {
+      expect(missingSortBeforeLimit('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(missingSortBeforeLimit('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without sort", () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if sort is before limit', () => {
+      expect(missingSortBeforeLimit('FROM index | SORT field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before sort', () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10 | SORT field')).toBe(true);
+    });
+  });
+
+  describe('hasOnlySourceCommand', () => {
+    it('should return true for queries with only FROM command', () => {
+      expect(hasOnlySourceCommand('FROM index')).toBe(true);
+    });
+
+    it('should return true for queries with only TS command', () => {
+      expect(hasOnlySourceCommand('TS index')).toBe(true);
+    });
+
+    it('should return false for queries with FROM and other commands', () => {
+      expect(hasOnlySourceCommand('FROM index | STATS count()')).toBe(false);
+    });
+
+    it('should return false for queries with TS and other commands', () => {
+      expect(hasOnlySourceCommand('TS index | WHERE field > 0')).toBe(false);
+    });
+
+    it('should return false for empty query', () => {
+      expect(hasOnlySourceCommand('')).toBe(false);
+    });
+
+    it('should return false for queries with only PROMQL command', () => {
+      expect(
+        hasOnlySourceCommand(
+          'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
+        )
+      ).toBe(false);
     });
   });
 });

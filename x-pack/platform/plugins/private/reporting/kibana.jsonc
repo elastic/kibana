@@ -16,6 +16,7 @@
       "reporting"
     ],
     "requiredPlugins": [
+      "actions",
       "data",
       "discover",
       "encryptedSavedObjects",
@@ -28,7 +29,9 @@
       "taskManager",
       "screenshotMode",
       "share",
-      "features"
+      "features",
+      "actions",
+      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "security",
@@ -37,7 +40,6 @@
       "screenshotting"
     ],
     "requiredBundles": [
-      "embeddable",
       "esUiShared",
       "kibanaReact"
     ]

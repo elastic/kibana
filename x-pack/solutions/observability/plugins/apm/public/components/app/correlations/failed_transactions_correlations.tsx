@@ -52,6 +52,9 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 
 export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => void }) {
   const { euiTheme } = useEuiTheme();
@@ -60,6 +63,24 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
     core: { notifications },
   } = useApmPluginContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
+
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: {
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      transactionName,
+      transactionType,
+      sampleRangeFrom,
+      sampleRangeTo,
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { progress, response, startFetch, cancelFetch } = useFailedTransactionsCorrelations();
 
@@ -117,7 +138,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   content={i18n.translate(
                     'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
@@ -148,7 +169,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   content={i18n.translate(
                     'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageDescription',
@@ -177,7 +198,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   content={i18n.translate(
                     'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageDescription',
@@ -210,7 +231,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
             <EuiIconTip
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               content={i18n.translate(
                 'xpack.apm.correlations.failedTransactions.correlationsTable.scoreTooltip',
@@ -428,6 +449,25 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
+          <OpenInDiscover
+            dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
+            variant="button"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+              sampleRangeFrom,
+              sampleRangeTo,
+            }}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -482,7 +522,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
                   'Enable additional statistical information for the correlation results.',
               }
             )}
-            type="questionInCircle"
+            type="question"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

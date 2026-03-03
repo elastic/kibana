@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { SetOptional } from 'type-fest';
 import { searchAlerts, type SearchAlertsParams } from '../apis/search_alerts/search_alerts';
@@ -27,7 +27,11 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
  * When testing components that depend on this hook, prefer mocking the {@link searchAlerts} function instead of the hook itself.
  * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
-export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
+export const useSearchAlertsQuery = ({
+  data,
+  skipAlertsQueryContext,
+  ...params
+}: UseSearchAlertsQueryParams) => {
   const {
     ruleTypeIds,
     consumers,
@@ -64,7 +68,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         trackScores,
       }),
     refetchOnWindowFocus: false,
-    context: AlertsQueryContext,
+    context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
     enabled: ruleTypeIds.length > 0,
     // To avoid flash of empty state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
     keepPreviousData: true,

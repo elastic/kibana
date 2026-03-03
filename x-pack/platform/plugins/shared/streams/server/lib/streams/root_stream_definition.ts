@@ -5,40 +5,39 @@
  * 2.0.
  */
 
-import { Streams, getSegments } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import {
+  LOGS_ECS_STREAM_NAME,
+  LOGS_ROOT_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+} from '@kbn/streams-schema';
+import { baseFields } from './component_templates/logs_layer';
+import { ecsBaseFields } from './component_templates/logs_ecs_layer';
 
-export const LOGS_ROOT_STREAM_NAME = 'logs';
+export const createRootStreamDefinition = (
+  streamName: string = LOGS_ROOT_STREAM_NAME
+): Streams.WiredStream.Definition => {
+  const now = new Date().toISOString();
 
-export const rootStreamDefinition: Streams.WiredStream.Definition = {
-  name: LOGS_ROOT_STREAM_NAME,
-  description: 'Root stream',
-  ingest: {
-    lifecycle: { dsl: {} },
-    processing: [],
-    wired: {
-      routing: [],
-      fields: {
-        '@timestamp': {
-          type: 'date',
-        },
-        message: {
-          type: 'match_only_text',
-        },
-        'host.name': {
-          type: 'keyword',
-        },
-        'log.level': {
-          type: 'keyword',
-        },
-        'stream.name': {
-          type: 'system',
-        },
+  return {
+    name: streamName,
+    description: `Root stream for ${streamName}`,
+    updated_at: now,
+    ingest: {
+      lifecycle: { dsl: {} },
+      failure_store: {
+        lifecycle: { enabled: { data_retention: '30d' } }, // default 30d retention for failure store
+      },
+      settings: {},
+      processing: { steps: [], updated_at: now },
+      wired: {
+        routing: [],
+        fields: streamName === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
       },
     },
-  },
+  };
 };
 
-export function hasSupportedStreamsRoot(streamName: string) {
-  const root = getSegments(streamName)[0];
-  return [LOGS_ROOT_STREAM_NAME].includes(root);
+export function hasSupportedStreamsRoot(streamName: string): boolean {
+  return ROOT_STREAM_NAMES.some((root) => streamName === root || streamName.startsWith(`${root}.`));
 }

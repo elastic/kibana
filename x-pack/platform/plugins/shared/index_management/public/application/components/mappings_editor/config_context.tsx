@@ -7,8 +7,8 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
-import { DocLinksStart } from './shared_imports';
-import { IndexSettings } from './types';
+import type { DocLinksStart } from './shared_imports';
+import type { IndexSettings } from './types';
 
 interface ContextState {
   indexSettings: IndexSettings;

@@ -9,18 +9,19 @@
 
 import React from 'react';
 
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import { DashboardLinkComponent, DashboardLinkProps } from './dashboard_link_component';
+import type { DashboardLinkProps } from './dashboard_link_component';
+import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 
 function createMockLinksParent({
   initialQuery,
@@ -109,7 +110,7 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: [],
-      timeRange: {
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -126,12 +127,12 @@ describe('Dashboard link component', () => {
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('openInNewTab uses window.open, not navigateToApp, and renders external icon', async () => {
+  test('open_in_new_tab uses window.open, not navigateToApp, and renders external icon', async () => {
     const parentApi = createMockLinksParent({});
     renderComponent({
       link: {
         ...resolvedLink,
-        options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
+        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, open_in_new_tab: true },
       },
       parentApi,
     });
@@ -169,20 +170,20 @@ describe('Dashboard link component', () => {
     renderComponent({
       link: {
         ...resolvedLink,
-        options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       parentApi,
     });
 
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
       query: initialQuery,
     });
   });
 
-  test('does not pass timeRange to locator.getRedirectUrl if useCurrentDateRange is false', async () => {
+  test('does not pass timeRange to locator.getRedirectUrl if use_time_range is false', async () => {
     const initialFilters = [
       {
         query: { match_phrase: { foo: 'bar' } },
@@ -204,8 +205,8 @@ describe('Dashboard link component', () => {
       link: {
         ...resolvedLink,
         options: {
-          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-          useCurrentDateRange: false,
+          ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+          use_time_range: false,
         },
       },
       parentApi,
@@ -218,7 +219,7 @@ describe('Dashboard link component', () => {
     });
   });
 
-  test('does not pass filters or query to locator.getRedirectUrl if useCurrentFilters is false', async () => {
+  test('does not pass filters or query to locator.getRedirectUrl if use_filters is false', async () => {
     const initialFilters = [
       {
         query: { match_phrase: { foo: 'bar' } },
@@ -240,8 +241,8 @@ describe('Dashboard link component', () => {
       link: {
         ...resolvedLink,
         options: {
-          ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-          useCurrentFilters: false,
+          ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+          use_filters: false,
         },
       },
       parentApi,
@@ -249,7 +250,7 @@ describe('Dashboard link component', () => {
 
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
-      timeRange: { from: 'now-7d', to: 'now' },
+      time_range: { from: 'now-7d', to: 'now' },
       filters: [],
     });
   });

@@ -8,69 +8,81 @@
  */
 
 import React from 'react';
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
-import type { RouteProps } from 'react-router-dom';
-import { Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import { DiscoverRoutes } from './discover_router';
-import { SingleDocRoute } from './doc';
-import { ContextAppRoute } from './context';
+import { createMemoryHistory } from 'history';
+import { render, screen } from '@testing-library/react';
+import { DiscoverRouter } from './discover_router';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import { DiscoverMainRoute, type MainRouteProps } from './main/discover_main_route';
+import { createDiscoverServicesMock } from '../__mocks__/services';
+import type { HistoryLocationState } from '../build_services';
 
-let pathMap: Record<string, never> = {};
+// Mock the component dependencies
+jest.mock('./context', () => ({
+  ContextAppRoute: () => <div data-test-subj="context-app-route" />,
+}));
 
-const gatherRoutes = (wrapper: ShallowWrapper) => {
-  wrapper.find(Route).forEach((route) => {
-    const routeProps = route.props() as RouteProps;
-    const path = routeProps.path;
-    const children = routeProps.children;
-    if (typeof path === 'string') {
-      // @ts-expect-error
-      pathMap[path] = children ?? routeProps.render;
-    }
+jest.mock('./doc', () => ({
+  SingleDocRoute: () => <div data-test-subj="single-doc-route" />,
+}));
+
+jest.mock('./main', () => ({
+  DiscoverMainRoute: () => <div data-test-subj="discover-main-route" />,
+}));
+
+jest.mock('./view_alert', () => ({
+  ViewAlertRoute: () => <div data-test-subj="view-alert-route" />,
+}));
+
+jest.mock('./not_found', () => ({
+  NotFoundRoute: () => <div data-test-subj="not-found-route" />,
+}));
+
+const services = createDiscoverServicesMock();
+
+const renderWithRouter = (path: string) => {
+  const history = createMemoryHistory<HistoryLocationState>({
+    initialEntries: [path],
   });
-};
 
-const props: MainRouteProps = {
-  customizationContext: mockCustomizationContext,
+  render(
+    <DiscoverRouter
+      services={{ ...services, history }}
+      onAppLeave={jest.fn()}
+      customizationContext={mockCustomizationContext}
+    />
+  );
+
+  return history;
 };
 
 describe('DiscoverRouter', () => {
-  beforeAll(() => {
-    pathMap = {};
-    const component = shallow(<DiscoverRoutes customizationContext={mockCustomizationContext} />);
-    gatherRoutes(component);
-  });
-
   it('should show DiscoverMainRoute component for / route', () => {
-    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
+    const history = renderWithRouter('/');
+    expect(screen.getByTestId('discover-main-route')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/');
   });
 
   it('should show DiscoverMainRoute component for /view/:id route', () => {
-    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
+    const history = renderWithRouter('/view/test-id');
+    expect(screen.getByTestId('discover-main-route')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/view/test-id');
   });
 
-  it('should show Redirect component for /doc/:dataView/:index/:type route', () => {
-    const redirectParams = {
-      match: {
-        params: {
-          dataView: '123',
-          index: '456',
-        },
-      },
-    };
-    const redirect = pathMap['/doc/:dataView/:index/:type'] as Function;
-    expect(typeof redirect).toBe('function');
-    expect(redirect(redirectParams)).toMatchObject(<Redirect to="/doc/123/456" />);
+  it('should redirect from /doc/:dataView/:index/:type to /doc/:dataView/:index', () => {
+    // Render with a path that should trigger the redirect
+    const history = renderWithRouter('/doc/123/456/type');
+    expect(screen.getByTestId('single-doc-route')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/doc/123/456');
   });
 
   it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
-    expect(pathMap['/doc/:dataViewId/:index']).toMatchObject(<SingleDocRoute />);
+    const history = renderWithRouter('/doc/test-dataview/test-index');
+    expect(screen.getByTestId('single-doc-route')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/doc/test-dataview/test-index');
   });
 
   it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
-    expect(pathMap['/context/:dataViewId/:id']).toMatchObject(<ContextAppRoute />);
+    const history = renderWithRouter('/context/test-dataview/test-id');
+    expect(screen.getByTestId('context-app-route')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/context/test-dataview/test-id');
   });
 });

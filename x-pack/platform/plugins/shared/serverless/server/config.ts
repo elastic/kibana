@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export * from './types';
+export type * from './types';
 
 const configSchema = schema.object({
   // Is this plugin enabled?
@@ -39,7 +40,7 @@ const configSchema = schema.object({
             schema.literal('security'),
             schema.literal('observability'),
             schema.literal('search'),
-            schema.literal('chat'),
+            schema.literal('workplaceai'),
           ]),
         })
       ),

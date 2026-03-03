@@ -7,7 +7,7 @@
 
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { MarkerItems } from './waterfall/context/waterfall_context';
+import type { MarkerItems } from './waterfall/context/waterfall_context';
 
 export interface Props {
   checkGroup: string;

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
-import { ArgumentProps } from '../../../../types/arguments';
+import type { ArgumentProps } from '../../../../types/arguments';
 
 interface NumberFormatOption {
   /** A NumeralJS format string */
@@ -44,10 +45,12 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
 );
 
 NumberFormatArgInput.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   numberFormats: PropTypes.arrayOf(
     PropTypes.shape({ value: PropTypes.string, text: PropTypes.string })
   ).isRequired,
   onValueChange: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
   argId: PropTypes.string.isRequired,
 };

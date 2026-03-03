@@ -7,21 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { Query } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import {
-  IKbnUrlStateStorage,
-  createQueryParamObservable,
-  getQueryParams,
-} from '@kbn/kibana-utils-plugin/public';
-import { History } from 'history';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
+import type { History } from 'history';
 import { map } from 'rxjs';
-import { SEARCH_SESSION_ID } from '../../../common/constants';
-import { convertPanelMapToPanelsArray } from '../../../common/lib/dashboard_panel_converters';
-import { DashboardLocatorParams } from '../../../common/types';
-import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
+import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
+import type { DashboardLocatorParams } from '../../../common/types';
+import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
@@ -81,7 +77,12 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
-  const { panels, references } = dashboardInternalApi.serializePanels();
+
+  const { panels, pinned_panels } = dashboardInternalApi.serializeLayout() as Pick<
+    DashboardLocatorParams,
+    'panels' | 'pinned_panels'
+  >;
+
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -92,20 +93,16 @@ function getLocatorParams({
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
-    timeRange: shouldRestoreSearchSession
+    time_range: shouldRestoreSearchSession
       ? dataService.query.timefilter.timefilter.getAbsoluteTime()
       : dataService.query.timefilter.timefilter.getTime(),
-    refreshInterval: shouldRestoreSearchSession
+    refresh_interval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session
           value: 0,
         }
       : undefined,
-    ...(savedObjectId
-      ? {}
-      : {
-          panels: convertPanelMapToPanelsArray(panels) as DashboardLocatorParams['panels'],
-          references: references as DashboardLocatorParams['references'],
-        }),
+    pinned_panels,
+    panels,
   };
 }

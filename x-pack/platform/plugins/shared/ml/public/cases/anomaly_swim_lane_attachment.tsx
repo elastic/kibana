@@ -42,7 +42,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
           ),
           description: inputProps.jobIds.join(', '),
         },
-        ...(inputProps.viewBy
+        ...(inputProps.swimlaneType === 'viewBy' && inputProps.viewBy
           ? [
               {
                 title: (
@@ -63,8 +63,8 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             />
           ),
           description: `${dataFormatter.convert(
-            inputProps.timeRange!.from
-          )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+            inputProps.time_range!.from
+          )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
         },
       ];
 
@@ -87,9 +87,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
             getParentApi={() => ({
-              getSerializedStateForChild: () => ({
-                rawState: inputProps,
-              }),
+              getSerializedStateForChild: () => inputProps,
               executionContext: {
                 type: 'cases',
                 description: caseData.title,

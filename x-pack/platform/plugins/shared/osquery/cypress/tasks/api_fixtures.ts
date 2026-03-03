@@ -6,23 +6,76 @@
  */
 
 import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type {
   AgentPolicy,
   CreatePackagePolicyResponse,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
-import { API_VERSIONS } from '../../common/constants';
-import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
-import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
-import type { PackSavedObject, PackItem } from '../../public/packs/types';
-import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
+import type { SavedQuerySOFormData } from '@kbn/osquery-plugin/public/saved_queries/form/use_saved_query_form';
+import type { LiveQueryDetailsItem } from '@kbn/osquery-plugin/public/actions/use_live_query_details';
+import type { PackSavedObject, PackItem } from '@kbn/osquery-plugin/public/packs/types';
+import type { SavedQuerySO } from '@kbn/osquery-plugin/public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
 import { ServerlessRoleName } from '../support/roles';
+
+// Minimal type definitions to avoid direct import from security-solution
+interface RuleCreateProps {
+  type: string;
+  index: string[];
+  filters: Array<{
+    meta: {
+      type: string;
+      disabled: boolean;
+      negate: boolean;
+      alias: null | string;
+      key: string;
+      value: string;
+    };
+    query: Record<string, unknown>;
+    $state: {
+      store: string;
+    };
+  }>;
+  language: string;
+  query: string;
+  author: string[];
+  false_positives: string[];
+  references: string[];
+  risk_score: number;
+  risk_score_mapping: unknown[];
+  severity: string;
+  severity_mapping: unknown[];
+  threat: unknown[];
+  name: string;
+  description: string;
+  tags: string[];
+  license: string;
+  interval: string;
+  from: string;
+  to: string;
+  meta: {
+    from: string;
+    kibana_siem_app_url: string;
+  };
+  actions: unknown[];
+  enabled: boolean;
+  throttle: string;
+  note?: string;
+  response_actions?: Array<{
+    params: {
+      query: string;
+      ecs_mapping?: Record<string, unknown>;
+    };
+    action_type_id: string;
+  }>;
+}
+
+interface RuleResponse extends RuleCreateProps {
+  id: string;
+  [key: string]: unknown;
+}
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
@@ -291,7 +344,7 @@ export const loadCase = (owner: string) =>
       description: 'Test security case',
       assignees: [],
       connector: { id: 'none', name: 'none', type: '.none', fields: null },
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
       owner,
     },
   }).then((response) => response.body);

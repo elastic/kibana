@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup, Logger } from '@kbn/core/server';
-import { ServerRoute, registerRoutes } from '@kbn/server-route-repository';
-import { SLORoutesDependencies } from './types';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { ServerRoute } from '@kbn/server-route-repository';
+import { registerRoutes } from '@kbn/server-route-repository';
+import type { SLORoutesDependencies } from './types';
 
 interface RegisterRoutes {
   core: CoreSetup;

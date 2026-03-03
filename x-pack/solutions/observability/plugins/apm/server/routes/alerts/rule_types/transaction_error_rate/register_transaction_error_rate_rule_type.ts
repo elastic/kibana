@@ -28,6 +28,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -301,6 +302,7 @@ export function registerTransactionErrorRateRuleType({
           [ALERT_EVALUATION_VALUE]: errorRate,
           [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
           [ALERT_REASON]: reasonMessage,
+          [ALERT_INDEX_PATTERN]: index,
           ...sourceFields,
           ...groupByFields,
         };
@@ -335,10 +337,8 @@ export function registerTransactionErrorRateRuleType({
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-        const ruleParamsOfRecoveredAlert = alertHits?.[
-          ALERT_RULE_PARAMETERS
-        ] as TransactionErrorRateRuleTypeParams;
-        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const ruleParamsOfRecoveredAlert = alertHits?.[ALERT_RULE_PARAMETERS];
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert?.groupBy ?? [];
         const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
           groupByFieldsOfRecoveredAlert

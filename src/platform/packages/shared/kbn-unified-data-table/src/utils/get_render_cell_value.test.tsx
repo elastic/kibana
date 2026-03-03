@@ -8,17 +8,24 @@
  */
 
 import React from 'react';
-import { of } from 'rxjs';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render } from '@testing-library/react';
 import { getRenderCellValueFn } from './get_render_cell_value';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  columnsMetaOverridingBytesType,
+  createFormatFieldValueSpy,
+  expectFieldCallToMatch,
+} from '@kbn/discover-utils/src/__mocks__';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SourceDocument } from '../components/source_document';
 
 jest.mock('@kbn/code-editor', () => {
@@ -50,9 +57,6 @@ const mockServices = {
   },
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
-  },
-  theme: {
-    theme$: of({ darkMode: false }),
   },
 };
 
@@ -157,7 +161,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-wprskz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -184,7 +188,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-wprskz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -226,7 +230,52 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
       isCompressed: true,
+      columnsMeta: undefined,
     });
+  });
+
+  it('renders _source column in ES|QL mode even when dataView has no _source field', () => {
+    // Avoid object spread: it drops the DataView type shape.
+    // We only override getFieldByName for `_source` to simulate ES|QL views.
+    const originalGetFieldByName = dataViewMock.getFieldByName.bind(dataViewMock);
+    const dataViewWithoutSource: DataView = Object.create(dataViewMock) as DataView;
+    dataViewWithoutSource.getFieldByName = (name: string) =>
+      name === '_source' ? undefined : originalGetFieldByName(name);
+
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { bytes: 100, extension: 'gif' },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewWithoutSource,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      isPlainRecord: true,
+      columnsMeta: undefined,
+    });
+
+    const component = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(component.find(SourceDocument).exists()).toBeTruthy();
   });
 
   it('renders _source column correctly when isDetails is set to true', () => {
@@ -332,6 +381,7 @@ describe('Unified data table cell rendering', function () {
       row: rows[0],
       isPlainRecord: true,
       isCompressed: true,
+      columnsMeta: undefined,
     });
   });
 
@@ -371,6 +421,7 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
       isCompressed: true,
+      columnsMeta: undefined,
     });
   });
 
@@ -411,6 +462,7 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: showFieldHandler,
       row: rows[0],
       isCompressed: true,
+      columnsMeta: undefined,
     });
   });
 
@@ -525,6 +577,7 @@ describe('Unified data table cell rendering', function () {
       useTopLevelObjectColumns: true,
       row: rows[0],
       isCompressed: true,
+      columnsMeta: undefined,
     });
   });
 
@@ -566,6 +619,7 @@ describe('Unified data table cell rendering', function () {
       useTopLevelObjectColumns: true,
       row: rows[0],
       isCompressed: true,
+      columnsMeta: undefined,
     });
   });
 
@@ -935,6 +989,7 @@ describe('Unified data table cell rendering', function () {
       name: 'var0',
       type: 'number',
       esTypes: ['long'],
+      isComputedColumn: true,
       searchable: true,
       aggregatable: false,
       isNull: false,
@@ -967,9 +1022,96 @@ describe('Unified data table cell rendering', function () {
       name: 'bytes',
       type: 'string',
       esTypes: ['keyword'],
+      isComputedColumn: true,
       searchable: true,
       aggregatable: false,
       isNull: false,
+    });
+  });
+
+  describe('columnsMeta handling for _source column', () => {
+    it('should use data view field type when columnsMeta is undefined', () => {
+      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const testDataView = createDataViewWithBytesField();
+
+      const rows = [
+        buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _score: 1,
+            _source: { bytes: 100 },
+          },
+          testDataView
+        ),
+      ];
+
+      const DataTableCellValue = getRenderCellValueFn({
+        dataView: testDataView,
+        rows,
+        shouldShowFieldHandler: () => true,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        columnsMeta: undefined,
+      });
+
+      render(
+        <DataTableCellValue
+          rowIndex={0}
+          colIndex={0}
+          columnId="_source"
+          isDetails={false}
+          isExpanded={false}
+          isExpandable={true}
+          setCellProps={jest.fn()}
+        />
+      );
+
+      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
+      formatFieldValueSpy.mockRestore();
+    });
+
+    it('should use columnsMeta type instead of data view field type when provided', () => {
+      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const testDataView = createDataViewWithBytesField();
+
+      const rows = [
+        buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _score: 1,
+            _source: { bytes: '100' },
+          },
+          testDataView
+        ),
+      ];
+
+      const DataTableCellValue = getRenderCellValueFn({
+        dataView: testDataView,
+        rows,
+        shouldShowFieldHandler: () => true,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        columnsMeta: columnsMetaOverridingBytesType,
+      });
+
+      render(
+        <DataTableCellValue
+          rowIndex={0}
+          colIndex={0}
+          columnId="_source"
+          isDetails={false}
+          isExpanded={false}
+          isExpandable={true}
+          setCellProps={jest.fn()}
+        />
+      );
+
+      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
+      formatFieldValueSpy.mockRestore();
     });
   });
 });

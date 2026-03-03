@@ -6,19 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { ChatOpenAI, OpenAIClient } from '@langchain/openai';
-import { Stream } from 'openai/streaming';
+import type { OpenAIClient } from '@langchain/openai';
+import { ChatOpenAICompletions } from '@langchain/openai';
+import type { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { parseChatCompletion } from 'openai/lib/parser';
-import { ChatCompletionCreateParams } from 'openai/resources';
+import type { ChatCompletionCreateParams } from 'openai/resources';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
-import {
+import type {
   InferenceChatCompleteParamsSchema,
   InvokeAIActionParamsSchema,
   RunActionParamsSchema,
@@ -50,7 +51,7 @@ export interface ActionsClientChatOpenAIParams {
  * In the ChatOpenAI class, *_streamResponseChunks calls completionWithRetry
  * and iterates over the chunks to form the response.
  */
-export class ActionsClientChatOpenAI extends ChatOpenAI {
+export class ActionsClientChatOpenAI extends ChatOpenAICompletions {
   streaming: boolean;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -129,7 +130,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
 
   async betaParsedCompletionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsNonStreaming
-  ): Promise<ReturnType<OpenAIClient['beta']['chat']['completions']['parse']>> {
+  ): Promise<ReturnType<OpenAIClient['chat']['completions']['parse']>> {
     return this.completionWithRetry(request).then((response) =>
       parseChatCompletion(
         response,

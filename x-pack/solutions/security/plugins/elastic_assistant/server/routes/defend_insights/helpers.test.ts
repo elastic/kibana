@@ -8,15 +8,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Document } from '@langchain/core/documents';
-import type { DefendInsights } from '@kbn/elastic-assistant-common';
+import type { DefendInsights, ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import {
-  ContentReferencesStore,
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import {
   DEFEND_INSIGHT_ERROR_EVENT,

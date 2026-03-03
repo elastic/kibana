@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
@@ -31,7 +32,7 @@ const rules = [new AllRule(), new AnyRule()];
 const exceptRules = [new ExceptAllRule(), new ExceptAnyRule()];
 
 export const RuleGroupTitle = (props: Props) => {
-  if (props.readOnly === undefined) props.readOnly = false;
+  const readOnly = props.readOnly ?? false;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -70,12 +71,12 @@ export const RuleGroupTitle = (props: Props) => {
 
   const ruleButton = (
     <EuiLink
-      disabled={props.readOnly}
+      disabled={readOnly}
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       data-test-subj="ruleGroupTitle"
     >
       {props.rule.getDisplayTitle()}
-      {props.readOnly === false && <EuiIcon type="arrowDown" />}
+      {readOnly === false && <EuiIcon type="arrowDown" />}
     </EuiLink>
   );
 
@@ -95,15 +96,19 @@ export const RuleGroupTitle = (props: Props) => {
     </EuiPopover>
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const confirmChangeModal = showConfirmChangeModal ? (
     <EuiConfirmModal
       data-test-subj="confirmRuleChangeModal"
+      aria-labelledby={modalTitleId}
       title={
         <FormattedMessage
           id="xpack.security.management.editRoleMapping.confirmGroupChangePromptTitle"
           defaultMessage="Change group type?"
         />
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={() => {
         setShowConfirmChangeModal(false);
         setPendingNewRule(null);

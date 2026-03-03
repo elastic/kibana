@@ -67,7 +67,7 @@ export const EndpointDetailsFlyoutTabs = memo<EndpointDetailsTabsProps>(
           isHostInfoLoading={isHostInfoLoading}
           hasBorder
         >
-          <EuiTabs bottomBorder={false} style={{ marginBottom: '-25px' }}>
+          <EuiTabs bottomBorder={false} css={{ marginBottom: '-25px' }}>
             {renderTabs}
           </EuiTabs>
         </EndpointDetailsFlyoutHeader>

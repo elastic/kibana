@@ -21,7 +21,10 @@ export type SavedObjectBulkGetter = (
 
 export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
 
-export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectBulkGetter;
+export type SavedObjectProvider = (
+  request: KibanaRequest,
+  spaceId?: string
+) => SavedObjectBulkGetter;
 
 export class SavedObjectProviderRegistry {
   private providers = new Map<string, SavedObjectProvider>();
@@ -43,6 +46,20 @@ export class SavedObjectProviderRegistry {
   }
 
   public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetterResult {
+    return this.createProvidersClient(request);
+  }
+
+  public getProvidersClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): SavedObjectBulkGetterResult {
+    return this.createProvidersClient(request, spaceId);
+  }
+
+  private createProvidersClient(
+    request: KibanaRequest,
+    spaceId?: string
+  ): SavedObjectBulkGetterResult {
     if (!this.defaultProvider) {
       throw new Error(
         i18n.translate(
@@ -54,21 +71,21 @@ export class SavedObjectProviderRegistry {
       );
     }
 
-    // `scopedProviders` is a cache of providers which are scoped t othe current request.
+    // `scopedProviders` is a cache of providers which are scoped to the current request.
     // The client will only instantiate a provider on-demand and it will cache each
     // one to enable the request to reuse each provider.
 
     // would be nice to have a simple version support in API:
     // curl -X GET "localhost:9200/my-index-000001/_mget?pretty" -H 'Content-Type: application/json' -d' { "ids" : ["1", "2"] } '
     const scopedProviders = new Map<string, SavedObjectBulkGetter>();
-    const defaultGetter = this.defaultProvider(request);
+    const defaultGetter = this.defaultProvider(request, spaceId);
     return (type: string, ids: string[]) => {
       const objects = ids.map((id: string) => ({ type, id }));
       const getter = pipe(
         fromNullable(scopedProviders.get(type)),
         getOrElse(() => {
           const client = this.providers.has(type)
-            ? this.providers.get(type)!(request)
+            ? this.providers.get(type)!(request, spaceId)
             : defaultGetter;
           scopedProviders.set(type, client);
           return client;

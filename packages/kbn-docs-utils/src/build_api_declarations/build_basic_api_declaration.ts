@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JSDocTag, Node, TypeFormatFlags } from 'ts-morph';
-import { ApiDeclaration } from '../types';
+import type { JSDocTag } from 'ts-morph';
+import { Node, TypeFormatFlags } from 'ts-morph';
+import type { ApiDeclaration } from '../types';
 import { maybeCollectReferences } from './get_references';
 import { getSignature } from './get_signature';
 import { getTypeKind } from './get_type_kind';
 import { getCommentsFromNode, getJSDocTags } from './js_doc_utils';
-import { BuildApiDecOpts } from './types';
-import { getSourceForNode } from './utils';
+import type { BuildApiDecOpts } from './types';
+import { getSourceLocationForNode } from './utils';
 
 /**
  * @returns an ApiDeclaration with common functionality that every node shares. Type specific attributes, like
@@ -40,6 +41,8 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
       .getText(undefined, TypeFormatFlags.OmitParameterModifiers)}`;
   }
 
+  const { path, lineNumber, columnNumber } = getSourceLocationForNode(node);
+
   const apiDec = {
     parentPluginId: opts.currentPluginId,
     id: opts.id,
@@ -48,7 +51,9 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
     label,
     description: getCommentsFromNode(node),
     signature: getSignature(node, opts.plugins, opts.log),
-    path: getSourceForNode(node),
+    path,
+    lineNumber,
+    columnNumber,
     deprecated,
     removeBy: removeByTag ? removeByTag.getCommentText() : undefined,
     trackAdoption,

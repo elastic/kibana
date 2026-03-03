@@ -24,7 +24,7 @@ export interface JobGroupsInputProps {
 export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
     const { euiTheme } = useEuiTheme();
-    const groupsTitleId = useGeneratedHtmlId({ prefix: 'groupsTitleId' });
+    const titleId = useGeneratedHtmlId({ prefix: 'jobGroupsInput' });
     const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
       color: tabColor(g, euiTheme),
@@ -62,15 +62,18 @@ export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
       onChangeCallback([...selectedOptions, newGroup]);
     }
 
+    const jobGroupSelectLabel = i18n.translate(
+      'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
+      {
+        defaultMessage: 'Select or create groups',
+      }
+    );
+
     return (
-      <Description validation={validation} titleId={groupsTitleId}>
+      <Description validation={validation} titleId={titleId}>
         <EuiComboBox
-          placeholder={i18n.translate(
-            'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
-            {
-              defaultMessage: 'Select or create groups',
-            }
-          )}
+          placeholder={jobGroupSelectLabel}
+          aria-label={jobGroupSelectLabel}
           options={options}
           selectedOptions={selectedOptions}
           onChange={onChangeCallback}

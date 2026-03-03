@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange, TimeState } from '@kbn/es-query';
-import { BehaviorSubject, Observable, Subject, combineLatest, map, share, skip } from 'rxjs';
+import type { TimeRange, TimeState } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map, share, skip } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import type { Timefilter } from './timefilter';
 import { getAbsoluteTimeRange } from '../../../common';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 
 type TimeStateChange = 'initial' | 'shift' | 'override';
 

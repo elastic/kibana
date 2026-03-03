@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiToolTip, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +15,7 @@ import { SERVICE_NOT_ALLOWED } from '../../monitors_page/management/disabled_cal
 
 export const FleetPermissionsCallout = () => {
   return (
-    <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="help">
+    <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="question">
       <p>{NEED_PRIVATE_LOCATIONS_PERMISSION}</p>
       <p>
         <FormattedMessage
@@ -34,12 +35,14 @@ export const NoPermissionsTooltip = ({
   canEditSynthetics = true,
   canUsePublicLocations = true,
   canManagePrivateLocations = true,
+  content,
   children,
 }: {
   canEditSynthetics?: boolean;
   canUsePublicLocations?: boolean;
   canManagePrivateLocations?: boolean;
   children: ReactNode;
+  content?: ReactNode;
 }) => {
   const { isServiceAllowed } = useEnablement();
 
@@ -52,7 +55,7 @@ export const NoPermissionsTooltip = ({
   if (!isServiceAllowed) {
     return (
       <EuiToolTip content={SERVICE_NOT_ALLOWED}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }
@@ -60,7 +63,15 @@ export const NoPermissionsTooltip = ({
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
+      </EuiToolTip>
+    );
+  }
+
+  if (content) {
+    return (
+      <EuiToolTip content={content}>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }

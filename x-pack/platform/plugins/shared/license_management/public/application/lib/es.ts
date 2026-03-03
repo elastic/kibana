@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
 export function putLicense(http: HttpSetup, license: string, acknowledge: boolean) {

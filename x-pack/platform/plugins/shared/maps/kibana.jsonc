@@ -17,15 +17,19 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
+      "kql",
+      "lens",
       "licensing",
       "features",
       "inspector",
       "data",
+      "dataViews",
       "fieldFormats",
       "fileUpload",
       "uiActions",
       "navigation",
       "expressions",
+      "visualizations",
       "embeddable",
       "mapsEms",
       "share",
@@ -34,29 +38,25 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "customIntegrations",
-      "embeddableEnhanced",
       "home",
-      "lens",
       "savedObjectsTagging",
       "charts",
       "screenshotMode",
       "security",
       "spaces",
       "usageCollection",
-      "serverless",
-      "visualizations"
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "lens",
       "usageCollection",
       "unifiedSearch",
       "fieldFormats",
       "esql",
-      "savedObjects",
-      "visualizations"
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common"

@@ -10,15 +10,24 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('PresentationPanelErrorInternal', () => {
   test('should display error', async () => {
-    render(<PresentationPanelErrorInternal error={new Error('Simulated error')} />);
+    render(
+      <EuiThemeProvider>
+        <PresentationPanelErrorInternal error={new Error('Simulated error')} />
+      </EuiThemeProvider>
+    );
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
   });
 
   test('should display error with empty message', async () => {
-    render(<PresentationPanelErrorInternal error={new Error('')} />);
+    render(
+      <EuiThemeProvider>
+        <PresentationPanelErrorInternal error={new Error('')} />
+      </EuiThemeProvider>
+    );
     await waitFor(() => screen.getByTestId('errorMessageMarkdown'));
   });
 });

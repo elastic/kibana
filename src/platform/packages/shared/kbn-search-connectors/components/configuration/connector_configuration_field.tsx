@@ -27,7 +27,8 @@ import { i18n } from '@kbn/i18n';
 
 import { DisplayType } from '../..';
 
-import { ConfigEntryView, LicenseContext } from './connector_configuration';
+import type { ConfigEntryView } from './connector_configuration';
+import { LicenseContext } from './connector_configuration';
 import { DocumentLevelSecurityPanel } from './document_level_security_panel';
 import {
   ensureBooleanType,
@@ -246,7 +247,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                               defaultMessage: 'Open licensing popover',
                             }
                           )}
-                          iconType="questionInCircle"
+                          iconType="question"
                           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                         />
                       }

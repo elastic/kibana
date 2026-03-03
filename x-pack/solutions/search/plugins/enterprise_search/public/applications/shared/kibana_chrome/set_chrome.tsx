@@ -5,37 +5,28 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { SEARCH_APPS_BREADCRUMB } from '../../../../common/constants';
+import { SEARCH_APPS_TITLE } from '../../../../common/constants';
 import { KibanaLogic } from '../kibana';
 
+import type { BreadcrumbTrail } from './generate_breadcrumbs';
 import {
   useGenerateBreadcrumbs,
   useSearchBreadcrumbs,
   useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
-  useAiSearchBreadcrumbs,
-  useElasticsearchBreadcrumbs,
-  BreadcrumbTrail,
-  useSearchExperiencesBreadcrumbs,
-  useVectorSearchBreadcrumbs,
-  useSemanticSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
-  aiSearchTitle,
   analyticsTitle,
-  elasticsearchTitle,
   enterpriseSearchContentTitle,
   generateTitle,
   searchApplicationsTitle,
-  searchExperiencesTitle,
   searchTitle,
-  semanticSearchTitle,
-  vectorSearchTitle,
 } from './generate_title';
 
 /**
@@ -91,40 +82,6 @@ export const SetAnalyticsChrome: React.FC<SetChromeProps> = ({ trail = [] }) => 
   return null;
 };
 
-export const SetElasticsearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = elasticsearchTitle(title);
-
-  const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useElasticsearchBreadcrumbs(crumbs);
-
-  useEffect(() => {
-    setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
-  }, [trail]);
-
-  return null;
-};
-
-export const SetAiSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = aiSearchTitle(title);
-
-  const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useAiSearchBreadcrumbs(crumbs);
-
-  useEffect(() => {
-    setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
-  }, [trail]);
-
-  return null;
-};
-
 export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
@@ -133,23 +90,6 @@ export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ tra
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchContentBreadcrumbs(crumbs);
-
-  useEffect(() => {
-    setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
-  }, [trail]);
-
-  return null;
-};
-
-export const SetSearchExperiencesChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = searchExperiencesTitle(title);
-
-  const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useSearchExperiencesBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
@@ -182,40 +122,8 @@ export const SetEnterpriseSearchApplicationsChrome: React.FC<SetChromeProps> = (
   const docTitle = searchApplicationsTitle(title);
 
   const breadcrumbs = useEnterpriseSearchApplicationsBreadcrumbs(
-    useGenerateBreadcrumbs([SEARCH_APPS_BREADCRUMB, ...trail])
+    useGenerateBreadcrumbs([SEARCH_APPS_TITLE, ...trail])
   );
-
-  useEffect(() => {
-    setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
-  }, [trail]);
-
-  return null;
-};
-
-export const SetVectorSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = vectorSearchTitle(title);
-
-  const breadcrumbs = useVectorSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
-
-  useEffect(() => {
-    setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
-  }, [trail]);
-
-  return null;
-};
-
-export const SetSemanticSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = semanticSearchTitle(title);
-
-  const breadcrumbs = useSemanticSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

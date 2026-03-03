@@ -19,6 +19,9 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import type { CoreSetup } from '@kbn/core/server';
+import type { AlertingPluginsStart } from '../../../../plugin';
+import { ApiKeyType } from '../../../../task_runner/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -58,6 +61,7 @@ describe('createRuleRoute', () => {
           max: 1000,
         },
       },
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: {
       enabled: true,
@@ -66,7 +70,7 @@ describe('createRuleRoute', () => {
     maintenanceWindow: {
       enabled: true,
     },
-  };
+  } as const;
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
@@ -188,6 +192,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -264,7 +269,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": undefined,
           },
@@ -303,6 +307,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -383,7 +388,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -422,6 +426,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -503,7 +508,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -542,6 +546,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -623,7 +628,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -655,6 +659,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [, handler] = router.post.mock.calls[0];
@@ -683,6 +688,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [, handler] = router.post.mock.calls[0];
@@ -707,6 +713,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [, handler] = router.post.mock.calls[0];
@@ -740,6 +747,7 @@ describe('createRuleRoute', () => {
         usageCounter: mockUsageCounter,
         docLinks,
         alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -799,7 +807,6 @@ describe('createRuleRoute', () => {
               ],
               "throttle": "30s",
             },
-            "isFlappingEnabled": true,
             "options": Object {
               "id": undefined,
             },
@@ -824,6 +831,7 @@ describe('createRuleRoute', () => {
         usageCounter: mockUsageCounter,
         docLinks,
         alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -882,6 +890,7 @@ describe('createRuleRoute', () => {
         usageCounter: mockUsageCounter,
         docLinks,
         alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -896,6 +905,48 @@ describe('createRuleRoute', () => {
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Group is not defined in action 2"`
+      );
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+        docLinks,
+        alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient,
+          actionsClient,
+          // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          body: { ...ruleToCreate, rule_type_id: 'test.internal-rule-type' },
+        },
+        ['ok']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create rule of type \\"test.internal-rule-type\\" because it is internally managed."`
       );
     });
   });

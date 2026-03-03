@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import { Router as ReactRouter } from '@kbn/shared-ux-router';
 
-import { RouteMap, Router } from './types';
+import type { RouteMap, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
 export function RouterProvider({

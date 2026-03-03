@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { IndexLifecycleManagementPlugin } from './plugin';
 
@@ -13,3 +13,5 @@ import { IndexLifecycleManagementPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IndexLifecycleManagementPlugin(initializerContext);
 };
+
+export type { IndexLifecycleManagementPluginStart } from './types';

@@ -10,30 +10,43 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import type { TabItem, TabPreviewData } from '@kbn/unified-tabs';
 import { TabStatus } from '@kbn/unified-tabs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import type { RuntimeStateManager } from '../../state_management/redux';
-import { selectTabRuntimeState, useInternalStateSelector } from '../../state_management/redux';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { RuntimeStateManager, TabState } from '../../state_management/redux';
+import {
+  selectTabRuntimeState,
+  useInternalStateSelector,
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+} from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
+import type { RecentlyClosedTabState } from '../../state_management/redux/types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
-  const allTabIds = useInternalStateSelector((state) => state.tabs.allIds);
+  const allTabs = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedTabs = useInternalStateSelector(selectRecentlyClosedTabs);
+  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
+
   const previewDataMap$ = useMemo(
     () =>
       combineLatest(
-        allTabIds.reduce<Record<string, Observable<TabPreviewData>>>(
-          (acc, tabId) => ({
-            ...acc,
-            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId),
-          }),
+        [...allTabs, ...recentlyClosedTabs].reduce<Record<string, Observable<TabPreviewData>>>(
+          (acc, tabState) => {
+            const tabId = tabState.id;
+            return {
+              ...acc,
+              [tabId]: getPreviewDataObservable(runtimeStateManager, tabState, savedDataViews),
+            };
+          },
           {}
         )
       ),
-    [allTabIds, runtimeStateManager]
+    [allTabs, recentlyClosedTabs, runtimeStateManager, savedDataViews]
   );
   const previewDataMap = useObservable(previewDataMap$);
   const getPreviewData = useCallback(
@@ -65,7 +78,10 @@ const DEFAULT_PREVIEW_QUERY = {
   query: i18n.translate('discover.tabsView.defaultQuery', { defaultMessage: '(Empty query)' }),
 };
 
-const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreviewData['query'] => {
+const getPreviewQuery = (
+  query: TabPreviewData['query'] | undefined,
+  dataViewName: string | undefined
+): TabPreviewData['query'] => {
   if (!query) {
     return DEFAULT_PREVIEW_QUERY;
   }
@@ -77,31 +93,112 @@ const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreview
     };
   }
 
+  const trimmedQuery = typeof query.query === 'string' ? query.query.trim() : query.query;
+
   return {
     ...query,
-    query: query.query.trim() || DEFAULT_PREVIEW_QUERY.query,
+    query: trimmedQuery || (dataViewName ? '' : DEFAULT_PREVIEW_QUERY.query),
   };
 };
 
-const getPreviewDataObservable = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
-  selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
+const getDataViewNameFromInitialInternalState = (
+  initialInternalState: TabState['initialInternalState'] | undefined,
+  savedDataViews: DataViewListItem[]
+): string | undefined => {
+  if (!initialInternalState?.serializedSearchSource) {
+    return undefined;
+  }
+
+  const index = initialInternalState.serializedSearchSource.index;
+
+  if (typeof index === 'string') {
+    const matchedDataView = savedDataViews.find((dv) => dv.id === index);
+    return matchedDataView?.name || matchedDataView?.title;
+  }
+
+  if (index?.name) {
+    return index.name;
+  }
+
+  return undefined;
+};
+
+const getPreviewTitle = (
+  query: TabPreviewData['query'] | undefined,
+  dataViewName: string | undefined
+) => {
+  if (isOfAggregateQueryType(query)) {
+    return undefined;
+  }
+
+  return dataViewName
+    ? i18n.translate('discover.tabsView.tabPreviewDataViewTitle', {
+        defaultMessage: 'Data view: {dataViewName}',
+        values: { dataViewName },
+      })
+    : undefined;
+};
+
+const getPreviewDataObservable = (
+  runtimeStateManager: RuntimeStateManager,
+  tabState: TabState | RecentlyClosedTabState,
+  savedDataViews: DataViewListItem[]
+) => {
+  if ('closedAt' in tabState) {
+    // Recently closed tab, no runtime state, no updates expected
+    const derivedDataViewName = getDataViewNameFromInitialInternalState(
+      tabState.initialInternalState,
+      savedDataViews
+    );
+    return of({
+      status: TabStatus.DEFAULT,
+      query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+      title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
+    });
+  }
+
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
+
+  return tabRuntimeState.stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
-        return of({ status: TabStatus.RUNNING, query: DEFAULT_PREVIEW_QUERY });
+        const derivedDataViewName = getDataViewNameFromInitialInternalState(
+          tabState.initialInternalState,
+          savedDataViews
+        );
+        return of({
+          status: TabStatus.DEFAULT,
+          query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+          title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
+        });
       }
-
-      const { appState } = tabStateContainer;
 
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
-        appState.state$.pipe(startWith(appState.get())),
+        tabRuntimeState.currentDataView$,
       ]).pipe(
-        map(([{ fetchStatus }, { query }]) => ({ fetchStatus, query })),
-        distinctUntilChanged(isEqual),
-        map(({ fetchStatus, query }) => ({
-          status: getPreviewStatus(fetchStatus),
-          query: getPreviewQuery(query),
-        }))
+        map(([{ fetchStatus }, dataView]) => ({
+          fetchStatus,
+          dataViewName: dataView?.name,
+        })),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        map(({ fetchStatus, dataViewName }) => {
+          let derivedDataViewName = dataViewName;
+
+          if (!derivedDataViewName && tabState.initialInternalState?.serializedSearchSource) {
+            derivedDataViewName = getDataViewNameFromInitialInternalState(
+              tabState.initialInternalState,
+              savedDataViews
+            );
+          }
+
+          return {
+            status: tabState.forceFetchOnSelect ? TabStatus.DEFAULT : getPreviewStatus(fetchStatus),
+            query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+            title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
+          };
+        })
       );
     })
   );
+};

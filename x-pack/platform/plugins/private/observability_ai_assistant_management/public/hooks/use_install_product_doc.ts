@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { PerformInstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
@@ -20,13 +20,13 @@ export function useInstallProductDoc() {
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-
-  return useMutation<PerformInstallResponse, ServerError, void>(
+  return useMutation<PerformInstallResponse, ServerError, string>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
-    () => {
-      return productDocBase!.installation.install();
+    (inferenceId: string) => {
+      return productDocBase!.installation.install({ inferenceId });
     },
     {
+      networkMode: 'always',
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(

@@ -63,9 +63,9 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
       {!isHelpOpen && (
         <EuiFlexItem grow={false}>
           <StyledEuiButtonEmpty
-            style={{ marginLeft: 'auto' }}
+            css={{ marginLeft: 'auto' }}
             onClick={handleHelpButtonOnClick}
-            iconType="help"
+            iconType="question"
             title={HELP_TOOLTIP}
             aria-label={HELP_TOOLTIP}
             isSelected={isHelpOpen}

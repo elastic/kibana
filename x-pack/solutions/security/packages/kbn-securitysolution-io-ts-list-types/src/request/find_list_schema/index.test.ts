@@ -10,7 +10,8 @@ import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getFindListSchemaDecodedMock, getFindListSchemaMock } from './index.mock';
-import { FindListSchemaEncoded, findListSchema } from '.';
+import type { FindListSchemaEncoded } from '.';
+import { findListSchema } from '.';
 
 describe('find_list_schema', () => {
   test('it should validate a typical find item request', () => {

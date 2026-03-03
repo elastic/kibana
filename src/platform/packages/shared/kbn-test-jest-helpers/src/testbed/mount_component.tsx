@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
-import { Store } from 'redux';
-import { ReactWrapper } from 'enzyme';
+import type { ComponentType } from 'react';
+import React from 'react';
+import type { Store } from 'redux';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
-import { MemoryRouterConfig } from './types';
+import type { MemoryRouterConfig } from './types';
 
 interface Config<T extends object = Record<string, any>> {
   Component: ComponentType<T>;
@@ -48,6 +49,9 @@ function getCompFromConfig<T extends object = Record<string, any>>({
   return Comp;
 }
 
+/**
+ * @deprecated - use @testing-library/react instead
+ */
 export function mountComponentSync<T extends object = Record<string, any>>(
   config: Config<T>
 ): ReactWrapper {
@@ -55,6 +59,9 @@ export function mountComponentSync<T extends object = Record<string, any>>(
   return mountWithIntl(<Comp {...config.props} />);
 }
 
+/**
+ * @deprecated - use @testing-library/react instead
+ */
 export async function mountComponentAsync<T extends object = Record<string, any>>(
   config: Config<T>
 ): Promise<ReactWrapper> {

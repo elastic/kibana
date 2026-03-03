@@ -24,6 +24,7 @@ import {
 
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { filterTypeToText } from './utils';
 
@@ -87,6 +88,7 @@ export class ScopeExpression extends Component {
               <EuiSelect
                 value={filterType}
                 onChange={this.onChangeFilterType}
+                data-test-subj="mlScopeFilterTypeSelect"
                 options={[
                   {
                     value: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
@@ -97,6 +99,12 @@ export class ScopeExpression extends Component {
                     text: filterTypeToText(ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE),
                   },
                 ]}
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.scopeExpression.filterTypeSelectAriaLabel',
+                  {
+                    defaultMessage: 'Filter type',
+                  }
+                )}
               />
             </EuiFlexItem>
 
@@ -104,7 +112,14 @@ export class ScopeExpression extends Component {
               <EuiSelect
                 value={filterId}
                 onChange={this.onChangeFilterId}
+                data-test-subj="mlScopeFilterIdSelect"
                 options={getFilterListOptions(filterListIds)}
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.scopeExpression.filterListSelectAriaLabel',
+                  {
+                    defaultMessage: 'Filter list',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -158,6 +173,7 @@ export class ScopeExpression extends Component {
                   value={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
+                  data-test-subj="mlScopeExpressionFilterSelector"
                 />
               }
               isOpen={this.state.isFilterListOpen}

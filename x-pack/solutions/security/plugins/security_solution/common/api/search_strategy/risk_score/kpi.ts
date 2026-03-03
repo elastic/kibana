@@ -8,11 +8,11 @@
 import { z } from '@kbn/zod';
 
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
-import { riskScoreEntity } from './model/risk_score_entity';
+import { riskScoreEntity, riskScoreEntityArray } from './model/risk_score_entity';
 import { EntityRiskQueries } from '../model/factory_query_type';
 
 export const riskScoreKpiRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  entity: riskScoreEntity,
+  entity: z.union([riskScoreEntity, riskScoreEntityArray]),
   factoryQueryType: z.literal(EntityRiskQueries.kpi),
 });
 

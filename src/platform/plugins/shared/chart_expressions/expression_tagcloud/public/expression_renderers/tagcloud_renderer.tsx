@@ -12,8 +12,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { VisualizationContainer } from '@kbn/visualizations-common';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
@@ -27,8 +27,9 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
-import { ExpressionTagcloudRendererDependencies } from '../plugin';
-import { TagcloudRendererConfig } from '../../common/types';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { ExpressionTagcloudRendererDependencies } from '../plugin';
+import type { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
 
 export const strings = {
@@ -98,12 +99,6 @@ export const tagcloudRenderer: (
     handlers.event(chartSizeEvent);
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
-    let isDarkMode = false;
-    plugins.charts.theme.darkModeEnabled$
-      .subscribe((val) => {
-        isDarkMode = val.darkMode;
-      })
-      .unsubscribe();
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
@@ -125,7 +120,7 @@ export const tagcloudRenderer: (
                 fireEvent={handlers.event}
                 syncColors={config.syncColors}
                 overrides={config.overrides}
-                isDarkMode={isDarkMode}
+                isDarkMode={useKibanaIsDarkMode()}
               />
             </VisualizationContainer>
           )}

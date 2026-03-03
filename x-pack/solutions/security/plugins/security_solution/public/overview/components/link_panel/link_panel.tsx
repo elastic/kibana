@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import { chunk } from 'lodash';
 import type { EuiTableFieldDataColumnType, CriteriaWithPagination } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { HeaderSection } from '../../../common/components/header_section';
 import type { LinkPanelListItem } from './types';
@@ -133,6 +134,10 @@ const LinkPanelComponent = ({
                   onChange={onTableChange}
                   pagination={pagination}
                   sorting={sorting}
+                  tableCaption={i18n.translate('xpack.securitySolution.linkPanel.tableCaption', {
+                    defaultMessage: '{panelTitle} links',
+                    values: { panelTitle },
+                  })}
                 />
               )}
             </EuiPanel>

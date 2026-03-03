@@ -31,23 +31,27 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
+import type { ConfigType } from './config';
 
 export interface CasesServerSetupDependencies {
   alerting: AlertingServerSetup;
   actions: ActionsPluginSetup;
-  lens?: LensServerPluginSetup;
+  lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
   files: FilesSetup;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
-  taskManager?: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface CasesServerStartDependencies {
@@ -55,7 +59,7 @@ export interface CasesServerStartDependencies {
   features: FeaturesPluginStart;
   files: FilesStart;
   licensing: LicensingPluginStart;
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;
@@ -94,10 +98,13 @@ export interface CasesServerStart {
   getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
   getExternalReferenceAttachmentTypeRegistry(): ExternalReferenceAttachmentTypeRegistry;
   getPersistableStateAttachmentTypeRegistry(): PersistableStateAttachmentTypeRegistry;
+  getUnifiedAttachmentTypeRegistry(): UnifiedAttachmentTypeRegistry;
+  config: ConfigType;
 }
 
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
+  config: ConfigType;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

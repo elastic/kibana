@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -38,6 +39,9 @@ interface Props {
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   displayLimit?: number;
   isEmbeddable?: boolean;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  serviceBadgesHeight?: number;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -77,13 +81,16 @@ export function Waterfall({
   onNodeClick,
   displayLimit,
   isEmbeddable,
+  scrollElement,
+  getRelatedErrorsHref,
+  serviceBadgesHeight = 0,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryTransaction);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction?.transaction.marks?.agent);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   const timelineMargins = useMemo(() => {
@@ -102,6 +109,7 @@ export function Waterfall({
     <Container>
       {waterfall.exceedsMax && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="apmWaterfallSizeWarning"
           color="warning"
           size="s"
@@ -118,10 +126,16 @@ export function Waterfall({
       )}
 
       <div
+        data-test-subj="apmWaterfallTimelineContainer"
+        data-is-embeddable={String(isEmbeddable ?? false)}
+        data-service-badges-height={String(serviceBadgesHeight)}
         css={css`
           display: flex;
-          position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
+          ${isEmbeddable
+            ? 'position: relative;'
+            : `
+            position: sticky;
+            top: calc(var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) + ${serviceBadgesHeight}px);`}
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};
@@ -154,7 +168,7 @@ export function Waterfall({
           }}
         />
         <TimelineAxisContainer
-          marks={[...agentMarks, ...errorMarks]}
+          marks={[...agentMarks, ...(isEmbeddable ? [] : errorMarks)]}
           xMax={duration}
           margins={timelineMargins}
         />
@@ -180,6 +194,8 @@ export function Waterfall({
             }
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
+            scrollElement={scrollElement}
+            getRelatedErrorsHref={getRelatedErrorsHref}
           />
         )}
       </WaterfallItemsContainer>

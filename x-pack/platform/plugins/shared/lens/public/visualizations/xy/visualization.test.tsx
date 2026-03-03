@@ -7,16 +7,16 @@
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { LegendValue, Position } from '@elastic/charts';
-import {
+import type {
   Operation,
   OperationDescriptor,
   DatasourcePublicAPI,
   FramePublicAPI,
   UserMessage,
   AnnotationGroups,
-} from '../../types';
-import {
-  State,
+  DataViewsState,
+} from '@kbn/lens-common';
+import type {
   XYState,
   XYLayerConfig,
   XYDataLayerConfig,
@@ -30,36 +30,37 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import {
+import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DataViewsState } from '../../state_management';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { layerTypes, Visualization } from '../..';
+import type { Visualization } from '../..';
+import { layerTypes } from '../..';
 import { set } from '@kbn/safer-lodash-set';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   getAnnotationsLayers,
   isAnnotationsLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
-import { cloneDeep } from 'lodash';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import {
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
 import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
+import { KbnPalette } from '@kbn/palettes';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -93,7 +94,7 @@ function exampleState(): XYState {
         layerId: 'first',
         layerType: layerTypes.DATA,
         seriesType: 'area',
-        splitAccessor: 'd',
+        splitAccessors: ['d'],
         xAccessor: 'a',
         accessors: ['b', 'c'],
       },
@@ -109,7 +110,6 @@ set(core, 'application.capabilities.visualize_v2.save', true);
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
-  useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
   core,
@@ -355,7 +355,7 @@ describe('xy_visualization', () => {
       const refName1 = 'my-reference';
       const refName2 = 'my-other-reference';
 
-      const references: SavedObjectReference[] = [
+      const references: Reference[] = [
         {
           name: refName1,
           id: annotationGroupId1,
@@ -431,7 +431,7 @@ describe('xy_visualization', () => {
 
       const dataViewId = 'some-index-pattern-*';
 
-      const references: SavedObjectReference[] = [
+      const references: Reference[] = [
         {
           name: refName1,
           id: annotationGroupId1,
@@ -541,7 +541,7 @@ describe('xy_visualization', () => {
 
       const dataViewId = 'some-index-pattern-*';
 
-      const references: SavedObjectReference[] = [
+      const references: Reference[] = [
         {
           name: refName1,
           id: annotationGroupId1,
@@ -657,7 +657,7 @@ describe('xy_visualization', () => {
 
   describe('#removeLayer', () => {
     it('removes the specified layer', () => {
-      const prevState: State = {
+      const prevState: XYState = {
         ...exampleState(),
         layers: [
           ...exampleState().layers,
@@ -665,7 +665,7 @@ describe('xy_visualization', () => {
             layerId: 'second',
             layerType: layerTypes.DATA,
             seriesType: 'area',
-            splitAccessor: 'e',
+            splitAccessors: ['e'],
             xAccessor: 'f',
             accessors: ['g', 'h'],
           },
@@ -907,6 +907,255 @@ describe('xy_visualization', () => {
         xAccessor: 'newCol',
         accessors: [],
       });
+    });
+
+    it('hides X axis title when adding date histogram (undefined setting)', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: undefined,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // X axis title should be hidden for date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('hides X axis title when switching from non-histogram to date histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto for non-histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should change to None when switching to date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('shows X axis title when switching from date histogram to non-histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true }, // Was None for date histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldDateCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should change to Auto when switching away from date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves user choice of None for non-histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true }, // User set None for non-histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve user's choice of None
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves user choice of Auto for date histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // User set Auto for date histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldDateCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should preserve user's choice of Auto
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves custom title when switching between field types', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto (visible)
+          xTitle: 'My Custom Title', // User has set a custom title
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve visibility setting when custom title is set
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('does not change settings for non-date histogram with undefined setting', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: undefined,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should not change settings for non-date histogram (defaults to Auto)
+      expect(result.axisTitlesVisibilitySettings).toBeUndefined();
     });
 
     it('should add a dimension to a reference layer', () => {
@@ -1885,7 +2134,7 @@ describe('xy_visualization', () => {
           [
             {
               ...baseState.layers[0],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
             },
           ],
@@ -1896,19 +2145,19 @@ describe('xy_visualization', () => {
             {
               ...baseState.layers[0],
               accessors: ['a'],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
             },
             {
               ...baseState.layers[0],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: 'd',
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
             },
           ],
         ],
-      ] as Array<[string, State['layers']]>)(
+      ] as Array<[string, XYState['layers']]>)(
         'should not require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -1928,7 +2177,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
             },
           ],
@@ -1951,7 +2200,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
             },
           ],
         ],
@@ -1962,13 +2211,13 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
             },
             {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
             },
           ],
@@ -1985,7 +2234,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['e'],
               seriesType: 'bar_percentage_stacked',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
             },
           ],
@@ -2027,7 +2276,7 @@ describe('xy_visualization', () => {
           [
             {
               ...baseState.layers[0],
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
               yConfig: [
                 { forAccessor: 'a', axisMode: 'left' },
@@ -2043,7 +2292,7 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['a'],
               xAccessor: undefined,
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
               yConfig: [{ forAccessor: 'a', axisMode: 'left' }],
             },
@@ -2051,13 +2300,13 @@ describe('xy_visualization', () => {
               ...baseState.layers[0],
               accessors: ['b'],
               xAccessor: undefined,
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               seriesType: 'bar_percentage_stacked',
               yConfig: [{ forAccessor: 'b', axisMode: 'right' }],
             },
           ],
         ],
-      ] as Array<[string, State['layers']]>)(
+      ] as Array<[string, XYState['layers']]>)(
         'should require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2078,7 +2327,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithBaseReferenceLine(): State {
+      function getStateWithBaseReferenceLine(): XYState {
         return {
           ...exampleState(),
           layers: [
@@ -2086,7 +2335,7 @@ describe('xy_visualization', () => {
               layerId: 'first',
               layerType: layerTypes.DATA,
               seriesType: 'area',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: undefined,
               accessors: ['a'],
             },
@@ -2389,7 +2638,7 @@ describe('xy_visualization', () => {
           name: 'custom',
           params: {},
         };
-        (state.layers[0] as XYDataLayerConfig).splitAccessor = 'd';
+        (state.layers[0] as XYDataLayerConfig).splitAccessors = ['d'];
 
         const options = xyVisualization.getConfiguration({
           state,
@@ -2434,7 +2683,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithAnnotationLayer(): State {
+      function getStateWithAnnotationLayer(): XYState {
         return {
           ...exampleState(),
           layers: [
@@ -2442,7 +2691,7 @@ describe('xy_visualization', () => {
               layerId: 'first',
               layerType: layerTypes.DATA,
               seriesType: 'area',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: 'a',
               accessors: ['b'],
             },
@@ -2466,7 +2715,7 @@ describe('xy_visualization', () => {
         });
         expect(config.groups[0].accessors).toEqual([
           {
-            color: '#f04e98',
+            color: '#BC1E70',
             columnId: 'an1',
             customIcon: IconCircle,
             triggerIconType: 'custom',
@@ -2484,7 +2733,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 ...baseState.layers[0],
-                splitAccessor: undefined,
+                splitAccessors: undefined,
                 ...layerConfigOverride,
               } as XYLayerConfig,
             ],
@@ -2595,7 +2844,7 @@ describe('xy_visualization', () => {
       it('should show disable icon for splitted series', () => {
         const accessorConfig = callConfigAndFindYConfig(
           {
-            splitAccessor: 'd',
+            splitAccessors: ['d'],
           },
           'b'
         );
@@ -2608,7 +2857,7 @@ describe('xy_visualization', () => {
         (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);
         const breakdownConfig = callConfigForBreakdownConfigs({
           palette: { type: 'palette', name: 'mock', params: {} },
-          splitAccessor: 'd',
+          splitAccessors: ['d'],
         });
         const accessorConfig = breakdownConfig!.accessors[0];
         expect(typeof accessorConfig !== 'string' && accessorConfig.palette).toEqual(customColors);
@@ -2726,7 +2975,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: ['a'],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -2743,7 +2992,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -2759,7 +3008,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
               {
                 layerId: 'second',
@@ -2767,7 +3016,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -2819,7 +3068,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
               {
                 layerId: 'third',
@@ -2827,7 +3076,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -2861,7 +3110,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
               {
                 layerId: 'third',
@@ -2869,7 +3118,7 @@ describe('xy_visualization', () => {
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
-                splitAccessor: 'a',
+                splitAccessors: ['a'],
               },
             ],
           })
@@ -2927,7 +3176,7 @@ describe('xy_visualization', () => {
                   layerId: 'first',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'a',
                   accessors: ['b'], // just use a single accessor to avoid too much noise
                 },
@@ -2948,7 +3197,7 @@ describe('xy_visualization', () => {
         // current incompatibility is only for date and numeric histograms as xAccessors
         const datasourceLayers = {
           first: mockDatasource.publicAPIMock,
-          second: createMockDatasource('testDatasource').publicAPIMock,
+          second: createMockDatasource('formBased').publicAPIMock,
         };
         datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
           id === 'a'
@@ -2976,7 +3225,7 @@ describe('xy_visualization', () => {
                   layerId: 'first',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'a',
                   accessors: ['b'],
                 },
@@ -2984,7 +3233,7 @@ describe('xy_visualization', () => {
                   layerId: 'second',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'e',
                   accessors: ['b'],
                 },
@@ -3005,7 +3254,7 @@ describe('xy_visualization', () => {
         // current incompatibility is only for date and numeric histograms as xAccessors
         const datasourceLayers = {
           first: mockDatasource.publicAPIMock,
-          second: createMockDatasource('testDatasource').publicAPIMock,
+          second: createMockDatasource('formBased').publicAPIMock,
         };
         datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
           id === 'a'
@@ -3033,7 +3282,7 @@ describe('xy_visualization', () => {
                   layerId: 'first',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'a',
                   accessors: ['b'],
                 },
@@ -3041,7 +3290,7 @@ describe('xy_visualization', () => {
                   layerId: 'second',
                   layerType: layerTypes.DATA,
                   seriesType: 'area',
-                  splitAccessor: 'd',
+                  splitAccessors: ['d'],
                   xAccessor: 'e',
                   accessors: ['b'],
                 },
@@ -3066,7 +3315,7 @@ describe('xy_visualization', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: undefined,
+                splitAccessors: undefined,
                 xAccessor: DATE_HISTORGRAM_COLUMN_ID,
                 accessors: ['b'],
               },
@@ -3111,14 +3360,14 @@ describe('xy_visualization', () => {
           });
         }
         test('When data layer is empty, should return error on dimension', () => {
-          const state: State = {
+          const state: XYState = {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: undefined,
+                splitAccessors: undefined,
                 xAccessor: undefined, // important
                 accessors: ['b'],
               },
@@ -3324,7 +3573,7 @@ describe('xy_visualization', () => {
               layerId: 'first',
               layerType: layerTypes.DATA,
               seriesType: 'area',
-              splitAccessor: undefined,
+              splitAccessors: undefined,
               xAccessor: DATE_HISTORGRAM_COLUMN_ID,
               accessors: ['b'],
             },
@@ -3370,7 +3619,7 @@ describe('xy_visualization', () => {
 
       it('should not return an info message if annotation layer is ignoring the global filters but contains only manual annotations', () => {
         const initialState = createStateWithAnnotationProps({});
-        const state: State = {
+        const state: XYState = {
           ...initialState,
           layers: [
             // replace the existing annotation layers with a new one
@@ -3610,8 +3859,7 @@ describe('xy_visualization', () => {
       };
       state.layers = [layer];
 
-      const { state: persistableState, savedObjectReferences } =
-        xyVisualization.getPersistableState!(state);
+      const { state: persistableState, references } = xyVisualization.getPersistableState!(state);
 
       expect(persistableState.layers).toMatchInlineSnapshot(`
         Array [
@@ -3634,7 +3882,7 @@ describe('xy_visualization', () => {
         ]
       `);
 
-      expect(savedObjectReferences).toMatchInlineSnapshot(`
+      expect(references).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "some-index-pattern",
@@ -3695,25 +3943,24 @@ describe('xy_visualization', () => {
 
       state.layers = layers;
 
-      const { state: persistableState, savedObjectReferences } =
-        xyVisualization.getPersistableState!(state);
+      const { state: persistableState, references } = xyVisualization.getPersistableState!(state);
 
       expect(persistableState.layers).toEqual([
         {
-          annotationGroupRef: savedObjectReferences[0].name,
+          annotationGroupRef: references[0].name,
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'byReference',
         },
         {
-          annotationGroupRef: savedObjectReferences[1].name,
+          annotationGroupRef: references[1].name,
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'byReference',
         },
       ]);
 
-      expect(savedObjectReferences).toEqual([
+      expect(references).toEqual([
         {
           name: (persistableState.layers[0] as XYPersistedByReferenceAnnotationLayerConfig)
             .annotationGroupRef,
@@ -3728,7 +3975,7 @@ describe('xy_visualization', () => {
         },
       ]);
 
-      expect(savedObjectReferences[0].name).not.toBe(savedObjectReferences[1].name);
+      expect(references[0].name).not.toBe(references[1].name);
     });
 
     it('should persist unsaved changes to by-reference annotation layers', () => {
@@ -3773,7 +4020,7 @@ describe('xy_visualization', () => {
         annotationGroupId: `annotation-group-id-${index}`,
         __lastSaved: {
           ...byValueLayer,
-          annotations: cloneDeep(byValueLayer.annotations),
+          annotations: structuredClone(byValueLayer.annotations),
           title: 'My saved object title',
           description: 'some description',
           tags: [],
@@ -3786,13 +4033,11 @@ describe('xy_visualization', () => {
 
       state.layers = layers;
 
-      const { state: persistableState, savedObjectReferences } =
-        xyVisualization.getPersistableState!(state);
+      const { state: persistableState, references } = xyVisualization.getPersistableState!(state);
 
-      expect(savedObjectReferences).toHaveLength(4);
+      expect(references).toHaveLength(4);
 
-      expect(savedObjectReferences.filter(({ type }) => type === 'index-pattern'))
-        .toMatchInlineSnapshot(`
+      expect(references.filter(({ type }) => type === 'index-pattern')).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "some-index-pattern",
@@ -3807,7 +4052,7 @@ describe('xy_visualization', () => {
         ]
       `);
 
-      const annotationGroupRefs = savedObjectReferences.filter(
+      const annotationGroupRefs = references.filter(
         ({ type }) => type === 'event-annotation-group'
       );
 
@@ -3915,7 +4160,7 @@ describe('xy_visualization', () => {
                 "icon": "save",
                 "isCompatible": true,
                 "order": 100,
-                "showOutsideList": true,
+                "showOutsideList": false,
               },
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
@@ -4049,7 +4294,7 @@ describe('xy_visualization', () => {
     const refName1 = 'my-reference';
     const refName2 = 'my-other-reference';
 
-    const references1: SavedObjectReference[] = [
+    const references1: Reference[] = [
       {
         name: refName1,
         id: annotationGroupId1,
@@ -4062,7 +4307,7 @@ describe('xy_visualization', () => {
       },
     ];
 
-    const references2: SavedObjectReference[] = [
+    const references2: Reference[] = [
       {
         name: refName2,
         id: annotationGroupId1,
@@ -4234,6 +4479,61 @@ describe('xy_visualization', () => {
       expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual(newType);
       expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual(newType);
     });
+
+    it('should auto-switch palette from default to line-optimized when switching to line', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('line', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.ElasticLineOptimized
+      );
+    });
+
+    it('should auto-switch palette from line-optimized to default when switching from line to bar', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'line';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        paletteId: KbnPalette.ElasticLineOptimized,
+      };
+      const newState = xyVisualization.switchVisualizationType!('bar', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
+    it('should retain user-chosen default palette when switching from line to bar', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'line';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('bar', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
+    it('should not override user-selected non-default palette when switching to line', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        paletteId: 'status',
+      };
+      const newState = xyVisualization.switchVisualizationType!('line', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual('status');
+    });
+
+    it('should not change palette when base series type stays the same', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('bar_stacked', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
     it('should switch only the second layer to the new visualization type if layerId is specified (chart switch case)', () => {
       const state = exampleState();
       state.layers[1] = { ...state.layers[0] };

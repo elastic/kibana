@@ -9,7 +9,9 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -43,12 +45,90 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
+import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // Set a lower limit for bulk edit as the rules client might fail with a "Query
 // contains too many nested clauses" error
 const MAX_RULES_TO_BULK_EDIT = 2000;
 const MAX_ROUTE_CONCURRENCY = 5;
+
+interface ValidationError {
+  body: string;
+  statusCode: number;
+}
+
+const validateBulkAction = (
+  body: PerformRulesBulkActionRequestBody
+): ValidationError | undefined => {
+  if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
+    return {
+      body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+      statusCode: 400,
+    };
+  }
+
+  if (body?.ids && body.query !== undefined) {
+    return {
+      body: `Both query and ids are sent. Define either ids or query in request payload.`,
+      statusCode: 400,
+    };
+  }
+
+  const ruleExecutionGapBodyParamsSet = new Set([
+    Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0,
+    Boolean(body.gaps_range_start),
+    Boolean(body.gaps_range_end),
+  ]);
+
+  if (ruleExecutionGapBodyParamsSet.size > 1) {
+    return {
+      body: `gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.`,
+      statusCode: 400,
+    };
+  }
+
+  // Validate that ids and gap range params are not used together
+  if (body?.ids && ruleExecutionGapBodyParamsSet.has(true)) {
+    return {
+      body: `Cannot use both ids and gaps_range_start/gaps_range_end in request payload.`,
+      statusCode: 400,
+    };
+  }
+
+  return undefined;
+};
+
+const prepareGapParams = ({
+  gapFillStatuses,
+  gapsRangeStart,
+  gapsRangeEnd,
+}: {
+  gapFillStatuses: GapFillStatus[] | undefined;
+  gapsRangeStart: string | undefined;
+  gapsRangeEnd: string | undefined;
+}): {
+  gapRange: { start: string; end: string } | undefined;
+  gapFillStatuses: GapFillStatus[] | undefined;
+} => {
+  const hasGapStatuses = Array.isArray(gapFillStatuses) && gapFillStatuses.length > 0;
+
+  if (gapsRangeStart && gapsRangeEnd && hasGapStatuses) {
+    return {
+      gapRange: {
+        start: gapsRangeStart,
+        end: gapsRangeEnd,
+      },
+      gapFillStatuses,
+    };
+  }
+
+  return {
+    gapRange: undefined,
+    gapFillStatuses: undefined,
+  };
+};
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
@@ -60,7 +140,7 @@ export const performBulkActionRoute = (
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [{ anyRequired: [RULES_API_READ, RULES_API_ALL] }],
         },
       },
       options: {
@@ -80,7 +160,6 @@ export const performBulkActionRoute = (
           },
         },
       },
-
       async (
         context,
         request,
@@ -89,18 +168,9 @@ export const performBulkActionRoute = (
         const { body } = request;
         const siemResponse = buildSiemResponse(response);
 
-        if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
-          return siemResponse.error({
-            body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
-            statusCode: 400,
-          });
-        }
-
-        if (body?.ids && body.query !== undefined) {
-          return siemResponse.error({
-            body: `Both query and ids are sent. Define either ids or query in request payload.`,
-            statusCode: 400,
-          });
+        const validationError = validateBulkAction(body);
+        if (validationError) {
+          return siemResponse.error(validationError);
         }
 
         const isDryRun = request.query.dry_run;
@@ -134,6 +204,9 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -148,16 +221,21 @@ export const performBulkActionRoute = (
           });
 
           const query = body.query !== '' ? body.query : undefined;
-
+          const gapParams = prepareGapParams({
+            gapFillStatuses: body.gap_fill_statuses,
+            gapsRangeStart: body.gaps_range_start,
+            gapsRangeEnd: body.gaps_range_end,
+          });
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
             query,
             ids: body.ids,
-            abortSignal: abortController.signal,
             maxRules:
               body.action === BulkActionTypeEnum.edit
                 ? MAX_RULES_TO_BULK_EDIT
                 : MAX_RULES_TO_PROCESS_TOTAL,
+            gapRange: gapParams.gapRange,
+            gapFillStatuses: gapParams.gapFillStatuses,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
@@ -193,27 +271,18 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
-              const bulkActionOutcome = await initPromisePool({
-                concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-                items: rules,
-                executor: async (rule) => {
-                  // during dry run return early for delete, as no validations needed for this action
-                  if (isDryRun) {
-                    return null;
-                  }
+              // during dry run return early for delete, as no validations needed for this action
+              if (isDryRun) {
+                // Populate `deleted` so the summary reflects the correct count of affected rules
+                deleted = rules;
+                break;
+              }
 
-                  await detectionRulesClient.deleteRule({
-                    ruleId: rule.id,
-                  });
+              const ruleIds = rules.map((rule) => rule.id);
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
 
-                  return null;
-                },
-                abortSignal: abortController.signal,
-              });
-              errors.push(...bulkActionOutcome.errors);
-              deleted = bulkActionOutcome.results
-                .map(({ item }) => item)
-                .filter((rule): rule is RuleAlertType => rule !== null);
+              errors.push(...bulkDeleteResult.errors);
+              deleted = bulkDeleteResult.rules;
               break;
             }
             case BulkActionTypeEnum.duplicate: {
@@ -222,6 +291,14 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkDuplicateRule({ mlAuthz, rule });
+
+                  await validateRuleResponseActions({
+                    endpointAuthz,
+                    endpointService,
+                    rulePayload: {},
+                    spaceId,
+                    existingRule: rule,
+                  });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
@@ -298,6 +375,15 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.edit: {
+              const suppressionSupportError = await checkAlertSuppressionBulkEditSupport({
+                editActions: body.edit,
+                licensing: ctx.licensing,
+              });
+
+              if (suppressionSupportError) {
+                return siemResponse.error(suppressionSupportError);
+              }
+
               if (isDryRun) {
                 // during dry run only validation is getting performed and rule is not saved in ES
                 const bulkActionOutcome = await initPromisePool({
@@ -346,6 +432,29 @@ export const performBulkActionRoute = (
               });
               errors.push(...bulkActionErrors);
               updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);
+              break;
+            }
+
+            case BulkActionTypeEnum.fill_gaps: {
+              const {
+                backfilled,
+                errors: bulkActionErrors,
+                skipped: skippedRules,
+              } = await bulkScheduleRuleGapFilling({
+                rules,
+                isDryRun,
+                rulesClient,
+                mlAuthz,
+                fillGapsPayload: body.fill_gaps,
+              });
+              errors.push(...bulkActionErrors);
+              updated = backfilled;
+              skipped = skippedRules.map((rule) => {
+                return {
+                  ...rule,
+                  skip_reason: 'NO_GAPS_TO_FILL',
+                };
+              });
             }
           }
 

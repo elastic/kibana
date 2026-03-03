@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
-import { OverviewStatusMetaData } from '../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 import { selectOverviewState } from '../state/overview';
 import { useGetUrlParams } from './use_url_params';

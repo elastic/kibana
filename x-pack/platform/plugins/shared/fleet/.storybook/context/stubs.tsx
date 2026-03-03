@@ -7,29 +7,15 @@
 
 import type { FleetStartServices } from '../../public/plugin';
 
-type Stubs =
-  | 'licensing'
-  | 'storage'
-  | 'data'
-  | 'dataViews'
-  | 'unifiedSearch'
-  | 'deprecations'
-  | 'fatalErrors'
-  | 'navigation'
-  | 'overlays'
-  | 'savedObjects';
-
-type StubbedStartServices = Pick<FleetStartServices, Stubs>;
-
-export const stubbedStartServices: StubbedStartServices = {
+export const stubbedStartServices = {
   licensing: {} as FleetStartServices['licensing'],
   storage: {} as FleetStartServices['storage'],
   data: {} as FleetStartServices['data'],
   dataViews: {} as FleetStartServices['dataViews'],
   unifiedSearch: {} as FleetStartServices['unifiedSearch'],
+  kql: {} as FleetStartServices['kql'],
   deprecations: {} as FleetStartServices['deprecations'],
   fatalErrors: {} as FleetStartServices['fatalErrors'],
   navigation: {} as FleetStartServices['navigation'],
   overlays: {} as FleetStartServices['overlays'],
-  savedObjects: {} as FleetStartServices['savedObjects'],
-};
+} as FleetStartServices;

@@ -152,6 +152,8 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             {VISIBLE_PLATFORM_OPTIONS.map((option) => (
               <EuiFilterButton
                 key={option.id}
+                isToggle
+                isSelected={platform === option.id}
                 hasActiveFilters={platform === option.id}
                 onClick={() => setPlatform(option.id)}
                 data-test-subj={option['data-test-subj']}
@@ -261,6 +263,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             )}
 
             <EuiCodeBlock
+              data-test-subj="enrollmentInstructionsCodeBlock"
               onClick={onTextAreaClick}
               fontSize="m"
               isCopyable={!fullCopyButton}

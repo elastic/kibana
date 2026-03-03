@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Project } from 'ts-morph';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import type {
   AdoptionTrackedAPIsByPlugin,
@@ -18,9 +18,10 @@ import type {
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
+  UnnamedExportsByPlugin,
 } from './types';
 import { removeBrokenLinks } from './utils';
-import { AdoptionTrackedAPIStats } from './types';
+import type { AdoptionTrackedAPIStats } from './types';
 
 export function getPluginApiMap(
   project: Project,
@@ -33,13 +34,20 @@ export function getPluginApiMap(
   referencedDeprecations: ReferencedDeprecationsByPlugin;
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  unnamedExports: UnnamedExportsByPlugin;
 } {
   log.debug('Building plugin API map, getting missing comments, and collecting deprecations...');
   const pluginApiMap: { [key: string]: PluginApi } = {};
+  const unnamedExports: UnnamedExportsByPlugin = {};
+
   plugins.forEach((plugin) => {
     const captureReferences =
       collectReferences && (!pluginFilter || pluginFilter.indexOf(plugin.id) >= 0);
-    pluginApiMap[plugin.id] = getPluginApi(project, plugin, plugins, log, captureReferences);
+    const { pluginApi, warnings } = getPluginApi(project, plugin, plugins, log, captureReferences);
+    pluginApiMap[plugin.id] = pluginApi;
+    if (warnings.unnamedExports.length > 0) {
+      unnamedExports[plugin.id] = warnings.unnamedExports;
+    }
   });
 
   // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
@@ -61,6 +69,7 @@ export function getPluginApiMap(
     referencedDeprecations,
     unreferencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   };
 }
 

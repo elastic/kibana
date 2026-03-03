@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 
 export const catchErrorHandler: <P, Q, B, Context extends RequestHandlerContext>(
   fn: RequestHandler<P, Q, B, Context>

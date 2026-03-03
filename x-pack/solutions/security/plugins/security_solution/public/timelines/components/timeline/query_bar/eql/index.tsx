@@ -11,11 +11,11 @@ import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { PageScope } from '../../../../../data_view_manager/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation/components/eql_query_edit';
 import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
 
@@ -64,24 +64,23 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const {
     loading: oldIndexPatternsLoading,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
     selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec: experimentalDataView, status } = useDataViewSpec(
-    SourcererScopeName.timeline
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+
+  const indexPatternsLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIndexPatternsLoading),
+    [newDataViewPickerEnabled, oldIndexPatternsLoading, status]
   );
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-
-  const indexPatternsLoading = newDataViewPickerEnabled
-    ? status !== 'ready'
-    : oldIndexPatternsLoading;
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
 
   const initialState = useMemo(
     () => ({
@@ -172,17 +171,19 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     }
   }, [getFields, selectedPatterns]);
 
-  const dataView = useMemo(
-    () => ({
-      ...sourcererDataView,
-      title: sourcererDataView.title ?? '',
-      fields: Object.values(sourcererDataView.fields || {}),
-    }),
-    [sourcererDataView]
-  );
+  const dataView = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? experimentalDataView || { title: '', fields: [] }
+      : {
+          title: oldSourcererDataViewSpec.title ?? '',
+          fields: Object.values(oldSourcererDataViewSpec.fields || {}),
+        };
+  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataViewSpec]);
 
-  /* Force casting `sourcererDataView` to `DataViewBase` is required since EqlQueryEdit
-     accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
+  /* Force casting `dataViewSpec` to `DataViewBase` is required since EqlQueryEdit
+     accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`. Since
+     the DataView class inherits from DataViewBase, it is safe to use directly and the prioir statement is only valid
+     while sourcerer is not migrated to the new data view picker.
 
      When using `UseField` with `EqlQueryBar` such casting isn't required by TS since
      `UseField` component props are types as `Record<string, any>`. */

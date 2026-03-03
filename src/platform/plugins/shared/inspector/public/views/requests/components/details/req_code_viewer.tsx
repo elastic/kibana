@@ -14,7 +14,8 @@
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 

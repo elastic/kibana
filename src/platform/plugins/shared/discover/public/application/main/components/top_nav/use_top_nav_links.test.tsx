@@ -8,193 +8,289 @@
  */
 
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { BehaviorSubject } from 'rxjs';
 import { useTopNavLinks } from './use_top_nav_links';
-import type { DiscoverServices } from '../../../../build_services';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { RuntimeStateProvider } from '../../state_management/redux';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  useGetRuleTypesPermissions: jest.fn().mockReturnValue({ authorizedRuleTypes: [] }),
+}));
 
 describe('useTopNavLinks', () => {
-  const services = {
-    ...createDiscoverServicesMock(),
-    capabilities: {
-      discover_v2: {
-        save: true,
-      },
-    },
-    uiSettings: {
-      get: jest.fn(() => true),
-    },
-  } as unknown as DiscoverServices;
+  const getServices = () => {
+    const services = createDiscoverServicesMock();
+    const uiSettingsGetMock = services.uiSettings.get;
 
-  const state = getDiscoverStateMock({ isTimeBased: true });
-  state.actions.setDataView(dataViewMock);
+    services.share = sharePluginMock.createStartContract();
+    services.application.currentAppId$ = new BehaviorSubject('discover');
+    services.capabilities.discover_v2 = {
+      save: true,
+      storeSearchSession: true,
+    };
+    services.uiSettings.get = <T,>(key: string) => {
+      return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
+    };
 
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return (
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={state}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-            {children}
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
-    );
+    return services;
   };
 
-  test('useTopNavLinks result', () => {
-    const topNavLinks = renderHook(
+  const setup = async (hookAttrs: Partial<Parameters<typeof useTopNavLinks>[0]> = {}) => {
+    const services = hookAttrs.services ?? getServices();
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    return renderHook(
       () =>
         useTopNavLinks({
           dataView: dataViewMock,
           onOpenInspector: jest.fn(),
           services,
-          state,
+          state: stateContainer,
+          hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
-          topNavCustomization: undefined,
-          shouldShowESQLToDataViewTransitionModal: false,
+          hasShareIntegration: false,
+          persistedDiscoverSession: undefined,
+          ...hookAttrs,
         }),
       {
-        wrapper: Wrapper,
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
       }
     ).result.current;
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "color": "text",
-          "emphasize": true,
-          "fill": false,
-          "id": "esql",
-          "label": "Try ES|QL",
-          "run": [Function],
-          "testId": "select-text-based-language-btn",
-          "tooltip": "ES|QL is Elastic's powerful new piped query language.",
-        },
-        Object {
-          "description": "Open Inspector for search",
-          "id": "inspect",
-          "label": "Inspect",
-          "run": [Function],
-          "testId": "openInspectorButton",
-        },
-        Object {
-          "description": "New session",
-          "iconOnly": true,
-          "iconType": "plus",
-          "id": "new",
-          "label": "New session",
-          "run": [Function],
-          "testId": "discoverNewButton",
-        },
-        Object {
-          "description": "Open session",
-          "iconOnly": true,
-          "iconType": "folderOpen",
-          "id": "open",
-          "label": "Open session",
-          "run": [Function],
-          "testId": "discoverOpenButton",
-        },
-        Object {
-          "description": "Share Discover session",
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "Share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Save session",
-          "emphasize": true,
-          "iconType": "save",
-          "id": "save",
-          "label": "Save",
-          "run": [Function],
-          "testId": "discoverSaveButton",
-        },
-      ]
-    `);
+  };
+
+  it('should return results', async () => {
+    const appMenuConfig = await setup();
+
+    expect(appMenuConfig.items).toBeDefined();
+    expect(appMenuConfig.items?.length).toBeGreaterThan(0);
+
+    // Check for key items
+    const itemIds = appMenuConfig.items?.map((item) => item.id);
+    expect(itemIds).toContain('new');
+    expect(itemIds).toContain('open');
+
+    // Check primary action item (Save)
+    expect(appMenuConfig.primaryActionItem).toBeDefined();
+    expect(appMenuConfig.primaryActionItem?.label).toBe('Save');
   });
 
-  test('useTopNavLinks result for ES|QL mode', () => {
-    const topNavLinks = renderHook(
-      () =>
-        useTopNavLinks({
-          dataView: dataViewMock,
-          onOpenInspector: jest.fn(),
-          services,
-          state,
-          isEsqlMode: true,
-          adHocDataViews: [],
-          topNavCustomization: undefined,
-          shouldShowESQLToDataViewTransitionModal: false,
-        }),
-      {
-        wrapper: Wrapper,
-      }
-    ).result.current;
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "color": "text",
-          "emphasize": true,
-          "fill": false,
-          "id": "esql",
-          "label": "Switch to classic",
-          "run": [Function],
-          "testId": "switch-to-dataviews",
-          "tooltip": "Switch to KQL or Lucene syntax.",
-        },
-        Object {
-          "description": "Open Inspector for search",
-          "id": "inspect",
-          "label": "Inspect",
-          "run": [Function],
-          "testId": "openInspectorButton",
-        },
-        Object {
-          "description": "New session",
-          "iconOnly": true,
-          "iconType": "plus",
-          "id": "new",
-          "label": "New session",
-          "run": [Function],
-          "testId": "discoverNewButton",
-        },
-        Object {
-          "description": "Open session",
-          "iconOnly": true,
-          "iconType": "folderOpen",
-          "id": "open",
-          "label": "Open session",
-          "run": [Function],
-          "testId": "discoverOpenButton",
-        },
-        Object {
-          "description": "Share Discover session",
-          "iconOnly": true,
-          "iconType": "share",
-          "id": "share",
-          "label": "Share",
-          "run": [Function],
-          "testId": "shareTopNavButton",
-        },
-        Object {
-          "description": "Save session",
-          "emphasize": true,
-          "iconType": "save",
-          "id": "save",
-          "label": "Save",
-          "run": [Function],
-          "testId": "discoverSaveButton",
-        },
-      ]
-    `);
+  describe('when ES|QL mode is true', () => {
+    it('should NOT include the esql secondary action item', async () => {
+      const appMenuConfig = await setup({
+        isEsqlMode: true,
+      });
+
+      expect(appMenuConfig.items).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem).toBeUndefined();
+    });
+  });
+
+  describe('when ES|QL mode is false (classic mode)', () => {
+    it('should include the esql secondary action item', async () => {
+      const appMenuConfig = await setup({
+        isEsqlMode: false,
+      });
+
+      expect(appMenuConfig.items).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem?.id).toBe('esql');
+      expect(appMenuConfig.secondaryActionItem?.label).toBe('ES|QL');
+    });
+  });
+
+  describe('when share service included', () => {
+    it('should include the share menu item', async () => {
+      const services = getServices();
+
+      jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
+
+      const appMenuConfig = await setup({ hasShareIntegration: true, services });
+
+      expect(appMenuConfig.items).toBeDefined();
+
+      // Check for share item
+      const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
+      expect(shareItem?.label).toBe('Share');
+    });
+
+    it('should include the export menu item', async () => {
+      const services = getServices();
+
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'csvReports',
+                shareType: 'integration' as const,
+                groupId: 'export',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = await setup({ hasShareIntegration: true, services });
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      expect(exportItem).toBeDefined();
+      expect(exportItem?.label).toBe('Export');
+
+      expect(exportItem?.items).toBeDefined();
+      expect(exportItem?.items?.length).toBeGreaterThan(0);
+
+      const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
+    });
+  });
+
+  describe('when background search is enabled', () => {
+    it('should return the background search menu item', async () => {
+      const services = getServices();
+      services.data.search.isBackgroundSearchEnabled = true;
+      const appMenuConfig = await setup({ services });
+
+      const backgroundSearchItem = appMenuConfig.items?.find(
+        (item) => item.id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeDefined();
+    });
+  });
+
+  describe('when background search is disabled', () => {
+    it('should NOT return the background search menu item', async () => {
+      const appMenuConfig = await setup();
+
+      const backgroundSearchItem = appMenuConfig.items?.find(
+        (item) => item.id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeUndefined();
+    });
+  });
+
+  describe('save button with unsaved changes', () => {
+    it('should show notification indicator when there are unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
+
+      expect(appMenuConfig.primaryActionItem).toBeDefined();
+      expect(appMenuConfig.primaryActionItem?.id).toBe('save');
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.showNotificationIndicator).toBe(
+        true
+      );
+      expect(
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+      ).toBe('You have unsaved changes');
+    });
+
+    it('should NOT show notification indicator when there are no unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: false });
+
+      expect(appMenuConfig.primaryActionItem).toBeDefined();
+      expect(appMenuConfig.primaryActionItem?.id).toBe('save');
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.showNotificationIndicator).toBe(
+        false
+      );
+      expect(
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+      ).toBeUndefined();
+    });
+
+    it('should include Save as and Reset changes options in split button menu', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
+
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.items).toBeDefined();
+      const itemIds = appMenuConfig.primaryActionItem?.splitButtonProps?.items?.map(
+        (item) => item.id
+      );
+      expect(itemIds).toContain('saveAs');
+      expect(itemIds).toContain('resetChanges');
+    });
+
+    it('should have correct labels for split button menu items', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(saveAsItem?.label).toBe('Save as');
+      expect(resetChangesItem?.label).toBe('Reset changes');
+    });
+
+    it('should have run functions defined for split button menu items', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(saveAsItem?.run).toBeDefined();
+      expect(resetChangesItem?.run).toBeDefined();
+    });
+
+    it('should disable reset changes button when there are no unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: false });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(resetChangesItem?.disableButton).toBe(true);
+    });
+
+    it('should enable reset changes button when there are unsaved changes', async () => {
+      const appMenuConfig = await setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(resetChangesItem?.disableButton).toBe(false);
+    });
+  });
+
+  describe('save as button', () => {
+    it('should disable save as button when session is not persisted', async () => {
+      const appMenuConfig = await setup({ persistedDiscoverSession: undefined });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+
+      expect(saveAsItem?.disableButton).toBe(true);
+    });
+
+    it('should enable save as button when session is persisted', async () => {
+      const persistedSession = {
+        id: 'test-session-id',
+        title: 'Test Session',
+        description: 'Test Description',
+        tags: [],
+        managed: false,
+        tabs: [],
+        timeRestore: false,
+      };
+      const appMenuConfig = await setup({ persistedDiscoverSession: persistedSession });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+
+      expect(saveAsItem?.disableButton).toBe(false);
+    });
   });
 });

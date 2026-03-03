@@ -9,7 +9,7 @@ import { EuiAccordion, EuiTitle, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import { Stackframe } from '@kbn/apm-types';
+import type { Stackframe } from '@kbn/apm-types';
 import { Stacktrace } from '.';
 
 const Accordion = styled(EuiAccordion)`
@@ -66,7 +66,11 @@ export function CauseStacktrace({
   }
 
   return (
-    <Accordion buttonContent={<CausedBy message={message} />} id={id}>
+    <Accordion
+      buttonContent={<CausedBy message={message} />}
+      id={id}
+      data-test-subj="cause-stacktrace"
+    >
       <FramesContainer>
         <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
       </FramesContainer>

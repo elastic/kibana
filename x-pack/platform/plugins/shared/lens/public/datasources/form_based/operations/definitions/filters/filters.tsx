@@ -19,37 +19,32 @@ import {
   DraggableBucketContainer,
   isQueryValid,
 } from '@kbn/visualization-ui-components';
-import { IndexPattern } from '../../../../../types';
+import type {
+  FiltersIndexPatternColumn,
+  LensAggFilter as Filter,
+  LensAggFilterValue as FilterValue,
+  TermsIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
-import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
 
-// references types from src/plugins/data/common/search/aggs/buckets/filters.ts
-export interface Filter {
-  input: Query;
-  label: string;
-}
-
-export interface FilterValue {
-  id: string;
-  input: Query;
-  label: string;
-}
-
 const filtersLabel = i18n.translate('xpack.lens.indexPattern.filters', {
   defaultMessage: 'Filters',
 });
 
-export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
-  defaultMessage: 'All records',
-});
+export const filtersDefaultLabel = i18n.translate(
+  'xpack.lens.indexPattern.filters.label.placeholder',
+  {
+    defaultMessage: 'All records',
+  }
+);
 
 // to do: get the language from uiSettings
 const defaultFilter: Filter = {
@@ -60,13 +55,6 @@ const defaultFilter: Filter = {
   label: '',
 };
 
-export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
-  operationType: typeof OPERATION_NAME;
-  params: {
-    filters: Filter[];
-  };
-}
-
 export const filtersOperation: OperationDefinition<
   FiltersIndexPatternColumn,
   'none',
@@ -76,6 +64,7 @@ export const filtersOperation: OperationDefinition<
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
+  scale: () => 'ordinal',
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
@@ -108,7 +97,6 @@ export const filtersOperation: OperationDefinition<
       label: filtersLabel,
       dataType: 'string',
       operationType: OPERATION_NAME,
-      scale: 'ordinal',
       isBucketed: true,
       params,
     };
@@ -278,7 +266,7 @@ export const FilterList = ({
                     })}
                     css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
-                    {filter.label || (filter.input.query as string) || defaultLabel}
+                    {filter.label || (filter.input.query as string) || filtersDefaultLabel}
                   </EuiLink>
                 }
               />

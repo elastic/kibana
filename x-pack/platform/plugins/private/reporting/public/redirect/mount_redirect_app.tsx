@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -27,14 +26,14 @@ export const mountRedirectApp = (
   { element, apiClient, history, screenshotMode, share }: MountParams
 ) => {
   render(
-    <KibanaRenderContextProvider {...coreStart}>
+    coreStart.rendering.addContext(
       <RedirectApp
         apiClient={apiClient}
         history={history}
         screenshotMode={screenshotMode}
         share={share}
       />
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

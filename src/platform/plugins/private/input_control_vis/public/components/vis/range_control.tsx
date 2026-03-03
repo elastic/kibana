@@ -11,7 +11,7 @@ import _ from 'lodash';
 import React, { PureComponent } from 'react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { FormRow } from './form_row';
-import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
+import type { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 
 function roundWithPrecision(
   value: number,
@@ -83,7 +83,7 @@ export class RangeControl extends PureComponent<RangeControlProps, RangeControlS
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
-      return <ValidatedDualRange disabled showInput min={0} max={100} />;
+      return <ValidatedDualRange disabled showInput min={0} max={100} value={['', '']} />;
     }
 
     const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);

@@ -12,9 +12,10 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { load, dump } from 'js-yaml';
-import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
-import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
+import { dump } from 'js-yaml';
+import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
+import { generateAgentConfigTar } from './generate_agent_config';
+import { createWiredStreamsRoutingProcessor } from './inject_wired_streams_routing';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -22,11 +23,12 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
+import type { ElasticAgentStepPayload, InstalledIntegration } from '../types';
+import { StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
-import { makeTar, type Entry } from './make_tar';
+import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -61,6 +63,12 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       core,
     } = resources;
 
+    /**
+     * Message is base64 encoded as it might include arbitrary error messages
+     * from user's terminal containing special characters that would otherwise
+     * break the request.
+     */
+    const decodedMessage = Buffer.from(message ?? '', 'base64').toString('utf-8');
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
 
@@ -88,7 +96,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
           ...observabilityOnboardingState.progress,
           [name]: {
             status,
-            message,
+            message: decodedMessage,
             payload,
           },
         },
@@ -100,7 +108,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       flow_id: id,
       step: name,
       step_status: status,
-      step_message: message,
+      step_message: decodedMessage,
       payload,
     });
 
@@ -178,22 +186,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       reason: 'Authorization is checked by the Saved Object client',
     },
   },
-  params: t.type({
-    body: t.type({
-      name: t.string,
-    }),
-  }),
   async handler(resources) {
-    const {
-      context,
-      params: {
-        body: { name },
-      },
-      core,
-      request,
-      plugins,
-      kibanaVersion,
-    } = resources;
+    const { context, core, request, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
@@ -217,10 +211,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
             progress: {},
           },
         }),
-        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
         (
           await context.resolve(['core'])
-        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
         getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       ]);
 
@@ -306,12 +300,32 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     path: t.type({
       onboardingId: t.string,
     }),
+    query: t.union([
+      t.partial({
+        metricsEnabled: t.string,
+        writeToLogsStreams: t.string,
+      }),
+      t.undefined,
+    ]),
     body: t.string,
   }),
   async handler({ context, request, response, params, core, plugins, services }) {
     const coreStart = await core.start();
     const fleetStart = await plugins.fleet.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+
+    // Check Fleet integration privileges before attempting to install packages
+    const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetStart);
+
+    if (!hasFleetPrivileges) {
+      return response.forbidden({
+        body: {
+          message:
+            "You don't have adequate permissions to install Fleet packages. Contact your system administrator to grant you the required 'Integrations All' privilege.",
+        },
+      });
+    }
+
     const packageClient = fleetStart.packageService.asScoped(request);
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
@@ -338,11 +352,15 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       });
     }
 
+    const metricsEnabled = params.query?.metricsEnabled === 'true';
+    const writeToLogsStreams = params.query?.writeToLogsStreams === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
-        packageClient
+        packageClient,
+        metricsEnabled,
+        writeToLogsStreams
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
         if (result.status === 'fulfilled') {
@@ -398,11 +416,15 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
+    const shouldWriteToLogsStreams =
+      writeToLogsStreams &&
+      installedIntegrations.some((integration) => integration.installSource === 'custom');
+
     return response.ok({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar(output, installedIntegrations),
+      body: generateAgentConfigTar(output, installedIntegrations, shouldWriteToLogsStreams),
     });
   },
 });
@@ -427,7 +449,9 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
-  packageClient: PackageClient
+  packageClient: PackageClient,
+  metricsEnabled: boolean = true,
+  writeToLogsStreams: boolean = false
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
@@ -436,8 +460,15 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const config = filterUnsupportedInputs(
-          await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version)
+        const config = await packageClient.getAgentPolicyConfigYAML(
+          pkg.name,
+          pkg.version,
+          (input) =>
+            !['httpjson', 'winlog'].includes(input.type) &&
+            (metricsEnabled || !input.type.endsWith('/metrics')),
+          undefined, // prerelease
+          undefined, // ignoreUnverified
+          false // injectWiredStreamsRouting (only custom logs should route to /logs)
         );
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
@@ -459,6 +490,19 @@ async function ensureInstalledIntegrations(
         type: 'logs',
         dataset: pkgName,
       };
+
+      const processors = [
+        ...(writeToLogsStreams ? [createWiredStreamsRoutingProcessor()] : []),
+        {
+          add_fields: {
+            target: 'service',
+            fields: {
+              name: pkgName,
+            },
+          },
+        },
+      ];
+
       const installed: InstalledIntegration = {
         installSource,
         pkgName,
@@ -474,16 +518,7 @@ async function ensureInstalledIntegrations(
                   id: `filestream-${pkgName}`,
                   data_stream: dataStream,
                   paths: integration.logFilePaths,
-                  processors: [
-                    {
-                      add_fields: {
-                        target: 'service',
-                        fields: {
-                          name: pkgName,
-                        },
-                      },
-                    },
-                  ],
+                  processors,
                 },
               ],
             },
@@ -510,21 +545,6 @@ async function ensureInstalledIntegrations(
   );
 }
 
-function filterUnsupportedInputs(policyYML: string): string {
-  const policy = load(policyYML);
-
-  if (!policy) {
-    return policyYML;
-  }
-
-  return dump({
-    ...policy,
-    inputs: (policy.inputs || []).filter((input: any) => {
-      return input.type !== 'httpjson';
-    }),
-  });
-}
-
 /**
  * Parses and validates a TSV (tab-separated values) string of integrations with params.
  *
@@ -541,15 +561,17 @@ function filterUnsupportedInputs(policyYML: string): string {
  * checkout_service custom /path/to/error.log
  * ```
  */
-function parseIntegrationsTSV(tsv: string) {
+export const MAX_INTEGRATIONS_LIMIT = 100;
+
+export function parseIntegrationsTSV(tsv: string) {
   if (tsv.trim() === '') {
     return [];
   }
 
-  return Object.values(
-    tsv
-      .trim()
-      .split('\n')
+  const lines = tsv.trim().split('\n');
+
+  const integrations = Object.values(
+    lines
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
         const key = `${pkgName}-${installSource}`;
@@ -582,6 +604,14 @@ function parseIntegrationsTSV(tsv: string) {
         throw new Error(`Invalid install source: ${installSource}`);
       }, {})
   );
+
+  if (integrations.length > MAX_INTEGRATIONS_LIMIT) {
+    throw new Error(
+      `Too many integrations in the request. Maximum allowed is ${MAX_INTEGRATIONS_LIMIT}, but received ${integrations.length}.`
+    );
+  }
+
+  return integrations;
 }
 
 function parseRegistryIntegrationMetadata(
@@ -598,37 +628,6 @@ function parseRegistryIntegrationMetadata(
     default:
       return undefined;
   }
-}
-
-function generateAgentConfigTar(output: Output, installedIntegrations: InstalledIntegration[]) {
-  const now = new Date();
-
-  return makeTar([
-    {
-      type: 'File',
-      path: 'elastic-agent.yml',
-      mode: 0o644,
-      mtime: now,
-      data: dump({
-        outputs: {
-          default: transformOutputToFullPolicyOutput(output, undefined, true),
-        },
-      }),
-    },
-    {
-      type: 'Directory',
-      path: 'inputs.d/',
-      mode: 0o755,
-      mtime: now,
-    },
-    ...installedIntegrations.map<Entry>((integration) => ({
-      type: 'File',
-      path: `inputs.d/${integration.pkgName}.yml`,
-      mode: 0o644,
-      mtime: now,
-      data: integration.config,
-    })),
-  ]);
 }
 
 export const flowRouteRepository = {

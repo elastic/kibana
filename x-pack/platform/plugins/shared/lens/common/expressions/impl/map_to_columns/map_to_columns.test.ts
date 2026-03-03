@@ -6,7 +6,7 @@
  */
 
 import { mapToColumns } from '../../defs/map_to_columns/map_to_columns';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 
 describe('map_to_columns', () => {

@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('ResultsService', () => {
+    loadTestFile(require.resolve('./get_anomalies_table_data'));
+    loadTestFile(require.resolve('./get_categorizer_stats'));
+    loadTestFile(require.resolve('./get_stopped_partitions'));
+    loadTestFile(require.resolve('./get_category_definition'));
+    loadTestFile(require.resolve('./get_category_examples'));
+    loadTestFile(require.resolve('./max_anomaly_score'));
+    loadTestFile(require.resolve('./get_partition_fields_values'));
+    loadTestFile(require.resolve('./get_anomaly_search'));
+    loadTestFile(require.resolve('./get_datafeed_results_chart'));
+    loadTestFile(require.resolve('./get_top_influencers'));
+    loadTestFile(require.resolve('./get_view_by_data'));
+  });
+}

@@ -8,41 +8,45 @@
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useIsMutating } from '@kbn/react-query';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useIsMutating } from '@tanstack/react-query';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import dedent from 'dedent';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingState } from '../../components/loading_state';
-import { paths } from '../../../common/locators/paths';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
-import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { LoadingState } from '../../components/loading_state';
+import { ActionModalProvider } from '../../context/action_modal';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import PageNotFound from '../404';
+import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderControl } from './components/header_control';
 import { HeaderTitle } from './components/header_title';
 import { SloDetails } from './components/slo_details';
+import { useAutoRefreshState } from './hooks/use_auto_refresh_state';
 import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useSelectedTab } from './hooks/use_selected_tab';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
-import { ActionModalProvider } from '../../context/action_modal';
 
 export function SloDetailsPage() {
-  const { onPageReady } = usePerformanceContext();
   const {
     application: { navigateToUrl },
     http: { basePath },
     observabilityAIAssistant,
     serverless,
+    agentBuilder,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
@@ -51,9 +55,13 @@ export function SloDetailsPage() {
 
   const { sloId } = useParams<SloDetailsPathParams>();
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
-  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
-  const { isLoading, data: slo } = useFetchSloDetails({
+  const [isAutoRefreshing, setAutoRefresh] = useAutoRefreshState();
+
+  const {
+    isLoading,
+    data: slo,
+    isRefetching,
+  } = useFetchSloDetails({
     sloId,
     remoteName,
     instanceId: sloInstanceId,
@@ -96,17 +104,48 @@ export function SloDetailsPage() {
     });
   }, [observabilityAIAssistant, slo]);
 
+  // Configure agent builder global flyout with the SLO attachment
+  useEffect(() => {
+    if (!agentBuilder || !slo) {
+      return;
+    }
+
+    agentBuilder.setConversationFlyoutActiveConfig({
+      agentId: OBSERVABILITY_AGENT_ID,
+      attachments: [
+        {
+          type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+          data: {
+            sloId: slo.id,
+            remoteName,
+            sloInstanceId,
+            attachmentLabel: i18n.translate('xpack.slo.sloDetails.sloAttachmentLabel', {
+              defaultMessage: '{sloName} SLO',
+              values: { sloName: slo.name },
+            }),
+          },
+        },
+      ],
+    });
+
+    return () => {
+      agentBuilder.clearConversationFlyoutActiveConfig();
+    };
+  }, [agentBuilder, sloId, sloInstanceId, remoteName, slo]);
+
   useEffect(() => {
     if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {
       navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
   }, [hasRightLicense, permissions, navigateToUrl, basePath]);
 
-  useEffect(() => {
-    if (!isLoading && slo !== undefined) {
-      onPageReady();
-    }
-  }, [onPageReady, slo, isLoading]);
+  usePageReady({
+    isReady: !isLoading && slo !== undefined,
+    isRefreshing: isRefetching,
+    meta: {
+      description: '[ttfmp_slos] The SLO details page has loaded and SLO data is present.',
+    },
+  });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo), { serverless });
 
@@ -116,11 +155,6 @@ export function SloDetailsPage() {
   }
 
   const isPerformingAction = isLoading || isDeleting;
-
-  const handleToggleAutoRefresh = () => {
-    setIsAutoRefreshing(!isAutoRefreshing);
-    storeAutoRefreshState(!isAutoRefreshing);
-  };
 
   return (
     <ObservabilityPageTemplate
@@ -134,7 +168,7 @@ export function SloDetailsPage() {
               </ActionModalProvider>,
               <AutoRefreshButton
                 isAutoRefreshing={isAutoRefreshing}
-                onClick={handleToggleAutoRefresh}
+                onClick={() => setAutoRefresh((prev) => !prev)}
               />,
             ]
           : undefined,

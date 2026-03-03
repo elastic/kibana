@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleAdoption } from './types';
 
 import { updateRuleUsage } from './update_usage';
@@ -14,6 +15,8 @@ import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
   getInitialEventLogUsage,
+  getInitialRuleCustomizationStatus,
+  getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
 } from './get_initial_usage';
@@ -27,6 +30,9 @@ import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
+import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
+import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
+import { getRuleCustomizationStatus } from './get_rule_customization_status';
 
 export interface GetRuleMetricsOptions {
   signalsIndex: string;
@@ -58,6 +64,8 @@ export const getRuleMetrics = async ({
         detection_rule_detail: [],
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
+        elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+        elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
         spaces_usage: getInitialSpacesUsage(),
       };
     }
@@ -116,6 +124,17 @@ export const getRuleMetrics = async ({
       alertsCounts,
     });
 
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+    const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
+    const latestRuleVersionsMap = new Map(latestRuleVersions.map((rule) => [rule.rule_id, rule]));
+
+    const upgradeableRules = rulesCorrelated.filter((rule) => {
+      const latestVersion = latestRuleVersionsMap.get(rule.rule_id);
+      return (
+        latestVersion != null && rule.elastic_rule && rule.rule_version < latestVersion.version
+      );
+    });
+
     // Only bring back rule detail on elastic prepackaged detection rules
     const elasticRuleObjects = rulesCorrelated.filter((hit) => hit.elastic_rule === true);
 
@@ -129,6 +148,8 @@ export const getRuleMetrics = async ({
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
+      elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
+      elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
       spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
@@ -140,7 +161,35 @@ export const getRuleMetrics = async ({
       detection_rule_detail: [],
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
+      elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+      elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
       spaces_usage: getInitialSpacesUsage(),
     };
   }
 };
+
+function prepareRuleCustomizationStatus(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
+) {
+  const ruleSources = ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
+    const ruleSource = ruleResult.attributes?.params?.ruleSource;
+    if (
+      !ruleSource ||
+      ruleSource?.type !== 'external' ||
+      typeof ruleSource.isCustomized !== 'boolean'
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        is_customized: ruleSource.isCustomized,
+        customized_fields: ruleSource.customizedFields ?? [],
+      },
+    ];
+  });
+
+  return ruleSources.length === 0
+    ? getInitialRuleCustomizationStatus()
+    : getRuleCustomizationStatus(ruleSources);
+}

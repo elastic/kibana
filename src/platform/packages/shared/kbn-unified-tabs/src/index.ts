@@ -8,3 +8,4 @@
  */
 
 export { TabbedContent, type TabbedContentProps } from './components/tabbed_content';
+export { type TabsEBTEvent, TabsEventName } from './types';

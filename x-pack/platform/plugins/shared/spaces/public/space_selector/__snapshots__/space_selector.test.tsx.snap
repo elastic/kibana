@@ -5,13 +5,8 @@ exports[`it renders with custom logo 1`] = `
   css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
-  <EuiPortal>
-    <div
-      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-      role="presentation"
-    />
-  </EuiPortal>
-  <_EuiPageSection
+  <Memo(BackgroundPortal) />
+  <EuiPageTemplate.Section
     color="transparent"
     paddingSize="xl"
   >
@@ -56,7 +51,7 @@ exports[`it renders with custom logo 1`] = `
     <EuiLoadingSpinner
       size="xl"
     />
-  </_EuiPageSection>
+  </EuiPageTemplate.Section>
 </_KibanaPageTemplate>
 `;
 
@@ -65,13 +60,8 @@ exports[`it renders without crashing 1`] = `
   css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
-  <EuiPortal>
-    <div
-      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-      role="presentation"
-    />
-  </EuiPortal>
-  <_EuiPageSection
+  <Memo(BackgroundPortal) />
+  <EuiPageTemplate.Section
     color="transparent"
     paddingSize="xl"
   >
@@ -115,6 +105,6 @@ exports[`it renders without crashing 1`] = `
     <EuiLoadingSpinner
       size="xl"
     />
-  </_EuiPageSection>
+  </EuiPageTemplate.Section>
 </_KibanaPageTemplate>
 `;

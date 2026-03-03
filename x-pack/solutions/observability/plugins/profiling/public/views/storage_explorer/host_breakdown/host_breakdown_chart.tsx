@@ -74,6 +74,7 @@ export function HostBreakdownChart({ data = [] }: Props) {
           timeZone={timeZone}
           key={serie.title}
           id={serie.title}
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

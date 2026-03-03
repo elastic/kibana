@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
-import { AggregationType } from '../types';
+import type { AggregationType } from '../types';
 import { ClosablePopoverTitle } from './components';
 
 export interface WhenExpressionProps {
@@ -82,6 +82,12 @@ export const WhenExpression = ({
           id="aggTypeField"
           value={aggType}
           fullWidth
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.common.expressionItems.threshold.aggTypeSelectAriaLabel',
+            {
+              defaultMessage: 'Aggregation type',
+            }
+          )}
           onChange={(e) => {
             onChangeSelectedAggType(e.target.value);
             setAggTypePopoverOpen(false);

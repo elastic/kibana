@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
   EuiText,
   EuiHighlight,
-  IconType,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';

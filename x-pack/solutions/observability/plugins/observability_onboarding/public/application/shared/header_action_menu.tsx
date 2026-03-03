@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -22,28 +22,33 @@ interface Props {
 
 export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, theme$ }: Props) {
   const {
-    services: { context },
+    services: { context, notifications },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const location = useLocation();
   const normalizedPathname = location.pathname.replace(/\/$/, '');
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
   const isRootPage = normalizedPathname === '';
 
-  if (!context.isServerless && !isRootPage) {
+  const feedbackButtonLabel = i18n.translate('xpack.observability_onboarding.header.feedback', {
+    defaultMessage: 'Give feedback',
+  });
+
+  if (!context.isServerless && !isRootPage && isFeedbackEnabled) {
     return (
       <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-        <EuiButton
+        <EuiButtonEmpty
           data-test-subj="observabilityOnboardingPageGiveFeedback"
+          aria-label={feedbackButtonLabel}
           href={LOGS_ONBOARDING_FEEDBACK_LINK}
           size="s"
+          iconType="popout"
+          iconSide="right"
           target="_blank"
-          color="warning"
-          iconType="editorComment"
+          color="primary"
         >
-          {i18n.translate('xpack.observability_onboarding.header.feedback', {
-            defaultMessage: 'Give feedback',
-          })}
-        </EuiButton>
+          {feedbackButtonLabel}
+        </EuiButtonEmpty>
       </HeaderMenuPortal>
     );
   }

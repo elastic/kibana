@@ -211,6 +211,7 @@ export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
 };
 
 export interface Flapping extends SavedObjectAttributes {
+  enabled?: boolean;
   lookBackWindow: number;
   statusChangeThreshold: number;
 }
@@ -246,6 +247,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser?: boolean | null;
+  uiamApiKey?: string | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;

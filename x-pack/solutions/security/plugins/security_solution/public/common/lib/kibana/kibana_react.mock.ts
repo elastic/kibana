@@ -7,7 +7,9 @@
 
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -45,7 +47,6 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { mockApm } from '../apm/service.mock';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
@@ -115,10 +116,12 @@ export const createStartServicesMock = (
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const customDataService = dataPluginMock.createStartContract();
+  const logger = loggingSystemMock.createLogger();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const kql = kqlPluginMock.createStartContract();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const navigation = navigationPluginMock.createStartContract();
   const discover = discoverPluginMock.createStartContract();
@@ -126,7 +129,6 @@ export const createStartServicesMock = (
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
-  const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
   const timelineDataService = dataPluginMock.createStartContract();
@@ -157,6 +159,8 @@ export const createStartServicesMock = (
     configSettings: getDefaultConfigSettings(),
     apm,
     cases,
+    kql,
+    logger,
     unifiedSearch,
     navigation,
     discover,
@@ -224,6 +228,10 @@ export const createStartServicesMock = (
         actions: {
           show: true,
         },
+        fleet: {
+          crud: true,
+          read: true,
+        },
       },
     },
     security,
@@ -255,7 +263,6 @@ export const createStartServicesMock = (
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     triggersActionsUi,
-    guidedOnboarding,
     cloud: {
       ...cloud,
       isCloudEnabled: false,
@@ -276,6 +283,7 @@ export const createStartServicesMock = (
       removeItem: jest.fn(),
       clear: jest.fn(),
     }),
+    plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };
 

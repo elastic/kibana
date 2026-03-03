@@ -45,10 +45,6 @@ import type {
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
 import type {
-  EntityManagerServerPluginSetup,
-  EntityManagerServerPluginStart,
-} from '@kbn/entityManager-plugin/server';
-import type {
   LogsDataAccessPluginSetup,
   LogsDataAccessPluginStart,
 } from '@kbn/logs-data-access-plugin/server';
@@ -57,9 +53,18 @@ import type {
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
 import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
+import type {
+  ObservabilityAgentBuilderPluginSetup,
+  ObservabilityAgentBuilderPluginStart,
+} from '@kbn/observability-agent-builder-plugin/server';
+import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type { SLOServerSetup, SLOServerStart } from '@kbn/slo-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -78,9 +83,10 @@ export interface APMPluginSetupDependencies {
   dataViews: {};
   share: SharePluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
-  entityManager: EntityManagerServerPluginSetup;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
@@ -88,6 +94,7 @@ export interface APMPluginSetupDependencies {
   home?: HomeServerPluginSetup;
   ml?: MlPluginSetup;
   security?: SecurityPluginSetup;
+  slo?: SLOServerSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -106,9 +113,10 @@ export interface APMPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   share: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
-  entityManager: EntityManagerServerPluginStart;
   // optional dependencies
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
+  agentBuilder?: AgentBuilderPluginStart;
   actions?: ActionsPlugin['start'];
   alerting?: AlertingServerStart;
   cloud?: undefined;
@@ -116,6 +124,7 @@ export interface APMPluginStartDependencies {
   home?: HomeServerPluginStart;
   ml?: MlPluginStart;
   security?: SecurityPluginStart;
+  slo?: SLOServerStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;

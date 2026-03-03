@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CSSProperties, Dispatch } from 'react';
+import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
+import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
+import { normalizeUrl } from '../../../lib/utils';
 import { sendRequest } from '../../hooks';
-import { Actions } from '../../stores/request';
+import type { Actions } from '../../stores/request';
 
 import {
   AutocompleteType,
@@ -34,17 +37,15 @@ import {
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
-  SELECTED_REQUESTS_CLASSNAME,
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
-  isInsideTripleQuotes,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import { StorageQuotaError } from '../../components/storage_quota_error';
-import { ContextValue } from '../../contexts';
+import type { ContextValue } from '../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
@@ -52,8 +53,6 @@ const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
 const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
-const INSPECT_TOKENS_LABEL = 'Inspect tokens';
-const INSPECT_TOKENS_HANDLER_ID = 'editor.action.inspectTokens';
 const { collapseLiteralStrings } = XJson;
 
 export class MonacoEditorActionsProvider {
@@ -62,15 +61,18 @@ export class MonacoEditorActionsProvider {
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
-    private isDevMode: boolean
+    private highlightedLinesClassName: string,
+    customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
-    this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
+    // Use custom provider if provided, otherwise fallback to default
+    this.parsedRequestsProvider =
+      customParsedRequestsProvider || getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(
       async () => {
         if (editor.hasTextFocus()) {
-          await this.highlightRequests();
+          await this.highlightRequests(this.highlightedLinesClassName);
         } else {
           this.clearEditorDecorations();
         }
@@ -111,8 +113,9 @@ export class MonacoEditorActionsProvider {
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
       }
-      if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
-        this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
+      // trigger autocomplete on dot (period) for nested field suggestions
+      if (event.keyCode === monaco.KeyCode.Period) {
+        debouncedTriggerSuggestions();
       }
     });
   }
@@ -150,7 +153,7 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  private async highlightRequests(): Promise<void> {
+  private async highlightRequests(highlightedLinesClassName: string): Promise<void> {
     // get the requests in the selected range
     const parsedRequests = await this.getSelectedParsedRequests();
     // if any requests are selected, highlight the lines and update the position of actions buttons
@@ -172,7 +175,7 @@ export class MonacoEditorActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            blockClassName: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: highlightedLinesClassName,
           },
         },
       ]);
@@ -294,7 +297,15 @@ export class MonacoEditorActionsProvider {
 
   public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
     const {
-      services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
+      services: {
+        notifications,
+        trackUiMetric,
+        http,
+        settings,
+        history,
+        autocompleteInfo,
+        esHostService,
+      },
       ...startServices
     } = context;
     const { toasts } = notifications;
@@ -354,7 +365,30 @@ export class MonacoEditorActionsProvider {
       // track the requests
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
-      const results = await sendRequest({ http, requests });
+      const selectedHost = settings.getSelectedHost();
+
+      // Ensure the host list is available before validating.
+      await esHostService.waitForInitialization();
+      const availableHosts = esHostService.getAllHosts();
+
+      let hostToUse: string | undefined;
+      if (selectedHost) {
+        const normalizedSelected = normalizeUrl(selectedHost);
+        const isValid = availableHosts.some((h) => normalizeUrl(h) === normalizedSelected);
+        if (isValid) {
+          hostToUse = selectedHost;
+        } else {
+          // Stale host in localStorage: clear it and fall back to the server default.
+          settings.setSelectedHost(null);
+        }
+      }
+
+      const results = await sendRequest({
+        http,
+        requests,
+        host: hostToUse,
+        isPackagedEnvironment: context.config.isPackagedEnvironment,
+      });
 
       let saveToHistoryError: undefined | Error;
       const isHistoryEnabled = settings.getIsHistoryEnabled();
@@ -588,8 +622,7 @@ export class MonacoEditorActionsProvider {
   public async provideCompletionItems(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
-    context: monaco.languages.CompletionContext,
-    token: monaco.CancellationToken
+    context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
   }
@@ -783,10 +816,10 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
-  private async isPositionInsideScript(
+  private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<boolean> {
+  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -801,18 +834,21 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        if (isInsideTripleQuotes(requestContentBefore)) {
-          return true;
-        }
+        const { insideTripleQuotes, insideEsqlQuery } =
+          checkForTripleQuotesAndEsqlQuery(requestContentBefore);
+        return {
+          insideTripleQuotes,
+          insideEsqlQuery,
+        };
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
-        return false;
+        return { insideTripleQuotes: false, insideEsqlQuery: false };
       }
     }
 
-    // Return false if no match
-    return false;
+    // Return false if the position is not inside a request
+    return { insideTripleQuotes: false, insideEsqlQuery: false };
   }
 
   private triggerSuggestions() {
@@ -821,23 +857,32 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
-    this.isPositionInsideScript(model, position).then((isCursorInsideScript) => {
-      if (isCursorInsideScript) {
-        // Don't trigger autocomplete suggestions inside scripts
-        return;
-      }
+    this.isPositionInsideTripleQuotesAndQuery(model, position).then(
+      ({ insideTripleQuotes, insideEsqlQuery }) => {
+        if (insideTripleQuotes && !insideEsqlQuery) {
+          // Don't trigger autocomplete suggestions inside scripts and strings
+          return;
+        }
 
-      const lineContentBefore = model.getValueInRange({
-        startLineNumber: position.lineNumber,
-        startColumn: 1,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column,
-      });
-      // if the line is empty or it matches specified regex, trigger suggestions
-      if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
-        this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+        const lineContentBefore = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+        // Trigger suggestions if the line:
+        // - is empty
+        // - matches specified regex
+        // - is inside an ESQL query
+        if (
+          !lineContentBefore.trim() ||
+          shouldTriggerSuggestions(lineContentBefore) ||
+          insideEsqlQuery
+        ) {
+          this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+        }
       }
-    });
+    );
   }
 
   /*
@@ -864,8 +909,8 @@ export class MonacoEditorActionsProvider {
    */
   public async appendRequestToEditor(
     req: RequestToRestore,
-    dispatch: Dispatch<Actions>,
-    context: ContextValue
+    dispatch?: Dispatch<Actions>,
+    context?: ContextValue
   ) {
     const model = this.editor.getModel();
 
@@ -890,30 +935,25 @@ export class MonacoEditorActionsProvider {
 
     // 2 - Since we add two new lines, the cursor should be at the beginning of the new request
     const beginningOfNewReq = lastLineNumber + 2;
-    const selectedRequests = await this.getRequestsBetweenLines(
-      model,
-      beginningOfNewReq,
-      beginningOfNewReq
-    );
-    // We can assume that there is only one request given that we only add one
-    // request at a time.
-    const restoredRequest = selectedRequests[0];
 
     // 3 - Set the cursor to the beginning of the new request,
     this.editor.setSelection({
-      startLineNumber: restoredRequest.startLineNumber,
+      startLineNumber: beginningOfNewReq,
       startColumn: 1,
-      endLineNumber: restoredRequest.startLineNumber,
+      endLineNumber: beginningOfNewReq,
       endColumn: 1,
     });
 
     // 4 - Scroll to the beginning of the new request
     this.editor.setScrollPosition({
-      scrollTop: this.editor.getTopForLineNumber(restoredRequest.startLineNumber),
+      scrollTop: this.editor.getTopForLineNumber(beginningOfNewReq),
     });
 
+    // Focus on the editor so that the selection is highlighted
+    this.editor.focus();
+
     // 5 - Optionally send the request
-    if (req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
+    if (dispatch && context && req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
       this.sendRequests(dispatch, context);
     }
   }

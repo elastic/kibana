@@ -6,50 +6,100 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { context, trace } from '@opentelemetry/api';
-import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import { resourceFromAttributes } from '@opentelemetry/resources';
+import type { resources } from '@elastic/opentelemetry-node/sdk';
+import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
-  NodeTracerProvider,
-  ParentBasedSampler,
-  TraceIdRatioBasedSampler,
-} from '@opentelemetry/sdk-trace-node';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { TracingConfig } from '@kbn/telemetry-config';
-import { AgentConfigOptions } from 'elastic-apm-node';
+  EVAL_RUN_ID_BAGGAGE_KEY,
+  LangfuseSpanProcessor,
+  PhoenixSpanProcessor,
+} from '@kbn/inference-tracing';
+import { fromExternalVariant } from '@kbn/std';
+import type { TracingConfig } from '@kbn/tracing-config';
+import { context, propagation, trace } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { castArray } from 'lodash';
+import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
+import { EvalSpanProcessor } from './eval_span_processor';
+import { OTLPSpanProcessor } from './otlp_span_processor';
 import { LateBindingSpanProcessor } from '..';
 
+/**
+ * Initialize the OpenTelemetry tracing provider
+ * @param resource The OpenTelemetry resource information
+ * @param tracingConfig The OpenTelemetry tracing configuration
+ */
 export function initTracing({
+  resource,
   tracingConfig,
-  apmConfig,
 }: {
-  tracingConfig?: TracingConfig;
-  apmConfig: AgentConfigOptions;
+  resource: resources.Resource;
+  tracingConfig: TracingConfig;
 }) {
   const contextManager = new AsyncLocalStorageContextManager();
   context.setGlobalContextManager(contextManager);
   contextManager.enable();
 
   // this is used for late-binding of span processors
-  const processor = LateBindingSpanProcessor.get();
+  const lateBindingProcessor = LateBindingSpanProcessor.get();
 
-  const nodeTracerProvider = new NodeTracerProvider({
+  lateBindingProcessor.register(new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }]));
+
+  const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
+
+  propagation.setGlobalPropagator(
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
+    })
+  );
+
+  const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
+
+  const nodeTracerProvider = new node.NodeTracerProvider({
     // by default, base sampling on parent context,
     // or for root spans, based on the configured sample rate
-    sampler: new ParentBasedSampler({
-      root: new TraceIdRatioBasedSampler(tracingConfig?.sample_rate),
+    sampler: new tracing.ParentBasedSampler({
+      root: traceIdSampler,
     }),
-    spanProcessors: [processor],
-    resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: apmConfig.serviceName,
-      [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
-    }),
+    spanProcessors: allSpanProcessors,
+    resource,
+  });
+
+  castArray(tracingConfig.exporters).forEach((exporter) => {
+    const variant = fromExternalVariant(exporter);
+    switch (variant.type) {
+      case 'langfuse':
+        LateBindingSpanProcessor.get().register(new LangfuseSpanProcessor(variant.value));
+        break;
+
+      case 'phoenix':
+        LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
+        break;
+
+      case 'grpc':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'grpc'));
+        break;
+
+      case 'proto':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'proto'));
+        break;
+
+      case 'http':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'http'));
+        break;
+    }
   });
 
   trace.setGlobalTracerProvider(nodeTracerProvider);
 
-  return async () => {
-    // allow for programmatic shutdown
-    await processor.shutdown();
+  propagation.setGlobalPropagator(
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
+    })
+  );
+
+  const shutdown = async () => {
+    await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
   };
+
+  cleanupBeforeExit(() => shutdown(), { blockExit: true, timeout: 30_000 });
 }

@@ -18,6 +18,12 @@ describe('computeDryRunEditPayload', () => {
     [BulkActionEditTypeEnum.set_index_patterns, []],
     [BulkActionEditTypeEnum.delete_index_patterns, []],
     [BulkActionEditTypeEnum.add_index_patterns, []],
+    [BulkActionEditTypeEnum.delete_alert_suppression, undefined],
+    [BulkActionEditTypeEnum.set_alert_suppression, { group_by: ['test_field'] }],
+    [
+      BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+      { duration: { unit: 'm', value: 4 } },
+    ],
     [BulkActionEditTypeEnum.add_tags, []],
     [BulkActionEditTypeEnum.delete_index_patterns, []],
     [BulkActionEditTypeEnum.set_tags, []],
@@ -25,7 +31,6 @@ describe('computeDryRunEditPayload', () => {
   ])('should return correct payload for bulk edit action %s', (editAction, value) => {
     const payload = computeDryRunEditPayload(editAction);
     expect(payload).toHaveLength(1);
-    expect(payload?.[0].type).toEqual(editAction);
-    expect(payload?.[0].value).toEqual(value);
+    expect(payload?.[0]).toEqual({ type: editAction, value });
   });
 });

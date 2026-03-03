@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, KeyboardEventHandler } from 'react';
+import type { KeyboardEventHandler } from 'react';
+import React, { useEffect } from 'react';
 import { monaco } from '@kbn/monaco';
 // TODO: circular dependency
 // import type { MonacoEditorProps } from '@kbn/code-editor/react_monaco_editor';
@@ -19,6 +20,7 @@ function createEditorInstance() {
   const didHideListeners: Array<(e?: unknown) => void> = [];
   let placeholderDiv: undefined | HTMLDivElement;
   let areSuggestionsVisible = false;
+  let isInspectTokensWidgetVisible = false;
 
   /**
    * Mocks for monaco editor API
@@ -68,9 +70,15 @@ function createEditorInstance() {
     onDidBlurEditorWidget: () => ({
       dispose: jest.fn(),
     }),
+    onDidScrollChange: jest.fn(() => ({
+      dispose: jest.fn(),
+    })),
+    setScrollTop: jest.fn(),
+    getScrollTop: jest.fn(() => 0),
     // Helpers for our tests
     __helpers__: {
       areSuggestionsVisible: () => areSuggestionsVisible,
+      isInspectTokensWidgetVisible: () => isInspectTokensWidgetVisible,
       getPlaceholderRef: (div: HTMLDivElement) => {
         placeholderDiv = div;
       },
@@ -82,6 +90,10 @@ function createEditorInstance() {
         if (e.keyCode === monaco.KeyCode.Escape && areSuggestionsVisible) {
           editorInstanceMethods.__helpers__.hideSuggestions();
         }
+        // Close the inspect tokens when hitting the ESC key
+        if (e.keyCode === monaco.KeyCode.Escape && isInspectTokensWidgetVisible) {
+          editorInstanceMethods.__helpers__.hideInspectTokensWidget();
+        }
       }) as KeyboardEventHandler,
       showSuggestions: () => {
         areSuggestionsVisible = true;
@@ -89,6 +101,14 @@ function createEditorInstance() {
       },
       hideSuggestions: () => {
         areSuggestionsVisible = false;
+        didHideListeners.forEach((listener) => listener());
+      },
+      showInspectTokensWidget: () => {
+        isInspectTokensWidgetVisible = true;
+        didShowListeners.forEach((listener) => listener());
+      },
+      hideInspectTokensWidget: () => {
+        isInspectTokensWidgetVisible = false;
         didHideListeners.forEach((listener) => listener());
       },
     },
