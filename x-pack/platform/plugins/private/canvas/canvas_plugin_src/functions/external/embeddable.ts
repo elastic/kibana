@@ -12,6 +12,7 @@ import type {
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import type { ExpressionValueFilter } from '../../../types';
 import type { EmbeddableExpression } from '../../expression_types';
@@ -99,6 +100,66 @@ export function embeddableFunctionFactory({
           embeddableType: args.type,
         };
       },
+
+      extract(state) {
+        const input = decode(state.config[0] as string);
+
+        // extracts references for by-reference embeddables
+        if (input.savedObjectId) {
+          const refName = 'embeddable.savedObjectId';
+
+          const references: SavedObjectReference[] = [
+            {
+              name: refName,
+              type: state.type[0] as string,
+              id: input.savedObjectId as string,
+            },
+          ];
+
+          return {
+            state,
+            references,
+          };
+        }
+
+        // extracts references for by-value embeddables
+        const { state: extractedState, references: extractedReferences } =
+          embeddablePersistableStateService.extract({
+            ...input,
+            type: state.type[0],
+          });
+
+        const { type, ...extractedInput } = extractedState;
+
+        return {
+          state: { ...state, config: [encode(extractedInput)], type: [type] },
+          references: extractedReferences,
+        };
+      },
+
+      inject(state, references) {
+        const input = decode(state.config[0] as string);
+        const savedObjectReference = references.find(
+          (ref) => ref.name === 'embeddable.savedObjectId'
+        );
+
+        // injects saved object id for by-references embeddable
+        if (savedObjectReference) {
+          input.savedObjectId = savedObjectReference.id;
+          state.config[0] = encode(input);
+          state.type[0] = savedObjectReference.type;
+        } else {
+          // injects references for by-value embeddables
+          const { type, ...injectedInput } = embeddablePersistableStateService.inject(
+            { ...input, type: state.type[0] },
+            references
+          );
+          state.config[0] = encode(injectedInput);
+          state.type[0] = type;
+        }
+        return state;
+      },
+
       migrations: () => {
         return mapValues<
           MigrateFunctionsObject,

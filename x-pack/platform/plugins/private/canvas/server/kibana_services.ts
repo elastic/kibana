@@ -7,12 +7,15 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { ExpressionsServerStart } from '@kbn/expressions-plugin/server';
 import type { StartDeps } from './plugin';
 
 export let embeddableService: EmbeddableStart;
+export let expressionsService: ExpressionsServerStart;
 export let logger: Logger;
 
 export const setKibanaServices = (deps: StartDeps, _logger: Logger) => {
   embeddableService = deps.embeddable;
+  expressionsService = deps.expressions;
   logger = _logger;
 };

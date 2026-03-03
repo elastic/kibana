@@ -13,7 +13,7 @@ import { EmbeddableTypes } from '../../canvas_plugin_src/expression_types';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
-import { embeddableService, logger } from '../kibana_services';
+import { embeddableService, logger, expressionsService } from '../kibana_services';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -47,7 +47,15 @@ export function transformWorkpadOut(
             name: reference.name.slice(`${element.id}:`.length),
           }));
 
-        const ast = fromExpression(element.expression);
+        // use expressions service to inject references for by-reference embeddables using Canvas defined references
+        const ast =
+          referencesForElement.length > 0 &&
+          referencesForElement.some((ref) =>
+            embeddableFunctions.some((fn) => ref.name.includes(fn))
+          )
+            ? expressionsService.inject(fromExpression(element.expression), referencesForElement)
+            : fromExpression(element.expression);
+
         ast.chain = ast.chain.map((fn) => {
           if (!embeddableFunctions.includes(fn.function)) return fn;
 
@@ -108,10 +116,7 @@ export function transformWorkpadOut(
           // transforms haven't been applied, so we need to transform in before we can transform out.
           // This should only execute once per legacy embeddable element because stored embeddables should
           // no longer have a savedObjectId.
-          if (embeddableConfig.savedObjectId && referencesForElement.length > 0) {
-            // Inject the savedObjectId from the legacy Canvas generated references for the element
-            embeddableConfig.savedObjectId = referencesForElement[0].id;
-
+          if (embeddableConfig.savedObjectId) {
             if (transforms?.transformIn && transforms.transformOut) {
               const { state: storedState, references: storedReferences } =
                 transforms.transformIn(embeddableConfig);
