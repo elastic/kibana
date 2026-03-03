@@ -133,6 +133,7 @@ export const createNavigationTree = (
       children: [
         {
           title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
+          breadcrumbStatus: 'hidden',
           children: [
             { link: 'integrations' },
             // TODO: Add fleet back when it is possible to not jump to  fleet sub menu under assets
@@ -145,6 +146,7 @@ export const createNavigationTree = (
         },
         {
           title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
+          breadcrumbStatus: 'hidden',
           children: [
             { link: 'streams' },
             { link: 'management:index_management' },

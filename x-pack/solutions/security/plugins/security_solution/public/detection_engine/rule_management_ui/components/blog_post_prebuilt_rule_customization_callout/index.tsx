@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import avcBannerBackground from '@kbn/avc-banner/src/avc_banner_background.svg';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
 import { type CallOutMessage } from '../../../../common/components/callouts';
@@ -44,7 +45,11 @@ export function BlogPostPrebuiltRuleCustomizationCallout() {
 
   if (isVisible(calloutMessage)) {
     return (
-      <>
+      <div
+        css={css`
+          padding: 12px 12px 0;
+        `}
+      >
         <BackgroundImageCallout
           backgroundImage={avcBannerBackground}
           title={calloutMessage.title}
@@ -54,7 +59,7 @@ export function BlogPostPrebuiltRuleCustomizationCallout() {
           onDismiss={handleDismiss}
         />
         {/* <EuiSpacer size="l" /> */}
-      </>
+      </div>
     );
   }
 
