@@ -7,8 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
-import type { ESQLCommand } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 
 const ESQL_UNITS: Record<string, string> = {
