@@ -9,6 +9,8 @@ import { API_BASE_PATH } from '../../common/constants';
 import type { RouteOptions } from '.';
 
 export const registerPrivilegesRoute = ({ router, logger }: RouteOptions) => {
+  const requiredClusterPrivileges = ['monitor', 'manage'] as const;
+
   router.get(
     {
       path: `${API_BASE_PATH}/privileges`,
@@ -30,20 +32,31 @@ export const registerPrivilegesRoute = ({ router, logger }: RouteOptions) => {
 
         const hasPrivileges = esClient.security?.hasPrivileges;
         if (typeof hasPrivileges !== 'function') {
-          return response.ok({ body: { canCancelTasks: false, canViewTasks: false } });
+          // If Elasticsearch security isn't enabled (or isn't available on the client),
+          // we can't perform a privilege check. In that case, default to "allowed".
+          return response.ok({
+            body: { canCancelTasks: true, canViewTasks: true, missingClusterPrivileges: [] },
+          });
         }
 
-        const result = await hasPrivileges.call(esClient.security, { cluster: ['manage', 'monitor'] });
-        const hasAllRequested = Boolean((result as { has_all_requested?: boolean })?.has_all_requested);
-        const cluster = (result as { cluster?: Record<string, boolean> })?.cluster ?? {};
+        const { has_all_requested: hasAllRequested, cluster } = await hasPrivileges.call(
+          esClient.security,
+          { cluster: [...requiredClusterPrivileges] }
+        );
+
+        const missingClusterPrivileges = requiredClusterPrivileges.filter(
+          (privilege) => !cluster?.[privilege]
+        );
 
         const canCancelTasks = hasAllRequested || Boolean(cluster.manage);
         const canViewTasks = hasAllRequested || Boolean(cluster.monitor);
 
-        return response.ok({ body: { canCancelTasks, canViewTasks } });
+        return response.ok({ body: { canCancelTasks, canViewTasks, missingClusterPrivileges } });
       } catch (error) {
         logger.debug(`Failed to check running queries privileges: ${error}`);
-        return response.ok({ body: { canCancelTasks: false, canViewTasks: false } });
+        return response.ok({
+          body: { canCancelTasks: false, canViewTasks: false, missingClusterPrivileges: [] },
+        });
       }
     }
   );

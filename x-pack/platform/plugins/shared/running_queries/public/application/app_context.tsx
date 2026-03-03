@@ -14,6 +14,7 @@ export interface RunningQueriesCapabilities {
   canCancelTasks: boolean;
   canViewTasks: boolean;
   isLoading: boolean;
+  missingClusterPrivileges: string[];
 }
 
 export interface RunningQueriesAppContextValue {
@@ -39,8 +40,9 @@ export const RunningQueriesAppContextProvider: React.FC<
       canCancelTasks: Boolean(data?.canCancelTasks),
       canViewTasks: Boolean(data?.canViewTasks),
       isLoading,
+      missingClusterPrivileges: data?.missingClusterPrivileges ?? [],
     }),
-    [data?.canCancelTasks, data?.canViewTasks, isLoading]
+    [data?.canCancelTasks, data?.canViewTasks, data?.missingClusterPrivileges, isLoading]
   );
 
   return (

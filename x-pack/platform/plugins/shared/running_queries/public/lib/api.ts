@@ -32,7 +32,11 @@ export class RunningQueriesApiService {
   }
 
   public useLoadPrivileges() {
-    return this.useRequest<{ canCancelTasks: boolean; canViewTasks: boolean }>({
+    return this.useRequest<{
+      canCancelTasks: boolean;
+      canViewTasks: boolean;
+      missingClusterPrivileges: string[];
+    }>({
       path: `${API_BASE_PATH}/privileges`,
       method: 'get',
     });

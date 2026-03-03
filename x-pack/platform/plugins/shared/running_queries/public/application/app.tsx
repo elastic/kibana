@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -21,10 +22,59 @@ import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useRunningQueriesAppContext } from './app_context';
 import { RunningQueriesTable } from './components/running_queries_table';
 
-export const RunningQueriesApp: React.FC = () => {
-  useBreadcrumbs();
+const RunningQueriesNoAccessPrompt: React.FC<{ missingClusterPrivileges: string[] }> = ({
+  missingClusterPrivileges,
+}) => {
+  return (
+    <EuiPageTemplate
+      minHeight="0"
+      style={{ minHeight: 420 }}
+      restrictWidth={false}
+      data-test-subj="runningQueriesNoAccessPrompt"
+    >
+      <EuiPageTemplate.Section alignment="center">
+        <EuiEmptyPrompt
+          iconType="lock"
+          color="plain"
+          layout="vertical"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.runningQueries.noAccess.title"
+                defaultMessage="Contact your administrator for access"
+              />
+            </h2>
+          }
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.runningQueries.noAccess.description"
+                  defaultMessage="To view running queries in this space, you need additional privileges."
+                />
+              </p>
+              {missingClusterPrivileges.length > 0 && (
+                <p>
+                  <FormattedMessage
+                    id="xpack.runningQueries.noAccess.missingClusterPrivileges"
+                    defaultMessage="Missing Elasticsearch cluster {privilegesCount, plural, one {privilege} other {privileges}}: {missingPrivileges}."
+                    values={{
+                      missingPrivileges: missingClusterPrivileges.join(', '),
+                      privilegesCount: missingClusterPrivileges.length,
+                    }}
+                  />
+                </p>
+              )}
+            </>
+          }
+        />
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+  );
+};
 
-  const { apiService, notifications, capabilities } = useRunningQueriesAppContext();
+const RunningQueriesAppWithData: React.FC = () => {
+  const { apiService, notifications } = useRunningQueriesAppContext();
   const { data, isLoading, error, resendRequest } = apiService.useLoadRunningQueries();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -84,7 +134,6 @@ export const RunningQueriesApp: React.FC = () => {
   );
 
   const queries = data?.queries ?? [];
-  const canViewTasks = capabilities.canViewTasks;
 
   return (
     <EuiPageTemplate restrictWidth={false}>
@@ -133,17 +182,7 @@ export const RunningQueriesApp: React.FC = () => {
         ]}
       />
       <EuiPageTemplate.Section>
-        {!capabilities.isLoading && !canViewTasks ? (
-          <EuiText color="danger">
-            <p>
-              {i18n.translate('xpack.runningQueries.insufficientViewPrivileges', {
-                defaultMessage:
-                  'Insufficient privileges to view running queries. Required Elasticsearch cluster privilege: {privilege}.',
-                values: { privilege: 'monitor' },
-              })}
-            </p>
-          </EuiText>
-        ) : isLoading && !data ? (
+        {isLoading && !data ? (
           <EuiLoadingSpinner size="l" />
         ) : error ? (
           <EuiText color="danger">
@@ -159,4 +198,35 @@ export const RunningQueriesApp: React.FC = () => {
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
+};
+
+export const RunningQueriesApp: React.FC = () => {
+  useBreadcrumbs();
+
+  const { capabilities } = useRunningQueriesAppContext();
+
+  if (capabilities.isLoading) {
+    return (
+      <EuiPageTemplate restrictWidth={false}>
+        <EuiPageTemplate.Header
+          pageTitle={i18n.translate('xpack.runningQueries.title', {
+            defaultMessage: 'Running queries',
+          })}
+        />
+        <EuiPageTemplate.Section>
+          <EuiLoadingSpinner size="l" />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    );
+  }
+
+  if (!capabilities.canViewTasks) {
+    return (
+      <RunningQueriesNoAccessPrompt
+        missingClusterPrivileges={capabilities.missingClusterPrivileges}
+      />
+    );
+  }
+
+  return <RunningQueriesAppWithData />;
 };

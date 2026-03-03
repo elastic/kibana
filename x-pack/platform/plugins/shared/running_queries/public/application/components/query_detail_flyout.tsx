@@ -29,11 +29,11 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useRunningQueriesAppContext } from '../app_context';
+import { notAvailableLabel } from './running_queries_table';
 import type { RunningQuery } from '../../../common/types';
 
 interface QueryDetailFlyoutProps {
   query: RunningQuery;
-  notAvailableLabel: string;
   isStopRequested: boolean;
   onClose: () => void;
   onStopQuery: (taskId: string) => void;
@@ -65,7 +65,6 @@ function formatRuntime(startTime: number): string {
 
 export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   query,
-  notAvailableLabel,
   isStopRequested,
   onClose,
   onStopQuery,
