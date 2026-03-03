@@ -29,10 +29,9 @@ const ObservabilityAlertsManageRulesButton: React.FC<{ href: string }> = ({ href
     iconType="gear"
     href={href}
     data-test-subj="headerGlobalNav-appActionsManageRulesButton"
-    aria-label={i18n.translate(
-      'xpack.observability.alerts.headerAppActions.manageRulesAriaLabel',
-      { defaultMessage: 'Manage rules' }
-    )}
+    aria-label={i18n.translate('xpack.observability.alerts.headerAppActions.manageRulesAriaLabel', {
+      defaultMessage: 'Manage rules',
+    })}
   >
     {i18n.translate('xpack.observability.alerts.headerAppActions.manageRulesButton', {
       defaultMessage: 'Manage rules',
@@ -91,19 +90,18 @@ export const getObservabilityAlertsHeaderAppActionsConfig = (
  * Single icon-only "New" (plusInCircle) secondary action (dumb button, no-op).
  * Set when the Cases page is active; cleared when navigating away (handled by platform on app change).
  */
-export const getObservabilityCasesHeaderAppActionsConfig =
-  (): ChromeHeaderAppActionsConfig => ({
-    secondaryActions: [
-      <EuiButtonIcon
-        key="observability-cases-new"
-        size="xs"
-        color="text"
-        iconType="plusInCircle"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsNewButton"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
-          defaultMessage: 'New',
-        })}
-      />,
-    ],
-  });
+export const getObservabilityCasesHeaderAppActionsConfig = (): ChromeHeaderAppActionsConfig => ({
+  secondaryActions: [
+    <EuiButtonIcon
+      key="observability-cases-new"
+      size="xs"
+      color="text"
+      iconType="plusInCircle"
+      onClick={noop}
+      data-test-subj="headerGlobalNav-appActionsNewButton"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
+        defaultMessage: 'New',
+      })}
+    />,
+  ],
+});
