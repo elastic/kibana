@@ -59,7 +59,7 @@ const ServiceNameComponent: React.FC<Props> = ({
         right: {
           id: ServicePanelKey,
           params: {
-            serviceName,
+            entityIdentifiers: { 'service.name': serviceName },
             contextID: contextId,
             scopeId: timelineID,
           },

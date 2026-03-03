@@ -149,7 +149,11 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: ServicePanelKey,
-        params: { serviceName: 'testService', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityIdentifiers: { 'service.name': 'testService' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+        },
       },
     });
   });

@@ -27,13 +27,14 @@ import { ServicePanelContent } from './content';
 import { ServicePanelHeader } from './header';
 import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
-  serviceName: string;
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -47,19 +48,22 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelProps) => {
+const getServiceNameFromEntityIdentifiers = (entityIdentifiers: EntityIdentifiers): string =>
+  entityIdentifiers['service.name'] || Object.values(entityIdentifiers)[0] || '';
+
+export const ServicePanel = ({ contextID, scopeId, entityIdentifiers }: ServicePanelProps) => {
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const serviceName = useMemo(
+    () => getServiceNameFromEntityIdentifiers(entityIdentifiers ?? {}),
+    [entityIdentifiers]
+  );
 
   const serviceFilterQuery = useMemo(() => {
-    if (entityStoreV2Enabled && serviceName) {
-      return (
-        euid.getEuidDslFilterBasedOnDocument('service', {
-          'service.name': serviceName,
-        }) ?? undefined
-      );
+    if (entityStoreV2Enabled && Object.keys(entityIdentifiers ?? {}).length > 0) {
+      return euid.getEuidDslFilterBasedOnDocument('service', entityIdentifiers ?? {}) ?? undefined;
     }
     return serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined;
-  }, [entityStoreV2Enabled, serviceName]);
+  }, [entityStoreV2Enabled, entityIdentifiers, serviceName]);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,
@@ -71,7 +75,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
 
   const { inspect, refetch, loading } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
-  const observedService = useObservedService(serviceName, scopeId);
+  const observedService = useObservedService(entityIdentifiers ?? {}, scopeId);
   const { data: serviceRisk } = riskScoreState;
   const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
   const isRiskScoreExist = !!serviceRiskData?.service.risk;
@@ -98,7 +102,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
   });
 
   const openDetailsPanel = useNavigateToServiceDetails({
-    serviceName,
+    entityIdentifiers: entityIdentifiers ?? {},
     scopeId,
     isRiskScoreExist,
   });

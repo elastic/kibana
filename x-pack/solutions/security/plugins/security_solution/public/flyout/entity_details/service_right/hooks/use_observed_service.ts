@@ -21,8 +21,11 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useObservedServiceDetails } from './observed_service_details';
 
+const getServiceNameFromEntityIdentifiers = (entityIdentifiers: Record<string, string>): string =>
+  entityIdentifiers['service.name'] || Object.values(entityIdentifiers)[0] || '';
+
 export const useObservedService = (
-  serviceName: string,
+  entityIdentifiers: Record<string, string>,
   scopeId: string
 ): Omit<ObservedEntityData<ServiceItem>, 'anomalies'> => {
   const timelineTime = useDeepEqualSelector((state) =>
@@ -32,6 +35,7 @@ export const useObservedService = (
   const isActiveTimelines = isActiveTimeline(scopeId);
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
+  const serviceName = getServiceNameFromEntityIdentifiers(entityIdentifiers);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =

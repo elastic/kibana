@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EntityIdentifiers } from '../../../../document_details/shared/utils';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -18,14 +19,12 @@ import { type UseGetGenericEntityParams } from './use_get_generic_entity';
 
 export const useOpenGenericEntityDetailsLeftPanel = (
   params: {
-    insightsField: string;
-    insightsValue: string;
+    entityIdentifiers: EntityIdentifiers;
     scopeId: string;
   } & UseGetGenericEntityParams
 ) => {
-  const { insightsField, insightsValue, entityDocId, entityId, scopeId } = params;
+  const { entityIdentifiers, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const entityIdentifiers = { [insightsField]: insightsValue };
   const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
   const { to, from } = useGlobalTime();
@@ -42,8 +41,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
       params: {
         entityDocId,
         entityId,
-        field: insightsField,
-        value: insightsValue,
+        entityIdentifiers,
         scopeId,
         isRiskScoreExist: false,
         hasMisconfigurationFindings,
