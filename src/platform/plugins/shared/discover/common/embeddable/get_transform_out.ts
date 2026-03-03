@@ -10,7 +10,7 @@
 import { flow } from 'lodash';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { savedSearchToDiscoverSessionEmbeddableState } from './transform_utils';
 import type { StoredSearchEmbeddableState } from './types';
 
@@ -21,6 +21,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
   ) {
     const transformsFlow = flow(
       transformTitlesOut<StoredSearchEmbeddableState>,
+      transformTimeRangeOut<StoredSearchEmbeddableState>,
       (state: StoredSearchEmbeddableState) => transformDrilldownsOut(state, references)
     );
     const state = transformsFlow(storedState);
