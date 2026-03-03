@@ -8,8 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getDurationUnitValue, getDurationNumberInItsUnit } from '../../flyout/utils';
-import { getTimeOptions } from '../../flyout/utils';
+import { getDurationUnitValue, getDurationNumberInItsUnit, getTimeOptions } from '../utils';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];

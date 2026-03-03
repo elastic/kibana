@@ -9,17 +9,13 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import {
-  getDurationUnitValue,
-  getDurationNumberInItsUnit,
-  getTimeOptions,
-} from '../../flyout/utils';
+import { getDurationUnitValue, getDurationNumberInItsUnit, getTimeOptions } from '../utils';
 import type { FormValues } from '../types';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
-export const ActivationTimeframeField: React.FC = () => {
+export const StateTransitionTimeframeField: React.FC = () => {
   const { control } = useFormContext<FormValues>();
 
   return (
@@ -28,10 +24,10 @@ export const ActivationTimeframeField: React.FC = () => {
       control={control}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.ruleForm.activationConfig.timeframeLabel', {
+          label={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.timeframeLabel', {
             defaultMessage: 'Breached for duration',
           })}
-          helpText={i18n.translate('xpack.alertingV2.ruleForm.activationConfig.timeframeHelpText', {
+          helpText={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.timeframeHelpText', {
             defaultMessage:
               'How long the condition must be breached before the alert becomes active.',
           })}
@@ -39,7 +35,7 @@ export const ActivationTimeframeField: React.FC = () => {
           error={error?.message}
           fullWidth
         >
-          <ActivationTimeframeInput
+          <StateTransitionTimeframeInput
             value={value}
             onChange={onChange}
             errors={error?.message}
@@ -51,14 +47,14 @@ export const ActivationTimeframeField: React.FC = () => {
   );
 };
 
-interface ActivationTimeframeInputProps {
+interface StateTransitionTimeframeInputProps {
   value?: string;
   onChange: (value: string | undefined) => void;
   errors?: string;
   inputRef?: React.Ref<HTMLInputElement>;
 }
 
-const ActivationTimeframeInput: React.FC<ActivationTimeframeInputProps> = ({
+const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps> = ({
   value,
   onChange,
   errors,
@@ -119,7 +115,7 @@ const ActivationTimeframeInput: React.FC<ActivationTimeframeInputProps> = ({
           onKeyDown={onKeyDown}
           min={1}
           step={1}
-          data-test-subj="activationTimeframeNumberInput"
+          data-test-subj="stateTransitionTimeframeNumberInput"
           inputRef={inputRef}
         />
       </EuiFlexItem>
@@ -129,9 +125,9 @@ const ActivationTimeframeInput: React.FC<ActivationTimeframeInputProps> = ({
           value={intervalUnit}
           options={getTimeOptions(intervalNumber ?? 1)}
           onChange={onIntervalUnitChange}
-          data-test-subj="activationTimeframeUnitInput"
+          data-test-subj="stateTransitionTimeframeUnitInput"
           aria-label={i18n.translate(
-            'xpack.alertingV2.ruleForm.activationConfig.timeframeUnitLabel',
+            'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitLabel',
             { defaultMessage: 'Time unit' }
           )}
         />

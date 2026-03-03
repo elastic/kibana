@@ -13,7 +13,7 @@ import type { FormValues } from '../types';
 
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
-export const ActivationCountField: React.FC = () => {
+export const StateTransitionCountField: React.FC = () => {
   const { control } = useFormContext<FormValues>();
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -29,13 +29,13 @@ export const ActivationCountField: React.FC = () => {
       rules={{
         min: {
           value: 1,
-          message: i18n.translate('xpack.alertingV2.ruleForm.activationConfig.countMinError', {
+          message: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countMinError', {
             defaultMessage: 'Must be at least 1.',
           }),
         },
         validate: (value) => {
           if (value != null && !Number.isInteger(value)) {
-            return i18n.translate('xpack.alertingV2.ruleForm.activationConfig.countIntegerError', {
+            return i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countIntegerError', {
               defaultMessage: 'Must be a whole number.',
             });
           }
@@ -44,10 +44,10 @@ export const ActivationCountField: React.FC = () => {
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.ruleForm.activationConfig.countLabel', {
+          label={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countLabel', {
             defaultMessage: 'Consecutive breaches',
           })}
-          helpText={i18n.translate('xpack.alertingV2.ruleForm.activationConfig.countHelpText', {
+          helpText={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countHelpText', {
             defaultMessage: 'Number of consecutive breaches before the alert becomes active.',
           })}
           isInvalid={!!error}
@@ -70,7 +70,7 @@ export const ActivationCountField: React.FC = () => {
             min={1}
             step={1}
             isInvalid={!!error}
-            data-test-subj="activationCountInput"
+            data-test-subj="stateTransitionCountInput"
             placeholder="1"
             inputRef={ref}
           />

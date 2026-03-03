@@ -11,7 +11,7 @@ import { Controller, useWatch, useFormContext } from 'react-hook-form';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
-import { firstFieldOption, getTimeFieldOptions } from '../../flyout/utils';
+import { firstFieldOption, getTimeFieldOptions } from '../utils';
 import { useDataFields } from '../hooks/use_data_fields';
 import { useRuleFormServices } from '../contexts';
 

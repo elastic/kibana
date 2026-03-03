@@ -37,12 +37,11 @@ export interface RuleGrouping {
 }
 
 /**
- * Activation configuration for alert-type rules.
+ * State transition configuration for alert-type rules.
  */
 export interface StateTransition {
   pendingCount?: number;
   pendingTimeframe?: string;
-  pendingOperator?: 'AND' | 'OR';
 }
 
 /**

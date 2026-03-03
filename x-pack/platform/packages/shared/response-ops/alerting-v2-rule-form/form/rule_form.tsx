@@ -11,7 +11,7 @@ import { useFormContext } from 'react-hook-form';
 import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
-import { ActivationConfigurationFieldGroup } from './field_groups/activation_configuration_field_group';
+import { StateTransitionFieldGroup } from './field_groups/state_transition_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RuleFormServicesProvider, type RuleFormServices } from './contexts';
 
@@ -44,7 +44,7 @@ export const RuleForm: React.FC<RuleFormProps> = ({ formId, services, onSubmit }
         <ErrorCallOut />
         <RuleDetailsFieldGroup />
         <EuiSpacer size="m" />
-        <ActivationConfigurationFieldGroup />
+        <StateTransitionFieldGroup />
         <EuiSpacer size="m" />
         <RuleExecutionFieldGroup />
       </EuiForm>

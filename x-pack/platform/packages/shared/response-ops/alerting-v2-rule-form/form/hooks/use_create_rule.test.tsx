@@ -187,7 +187,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('includes state_transition in payload when kind is alert with activation config', async () => {
+  it('includes state_transition in payload when kind is alert with state transition config', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
@@ -224,7 +224,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('omits state_transition when kind is signal even if stateTransition is set', async () => {
+  it('omits state_transition when kind is signal even if state transition is set', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Signal Rule' } });
@@ -257,7 +257,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('omits state_transition when kind is alert but stateTransition is empty', async () => {
+  it('omits state_transition when kind is alert but state transition is empty', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
@@ -288,7 +288,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('includes only pending_count when pending_timeframe is not set', async () => {
+  it('includes only pending_count when state transition timeframe is not set', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
