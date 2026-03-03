@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Run Dataset Examples API endpoint
+  version: "1"
+paths:
+  /internal/evals/runs/{runId}/datasets/{datasetId}/examples:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationRunDatasetExamples
+      description: Get evaluation score documents grouped by example for a run and dataset
+      summary: Get evaluation run dataset examples
+      tags:
+        - Evals API
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  examples:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluationRunDatasetExample'
+                required:
+                  - examples
+components:
+  schemas:
+    EvaluationRunDatasetExample:
+      type: object
+      properties:
+        example_id:
+          type: string
+        example_index:
+          type: integer
+          nullable: true
+        scores:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationScoreDocument'
+      required:
+        - example_id
+        - example_index
+        - scores

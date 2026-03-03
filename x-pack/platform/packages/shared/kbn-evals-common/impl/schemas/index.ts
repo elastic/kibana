@@ -10,6 +10,7 @@ export * from './common_attributes.gen';
 export * from './runs/get_runs_route.gen';
 export * from './runs/get_run_route.gen';
 export * from './runs/get_run_scores_route.gen';
+export * from './runs/get_run_dataset_examples_route.gen';
 
 export * from './datasets/get_datasets_route.gen';
 export * from './datasets/create_dataset_route.gen';
@@ -22,3 +23,4 @@ export * from './datasets/delete_example_route.gen';
 export * from './datasets/upsert_dataset_route.gen';
 
 export * from './traces/get_trace_route.gen';
+export * from './examples/get_example_scores_route.gen';

@@ -265,6 +265,60 @@ export const FLYOUT_NO_EXPERIMENT_RUNS = i18n.translate(
   }
 );
 
+export const COLUMN_EXPERIMENT_RUN_ID = i18n.translate(
+  'xpack.evals.datasetDetail.experimentRunsColumns.runId',
+  {
+    defaultMessage: 'Run ID',
+  }
+);
+
+export const COLUMN_EXPERIMENT_TIMESTAMP = i18n.translate(
+  'xpack.evals.datasetDetail.experimentRunsColumns.timestamp',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
+
+export const COLUMN_EXPERIMENT_TASK_MODEL = i18n.translate(
+  'xpack.evals.datasetDetail.experimentRunsColumns.taskModel',
+  {
+    defaultMessage: 'Task model',
+  }
+);
+
+export const COLUMN_EXPERIMENT_EVALUATOR_SCORES = i18n.translate(
+  'xpack.evals.datasetDetail.experimentRunsColumns.evaluatorScores',
+  {
+    defaultMessage: 'Evaluator scores',
+  }
+);
+
+export const COLUMN_EXPERIMENT_TRACE = i18n.translate(
+  'xpack.evals.datasetDetail.experimentRunsColumns.trace',
+  {
+    defaultMessage: 'Trace',
+  }
+);
+
+export const SCORE_NOT_AVAILABLE = i18n.translate(
+  'xpack.evals.datasetDetail.experimentRunsScoreNotAvailable',
+  {
+    defaultMessage: 'N/A',
+  }
+);
+
+export const getExperimentRunsLoadError = (error: string) =>
+  i18n.translate('xpack.evals.datasetDetail.experimentRunsLoadError', {
+    defaultMessage: 'Failed to load experiment runs: {error}',
+    values: { error },
+  });
+
+export const getTraceFlyoutTitle = (traceId: string) =>
+  i18n.translate('xpack.evals.datasetDetail.traceFlyoutTitle', {
+    defaultMessage: 'Trace waterfall: {traceId}',
+    values: { traceId },
+  });
+
 export const SEARCH_EXAMPLES_PLACEHOLDER = i18n.translate(
   'xpack.evals.datasetDetail.searchExamplesPlaceholder',
   {

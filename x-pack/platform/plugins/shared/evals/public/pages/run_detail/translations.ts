@@ -32,13 +32,20 @@ export const STAT_TRACES = i18n.translate('xpack.evals.runDetail.stat.traces', {
   defaultMessage: 'Traces',
 });
 
-export const SECTION_TRACES = i18n.translate('xpack.evals.runDetail.section.traces', {
-  defaultMessage: 'Traces',
+export const SECTION_DATASETS = i18n.translate('xpack.evals.runDetail.section.datasets', {
+  defaultMessage: 'Datasets',
 });
 
 export const SECTION_EVALUATOR_STATS = i18n.translate(
   'xpack.evals.runDetail.section.evaluatorStats',
   { defaultMessage: 'Evaluator Statistics' }
+);
+
+export const SECTION_EXAMPLE_SCORES = i18n.translate(
+  'xpack.evals.runDetail.section.exampleScores',
+  {
+    defaultMessage: 'Example Scores',
+  }
 );
 
 export const COLUMN_EVALUATOR = i18n.translate('xpack.evals.runDetail.columns.evaluator', {
@@ -85,4 +92,10 @@ export const getTraceFlyoutTitle = (traceId: string) =>
   i18n.translate('xpack.evals.runDetail.traceFlyoutTitle', {
     defaultMessage: 'Trace: {traceId}',
     values: { traceId },
+  });
+
+export const getExamplesLoadError = (errorMessage: string) =>
+  i18n.translate('xpack.evals.runDetail.examplesLoadError', {
+    defaultMessage: 'Failed to load dataset examples: {errorMessage}',
+    values: { errorMessage },
   });

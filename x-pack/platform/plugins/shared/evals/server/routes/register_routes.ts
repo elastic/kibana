@@ -10,6 +10,8 @@ import type { EvalsRouter } from '../types';
 import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
+import { registerGetRunDatasetExamplesRoute } from './runs/get_run_dataset_examples';
+import { registerGetExampleScoresRoute } from './examples/get_example_scores';
 import { registerGetTraceRoute } from './traces/get_trace';
 import { registerListDatasetsRoute } from './datasets/list_datasets';
 import { registerCreateDatasetRoute } from './datasets/create_dataset';
@@ -30,6 +32,8 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetRunsRoute(dependencies);
   registerGetRunRoute(dependencies);
   registerGetRunScoresRoute(dependencies);
+  registerGetRunDatasetExamplesRoute(dependencies);
+  registerGetExampleScoresRoute(dependencies);
   registerGetTraceRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);

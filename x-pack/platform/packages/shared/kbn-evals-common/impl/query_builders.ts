@@ -94,6 +94,30 @@ export const buildRunFilterQuery = (
   return { bool: { must } };
 };
 
+/**
+ * Builds a bool/must query that filters evaluation score documents by example ID.
+ */
+export const buildExampleScoresQuery = (
+  exampleId: string
+): { bool: { must: Array<Record<string, unknown>> } } => ({
+  bool: {
+    must: [{ term: { 'example.id': exampleId } }],
+  },
+});
+
+/**
+ * Builds a bool/must query that filters evaluation score documents by
+ * dataset ID and run ID.
+ */
+export const buildDatasetExampleScoresQuery = (
+  datasetId: string,
+  runId: string
+): { bool: { must: Array<Record<string, unknown>> } } => ({
+  bool: {
+    must: [{ term: { 'example.dataset.id': datasetId } }, { term: { run_id: runId } }],
+  },
+});
+
 // ---------------------------------------------------------------------------
 // Per-run stats aggregation
 // ---------------------------------------------------------------------------

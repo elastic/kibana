@@ -11,6 +11,8 @@ import {
   EVALS_RUNS_URL,
   EVALS_RUN_URL,
   EVALS_RUN_SCORES_URL,
+  EVALS_RUN_DATASET_EXAMPLES_URL,
+  EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
   EVALS_DATASETS_URL,
   EVALS_DATASET_URL,
@@ -32,6 +34,8 @@ import {
   type GetEvaluationRunsResponse,
   type GetEvaluationRunResponse,
   type GetEvaluationRunScoresResponse,
+  type GetEvaluationRunDatasetExamplesResponse,
+  type GetExampleScoresResponse,
   type GetTraceResponse,
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
@@ -297,6 +301,39 @@ export const useEvaluationRunScores = (runId: string) => {
         version: API_VERSIONS.internal.v1,
       });
     },
+  });
+};
+
+export const useRunDatasetExamples = (runId: string, datasetId: string) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.runs.datasetExamples(runId, datasetId),
+    queryFn: async (): Promise<GetEvaluationRunDatasetExamplesResponse> => {
+      const url = EVALS_RUN_DATASET_EXAMPLES_URL.replace('{runId}', runId).replace(
+        '{datasetId}',
+        datasetId
+      );
+      return services.http!.get<GetEvaluationRunDatasetExamplesResponse>(url, {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled: runId.length > 0 && datasetId.length > 0,
+  });
+};
+
+export const useExampleScores = (exampleId: string) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.examples.scores(exampleId),
+    queryFn: async (): Promise<GetExampleScoresResponse> => {
+      const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', exampleId);
+      return services.http!.get<GetExampleScoresResponse>(url, {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled: exampleId.length > 0,
   });
 };
 

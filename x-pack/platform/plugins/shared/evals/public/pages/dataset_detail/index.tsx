@@ -8,6 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
@@ -43,15 +44,21 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useHistory, useParams } from 'react-router-dom';
-import type { DatasetExample, EvaluationRunSummary } from '@kbn/evals-common';
+import type {
+  DatasetExample,
+  EvaluationRunSummary,
+  EvaluationScoreDocument,
+} from '@kbn/evals-common';
 import {
   useAddExamples,
   useDataset,
   useDeleteExample,
+  useExampleScores,
   useEvaluationRuns,
   useUpdateDataset,
   useUpdateExample,
 } from '../../hooks/use_evals_api';
+import { TraceWaterfall } from '../../components/trace_waterfall';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -77,6 +84,9 @@ const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
 };
 
 const formatDate = (value?: string) => (value ? new Date(value).toLocaleString() : '-');
+
+const formatScore = (score: number | null | undefined) =>
+  score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(3);
 
 const truncatedCellStyles = css`
   overflow: hidden;
@@ -121,6 +131,13 @@ export const DatasetDetailPage: React.FC = () => {
   const [deletingExample, setDeletingExample] = useState<DatasetExample | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+
+  const {
+    data: exampleScoresData,
+    isLoading: isExampleScoresLoading,
+    error: exampleScoresError,
+  } = useExampleScores(selectedExample?.id ?? '');
 
   const openMetadataModal = () => {
     setMetadataName(dataset?.name ?? '');
@@ -361,6 +378,147 @@ export const DatasetDetailPage: React.FC = () => {
     ];
   }, [dataset]);
 
+  interface RunScoreRow {
+    runId: string;
+    timestamp?: string;
+    taskModelId?: string;
+    scores: EvaluationScoreDocument[];
+    traceIds: string[];
+  }
+
+  const exampleRunRows = useMemo<RunScoreRow[]>(() => {
+    const groupedRuns = new Map<string, RunScoreRow>();
+    for (const score of exampleScoresData?.scores ?? []) {
+      const existing = groupedRuns.get(score.run_id);
+      if (!existing) {
+        groupedRuns.set(score.run_id, {
+          runId: score.run_id,
+          timestamp: score['@timestamp'],
+          taskModelId: score.task.model.id,
+          scores: [score],
+          traceIds: score.task.trace_id ? [score.task.trace_id] : [],
+        });
+        continue;
+      }
+
+      existing.scores.push(score);
+      if (!existing.timestamp || score['@timestamp'] > existing.timestamp) {
+        existing.timestamp = score['@timestamp'];
+      }
+      if (!existing.taskModelId) {
+        existing.taskModelId = score.task.model.id;
+      }
+      if (score.task.trace_id && !existing.traceIds.includes(score.task.trace_id)) {
+        existing.traceIds.push(score.task.trace_id);
+      }
+    }
+
+    return Array.from(groupedRuns.values()).sort((a, b) => {
+      if (a.timestamp && b.timestamp) {
+        return b.timestamp.localeCompare(a.timestamp);
+      }
+      return a.runId.localeCompare(b.runId);
+    });
+  }, [exampleScoresData?.scores]);
+
+  const exampleRunColumns: Array<EuiBasicTableColumn<RunScoreRow>> = useMemo(
+    () => [
+      {
+        field: 'runId',
+        name: i18n.COLUMN_EXPERIMENT_RUN_ID,
+        width: '180px',
+        render: (runId: string) => (
+          <EuiLink
+            onClick={() =>
+              history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
+            }
+          >
+            {runId.slice(0, 12)}...
+          </EuiLink>
+        ),
+      },
+      {
+        field: 'timestamp',
+        name: i18n.COLUMN_EXPERIMENT_TIMESTAMP,
+        width: '180px',
+        render: (timestamp?: string) => formatDate(timestamp),
+      },
+      {
+        field: 'taskModelId',
+        name: i18n.COLUMN_EXPERIMENT_TASK_MODEL,
+        render: (taskModelId?: string) => taskModelId ?? '-',
+      },
+      {
+        field: 'scores',
+        name: i18n.COLUMN_EXPERIMENT_EVALUATOR_SCORES,
+        render: (scores: EvaluationScoreDocument[]) => {
+          const sortedScores = [...scores].sort((a, b) => {
+            const evaluatorDelta = a.evaluator.name.localeCompare(b.evaluator.name);
+            if (evaluatorDelta !== 0) return evaluatorDelta;
+            return a.task.repetition_index - b.task.repetition_index;
+          });
+
+          const evaluatorCounts = sortedScores.reduce<Record<string, number>>((acc, score) => {
+            acc[score.evaluator.name] = (acc[score.evaluator.name] ?? 0) + 1;
+            return acc;
+          }, {});
+
+          return (
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {sortedScores.map((score) => {
+                const includeRepetition = (evaluatorCounts[score.evaluator.name] ?? 0) > 1;
+                const repetitionLabel = includeRepetition
+                  ? ` (r${score.task.repetition_index + 1})`
+                  : '';
+                return (
+                  <EuiFlexItem
+                    key={[
+                      score.evaluator.name,
+                      score.task.repetition_index,
+                      score.task.trace_id ?? 'no_trace',
+                      score['@timestamp'],
+                    ].join(':')}
+                    grow={false}
+                  >
+                    <EuiBadge color="hollow">
+                      {`${score.evaluator.name}${repetitionLabel}: ${formatScore(
+                        score.evaluator.score
+                      )}`}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+          );
+        },
+      },
+      {
+        field: 'traceIds',
+        name: i18n.COLUMN_EXPERIMENT_TRACE,
+        width: '170px',
+        render: (traceIds: string[]) =>
+          traceIds.length > 0 ? (
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {traceIds.map((traceId) => (
+                <EuiFlexItem key={traceId} grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="apmTrace"
+                    onClick={() => setSelectedTraceId(traceId)}
+                  >
+                    {traceId.slice(0, 12)}...
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ) : (
+            '-'
+          ),
+      },
+    ],
+    [datasetId, history]
+  );
+
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Header
@@ -586,9 +744,18 @@ export const DatasetDetailPage: React.FC = () => {
                   <h4>{i18n.FLYOUT_EXPERIMENT_RUNS_SECTION}</h4>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p>{i18n.FLYOUT_NO_EXPERIMENT_RUNS}</p>
-                </EuiText>
+                {exampleScoresError ? (
+                  <EuiText size="s" color="danger">
+                    <p>{i18n.getExperimentRunsLoadError(String(exampleScoresError))}</p>
+                  </EuiText>
+                ) : (
+                  <EuiBasicTable<RunScoreRow>
+                    items={exampleRunRows}
+                    columns={exampleRunColumns}
+                    loading={isExampleScoresLoading}
+                    noItemsMessage={i18n.FLYOUT_NO_EXPERIMENT_RUNS}
+                  />
+                )}
               </>
             )}
           </EuiFlyoutBody>
@@ -721,6 +888,40 @@ export const DatasetDetailPage: React.FC = () => {
         >
           <p>{i18n.CONFIRM_DELETE_EXAMPLE_BODY}</p>
         </EuiConfirmModal>
+      ) : null}
+
+      {selectedTraceId ? (
+        <EuiFlyoutResizable
+          ownFocus
+          onClose={() => setSelectedTraceId(null)}
+          size="l"
+          minWidth={480}
+          maxWidth={1600}
+          aria-labelledby="datasetExampleTraceWaterfallTitle"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s">
+              <h2 id="datasetExampleTraceWaterfallTitle" style={{ wordBreak: 'break-all' }}>
+                {i18n.getTraceFlyoutTitle(selectedTraceId)}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody
+            className={css`
+              .euiFlyoutBody__overflowContent {
+                height: 100%;
+                padding: 0;
+              }
+              .euiFlyoutBody__overflow {
+                overflow: hidden;
+              }
+            `}
+          >
+            <div style={{ height: '100%', padding: 16 }}>
+              <TraceWaterfall traceId={selectedTraceId} />
+            </div>
+          </EuiFlyoutBody>
+        </EuiFlyoutResizable>
       ) : null}
     </EuiPageTemplate>
   );

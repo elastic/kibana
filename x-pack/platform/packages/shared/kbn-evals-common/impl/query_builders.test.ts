@@ -7,6 +7,8 @@
 
 import {
   buildRunFilterQuery,
+  buildExampleScoresQuery,
+  buildDatasetExampleScoresQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
@@ -17,6 +19,29 @@ import {
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('buildExampleScoresQuery', () => {
+    it('filters by example.id', () => {
+      const query = buildExampleScoresQuery('example-123');
+      expect(query).toEqual({
+        bool: { must: [{ term: { 'example.id': 'example-123' } }] },
+      });
+    });
+  });
+
+  describe('buildDatasetExampleScoresQuery', () => {
+    it('filters by example.dataset.id and run_id', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'run-123');
+      expect(query).toEqual({
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { run_id: 'run-123' } },
+          ],
+        },
+      });
+    });
+  });
+
   describe('buildRunFilterQuery', () => {
     it('filters by run_id only when no options provided', () => {
       const query = buildRunFilterQuery('run-123');

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, type MouseEvent } from 'react';
 import {
   EuiPageTemplate,
+  EuiAccordion,
   EuiBasicTable,
   EuiBadge,
   EuiLink,
@@ -17,7 +18,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutResizable,
@@ -27,9 +27,96 @@ import {
 import { css } from '@emotion/css';
 import { useParams, useHistory } from 'react-router-dom';
 import type { EvaluatorStats } from '@kbn/evals-common';
-import { useEvaluationRun, useEvaluationRunScores } from '../../hooks/use_evals_api';
+import {
+  useEvaluationRun,
+  useEvaluationRunScores,
+  useRunDatasetExamples,
+} from '../../hooks/use_evals_api';
+import { ExampleScoresTable } from '../../components/example_scores_table';
 import { TraceWaterfall } from '../../components/trace_waterfall';
 import * as i18n from './translations';
+
+interface DatasetStatsGroup {
+  datasetId: string;
+  datasetName: string;
+  stats: EvaluatorStats[];
+}
+
+interface DatasetStatsAccordionProps {
+  runId: string;
+  group: DatasetStatsGroup;
+  statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
+  runLoading: boolean;
+  onTraceClick: (traceId: string) => void;
+  onDatasetClick: (datasetId: string) => void;
+}
+
+const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
+  runId,
+  group,
+  statsColumns,
+  runLoading,
+  onTraceClick,
+  onDatasetClick,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const {
+    data: datasetExamples,
+    isLoading: examplesLoading,
+    error: examplesError,
+  } = useRunDatasetExamples(runId, isOpen ? group.datasetId : '');
+
+  return (
+    <>
+      <EuiAccordion
+        id={`runDatasetAccordion-${group.datasetId}`}
+        buttonContent={
+          <EuiText size="s">
+            <h4>
+              <EuiLink
+                onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onDatasetClick(group.datasetId);
+                }}
+              >
+                {group.datasetName}
+              </EuiLink>
+            </h4>
+          </EuiText>
+        }
+        onToggle={(nextIsOpen) => setIsOpen(nextIsOpen)}
+      >
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <h5>{i18n.SECTION_EXAMPLE_SCORES}</h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        {examplesError ? (
+          <EuiText color="danger" size="s">
+            <p>{i18n.getExamplesLoadError(String(examplesError))}</p>
+          </EuiText>
+        ) : (
+          <ExampleScoresTable
+            examples={datasetExamples?.examples ?? []}
+            onTraceClick={(traceId) => onTraceClick(traceId)}
+          />
+        )}
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <h5>{i18n.SECTION_EVALUATOR_STATS}</h5>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiBasicTable<EvaluatorStats>
+          items={group.stats}
+          columns={statsColumns}
+          loading={runLoading || (isOpen && examplesLoading)}
+        />
+      </EuiAccordion>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
 
 export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
@@ -191,50 +278,20 @@ export const RunDetailPage: React.FC = () => {
           </>
         )}
 
-        {uniqueTraceIds.length > 0 && (
-          <>
-            <EuiText size="s">
-              <h3>{i18n.SECTION_TRACES}</h3>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup wrap>
-              {uniqueTraceIds.slice(0, 20).map((traceId) => (
-                <EuiFlexItem key={traceId} grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="apmTrace"
-                    onClick={() => setSelectedTraceId(traceId)}
-                  >
-                    {traceId.slice(0, 12)}...
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </>
-        )}
-
         <EuiText size="s">
-          <h3>{i18n.SECTION_EVALUATOR_STATS}</h3>
+          <h3>{i18n.SECTION_DATASETS}</h3>
         </EuiText>
         <EuiSpacer size="m" />
         {datasetStatsGroups.map(({ datasetId, datasetName, stats }) => (
-          <React.Fragment key={datasetId}>
-            <EuiText size="s">
-              <h4>
-                <EuiLink onClick={() => history.push(`/datasets/${datasetId}`)}>
-                  {datasetName}
-                </EuiLink>
-              </h4>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiBasicTable<EvaluatorStats>
-              items={stats}
-              columns={statsColumns}
-              loading={runLoading}
-            />
-            <EuiSpacer size="l" />
-          </React.Fragment>
+          <DatasetStatsAccordion
+            key={datasetId}
+            runId={runId}
+            group={{ datasetId, datasetName, stats }}
+            statsColumns={statsColumns}
+            runLoading={runLoading}
+            onTraceClick={setSelectedTraceId}
+            onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
+          />
         ))}
       </EuiPageTemplate.Section>
 
