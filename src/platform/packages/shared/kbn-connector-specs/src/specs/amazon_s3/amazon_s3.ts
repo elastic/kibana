@@ -286,7 +286,7 @@ export const AmazonS3: ConnectorSpec = {
             return {
               bucket: typedInput.bucket,
               key: typedInput.key,
-              contentType: contentType,
+              contentType,
               contentLength: metadata.ContentLength,
               lastModified: metadata.LastModified?.toISOString(),
               etag: metadata.ETag,
@@ -306,7 +306,9 @@ export const AmazonS3: ConnectorSpec = {
           }
 
           const contentBytes = await response.Body.transformToByteArray();
-          const base64Content = contentBytes ? Buffer.from(contentBytes).toString('base64') : undefined;
+          const base64Content = contentBytes
+            ? Buffer.from(contentBytes).toString('base64')
+            : undefined;
 
           if (!base64Content) {
             throw new Error('Failed to read file content');
@@ -315,7 +317,7 @@ export const AmazonS3: ConnectorSpec = {
           return {
             bucket: typedInput.bucket,
             key: typedInput.key,
-            contentType: contentType,
+            contentType,
             contentLength: metadata.ContentLength,
             lastModified: metadata.LastModified?.toISOString(),
             etag: metadata.ETag,
