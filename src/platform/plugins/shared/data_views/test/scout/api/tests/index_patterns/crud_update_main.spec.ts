@@ -409,63 +409,60 @@ apiTest.describe(
       expect(getResponse.body[SERVICE_KEY_LEGACY].typeMeta).toStrictEqual({ foo: 'baz' });
     });
 
-    apiTest(
-      'can update multiple index pattern fields at once',
-      async ({ apiClient }) => {
-        const title = `foo-${Date.now()}-${Math.random()}*`;
+    apiTest('can update multiple index pattern fields at once', async ({ apiClient }) => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
 
-        const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
+      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: {
+            title,
+            timeFieldName: 'timeFieldName1',
+            typeMeta: { foo: 'bar' },
           },
-          responseType: 'json',
-          body: {
-            [SERVICE_KEY_LEGACY]: {
-              title,
-              timeFieldName: 'timeFieldName1',
-              typeMeta: { foo: 'bar' },
-            },
+        },
+      });
+
+      expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('timeFieldName1');
+      expect(createResponse.body[SERVICE_KEY_LEGACY].typeMeta.foo).toBe('bar');
+      const id = createResponse.body[SERVICE_KEY_LEGACY].id;
+      createdIds.push(id);
+
+      const updateResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: {
+            timeFieldName: 'timeFieldName2',
+            typeMeta: { baz: 'qux' },
           },
-        });
+        },
+      });
 
-        expect(createResponse).toHaveStatusCode(200);
-        expect(createResponse.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('timeFieldName1');
-        expect(createResponse.body[SERVICE_KEY_LEGACY].typeMeta.foo).toBe('bar');
-        const id = createResponse.body[SERVICE_KEY_LEGACY].id;
-        createdIds.push(id);
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(updateResponse.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('timeFieldName2');
+      expect(updateResponse.body[SERVICE_KEY_LEGACY].typeMeta.baz).toBe('qux');
 
-        const updateResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            [SERVICE_KEY_LEGACY]: {
-              timeFieldName: 'timeFieldName2',
-              typeMeta: { baz: 'qux' },
-            },
-          },
-        });
+      const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
 
-        expect(updateResponse).toHaveStatusCode(200);
-        expect(updateResponse.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('timeFieldName2');
-        expect(updateResponse.body[SERVICE_KEY_LEGACY].typeMeta.baz).toBe('qux');
-
-        const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-        });
-
-        expect(getResponse).toHaveStatusCode(200);
-        expect(getResponse.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('timeFieldName2');
-        expect(getResponse.body[SERVICE_KEY_LEGACY].typeMeta.baz).toBe('qux');
-      }
-    );
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body[SERVICE_KEY_LEGACY].timeFieldName).toBe('timeFieldName2');
+      expect(getResponse.body[SERVICE_KEY_LEGACY].typeMeta.baz).toBe('qux');
+    });
 
     apiTest('can update index pattern runtime fields', async ({ apiClient }) => {
       const title = `basic_index*`;
@@ -497,9 +494,9 @@ apiTest.describe(
       expect(createResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeFoo.type).toBe(
         'keyword'
       );
-      expect(
-        createResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeFoo.script.source
-      ).toBe('emit(doc["foo"].value)');
+      expect(createResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeFoo.script.source).toBe(
+        'emit(doc["foo"].value)'
+      );
       const id = createResponse.body[SERVICE_KEY_LEGACY].id;
       createdIds.push(id);
 
@@ -527,9 +524,7 @@ apiTest.describe(
       expect(updateResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeBar.type).toBe(
         'keyword'
       );
-      expect(
-        updateResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeFoo
-      ).toBeUndefined();
+      expect(updateResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeFoo).toBeUndefined();
 
       const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
         headers: {
@@ -540,9 +535,7 @@ apiTest.describe(
       });
 
       expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeBar.type).toBe(
-        'keyword'
-      );
+      expect(getResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeBar.type).toBe('keyword');
       expect(getResponse.body[SERVICE_KEY_LEGACY].runtimeFieldMap.runtimeFoo).toBeUndefined();
     });
   }

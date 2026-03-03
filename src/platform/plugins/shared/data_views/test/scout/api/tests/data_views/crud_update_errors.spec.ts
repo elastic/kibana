@@ -29,25 +29,22 @@ apiTest.describe(
       createdIds = [];
     });
 
-    apiTest(
-      'returns error when data_view object is not provided',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(`${DATA_VIEW_PATH}/foo`, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: null,
-        });
+    apiTest('returns error when data_view object is not provided', async ({ apiClient }) => {
+      const response = await apiClient.post(`${DATA_VIEW_PATH}/foo`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: null,
+      });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.statusCode).toBe(400);
-        expect(response.body.message).toBe(
-          '[request body]: expected a plain object value, but found [null] instead.'
-        );
-      }
-    );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.message).toBe(
+        '[request body]: expected a plain object value, but found [null] instead.'
+      );
+    });
 
     apiTest('returns error on non-existing data view', async ({ apiClient }) => {
       const response = await apiClient.post(`${DATA_VIEW_PATH}/non-existing-index-pattern`, {

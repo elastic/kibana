@@ -33,40 +33,34 @@ apiTest.describe(
       createdIds = [];
     });
 
-    apiTest(
-      'returns error when index_pattern object is not provided',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/foo`, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: null,
-        });
+    apiTest('returns error when index_pattern object is not provided', async ({ apiClient }) => {
+      const response = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/foo`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: null,
+      });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.statusCode).toBe(400);
-        expect(response.body.message).toBe(
-          '[request body]: expected a plain object value, but found [null] instead.'
-        );
-      }
-    );
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.message).toBe(
+        '[request body]: expected a plain object value, but found [null] instead.'
+      );
+    });
 
     apiTest('returns error on non-existing index pattern', async ({ apiClient }) => {
-      const response = await apiClient.post(
-        `${DATA_VIEW_PATH_LEGACY}/non-existing-index-pattern`,
-        {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            [SERVICE_KEY_LEGACY]: {},
-          },
-        }
-      );
+      const response = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/non-existing-index-pattern`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: {},
+        },
+      });
 
       expect(response).toHaveStatusCode(404);
       expect(response.body.statusCode).toBe(404);

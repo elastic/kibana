@@ -69,48 +69,45 @@ apiTest.describe(
       expect(getResponse.body[serviceKeyId]).toBe(defaultId);
     });
 
-    apiTest(
-      'does not override existing default without force flag',
-      async ({ apiClient }) => {
-        const defaultId = newId();
+    apiTest('does not override existing default without force flag', async ({ apiClient }) => {
+      const defaultId = newId();
 
-        await apiClient.post(defaultPath, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            [serviceKeyId]: defaultId,
-            force: true,
-          },
-        });
+      await apiClient.post(defaultPath, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [serviceKeyId]: defaultId,
+          force: true,
+        },
+      });
 
-        const overrideResponse = await apiClient.post(defaultPath, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            [serviceKeyId]: newId(),
-          },
-        });
+      const overrideResponse = await apiClient.post(defaultPath, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [serviceKeyId]: newId(),
+        },
+      });
 
-        expect(overrideResponse).toHaveStatusCode(200);
+      expect(overrideResponse).toHaveStatusCode(200);
 
-        const getResponse = await apiClient.get(defaultPath, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-        });
+      const getResponse = await apiClient.get(defaultPath, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
 
-        expect(getResponse).toHaveStatusCode(200);
-        expect(getResponse.body[serviceKeyId]).toBe(defaultId);
-      }
-    );
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body[serviceKeyId]).toBe(defaultId);
+    });
 
     apiTest('can clear default data view with force flag', async ({ apiClient }) => {
       const defaultId = newId();
