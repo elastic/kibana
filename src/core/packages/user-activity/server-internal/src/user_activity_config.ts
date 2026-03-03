@@ -28,15 +28,15 @@ const defaultAppender: Map<string, AppendersType> = new Map([
 
 type FilterPolicy = keyof typeof filterPolicies;
 
-const filterPolicySchema: Type<FilterPolicy> = schema.oneOf(
-  [schema.literal('keep'), schema.literal('drop')],
-  { defaultValue: 'drop' }
-);
+const filterPolicySchema: Type<FilterPolicy> = schema.oneOf([
+  schema.literal('keep'),
+  schema.literal('drop'),
+]);
 
 /** Filters applied to user activity events (defaults to none). */
 const filtersSchema = schema.arrayOf(
   schema.object({
-    actions: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    actions: schema.arrayOf(schema.string()),
     policy: filterPolicySchema,
   }),
   { defaultValue: [] }
