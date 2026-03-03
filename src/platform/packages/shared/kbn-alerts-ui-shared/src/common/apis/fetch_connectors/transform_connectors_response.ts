@@ -29,6 +29,7 @@ const transformConnector: RewriteRequestCase<
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   auth_mode: authMode,
+  current_user_connection_status: currentUserConnectionStatus,
   ...res
 }) => ({
   actionTypeId,
@@ -38,6 +39,7 @@ const transformConnector: RewriteRequestCase<
   isMissingSecrets,
   isSystemAction,
   isConnectorTypeDeprecated,
+  currentUserConnectionStatus,
   ...(authMode !== undefined ? { authMode } : {}),
   ...res,
 });

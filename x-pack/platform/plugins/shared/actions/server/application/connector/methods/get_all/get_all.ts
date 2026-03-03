@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import type { GetUserTokenConnectorsSoResult } from '../../../../data/connector/types';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
@@ -23,6 +24,7 @@ import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
+import { getUserTokenConnectorsSo } from '../../../../data/connector/get_user_token_connectors_so';
 
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
@@ -34,11 +36,13 @@ interface GetAllHelperOpts {
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
   authorizationCodeEnabled: boolean;
+  profileUid?: string;
 }
 
 export async function getAll({
   context,
   includeSystemActions = false,
+  profileUid,
 }: GetAllParams): Promise<ConnectorWithExtraFindData[]> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
@@ -65,6 +69,7 @@ export async function getAll({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorTypeRegistry: context.actionTypeRegistry,
     authorizationCodeEnabled,
+    profileUid,
   });
 }
 
@@ -103,7 +108,19 @@ async function getAllHelper({
   savedObjectsClient,
   connectorTypeRegistry,
   authorizationCodeEnabled,
+  profileUid,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
+  let userTokenConnectors: GetUserTokenConnectorsSoResult = {
+    connectorIds: [],
+  };
+
+  if (profileUid) {
+    userTokenConnectors = await getUserTokenConnectorsSo({
+      savedObjectsClient,
+      profileUid,
+    });
+  }
+
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
@@ -111,7 +128,8 @@ async function getAllHelper({
       rawAction,
       isConnectorDeprecated(rawAction.attributes),
       connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId),
-      authorizationCodeEnabled
+      authorizationCodeEnabled,
+      userTokenConnectors
     );
     return omit(connector, 'secrets');
   });
@@ -139,6 +157,7 @@ async function getAllHelper({
         isDeprecated: isConnectorDeprecated(connector),
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
+        currentUserConnectionStatus: 'not_applicable' as const,
         ...(connector.exposeConfig ? { config: connector.config } : {}),
         ...(authMode !== undefined ? { authMode } : {}),
       };
@@ -203,6 +222,7 @@ export async function getAllSystemConnectors({
         isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
           systemConnector.actionTypeId
         ),
+        currentUserConnectionStatus: 'not_applicable' as const,
         ...(authMode !== undefined ? { authMode } : {}),
       };
     })
