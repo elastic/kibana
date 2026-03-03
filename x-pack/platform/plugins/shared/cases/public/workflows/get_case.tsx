@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  getCaseStepCommonDefinition,
-  GetCaseStepTypeId,
-} from '../../common/workflows/steps/get_case';
-import * as i18n from './translations';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { getCaseStepCommonDefinition } from '../../common/workflows/steps/get_case';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 export const getCaseStepDefinition = createPublicStepDefinition({
@@ -21,42 +17,6 @@ export const getCaseStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.GET_CASE_STEP_LABEL,
-  description: i18n.GET_CASE_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.GET_CASE_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Basic usage
-\`\`\`yaml
-- name: get_case
-  type: ${GetCaseStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-\`\`\``,
-      `## With comments included
-\`\`\`yaml
-- name: get_case_with_comments
-  type: ${GetCaseStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    include_comments: true
-\`\`\``,
-      `## Using case from previous step
-\`\`\`yaml
-- name: find_cases
-  type: cases.findCases
-  with:
-    search_term: "critical incident"
-
-- name: get_first_case
-  type: ${GetCaseStepTypeId}
-  with:
-    case_id: \${{ steps.find_cases.output.cases[0].id }}
-    include_comments: true
-\`\`\``,
-    ],
-  },
-  actionsMenuGroup: ActionsMenuGroup.kibana,
   // TODO: enable one case_id can be a template AND an inputHandler
   // editorHandlers: caseIdInputEditorHandlers,
 });
