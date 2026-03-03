@@ -155,7 +155,7 @@ export function ScanHistoryList({ onSelectScanId }: Props) {
           tableCaption={i18n.translate('xpack.slo.healthScanFlyout.scanHistoryList.tableCaption', {
             defaultMessage: 'Health scans',
           })}
-          items={data?.scans}
+          items={data.scans}
           columns={columns}
           rowProps={(scan) => ({
             'data-test-subj': `healthScanRow-${scan.scanId}`,
