@@ -325,6 +325,7 @@ describe('findInternalRulesRoute', () => {
               },
               "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
               "snooze_schedule": Array [],
+              "snoozed_instances": Array [],
               "tags": Array [],
               "throttle": null,
               "updated_at": "2024-03-21T13:15:00.498Z",

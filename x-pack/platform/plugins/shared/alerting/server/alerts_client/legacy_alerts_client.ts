@@ -109,9 +109,11 @@ export class LegacyAlertsClient<
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
     this.snoozedInstances = snoozedInstances ?? [];
 
+    const snoozedInstancesMap = new Map(this.snoozedInstances.map((e) => [e.instanceId, e]));
+
     for (const id of keys(activeAlertsFromState)) {
       this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
-      const snoozeEntry = (snoozedInstances ?? []).find((e) => e.instanceId === id);
+      const snoozeEntry = snoozedInstancesMap.get(id);
       if (snoozeEntry) {
         this.trackedAlerts.active[id].setSnoozeConfig(snoozeEntry);
       }

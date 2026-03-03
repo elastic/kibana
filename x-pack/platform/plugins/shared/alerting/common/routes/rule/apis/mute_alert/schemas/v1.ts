@@ -104,15 +104,28 @@ export const muteAlertBodySchema = schema.maybe(
       },
       {
         validate: (value) => {
-          if (value == null || typeof value !== 'object') {
-            return;
-          }
           const hasExpiresAt = value.expires_at != null && value.expires_at !== '';
           const hasConditions = Array.isArray(value.conditions) && value.conditions.length > 0;
           const isEmptyBody = Object.keys(value).length === 0;
           // Empty object {} is allowed for indefinite mute (backward compatibility with clients that send empty JSON body).
           if (!isEmptyBody && !hasExpiresAt && !hasConditions) {
             return 'When providing a request body, at least one of expires_at or conditions (non-empty array) is required. Omit the body for indefinite mute.';
+          }
+          if (hasConditions) {
+            for (const condition of value.conditions!) {
+              if (
+                (condition.type === 'field_change' || condition.type === 'severity_change') &&
+                (!condition.snapshot_value || condition.snapshot_value.trim() === '')
+              ) {
+                return `Condition type '${condition.type}' requires a non-empty snapshot_value.`;
+              }
+              if (
+                condition.type === 'severity_equals' &&
+                (!condition.value || condition.value.trim() === '')
+              ) {
+                return `Condition type 'severity_equals' requires a non-empty value.`;
+              }
+            }
           }
         },
       }

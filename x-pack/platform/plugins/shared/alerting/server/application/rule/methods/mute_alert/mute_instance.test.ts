@@ -292,6 +292,57 @@ describe('mute alert instance', () => {
     );
   });
 
+  it('stores conditionOperator default when not explicitly provided', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await muteInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: {
+        conditions: [
+          {
+            type: 'severity_equals',
+            field: 'kibana.alert.severity',
+            value: 'low',
+          },
+        ],
+        // conditionOperator intentionally omitted
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      expect.objectContaining({
+        snoozedInstances: [
+          expect.objectContaining({
+            instanceId: 'instance1',
+            conditionOperator: 'any',
+          }),
+        ],
+      }),
+      { version: 'v1' }
+    );
+  });
+
   it('removes stale mutedInstanceIds when transitioning from simple mute to conditional snooze', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',

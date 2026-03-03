@@ -161,6 +161,7 @@ describe('transformBulkEnableResponse', () => {
               "interval": "1s",
             },
             "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
+            "snoozed_instances": Array [],
             "tags": Array [],
             "throttle": null,
             "updated_at": "2023-08-01T09:16:35.368Z",

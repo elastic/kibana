@@ -232,6 +232,7 @@ describe('findRulesRoute', () => {
               },
               "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
               "snooze_schedule": Array [],
+              "snoozed_instances": Array [],
               "tags": Array [],
               "throttle": null,
               "updated_at": "2024-03-21T13:15:00.498Z",
@@ -297,6 +298,7 @@ describe('findRulesRoute', () => {
             id: '3d534c70-582b-11ec-8995-2b1578a3bc5d',
             mute_all: false,
             muted_alert_ids: [],
+            snoozed_instances: [],
             name: 'stressing index-threshold 37/200',
             notify_when: 'onActiveAlert',
             params: {
@@ -852,6 +854,7 @@ describe('findRulesRoute', () => {
               },
               "scheduled_task_id": "52125fb0-5895-11ec-ae69-bb65d1a71b72",
               "snooze_schedule": Array [],
+              "snoozed_instances": Array [],
               "tags": Array [],
               "throttle": null,
               "updated_at": "2024-03-21T13:15:00.498Z",
@@ -917,6 +920,7 @@ describe('findRulesRoute', () => {
             id: '3d534c70-582b-11ec-8995-2b1578a3bc5d',
             mute_all: false,
             muted_alert_ids: [],
+            snoozed_instances: [],
             name: 'stressing index-threshold 37/200',
             notify_when: 'onActiveAlert',
             params: {

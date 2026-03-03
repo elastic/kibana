@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import type { SnoozeCondition } from '@kbn/alerting-types';
+import type { SnoozedInstanceConfig } from '../snooze_types';
+import { snoozeConditionOperator } from '../../../common/routes/rule/common/constants/v1';
 
 /**
  * Result of evaluating snooze conditions for a single alert instance.
@@ -19,15 +20,6 @@ export interface SnoozeConditionEvalResult {
 }
 
 /**
- * Snooze configuration extracted from an alert-as-data document.
- */
-export interface AlertSnoozeConfig {
-  expiresAt?: string;
-  conditions?: SnoozeCondition[];
-  conditionOperator?: 'any' | 'all';
-}
-
-/**
  * Evaluates whether a single `SnoozeCondition` is satisfied by the current alert data.
  *
  * **Limitation**: Field values are coerced to strings via `String()` before comparison.
@@ -37,7 +29,7 @@ export interface AlertSnoozeConfig {
  * making condition matches effectively impossible for non-primitive fields.
  */
 function evaluateSingleCondition(
-  condition: SnoozeCondition,
+  condition: NonNullable<SnoozedInstanceConfig['conditions']>[number],
   currentAlertData: Record<string, unknown>
 ): { met: boolean; reason: string } {
   const currentValue = get(currentAlertData, condition.field);
@@ -54,9 +46,7 @@ function evaluateSingleCondition(
       return {
         met: changed,
         reason: changed
-          ? `Field '${condition.field}' changed from '${condition.snapshotValue}' to '${
-              currentStr ?? 'undefined'
-            }'`
+          ? `Field '${condition.field}' changed from '${condition.snapshotValue}' to '${currentStr}'`
           : '',
       };
     }
@@ -87,10 +77,10 @@ function evaluateSingleCondition(
  * - `conditionOperator: 'all'` -- unmute only when ALL conditions AND time expiry are met.
  */
 export function evaluateSnoozeConditions(
-  snoozeConfig: AlertSnoozeConfig,
+  snoozeConfig: SnoozedInstanceConfig,
   currentAlertData: Record<string, unknown>
 ): SnoozeConditionEvalResult {
-  const operator = snoozeConfig.conditionOperator ?? 'any';
+  const operator = snoozeConfig.conditionOperator ?? snoozeConditionOperator.ANY;
   const results: Array<{ met: boolean; reason: string }> = [];
 
   // Check time expiry first
@@ -114,7 +104,7 @@ export function evaluateSnoozeConditions(
     return { shouldUnmute: false };
   }
 
-  if (operator === 'any') {
+  if (operator === snoozeConditionOperator.ANY) {
     const firstMet = results.find((r) => r.met);
     return firstMet ? { shouldUnmute: true, reason: firstMet.reason } : { shouldUnmute: false };
   }

@@ -91,6 +91,7 @@ describe('cloneRuleRoute', () => {
     updated_by: mockedRule.updatedBy,
     api_key_owner: mockedRule.apiKeyOwner,
     muted_alert_ids: mockedRule.mutedInstanceIds,
+    snoozed_instances: [],
     created_at: mockedRule.createdAt.toISOString(),
     updated_at: mockedRule.updatedAt.toISOString(),
     id: mockedRule.id,

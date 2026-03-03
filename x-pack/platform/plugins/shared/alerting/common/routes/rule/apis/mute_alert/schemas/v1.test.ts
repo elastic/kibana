@@ -45,7 +45,13 @@ describe('muteAlertBodySchema', () => {
   test('allows body with both expires_at and conditions', () => {
     const body = {
       expires_at: '2025-12-31T23:59:59Z',
-      conditions: [{ type: 'field_change' as const, field: 'kibana.alert.severity' }],
+      conditions: [
+        {
+          type: 'field_change' as const,
+          field: 'kibana.alert.severity',
+          snapshot_value: 'critical',
+        },
+      ],
       condition_operator: 'any' as const,
     };
     expect(() => muteAlertBodySchema.validate(body)).not.toThrow();
@@ -71,6 +77,30 @@ describe('muteAlertBodySchema', () => {
     expect(() => muteAlertBodySchema.validate({ expires_at: '2025-13-45' })).toThrow(
       'expires_at must be a valid ISO 8601 date string'
     );
+  });
+
+  test('rejects field_change without snapshot_value', () => {
+    expect(() =>
+      muteAlertBodySchema.validate({
+        conditions: [{ type: 'field_change', field: 'kibana.alert.severity' }],
+      })
+    ).toThrow(`Condition type 'field_change' requires a non-empty snapshot_value.`);
+  });
+
+  test('rejects severity_change without snapshot_value', () => {
+    expect(() =>
+      muteAlertBodySchema.validate({
+        conditions: [{ type: 'severity_change', field: 'kibana.alert.severity' }],
+      })
+    ).toThrow(`Condition type 'severity_change' requires a non-empty snapshot_value.`);
+  });
+
+  test('rejects severity_equals without value', () => {
+    expect(() =>
+      muteAlertBodySchema.validate({
+        conditions: [{ type: 'severity_equals', field: 'kibana.alert.severity' }],
+      })
+    ).toThrow(`Condition type 'severity_equals' requires a non-empty value.`);
   });
 
   test('accepts valid ISO 8601 expires_at formats', () => {

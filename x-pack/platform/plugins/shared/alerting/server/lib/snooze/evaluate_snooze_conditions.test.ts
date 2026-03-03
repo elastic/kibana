@@ -6,12 +6,12 @@
  */
 
 import { evaluateSnoozeConditions } from './evaluate_snooze_conditions';
-import type { AlertSnoozeConfig } from './evaluate_snooze_conditions';
+import type { SnoozedInstanceConfig } from '../snooze_types';
 
 describe('evaluateSnoozeConditions', () => {
   describe('time-based expiry', () => {
     it('returns shouldUnmute: true when the expiry time is in the past', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         expiresAt: new Date(Date.now() - 60000).toISOString(),
       };
       const result = evaluateSnoozeConditions(config, {});
@@ -20,7 +20,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: false when the expiry time is in the future', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         expiresAt: new Date(Date.now() + 3600000).toISOString(),
       };
       const result = evaluateSnoozeConditions(config, {});
@@ -30,7 +30,7 @@ describe('evaluateSnoozeConditions', () => {
 
   describe('field_change condition', () => {
     it('returns shouldUnmute: true when field has changed from snapshot', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'field_change',
@@ -47,7 +47,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: false when field has not changed', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'field_change',
@@ -63,7 +63,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: false when snapshotValue is undefined', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'field_change',
@@ -78,7 +78,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: false when monitored field is missing from alert data', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'field_change',
@@ -92,7 +92,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: false for severity_change when field is absent', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'severity_change',
@@ -108,7 +108,7 @@ describe('evaluateSnoozeConditions', () => {
 
   describe('severity_equals condition', () => {
     it('returns shouldUnmute: true when field equals target value', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'severity_equals',
@@ -125,7 +125,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: false when field does not equal target', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         conditions: [
           {
             type: 'severity_equals',
@@ -143,7 +143,7 @@ describe('evaluateSnoozeConditions', () => {
 
   describe('compound conditions (any operator)', () => {
     it('returns shouldUnmute: true if any condition is met', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         expiresAt: new Date(Date.now() + 3600000).toISOString(), // future, not expired
         conditions: [
           {
@@ -163,7 +163,7 @@ describe('evaluateSnoozeConditions', () => {
 
   describe('compound conditions (all operator)', () => {
     it('returns shouldUnmute: false if only some conditions are met', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         expiresAt: new Date(Date.now() + 3600000).toISOString(), // future, not expired
         conditions: [
           {
@@ -182,7 +182,7 @@ describe('evaluateSnoozeConditions', () => {
     });
 
     it('returns shouldUnmute: true if all conditions are met', () => {
-      const config: AlertSnoozeConfig = {
+      const config: SnoozedInstanceConfig = {
         expiresAt: new Date(Date.now() - 60000).toISOString(), // past, expired
         conditions: [
           {
@@ -202,7 +202,7 @@ describe('evaluateSnoozeConditions', () => {
 
   describe('indefinite mute (no conditions, no expiry)', () => {
     it('returns shouldUnmute: false', () => {
-      const config: AlertSnoozeConfig = {};
+      const config: SnoozedInstanceConfig = {};
       const result = evaluateSnoozeConditions(config, {});
       expect(result.shouldUnmute).toBe(false);
     });

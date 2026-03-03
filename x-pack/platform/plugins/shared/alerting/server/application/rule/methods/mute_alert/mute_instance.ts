@@ -16,6 +16,7 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { updateMeta } from '../../../../rules_client/lib';
+import { snoozeConditionOperator } from '../../../../../common/routes/rule/common/constants/v1';
 
 export async function muteInstance(
   context: RulesClientContext,
@@ -131,8 +132,10 @@ async function muteInstanceWithOCC(
       .concat({
         instanceId: alertInstanceId,
         ...(body.expiresAt ? { expiresAt: body.expiresAt } : {}),
-        ...(body.conditions ? { conditions: body.conditions } : {}),
-        ...(body.conditionOperator ? { conditionOperator: body.conditionOperator } : {}),
+        ...(body.conditions?.length ? { conditions: body.conditions } : {}),
+        ...(body.conditions?.length
+          ? { conditionOperator: body.conditionOperator ?? snoozeConditionOperator.ANY }
+          : {}),
       });
 
     await updateRuleSo({

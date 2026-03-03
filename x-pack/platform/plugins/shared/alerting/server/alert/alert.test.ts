@@ -914,11 +914,6 @@ describe('snooze config', () => {
     expect(alert.getSnoozeConfig()).toBeUndefined();
   });
 
-  test('isAlertSnoozed returns false when no snooze config', () => {
-    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
-    expect(alert.isAlertSnoozed()).toBe(false);
-  });
-
   test('setSnoozeConfig and getSnoozeConfig round-trip', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     const entry = {
@@ -929,7 +924,6 @@ describe('snooze config', () => {
     };
     alert.setSnoozeConfig(entry);
     expect(alert.getSnoozeConfig()).toEqual(entry);
-    expect(alert.isAlertSnoozed()).toBe(true);
   });
 
   test('setSnoozeConfig(undefined) clears snooze', () => {
@@ -940,6 +934,5 @@ describe('snooze config', () => {
     });
     alert.setSnoozeConfig(undefined);
     expect(alert.getSnoozeConfig()).toBeUndefined();
-    expect(alert.isAlertSnoozed()).toBe(false);
   });
 });

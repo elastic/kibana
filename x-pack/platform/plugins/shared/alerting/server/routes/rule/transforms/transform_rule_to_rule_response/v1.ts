@@ -147,9 +147,9 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   mute_all: rule.muteAll,
   ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
-  ...(rule.snoozedInstances?.length
-    ? { snoozed_instances: transformSnoozedInstances(rule.snoozedInstances) }
-    : {}),
+  snoozed_instances: rule.snoozedInstances?.length
+    ? transformSnoozedInstances(rule.snoozedInstances)
+    : [],
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   ...(rule.executionStatus
     ? {

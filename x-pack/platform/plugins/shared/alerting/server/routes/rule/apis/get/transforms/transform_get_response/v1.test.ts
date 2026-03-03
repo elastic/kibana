@@ -62,6 +62,7 @@ describe('transformGetResponse', () => {
         api_key_owner: '',
         throttle: '30s',
         muted_alert_ids: [],
+        snoozed_instances: [],
         execution_status: {
           status: 'unknown' as const,
           last_execution_date: new Date('2020-08-20T19:23:38Z').toISOString(),
@@ -106,6 +107,7 @@ describe('transformGetResponse', () => {
         api_key_owner: '',
         throttle: '30s',
         muted_alert_ids: [],
+        snoozed_instances: [],
         execution_status: {
           status: 'unknown' as const,
           last_execution_date: new Date('2020-08-20T19:23:38Z').toISOString(),
@@ -158,6 +160,7 @@ describe('transformGetResponse', () => {
         api_key_owner: '',
         throttle: '30s',
         muted_alert_ids: [],
+        snoozed_instances: [],
         execution_status: {
           status: 'unknown' as const,
           last_execution_date: new Date('2020-08-20T19:23:38Z').toISOString(),
@@ -193,6 +196,7 @@ describe('transformGetResponse', () => {
         api_key_owner: '',
         throttle: '30s',
         muted_alert_ids: [],
+        snoozed_instances: [],
         execution_status: {
           status: 'unknown' as const,
           last_execution_date: new Date('2020-08-20T19:23:38Z').toISOString(),

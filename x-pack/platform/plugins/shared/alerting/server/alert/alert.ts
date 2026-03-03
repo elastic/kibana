@@ -388,8 +388,4 @@ export class Alert<
   getSnoozeConfig(): SnoozedInstanceEntry | undefined {
     return this.snoozedInstance;
   }
-
-  isAlertSnoozed(): boolean {
-    return this.snoozedInstance != null;
-  }
 }

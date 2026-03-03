@@ -618,6 +618,35 @@ describe('Per-Alert Action Scheduler', () => {
       expect(scheduler.alertsToAutoUnmute[0].reason).toContain('Time expiry reached');
     });
 
+    test('should auto-unmute recovered alert when conditional snooze TTL expires', async () => {
+      // A recovered alert with an expired per-alert snooze should still appear in
+      // alertsToAutoUnmute so the rule SO is cleaned up.
+      const expiredSnooze = {
+        instanceId: '3',
+        expiresAt: new Date(Date.now() - 60000).toISOString(),
+      };
+      const recoveredAlert = generateRecoveredAlert({ id: 3 });
+      recoveredAlert['3'].setSnoozeConfig(expiredSnooze);
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          snoozedInstances: [expiredSnooze],
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+        recoveredAlerts: recoveredAlert,
+      });
+
+      // Active alerts get their actions as usual
+      expect(results).toHaveLength(4);
+      // The recovered alert should be queued for auto-unmute
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(1);
+      expect(scheduler.alertsToAutoUnmute[0].alertInstanceId).toBe('3');
+      expect(scheduler.alertsToAutoUnmute[0].reason).toContain('Time expiry reached');
+    });
+
     test('should treat alert as simple mute when in mutedInstanceIds but not snoozedInstances', async () => {
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),

@@ -51,9 +51,9 @@ export const transformPartialRule = <Params extends RuleParams = never>(
     ...(rule.muteAll !== undefined ? { mute_all: rule.muteAll } : {}),
     ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
     ...(rule.mutedInstanceIds ? { muted_alert_ids: rule.mutedInstanceIds } : {}),
-    ...(rule.snoozedInstances?.length
-      ? { snoozed_instances: transformSnoozedInstancesV1(rule.snoozedInstances) }
-      : {}),
+    snoozed_instances: rule.snoozedInstances?.length
+      ? transformSnoozedInstancesV1(rule.snoozedInstances)
+      : [],
     ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
     ...(rule.executionStatus
       ? {

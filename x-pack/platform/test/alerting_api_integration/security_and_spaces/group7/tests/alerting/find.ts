@@ -125,6 +125,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
+                snoozed_instances: [],
                 revision: 0,
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
@@ -326,6 +327,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 api_key_owner: null,
                 mute_all: false,
                 muted_alert_ids: [],
+                snoozed_instances: [],
                 notify_when: 'onThrottleInterval',
                 created_at: match.created_at,
                 updated_at: match.updated_at,
@@ -406,11 +408,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
+                snoozed_instances: [],
                 tags: [myTag],
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
+                snoozed_instances: [],
                 tags: [myTag],
               });
               break;
@@ -483,12 +487,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
+                snoozed_instances: [],
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
+                snoozed_instances: [],
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
               });
@@ -658,11 +664,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(omit(matchFirst, 'updatedAt')).to.eql({
           id: createdAlert.id,
           actions: [],
+          snoozed_instances: [],
           tags: [myTag],
         });
         expect(omit(matchSecond, 'updatedAt')).to.eql({
           id: createdSecondAlert.id,
           actions: [],
+          snoozed_instances: [],
           tags: [myTag],
         });
       });
@@ -714,12 +722,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           id: createdAlert.id,
           actions: [],
           name: 'abc',
+          snoozed_instances: [],
           tags: [myTag],
         });
         expect(omit(matchSecond, 'updatedAt')).to.eql({
           id: createdSecondAlert.id,
           actions: [],
           name: 'abc',
+          snoozed_instances: [],
           tags: [myTag],
         });
       });

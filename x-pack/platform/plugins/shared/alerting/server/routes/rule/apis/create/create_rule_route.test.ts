@@ -157,6 +157,7 @@ describe('createRuleRoute', () => {
     updated_by: mockedAlert.updatedBy,
     api_key_owner: mockedAlert.apiKeyOwner,
     muted_alert_ids: mockedAlert.mutedInstanceIds,
+    snoozed_instances: [],
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
     id: mockedAlert.id,

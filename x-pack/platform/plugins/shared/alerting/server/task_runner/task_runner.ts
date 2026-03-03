@@ -62,6 +62,7 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import type { AlertsToUpdateWithLastScheduledActions } from '../alerts_client/types';
+import type { SnoozedInstanceEntry } from '../lib/snooze_types';
 import {
   createTaskRunnerLogger,
   withAlertingSpan,
@@ -153,17 +154,7 @@ export class TaskRunner<
     AlertData
   >;
   private runDate = new Date();
-  private pendingSnoozedInstancesUpdate?: Array<{
-    instanceId: string;
-    expiresAt?: string;
-    conditions?: Array<{
-      type: string;
-      field: string;
-      value?: string;
-      snapshotValue?: string;
-    }>;
-    conditionOperator?: 'any' | 'all';
-  }>;
+  private pendingSnoozedInstancesUpdate?: SnoozedInstanceEntry[];
 
   constructor({
     context,
@@ -227,17 +218,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      snoozedInstances?: Array<{
-        instanceId: string;
-        expiresAt?: string;
-        conditions?: Array<{
-          type: string;
-          field: string;
-          value?: string;
-          snapshotValue?: string;
-        }>;
-        conditionOperator?: 'any' | 'all';
-      }>;
+      snoozedInstances?: SnoozedInstanceEntry[];
     }
   ) {
     const client = this.context.elasticsearch.client.asInternalUser;
@@ -299,6 +280,8 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    this.pendingSnoozedInstancesUpdate = undefined;
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
       apm.currentTransaction.addLabels({
@@ -497,8 +480,12 @@ export class TaskRunner<
       const updatedSnoozedInstances = (rule.snoozedInstances ?? []).filter(
         (e) => !autoUnmuteInstanceIds.has(e.instanceId)
       );
+      const getAlertMeta = (instanceId: string) =>
+        alertsToReturn[instanceId]?.meta ?? recoveredAlertsToReturn[instanceId]?.meta;
+
       for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
-        const uuid = alertsToReturn[alertInstanceId]?.meta?.uuid;
+        const meta = getAlertMeta(alertInstanceId);
+        const uuid = meta?.uuid;
         if (uuid) {
           alertUuidsToAutoUnmute.push(uuid);
         }
@@ -510,7 +497,7 @@ export class TaskRunner<
           id: alertInstanceId,
           uuid: uuid ?? alertInstanceId,
           message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
-          flapping: false,
+          flapping: meta?.flapping ?? false,
         });
       }
 

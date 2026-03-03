@@ -91,6 +91,9 @@ export function createAlertFactory<
 
   const maxAlerts = getMaxAlertLimit(configuredMaxAlerts);
 
+  // Build a Map for O(1) snooze lookups per alert creation
+  const snoozedInstancesMap = new Map((snoozedInstances ?? []).map((e) => [e.instanceId, e]));
+
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
@@ -110,7 +113,7 @@ export function createAlertFactory<
 
       if (!alerts[id]) {
         alerts[id] = new Alert<State, Context>(id);
-        const snoozeEntry = (snoozedInstances ?? []).find((e) => e.instanceId === id);
+        const snoozeEntry = snoozedInstancesMap.get(id);
         if (snoozeEntry) {
           alerts[id].setSnoozeConfig(snoozeEntry);
         }
