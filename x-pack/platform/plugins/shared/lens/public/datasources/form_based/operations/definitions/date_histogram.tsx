@@ -104,26 +104,38 @@ function getTimeZoneAndInterval(
   };
 }
 
-export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
-  if (interval !== 'm' && interval.endsWith('m')) {
-    return interval.replace('m', ' minutes');
+function splitIntervalToValueAndUnit(interval: string) {
+  if (!interval || interval === 'auto') return null;
+  const trimmed = interval.trim();
+  const numMatch = trimmed.match(/^[\d.]+/);
+  const value = numMatch ? parseFloat(numMatch[0]) : 1;
+  const unit = trimmed.replace(/^[\d.\s]+/, '').trim() || 'h';
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return { value, unit };
+}
+
+const ESQL_UNIT_MAP: Record<string, [string, string]> = {
+  ms: ['millisecond', 'milliseconds'],
+  s: ['second', 'seconds'],
+  m: ['minute', 'minutes'],
+  h: ['hour', 'hours'],
+  d: ['day', 'days'],
+  w: ['week', 'weeks'],
+  M: ['month', 'months'],
+  y: ['year', 'years'],
+};
+
+function mapToEsqlInterval(_dateRange: DateRange, interval: string) {
+  const parsed = splitIntervalToValueAndUnit(interval);
+  if (!parsed) return '1 hour';
+  const { value, unit } = parsed;
+  const n = value;
+  const pair = ESQL_UNIT_MAP[unit];
+  if (pair) {
+    const word = n === 1 ? pair[0] : pair[1];
+    return `${n} ${word}`;
   }
-  switch (interval) {
-    case '1M':
-      return '1 month';
-    case 'd':
-      return '1d';
-    case 'h':
-      return '1h';
-    case 'm':
-      return '1 minute';
-    case 's':
-      return '1s';
-    case 'ms':
-      return '1ms';
-    default:
-      return interval;
-  }
+  return interval;
 }
 
 export const dateHistogramOperation: OperationDefinition<
