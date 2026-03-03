@@ -455,7 +455,7 @@ describe('query_utils', () => {
         took: 1,
         timed_out: false,
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: { total: { value: totalHits, relation: 'eq' }, hits: [] },
+        hits: { total: { value: totalHits, relation: 'eq' as const }, hits: [] },
         aggregations: {
           rounds_distribution: { buckets: roundsBuckets },
           total_rounds: { value: totalRounds },
