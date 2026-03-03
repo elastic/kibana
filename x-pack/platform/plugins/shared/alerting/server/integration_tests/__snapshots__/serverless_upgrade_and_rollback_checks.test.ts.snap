@@ -6192,6 +6192,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
@@ -6922,6 +6925,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
@@ -7718,6 +7724,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
@@ -8429,6 +8438,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
@@ -9196,6 +9208,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
@@ -9964,6 +9979,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
@@ -10732,6 +10750,9 @@ Object {
                             "type": "object",
                           },
                         },
+                        "required": Array [
+                          "command",
+                        ],
                         "type": "object",
                       },
                     ],
