@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
   const browser = getService('browser');
 
   describe('telemetry', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/252235
-    describe.skip('context', () => {
+    describe('context', () => {
       before(async () => {
         await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
@@ -58,15 +57,17 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilSearchingHasFinished();
 
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
-        });
+        await retry.try(async () => {
+          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['performance_metric'],
+            withTimeoutMs: 500,
+          });
 
-        expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'observability-root-profile',
-          'default-data-source-profile',
-        ]);
+          expect(events[events.length - 1].context.discoverProfiles).to.eql([
+            'observability-root-profile',
+            'default-data-source-profile',
+          ]);
+        });
       });
 
       it('should set EBT context for telemetry events when logs data source profile and reset', async () => {
@@ -78,15 +79,17 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilSearchingHasFinished();
 
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
-        });
+        await retry.try(async () => {
+          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['performance_metric'],
+            withTimeoutMs: 500,
+          });
 
-        expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'observability-root-profile',
-          'observability-logs-data-source-profile',
-        ]);
+          expect(events[events.length - 1].context.discoverProfiles).to.eql([
+            'observability-root-profile',
+            'observability-logs-data-source-profile',
+          ]);
+        });
 
         // should reset the profiles when navigating away from Discover
         await testSubjects.click('logo');
@@ -130,9 +133,9 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/252793
-    describe.skip('contextual profiles', () => {
+    describe('contextual profiles', () => {
       before(async () => {
+        await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
         );
@@ -242,9 +245,9 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/252799
-    describe.skip('events', () => {
+    describe('events', () => {
       beforeEach(async () => {
+        await svlCommonPage.loginAsAdmin();
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
