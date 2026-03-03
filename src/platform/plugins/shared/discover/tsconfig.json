@@ -129,8 +129,7 @@
     "@kbn/as-code-filters-schema",
     "@kbn/scout",
     "@kbn/synthtrace-client",
-    "@kbn/cps-utils",
-    "@kbn/es-types"
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }
