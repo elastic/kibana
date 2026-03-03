@@ -199,9 +199,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             `retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`
         );
 
-        const checkpoint = await filterCompletedSpecs(files, log);
-        files = checkpoint.remaining;
-        checkpointSkippedCount = checkpoint.skippedCount;
+        await filterCompletedSpecs(files, log).then((checkpoint) => {
+          files = checkpoint.remaining;
+          checkpointSkippedCount = checkpoint.skippedCount;
+        });
       }
 
       if (!files?.length) {
