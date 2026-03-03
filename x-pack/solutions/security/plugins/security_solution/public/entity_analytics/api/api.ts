@@ -10,6 +10,7 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
+  Entity,
   AssetCriticalityRecord,
   CreateEntitySourceResponse,
   CreatePrivilegesImportIndexResponse,
@@ -44,6 +45,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
   ASSET_CRITICALITY_PUBLIC_URL,
+  ENTITIES_URL,
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
   getPrivmonMonitoringSourceByIdUrl,
   LIST_ENTITIES_URL,
@@ -123,6 +125,21 @@ export const useEntityAnalyticsRoutes = () => {
           filterQuery: params.filterQuery,
         },
         signal,
+      });
+
+    /**
+     * Create or update an entity in the Entity Store (e.g. after asset criticality change).
+     */
+    const upsertEntity = (params: {
+      entityType: 'host' | 'user' | 'service' | 'generic';
+      body: Entity;
+      force?: boolean;
+    }) =>
+      http.fetch<void>(`${ENTITIES_URL}/${params.entityType}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify(params.body),
+        query: params.force !== undefined ? { force: params.force ? 'true' : 'false' } : undefined,
       });
 
     /**
@@ -523,6 +540,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      upsertEntity,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,

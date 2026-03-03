@@ -10,6 +10,9 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
 import { buildEntityNameFilter } from '../../../../common/search_strategy';
+import { euid } from '../../../../../../plugins/entity_store/common';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../common/lib/kibana';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -25,6 +28,7 @@ import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
+import { ESQuery } from '@kbn/security-solution-plugin/common/typed_json';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
@@ -44,16 +48,25 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelProps) => {
-  const serviceNameFilterQuery = useMemo(
-    () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
-    [serviceName]
-  );
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const serviceFilterQuery = useMemo(() => {
+    if (entityStoreV2Enabled && serviceName) {
+      return euid.getEuidDslFilterBasedOnDocument('service', {
+        'service.name': serviceName,
+      }) ?? undefined;
+    }
+    return serviceName
+      ? buildEntityNameFilter(EntityType.service, [serviceName])
+      : undefined;
+  }, [entityStoreV2Enabled, serviceName]);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,
-    filterQuery: serviceNameFilterQuery,
+    filterQuery: serviceFilterQuery as unknown as ESQuery | undefined,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
+    skip: entityStoreV2Enabled,
   });
 
   const { inspect, refetch, loading } = riskScoreState;

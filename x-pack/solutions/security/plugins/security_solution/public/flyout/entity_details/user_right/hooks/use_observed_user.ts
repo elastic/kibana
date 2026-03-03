@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import type { UserItem } from '../../../../../common/search_strategy';
@@ -24,10 +25,16 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytic
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../shared/hooks/use_entity_from_store';
 
+export type ObservedUserResult = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
+  entityRecord?: EntityStoreRecord | null;
+  /** Refetch from entity store (when entity store v2 is enabled). */
+  refetchEntityStore?: () => void;
+};
+
 export const useObservedUser = (
   entityIdentifiers: Record<string, string>,
   scopeId: string
-): Omit<ObservedEntityData<UserItem>, 'anomalies'> => {
+): ObservedUserResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
@@ -78,22 +85,24 @@ export const useObservedUser = (
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
-    entityIdentifiers,
-    entityType: 'user',
+    field: 'user.name',
+    value: userName,
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
+    skip: entityStoreV2Enabled,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
-    entityIdentifiers,
-    entityType: 'user',
+    field: 'user.name',
+    value: userName,
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
+    skip: entityStoreV2Enabled,
   });
 
-  return useMemo(() => {
+  return useMemo((): ObservedUserResult => {
     if (entityStoreV2Enabled) {
       return {
         details: (entityFromStore.entity ?? {}) as UserItem,
@@ -106,6 +115,8 @@ export const useObservedUser = (
           date: entityFromStore.lastSeen ?? undefined,
           isLoading: entityFromStore.isLoading,
         },
+        entityRecord: entityFromStore.entityRecord ?? null,
+        refetchEntityStore: entityFromStore.refetch,
       };
     }
     return {
@@ -120,6 +131,7 @@ export const useObservedUser = (
   }, [
     entityStoreV2Enabled,
     entityFromStore.entity,
+    entityFromStore.entityRecord,
     entityFromStore.firstSeen,
     entityFromStore.isLoading,
     entityFromStore.lastSeen,

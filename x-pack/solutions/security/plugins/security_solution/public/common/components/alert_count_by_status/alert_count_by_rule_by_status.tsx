@@ -36,9 +36,10 @@ import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
 
 interface AlertCountByStatusProps {
-  entityIdentifiers: EntityIdentifiers;
+  entityIdentifiers?: EntityIdentifiers;
   additionalFilters?: ESBoolQuery[];
   signalIndexName: string | null;
+  entityFilter?: Filter;
 }
 
 interface StatusSelection {
@@ -66,7 +67,7 @@ const buildTimelineFiltersFromEntityIdentifiers = (
   return esFilters
     .filter(
       (filter): filter is { term: Record<string, string> } =>
-        'term' in filter && filter.term !== undefined
+        filter != null && filter !== undefined && 'term' in filter && filter.term !== undefined
     )
     .flatMap((filter) => {
       return Object.entries(filter.term).map(([field, value]) => ({
@@ -74,6 +75,29 @@ const buildTimelineFiltersFromEntityIdentifiers = (
         value: String(value),
       }));
     });
+};
+
+/**
+ * Normalizes entityIdentifiers or legacy entityFilter into a single EntityIdentifiers record.
+ * Prefers entityIdentifiers when both are provided.
+ */
+const resolveEntityIdentifiers = (
+  entityIdentifiers?: EntityIdentifiers | null,
+  entityFilter?: Filter | null
+): EntityIdentifiers => {
+  if (entityFilter != null) {
+    const value =
+      typeof entityFilter.value === 'string'
+        ? entityFilter.value
+        : Array.isArray(entityFilter.value)
+          ? entityFilter.value[0]
+          : '';
+    return { [entityFilter.field]: String(value) };
+  }
+  if (entityIdentifiers != null && Object.keys(entityIdentifiers).length > 0) {
+    return entityIdentifiers;
+  }
+  return {};
 };
 
 /**
@@ -105,8 +129,12 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 `;
 
 export const AlertCountByRuleByStatus = React.memo(
-  ({ entityIdentifiers, signalIndexName, additionalFilters }: AlertCountByStatusProps) => {
-    const entityKey = getEntityKey(entityIdentifiers);
+  ({ entityIdentifiers, signalIndexName, additionalFilters, entityFilter }: AlertCountByStatusProps) => {
+    const entityIdentifiersResolved = useMemo(
+      () => resolveEntityIdentifiers(entityIdentifiers, entityFilter),
+      [entityIdentifiers, entityFilter]
+    );
+    const entityKey = getEntityKey(entityIdentifiersResolved);
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${entityKey}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
 
@@ -123,8 +151,8 @@ export const AlertCountByRuleByStatus = React.memo(
     });
 
     const entityTimelineFilters = useMemo(
-      () => buildTimelineFiltersFromEntityIdentifiers(entityIdentifiers),
-      [entityIdentifiers]
+      () => buildTimelineFiltersFromEntityIdentifiers(entityIdentifiersResolved),
+      [entityIdentifiersResolved]
     );
 
     const columns = useMemo(() => {
@@ -157,7 +185,7 @@ export const AlertCountByRuleByStatus = React.memo(
 
     const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
       additionalFilters,
-      entityIdentifiers,
+      entityIdentifiers: entityIdentifiersResolved,
       queryId,
       statuses: (selectedStatusesByField[entityKey] || ['open']) as Status[],
       skip: !toggleStatus,

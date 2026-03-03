@@ -9,8 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { euid } from '../../../../../../plugins/entity_store/common';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import type { ESQuery } from '../../../../common/typed_json';
+import { useUiSetting } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -31,6 +34,11 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/compon
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../shared/entity_store_risk_utils';
+import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
@@ -65,6 +73,7 @@ export const UserPanel = ({
 }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   // Extract userName from entityIdentifiers
   // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
@@ -74,13 +83,21 @@ export const UserPanel = ({
     return userNameFromIdentifiers as string;
   }, [entityIdentifiers]);
 
-  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+  const userFilterQuery = useMemo((): ESQuery | undefined => {
+    if (entityStoreV2Enabled) {
+      return euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers) as unknown as ESQuery | undefined;
+    }
+    return effectiveUserName
+      ? (buildUserNamesFilter([effectiveUserName]) as ESQuery)
+      : undefined;
+  }, [entityStoreV2Enabled, entityIdentifiers, effectiveUserName]);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
-    filterQuery: entityFilters as ESQuery,
+    filterQuery: userFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
+    skip: entityStoreV2Enabled,
   });
 
   const { inspect, refetch, loading } = riskScoreState;
@@ -91,7 +108,6 @@ export const UserPanel = ({
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const isRiskScoreExist = !!userRiskData?.user.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -123,6 +139,11 @@ export const UserPanel = ({
     setQuery,
   });
 
+  const isRiskScoreExist =
+    entityStoreV2Enabled && observedUser.entityRecord
+      ? !!getRiskFromEntityRecord(observedUser.entityRecord)
+      : !!userRiskData?.user?.risk;
+
   const openDetailsPanel = useNavigateToUserDetails({
     entityIdentifiers,
     scopeId,
@@ -132,6 +153,29 @@ export const UserPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
   });
+
+  const { upsertEntity } = useEntityAnalyticsRoutes();
+
+  const riskScoreStateFromStore =
+    entityStoreV2Enabled && observedUser.entityRecord
+      ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
+          refetch: observedUser.refetchEntityStore ?? (() => {}),
+          isLoading: observedUser.isLoading,
+          error: null,
+        })
+      : null;
+
+  const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
+  
+
+  const handleSaveAssetCriticalityViaEntityStore = useCallback(
+    async (updatedRecord: Parameters<typeof upsertEntity>[0]['body']) => {
+      await upsertEntity({ entityType: 'user', body: updatedRecord, force: true });
+      observedUser.refetchEntityStore?.();
+      calculateEntityRiskScore();
+    },
+    [upsertEntity, observedUser.refetchEntityStore, calculateEntityRiskScore]
+  );
 
   const openPanelFirstTab = useCallback(
     () =>
@@ -144,7 +188,7 @@ export const UserPanel = ({
   );
 
   const hasUserDetailsData =
-    !!userRiskData?.user.risk ||
+    isRiskScoreExist ||
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
@@ -164,7 +208,7 @@ export const UserPanel = ({
       />
       <UserPanelContent
         observedUser={observedUser}
-        riskScoreState={riskScoreState}
+        riskScoreState={effectiveRiskScoreState}
         recalculatingScore={recalculatingScore}
         onAssetCriticalityChange={calculateEntityRiskScore}
         contextID={contextID}
@@ -172,6 +216,17 @@ export const UserPanel = ({
         openDetailsPanel={openDetailsPanel}
         isPreviewMode={isPreviewMode}
         entityIdentifiers={entityIdentifiers}
+        entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+        criticalityFromEntityStore={
+          entityStoreV2Enabled && observedUser.entityRecord?.asset?.criticality
+            ? observedUser.entityRecord.asset.criticality
+            : undefined
+        }
+        onSaveAssetCriticalityViaEntityStore={
+          entityStoreV2Enabled && observedUser.entityRecord
+            ? handleSaveAssetCriticalityViaEntityStore
+            : undefined
+        }
       />
       {!isPreviewMode && assetInventoryEnabled && (
         <UserPanelFooter entityIdentifiers={entityIdentifiers} />

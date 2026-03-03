@@ -86,6 +86,13 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../../../entity_details/shared/entity_store_risk_utils';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -179,13 +186,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     });
   }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
-  const [isHostLoading, { inspect, hostDetails, refetch }] = useHostDetails({
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const observedHost = useObservedHost(entityIdentifiers, scopeId);
+
+  const [isHostLoadingFromDetails, hostDetailsArgs, refetch] = useHostDetails({
     id: hostDetailsQueryId,
     startDate: from,
     endDate: to,
     entityIdentifiers,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
+    skip: entityStoreV2Enabled || selectedPatterns.length === 0,
   });
 
   const filterQuery = useMemo(
@@ -195,11 +205,33 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const { data: hostRisk } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.host,
-    skip: hostName == null,
+    skip: entityStoreV2Enabled || hostName == null,
     timerange,
   });
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-  const isRiskScoreExist = !!hostRiskData?.host.risk;
+
+  const hostDetails = entityStoreV2Enabled ? observedHost.details : hostDetailsArgs.hostDetails;
+  const isHostLoading = entityStoreV2Enabled ? observedHost.isLoading : isHostLoadingFromDetails;
+  const hostRiskScoreStateFromEntityStore = useMemo(
+    () =>
+      entityStoreV2Enabled && observedHost.entityRecord
+        ? buildRiskScoreStateFromEntityRecord(EntityType.host, observedHost.entityRecord, {
+            refetch: observedHost.refetchEntityStore ?? (() => {}),
+            isLoading: observedHost.isLoading,
+            error: null,
+          })
+        : undefined,
+    [
+      entityStoreV2Enabled,
+      observedHost.entityRecord,
+      observedHost.refetchEntityStore,
+      observedHost.isLoading,
+    ]
+  );
+  const isRiskScoreExist =
+    entityStoreV2Enabled && observedHost.entityRecord
+      ? !!getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level
+      : !!hostRiskData?.host?.risk;
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers,
@@ -396,11 +428,18 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
               endDate={to}
               narrowDateRange={narrowDateRange}
               setQuery={setQuery}
-              refetch={refetch}
-              inspect={inspect}
+              refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
+              inspect={hostDetailsArgs.inspect}
               deleteQuery={deleteQuery}
               scopeId={scopeId}
               isFlyoutOpen={true}
+              riskScoreState={hostRiskScoreStateFromEntityStore}
+              firstSeenFromEntityStore={
+                entityStoreV2Enabled ? (observedHost.firstSeen?.date ?? undefined) : undefined
+              }
+              lastSeenFromEntityStore={
+                entityStoreV2Enabled ? (observedHost.lastSeen?.date ?? undefined) : undefined
+              }
             />
           )}
         </AnomalyTableProvider>

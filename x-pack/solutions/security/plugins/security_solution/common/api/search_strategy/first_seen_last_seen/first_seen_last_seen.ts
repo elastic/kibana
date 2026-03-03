@@ -19,8 +19,6 @@ export const firstLastSeenRequestOptionsSchema = requestBasicOptionsSchema.exten
   field: z.string(),
   value: z.string(),
   factoryQueryType: z.literal(FirstLastSeenQuery),
-  entityIdentifiers: z.record(z.string(), z.string()).optional(),
-  entityType: z.enum(['host', 'user', 'service']).optional(),
 });
 
 export type FirstLastSeenRequestOptionsInput = z.input<typeof firstLastSeenRequestOptionsSchema>;

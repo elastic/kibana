@@ -46,6 +46,8 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import { RiskScoreDocTooltip } from '../common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -63,6 +65,12 @@ interface HostSummaryProps {
   entityIdentifiers: Record<string, string>;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When using Entity Store v2: pre-fetched risk state from entity store. */
+  riskScoreState?: RiskScoreState<EntityType.host>;
+  /** When using Entity Store v2: first seen from entity lifecycle. */
+  firstSeenFromEntityStore?: string;
+  /** When using Entity Store v2: last seen from entity lifecycle. */
+  lastSeenFromEntityStore?: string;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -91,6 +99,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
     entityIdentifiers,
     jobNameById,
     isFlyoutOpen = false,
+    riskScoreState: riskScoreStateFromEntityStore,
+    firstSeenFromEntityStore,
+    lastSeenFromEntityStore,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -116,26 +127,28 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
-      data: hostRisk,
-      isAuthorized,
+      data: hostRiskFromSearch,
+      isAuthorized: isRiskScoreAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
-   } = useRiskScore({
+    } = useRiskScore({
       filterQuery,
       riskEntity: EntityType.host,
-     skip: effectiveHostName == null,
-    onlyLatest: false,
+      skip: !!riskScoreStateFromEntityStore || effectiveHostName == null,
+      onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
 
+    const hostRisk = riskScoreStateFromEntityStore?.data ?? hostRiskFromSearch;
+    const isAuthorized = riskScoreStateFromEntityStore ? true : isRiskScoreAuthorized;
 
     useQueryInspector({
       deleteQuery,
-      inspect: inspectRiskScore,
-      loading: loadingRiskScore,
+      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
       setQuery,
     });
 
@@ -212,26 +225,47 @@ export const HostOverview = React.memo<HostSummaryProps>(
         },
         {
           title: i18n.FIRST_SEEN,
-          description: (
-            <FirstLastSeen
-              indexPatterns={indexNames}
-              entityIdentifiers={entityIdentifiers}
-              type={FirstLastSeenType.FIRST_SEEN}
-            />
-          ),
+          description:
+            firstSeenFromEntityStore != null ? (
+              <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
+            ) : effectiveHostName != null ? (
+              <FirstLastSeen
+                indexPatterns={indexNames}
+                field="host.name"
+                value={effectiveHostName}
+                type={FirstLastSeenType.FIRST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.LAST_SEEN,
-          description: (
-            <FirstLastSeen
-              indexPatterns={indexNames}
-              entityIdentifiers={entityIdentifiers}
-              type={FirstLastSeenType.LAST_SEEN}
-            />
-          ),
+          description:
+            lastSeenFromEntityStore != null ? (
+              <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
+            ) : effectiveHostName != null ? (
+              <FirstLastSeen
+                indexPatterns={indexNames}
+                field="host.name"
+                value={effectiveHostName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
       ],
-      [data, scopeId, indexNames, entityIdentifiers, isFlyoutOpen]
+      [
+        data,
+        scopeId,
+        indexNames,
+        entityIdentifiers,
+        isFlyoutOpen,
+        effectiveHostName,
+        firstSeenFromEntityStore,
+        lastSeenFromEntityStore,
+      ]
     );
     const firstColumn = useMemo(
       () =>

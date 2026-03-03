@@ -16,6 +16,7 @@ import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
@@ -24,10 +25,16 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytic
 import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../shared/hooks/use_entity_from_store';
 
+export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
+  entityRecord?: EntityStoreRecord | null;
+  /** Refetch from entity store (when entity store v2 is enabled). */
+  refetchEntityStore?: () => void;
+};
+
 export const useObservedHost = (
   entityIdentifiers: Record<string, string>,
   scopeId: string
-): Omit<ObservedEntityData<HostItem>, 'anomalies'> => {
+): ObservedHostResult => {
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
@@ -51,9 +58,17 @@ export const useObservedHost = (
     skip: !entityStoreV2Enabled || isInitializing,
   });
 
+  const hostName = useMemo(
+    () =>
+      entityIdentifiers['host.name'] ||
+      Object.values(entityIdentifiers)[0] ||
+      '',
+    [entityIdentifiers]
+  );
+
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,
-    entityIdentifiers,
+    hostName,
     indexNames: securityDefaultPatterns,
     id: HOST_PANEL_RISK_SCORE_QUERY_ID,
     skip: isInitializing || entityStoreV2Enabled,
@@ -70,22 +85,24 @@ export const useObservedHost = (
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
-    entityIdentifiers,
-    entityType: 'host',
+    field: 'host.name',
+    value: hostName,
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
+    skip: entityStoreV2Enabled,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
-    entityIdentifiers,
-    entityType: 'host',
+    field: 'host.name',
+    value: hostName,
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
+    skip: entityStoreV2Enabled,
   });
 
-  return useMemo(() => {
+  return useMemo((): ObservedHostResult => {
     if (entityStoreV2Enabled) {
       return {
         details: (entityFromStore.entity ?? {}) as HostItem,
@@ -98,6 +115,8 @@ export const useObservedHost = (
           date: entityFromStore.lastSeen ?? undefined,
           isLoading: entityFromStore.isLoading,
         },
+        entityRecord: entityFromStore.entityRecord ?? null,
+        refetchEntityStore: entityFromStore.refetch,
       };
     }
     return {

@@ -20,7 +20,7 @@ interface HostBodyComponentDispatchProps {
 }
 
 export interface HostDetailsProps {
-  entityIdentifiers: Record<string, string>;
+  detailName: string;
   hostDetailsPagePath: string;
 }
 

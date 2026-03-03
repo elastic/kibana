@@ -7,6 +7,8 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import type { Entity } from '../../../../common/api/entity_analytics';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -35,6 +37,9 @@ interface UserPanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
+  entityRecord?: Entity;
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
 }
 
 export const UserPanelContent = ({
@@ -47,6 +52,9 @@ export const UserPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  entityRecord,
+  criticalityFromEntityStore,
+  onSaveAssetCriticalityViaEntityStore,
 }: UserPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -78,6 +86,9 @@ export const UserPanelContent = ({
       <AssetCriticalityAccordion
         entity={{ name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}
+        entityRecord={entityRecord}
+        criticalityFromEntityStore={criticalityFromEntityStore}
+        onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
       />
       <EntityInsight
         entityIdentifiers={entityIdentifiers}

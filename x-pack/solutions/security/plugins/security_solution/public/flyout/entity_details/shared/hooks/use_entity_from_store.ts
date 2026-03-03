@@ -7,7 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import type { HostEntity, UserEntity } from '../../../../../common/api/entity_analytics';
+import type {
+  HostEntity,
+  UserEntity,
+  ServiceEntity,
+} from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import { euid } from '../../../../../../../plugins/entity_store/common';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
@@ -59,8 +63,12 @@ export interface UseEntityFromStoreParams {
   skip: boolean;
 }
 
+export type EntityStoreRecord = HostEntity | UserEntity | ServiceEntity;
+
 export interface EntityFromStoreResult<T> {
   entity: T | null;
+  /** Raw entity store record (host/user/service) with risk and asset criticality. */
+  entityRecord: EntityStoreRecord | null;
   firstSeen: string | null;
   lastSeen: string | null;
   isLoading: boolean;
@@ -113,6 +121,7 @@ export function useEntityFromStore(
 
   return {
     entity: mappedDetails,
+    entityRecord: record ?? null,
     firstSeen,
     lastSeen,
     isLoading,

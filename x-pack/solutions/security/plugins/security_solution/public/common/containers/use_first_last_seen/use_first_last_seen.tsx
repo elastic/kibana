@@ -18,7 +18,9 @@ export interface FirstLastSeenArgs {
   firstSeen?: string | null;
   lastSeen?: string | null;
 }
-export interface UseFirstLastSeenBase {
+export interface UseFirstLastSeen {
+  field: string;
+  value: string;
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
   filterQuery?: ESQuery | string;
@@ -26,63 +28,14 @@ export interface UseFirstLastSeenBase {
   skip?: boolean;
 }
 
-export interface UseFirstLastSeenWithField extends UseFirstLastSeenBase {
-  field: string;
-  value: string;
-  entityIdentifiers?: never;
-  entityType?: never;
-}
-
-export interface UseFirstLastSeenWithEntityIdentifiers extends UseFirstLastSeenBase {
-  entityIdentifiers: Record<string, string>;
-  entityType: 'host' | 'user' | 'service';
-  field?: never;
-  value?: never;
-}
-
-export type UseFirstLastSeen = UseFirstLastSeenWithField | UseFirstLastSeenWithEntityIdentifiers;
-
-export const useFirstLastSeen = (props: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
-  const { order, defaultIndex, filterQuery: externalFilterQuery, skip = false } = props;
-
-  const isEntityIdentifiersMode =
-    'entityIdentifiers' in props &&
-    props.entityIdentifiers != null &&
-    Object.keys(props.entityIdentifiers).length > 0 &&
-    'entityType' in props &&
-    props.entityType != null;
-
-  const entityIdentifiersFromProps =
-    'entityIdentifiers' in props ? props.entityIdentifiers : undefined;
-  const entityTypeFromProps = 'entityType' in props ? props.entityType : undefined;
-  const fieldFromProps = 'field' in props ? props.field : undefined;
-  const valueFromProps = 'value' in props ? props.value : undefined;
-
-  const searchParams = useMemo(() => {
-    if (isEntityIdentifiersMode && entityIdentifiersFromProps && entityTypeFromProps) {
-      return {
-        entityIdentifiers: entityIdentifiersFromProps,
-        entityType: entityTypeFromProps,
-        filterQuery: externalFilterQuery,
-      };
-    }
-    if (fieldFromProps != null && valueFromProps != null) {
-      return {
-        field: fieldFromProps,
-        value: valueFromProps,
-        filterQuery: externalFilterQuery,
-      };
-    }
-    return null;
-  }, [
-    isEntityIdentifiersMode,
-    entityIdentifiersFromProps,
-    entityTypeFromProps,
-    fieldFromProps,
-    valueFromProps,
-    externalFilterQuery,
-  ]);
-
+export const useFirstLastSeen = ({
+  field,
+  value,
+  order,
+  defaultIndex,
+  filterQuery,
+  skip = false,
+}: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { loading, result, search, error } = useSearchStrategy<typeof FirstLastSeenQuery>({
     factoryQueryType: FirstLastSeenQuery,
     initialResult: {
@@ -93,13 +46,15 @@ export const useFirstLastSeen = (props: UseFirstLastSeen): [boolean, FirstLastSe
   });
 
   useEffect(() => {
-    if (skip || searchParams == null) return;
+    if (skip) return;
     search({
       defaultIndex,
+      field,
+      value,
       order,
-      ...searchParams,
+      filterQuery,
     });
-  }, [defaultIndex, order, search, searchParams, skip]);
+  }, [defaultIndex, field, value, order, search, filterQuery, skip]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

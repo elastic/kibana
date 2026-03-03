@@ -29,6 +29,10 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import {
   FirstLastSeen,
@@ -67,6 +71,7 @@ import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
@@ -93,6 +98,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
@@ -115,30 +121,60 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
     [hostName]
   );
 
+  const entityFromStore = useEntityFromStore({
+    entityIdentifiers,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled,
+  });
+
   const {
     data: hostRisk,
-    isAuthorized,
+    isAuthorized: isRiskScoreAuthorized,
     loading: isRiskScoreLoading,
   } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.host,
-    skip: hostName == null,
+    skip: entityStoreV2Enabled || hostName == null,
     timerange,
   });
-  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-  const isRiskScoreExist = !!hostRiskData?.host.risk;
+  const hostRiskFromSearch = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     entityIdentifiers,
     indexNames: selectedPatterns,
     startDate: from,
     endDate: to,
+    skip: entityStoreV2Enabled,
   });
 
-  const hostOSFamilyValue = useMemo(
-    () => getField(getOr([], 'host.os.family', hostDetails)),
-    [hostDetails]
-  );
+  const hostRiskData = useMemo(() => {
+    if (entityStoreV2Enabled && entityFromStore.entityRecord) {
+      const riskFromRecord = getRiskFromEntityRecord(entityFromStore.entityRecord);
+      if (riskFromRecord?.calculated_level) {
+        return {
+          host: {
+            name: hostName,
+            risk: {
+              calculated_level: riskFromRecord.calculated_level,
+              calculated_score: riskFromRecord.calculated_score,
+              calculated_score_norm: riskFromRecord.calculated_score_norm,
+            },
+          },
+        };
+      }
+    }
+    return hostRiskFromSearch;
+  }, [entityStoreV2Enabled, entityFromStore.entityRecord, hostName, hostRiskFromSearch]);
+
+  const isRiskScoreExist = !!hostRiskData?.host?.risk;
+  const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
+
+  const hostOSFamilyValue = useMemo(() => {
+    if (entityStoreV2Enabled) {
+      return undefined;
+    }
+    return getField(getOr([], 'host.os.family', hostDetails));
+  }, [entityStoreV2Enabled, hostDetails]);
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
@@ -159,20 +195,38 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
     () => [
       {
         title: LAST_SEEN,
-        description: (
-          <FirstLastSeen
-            indexPatterns={selectedPatterns}
-            entityIdentifiers={entityIdentifiers}
-            type={FirstLastSeenType.LAST_SEEN}
-          />
-        ),
+        description:
+          hostName != null ? (
+            entityStoreV2Enabled && entityFromStore.lastSeen ? (
+              <PreferenceFormattedDateFromPrimitive value={entityFromStore.lastSeen} />
+            ) : !entityStoreV2Enabled ? (
+              <FirstLastSeen
+                indexPatterns={selectedPatterns}
+                field="host.name"
+                value={hostName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            )
+          ) : (
+            getEmptyTagValue()
+          ),
       },
     ],
-    [entityIdentifiers, selectedPatterns]
+    [
+      hostName,
+      selectedPatterns,
+      entityStoreV2Enabled,
+      entityFromStore.lastSeen,
+    ]
   );
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  const isLoading =
+    entityStoreV2Enabled ? entityFromStore.isLoading : isRiskScoreLoading || isHostDetailsLoading;
 
   const [hostRiskLevel] = useMemo(
     () => [
@@ -187,7 +241,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
         ),
         description: (
           <>
-            {hostRiskData ? (
+            {hostRiskData?.host?.risk?.calculated_level ? (
               <RiskScoreLevel severity={hostRiskData.host.risk.calculated_level} />
             ) : (
               getEmptyTagValue()
@@ -249,7 +303,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isRiskScoreLoading || isHostDetailsLoading ? (
+      {isLoading ? (
         <EuiSkeletonText
           data-test-subj={ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(

@@ -44,6 +44,8 @@ import { RiskScoreLevel } from '../../../entity_analytics/components/severity/co
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreDocTooltip } from '../common';
 import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -61,6 +63,12 @@ export interface UserSummaryProps {
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When using Entity Store v2: pre-fetched risk state from entity store. */
+  riskScoreState?: RiskScoreState<EntityType.user>;
+  /** When using Entity Store v2: first seen from entity lifecycle. */
+  firstSeenFromEntityStore?: string;
+  /** When using Entity Store v2: last seen from entity lifecycle. */
+  lastSeenFromEntityStore?: string;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -89,6 +97,9 @@ export const UserOverview = React.memo<UserSummaryProps>(
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
+    riskScoreState: riskScoreStateFromEntityStore,
+    firstSeenFromEntityStore,
+    lastSeenFromEntityStore,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -114,25 +125,31 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
-      data: userRisk,
-      isAuthorized,
+      data: userRiskFromSearch,
+      isAuthorized: isRiskScoreAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      skip: !userName || Object.keys(entityIdentifiers).length === 0,
+      skip:
+        !!riskScoreStateFromEntityStore ||
+        !userName ||
+        Object.keys(entityIdentifiers).length === 0,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
 
+    const userRisk = riskScoreStateFromEntityStore?.data ?? userRiskFromSearch;
+    const isAuthorized = riskScoreStateFromEntityStore ? true : isRiskScoreAuthorized;
+
     useQueryInspector({
       deleteQuery,
-      inspect: inspectRiskScore,
-      loading: loadingRiskScore,
+      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
       setQuery,
     });
 
@@ -246,23 +263,35 @@ export const UserOverview = React.memo<UserSummaryProps>(
         [
           {
             title: i18n.FIRST_SEEN,
-            description: (
-              <FirstLastSeen
-                indexPatterns={indexPatterns}
-                entityIdentifiers={entityIdentifiers}
-                type={FirstLastSeenType.FIRST_SEEN}
-              />
-            ),
+            description:
+              firstSeenFromEntityStore != null ? (
+                <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
+              ) : userName != null && userName !== '' ? (
+                <FirstLastSeen
+                  indexPatterns={indexPatterns}
+                  field="user.name"
+                  value={userName}
+                  type={FirstLastSeenType.FIRST_SEEN}
+                />
+              ) : (
+                getEmptyTagValue()
+              ),
           },
           {
             title: i18n.LAST_SEEN,
-            description: (
-              <FirstLastSeen
-                indexPatterns={indexPatterns}
-                entityIdentifiers={entityIdentifiers}
-                type={FirstLastSeenType.LAST_SEEN}
-              />
-            ),
+            description:
+              lastSeenFromEntityStore != null ? (
+                <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
+              ) : userName != null && userName !== '' ? (
+                <FirstLastSeen
+                  indexPatterns={indexPatterns}
+                  field="user.name"
+                  value={userName}
+                  type={FirstLastSeenType.LAST_SEEN}
+                />
+              ) : (
+                getEmptyTagValue()
+              ),
           },
         ],
         [
@@ -306,6 +335,9 @@ export const UserOverview = React.memo<UserSummaryProps>(
         contextID,
         scopeId,
         entityIdentifiers,
+        userName,
+        firstSeenFromEntityStore,
+        lastSeenFromEntityStore,
         firstColumn,
         isFlyoutOpen,
       ]

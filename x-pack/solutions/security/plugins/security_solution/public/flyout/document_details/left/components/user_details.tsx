@@ -80,6 +80,13 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../../../entity_details/shared/entity_store_risk_utils';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -176,6 +183,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     });
   }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const observedUser = useObservedUser(entityIdentifiers, scopeId);
+
   const filterQuery = useMemo(
     () => (filterValue ? buildUserNamesFilter([filterValue]) : undefined),
     [filterValue]
@@ -184,10 +194,45 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const { data: userRisk } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.user,
+    skip: entityStoreV2Enabled,
     timerange,
   });
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const isRiskScoreExist = !!userRiskData?.user.risk;
+
+  const [isUserLoadingFromSearch, { inspect, userDetails: userDetailsFromSearch, refetch }] =
+    useObservedUserDetails({
+      id: userDetailsQueryId,
+      startDate: from,
+      endDate: to,
+      entityIdentifiers,
+      indexNames: selectedPatterns,
+      skip: entityStoreV2Enabled || selectedPatterns.length === 0,
+    });
+
+  const effectiveUserDetails = entityStoreV2Enabled ? observedUser.details : userDetailsFromSearch;
+  const isUserLoading = entityStoreV2Enabled ? observedUser.isLoading : isUserLoadingFromSearch;
+
+  const userRiskScoreStateFromEntityStore = useMemo(
+    () =>
+      entityStoreV2Enabled && observedUser.entityRecord
+        ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
+            refetch: observedUser.refetchEntityStore ?? (() => {}),
+            isLoading: observedUser.isLoading,
+            error: null,
+          })
+        : undefined,
+    [
+      entityStoreV2Enabled,
+      observedUser.entityRecord,
+      observedUser.refetchEntityStore,
+      observedUser.isLoading,
+    ]
+  );
+
+  const isRiskScoreExist =
+    entityStoreV2Enabled && observedUser.entityRecord
+      ? !!getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level
+      : !!userRiskData?.user?.risk;
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
@@ -205,15 +250,6 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     hasNonClosedAlerts,
     isPreviewMode: true, // setting to true to always open a new user flyout
     contextID: USER_DETAILS_INSIGHTS_ID,
-  });
-
-  const [isUserLoading, { inspect, userDetails, refetch }] = useObservedUserDetails({
-    id: userDetailsQueryId,
-    startDate: from,
-    endDate: to,
-    entityIdentifiers,
-    indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
   });
 
   const {
@@ -373,7 +409,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
         <AnomalyTableProvider
-          criteriaFields={hostToCriteria(userDetails)}
+          criteriaFields={hostToCriteria(effectiveUserDetails)}
           startDate={from}
           endDate={to}
           skip={isInitializing}
@@ -382,7 +418,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             <UserOverviewManage
               id={userDetailsQueryId}
               isInDetailsSidePanel={false}
-              data={userDetails}
+              data={effectiveUserDetails}
               anomaliesData={anomaliesData}
               isLoadingAnomaliesData={isLoadingAnomaliesData}
               loading={isUserLoading}
@@ -390,13 +426,22 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
               endDate={to}
               narrowDateRange={narrowDateRange}
               setQuery={setQuery}
-              refetch={refetch}
+              refetch={
+                entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch
+              }
               inspect={inspect}
               entityIdentifiers={entityIdentifiers}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
               scopeId={scopeId}
               isFlyoutOpen={true}
+              riskScoreState={userRiskScoreStateFromEntityStore}
+              firstSeenFromEntityStore={
+                entityStoreV2Enabled ? (observedUser.firstSeen?.date ?? undefined) : undefined
+              }
+              lastSeenFromEntityStore={
+                entityStoreV2Enabled ? (observedUser.lastSeen?.date ?? undefined) : undefined
+              }
             />
           )}
         </AnomalyTableProvider>
