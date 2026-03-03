@@ -234,17 +234,25 @@ export const BuiltInStepProperties = [
 ];
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
+export const WaitStepInputSchema = z.object({
+  duration: DurationSchema.describe(
+    'Duration to wait, e.g. "5s", "1m", "2h". Format: number + unit (ms/s/m/h/d/w)'
+  ),
+});
 export const WaitStepSchema = BaseStepSchema.extend({
-  type: z.literal('wait'),
-  with: z.object({
-    duration: DurationSchema, // e.g., '5s', '1m', '2h'
-  }),
+  type: z.literal('wait').describe('Pause execution for a specified duration'),
+  with: WaitStepInputSchema,
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const DataSetStepInputSchema = z
+  .record(z.string(), z.unknown())
+  .describe(
+    'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
+  );
 export const DataSetStepSchema = BaseStepSchema.extend({
-  type: z.literal('data.set'),
-  with: z.record(z.string(), z.unknown()),
+  type: z.literal('data.set').describe('Set variables in the workflow context'),
+  with: DataSetStepInputSchema,
 });
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
@@ -265,36 +273,37 @@ export const FetcherConfigSchema = z
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
+export const ElasticsearchStepInputSchema = z.union([
+  // Raw API format - like Dev Console
+  z.object({
+    request: z.object({
+      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      path: z.string().min(1),
+      body: z.any().optional(),
+    }),
+  }),
+  // Sugar syntax for common operations
+  z
+    .object({
+      index: z.string().optional(),
+      id: z.string().optional(),
+      query: z.record(z.string(), z.any()).optional(),
+      body: z.record(z.string(), z.any()).optional(),
+      size: z.number().optional(),
+      from: z.number().optional(),
+      sort: z.array(z.any()).optional(),
+      _source: z.union([z.boolean(), z.array(z.string()), z.string()]).optional(),
+      aggs: z.record(z.string(), z.any()).optional(),
+      aggregations: z.record(z.string(), z.any()).optional(),
+    })
+    .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+]);
 // Generic Elasticsearch step schema for backend validation
 export const ElasticsearchStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
-  with: z.union([
-    // Raw API format - like Dev Console
-    z.object({
-      request: z.object({
-        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
-        path: z.string().min(1),
-        body: z.any().optional(),
-      }),
-    }),
-    // Sugar syntax for common operations
-    z
-      .object({
-        index: z.string().optional(),
-        id: z.string().optional(),
-        query: z.record(z.string(), z.any()).optional(),
-        body: z.record(z.string(), z.any()).optional(),
-        size: z.number().optional(),
-        from: z.number().optional(),
-        sort: z.array(z.any()).optional(),
-        _source: z.union([z.boolean(), z.array(z.string()), z.string()]).optional(),
-        aggs: z.record(z.string(), z.any()).optional(),
-        aggregations: z.record(z.string(), z.any()).optional(),
-      })
-      .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
-  ]),
+  with: ElasticsearchStepInputSchema,
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -315,57 +324,71 @@ export const KibanaStepMetaSchema = {
 };
 
 // Generic Kibana step schema for backend validation
+export const KibanaStepInputSchema = z.union([
+  // Raw API format - direct HTTP API calls
+  z.object({
+    request: z.object({
+      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      path: z.string().min(1),
+      body: z.any().optional(),
+      headers: z.record(z.string(), z.string()).optional(),
+    }),
+    fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
+  }),
+  // Sugar syntax for common Kibana operations
+  z
+    .object({
+      // Cases API
+      title: z.string().optional(),
+      description: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+      assignees: z.array(z.string()).optional(),
+      owner: z.string().optional(),
+      connector: z.record(z.string(), z.any()).optional(),
+      settings: z.record(z.string(), z.any()).optional(),
+      // Generic parameters
+      id: z.string().optional(),
+      case_id: z.string().optional(),
+      space_id: z.string().optional(),
+      page: z.number().optional(),
+      perPage: z.number().optional(),
+      status: z.string().optional(),
+      fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
+    })
+    .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
+]);
 export const KibanaStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('kibana.'), {
     message: 'Kibana step type must start with "kibana."',
   }),
-  with: z.union([
-    // Raw API format - direct HTTP API calls
-    z.object({
-      request: z.object({
-        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
-        path: z.string().min(1),
-        body: z.any().optional(),
-        headers: z.record(z.string(), z.string()).optional(),
-      }),
-      fetcher: FetcherConfigSchema,
-      ...KibanaStepMetaSchema,
-    }),
-    // Sugar syntax for common Kibana operations
-    z
-      .object({
-        // Cases API
-        title: z.string().optional(),
-        description: z.string().optional(),
-        tags: z.array(z.string()).optional(),
-        severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-        assignees: z.array(z.string()).optional(),
-        owner: z.string().optional(),
-        connector: z.record(z.string(), z.any()).optional(),
-        settings: z.record(z.string(), z.any()).optional(),
-        // Generic parameters
-        id: z.string().optional(),
-        case_id: z.string().optional(),
-        space_id: z.string().optional(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
-        status: z.string().optional(),
-        fetcher: FetcherConfigSchema,
-        ...KibanaStepMetaSchema,
-      })
-      .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
-  ]),
+  with: KibanaStepInputSchema,
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
+export const ForEachStepConfigSchema = z.object({
+  foreach: z
+    .union([z.string(), z.array(z.unknown())])
+    .describe(
+      'Liquid expression evaluating to an array, e.g. "{{ steps.search.output.hits.hits | json }}"'
+    ),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute for each item'),
+});
+
 export const ForEachStepSchema = BaseStepSchema.extend({
-  type: z.literal('foreach'),
-  foreach: z.union([z.string(), z.array(z.unknown())]),
-  steps: z.array(BaseStepSchema).min(1),
-})
-  .merge(LoopStepPropsSchema)
-  .merge(StepWithIfConditionSchema)
-  .merge(TimeoutPropSchema);
+  type: z
+    .literal('foreach')
+    .describe(
+      'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}'
+    ),
+  ...ForEachStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
+  ...LoopStepPropsSchema.shape,
+  ...TimeoutPropSchema.shape,
+});
+
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
 const getLoopStepSchemaOverrides = (stepSchema: z.ZodType, loose: boolean) => ({
@@ -387,11 +410,22 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
   return schema;
 };
 
+export const IfStepConfigSchema = z.object({
+  condition: z
+    .string()
+    .describe(
+      'Condition expression in KQL format that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
+    ),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
+  else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
+});
 export const IfStepSchema = BaseStepSchema.extend({
-  type: z.literal('if'),
-  condition: z.string(),
-  steps: z.array(BaseStepSchema).min(1),
-  else: z.array(BaseStepSchema).optional(),
+  type: z
+    .literal('if')
+    .describe(
+      'Conditional execution. Runs steps when condition is true, with optional else block for the false branch'
+    ),
+  ...IfStepConfigSchema.shape,
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
 
@@ -409,14 +443,23 @@ export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) =
   return schema;
 };
 
+export const ParallelStepConfigSchema = z.object({
+  branches: z
+    .array(
+      z.object({
+        name: z.string().describe('Unique name for this branch'),
+        steps: z.array(BaseStepSchema).describe('Steps to execute in this branch'),
+      })
+    )
+    .describe('Array of named branches to execute in parallel'),
+});
 export const ParallelStepSchema = BaseStepSchema.extend({
-  type: z.literal('parallel'),
-  branches: z.array(
-    z.object({
-      name: z.string(),
-      steps: z.array(BaseStepSchema),
-    })
-  ),
+  type: z
+    .literal('parallel')
+    .describe(
+      'Execute multiple branches of steps concurrently. Each branch runs independently and results are available after all branches complete'
+    ),
+  ...ParallelStepConfigSchema.shape,
 });
 export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
@@ -433,10 +476,17 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
   return schema;
 };
 
+export const MergeStepConfigSchema = z.object({
+  sources: z
+    .array(z.string())
+    .describe('References to branch or step names whose results to merge'),
+  steps: z.array(BaseStepSchema).describe('Steps to execute after merging'),
+});
 export const MergeStepSchema = BaseStepSchema.extend({
-  type: z.literal('merge'),
-  sources: z.array(z.string()), // references to branches or steps to merge
-  steps: z.array(BaseStepSchema), // steps to run after merge
+  type: z
+    .literal('merge')
+    .describe('Merge results from parallel branches and continue with subsequent steps'),
+  ...MergeStepConfigSchema.shape,
 });
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
@@ -453,12 +503,18 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const ConsoleStepInputSchema = z.object({
+  message: z.unknown().optional(),
+});
+
 // Base schema shared by both workflow.execute and workflow.executeAsync
+export const WorkflowExecuteStepInputSchema = z.object({
+  'workflow-id': z.string().min(1),
+  inputs: z.record(z.string(), z.unknown()).optional(),
+});
+
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
-  with: z.object({
-    'workflow-id': z.string().min(1),
-    inputs: z.record(z.string(), z.unknown()).optional(),
-  }),
+  with: WorkflowExecuteStepInputSchema,
 });
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
@@ -470,6 +526,14 @@ export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.executeAsync'),
 });
 export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
+
+export const WorkflowExecuteAsyncStepOutputSchema = z.object({
+  workflowId: z.string(),
+  executionId: z.string(),
+  awaited: z.boolean(),
+  status: z.string(),
+  startedAt: z.string().optional(),
+});
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
