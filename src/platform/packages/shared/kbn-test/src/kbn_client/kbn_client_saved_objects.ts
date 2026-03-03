@@ -203,9 +203,13 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
-      path: uriencode`${options.space ? `/s/${options.space}` : ''}/internal/ftr/kbn_client_so/${
-        options.type
-      }${options.id ? `/${options.id}` : ''}`,
+      path: options.space
+        ? options.id
+          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+          : uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}`
+        : options.id
+        ? uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+        : uriencode`/internal/ftr/kbn_client_so/${options.type}`,
       query: {
         overwrite: options.overwrite,
       },
