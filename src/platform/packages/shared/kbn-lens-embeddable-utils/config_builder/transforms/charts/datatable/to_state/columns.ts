@@ -32,10 +32,10 @@ function buildColorProps(
 
   if (isColorMappingColor(config.color)) {
     const color = fromColorMappingAPIToLensState(config.color);
-    return {
-      colorMode,
-      colorMapping: isLegacyColorPalette(color) ? undefined : color?.colorMapping,
-    };
+    if (isLegacyColorPalette(color)) {
+      return { colorMode, palette: color.palette };
+    }
+    return { colorMode, colorMapping: color?.colorMapping };
   }
 
   if (isColorByValueColor(config.color)) {

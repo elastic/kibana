@@ -12,6 +12,7 @@ import type {
   TextBasedLayer,
   ColumnState,
 } from '@kbn/lens-common';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
@@ -99,13 +100,15 @@ type APIRowPropsNoESQL = APIMetricRowCommonProps &
   >;
 
 function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
-  const { colorMode, colorMapping } = column;
+  const { colorMode, colorMapping, palette } = column;
   return {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
           apply_color_to: colorMode === 'text' ? 'value' : 'background',
-          ...(colorMapping ? { color: fromColorMappingLensStateToAPI(colorMapping) } : {}),
+          ...(colorMapping || palette
+            ? { color: fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput) }
+            : {}),
         }
       : {}),
   };
