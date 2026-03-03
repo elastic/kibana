@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
-    cancel_on_build_failing: true
     label: 'Explore - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
