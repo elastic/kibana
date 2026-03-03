@@ -62,6 +62,7 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
+import { CompleteSetupPage } from './sections/cloud_connector/complete_setup_page';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -441,6 +442,10 @@ export const AppRoutes = memo(
                 </AppLayout>
               </ErrorLayout>
             )}
+          </Route>
+
+          <Route path={FLEET_ROUTING_PATHS.cloud_connector_complete}>
+            <CompleteSetupPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}

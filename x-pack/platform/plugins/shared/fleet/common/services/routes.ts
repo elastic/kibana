@@ -27,6 +27,7 @@ import {
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
   AGENTLESS_POLICIES_ROUTES,
+  CLOUD_CONNECTOR_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -220,6 +221,12 @@ export const agentlessPolicyRouteService = {
   },
   getDeletePath: (policyId: string) => {
     return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+};
+
+export const cloudConnectorRouteService = {
+  getCompletePath: () => {
+    return CLOUD_CONNECTOR_API_ROUTES.COMPLETE_PATTERN;
   },
 };
 

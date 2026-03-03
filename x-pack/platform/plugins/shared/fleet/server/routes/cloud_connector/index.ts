@@ -24,6 +24,8 @@ import {
   DeleteCloudConnectorResponseSchema,
   GetCloudConnectorUsageRequestSchema,
   GetCloudConnectorUsageResponseSchema,
+  CompleteCloudConnectorSetupRequestSchema,
+  CompleteCloudConnectorSetupResponseSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 import {
@@ -33,6 +35,7 @@ import {
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
   getCloudConnectorUsageHandler,
+  completeCloudConnectorSetupHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -357,5 +360,50 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getCloudConnectorUsageHandler
+    );
+
+  // POST /api/fleet/cloud_connectors/complete
+  router.versioned
+    .post({
+      path: CLOUD_CONNECTOR_API_ROUTES.COMPLETE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Complete cloud connector setup from CloudFormation',
+      options: {
+        tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '9.2.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: CompleteCloudConnectorSetupRequestSchema,
+          response: {
+            200: {
+              body: () => CompleteCloudConnectorSetupResponseSchema,
+              description: 'OK: Cloud connector setup completed successfully.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      completeCloudConnectorSetupHandler
     );
 };

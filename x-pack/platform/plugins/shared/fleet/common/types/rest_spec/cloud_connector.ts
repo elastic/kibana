@@ -67,3 +67,20 @@ export interface GetCloudConnectorUsageResponse {
   page: number;
   perPage: number;
 }
+
+export interface CompleteCloudConnectorSetupRequest {
+  role_arn: string;
+  external_id: string;
+  account_type: 'single-account' | 'organization-account';
+  integration_type: string;
+  stack_name: string;
+  region: string;
+}
+
+export interface CompleteCloudConnectorSetupResponse {
+  cloud_connector_id: string;
+  cloud_connector_name: string;
+  package_policy_id: string;
+  agent_policy_id: string;
+  redirect_url: string;
+}
