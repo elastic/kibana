@@ -107,8 +107,8 @@ steps:
               );
             // Duration should be at least 2s (2 retries with 1s delay each)
             expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(1999);
-            // But less than 10s to avoid test timeout
-            expect(workflowExecutionDoc?.duration).toBeLessThan(2100);
+            // But less than 2.5s to allow CI/timer variance while still catching runaway runs
+            expect(workflowExecutionDoc?.duration).toBeLessThan(2500);
           });
 
           it('should have 3 executions of constantlyFailingStep (1 initial + 2 retries)', async () => {
