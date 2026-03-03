@@ -172,18 +172,24 @@ export const handleAgentExecution = async ({
               : (conversation.rounds?.length ?? 0) + 1;
 
             // metering
-            meteringService.reportExecution({
-              conversationId: effectiveConversationId,
-              executionId: execution.executionId,
-              roundCount: currentRoundCount,
-              agentId,
-              round: event.data.round,
-              modelProvider,
-            });
+            meteringService
+              .reportExecution({
+                conversationId: effectiveConversationId,
+                executionId: execution.executionId,
+                roundCount: currentRoundCount,
+                agentId,
+                round: event.data.round,
+                modelProvider,
+              })
+              .catch((err) => {
+                logger.warn(`Failed to report execution metering: ${err}`);
+              });
+
             // snapshot telemetry tracking
             if (effectiveConversationId) {
               trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
             }
+
             // EBT tracking
             analyticsService?.reportRoundComplete({
               conversationId: effectiveConversationId,
