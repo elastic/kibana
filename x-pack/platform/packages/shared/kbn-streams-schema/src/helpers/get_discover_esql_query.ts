@@ -29,7 +29,8 @@ export interface GetDiscoverEsqlQueryOptions {
  *
  * Uses 'TS' source command for TSDB mode streams, 'FROM' otherwise.
  * Optionally includes METADATA _source for wired streams.
- * Results are sorted by @timestamp descending by default.
+ * Results are sorted by @timestamp descending by default for FROM queries.
+ * TS (time series) queries do not add explicit sorting as TSDB data is inherently time-ordered.
  *
  * @param options - Configuration options for query generation
  * @returns The ES|QL query string, or undefined if index patterns cannot be determined
@@ -40,9 +41,9 @@ export interface GetDiscoverEsqlQueryOptions {
  * // Returns: "FROM logs,logs.* | SORT @timestamp DESC"
  *
  * @example
- * // With TSDB mode
+ * // With TSDB mode (no explicit sort - TSDB is time-ordered)
  * getDiscoverEsqlQuery({ definition, indexMode: 'time_series' })
- * // Returns: "TS logs,logs.* | SORT @timestamp DESC"
+ * // Returns: "TS logs,logs.*"
  *
  * @example
  * // With metadata for wired streams
@@ -64,6 +65,7 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
 
   const sourceCommand = indexMode === 'time_series' ? 'TS' : 'FROM';
   const metadataSuffix = includeMetadata ? ' METADATA _source' : '';
+  const sortSuffix = indexMode === 'time_series' ? '' : ' | SORT @timestamp DESC';
 
-  return `${sourceCommand} ${indexPatterns.join(', ')}${metadataSuffix} | SORT @timestamp DESC`;
+  return `${sourceCommand} ${indexPatterns.join(', ')}${metadataSuffix}${sortSuffix}`;
 }
