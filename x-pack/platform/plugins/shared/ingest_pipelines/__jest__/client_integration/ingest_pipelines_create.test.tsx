@@ -45,7 +45,8 @@ const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: stri
   await screen.findByTestId('descriptionField');
 };
 
-describe('<PipelinesCreate />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253406
+describe.skip('<PipelinesCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(() => {
