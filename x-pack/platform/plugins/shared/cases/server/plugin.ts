@@ -54,6 +54,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { createExtendedFieldsIndicesOnStartup } from './templates';
 
 export class CasePlugin
   implements
@@ -219,6 +220,19 @@ export class CasePlugin
 
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
+
+    if (this.caseConfig.templates.enabled) {
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        CASE_SAVED_OBJECT,
+      ]);
+      const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
+
+      createExtendedFieldsIndicesOnStartup({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+        savedObjectsClient: internalSavedObjectsClient,
+      }).catch(() => {});
+    }
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
