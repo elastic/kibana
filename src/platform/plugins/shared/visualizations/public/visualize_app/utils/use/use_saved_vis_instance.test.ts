@@ -141,7 +141,7 @@ describe('useSavedVisInstance', () => {
       });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
+        expect.objectContaining({ originatingAppName: undefined, redirectToOrigin: undefined }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe('useSavedVisInstance', () => {
       });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
+        expect.objectContaining({ originatingAppName: undefined, redirectToOrigin: undefined }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();

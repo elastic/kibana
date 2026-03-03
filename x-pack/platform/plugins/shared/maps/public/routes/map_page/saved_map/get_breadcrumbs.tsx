@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ScopedHistory } from '@kbn/core/public';
+import { getOriginatingAppBreadcrumbs } from '@kbn/embeddable-plugin/public';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 import { APP_NAME } from '../../../../common/constants';
 
@@ -26,6 +27,8 @@ export function getBreadcrumbs({
   isByValue,
   getHasUnsavedChanges,
   originatingApp,
+  originatingPath,
+  breadcrumbTitle,
   getAppNameFromId,
   history,
 }: {
@@ -33,12 +36,24 @@ export function getBreadcrumbs({
   isByValue: boolean;
   getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbTitle?: string;
   getAppNameFromId?: (id: string) => string | undefined;
   history: ScopedHistory;
 }) {
   const breadcrumbs = [];
 
-  if (originatingApp && getAppNameFromId) {
+  if (originatingApp && getAppNameFromId && originatingPath && breadcrumbTitle) {
+    breadcrumbs.push(
+      ...getOriginatingAppBreadcrumbs({
+        originatingApp,
+        originatingPath,
+        breadcrumbTitle,
+        originatingAppName: getAppNameFromId(originatingApp),
+        navigateToApp: getNavigateToApp(),
+      })
+    );
+  } else if (originatingApp && getAppNameFromId) {
     breadcrumbs.push({
       onClick: () => {
         getNavigateToApp()(originatingApp);
@@ -47,7 +62,7 @@ export function getBreadcrumbs({
     });
   }
 
-  if (!isByValue) {
+  if (!isByValue && !breadcrumbTitle) {
     breadcrumbs.push({
       text: APP_NAME,
       onClick: async () => {

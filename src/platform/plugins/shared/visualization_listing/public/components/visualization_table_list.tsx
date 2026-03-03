@@ -50,6 +50,7 @@ interface VisualizationTableListProps {
   embeddable: EmbeddableStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
+  breadcrumbTitle?: string;
 }
 
 export const VisualizationTableList = ({
@@ -59,6 +60,7 @@ export const VisualizationTableList = ({
   embeddable,
   savedObjectsTagging,
   parentProps,
+  breadcrumbTitle,
 }: VisualizationTableListProps) => {
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
@@ -110,6 +112,7 @@ export const VisualizationTableList = ({
           state: {
             originatingApp: currentApp,
             originatingPath: window.location.hash,
+            breadcrumbTitle,
           },
         });
         return;
@@ -117,7 +120,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable]
+    [core.application, embeddable, breadcrumbTitle]
   );
 
   const fetchItems = useCallback(

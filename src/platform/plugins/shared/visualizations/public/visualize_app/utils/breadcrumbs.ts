@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '@kbn/visualizations-common';
+import { getOriginatingAppBreadcrumbs } from '@kbn/embeddable-plugin/public';
 
 const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
@@ -28,13 +29,40 @@ export function getLandingBreadcrumbs() {
 
 export function getCreateBreadcrumbs({
   byValue,
+  originatingApp,
   originatingAppName,
+  originatingPath,
+  breadcrumbTitle,
   redirectToOrigin,
+  navigateToApp,
 }: {
   byValue?: boolean;
+  originatingApp?: string;
   originatingAppName?: string;
+  originatingPath?: string;
+  breadcrumbTitle?: string;
   redirectToOrigin?: () => void;
+  navigateToApp?: (appId: string, options?: { path?: string }) => void;
 }) {
+  const originatingCrumbs = navigateToApp
+    ? getOriginatingAppBreadcrumbs({
+        originatingApp,
+        originatingAppName,
+        originatingPath,
+        breadcrumbTitle,
+        navigateToApp,
+      })
+    : [];
+  if (originatingCrumbs.length > 0) {
+    return [
+      ...originatingCrumbs,
+      {
+        text: i18n.translate('visualizations.editor.createBreadcrumb', {
+          defaultMessage: 'Create',
+        }),
+      },
+    ];
+  }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
     ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
@@ -71,15 +99,35 @@ export function getCreateServerlessBreadcrumbs({
 export function getEditBreadcrumbs(
   {
     byValue,
+    originatingApp,
     originatingAppName,
+    originatingPath,
+    breadcrumbTitle,
     redirectToOrigin,
+    navigateToApp,
   }: {
     byValue?: boolean;
+    originatingApp?: string;
     originatingAppName?: string;
+    originatingPath?: string;
+    breadcrumbTitle?: string;
     redirectToOrigin?: () => void;
+    navigateToApp?: (appId: string, options?: { path?: string }) => void;
   },
   title: string = defaultEditText
 ) {
+  const originatingCrumbs = navigateToApp
+    ? getOriginatingAppBreadcrumbs({
+        originatingApp,
+        originatingAppName,
+        originatingPath,
+        breadcrumbTitle,
+        navigateToApp,
+      })
+    : [];
+  if (originatingCrumbs.length > 0) {
+    return [...originatingCrumbs, { text: title }];
+  }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
     ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),

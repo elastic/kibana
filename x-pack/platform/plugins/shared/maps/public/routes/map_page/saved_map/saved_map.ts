@@ -95,6 +95,7 @@ export class SavedMap {
   private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
   private _originatingPath?: string;
+  private readonly _breadcrumbTitle?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
@@ -109,6 +110,7 @@ export class SavedMap {
     originatingApp,
     stateTransfer,
     originatingPath,
+    breadcrumbTitle,
     defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
@@ -118,6 +120,7 @@ export class SavedMap {
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
     originatingPath?: string;
+    breadcrumbTitle?: string;
     defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
@@ -126,6 +129,7 @@ export class SavedMap {
     this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
     this._originatingPath = originatingPath;
+    this._breadcrumbTitle = breadcrumbTitle;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
     this._defaultLayerWizard = defaultLayerWizard || '';
@@ -319,11 +323,18 @@ export class SavedMap {
         pageTitle: this._getPageTitle(),
         isByValue: this.isByValue(),
         getHasUnsavedChanges: this.hasUnsavedChanges,
-        originatingApp: this.hasOriginatingApp() ? this._originatingApp : undefined,
+        originatingApp:
+          this.hasOriginatingApp() || this._isFromDashboardListing()
+            ? this._originatingApp
+            : undefined,
+        originatingPath: this._isFromDashboardListing() ? this._originatingPath : undefined,
+        breadcrumbTitle: this._isFromDashboardListing() ? this._breadcrumbTitle : undefined,
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
       });
-      getCoreChrome().setBreadcrumbs(breadcrumbs);
+      getCoreChrome().setBreadcrumbs(breadcrumbs, {
+        project: { value: breadcrumbs, absolute: true },
+      });
     }
   }
 

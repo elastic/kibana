@@ -67,6 +67,7 @@ interface VisualizeTopNavProps {
   hasUnappliedChanges: boolean;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
@@ -86,6 +87,7 @@ const TopNav = ({
   originatingApp,
   setOriginatingApp,
   originatingPath,
+  breadcrumbTitle,
   visInstance,
   stateContainer,
   visualizationIdFromUrl,
@@ -160,6 +162,7 @@ const TopNav = ({
           originatingApp,
           setOriginatingApp,
           originatingPath,
+          breadcrumbTitle,
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
@@ -183,6 +186,7 @@ const TopNav = ({
     originatingApp,
     setOriginatingApp,
     originatingPath,
+    breadcrumbTitle,
     visInstance,
     stateContainer,
     visualizationIdFromUrl,
