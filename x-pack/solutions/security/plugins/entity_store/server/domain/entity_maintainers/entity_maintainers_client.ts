@@ -10,7 +10,9 @@ import { SavedObjectsErrorHelpers, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   getTaskId,
+  removeEntityMaintainer,
   scheduleEntityMaintainerTask,
+  startEntityMaintainer,
   stopEntityMaintainer,
 } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
@@ -55,13 +57,11 @@ export class EntityMaintainersClient {
     }
     this.logger.debug(`Starting entity maintainer task: ${id}`);
     try {
-      const { interval } = entityMaintainersRegistry.get(id)!;
-      await scheduleEntityMaintainerTask({
-        logger: this.logger,
+      await startEntityMaintainer({
         taskManager: this.taskManager,
         id,
-        interval,
         namespace: this.namespace,
+        logger: this.logger,
         request,
       });
       entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STARTED });
@@ -94,7 +94,7 @@ export class EntityMaintainersClient {
     }
   }
 
-  public async stop(id: string): Promise<void> {
+  public async stop(id: string, request: KibanaRequest): Promise<void> {
     if (!entityMaintainersRegistry.hasId(id)) {
       return;
     }
@@ -103,6 +103,7 @@ export class EntityMaintainersClient {
       await stopEntityMaintainer({
         taskManager: this.taskManager,
         id,
+        request,
         namespace: this.namespace,
         logger: this.logger,
       });
@@ -113,13 +114,23 @@ export class EntityMaintainersClient {
     }
   }
 
-  public async stopAll(): Promise<void> {
-    this.logger.debug('Stopping all entity maintainer tasks');
+  public async removeAll(): Promise<void> {
+    this.logger.debug('Removing all entity maintainer tasks');
     try {
       const tasks = entityMaintainersRegistry.getAll();
-      await Promise.all(tasks.map(async ({ id }) => this.stop(id)));
+      await Promise.all(
+        tasks.map(async ({ id }) => {
+          await removeEntityMaintainer({
+            taskManager: this.taskManager,
+            id,
+            namespace: this.namespace,
+            logger: this.logger,
+          });
+          entityMaintainersRegistry.update(id, { taskStatus: EntityMaintainerTaskStatus.STOPPED });
+        })
+      );
     } catch (error) {
-      this.logger.error('Failed to stop all entity maintainer tasks', { error });
+      this.logger.error('Failed to remove all entity maintainer tasks', { error });
       throw error;
     }
   }

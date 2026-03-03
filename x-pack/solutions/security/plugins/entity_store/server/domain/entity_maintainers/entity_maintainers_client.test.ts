@@ -15,7 +15,9 @@ import type { EntityMaintainerTaskEntry } from '../../tasks/entity_maintainers/t
 
 jest.mock('../../tasks/entity_maintainers', () => ({
   getTaskId: jest.fn((id: string, namespace: string) => `${id}:${namespace}`),
+  removeEntityMaintainer: jest.fn().mockResolvedValue(undefined),
   scheduleEntityMaintainerTask: jest.fn().mockResolvedValue(undefined),
+  startEntityMaintainer: jest.fn().mockResolvedValue(undefined),
   stopEntityMaintainer: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -38,12 +40,22 @@ jest.mock('@kbn/core/server', () => {
   };
 });
 
-const { getTaskId, scheduleEntityMaintainerTask, stopEntityMaintainer } = jest.requireMock(
-  '../../tasks/entity_maintainers'
-) as {
+const {
+  getTaskId,
+  removeEntityMaintainer,
+  scheduleEntityMaintainerTask,
+  startEntityMaintainer,
+  stopEntityMaintainer,
+} = jest.requireMock('../../tasks/entity_maintainers') as {
   getTaskId: jest.MockedFunction<(id: string, namespace: string) => string>;
+  removeEntityMaintainer: jest.MockedFunction<
+    typeof import('../../tasks/entity_maintainers').removeEntityMaintainer
+  >;
   scheduleEntityMaintainerTask: jest.MockedFunction<
     typeof import('../../tasks/entity_maintainers').scheduleEntityMaintainerTask
+  >;
+  startEntityMaintainer: jest.MockedFunction<
+    typeof import('../../tasks/entity_maintainers').startEntityMaintainer
   >;
   stopEntityMaintainer: jest.MockedFunction<
     typeof import('../../tasks/entity_maintainers').stopEntityMaintainer
@@ -92,7 +104,7 @@ describe('EntityMaintainersClient', () => {
   });
 
   describe('start', () => {
-    it('should return without scheduling when id is not in registry', async () => {
+    it('should return without starting when id is not in registry', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(false);
       const client = createClient();
       const request = createMockRequest();
@@ -100,26 +112,20 @@ describe('EntityMaintainersClient', () => {
       await client.start('unknown-id', request);
 
       expect(entityMaintainersRegistry.hasId).toHaveBeenCalledWith('unknown-id');
-      expect(scheduleEntityMaintainerTask).not.toHaveBeenCalled();
+      expect(startEntityMaintainer).not.toHaveBeenCalled();
       expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
 
-    it('should schedule task and update registry to STARTED when id is in registry', async () => {
+    it('should start task and update registry to STARTED when id is in registry', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.get.mockReturnValue({
-        id: 'maintainer-a',
-        interval: '5m',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
-      });
       const client = createClient();
       const request = createMockRequest();
 
       await client.start('maintainer-a', request);
 
-      expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
+      expect(startEntityMaintainer).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'maintainer-a',
-          interval: '5m',
           namespace: 'default',
           request,
         })
@@ -129,19 +135,13 @@ describe('EntityMaintainersClient', () => {
       });
     });
 
-    it('should propagate error and not update registry when scheduleEntityMaintainerTask throws', async () => {
+    it('should propagate error and not update registry when startEntityMaintainer throws', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
-      entityMaintainersRegistry.get.mockReturnValue({
-        id: 'maintainer-a',
-        interval: '5m',
-        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
-      });
-      const err = new Error('schedule failed');
-      (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(err);
+      (startEntityMaintainer as jest.Mock).mockRejectedValueOnce(new Error('start failed'));
       const client = createClient();
       const request = createMockRequest();
 
-      await expect(client.start('maintainer-a', request)).rejects.toThrow('schedule failed');
+      await expect(client.start('maintainer-a', request)).rejects.toThrow('start failed');
       expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
   });
@@ -191,8 +191,9 @@ describe('EntityMaintainersClient', () => {
     it('should return without stopping when id is not in registry', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(false);
       const client = createClient();
+      const request = createMockRequest();
 
-      await client.stop('unknown-id');
+      await client.stop('unknown-id', request);
 
       expect(stopEntityMaintainer).not.toHaveBeenCalled();
       expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
@@ -201,13 +202,15 @@ describe('EntityMaintainersClient', () => {
     it('should stop task and update registry to STOPPED when id is in registry', async () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       const client = createClient();
+      const request = createMockRequest();
 
-      await client.stop('maintainer-a');
+      await client.stop('maintainer-a', request);
 
       expect(stopEntityMaintainer).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'maintainer-a',
           namespace: 'default',
+          request,
         })
       );
       expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('maintainer-a', {
@@ -219,30 +222,30 @@ describe('EntityMaintainersClient', () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       (stopEntityMaintainer as jest.Mock).mockRejectedValueOnce(new Error('stop failed'));
       const client = createClient();
+      const request = createMockRequest();
 
-      await expect(client.stop('maintainer-a')).rejects.toThrow('stop failed');
+      await expect(client.stop('maintainer-a', request)).rejects.toThrow('stop failed');
       expect(entityMaintainersRegistry.update).not.toHaveBeenCalled();
     });
   });
 
-  describe('stopAll', () => {
-    it('should stop all registered tasks and update each to STOPPED', async () => {
+  describe('removeAll', () => {
+    it('should remove all registered tasks and update each to STOPPED', async () => {
       const entries: EntityMaintainerTaskEntry[] = [
         { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
         { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STARTED },
       ];
       entityMaintainersRegistry.getAll.mockReturnValue(entries);
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
       const client = createClient();
 
-      await client.stopAll();
+      await client.removeAll();
 
       expect(entityMaintainersRegistry.getAll).toHaveBeenCalled();
-      expect(stopEntityMaintainer).toHaveBeenCalledTimes(2);
-      expect(stopEntityMaintainer).toHaveBeenCalledWith(
+      expect(removeEntityMaintainer).toHaveBeenCalledTimes(2);
+      expect(removeEntityMaintainer).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'm1', namespace: 'default' })
       );
-      expect(stopEntityMaintainer).toHaveBeenCalledWith(
+      expect(removeEntityMaintainer).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'm2', namespace: 'default' })
       );
       expect(entityMaintainersRegistry.update).toHaveBeenCalledWith('m1', {
@@ -253,19 +256,18 @@ describe('EntityMaintainersClient', () => {
       });
     });
 
-    it('should propagate error when any stop fails', async () => {
+    it('should propagate error when any remove fails', async () => {
       const entries: EntityMaintainerTaskEntry[] = [
         { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
         { id: 'm2', interval: '1h', taskStatus: EntityMaintainerTaskStatus.STARTED },
       ];
       entityMaintainersRegistry.getAll.mockReturnValue(entries);
-      entityMaintainersRegistry.hasId.mockReturnValue(true);
-      (stopEntityMaintainer as jest.Mock)
+      (removeEntityMaintainer as jest.Mock)
         .mockResolvedValueOnce(undefined)
-        .mockRejectedValueOnce(new Error('stop failed'));
+        .mockRejectedValueOnce(new Error('remove failed'));
       const client = createClient();
 
-      await expect(client.stopAll()).rejects.toThrow('stop failed');
+      await expect(client.removeAll()).rejects.toThrow('remove failed');
     });
   });
 

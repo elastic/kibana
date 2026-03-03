@@ -46,7 +46,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
 
         await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
-        await entityMaintainersClient.stopAll();
+        await entityMaintainersClient.removeAll();
         
         return res.ok({ body: { ok: true } });
       })
