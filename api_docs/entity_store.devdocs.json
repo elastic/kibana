@@ -55,10 +55,230 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.BulkObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkObject",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObject.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"user\" | \"host\" | \"service\" | \"generic\""
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObject.doc",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "{ entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; user?: { name: string; id?: string[] | undefined; email?: string[] | undefined; full_name?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodUnknown",
+              ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; roles?: string[] | undefined; hash?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; host?: { name: string; id?: string[] | undefined; type?: string[] | undefined; ip?: string[] | undefined; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; hostname?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodUnknown",
+              ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; mac?: string[] | undefined; architecture?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; service?: { name: string; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+              "objectOutputType",
+              "<{}, ",
+              "ZodUnknown",
+              ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; }"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.BulkObjectResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkObjectResponse",
+        "description": [],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.BulkObjectResponse.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud_client/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.EntityStoreCRUDClient",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityStoreCRUDClient",
+        "description": [],
+        "signature": [
+          "CRUDClient"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "entityStore",
+      "id": "def-server.EntityStoreStartContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "EntityStoreStartContract",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+      "lineNumber": 70,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "entityStore",
+          "id": "def-server.EntityStoreStartContract.createCRUDClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createCRUDClient",
+          "description": [],
+          "signature": [
+            "(esClient: ",
+            "ElasticsearchClient",
+            ", namespace: string) => ",
+            "CRUDClient"
+          ],
+          "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+          "lineNumber": 71,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createCRUDClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "esClient",
+              "description": [],
+              "signature": [
+                "ElasticsearchClient"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 71,
+              "columnNumber": 22,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "entityStore",
+              "id": "def-server.EntityStoreStartContract.createCRUDClient.$2",
+              "type": "string",
+              "tags": [],
+              "label": "namespace",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/solutions/security/plugins/entity_store/server/types.ts",
+              "lineNumber": 71,
+              "columnNumber": 53,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
@@ -74,7 +294,7 @@
           "(error: unknown) => string"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -90,7 +310,7 @@
               "unknown"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -176,6 +396,35 @@
       },
       {
         "parentPluginId": "entityStore",
+        "id": "def-common.Entity",
+        "type": "Type",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          "{ entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; user?: { name: string; id?: string[] | undefined; email?: string[] | undefined; full_name?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; roles?: string[] | undefined; hash?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; host?: { name: string; id?: string[] | undefined; type?: string[] | undefined; ip?: string[] | undefined; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; hostname?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; mac?: string[] | undefined; architecture?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; service?: { name: string; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 313,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
         "id": "def-common.EntityStoreStatus",
         "type": "Type",
         "tags": [],
@@ -185,7 +434,7 @@
           "\"error\" | \"running\" | \"not_installed\" | \"installing\" | \"stopped\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 41,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -270,7 +519,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 22,
         "deprecated": false,
         "trackAdoption": false,
@@ -287,7 +536,7 @@
           "any"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 12,
         "deprecated": false,
         "trackAdoption": false,
@@ -295,6 +544,50 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-common.Entity",
+        "type": "Object",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          "ZodType",
+          "<{ entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; user?: { name: string; id?: string[] | undefined; email?: string[] | undefined; full_name?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; roles?: string[] | undefined; hash?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; host?: { name: string; id?: string[] | undefined; type?: string[] | undefined; ip?: string[] | undefined; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; hostname?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; mac?: string[] | undefined; architecture?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; service?: { name: string; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; }, ",
+          "ZodTypeDef",
+          ", { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; user?: { name: string; id?: string[] | undefined; email?: string[] | undefined; full_name?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; roles?: string[] | undefined; hash?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; host?: { name: string; id?: string[] | undefined; type?: string[] | undefined; ip?: string[] | undefined; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; hostname?: string[] | undefined; domain?: string[] | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; mac?: string[] | undefined; architecture?: string[] | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; event?: { ingested?: string | undefined; } | undefined; service?: { name: string; entity?: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; } | undefined; risk?: { '@timestamp': string; inputs: { id: string; index: string; description: string; category: string; timestamp?: string | undefined; risk_score?: number | undefined; contribution_score?: number | undefined; }[]; calculated_level: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\"; calculated_score: number; calculated_score_norm: number; id_field: string; id_value: string; category_1_score: number; category_1_count: number; notes: string[]; category_2_score?: number | undefined; category_2_count?: number | undefined; criticality_modifier?: number | undefined; criticality_level?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; modifiers?: { type: string; contribution: number; metadata?: ",
+          "objectOutputType",
+          "<{}, ",
+          "ZodUnknown",
+          ", \"strip\"> | undefined; subtype?: string | undefined; modifier_value?: number | undefined; }[] | undefined; } | undefined; } | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; } | { entity: { id: string; source?: string | undefined; type?: string | undefined; name?: string | undefined; attributes?: { managed?: boolean | undefined; watchlists?: string[] | undefined; asset?: boolean | undefined; mfa_enabled?: boolean | undefined; } | undefined; sub_type?: string | undefined; EngineMetadata?: { Type: string; } | undefined; behaviors?: { rule_names?: string[] | undefined; anomaly_job_ids?: string[] | undefined; } | undefined; lifecycle?: { first_seen?: string | undefined; last_activity?: string | undefined; } | undefined; relationships?: { communicates_with?: string[] | undefined; depends_on?: string[] | undefined; owns?: string[] | undefined; accesses_frequently?: string[] | undefined; supervises?: string[] | undefined; } | undefined; risk?: { calculated_level?: \"Unknown\" | \"Low\" | \"Moderate\" | \"High\" | \"Critical\" | undefined; calculated_score?: number | undefined; calculated_score_norm?: number | undefined; } | undefined; }; '@timestamp'?: string | undefined; asset?: { id?: string | undefined; name?: string | undefined; environment?: string | undefined; owner?: string | undefined; model?: string | undefined; serial_number?: string | undefined; vendor?: string | undefined; criticality?: \"low_impact\" | \"medium_impact\" | \"high_impact\" | \"extreme_impact\" | undefined; business_unit?: string | undefined; } | undefined; }>"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/common/domain/definitions/entity.gen.ts",
+        "lineNumber": 314,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "entityStore",
         "id": "def-common.ENTITY_STORE_ROUTES",
@@ -306,7 +599,7 @@
           "{ readonly INSTALL: \"/internal/security/entity_store/install\"; readonly UNINSTALL: \"/internal/security/entity_store/uninstall\"; readonly STATUS: \"/internal/security/entity_store/status\"; readonly START: \"/internal/security/entity_store/start\"; readonly STOP: \"/internal/security/entity_store/stop\"; readonly FORCE_LOG_EXTRACTION: \"/internal/security/entity_store/{entityType}/force_log_extraction\"; readonly CRUD_UPSERT: \"/internal/security/entity_store/entities/{entityType}\"; readonly CRUD_UPSERT_BULK: \"/internal/security/entity_store/entities/bulk\"; readonly CRUD_DELETE: \"/internal/security/entity_store/entities/\"; }"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -324,7 +617,7 @@
           "<[\"not_installed\", \"installing\", \"running\", \"stopped\", \"error\"]>"
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

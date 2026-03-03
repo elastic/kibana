@@ -18,7 +18,6 @@ export async function describeDataset({
   index,
   kql,
   filter,
-  sampleDocsSize,
 }: {
   esClient: ElasticsearchClient;
   start: number;
@@ -26,7 +25,6 @@ export async function describeDataset({
   index: string | string[];
   kql?: string;
   filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
-  sampleDocsSize?: number;
 }) {
   const [fieldCaps, hits] = await Promise.all([
     esClient.fieldCaps({
@@ -45,7 +43,6 @@ export async function describeDataset({
       end,
       kql,
       filter,
-      size: sampleDocsSize,
     }),
   ]);
 
