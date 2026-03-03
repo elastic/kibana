@@ -32,7 +32,7 @@ scrape
     - **url** (required): The URL to scrape.
     - **formats** (optional): Output formats: `markdown`, `html`, `links`, `screenshot`, `extract`. Defaults to markdown.
     - **onlyMainContent** (optional): Return only main content, excluding nav/footer. Defaults to true.
-    - **waitFor** (optional): Delay in milliseconds before fetching (e.g. for JS-rendered pages).
+    - **waitFor** (optional): Delay in milliseconds before fetching (useful for JS-rendered pages).
 
 search
 :   Search the web and optionally get full content from results.
