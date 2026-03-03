@@ -135,7 +135,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - ./emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:
