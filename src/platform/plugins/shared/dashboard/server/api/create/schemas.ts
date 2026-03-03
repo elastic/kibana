@@ -17,6 +17,8 @@ export function getCreateRequestBodySchema() {
   return schema.object({
     id: schema.maybe(
       schema.string({
+        maxLength: 100,
+        minLength: 1,
         validate: (value) => {
           if (!DASHBOARD_ID_REGEX.test(value)) {
             return `must be lower case, a-z, 0-9, '_', and '-' are allowed`;
