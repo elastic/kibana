@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { isValidNamespace, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -77,11 +77,21 @@ export class AddEditMonitorAPI {
     });
 
     try {
+      const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
+        (loc) => !loc.isServiceManaged
+      );
+      const references = monitorPrivateLocations.map((loc) => ({
+        id: `${newMonitorId}-${loc.id}`,
+        name: `${newMonitorId}-${loc.id}`,
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      }));
+
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
         spaceId,
         savedObjectType,
+        references: references.length > 0 ? references : undefined,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
@@ -90,20 +100,9 @@ export class AddEditMonitorAPI {
         spaceId
       );
 
-      // Compute expected policy IDs upfront
-      const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
-        (loc) => !loc.isServiceManaged
-      );
-      const packagePolicyIds = monitorPrivateLocations.map((loc) => `${newMonitorId}-${loc.id}`);
-
       const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
         newMonitorPromise,
         syncErrorsPromise,
-        packagePolicyIds.length > 0
-          ? this.routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences([
-              { monitorId: newMonitorId, packagePolicyIds, savedObjectType },
-            ])
-          : Promise.resolve(),
       ]);
 
       if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {

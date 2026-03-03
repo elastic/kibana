@@ -86,7 +86,7 @@ describe('syncEditedMonitor', () => {
     );
   });
 
-  it('updates monitor references optimistically for private locations', async () => {
+  it('passes package policy references when monitor has private locations', async () => {
     const monitorWithPrivateLocation = {
       ...editedMonitor,
       locations: [
@@ -104,7 +104,6 @@ describe('syncEditedMonitor', () => {
     routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
       failedPolicyUpdates: [],
       publicSyncErrors: [],
-      activePolicyIds: [],
     });
 
     await syncEditedMonitor({
@@ -115,18 +114,23 @@ describe('syncEditedMonitor', () => {
       spaceId: 'test-space',
     });
 
-    expect(
-      routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences
-    ).toHaveBeenCalledWith([
-      {
-        monitorId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-        packagePolicyIds: ['7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1'],
-        savedObjectType: 'synthetics-monitor',
-      },
-    ]);
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.any(Object),
+      expect.objectContaining({
+        references: [
+          {
+            id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
+            name: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
+            type: 'ingest-package-policies',
+          },
+        ],
+      })
+    );
   });
 
-  it('does not update references when monitor has no private locations', async () => {
+  it('does not pass references when monitor has no private locations', async () => {
     // editedMonitor only has a service-managed (public) location
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
@@ -136,8 +140,11 @@ describe('syncEditedMonitor', () => {
       spaceId: 'test-space',
     });
 
-    expect(
-      routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences
-    ).not.toHaveBeenCalled();
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.any(Object),
+      expect.objectContaining({ references: undefined })
+    );
   });
 });

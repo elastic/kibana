@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
@@ -251,13 +252,15 @@ export const syncEditedMonitor = async ({
   const { server, savedObjectsClient, syntheticsMonitorClient, monitorConfigRepository } =
     routeContext;
 
-  // Compute expected policy IDs upfront
   const monitorId = decryptedPreviousMonitor.id;
-  const savedObjectType = decryptedPreviousMonitor.type;
   const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
     (loc) => !loc.isServiceManaged
   );
-  const packagePolicyIds = monitorPrivateLocations.map((loc) => `${monitorId}-${loc.id}`);
+  const references = monitorPrivateLocations.map((loc) => ({
+    id: `${monitorId}-${loc.id}`,
+    name: `${monitorId}-${loc.id}`,
+    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  }));
 
   try {
     const monitorWithId = {
@@ -273,7 +276,12 @@ export const syncEditedMonitor = async ({
 
     const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
       [
-        monitorConfigRepository.update(monitorId, formattedMonitor, decryptedPreviousMonitor),
+        monitorConfigRepository.update(
+          monitorId,
+          formattedMonitor,
+          decryptedPreviousMonitor,
+          references.length > 0 ? references : undefined
+        ),
         syntheticsMonitorClient.editMonitors(
           [{ monitor: monitorWithId as MonitorFields, id: monitorId, decryptedPreviousMonitor }],
           allPrivateLocations,
@@ -281,14 +289,6 @@ export const syncEditedMonitor = async ({
         ),
       ]
     );
-
-    // Reference update must run after monitorConfigRepository.update completes,
-    // because update may delete and recreate the saved object when spaces change.
-    if (packagePolicyIds.length > 0) {
-      await monitorConfigRepository.bulkUpdatePackagePolicyReferences([
-        { monitorId, packagePolicyIds, savedObjectType },
-      ]);
-    }
 
     sendTelemetryEvents(
       server.logger,

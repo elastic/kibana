@@ -20,7 +20,6 @@ jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
 describe('syncNewMonitorBulk', () => {
   const mockMonitorConfigRepository = {
     createBulk: jest.fn(),
-    bulkUpdatePackagePolicyReferences: jest.fn(),
   };
 
   const mockSyntheticsMonitorClient = {
@@ -44,7 +43,7 @@ describe('syncNewMonitorBulk', () => {
   });
 
   describe('package policy references', () => {
-    it('should update references optimistically based on private locations', async () => {
+    it('should pass references inline via createBulk for private locations', async () => {
       const normalizedMonitors = [
         {
           name: 'Monitor 1',
@@ -64,9 +63,6 @@ describe('syncNewMonitorBulk', () => {
         { id: 'monitor-2', attributes: { name: 'Monitor 2' } },
       ]);
       mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([{ created: [], failed: [] }, []]);
-      mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences.mockResolvedValue({
-        saved_objects: [],
-      });
 
       await syncNewMonitorBulk({
         routeContext: mockRouteContext,
@@ -75,26 +71,28 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledTimes(
-        1
-      );
-      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          {
-            monitorId: 'monitor-1',
-            packagePolicyIds: ['monitor-1-loc-1', 'monitor-1-loc-2'],
-            savedObjectType: undefined,
-          },
-          {
-            monitorId: 'monitor-2',
-            packagePolicyIds: ['monitor-2-loc-1'],
-            savedObjectType: undefined,
-          },
-        ])
+      expect(mockMonitorConfigRepository.createBulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          monitors: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'monitor-1',
+              references: [
+                { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
+                { id: 'monitor-1-loc-2', name: 'monitor-1-loc-2', type: 'ingest-package-policies' },
+              ],
+            }),
+            expect.objectContaining({
+              id: 'monitor-2',
+              references: [
+                { id: 'monitor-2-loc-1', name: 'monitor-2-loc-1', type: 'ingest-package-policies' },
+              ],
+            }),
+          ]),
+        })
       );
     });
 
-    it('should not update references when monitors have no private locations', async () => {
+    it('should not pass references when monitors have no private locations', async () => {
       const normalizedMonitors = [
         {
           name: 'Monitor 1',
@@ -114,7 +112,13 @@ describe('syncNewMonitorBulk', () => {
         spaceId: 'default',
       });
 
-      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).not.toHaveBeenCalled();
+      expect(mockMonitorConfigRepository.createBulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          monitors: expect.arrayContaining([
+            expect.not.objectContaining({ references: expect.anything() }),
+          ]),
+        })
+      );
     });
   });
 });

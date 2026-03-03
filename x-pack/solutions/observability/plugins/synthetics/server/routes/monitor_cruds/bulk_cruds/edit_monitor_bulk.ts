@@ -6,6 +6,7 @@
  */
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { RouteContext } from '../../types';
 import type { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import type {
@@ -71,35 +72,33 @@ export const syncEditedMonitorBulk = async ({
 }) => {
   const { server, monitorConfigRepository } = routeContext;
 
-  // Compute expected policy IDs upfront
-  const referenceUpdates = monitorsToUpdate
-    .map(({ normalizedMonitor, decryptedPreviousMonitor }) => {
-      const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
-        (loc) => !loc.isServiceManaged
-      );
-      return {
-        monitorId: decryptedPreviousMonitor.id,
-        packagePolicyIds: monitorPrivateLocations.map(
-          (loc) => `${decryptedPreviousMonitor.id}-${loc.id}`
-        ),
-        savedObjectType: decryptedPreviousMonitor.type,
-      };
-    })
-    .filter((update) => update.packagePolicyIds.length > 0);
-
   const namespace = spaceId !== routeContext.spaceId ? spaceId : undefined;
 
   try {
-    const data = monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
-      id: decryptedPreviousMonitor.id,
-      attributes: {
-        ...monitorWithRevision,
-        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
-        [ConfigKey.MONITOR_QUERY_ID]:
-          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-      } as unknown as MonitorFields,
-      previousMonitor: decryptedPreviousMonitor,
-    }));
+    const data = monitorsToUpdate.map(
+      ({ normalizedMonitor, monitorWithRevision, decryptedPreviousMonitor }) => {
+        const monitorId = decryptedPreviousMonitor.id;
+        const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
+          (loc) => !loc.isServiceManaged
+        );
+        const references = monitorPrivateLocations.map((loc) => ({
+          id: `${monitorId}-${loc.id}`,
+          name: `${monitorId}-${loc.id}`,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        }));
+        return {
+          id: monitorId,
+          attributes: {
+            ...monitorWithRevision,
+            [ConfigKey.CONFIG_ID]: monitorId,
+            [ConfigKey.MONITOR_QUERY_ID]:
+              monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
+          } as unknown as MonitorFields,
+          previousMonitor: decryptedPreviousMonitor,
+          ...(references.length > 0 && { references }),
+        };
+      }
+    );
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
       monitorConfigRepository.bulkUpdate({
         monitors: data,
@@ -107,12 +106,6 @@ export const syncEditedMonitorBulk = async ({
       }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
-
-    // Reference update must run after bulkUpdate completes,
-    // because bulkUpdate may delete and recreate saved objects when spaces change.
-    if (referenceUpdates.length > 0) {
-      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(referenceUpdates, namespace);
-    }
 
     const { failedPolicyUpdates, publicSyncErrors } = editSyncResponse;
 

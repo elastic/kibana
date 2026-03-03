@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext } from '../../types';
@@ -44,6 +45,14 @@ export const syncNewMonitorBulk = async ({
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
     const monitorSavedObjectId = uuidV4();
+    const monitorPrivateLocations = monitor[ConfigKey.LOCATIONS].filter(
+      (loc) => !loc.isServiceManaged
+    );
+    const references = monitorPrivateLocations.map((loc) => ({
+      id: `${monitorSavedObjectId}-${loc.id}`,
+      name: `${monitorSavedObjectId}-${loc.id}`,
+      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    }));
     return {
       id: monitorSavedObjectId,
       monitor: {
@@ -52,22 +61,9 @@ export const syncNewMonitorBulk = async ({
         [ConfigKey.MONITOR_QUERY_ID]:
           monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
       } as MonitorFields,
+      ...(references.length > 0 && { references }),
     };
   });
-
-  // Compute expected policy IDs upfront
-  const referenceUpdates = monitorsToCreate
-    .map(({ id, monitor }) => {
-      const monitorPrivateLocations = monitor[ConfigKey.LOCATIONS].filter(
-        (loc) => !loc.isServiceManaged
-      );
-      return {
-        monitorId: id,
-        packagePolicyIds: monitorPrivateLocations.map((loc) => `${id}-${loc.id}`),
-        savedObjectType: query.savedObjectType,
-      };
-    })
-    .filter((update) => update.packagePolicyIds.length > 0);
 
   try {
     const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
@@ -76,9 +72,6 @@ export const syncNewMonitorBulk = async ({
         savedObjectType: query.savedObjectType,
       }),
       syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
-      referenceUpdates.length > 0
-        ? monitorConfigRepository.bulkUpdatePackagePolicyReferences(referenceUpdates)
-        : Promise.resolve(),
     ]);
 
     let failedMonitors: FailedMonitorConfig[] = [];
