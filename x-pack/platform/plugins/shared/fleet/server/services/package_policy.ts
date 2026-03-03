@@ -52,6 +52,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -738,12 +739,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         let versionsToCompile: string[];
         if (agentVersions) {
+          // Async task path: skip versions already compiled to avoid unnecessary recompilation and
+          // deployment. The stored inputs are guaranteed to be current because the create/update
+          // path (below) recompiles all previously stored versions whenever the package policy changes.
           versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
           if (versionsToCompile.length === 0) {
             t.end();
             return;
           }
         } else {
+          // Create/update path: compile default common agent versions plus any extra versions already
+          // stored in inputs_for_versions (e.g. from agents that enrolled on older versions), so
+          // that all stored inputs stay current after a package policy configuration change.
           const defaultVersions = await getAgentVersionsForVersionSpecificPolicies();
           const existingVersionKeys = Object.keys(existingInputsForVersions);
           versionsToCompile = [...new Set([...defaultVersions, ...existingVersionKeys])];
@@ -3460,6 +3467,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
         })
       );
     }
+  }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
   }
 }
 
