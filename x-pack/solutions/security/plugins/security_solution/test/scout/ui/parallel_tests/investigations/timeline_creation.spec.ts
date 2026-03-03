@@ -40,7 +40,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('Create timeline from template', async () => {
-          await timelinePage.createTimelineFromTemplate();
+          await timelinePage.createTimelineFromTemplate('Security Timeline');
         });
 
         await spaceTest.step('Verify flyout is visible with the template query', async () => {

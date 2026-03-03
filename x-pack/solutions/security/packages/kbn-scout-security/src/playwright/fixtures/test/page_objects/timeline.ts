@@ -26,7 +26,6 @@ export class TimelinePage {
   readonly createNewTimelineOption: Locator;
   readonly bottomBarToggle: Locator;
   readonly timelinesTable: Locator;
-  readonly collapsedActionsButton: Locator;
   readonly createFromTemplateButton: Locator;
   readonly customTemplatesTab: Locator;
   readonly kqlTextarea: Locator;
@@ -51,7 +50,6 @@ export class TimelinePage {
     this.createNewTimelineOption = this.page.testSubj.locator('timeline-modal-new-timeline');
     this.bottomBarToggle = this.page.testSubj.locator('timeline-bottom-bar-title-button');
     this.timelinesTable = this.page.testSubj.locator('timelines-table');
-    this.collapsedActionsButton = this.page.testSubj.locator('euiCollapsedItemActionsButton');
     this.createFromTemplateButton = this.page.testSubj.locator('create-from-template');
     this.customTemplatesTab = this.page.testSubj.locator('Custom templates');
     this.kqlTextarea = this.page.testSubj
@@ -129,11 +127,14 @@ export class TimelinePage {
   async selectCustomTemplates() {
     await this.timelinesTable.waitFor({ timeout: 30_000 });
     await this.customTemplatesTab.click();
-    await this.collapsedActionsButton.waitFor({ timeout: 30_000 });
   }
 
-  async createTimelineFromTemplate() {
-    await this.collapsedActionsButton.click();
+  async createTimelineFromTemplate(templateTitle: string) {
+    const templateRow = this.timelinesTable
+      .locator('tbody')
+      .getByRole('row')
+      .filter({ hasText: templateTitle });
+    await templateRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.createFromTemplateButton.click();
   }
 
