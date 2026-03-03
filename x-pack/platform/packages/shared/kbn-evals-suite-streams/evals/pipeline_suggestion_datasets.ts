@@ -79,6 +79,69 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
       // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
       {
         input: {
+          stream_name: 'logs.structured',
+          system: 'structured',
+          // Already-structured data with proper OTel fields - no parsing needed
+          sample_documents: [
+            {
+              '@timestamp': '2026-01-30T16:36:12.700Z',
+              severity_text: 'INFO',
+              'body.text': 'Service initialized',
+              'resource.attributes.service.name': 'my-app',
+            },
+            {
+              '@timestamp': '2026-01-30T16:36:13.500Z',
+              severity_text: 'DEBUG',
+              'body.text': 'Configuration loaded',
+              'resource.attributes.service.name': 'my-app',
+            },
+            {
+              '@timestamp': '2026-01-30T16:36:14.200Z',
+              severity_text: 'WARN',
+              'body.text': 'Slow response detected',
+              'resource.attributes.service.name': 'my-app',
+            },
+            {
+              '@timestamp': '2026-01-30T16:36:15.100Z',
+              severity_text: 'ERROR',
+              'body.text': 'Connection failed',
+              'resource.attributes.service.name': 'my-app',
+            },
+            {
+              '@timestamp': '2026-01-30T16:36:16.800Z',
+              severity_text: 'INFO',
+              'body.text': 'Request complete',
+              'resource.attributes.service.name': 'my-app',
+            },
+          ],
+        },
+        output: {
+          source_id: 'structured-logs-2026-01-30',
+          system: 'structured',
+          expected_processors: {
+            // No pipeline expected - the data is already structured with proper OTel fields
+            parsing: undefined,
+            normalization: [],
+          },
+          quality_thresholds: {
+            min_parse_rate: 0,
+            min_field_count: 0,
+            max_field_count: 0,
+            required_semantic_fields: [],
+          },
+          schema_expectations: {
+            expected_schema_fields: [],
+          },
+        },
+        metadata: {
+          difficulty: 'easy' as const,
+          notes:
+            'Tests that the LLM correctly identifies when no pipeline is needed. Data already has @timestamp, severity_text, body.text - no parsing required.',
+        },
+      },
+      // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
+      {
+        input: {
           stream_name: 'logs.apache',
           system: 'Apache',
           sample_document_count: 100,

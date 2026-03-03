@@ -1,7 +1,8 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "useUnknownInCatchVariables": true
   },
   "include": [
     "../../../../../typings/**/*",
@@ -55,7 +56,6 @@
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/ai-tools",
-    "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
     "@kbn/dissect-heuristics",
     "@kbn/streamlang",
@@ -77,5 +77,7 @@
     "@kbn/core-http-common",
     "@kbn/scout",
     "@kbn/esql-language",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
   ]
 }

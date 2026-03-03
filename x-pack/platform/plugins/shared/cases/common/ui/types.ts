@@ -37,7 +37,7 @@ import type {
   CustomFieldTypes,
   EventAttachment,
   UnifiedAttachment,
-  CombinedAttachment,
+  AttachmentV2,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -86,6 +86,9 @@ export interface CasesUiConfigType {
   incrementalId: {
     enabled: boolean;
   };
+  templates: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -107,7 +110,7 @@ export type CaseViewRefreshPropInterface = null | {
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
 export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
-export type CombinedAttachmentUI = SnakeToCamelCase<CombinedAttachment>;
+export type AttachmentUIV2 = SnakeToCamelCase<AttachmentV2>;
 
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;

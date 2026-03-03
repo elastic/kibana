@@ -16,7 +16,7 @@ globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
     testData.ES_ARCHIVES.ECOMMERCE,
   ];
 
-  log.debug('[setup] loading test data (only if indexes do not exist)...');
+  log.debug('[setup] loading ES archives (only if indices do not exist)...');
   for (const archive of archives) {
     await esArchiver.loadIfNeeded(archive);
   }

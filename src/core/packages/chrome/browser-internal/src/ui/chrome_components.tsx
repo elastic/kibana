@@ -19,6 +19,7 @@ import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
@@ -46,9 +47,11 @@ interface NavControlsObservables {
 interface ProjectNavigationObservables {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   homeHref$: Observable<string>;
-  navigationTree$: Observable<NavigationTreeDefinitionUI>;
-  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
-  activeDataTestSubj$?: Observable<string | undefined>;
+  navigation$: Observable<{
+    solutionId: SolutionId;
+    navigationTree: NavigationTreeDefinitionUI;
+    activeNodes: ChromeProjectNavigationNode[][];
+  }>;
 }
 
 export interface ChromeComponentsDeps {
@@ -61,13 +64,11 @@ export interface ChromeComponentsDeps {
   projectNavigation: ProjectNavigationObservables;
   loadingCount$: Observable<number>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
-  forceAppSwitcherNavigation$: Observable<boolean>;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
   customBranding$: CustomBrandingStart['customBranding$'];
   appMenuActions$: InternalApplicationStart['currentActionMenu$'];
   prependBasePath: InternalHttpStart['basePath']['prepend'];
-  reportEvent: (eventType: string, eventData: object) => void;
 }
 
 export const createChromeComponents = ({
@@ -78,7 +79,6 @@ export const createChromeComponents = ({
   state,
   loadingCount$,
   helpMenuLinks$,
-  forceAppSwitcherNavigation$,
   navLinks$,
   recentlyAccessed$,
   navControls,
@@ -86,7 +86,6 @@ export const createChromeComponents = ({
   appMenuActions$,
   projectNavigation,
   prependBasePath,
-  reportEvent,
 }: ChromeComponentsDeps) => {
   const getClassicHeader = () => (
     <Header
@@ -100,7 +99,6 @@ export const createChromeComponents = ({
       customNavLink$={state.customNavLink.$}
       kibanaDocLink={config.kibanaDocLink}
       docLinks={docLinks}
-      forceAppSwitcherNavigation$={forceAppSwitcherNavigation$}
       globalHelpExtensionMenuLinks$={state.help.globalMenuLinks.$}
       helpExtension$={state.help.extension.$}
       helpSupportUrl$={state.help.supportUrl.$}
@@ -144,19 +142,15 @@ export const createChromeComponents = ({
     const navProps: NavigationProps = {
       basePath,
       application,
-      reportEvent,
-      navigationTree$: projectNavigation.navigationTree$,
-      activeNodes$: projectNavigation.activeNodes$,
+      navigation$: projectNavigation.navigation$,
       navLinks$,
-      dataTestSubj$: projectNavigation.activeDataTestSubj$,
-      feedbackUrlParams$: state.feedback.urlParams$,
       onToggleCollapsed: state.sideNav.collapsed.set,
-      isFeedbackEnabled$: state.feedback.isEnabled$,
     };
 
     return (
       <GridLayoutProjectSideNav
-        isCollapsed$={state.sideNav.collapsed.subject$}
+        isCollapsed$={state.sideNav.collapsed.$}
+        initialIsCollapsed={state.sideNav.collapsed.get()}
         navProps={navProps}
       />
     );

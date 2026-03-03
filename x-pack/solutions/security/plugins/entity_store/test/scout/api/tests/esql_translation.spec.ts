@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// ignoring linter about api calls because we are testing ESQL only.
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
-
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
 import {
@@ -38,7 +35,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       responseType: 'json',
       body: {},
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(201);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'

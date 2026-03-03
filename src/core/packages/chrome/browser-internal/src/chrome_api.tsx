@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { map } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -65,25 +65,23 @@ export function createChromeApi({
     }
   };
 
+  const hasHeaderBanner$ = state.headerBanner.$.pipe(
+    map((banner) => Boolean(banner)),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
   const project: InternalChromeStart['project'] = {
-    setHome: (homeHref) => {
-      validateProjectStyle();
-      projectNavigation.setProjectHome(homeHref);
-    },
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
-    setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
-    initNavigation: (id, navigationTree$, config) => {
+    initNavigation: (id, navigationTree$) => {
       validateProjectStyle();
-      projectNavigation.initNavigation(id, navigationTree$, config);
+      projectNavigation.initNavigation(id, navigationTree$);
     },
-    getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
+    getNavigation$: () => projectNavigation.getNavigation$(),
     setBreadcrumbs: (breadcrumbs, params) =>
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
-    getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
-    updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
-    changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
   };
 
   return {
@@ -119,6 +117,7 @@ export function createChromeApi({
 
     // Breadcrumbs
     getBreadcrumbs$: () => state.breadcrumbs.classic.$,
+    getBreadcrumbs: () => state.breadcrumbs.classic.get(),
     setBreadcrumbs: (newBreadcrumbs, params = {}) => {
       state.breadcrumbs.classic.set(newBreadcrumbs);
       if (params.project) {
@@ -157,10 +156,9 @@ export function createChromeApi({
 
     // Header Banner
     setHeaderBanner: state.headerBanner.set,
-    hasHeaderBanner$: () => state.headerBanner.$.pipe(map((banner) => Boolean(banner))),
+    hasHeaderBanner$: () => hasHeaderBanner$,
 
     // Chrome Style
-    getBodyClasses$: () => state.bodyClasses$,
     setChromeStyle: state.style.setChromeStyle,
     getChromeStyle$: () => state.style.chromeStyle$,
 
@@ -168,8 +166,6 @@ export function createChromeApi({
     sideNav: {
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       setIsCollapsed: state.sideNav.collapsed.set,
-      getIsFeedbackBtnVisible$: () => state.feedback.isBtnVisible$,
-      setIsFeedbackBtnVisible: state.feedback.setIsBtnVisible,
     },
 
     // Project Navigation

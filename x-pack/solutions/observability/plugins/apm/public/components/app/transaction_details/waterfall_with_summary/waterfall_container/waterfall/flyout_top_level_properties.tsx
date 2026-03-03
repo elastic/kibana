@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../../../../common/es_fields/apm';
-import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+  getNextEnvironmentUrlParam,
+} from '../../../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
 import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
@@ -40,8 +44,8 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
   }
 
   const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: transaction.service.environment,
-    currentEnvironmentUrlParam: query.environment,
+    requestedEnvironment: transaction.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
+    currentEnvironmentUrlParam: query?.environment ?? ENVIRONMENT_ALL.value,
   });
 
   const stickyProperties = [

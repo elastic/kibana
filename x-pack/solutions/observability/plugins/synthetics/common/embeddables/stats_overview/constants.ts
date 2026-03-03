@@ -5,4 +5,7 @@
  * 2.0.
  */
 
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
 export const SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE = 'SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
+export const SYNTHETICS_STATS_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];

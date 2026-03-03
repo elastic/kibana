@@ -8,7 +8,6 @@
 /* eslint-disable react/jsx-no-literals */
 
 import React from 'react';
-import { ThemeProvider } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { NodeShapeContainer } from './styles';
@@ -17,12 +16,10 @@ import { NodeExpandButton } from './node_expand_button';
 const meta = {
   component: NodeExpandButton,
   render: (args) => (
-    <ThemeProvider theme={{ darkMode: false }}>
-      <NodeShapeContainer>
-        Hover me
-        <NodeExpandButton color={args.color} onClick={args.onClick} />
-      </NodeShapeContainer>
-    </ThemeProvider>
+    <NodeShapeContainer>
+      Hover me
+      <NodeExpandButton color={args.color} onClick={args.onClick} />
+    </NodeShapeContainer>
   ),
   title: 'Components/Graph Components/Additional Components',
   argTypes: {

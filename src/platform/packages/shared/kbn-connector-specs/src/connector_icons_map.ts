@@ -35,6 +35,14 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
+    '.pagerduty-v2',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
+    '.pagerduty',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
     '.brave-search',
     lazy(
       () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
@@ -72,5 +80,36 @@ export const ConnectorIconsMap: Map<
   [
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
+  ],
+  [
+    '.jira-cloud',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
+    ),
+  ],
+  [
+    '.google_drive',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+    ),
+  ],
+  [
+    '.slack2',
+    lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
+  ],
+  ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
+  [
+    '.zendesk',
+    lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
+  ],
+  [
+    '.servicenow_search',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+        )
+    ),
   ],
 ]);

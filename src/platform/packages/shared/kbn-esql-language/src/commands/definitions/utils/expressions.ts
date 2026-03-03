@@ -13,12 +13,14 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../ast/is';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
-import { lastItem } from '../../../ast/visitor/utils';
+  lastItem,
+  type PromQLAstExpression,
+} from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type {
   FunctionDefinition,
   FunctionParameterType,
+  InlineCastingType,
   PromQLFunctionParamType,
   Signature,
   SupportedDataType,
@@ -31,8 +33,7 @@ import { UnmappedFieldsStrategy } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
-import { getPromqlFunctionDefinition, normalizePromqlReturnType } from './promql';
-import type { PromQLAstExpression } from '../../../promql/types';
+import { getPromqlFunctionDefinition } from './promql';
 
 // #region type detection
 
@@ -67,7 +68,7 @@ export function getExpressionType(
   }
 
   if (isInlineCast(root)) {
-    const castFunction = getFunctionForInlineCast(root.castType);
+    const castFunction = getFunctionForInlineCast(root.castType as InlineCastingType);
     if (!castFunction) {
       return 'unknown';
     }
@@ -478,9 +479,7 @@ export function getPromqlExpressionType(
     case 'unary-expression':
       return getPromqlExpressionType(expression.arg);
     case 'function':
-      return normalizePromqlReturnType(
-        getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType
-      );
+      return getPromqlFunctionDefinition(expression.name)?.signatures[0]?.returnType;
     case 'binary-expression': {
       const bothScalar =
         getPromqlExpressionType(expression.left) === 'scalar' &&

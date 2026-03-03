@@ -26,7 +26,7 @@ import {
 import { apiTest } from '../../fixtures';
 import { prepareImportFormData } from '../../helpers';
 
-apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () => {
+apiTest.describe(`_import API with multiple spaces`, { tag: tags.stateful.all }, () => {
   // Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
   // Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects
 
