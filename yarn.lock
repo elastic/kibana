@@ -2436,6 +2436,15 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.9.0.tgz#0901bb3c98b4a1006473d2d4e54b6e49cd537095"
   integrity sha512-aIW2iGyeL36w8nXK3huGKBd68sskSr0NdrvXh7Ldx02jz/ASnyZ0PlK7LireueNa8hjd7pG+VWa5b3YHdgQb3w==
 
+"@elastic/esql@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.0.2.tgz#bd99551b627e5a89c5b6bc3e6cc1965621d1e89e"
+  integrity sha512-incHi+6z38W6Y/8jZl3MbLL21if3CyDZUtNxuCSWS2pno/334cU8NxC0cBUXTHrD2M/oGMQClVxJzXwFhbmEFQ==
+  dependencies:
+    antlr4 "4.13.2"
+    tree-dump "1.1.0"
+    tslib "2.8.1"
+
 "@elastic/eui-theme-borealis@6.1.0":
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-6.1.0.tgz#20fc595fc7ecadd26ccdb912dada18e8cc97a8d3"
@@ -6726,6 +6735,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-entity-analytics@link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-llm-tasks@link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks":
   version "0.0.0"
   uid ""
@@ -9187,10 +9200,6 @@
   uid ""
 
 "@kbn/test-suites-security-solution-apis@link:x-pack/solutions/security/test/security_solution_api_integration":
-  version "0.0.0"
-  uid ""
-
-"@kbn/test-suites-security-solution-evals@link:x-pack/solutions/security/test/security-solution-evals":
   version "0.0.0"
   uid ""
 

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 
 import type {
   SuggestionRequest,
