@@ -68,8 +68,6 @@ export const TRANSLATED_RULE_QUERY_EDITOR_PARENT = `${getDataTestSubjectSelector
   'kibanaCodeEditor'
 )}`;
 
-export const TRANSLATED_RULE_QUERY_EDITOR_INPUT = `${TRANSLATED_RULE_QUERY_EDITOR_PARENT} textarea`;
-
 export const TRANSLATED_RULE_EDIT_BTN = getDataTestSubjectSelector('editTranslatedRuleButton');
 export const TRANSLATED_RULE_SAVE_BTN = getDataTestSubjectSelector('saveTranslatedRuleBtn');
 
