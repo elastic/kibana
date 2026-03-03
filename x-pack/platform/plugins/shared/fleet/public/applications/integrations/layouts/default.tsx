@@ -8,7 +8,6 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ExperimentalFeaturesService } from '../../../services';
 import { useLink, useStartServices } from '../../../hooks';
 import type { Section } from '../sections';
 
