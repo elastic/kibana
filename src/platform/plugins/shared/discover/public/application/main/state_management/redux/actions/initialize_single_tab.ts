@@ -17,7 +17,7 @@ import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
-import { getDataStateContainer } from '../../discover_data_state_container';
+import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews } from './data_views';
 import { setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
@@ -41,6 +41,7 @@ import { initializeAndSync } from './tab_sync';
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
+  dataStateContainer: DiscoverDataStateContainer;
   dataViewSpec: DataViewSpec | undefined;
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
@@ -54,6 +55,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       initializeSingleTabParams: {
         stateContainer,
         customizationService,
+        dataStateContainer,
         dataViewSpec,
         esqlControls,
         defaultUrlState,
@@ -300,16 +302,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // Set runtime state
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
-
-    // Create and set dataStateContainer (lazy initialization)
-    const dataStateContainer = getDataStateContainer({
-      services,
-      searchSessionManager,
-      internalState: stateContainer.internalState,
-      runtimeStateManager,
-      injectCurrentTab: stateContainer.injectCurrentTab,
-      getCurrentTab: stateContainer.getCurrentTab,
-    });
     dataStateContainer$.next(dataStateContainer);
 
     // Begin syncing the state and trigger the initial fetch

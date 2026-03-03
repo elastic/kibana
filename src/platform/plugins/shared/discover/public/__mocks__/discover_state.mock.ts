@@ -261,12 +261,22 @@ export function getDiscoverInternalStateMock({
           services,
         });
 
+        const dataStateContainer = getDataStateContainer({
+          services,
+          searchSessionManager,
+          internalState,
+          runtimeStateManager,
+          injectCurrentTab: stateContainer.injectCurrentTab,
+          getCurrentTab: stateContainer.getCurrentTab,
+        });
+
         await internalState.dispatch(
           internalStateActions.initializeSingleTab({
             tabId,
             initializeSingleTabParams: {
               stateContainer,
               customizationService,
+              dataStateContainer,
               dataViewSpec: undefined,
               esqlControls: undefined,
               defaultUrlState: undefined,
@@ -277,8 +287,6 @@ export function getDiscoverInternalStateMock({
         if (!skipWaitForDataFetching) {
           await toolkit.waitForDataFetching({ tabId });
         }
-
-        const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue()!;
 
         return { stateContainer, customizationService, dataStateContainer };
       }
@@ -523,13 +531,29 @@ export function getDiscoverStateMock({
 }
 
 /**
- * @deprecated Use `InternalStateMockToolkit.initializeSingleTab()` instead, which returns
- * `dataStateContainer` as part of its result. This helper exists only for backward compatibility
- * with tests that use `getDiscoverStateMock` directly without calling `initializeSingleTab`.
- *
+ * Creates a `dataStateContainer` for testing purposes.
+ * This is primarily used when calling `initializeSingleTab` which stores the container.
+ */
+export function createDataStateContainer(
+  stateContainer: DiscoverStateContainer,
+  services: DiscoverServices = discoverServiceMock
+): DiscoverDataStateContainer {
+  const { runtimeStateManager, internalState } = stateContainer;
+
+  return getDataStateContainer({
+    internalState,
+    services,
+    searchSessionManager: stateContainer.searchSessionManager,
+    runtimeStateManager,
+    injectCurrentTab: stateContainer.injectCurrentTab,
+    getCurrentTab: stateContainer.getCurrentTab,
+  });
+}
+
+/**
  * Returns an existing `dataStateContainer` from the runtime state, or creates and stores a new one
  * if it doesn't exist. This is useful for tests that need `dataStateContainer` without going through
- * the full `initializeSingleTab` flow.
+ * the full `initializeSingleTab` flow (e.g., tests using `initializeAndSync` directly).
  */
 export function getOrCreateDataStateFromMock(
   stateContainer: DiscoverStateContainer,
@@ -545,14 +569,7 @@ export function getOrCreateDataStateFromMock(
     return existing;
   }
 
-  const dataStateContainer = getDataStateContainer({
-    internalState,
-    services,
-    searchSessionManager: stateContainer.searchSessionManager,
-    runtimeStateManager,
-    injectCurrentTab: stateContainer.injectCurrentTab,
-    getCurrentTab: stateContainer.getCurrentTab,
-  });
+  const dataStateContainer = createDataStateContainer(stateContainer, services);
   tabRuntimeState.dataStateContainer$.next(dataStateContainer);
 
   return dataStateContainer;

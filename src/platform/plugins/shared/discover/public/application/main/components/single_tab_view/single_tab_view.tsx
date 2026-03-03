@@ -18,6 +18,7 @@ import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { getDiscoverStateContainer } from '../../state_management/discover_state';
+import { getDataStateContainer } from '../../state_management/discover_data_state_container';
 import {
   RuntimeStateProvider,
   internalStateActions,
@@ -118,11 +119,21 @@ export const SingleTabView = ({
         services,
       });
 
+      const dataStateContainer = getDataStateContainer({
+        services,
+        searchSessionManager,
+        internalState: stateContainer.internalState,
+        runtimeStateManager,
+        injectCurrentTab: stateContainer.injectCurrentTab,
+        getCurrentTab: stateContainer.getCurrentTab,
+      });
+
       dispatch(
         initializeSingleTab({
           initializeSingleTabParams: {
             stateContainer,
             customizationService,
+            dataStateContainer,
             dataViewSpec,
             esqlControls,
             defaultUrlState,

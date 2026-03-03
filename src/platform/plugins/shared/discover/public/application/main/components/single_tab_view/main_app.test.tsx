@@ -17,7 +17,10 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverStateMock,
+  getOrCreateDataStateFromMock,
+} from '../../../../__mocks__/discover_state.mock';
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
@@ -32,6 +35,7 @@ describe('DiscoverMainApp', () => {
     }) as unknown as DataViewListItem[];
     jest.spyOn(discoverServiceMock.dataViews, 'getIdsWithTitle').mockResolvedValue(dataViewList);
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    getOrCreateDataStateFromMock(stateContainer, discoverServiceMock);
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
         dataView: dataViewMock,

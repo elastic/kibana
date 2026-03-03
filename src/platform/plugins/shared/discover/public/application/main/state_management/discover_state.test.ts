@@ -21,25 +21,6 @@ jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
 }));
 
-const mockDataStateContainerFetch = jest.fn();
-
-jest.mock('./discover_data_state_container', () => {
-  const actual = jest.requireActual('./discover_data_state_container');
-  return {
-    ...actual,
-    getDataStateContainer: jest.fn().mockImplementation((params) => {
-      const realContainer = actual.getDataStateContainer(params);
-      // Wrap fetch to track calls
-      const originalFetch = realContainer.fetch.bind(realContainer);
-      realContainer.fetch = (...args: Parameters<typeof originalFetch>) => {
-        mockDataStateContainerFetch(...args);
-        return originalFetch(...args);
-      };
-      return realContainer;
-    }),
-  };
-});
-
 import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
@@ -76,6 +57,7 @@ import {
   getDiscoverInternalStateMock,
   getDiscoverStateMock,
   getOrCreateDataStateFromMock,
+  createDataStateContainer,
 } from '../../../__mocks__/discover_state.mock';
 import { getConnectedCustomizationService } from '../../../customizations';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -111,8 +93,6 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
     history: nextHistory,
     services: mockServices,
   });
-  const dataState = getOrCreateDataStateFromMock(nextState);
-  jest.spyOn(dataState, 'fetch');
   nextState.internalState.dispatch(
     internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
   );
@@ -120,7 +100,6 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
   return {
     history: nextHistory,
     state: nextState,
-    dataState,
     customizationService: await getConnectedCustomizationService({
       customizationCallbacks: [],
       stateContainer: nextState,
@@ -299,6 +278,7 @@ describe('Discover state', () => {
       } as SavedSearch;
 
       const { state } = await getState('/#?_a=(sort:!(!(timestamp,desc)))', { savedSearch });
+      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeAndSync)()
       );
@@ -320,6 +300,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -506,6 +487,7 @@ describe('Discover state', () => {
       const { state } = await getState();
       const nextId = 'id';
       mockServices.data.search.session.start = jest.fn(() => nextId);
+      getOrCreateDataStateFromMock(state); // Required: initializeAndSync expects dataStateContainer to exist
       state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeAndSync)()
       );
@@ -542,6 +524,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -579,6 +562,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -659,6 +643,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -687,6 +672,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -715,6 +701,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -743,6 +730,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -774,6 +762,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -808,6 +797,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -843,6 +833,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -882,6 +873,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -905,6 +897,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -922,6 +915,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -954,6 +948,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -974,6 +969,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1001,6 +997,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1047,6 +1044,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             esqlControls: undefined,
             defaultUrlState: {},
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1095,6 +1093,7 @@ describe('Discover state', () => {
                 dataViewId: 'index-pattern-with-timefield-id',
               }),
             },
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1132,6 +1131,7 @@ describe('Discover state', () => {
             dataViewSpec: dataViewSpecMock,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1166,6 +1166,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1196,6 +1197,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1216,6 +1218,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1239,6 +1242,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1262,17 +1266,21 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
-      await new Promise(process.nextTick);
 
-      // test initial state - fetch was called during initializeSingleTab
-      expect(mockDataStateContainerFetch).toHaveBeenCalledTimes(1);
-      const { currentDataView$ } = selectTabRuntimeState(
+      // Get dataStateContainer created by initializeSingleTab and set up spy
+      const { currentDataView$, dataStateContainer$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
+      const dataState = dataStateContainer$.getValue()!;
+      jest.spyOn(dataState, 'fetch');
+
+      await new Promise(process.nextTick);
+      // test initial state
       expect(currentDataView$.getValue()?.id).toBe(dataViewMock.id);
       expect(getCurrentUrl()).toContain(dataViewMock.id);
 
@@ -1284,8 +1292,8 @@ describe('Discover state', () => {
       );
       await new Promise(process.nextTick);
 
-      // test changed state, fetch should be called once more
-      expect(mockDataStateContainerFetch).toHaveBeenCalledTimes(2);
+      // test changed state, fetch should be called for the data view change
+      expect(dataState.fetch).toHaveBeenCalledTimes(1);
       expect(state.getCurrentTab().appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
@@ -1305,6 +1313,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1358,6 +1367,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
@@ -1384,12 +1394,17 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );
-      await new Promise(process.nextTick);
 
+      // Get dataStateContainer created by initializeSingleTab and set up spy
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, state.getCurrentTab().id);
+      const dataState = tabRuntimeState.dataStateContainer$.getValue()!;
+      jest.spyOn(dataState, 'fetch');
+
+      await new Promise(process.nextTick);
       expect(getCurrentUrl()).toBe(
         "/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,query:(language:kuery,query:''),sort:!())"
       );
@@ -1406,7 +1421,7 @@ describe('Discover state', () => {
         `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,query:(language:kuery,query:''),sort:!(!(data,desc)))"`
       );
       await waitFor(() => {
-        expect(mockDataStateContainerFetch).toHaveBeenCalledTimes(2);
+        expect(dataState.fetch).toHaveBeenCalledTimes(1);
       });
       expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
 
@@ -1417,7 +1432,7 @@ describe('Discover state', () => {
         "/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,query:(language:kuery,query:''),sort:!())"
       );
       await waitFor(() => {
-        expect(mockDataStateContainerFetch).toHaveBeenCalledTimes(3);
+        expect(dataState.fetch).toHaveBeenCalledTimes(2);
       });
       expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewMock.id);
 
@@ -1444,6 +1459,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             esqlControls: undefined,
+            dataStateContainer: createDataStateContainer(state),
           },
         })
       );

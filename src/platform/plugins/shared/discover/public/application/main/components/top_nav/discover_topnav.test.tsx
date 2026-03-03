@@ -15,7 +15,10 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DiscoverTopNav } from './discover_topnav';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverStateMock,
+  getOrCreateDataStateFromMock,
+} from '../../../../__mocks__/discover_state.mock';
 import type { SearchBarCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -70,6 +73,7 @@ function getProps(
     mockDiscoverService.capabilities = capabilities as typeof mockDiscoverService.capabilities;
   }
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  getOrCreateDataStateFromMock(stateContainer, mockDiscoverService);
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView: dataViewMock })
   );
