@@ -14,9 +14,9 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { uniqBy, uniqWith } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import { evaluate } from '../src/evaluate';
+import { evaluate } from '../../../src/evaluate';
 import { FEATURES_DUPLICATION_DATASETS } from './features_duplication_datasets';
-import { indexSynthtraceScenario } from './synthtrace_helpers';
+import { indexSynthtraceScenario } from '../../synthtrace_helpers';
 
 evaluate.describe.configure({ timeout: 600_000 });
 
