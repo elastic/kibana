@@ -44,7 +44,7 @@ import type {
 import type { AlertingPluginsStart } from '../plugin';
 
 export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
-const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
+const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 const RUN_AT_INTERVAL = 60000;
 const TASK_TIMEOUT = '5m';
 const GET_RULES_BATCH_SIZE = 500;
