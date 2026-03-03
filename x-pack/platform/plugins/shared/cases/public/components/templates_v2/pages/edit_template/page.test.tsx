@@ -29,7 +29,7 @@ jest.mock('../../hooks/use_update_template', () => ({
 }));
 
 jest.mock('../../components/template_form', () => ({
-  TemplateFormFields: () => <div data-test-subj="template-form-fields" />,
+  TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
 }));
 
 jest.mock('../../components/template_preview', () => ({
@@ -38,21 +38,18 @@ jest.mock('../../components/template_preview', () => ({
 
 const mockTemplateFormLayout = jest.fn();
 jest.mock('../../components/template_form_layout', () => ({
-  TemplateFormLayout: (props: {
-    title: string;
-    isLoading?: boolean;
-    formContent: React.ReactNode;
-  }) => mockTemplateFormLayout(props),
+  TemplateFormLayout: (props: { title: string; isLoading?: boolean }) =>
+    mockTemplateFormLayout(props),
 }));
 
 describe('EditTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockTemplateFormLayout.mockImplementation(({ title, isLoading, formContent }) => (
+    mockTemplateFormLayout.mockImplementation(({ title, isLoading }) => (
       <div>
         <div data-test-subj="layout-title">{title}</div>
         <div data-test-subj={isLoading ? 'layout-loading' : 'layout-loaded'} />
-        <div data-test-subj="layout-form-content">{formContent}</div>
+        <div data-test-subj="template-yaml-editor" />
       </div>
     ));
   });
@@ -77,7 +74,7 @@ describe('EditTemplatePage', () => {
 
     expect(screen.getByTestId('layout-title')).toHaveTextContent(i18n.EDIT_TEMPLATE_TITLE);
     expect(screen.getByTestId('layout-loaded')).toBeInTheDocument();
-    expect(screen.getByTestId('template-form-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
   });
 
   it('shows loading state when template is not yet available', () => {

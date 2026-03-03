@@ -12,7 +12,7 @@ import { TestProviders } from '../../../../common/mock';
 import * as i18n from '../../translations';
 
 jest.mock('../../components/template_form', () => ({
-  TemplateFormFields: () => <div data-test-subj="template-form-fields" />,
+  TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
 }));
 
 jest.mock('../../components/template_preview', () => ({
@@ -34,7 +34,7 @@ describe('CreateTemplatePage', () => {
     expect(screen.getByText(i18n.ADD_TEMPLATE_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.BACK_TO_TEMPLATES)).toBeInTheDocument();
     expect(screen.getByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
-    expect(screen.getByTestId('template-form-fields')).toBeInTheDocument();
+    expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
     expect(screen.getByTestId('create-template-preview')).toBeInTheDocument();
   });
 });

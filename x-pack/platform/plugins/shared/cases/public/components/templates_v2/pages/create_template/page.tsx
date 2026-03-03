@@ -9,7 +9,6 @@ import React, { useCallback, useEffect } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from '../../components/template_form';
-import { TemplateYamlEditor } from '../../components/template_form';
 import { exampleTemplateDefinition } from '../../field_types/constants';
 import { TemplateFormLayout } from '../../components/template_form_layout';
 import { useCreateTemplate } from '../../hooks/use_create_template';
@@ -56,7 +55,6 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
     <TemplateFormLayout
       form={form}
       title={i18n.ADD_TEMPLATE_TITLE}
-      formContent={<TemplateYamlEditor />}
       isSaving={isSaving}
       onCreate={handleCreate}
     />

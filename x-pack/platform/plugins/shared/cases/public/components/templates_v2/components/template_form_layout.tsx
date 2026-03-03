@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type { ReactNode } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,6 +31,7 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import type { YamlEditorFormValues } from './template_form';
+import { TemplateYamlEditor } from './template_form';
 import { TemplatePreview } from './template_preview';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import * as i18n from '../translations';
@@ -41,7 +41,6 @@ import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH, TEMPLATE_PREVIEW_WIDTH_KEY } from 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
   title: string;
-  formContent: ReactNode;
   isLoading?: boolean;
   isSaving?: boolean;
   onCreate: (data: YamlEditorFormValues) => Promise<void>;
@@ -51,7 +50,6 @@ interface TemplateFormLayoutProps {
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   form,
   title,
-  formContent,
   isLoading,
   isSaving,
   onCreate,
@@ -157,7 +155,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
           ) : (
             <ResizableLayout
               className="eui-fullHeight"
-              flexPanel={<div css={styles.editorPanel}>{formContent}</div>}
+              flexPanel={
+                <div css={styles.editorPanel}>
+                  <TemplateYamlEditor />
+                </div>
+              }
               minFlexPanelSize={MIN_EDITOR_WIDTH}
               fixedPanel={
                 <div css={styles.previewPanel}>

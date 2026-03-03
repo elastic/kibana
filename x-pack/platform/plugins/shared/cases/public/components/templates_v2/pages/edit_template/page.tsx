@@ -11,7 +11,6 @@ import { useForm } from 'react-hook-form';
 import { dump as yamlDump } from 'js-yaml';
 import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
 import type { YamlEditorFormValues } from '../../components/template_form';
-import { TemplateYamlEditor } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
 import { useUpdateTemplate } from '../../hooks/use_update_template';
 import { TemplateFormLayout } from '../../components/template_form_layout';
@@ -65,7 +64,6 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       title={i18n.EDIT_TEMPLATE_TITLE}
       isLoading={isLoading && !template}
       isSaving={isSaving}
-      formContent={<TemplateYamlEditor />}
       onCreate={handleSave}
       isEdit
     />
