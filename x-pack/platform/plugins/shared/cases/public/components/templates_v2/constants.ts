@@ -29,3 +29,7 @@ export const LINE_CLAMP = 3;
 export const MAX_TEMPLATES_PER_FILE = 100;
 
 export const MAX_TOTAL_IMPORT_TEMPLATES = 100;
+
+export const TEMPLATE_PREVIEW_WIDTH_KEY = 'CASES_TEMPLATE_PREVIEW_WIDTH';
+export const MIN_PREVIEW_WIDTH = 250;
+export const MIN_EDITOR_WIDTH = 400;

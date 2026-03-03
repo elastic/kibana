@@ -6,10 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { load as parseYaml } from 'js-yaml';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
+import { TemplateMetadataPreview } from './template_metadata_preview';
+import * as i18n from '../translations';
+
+const fieldsSectionStyles = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+});
 
 export const TemplatePreview = () => {
   const { control } = useFormContext();
@@ -52,8 +62,19 @@ export const TemplatePreview = () => {
 
   return (
     <div>
-      {/** NOTE: this component uses shared-form renderer for Case form compatiblit */}
-      <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
+      <TemplateMetadataPreview parsedTemplate={parsedTemplateData} />
+
+      {parsedTemplateData.fields.length > 0 && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <div css={fieldsSectionStyles}>
+            <EuiText size="xs" color="subdued">
+              <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
+            </EuiText>
+            <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
+          </div>
+        </>
+      )}
     </div>
   );
 };

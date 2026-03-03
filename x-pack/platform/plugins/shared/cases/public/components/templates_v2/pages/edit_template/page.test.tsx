@@ -11,8 +11,12 @@ import { EditTemplatePage } from './page';
 import * as i18n from '../../translations';
 
 const mockUseTemplateViewParams = jest.fn();
+const mockNavigateToCasesTemplates = jest.fn();
 jest.mock('../../../../common/navigation', () => ({
   useTemplateViewParams: () => mockUseTemplateViewParams(),
+  useCasesTemplatesNavigation: () => ({
+    navigateToCasesTemplates: mockNavigateToCasesTemplates,
+  }),
 }));
 
 const mockUseGetTemplate = jest.fn();
@@ -20,8 +24,16 @@ jest.mock('../../hooks/use_get_template', () => ({
   useGetTemplate: () => mockUseGetTemplate(),
 }));
 
+jest.mock('../../hooks/use_update_template', () => ({
+  useUpdateTemplate: () => ({ mutateAsync: jest.fn(), isLoading: false }),
+}));
+
 jest.mock('../../components/template_form', () => ({
-  UpdateTemplateForm: () => <div data-test-subj="update-template-form" />,
+  TemplateFormFields: () => <div data-test-subj="template-form-fields" />,
+}));
+
+jest.mock('../../components/template_preview', () => ({
+  TemplatePreview: () => <div data-test-subj="template-preview" />,
 }));
 
 const mockTemplateFormLayout = jest.fn();
@@ -45,7 +57,7 @@ describe('EditTemplatePage', () => {
     ));
   });
 
-  it('renders the edit layout with update form', () => {
+  it('renders the edit layout with form fields', () => {
     mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
     mockUseGetTemplate.mockReturnValue({
       data: {
@@ -65,7 +77,7 @@ describe('EditTemplatePage', () => {
 
     expect(screen.getByTestId('layout-title')).toHaveTextContent(i18n.EDIT_TEMPLATE_TITLE);
     expect(screen.getByTestId('layout-loaded')).toBeInTheDocument();
-    expect(screen.getByTestId('update-template-form')).toBeInTheDocument();
+    expect(screen.getByTestId('template-form-fields')).toBeInTheDocument();
   });
 
   it('shows loading state when template is not yet available', () => {

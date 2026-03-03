@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import type { TemplateFormValues } from '../../components/template_form';
-import { CreateTemplateForm } from '../../components/template_form';
+import type { YamlEditorFormValues } from '../../components/template_form';
+import { TemplateYamlEditor } from '../../components/template_form';
 import { exampleTemplateDefinition } from '../../field_types/constants';
-import { GENERAL_CASES_OWNER } from '../../../../../common/constants';
 import { TemplateFormLayout } from '../../components/template_form_layout';
+import { useCreateTemplate } from '../../hooks/use_create_template';
+import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../../../app/use_available_owners';
+import { getOwnerDefaultValue } from '../../../create/utils';
+import { useCasesTemplatesNavigation } from '../../../../common/navigation';
 
 import * as i18n from '../../translations';
 
@@ -20,25 +24,41 @@ import * as i18n from '../../translations';
 export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
-  const form = useForm<TemplateFormValues>({
+  const form = useForm<YamlEditorFormValues>({
     defaultValues: {
-      name: '',
-      owner: GENERAL_CASES_OWNER,
       definition: exampleTemplateDefinition,
     },
   });
+  const { mutateAsync, isLoading: isSaving } = useCreateTemplate();
+  const { owner } = useCasesContext();
+  const availableOwners = useAvailableCasesOwners();
+  const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
-  // NOTE: reset the form to propagate initial value to the renderer.
-  // For some reason it does not happen automatically.
   useEffect(() => {
     form.reset();
   }, [form]);
+
+  const handleCreate = useCallback(
+    async (data: YamlEditorFormValues) => {
+      await mutateAsync({
+        template: {
+          owner: defaultOwnerValue,
+          definition: data.definition,
+        },
+      });
+      navigateToCasesTemplates();
+    },
+    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates]
+  );
 
   return (
     <TemplateFormLayout
       form={form}
       title={i18n.ADD_TEMPLATE_TITLE}
-      formContent={<CreateTemplateForm />}
+      formContent={<TemplateYamlEditor />}
+      isSaving={isSaving}
+      onCreate={handleCreate}
     />
   );
 };

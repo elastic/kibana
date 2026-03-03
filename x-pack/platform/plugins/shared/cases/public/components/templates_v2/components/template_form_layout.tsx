@@ -5,29 +5,47 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageBody,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
+  EuiPageHeaderSection,
+  EuiPageTemplate,
+  EuiSkeletonTitle,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
-import type { TemplateFormValues } from './template_form';
-import { HeaderPage } from '../../header_page';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  ResizableLayout,
+  ResizableLayoutDirection,
+  ResizableLayoutMode,
+  ResizableLayoutOrder,
+} from '@kbn/resizable-layout';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import type { YamlEditorFormValues } from './template_form';
 import { TemplatePreview } from './template_preview';
+import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import * as i18n from '../translations';
+import { componentStyles } from './template_form_layout.styles';
+import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH, TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 
 interface TemplateFormLayoutProps {
-  form: UseFormReturn<TemplateFormValues>;
+  form: UseFormReturn<YamlEditorFormValues>;
   title: string;
   formContent: ReactNode;
   isLoading?: boolean;
+  isSaving?: boolean;
+  onCreate: (data: YamlEditorFormValues) => Promise<void>;
+  isEdit?: boolean;
 }
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
@@ -35,36 +53,129 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   title,
   formContent,
   isLoading,
+  isSaving,
+  onCreate,
+  isEdit = false,
 }) => {
+  const styles = useMemoCss(componentStyles);
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+
+  const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
+  const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
+    TEMPLATE_PREVIEW_WIDTH_KEY,
+    defaultPreviewWidth
+  );
+
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleCreate = useCallback(() => {
+    setSubmitError(null);
+    form.handleSubmit(
+      async (data) => {
+        try {
+          await onCreate(data);
+        } catch (e) {
+          setSubmitError(e?.message ?? 'Failed to save template');
+        }
+      },
+      () => {
+        setSubmitError('Please fix validation errors before saving.');
+      }
+    )();
+  }, [form, onCreate]);
+
+  const saveTooltipContent = submitError ?? undefined;
+
   return (
     <FormProvider {...form}>
-      <EuiPageSection restrictWidth={false}>
-        <HeaderPage data-test-subj="case-configure-title" title={title} />
-        <EuiPageBody>
-          <EuiSpacer size="xs" />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        css={[kbnFullBodyHeightCss(), styles.wrapper]}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
+            <EuiPageTemplate.Header
+              css={styles.header}
+              restrictWidth={false}
+              bottomBorder={false}
+              paddingSize="m"
+              alignItems="bottom"
+            >
+              <EuiPageHeaderSection css={styles.headerSection}>
+                <EuiButtonEmpty
+                  iconType="sortLeft"
+                  size="xs"
+                  flush="left"
+                  onClick={navigateToCasesTemplates}
+                  aria-label={i18n.BACK_TO_TEMPLATES}
+                >
+                  {i18n.BACK_TO_TEMPLATES}
+                </EuiButtonEmpty>
+                <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
+                  <EuiFlexItem grow={false} css={styles.titleItem}>
+                    <EuiSkeletonTitle
+                      size="m"
+                      isLoading={!!isLoading}
+                      contentAriaLabel={title}
+                      css={styles.skeletonTitle}
+                    >
+                      <EuiTitle size="m" css={styles.title}>
+                        <h2>{title}</h2>
+                      </EuiTitle>
+                    </EuiSkeletonTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPageHeaderSection>
+
+              <EuiPageHeaderSection>
+                <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m">
+                  <EuiToolTip content={saveTooltipContent}>
+                    <EuiButton
+                      fill
+                      color="primary"
+                      size="s"
+                      onClick={handleCreate}
+                      disabled={isLoading || isSaving}
+                      isLoading={isSaving}
+                      data-test-subj="saveTemplateHeaderButton"
+                    >
+                      {isEdit ? i18n.SAVE_TEMPLATE : i18n.CREATE_TEMPLATE}
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexGroup>
+              </EuiPageHeaderSection>
+            </EuiPageTemplate.Header>
+          </EuiPageTemplate>
+        </EuiFlexItem>
+
+        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
           {isLoading ? (
-            <EuiLoadingSpinner size="l" />
-          ) : (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={3}>
-                <EuiText>
-                  <h3>{i18n.YAML_EDITOR_TITLE}</h3>
-                </EuiText>
-                <EuiSpacer size="m" />
-                {formContent}
-                <EuiSpacer size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>
-                <EuiText>
-                  <h3>{i18n.INTERACTIVE_EDITOR_TITLE}</h3>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <TemplatePreview />
-              </EuiFlexItem>
+            <EuiFlexGroup justifyContent="center" alignItems="center" css={css({ height: '100%' })}>
+              <EuiLoadingSpinner size="xl" />
             </EuiFlexGroup>
+          ) : (
+            <ResizableLayout
+              className="eui-fullHeight"
+              flexPanel={<div css={styles.editorPanel}>{formContent}</div>}
+              minFlexPanelSize={MIN_EDITOR_WIDTH}
+              fixedPanel={
+                <div css={styles.previewPanel}>
+                  <TemplatePreview />
+                </div>
+              }
+              fixedPanelSize={previewWidth}
+              onFixedPanelSizeChange={setPreviewWidth}
+              minFixedPanelSize={MIN_PREVIEW_WIDTH}
+              fixedPanelOrder={ResizableLayoutOrder.End}
+              mode={ResizableLayoutMode.Resizable}
+              direction={ResizableLayoutDirection.Horizontal}
+              resizeButtonClassName="templatePreviewResizeButton"
+              data-test-subj="templateEditorWithPreviewLayout"
+            />
           )}
-        </EuiPageBody>
-      </EuiPageSection>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </FormProvider>
   );
 };

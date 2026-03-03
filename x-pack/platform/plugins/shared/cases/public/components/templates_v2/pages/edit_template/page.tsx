@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { dump as yamlDump } from 'js-yaml';
-import { useTemplateViewParams } from '../../../../common/navigation';
-import type { TemplateFormValues } from '../../components/template_form';
-import { UpdateTemplateForm } from '../../components/template_form';
-import { GENERAL_CASES_OWNER } from '../../../../../common/constants';
+import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
+import type { YamlEditorFormValues } from '../../components/template_form';
+import { TemplateYamlEditor } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
+import { useUpdateTemplate } from '../../hooks/use_update_template';
 import { TemplateFormLayout } from '../../components/template_form_layout';
 import * as i18n from '../../translations';
 
@@ -23,11 +23,11 @@ export interface EditTemplatePageProps {}
 export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { templateId } = useTemplateViewParams();
   const { data: template, isLoading } = useGetTemplate(templateId);
+  const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
-  const form = useForm<TemplateFormValues>({
+  const form = useForm<YamlEditorFormValues>({
     defaultValues: {
-      name: '',
-      owner: GENERAL_CASES_OWNER,
       definition: '',
     },
   });
@@ -39,18 +39,35 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
 
     const definition = yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
     form.reset({
-      name: template.name,
-      owner: template.owner,
       definition,
     });
   }, [form, template]);
+
+  const handleSave = useCallback(
+    async (data: YamlEditorFormValues) => {
+      if (!templateId) {
+        return;
+      }
+      await mutateAsync({
+        templateId,
+        template: {
+          definition: data.definition,
+        },
+      });
+      navigateToCasesTemplates();
+    },
+    [mutateAsync, navigateToCasesTemplates, templateId]
+  );
 
   return (
     <TemplateFormLayout
       form={form}
       title={i18n.EDIT_TEMPLATE_TITLE}
       isLoading={isLoading && !template}
-      formContent={templateId ? <UpdateTemplateForm templateId={templateId} /> : null}
+      isSaving={isSaving}
+      formContent={<TemplateYamlEditor />}
+      onCreate={handleSave}
+      isEdit
     />
   );
 };

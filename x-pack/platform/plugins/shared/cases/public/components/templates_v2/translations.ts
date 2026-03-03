@@ -21,6 +21,10 @@ export const SUCCESS_CREATING_TEMPLATE = i18n.translate(
   }
 );
 
+export const CREATE_TEMPLATE = i18n.translate('xpack.cases.templates.create', {
+  defaultMessage: 'Create',
+});
+
 export const SAVE_TEMPLATE = i18n.translate('xpack.cases.templates.save', {
   defaultMessage: 'Save',
 });
@@ -33,13 +37,10 @@ export const EDIT_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.editTem
   defaultMessage: 'Edit template',
 });
 
-export const YAML_EDITOR_TITLE = i18n.translate('xpack.cases.templates.yamlEditorTitle', {
-  defaultMessage: 'YAML Editor',
+export const BACK_TO_TEMPLATES = i18n.translate('xpack.cases.templates.backToTemplates', {
+  defaultMessage: 'Back to Templates',
 });
 
-export const INTERACTIVE_EDITOR_TITLE = i18n.translate(
-  'xpack.cases.templates.interactiveEditorTitle',
-  {
-    defaultMessage: 'Interactive editor / Preview',
-  }
-);
+export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
+  defaultMessage: 'Fields',
+});

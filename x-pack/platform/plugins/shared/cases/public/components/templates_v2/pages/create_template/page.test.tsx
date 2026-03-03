@@ -12,15 +12,19 @@ import { TestProviders } from '../../../../common/mock';
 import * as i18n from '../../translations';
 
 jest.mock('../../components/template_form', () => ({
-  CreateTemplateForm: () => <div data-test-subj="create-template-form" />,
+  TemplateFormFields: () => <div data-test-subj="template-form-fields" />,
 }));
 
 jest.mock('../../components/template_preview', () => ({
   TemplatePreview: () => <div data-test-subj="create-template-preview" />,
 }));
 
+jest.mock('../../hooks/use_create_template', () => ({
+  useCreateTemplate: () => ({ mutateAsync: jest.fn(), isLoading: false }),
+}));
+
 describe('CreateTemplatePage', () => {
-  it('renders the layout copy and sections', () => {
+  it('renders the layout with header and sections', () => {
     render(
       <TestProviders>
         <CreateTemplatePage />
@@ -28,11 +32,9 @@ describe('CreateTemplatePage', () => {
     );
 
     expect(screen.getByText(i18n.ADD_TEMPLATE_TITLE)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: i18n.YAML_EDITOR_TITLE })).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: i18n.INTERACTIVE_EDITOR_TITLE })
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('create-template-form')).toBeInTheDocument();
+    expect(screen.getByText(i18n.BACK_TO_TEMPLATES)).toBeInTheDocument();
+    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
+    expect(screen.getByTestId('template-form-fields')).toBeInTheDocument();
     expect(screen.getByTestId('create-template-preview')).toBeInTheDocument();
   });
 });
