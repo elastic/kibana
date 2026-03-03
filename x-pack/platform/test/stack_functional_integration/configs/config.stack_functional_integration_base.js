@@ -29,7 +29,7 @@ export default async ({ readConfigFile }) => {
     TESTS_LIST: 'alerts',
   };
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.ccs.ts')
+    require.resolve('../../functional/config.ccs.1.ts')
   );
   const fleetFunctionalConfig = await readConfigFile(
     require.resolve('../../fleet_functional/config.ts')

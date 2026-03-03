@@ -74,6 +74,5 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     loadTestFile(require.resolve('./smokescreen.ts')); // 14m 25s
-    loadTestFile(require.resolve('./vega_chart.ts')); // 3m
   });
 };

@@ -34,7 +34,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
     loadTestFile(require.resolve('./index_data_visualizer_data_view_management'));
     loadTestFile(require.resolve('./file_data_visualizer'));
-    loadTestFile(require.resolve('./data_drift'));
-    loadTestFile(require.resolve('./esql_data_visualizer'));
   });
 }

@@ -11,7 +11,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules Upgrade (Customization Enabled)', function () {
     loadTestFile(require.resolve('./review_prebuilt_rules_upgrade'));
     loadTestFile(require.resolve('./bulk_upgrade_all_prebuilt_rules'));
-    loadTestFile(require.resolve('./bulk_upgrade_selected_prebuilt_rules'));
-    loadTestFile(require.resolve('./upgrade_single_prebuilt_rule'));
   });
 };

@@ -71,12 +71,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~ 16m
     loadTestFile(require.resolve('./drag_and_drop')); // 7m 40s
     loadTestFile(require.resolve('./geo_field')); // 26s
     loadTestFile(require.resolve('./formula')); // 5m 52s
-    loadTestFile(require.resolve('./heatmap')); // 51s
-    loadTestFile(require.resolve('./gauge')); // 1m 17s
-    loadTestFile(require.resolve('./tagcloud')); // 1m
   });
 };

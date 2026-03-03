@@ -18,7 +18,5 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./pages/cis_integrations/cnvm/cis_integration_cnvm'));
     loadTestFile(require.resolve('./pages/cis_integrations/cspm/cis_integration_aws'));
-    loadTestFile(require.resolve('./pages/cis_integrations/cspm/cis_integration_gcp'));
-    loadTestFile(require.resolve('./pages/cis_integrations/cspm/cis_integration_azure'));
   });
 }

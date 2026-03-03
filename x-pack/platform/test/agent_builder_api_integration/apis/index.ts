@@ -16,13 +16,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./tools/esql_tools.ts'));
     loadTestFile(require.resolve('./tools/esql_tools_internal.ts'));
     loadTestFile(require.resolve('./tools/legacy_tool_types_migration.ts'));
-    loadTestFile(require.resolve('./tools/index_search_tools.ts'));
-    loadTestFile(require.resolve('./agents.ts'));
-    loadTestFile(require.resolve('./conversations.ts'));
-    loadTestFile(require.resolve('./rbac.ts'));
-    loadTestFile(require.resolve('./attachments.ts'));
-    loadTestFile(require.resolve('./spaces.ts'));
-    loadTestFile(require.resolve('./skills/skills_crud.ts'));
-    loadTestFile(require.resolve('./skills/skills_validation.ts'));
   });
 }

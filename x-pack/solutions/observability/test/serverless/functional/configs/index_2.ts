@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI (part 2)', function () {
     this.tags(['esGate']);
 
+    loadTestFile(require.resolve('../test_suites/dataset_quality/index_2'));
     loadTestFile(require.resolve('../test_suites/advanced_settings'));
     loadTestFile(require.resolve('../test_suites/privileges'));
   });

@@ -14,7 +14,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseTestConfig.getAll(),
     testFiles: [
       require.resolve('../../test_suites/discover/embeddable'),
-      require.resolve('../../test_suites/context'),
     ],
     junit: {
       reportName:

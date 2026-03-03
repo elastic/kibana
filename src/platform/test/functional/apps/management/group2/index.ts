@@ -28,8 +28,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_scripted_fields_preview'));
     loadTestFile(require.resolve('./_scripted_fields_filter'));
     loadTestFile(require.resolve('./_runtime_fields'));
-    loadTestFile(require.resolve('./_runtime_fields_composite'));
-    loadTestFile(require.resolve('./_field_formatter'));
-    loadTestFile(require.resolve('./_try_esql'));
   });
 }

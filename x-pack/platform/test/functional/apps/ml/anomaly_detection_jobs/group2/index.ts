@@ -36,8 +36,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     if (!isCcs) {
       loadTestFile(require.resolve('./population_job'));
       loadTestFile(require.resolve('./geo_job'));
-      loadTestFile(require.resolve('./saved_search_job'));
-      loadTestFile(require.resolve('./advanced_job'));
     }
   });
 }

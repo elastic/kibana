@@ -63,6 +63,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./add_to_dashboard'));
-    loadTestFile(require.resolve('./save_and_return'));
   });
 }

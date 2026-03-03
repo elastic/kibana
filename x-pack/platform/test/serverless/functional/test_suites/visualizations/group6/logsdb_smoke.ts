@@ -7,19 +7,11 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  type ScenarioIndexes,
-  getDataMapping,
-  getDocsGenerator,
-  setupScenarioRunner,
-} from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, discover, header, timePicker, svlCommonPage } = getPageObjects([
+  const { common, lens, timePicker, svlCommonPage } = getPageObjects([
     'common',
     'lens',
-    'discover',
-    'header',
     'timePicker',
     'svlCommonPage',
   ]);
@@ -28,13 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
-  const dataStreams = getService('dataStreams');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
-  const monacoEditor = getService('monacoEditor');
-  const retry = getService('retry');
-
-  const createDocs = getDocsGenerator(log, es, 'logsdb');
 
   describe('lens logsdb - smoke and scenarios 1-2', function () {
     // see details: https://github.com/elastic/kibana/issues/195089
@@ -133,8 +120,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.closeDimensionEditor();
       });
     });
+  });
+}
 
-    describe('Scenarios with changing stream type', () => {
       const getScenarios = (
         initialIndex: string
       ): Array<{

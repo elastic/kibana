@@ -74,7 +74,5 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     loadTestFile(require.resolve('./logsdb_downgrade.ts'));
-    loadTestFile(require.resolve('./logsdb_downgrade_2.ts'));
-    loadTestFile(require.resolve('./logsdb_downgrade_3.ts'));
   });
 };

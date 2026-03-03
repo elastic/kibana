@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [require.resolve('../../test_suites/discover/esql')],
+    testFiles: [require.resolve('../../test_suites/discover/esql/index_group17')],
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 17 (Discover ES|QL)',
     },

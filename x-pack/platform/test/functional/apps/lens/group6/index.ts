@@ -78,7 +78,5 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./metric')); // 4m 7s
     loadTestFile(require.resolve('./legacy_metric')); // 29s
     loadTestFile(require.resolve('./disable_auto_apply')); // 1m 6s
-    loadTestFile(require.resolve('./reference_lines')); // 1m
-    loadTestFile(require.resolve('./annotations')); // 1m
   });
 };

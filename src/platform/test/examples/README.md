@@ -8,9 +8,9 @@ To run these tests during development you can use the following commands:
 
 ```
 # Start the test server (can continue running)
-node scripts/functional_tests_server.js --config src/platform/test/examples/config.js
+node scripts/functional_tests_server.js --config src/platform/test/examples/config.1.js or config.2.js
 # Start a test run
-node scripts/functional_test_runner.js --config src/platform/test/examples/config.js
+node scripts/functional_test_runner.js --config src/platform/test/examples/config.1.js or config.2.js
 ```
 
 ## Run Kibana with a test plugin

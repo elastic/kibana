@@ -31,9 +31,11 @@ enabled:
   - x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
   - x-pack/solutions/observability/test/functional/apps/dataset_quality/config_2.ts
   - x-pack/solutions/observability/test/functional/apps/uptime/config.ts
+  - x-pack/solutions/observability/test/functional/apps/uptime/config.2.ts
   - x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
   - x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
   - x-pack/solutions/observability/test/observability_functional/with_rac_write.config.ts
+  - x-pack/solutions/observability/test/observability_functional/with_rac_write.2.config.ts
   - x-pack/solutions/observability/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/solutions/observability/test/api_integration/profiling/cloud/config.ts
   - x-pack/solutions/observability/test/functional/apps/apm/config.ts
@@ -43,13 +45,16 @@ enabled:
   - x-pack/solutions/observability/test/api_integration/apis/security/config.ts
   - x-pack/solutions/observability/test/accessibility/config.ts
   - x-pack/solutions/observability/test/functional/apps/infra/config.ts
+  - x-pack/solutions/observability/test/functional/apps/infra/config.2.ts
   - x-pack/solutions/observability/test/functional/config.firefox.ts
   # stateful configs that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.2.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.2.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.3.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.2.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts
   - x-pack/solutions/observability/test/functional_solution_sidenav/config.ts

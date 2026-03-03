@@ -2082,7 +2082,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/tsconfig.json @elastic/appex-qa
 /src/platform/test/plugin_functional/services/index.ts @elastic/appex-qa
 /src/platform/test/plugin_functional/README.md @elastic/appex-qa
-/src/platform/test/plugin_functional/config.ts @elastic/appex-qa
+/src/platform/test/plugin_functional/config_1.ts @elastic/appex-qa
+/src/platform/test/plugin_functional/config_2.ts @elastic/appex-qa
 /src/platform/test/kibana.jsonc @elastic/appex-qa
 /src/platform/test/harden @elastic/appex-qa
 /src/platform/test/functional/services/supertest.ts @elastic/appex-qa
@@ -2112,7 +2113,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/firefox/config.base.ts @elastic/appex-qa
 /src/platform/test/functional/config.* @elastic/appex-qa
 /src/platform/test/functional/README.md @elastic/appex-qa
-/src/platform/test/examples/config.js @elastic/appex-qa
+/src/platform/test/examples/config.1.js @elastic/appex-qa
+/src/platform/test/examples/config.2.js @elastic/appex-qa
 /src/platform/test/examples/README.md @elastic/appex-qa
 /src/platform/test/common/services/index.ts @elastic/appex-qa
 /src/platform/test/common/fixtures/plugins/coverage/*.ts @elastic/appex-qa

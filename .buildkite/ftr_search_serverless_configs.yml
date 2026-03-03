@@ -9,9 +9,11 @@ enabled:
   - x-pack/solutions/search/test/serverless/functional/configs/config.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config_2.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.search_features.ts
+  - x-pack/solutions/search/test/serverless/functional/configs/config.search_features.2.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
+  - x-pack/platform/test/serverless/api_integration/configs/search/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.examples.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.saved_objects_management.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.context_awareness.ts
@@ -37,4 +39,17 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group17.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group18.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group19.ts
-  - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group20.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group21.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group22.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group23.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group24.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group25.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group26.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group27.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group28.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group29.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group30.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group31.ts
+  - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.1.ts
+  - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.2.ts

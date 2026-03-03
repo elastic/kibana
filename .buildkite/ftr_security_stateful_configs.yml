@@ -146,6 +146,8 @@ enabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/group4/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config_2.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config_3.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group6/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
@@ -157,6 +159,7 @@ enabled:
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common_2.ts
   - x-pack/solutions/security/test/api_integration_basic/config.ts
   - x-pack/solutions/security/test/api_integration/apis/cases/config.ts
   - x-pack/solutions/security/test/fleet_api_integration/config.agent.ts

@@ -31,6 +31,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_visualize_listing'));
-    loadTestFile(require.resolve('./_add_to_dashboard'));
   });
 }

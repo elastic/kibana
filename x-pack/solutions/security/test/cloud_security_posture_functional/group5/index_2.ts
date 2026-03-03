@@ -18,6 +18,5 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./pages/alerts_flyout'));
     loadTestFile(require.resolve('./pages/events_flyout'));
-    loadTestFile(require.resolve('./pages/entity_preview_flyout'));
   });
 }

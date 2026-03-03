@@ -33,6 +33,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));
-    loadTestFile(require.resolve('./continuous_transform'));
   });
 }
