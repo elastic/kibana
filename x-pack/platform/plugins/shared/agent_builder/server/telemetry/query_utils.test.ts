@@ -525,7 +525,12 @@ describe('query_utils', () => {
 
       it('applies date filter when provided', async () => {
         esClient.search.mockResolvedValue(
-          mockConversationResponse({ totalHits: 10, totalRounds: 25, inputTokens: 1000, outputTokens: 500 })
+          mockConversationResponse({
+            totalHits: 10,
+            totalRounds: 25,
+            inputTokens: 1000,
+            outputTokens: 500,
+          })
         );
 
         await queryUtils.getConversationMetrics({ gte: '2024-01-01T00:00:00.000Z' });
