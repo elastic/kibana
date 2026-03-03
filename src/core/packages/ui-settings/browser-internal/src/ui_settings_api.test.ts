@@ -41,8 +41,12 @@ async function settlePromise<T>(promise: Promise<T>) {
   }
 }
 
+beforeEach(() => {
+  fetchMock.mockGlobal();
+});
+
 afterEach(() => {
-  fetchMock.restore();
+  fetchMock.hardReset();
 });
 
 describe('#batchSet', () => {
@@ -53,7 +57,7 @@ describe('#batchSet', () => {
 
     const { uiSettingsApi } = setup();
     await uiSettingsApi.batchSet('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('single change');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('single change');
   });
 
   it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
@@ -68,7 +72,7 @@ describe('#batchSet', () => {
 
     expect(uiSettingsApi.hasPendingChanges()).toBe(true);
     await finalPromise;
-    expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('final, includes both requests');
   });
 
   it('Overwrites previously buffered values with new values for the same key', async () => {
@@ -83,7 +87,7 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('foo', 'c');
     await uiSettingsApi.batchSet('foo', 'd');
 
-    expect(fetchMock.calls()).toMatchSnapshot('two requests, foo=d in final');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('two requests, foo=d in final');
   });
 
   it('Buffers are always clear of previously buffered changes', async () => {
@@ -96,7 +100,7 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('bar', 'foo');
     await uiSettingsApi.batchSet('bar', 'box');
 
-    expect(fetchMock.calls()).toMatchSnapshot('two requests, second only sends bar, not foo');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('two requests, second only sends bar, not foo');
   });
 
   it('rejects on 404 response', async () => {
@@ -158,7 +162,7 @@ describe('#batchSet', () => {
     ).resolves.toMatchSnapshot('promise rejections');
 
     // ensure only two requests were sent
-    expect(fetchMock.calls()).toHaveLength(2);
+    expect(fetchMock.callHistory.calls()).toHaveLength(2);
   });
 });
 
@@ -170,7 +174,7 @@ describe('#batchSetGlobal', () => {
 
     const { uiSettingsApi } = setup();
     await uiSettingsApi.batchSetGlobal('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('single change');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('single change');
   });
 
   it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
@@ -185,7 +189,7 @@ describe('#batchSetGlobal', () => {
 
     expect(uiSettingsApi.hasPendingChanges()).toBe(true);
     await finalPromise;
-    expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('final, includes both requests');
   });
 
   it('Overwrites previously buffered values with new values for the same key', async () => {
@@ -200,7 +204,7 @@ describe('#batchSetGlobal', () => {
     uiSettingsApi.batchSetGlobal('foo', 'c');
     await uiSettingsApi.batchSetGlobal('foo', 'd');
 
-    expect(fetchMock.calls()).toMatchSnapshot('two requests, foo=d in final');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('two requests, foo=d in final');
   });
 
   it('Buffers are always clear of previously buffered changes', async () => {
@@ -213,7 +217,7 @@ describe('#batchSetGlobal', () => {
     uiSettingsApi.batchSetGlobal('bar', 'foo');
     await uiSettingsApi.batchSetGlobal('bar', 'box');
 
-    expect(fetchMock.calls()).toMatchSnapshot('two requests, second only sends bar, not foo');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('two requests, second only sends bar, not foo');
   });
 
   it('rejects on 404 response', async () => {
@@ -275,7 +279,7 @@ describe('#batchSetGlobal', () => {
     ).resolves.toMatchSnapshot('promise rejections');
 
     // ensure only two requests were sent
-    expect(fetchMock.calls()).toHaveLength(2);
+    expect(fetchMock.callHistory.calls()).toHaveLength(2);
   });
 });
 
@@ -354,7 +358,7 @@ describe('#validate', () => {
 
     const { uiSettingsApi } = setup();
     await uiSettingsApi.validate('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('validation request');
+    expect(fetchMock.callHistory.calls()).toMatchSnapshot('validation request');
   });
 
   it('rejects on 404 response', async () => {

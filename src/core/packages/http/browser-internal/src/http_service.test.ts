@@ -17,7 +17,8 @@ import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser
 import { HttpService } from './http_service';
 
 describe('interceptors', () => {
-  afterEach(() => fetchMock.restore());
+  beforeEach(() => fetchMock.mockGlobal());
+  afterEach(() => fetchMock.hardReset());
 
   it('shares interceptors across setup and start', async () => {
     fetchMock.get('*', {});

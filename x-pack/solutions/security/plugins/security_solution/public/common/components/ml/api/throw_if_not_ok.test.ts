@@ -17,8 +17,11 @@ import {
 } from './throw_if_not_ok';
 
 describe('throw_if_not_ok', () => {
+  beforeEach(() => {
+    fetchMock.mockGlobal();
+  });
   afterEach(() => {
-    fetchMock.reset();
+    fetchMock.hardReset();
   });
 
   describe('#tryParseResponse', () => {

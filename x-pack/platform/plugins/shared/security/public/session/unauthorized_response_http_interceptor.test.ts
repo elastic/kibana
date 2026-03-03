@@ -35,8 +35,12 @@ const setupHttp = (basePath: string) => {
 const tenant = '';
 const application = applicationServiceMock.createStartContract();
 
+beforeEach(() => {
+  fetchMock.mockGlobal();
+});
+
 afterEach(() => {
-  fetchMock.restore();
+  fetchMock.hardReset();
 });
 
 for (const reason of [
@@ -60,7 +64,7 @@ for (const reason of [
       http.anonymousPaths
     );
     http.intercept(interceptor);
-    fetchMock.mock('*', { status: 401, headers });
+    fetchMock.route('*', { status: 401, headers });
 
     let fetchResolved = false;
     let fetchRejected = false;
@@ -85,7 +89,7 @@ it(`ignores anonymous paths`, async () => {
   const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths);
   http.intercept(interceptor);
-  fetchMock.mock('*', 401);
+  fetchMock.route('*', 401);
 
   await expect(http.fetch('/foo-api')).rejects.toMatchInlineSnapshot(`[Error: Unauthorized]`);
   expect(sessionExpired.logout).not.toHaveBeenCalled();
@@ -96,7 +100,7 @@ it(`ignores errors which don't have a response, for example network connectivity
   const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
-  fetchMock.mock('*', new Promise((resolve, reject) => reject(new Error('Network is down'))));
+  fetchMock.route('*', new Promise((resolve, reject) => reject(new Error('Network is down'))));
 
   await expect(http.fetch('/foo-api')).rejects.toMatchInlineSnapshot(`[Error: Network is down]`);
   expect(sessionExpired.logout).not.toHaveBeenCalled();
@@ -107,7 +111,7 @@ it(`ignores requests which omit credentials`, async () => {
   const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
   http.intercept(interceptor);
-  fetchMock.mock('*', 401);
+  fetchMock.route('*', 401);
 
   await expect(http.fetch('/foo-api', { credentials: 'omit' })).rejects.toMatchInlineSnapshot(
     `[Error: Unauthorized]`

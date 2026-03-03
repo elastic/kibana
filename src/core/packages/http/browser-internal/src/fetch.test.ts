@@ -29,8 +29,11 @@ describe('Fetch', () => {
     buildNumber: 1234,
     executionContext: executionContextMock,
   });
+  beforeEach(() => {
+    fetchMock.mockGlobal();
+  });
   afterEach(() => {
-    fetchMock.restore();
+    fetchMock.hardReset();
     fetchInstance.removeAllInterceptors();
   });
 
@@ -121,14 +124,14 @@ describe('Fetch', () => {
       fetchMock.post('*', {});
       await fetchInstance.fetch('/my/path', { method: 'POST' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('POST');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('POST');
     });
 
     it('should use supplied Content-Type', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { headers: { 'Content-Type': 'CustomContentType' } });
 
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'content-type': 'CustomContentType',
       });
     });
@@ -137,7 +140,7 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { headers: { 'Content-Type': undefined } });
 
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'kbn-version': 'VERSION',
       });
     });
@@ -146,7 +149,7 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { query: { a: 'b' } });
 
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path?a=b');
+      expect(fetchMock.callHistory.lastCall()?.url).toBe('http://localhost/myBase/my/path?a=b');
     });
 
     it('should use supplied headers', async () => {
@@ -155,7 +158,7 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
         'kbn-build-number': '1234',
@@ -211,7 +214,7 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.callHistory.lastCall()?.options!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should not set kbn-system-request header when asSystemRequest: false', async () => {
@@ -221,7 +224,7 @@ describe('Fetch', () => {
         asSystemRequest: false,
       });
 
-      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.callHistory.lastCall()?.options!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should set kbn-system-request header when asSystemRequest: true', async () => {
@@ -231,7 +234,7 @@ describe('Fetch', () => {
         asSystemRequest: true,
       });
 
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'kbn-system-request': 'true',
         myheader: 'foo',
       });
@@ -275,7 +278,7 @@ describe('Fetch', () => {
         context,
       });
 
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'x-kbn-context':
           '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
       });
@@ -298,7 +301,7 @@ describe('Fetch', () => {
         context,
       });
 
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'x-kbn-context':
           '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22banana%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
       });
@@ -313,29 +316,29 @@ describe('Fetch', () => {
     it('should prepend url with basepath by default', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path');
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
+      expect(fetchMock.callHistory.lastCall()?.url).toBe('http://localhost/myBase/my/path');
     });
 
     it('should not prepend url with basepath when disabled', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('my/path', { prependBasePath: false });
-      expect(fetchMock.lastUrl()).toBe('/my/path');
+      expect(fetchMock.callHistory.lastCall()?.url).toBe('/my/path');
     });
 
     it('should not include undefined query params', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', { query: { a: undefined } });
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
+      expect(fetchMock.callHistory.lastCall()?.url).toBe('http://localhost/myBase/my/path');
     });
 
     it('should make request with defaults', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path');
 
-      const lastCall = fetchMock.lastCall();
+      const lastCall = fetchMock.callHistory.lastCall();
 
       expect(lastCall!.request!.credentials).toBe('same-origin');
-      expect(lastCall![1]).toMatchObject({
+      expect(lastCall!.options).toMatchObject({
         method: 'GET',
         headers: {
           'content-type': 'application/json',
@@ -441,49 +444,49 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await fetchInstance.get('/my/path', { method: 'POST' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('GET');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('GET');
     });
 
     it('should support head() helper', async () => {
       fetchMock.head('*', {});
       await fetchInstance.head('/my/path', { method: 'GET' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('HEAD');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('HEAD');
     });
 
     it('should support post() helper', async () => {
       fetchMock.post('*', {});
       await fetchInstance.post('/my/path', { method: 'GET', body: '{}' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('POST');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('POST');
     });
 
     it('should support put() helper', async () => {
       fetchMock.put('*', {});
       await fetchInstance.put('/my/path', { method: 'GET', body: '{}' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('PUT');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('PUT');
     });
 
     it('should support patch() helper', async () => {
       fetchMock.patch('*', {});
       await fetchInstance.patch('/my/path', { method: 'GET', body: '{}' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('PATCH');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('PATCH');
     });
 
     it('should support delete() helper', async () => {
       fetchMock.delete('*', {});
       await fetchInstance.delete('/my/path', { method: 'GET' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('DELETE');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('DELETE');
     });
 
     it('should support options() helper', async () => {
-      fetchMock.mock('*', { method: 'OPTIONS' });
+      fetchMock.route('*', { method: 'OPTIONS' });
       await fetchInstance.options('/my/path', { method: 'GET' });
 
-      expect(fetchMock.lastOptions()!.method).toBe('OPTIONS');
+      expect(fetchMock.callHistory.lastCall()?.options!.method).toBe('OPTIONS');
     });
 
     it('should make requests for NDJSON content', async () => {
@@ -515,7 +518,7 @@ describe('Fetch', () => {
     it('should pass through version as a header', async () => {
       fetchMock.get('*', { body: {} });
       await fetchInstance.fetch('/my/path', { asResponse: true, version: '99' });
-      expect(fetchMock.lastOptions()!.headers).toEqual(
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toEqual(
         expect.objectContaining({ [ELASTIC_HTTP_VERSION_HEADER.toLowerCase()]: '99' })
       );
     });
@@ -531,7 +534,7 @@ describe('Fetch', () => {
 
       const body = await fetchInstance.fetch('/my/path');
 
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(body).toEqual({ foo: 'bar' });
     });
 
@@ -554,12 +557,12 @@ describe('Fetch', () => {
 
       const body = await fetchInstance.fetch('/my/path');
 
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(body).toEqual({ foo: 'bar' });
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+      expect(fetchMock.callHistory.lastCall()?.options!.headers).toMatchObject({
         'content-type': 'CustomContentType',
       });
-      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/route');
+      expect(fetchMock.callHistory.lastCall()?.url).toBe('http://localhost/myBase/my/route');
     });
 
     it('should call interceptors in correct order', async () => {
@@ -592,7 +595,7 @@ describe('Fetch', () => {
 
       const body = await fetchInstance.fetch('/my/path');
 
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(body).toEqual({ foo: 'bar' });
       expect(order).toEqual([
         'Request 3',
@@ -625,7 +628,7 @@ describe('Fetch', () => {
 
       expect(unusedSpy).toHaveBeenCalledTimes(0);
       expect(usedSpy).toHaveBeenCalledTimes(1);
-      expect(fetchMock.called()).toBe(false);
+      expect(fetchMock.callHistory.called()).toBe(false);
     });
 
     it('should skip remaining interceptors when controller halts during response', async () => {
@@ -644,7 +647,7 @@ describe('Fetch', () => {
       fetchInstance.fetch('/my/path').then(unusedSpy, unusedSpy);
       await timer(1000);
 
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(usedSpy).toHaveBeenCalledTimes(3);
       expect(unusedSpy).toHaveBeenCalledTimes(0);
     });
@@ -664,7 +667,7 @@ describe('Fetch', () => {
       fetchInstance.post('/my/path').then(unusedSpy, unusedSpy);
       await timer(1000);
 
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(unusedSpy).toHaveBeenCalledTimes(0);
     });
 
@@ -688,7 +691,7 @@ describe('Fetch', () => {
       fetchInstance.intercept({ request: usedSpy, response: unusedSpy, responseError: unusedSpy });
 
       await expect(fetchInstance.fetch('/my/path')).rejects.toThrow(/Interception Error/);
-      expect(fetchMock.called()).toBe(false);
+      expect(fetchMock.callHistory.called()).toBe(false);
       expect(unusedSpy).toHaveBeenCalledTimes(0);
       expect(usedSpy).toHaveBeenCalledTimes(2);
     });
@@ -713,7 +716,7 @@ describe('Fetch', () => {
       fetchInstance.intercept({ request: usedSpy, response: usedSpy });
 
       await expect(fetchInstance.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(unusedSpy).toHaveBeenCalledTimes(0);
       expect(usedSpy).toHaveBeenCalledTimes(4);
     });
@@ -745,12 +748,12 @@ describe('Fetch', () => {
       });
 
       await expect(fetchInstance.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(routes.length).toBe(0);
       expect(createRequest.mock.calls[0][0].path).toContain('/my/route');
       expect(createRequest.mock.calls[1][0].path).toContain('/api/alpha');
       expect(createRequest.mock.calls[2][0].path).toContain('/api/beta');
-      expect(fetchMock.lastCall()!.request!.url).toContain('/api/gamma');
+      expect(fetchMock.callHistory.lastCall()!.request!.url).toContain('/api/gamma');
     });
 
     it('should accumulate response information', async () => {
@@ -780,7 +783,7 @@ describe('Fetch', () => {
       });
 
       await expect(fetchInstance.fetch('/my/route')).resolves.toEqual('gamma');
-      expect(fetchMock.called()).toBe(true);
+      expect(fetchMock.callHistory.called()).toBe(true);
       expect(bodies.length).toBe(0);
       expect(createResponse.mock.calls[0][0].body).toEqual({ foo: 'bar' });
       expect(createResponse.mock.calls[1][0].body).toBe('alpha');
@@ -803,14 +806,15 @@ describe('Fetch', () => {
         });
 
         await expect(fetchInstance.fetch('/my/path')).rejects.toThrow();
-        expect(fetchMock.called()).toBe(true);
+        expect(fetchMock.callHistory.called()).toBe(true);
         expect(spiedRequest).toBeDefined();
       });
     });
 
     describe('response availability during interception', () => {
       it('should be available to responseError when network request fails', async () => {
-        fetchMock.restore();
+        fetchMock.hardReset();
+        fetchMock.mockGlobal();
         fetchMock.get('*', { status: 500 });
 
         let spiedResponse: Response | undefined;

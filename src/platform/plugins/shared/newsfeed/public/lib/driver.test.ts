@@ -23,18 +23,15 @@ describe('NewsfeedApiDriver', () => {
   let storage: ReturnType<typeof storageMock.create>;
 
   beforeEach(() => {
+    fetchMock.mockGlobal();
     storage = storageMock.create();
     driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval, storage);
     convertItemsMock.mockReturnValue([]);
   });
 
   afterEach(() => {
-    fetchMock.reset();
+    fetchMock.hardReset();
     convertItemsMock.mockReset();
-  });
-
-  afterAll(() => {
-    fetchMock.restore();
   });
 
   describe('shouldFetch', () => {
@@ -66,13 +63,8 @@ describe('NewsfeedApiDriver', () => {
         .pipe(take(1))
         .toPromise();
 
-      expect(fetchMock.lastUrl()).toEqual('http://newsfeed.com/8.0.0/news');
-      expect(fetchMock.lastOptions()).toMatchInlineSnapshot(`
-        Object {
-          "body": Promise {},
-          "method": "GET",
-        }
-      `);
+      expect(fetchMock.callHistory.lastCall()?.url).toEqual('http://newsfeed.com/8.0.0/news');
+      expect(fetchMock.callHistory.lastCall()?.options?.method).toBe('GET');
     });
 
     it('calls `convertItems` with the correct parameters', async () => {
