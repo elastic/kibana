@@ -506,6 +506,71 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 };
 ```
 
+#### Linking by-value attachments to persistent storage with updateOrigin
+
+The `getActionButtons` params include an `updateOrigin` callback that allows you to link a by-value attachment to its persistent storage location (e.g., a saved object) after it has been saved.
+
+**When to use `updateOrigin`:**
+
+- When your attachment type supports a "Save" workflow where the user can persist a by-value attachment to external storage (e.g., saving a visualization to the library, saving a dashboard)
+- After successfully saving the attachment to persistent storage, call `updateOrigin` to record the reference back to the attachment
+
+**Why this matters:**
+
+- Enables "Open in [App]" functionality by storing the saved object reference
+- Allows the UI to show that an attachment is linked to a persistent resource
+- Maintains the connection between the conversation attachment and its source
+
+**Example: Save button that links to a saved object**
+
+```tsx
+getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
+  const buttons = [];
+
+  // Only show save button if not already linked to a saved object
+  if (!attachment.origin && isCanvas) {
+    buttons.push({
+      label: 'Save to library',
+      icon: 'save',
+      type: ActionButtonType.PRIMARY,
+      handler: async () => {
+        // 1. Save to your persistent storage (e.g., saved objects)
+        const savedObjectId = await myApi.saveToLibrary(attachment.data);
+
+        // 2. Link the attachment to the saved object
+        await updateOrigin({ saved_object_id: savedObjectId });
+      },
+    });
+  }
+
+  // Show "Open in App" if already linked
+  if (attachment.origin?.saved_object_id) {
+    buttons.push({
+      label: 'Open in App',
+      icon: 'popout',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        window.open(`/app/myApp/${attachment.origin.saved_object_id}`, '_blank');
+      },
+    });
+  }
+
+  return buttons;
+},
+```
+
+**Origin shape:**
+
+The `origin` parameter accepts any shape - it will be validated by the attachment type's `validateOrigin` function on the server. For saved object references, the common pattern is:
+
+```ts
+{
+  saved_object_id: string;
+  title?: string;
+  description?: string;
+}
+```
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
