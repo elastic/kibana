@@ -9,16 +9,27 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
-import { TRACES, simpleTrace } from '../../fixtures/traces_experience';
+import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
+import { TRACES, simpleTrace } from '../fixtures/traces_experience';
 
 globalSetupHook(
-  'Ingest trace data to Elasticsearch',
-  async ({ apmSynthtraceEsClient, apiServices, config, log }) => {
+  'Setup Discover tests data',
+  async ({ esClient, apmSynthtraceEsClient, apiServices, config, log }) => {
+    // Metrics Experience setup
+    log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
+    const created = await createMetricsTestIndexIfNeeded(esClient);
+    log.debug(
+      created
+        ? '[setup:metrics] metrics test index created successfully'
+        : '[setup:metrics] metrics test index already exists, skipping'
+    );
+
+    // Traces Experience setup
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
-      log.debug('[setup] Fleet infrastructure setup completed');
+      log.debug('[setup:traces] Fleet infrastructure setup completed');
       await apiServices.fleet.agent.setup();
-      log.debug('[setup] Fleet agents setup completed');
+      log.debug('[setup:traces] Fleet agents setup completed');
     }
 
     const traceData: SynthtraceGenerator<ApmFields> = simpleTrace({
@@ -27,6 +38,6 @@ globalSetupHook(
     });
 
     await apmSynthtraceEsClient.index(traceData);
-    log.debug('[setup] APM trace data indexed');
+    log.debug('[setup:traces] APM trace data indexed');
   }
 );
