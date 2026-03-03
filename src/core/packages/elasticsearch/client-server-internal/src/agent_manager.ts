@@ -9,7 +9,6 @@
 
 import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import CacheableLookup from 'cacheable-lookup';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
@@ -17,6 +16,10 @@ import { metrics, ValueType } from '@opentelemetry/api';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 const HTTPS = 'https:';
+
+// cacheable-lookup v7 is ESM-only; load it asynchronously at module initialisation.
+// The promise resolves before any agent factories are typically invoked during server startup.
+const cacheableLookupModule = import('cacheable-lookup');
 
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
@@ -56,7 +59,7 @@ export interface AgentStatsProvider {
  **/
 export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private readonly agents: Set<HttpAgent>;
-  private readonly cacheableLookup?: CacheableLookup;
+  private cacheableLookup?: InstanceType<Awaited<typeof cacheableLookupModule>['default']>;
 
   constructor(private readonly logger: Logger, options: AgentManagerOptions) {
     this.agents = new Set();
@@ -65,8 +68,12 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
       this.logger.info(
         `Caching ES host DNS resolutions for up to ${options.dnsCacheTtlInSeconds}s. If this causes problems, change the setting "elasticsearch.dnsCacheTtl: ${options.dnsCacheTtlInSeconds}s".`
       );
-      this.cacheableLookup = new CacheableLookup({
-        maxTtl: options.dnsCacheTtlInSeconds,
+      cacheableLookupModule.then(({ default: CacheableLookup }) => {
+        this.cacheableLookup = new CacheableLookup({ maxTtl: options.dnsCacheTtlInSeconds });
+        // Install on any HTTP agents that were already created before the module resolved
+        for (const agent of this.agents) {
+          this.cacheableLookup.install(agent);
+        }
       });
     }
 
