@@ -28,7 +28,7 @@ import { agentPolicyService, appContextService, auditLoggingService } from '../s
 import type { AgentPolicy } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
