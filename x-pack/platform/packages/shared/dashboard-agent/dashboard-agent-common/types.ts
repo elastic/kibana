@@ -37,7 +37,7 @@ export const lensAttachmentPanelSchema = z.object({
   query: z.string().optional(),
   /** ES|QL query used (if applicable) */
   esql: z.string().optional(),
-  /** Optional layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
+  /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
   grid: panelGridSchema.optional(),
 });
 
@@ -60,7 +60,7 @@ export const genericAttachmentPanelSchema = z.object({
   rawConfig: z.record(z.unknown()),
   /** Panel title if available */
   title: z.string().optional(),
-  /** Optional layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
+  /** Layout: width and height in grid units. When set, the renderer uses this instead of fixed defaults. */
   grid: panelGridSchema.optional(),
 });
 

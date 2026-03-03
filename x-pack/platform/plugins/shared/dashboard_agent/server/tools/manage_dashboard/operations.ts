@@ -29,11 +29,9 @@ export const visualizationQueryInputSchema = z.object({
     .optional()
     .describe('(optional) The type of chart to create.'),
   esql: z.string().optional().describe('(optional) An ES|QL query to use for the visualization.'),
-  grid: panelGridInputSchema
-    .optional()
-    .describe(
-      '(optional) Panel size in grid units. Choose based on number and type of panels for a balanced layout.'
-    ),
+  grid: panelGridInputSchema.describe(
+    'Panel size in grid units. Required — always set based on the number and type of panels for a balanced layout.'
+  ),
 }) satisfies z.ZodType<VisualizationQueryInput>;
 
 export const setMetadataOperationSchema = z.object({

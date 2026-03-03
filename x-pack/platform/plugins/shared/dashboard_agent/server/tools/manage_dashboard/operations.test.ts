@@ -52,7 +52,7 @@ describe('executeDashboardOperations', () => {
       { operation: 'remove_panels', panelIds: ['existing-panel'] },
       {
         operation: 'add_generated_panels',
-        items: [{ query: 'Show request count over time' }],
+        items: [{ query: 'Show request count over time', grid: { w: 48, h: 8 } }],
       },
       {
         operation: 'upsert_markdown',
@@ -118,7 +118,10 @@ describe('executeDashboardOperations', () => {
       operations: [
         {
           operation: 'add_generated_panels',
-          items: [{ query: 'Show traffic over time' }, { query: 'Show error rate over time' }],
+          items: [
+            { query: 'Show traffic over time', grid: { w: 48, h: 8 } },
+            { query: 'Show error rate over time', grid: { w: 24, h: 8 } },
+          ],
         },
         {
           operation: 'add_panels_from_attachments',
@@ -183,7 +186,7 @@ describe('executeDashboardOperations', () => {
       operations: [
         {
           operation: 'add_generated_panels',
-          items: [{ query: 'Show count as metric' }],
+          items: [{ query: 'Show count as metric', grid: { w: 24, h: 5 } }],
         },
       ],
       logger,

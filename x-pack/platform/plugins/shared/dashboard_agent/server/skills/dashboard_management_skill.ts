@@ -148,7 +148,7 @@ Each entry in \`add_generated_panels.items[]\` accepts:
     ', '
   )}. Set only when you are confident about the right chart type. See the chart type guide below.
 - \`esql\` (optional): a pre-generated ES|QL query. When provided, the visualization generator uses this directly instead of generating a query from scratch.
-- \`grid\` (optional): \`{ w: number, h: number }\` — panel size in grid units. **You should set this to control layout.** The dashboard grid has 48 columns; \`w\` is width (1–48), \`h\` is height in the same units (typically 4–12). Decide \`grid\` for each panel based on the number and type of panels so the dashboard is balanced (see Panel layout below).
+- \`grid\` (**required**): \`{ w: number, h: number }\` — panel size in grid units. **Always set this to control layout.** The dashboard grid has 48 columns; \`w\` is width (1–48), \`h\` is height in the same units (typically 4–12). Decide \`grid\` for each panel based on the number and type of panels so the dashboard is balanced (see Panel layout below).
 
 **Good queries are specific and reference real field names:**
 
@@ -192,7 +192,7 @@ Base panel selection on the fields actually available in the discovered index ma
 
 ## Panel layout (decide per panel)
 
-**You control layout by setting \`grid\` on each item in \`add_generated_panels.items[]\`.** The dashboard has a 48-column grid; each panel uses \`grid: { w, h }\` (width and height in grid units). If you omit \`grid\`, the renderer falls back to fixed defaults, which may not suit the mix of panels.
+**You control layout by setting \`grid\` on each item in \`add_generated_panels.items[]\`.** The dashboard has a 48-column grid; each panel uses \`grid: { w, h }\` (width and height in grid units). Always set \`grid\` — never omit it.
 
 **Decide the best layout from the number and type of panels:**
 
