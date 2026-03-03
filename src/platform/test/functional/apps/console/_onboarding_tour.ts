@@ -134,6 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('first tour step to open', async () => {
         return await isTourStepOpen('shellTourStep');
       });
+
       await testSubjects.existOrFail('consoleSkipTourButton');
       await PageObjects.console.clickSkipTour();
 
@@ -142,6 +143,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // All steps should now be hidden
       await waitForAllStepsHidden();
+      expect(await isTourStepOpen('shellTourStep')).to.be(false);
+      expect(await isTourStepOpen('editorTourStep')).to.be(false);
+      expect(await isTourStepOpen('historyTourStep')).to.be(false);
+      expect(await isTourStepOpen('configTourStep')).to.be(false);
+      expect(await isTourStepOpen('filesTourStep')).to.be(false);
     });
 
     it('allows re-running the tour', async () => {
