@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '../../../../../../../entity_store/common';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { createToolHandlerContext, createToolTestMocks } from '../../../../__mocks__/test_helpers';
 import { riskScoreDynamicInlineToolHandler } from './risk_score_esql';

@@ -20,7 +20,8 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { euid } from '../../../../../../../plugins/entity_store/common';
+import { euid } from '../../../../../../entity_store/common';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -225,12 +226,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
           ),
       },
     ],
-    [
-      userName,
-      selectedPatterns,
-      entityStoreV2Enabled,
-      entityFromStore.lastSeen,
-    ]
+    [userName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -254,7 +250,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
         description: (
           <>
             {userRiskData?.user?.risk?.calculated_level ? (
-              <RiskScoreLevel severity={userRiskData.user.risk.calculated_level} />
+              <RiskScoreLevel severity={userRiskData.user.risk.calculated_level as RiskSeverity} />
             ) : (
               getEmptyTagValue()
             )}
@@ -275,7 +271,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={USER_ICON} />
+            <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink

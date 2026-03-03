@@ -133,9 +133,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     } = useRiskScore({
       filterQuery,
       skip:
-        !!riskScoreStateFromEntityStore ||
-        !userName ||
-        Object.keys(entityIdentifiers).length === 0,
+        !!riskScoreStateFromEntityStore || !userName || Object.keys(entityIdentifiers).length === 0,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
@@ -334,7 +332,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
         getDefaultRenderer,
         contextID,
         scopeId,
-        entityIdentifiers,
         userName,
         firstSeenFromEntityStore,
         lastSeenFromEntityStore,

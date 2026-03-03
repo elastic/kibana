@@ -72,9 +72,20 @@ import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
+const VALID_RISK_SEVERITIES: readonly RiskSeverity[] = [
+  'Unknown',
+  'Low',
+  'Moderate',
+  'High',
+  'Critical',
+] as const;
+
+const isRiskSeverity = (value: string): value is RiskSeverity =>
+  VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
 
 export interface HostEntityOverviewProps {
   /**
@@ -214,19 +225,15 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
           ),
       },
     ],
-    [
-      hostName,
-      selectedPatterns,
-      entityStoreV2Enabled,
-      entityFromStore.lastSeen,
-    ]
+    [hostName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
   );
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const isLoading =
-    entityStoreV2Enabled ? entityFromStore.isLoading : isRiskScoreLoading || isHostDetailsLoading;
+  const isLoading = entityStoreV2Enabled
+    ? entityFromStore.isLoading
+    : isRiskScoreLoading || isHostDetailsLoading;
 
   const [hostRiskLevel] = useMemo(
     () => [
@@ -241,7 +248,8 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
         ),
         description: (
           <>
-            {hostRiskData?.host?.risk?.calculated_level ? (
+            {hostRiskData?.host?.risk?.calculated_level &&
+            isRiskSeverity(hostRiskData.host.risk.calculated_level) ? (
               <RiskScoreLevel severity={hostRiskData.host.risk.calculated_level} />
             ) : (
               getEmptyTagValue()
@@ -283,7 +291,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={HOST_ICON} />
+            <EuiIcon type={HOST_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink

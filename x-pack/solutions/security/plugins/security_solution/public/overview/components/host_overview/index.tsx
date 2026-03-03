@@ -110,9 +110,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
       () =>
         entityIdentifiers['host.name'] ||
         entityIdentifiers['host.hostname'] ||
-        Object.entries(entityIdentifiers).find(([k]) =>
-          k.startsWith('host.')
-        )?.[1],
+        Object.entries(entityIdentifiers).find(([k]) => k.startsWith('host.'))?.[1],
       [entityIdentifiers]
     );
     const filterQuery = useMemo(() => {
@@ -260,7 +258,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
         data,
         scopeId,
         indexNames,
-        entityIdentifiers,
         isFlyoutOpen,
         effectiveHostName,
         firstSeenFromEntityStore,

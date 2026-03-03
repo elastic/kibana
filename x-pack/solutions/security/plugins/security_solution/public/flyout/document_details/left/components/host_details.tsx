@@ -72,7 +72,7 @@ import {
   HOST_IP_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { PreviewLink } from '../../../shared/components/preview_link';
@@ -87,7 +87,6 @@ import { useNavigateToHostDetails } from '../../../entity_details/host_right/hoo
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -343,7 +342,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="user" />
+          <EuiIcon type="user" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
@@ -428,17 +427,19 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
               endDate={to}
               narrowDateRange={narrowDateRange}
               setQuery={setQuery}
-              refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
+              refetch={
+                entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch
+              }
               inspect={hostDetailsArgs.inspect}
               deleteQuery={deleteQuery}
               scopeId={scopeId}
               isFlyoutOpen={true}
               riskScoreState={hostRiskScoreStateFromEntityStore}
               firstSeenFromEntityStore={
-                entityStoreV2Enabled ? (observedHost.firstSeen?.date ?? undefined) : undefined
+                entityStoreV2Enabled ? observedHost.firstSeen?.date ?? undefined : undefined
               }
               lastSeenFromEntityStore={
-                entityStoreV2Enabled ? (observedHost.lastSeen?.date ?? undefined) : undefined
+                entityStoreV2Enabled ? observedHost.lastSeen?.date ?? undefined : undefined
               }
             />
           )}

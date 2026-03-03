@@ -23,9 +23,8 @@ import {
   buildEntityFilterFromEntityIdentifiers,
   buildHostNamesFilter,
 } from '../../../../common/search_strategy';
-import { euid } from '../../../../../../plugins/entity_store/common';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../common/lib/kibana';
+import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
 import { HostPanelContent } from './content';
@@ -40,9 +39,7 @@ import {
   getRiskFromEntityRecord,
 } from '../shared/entity_store_risk_utils';
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
-import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
-import type { ESQuery } from '../../../../common/typed_json';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface HostPanelProps extends Record<string, unknown> {
@@ -169,7 +166,7 @@ export const HostPanel = ({
       observedHost.refetchEntityStore?.();
       calculateEntityRiskScore();
     },
-    [upsertEntity, observedHost.refetchEntityStore, calculateEntityRiskScore]
+    [upsertEntity, observedHost, calculateEntityRiskScore]
   );
 
   const openDetailsPanel = useNavigateToHostDetails({

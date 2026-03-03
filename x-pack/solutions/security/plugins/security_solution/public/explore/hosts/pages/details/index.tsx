@@ -82,10 +82,7 @@ import { PageLoader } from '../../../../common/components/page_loader';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent: React.FC<HostDetailsProps> = ({
-  detailName,
-  hostDetailsPagePath,
-}) => {
+const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const displayName = detailName;
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(

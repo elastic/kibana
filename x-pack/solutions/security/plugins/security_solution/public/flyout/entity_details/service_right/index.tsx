@@ -9,8 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
+import { euid } from '../../../../../entity_store/common';
+import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter } from '../../../../common/search_strategy';
-import { euid } from '../../../../../../plugins/entity_store/common';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -28,7 +29,6 @@ import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
-import { ESQuery } from '@kbn/security-solution-plugin/common/typed_json';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
@@ -52,13 +52,13 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
 
   const serviceFilterQuery = useMemo(() => {
     if (entityStoreV2Enabled && serviceName) {
-      return euid.getEuidDslFilterBasedOnDocument('service', {
-        'service.name': serviceName,
-      }) ?? undefined;
+      return (
+        euid.getEuidDslFilterBasedOnDocument('service', {
+          'service.name': serviceName,
+        }) ?? undefined
+      );
     }
-    return serviceName
-      ? buildEntityNameFilter(EntityType.service, [serviceName])
-      : undefined;
+    return serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined;
   }, [entityStoreV2Enabled, serviceName]);
 
   const riskScoreState = useRiskScore({

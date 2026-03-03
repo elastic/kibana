@@ -36,8 +36,8 @@ export const euid = {
 
 export type { EntityType } from './domain/definitions/entity_schema';
 export {
-    buildEntityFiltersFromEntityIdentifiers,
-    buildGenericEntityFlyoutPreviewQuery,
+  buildEntityFiltersFromEntityIdentifiers,
+  buildGenericEntityFlyoutPreviewQuery,
 } from './domain/euid';
 export type { IdentitySourceFields } from './domain/euid';
 export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';

@@ -67,7 +67,7 @@ import {
   HOST_IP_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
@@ -81,7 +81,6 @@ import { useNavigateToUserDetails } from '../../../entity_details/user_right/hoo
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -341,7 +340,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="storage" />
+          <EuiIcon type="storage" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
@@ -437,10 +436,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
               isFlyoutOpen={true}
               riskScoreState={userRiskScoreStateFromEntityStore}
               firstSeenFromEntityStore={
-                entityStoreV2Enabled ? (observedUser.firstSeen?.date ?? undefined) : undefined
+                entityStoreV2Enabled ? observedUser.firstSeen?.date ?? undefined : undefined
               }
               lastSeenFromEntityStore={
-                entityStoreV2Enabled ? (observedUser.lastSeen?.date ?? undefined) : undefined
+                entityStoreV2Enabled ? observedUser.lastSeen?.date ?? undefined : undefined
               }
             />
           )}
