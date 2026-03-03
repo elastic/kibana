@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
+import { figmaDataSource } from './figma';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { googleDriveDataSource } from './google_drive';
@@ -16,6 +17,7 @@ import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
+  dataCatalog.register(figmaDataSource);
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
   dataCatalog.register(googleDriveDataSource);

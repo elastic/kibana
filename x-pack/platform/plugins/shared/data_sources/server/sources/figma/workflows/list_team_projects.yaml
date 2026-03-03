@@ -1,0 +1,21 @@
+version: '1'
+name: 'sources.figma.list_team_projects'
+description: >
+  List all projects in a Figma team. Returns project names and IDs. Use the project
+  IDs from the results with the list_project_files tool to browse files within a
+  project. Team IDs can be found in the Figma URL when viewing a team page.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: team_id
+    type: string
+    required: true
+    description: 'The Figma team ID (found in the URL on the team page)'
+steps:
+  - name: list-team-projects
+    type: figma.listTeamProjects
+    connector-id: <%= figma-stack-connector-id %>
+    with:
+      teamId: "${{inputs.team_id}}"

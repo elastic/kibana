@@ -1,0 +1,42 @@
+version: '1'
+name: 'sources.figma.render_nodes'
+description: >
+  Render Figma nodes as images. Provide a file key and one or more node IDs to get
+  temporary image URLs (valid for 30 days). Supports PNG, JPG, SVG, and PDF formats.
+  Use scale (0.01 to 4) to control resolution. Node IDs can be found in Figma URLs
+  (?node-id=1:2) or from the get_file tool output.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: file_key
+    type: string
+    required: true
+    description: 'The file key from a Figma file URL'
+  - name: node_ids
+    type: string
+    required: true
+    description: 'Comma-separated node IDs to render (e.g., "1:2,1:3")'
+  - name: format
+    type: choice
+    options:
+      - "png"
+      - "jpg"
+      - "svg"
+      - "pdf"
+    required: false
+    description: 'Image format (default: png)'
+  - name: scale
+    type: number
+    required: false
+    description: 'Image scale factor between 0.01 and 4 (default: 1)'
+steps:
+  - name: render-nodes
+    type: figma.renderNodes
+    connector-id: <%= figma-stack-connector-id %>
+    with:
+      fileKey: "${{inputs.file_key}}"
+      nodeIds: "${{inputs.node_ids}}"
+      format: "${{inputs.format}}"
+      scale: ${{inputs.scale}}
