@@ -20,6 +20,8 @@ import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
@@ -37,8 +39,6 @@ import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_histo
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
-import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   SLOPublicPluginsSetup,
   SLOPublicPluginsStart,
