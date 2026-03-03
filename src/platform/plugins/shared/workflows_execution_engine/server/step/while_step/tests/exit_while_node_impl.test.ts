@@ -68,9 +68,9 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 1,
       });
-      (stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
-        true
-      );
+      (
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue(true);
     });
 
     it('should loop back to the start node', () => {
@@ -91,9 +91,9 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
-        false
-      );
+      (
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue(false);
     });
 
     it('should finish the step', () => {
@@ -188,9 +188,9 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean true condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
-        true
-      );
+      (
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue(true);
 
       underTest.run();
 
@@ -198,9 +198,9 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean false condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
-        false
-      );
+      (
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue(false);
 
       underTest.run();
 
@@ -209,9 +209,9 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle undefined condition as false', () => {
-      (stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock).mockReturnValue(
-        undefined
-      );
+      (
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue(undefined);
 
       underTest.run();
 

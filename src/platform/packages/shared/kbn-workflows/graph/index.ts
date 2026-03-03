@@ -76,4 +76,5 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  shouldSuggestInnerSteps,
 } from './types';

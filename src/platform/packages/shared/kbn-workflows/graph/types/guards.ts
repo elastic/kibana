@@ -110,3 +110,12 @@ export const isEnterStepTimeoutZone = (node: GraphNodeUnion): node is EnterTimeo
 
 export const isExitStepTimeoutZone = (node: GraphNodeUnion): node is ExitTimeoutZoneNode =>
   node.type === 'exit-timeout-zone' && node.stepType !== 'workflow_level_timeout';
+
+/**
+ * Returns true for step types whose inner steps have guaranteed execution
+ * before certain fields (e.g. `condition`) are evaluated, making inner step
+ * outputs available for autocomplete suggestions.
+ *
+ * Currently applies to `while` (do-while semantics: body runs before condition).
+ */
+export const shouldSuggestInnerSteps = (node: GraphNodeUnion): boolean => isEnterWhile(node);
