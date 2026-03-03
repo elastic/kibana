@@ -26,9 +26,7 @@
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/core-lifecycle-server",
-    "@kbn/esql",
     "@kbn/esql-language",
-    "@kbn/esql-types",
     "@kbn/inference-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/i18n",
@@ -39,6 +37,5 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
-    "@kbn/core-elasticsearch-server",
   ]
 }
