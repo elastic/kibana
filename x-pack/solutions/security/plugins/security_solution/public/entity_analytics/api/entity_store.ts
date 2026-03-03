@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
   InitEntityStoreRequestBodyInput,
@@ -17,9 +18,12 @@ import type {
   ListEntityEnginesResponse,
   StartEntityEngineResponse,
   StopEntityEngineResponse,
+  StoreStatus,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+
+const ENTITY_STORE_V2_QUERY = { apiVersion: '2' } as const;
 
 export const useEntityStoreRoutes = () => {
   const http = useKibana().services.http;
@@ -83,6 +87,37 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
+    const getEntityStoreStatusV2 = async (withComponents = false) => {
+      return http.fetch<{ status: StoreStatus; engines: unknown[] }>(ENTITY_STORE_ROUTES.STATUS, {
+        method: 'GET',
+        query: { ...ENTITY_STORE_V2_QUERY, include_components: withComponents },
+      });
+    };
+
+    const installEntityStoreV2 = async () => {
+      return http.fetch(ENTITY_STORE_ROUTES.INSTALL, {
+        method: 'POST',
+        query: ENTITY_STORE_V2_QUERY,
+        body: JSON.stringify({}),
+      });
+    };
+
+    const startEntityStoreV2 = async () => {
+      return http.fetch(ENTITY_STORE_ROUTES.START, {
+        method: 'PUT',
+        query: ENTITY_STORE_V2_QUERY,
+        body: JSON.stringify({}),
+      });
+    };
+
+    const stopEntityStoreV2 = async () => {
+      return http.fetch(ENTITY_STORE_ROUTES.STOP, {
+        method: 'PUT',
+        query: ENTITY_STORE_V2_QUERY,
+        body: JSON.stringify({}),
+      });
+    };
+
     return {
       enableEntityStore,
       getEntityStoreStatus,
@@ -91,6 +126,10 @@ export const useEntityStoreRoutes = () => {
       stopEntityEngine,
       deleteEntityEngine,
       listEntityEngines,
+      getEntityStoreStatusV2,
+      installEntityStoreV2,
+      startEntityStoreV2,
+      stopEntityStoreV2,
     };
   }, [http]);
 };

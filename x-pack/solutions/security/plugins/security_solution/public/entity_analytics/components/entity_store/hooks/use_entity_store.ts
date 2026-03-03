@@ -20,11 +20,13 @@ import {
   type StartEntityEngineResponse,
   type StopEntityEngineResponse,
   type EntityType,
+  type StoreStatus,
 } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
+const ENTITY_STORE_V2_STATUS = ['GET', 'ENTITY_STORE_V2_STATUS'];
 
 interface ResponseError {
   body: { message: string };
@@ -32,6 +34,7 @@ interface ResponseError {
 
 interface Options {
   withComponents?: boolean;
+  enabled?: boolean;
 }
 
 export const useEntityStoreStatus = (opts: Options = {}) => {
@@ -40,6 +43,24 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
   return useQuery<GetEntityStoreStatusResponse, IHttpFetchError>({
     queryKey: [...ENTITY_STORE_STATUS, opts.withComponents],
     queryFn: () => getEntityStoreStatus(opts.withComponents),
+    enabled: opts.enabled !== false,
+    refetchInterval: (data) => {
+      if (data?.status === 'installing') {
+        return 5000;
+      }
+      return false;
+    },
+  });
+};
+
+export const useEntityStoreStatusV2 = (opts: { enabled?: boolean } = {}) => {
+  const { getEntityStoreStatusV2 } = useEntityStoreRoutes();
+  const isEnabled = opts.enabled !== false;
+
+  return useQuery<{ status: StoreStatus; engines: unknown[] }, IHttpFetchError>({
+    queryKey: ENTITY_STORE_V2_STATUS,
+    queryFn: () => getEntityStoreStatusV2(),
+    enabled: isEnabled,
     refetchInterval: (data) => {
       if (data?.status === 'installing') {
         return 5000;
@@ -80,8 +101,6 @@ export const useEnableEntityStoreMutation = (
     }
   );
 };
-
-export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
 
 export const START_ENTITY_ENGINE_STATUS_KEY = ['POST', 'START_ENTITY_ENGINE'];
 export const useStartEntityEngineMutation = (entityTypes: EntityType[]) => {
@@ -144,6 +163,69 @@ export const useDeleteEntityEngineMutation = ({
         queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
         onSuccess?.();
       },
+    }
+  );
+};
+
+export const INSTALL_ENTITY_STORE_V2_KEY = ['POST', 'INSTALL_ENTITY_STORE_V2'];
+export const useInstallEntityStoreMutationV2 = () => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
+  const { installEntityStoreV2 } = useEntityStoreRoutes();
+
+  return useMutation(
+    () => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
+        timestamp: new Date().toISOString(),
+        action: 'start',
+      });
+      return installEntityStoreV2();
+    },
+    {
+      mutationKey: INSTALL_ENTITY_STORE_V2_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_V2_STATUS }),
+    }
+  );
+};
+
+export const START_ENTITY_STORE_V2_KEY = ['PUT', 'START_ENTITY_STORE_V2'];
+export const useStartEntityStoreMutationV2 = () => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
+  const { startEntityStoreV2 } = useEntityStoreRoutes();
+
+  return useMutation(
+    () => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
+        timestamp: new Date().toISOString(),
+        action: 'start',
+      });
+      return startEntityStoreV2();
+    },
+    {
+      mutationKey: START_ENTITY_STORE_V2_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_V2_STATUS }),
+    }
+  );
+};
+
+export const STOP_ENTITY_STORE_V2_KEY = ['PUT', 'STOP_ENTITY_STORE_V2'];
+export const useStopEntityStoreMutationV2 = () => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
+  const { stopEntityStoreV2 } = useEntityStoreRoutes();
+
+  return useMutation(
+    () => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
+        timestamp: new Date().toISOString(),
+        action: 'stop',
+      });
+      return stopEntityStoreV2();
+    },
+    {
+      mutationKey: STOP_ENTITY_STORE_V2_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_V2_STATUS }),
     }
   );
 };
