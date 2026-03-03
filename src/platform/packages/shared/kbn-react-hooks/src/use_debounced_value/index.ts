@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext, useContext } from 'react';
-
-const exampleContext = createContext<{
-  currentMessage: string | undefined;
-  setCurrentMessage: (message: string | undefined) => void;
-}>({
-  currentMessage: undefined,
-  setCurrentMessage: () => {},
-});
-
-export const ExampleContextProvider = exampleContext.Provider;
-
-export const useExampleContext = () => useContext(exampleContext);
+export * from './use_debounced_value';
