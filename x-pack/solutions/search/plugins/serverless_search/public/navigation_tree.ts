@@ -253,6 +253,11 @@ export function createNavigationTree({
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+              {
+                link: 'management:running_queries',
+                breadcrumbStatus: 'hidden',
+                badgeType: 'new',
+              },
             ],
           },
           {

@@ -266,6 +266,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:jobsListLink' },
                     { link: 'management:watcher' },
                     { link: 'management:maintenanceWindows' },
+                    { link: 'management:running_queries', badgeType: 'new' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.alerts', {
                     defaultMessage: 'Alerts and Insights',
