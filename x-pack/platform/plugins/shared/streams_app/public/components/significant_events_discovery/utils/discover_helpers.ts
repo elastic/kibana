@@ -10,13 +10,6 @@ import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
-function ensureSortByTimestamp(esqlQuery: string): string {
-  if (/\|\s*sort\s+/i.test(esqlQuery)) {
-    return esqlQuery;
-  }
-  return `${esqlQuery} | SORT @timestamp DESC`;
-}
-
 export function buildDiscoverParams(
   query: StreamQuery,
   definition: Streams.all.Definition,
@@ -28,7 +21,7 @@ export function buildDiscoverParams(
       to: timeState.timeRange.to,
     },
     query: {
-      esql: ensureSortByTimestamp(query.esql.query),
+      esql: query.esql.query,
     },
     dataViewSpec: {
       id: v4(),
