@@ -363,6 +363,9 @@ export class Plugin
             const [, page, id] = currentLocation.pathname.split('/');
 
             switch (page) {
+              case 'rules':
+                await coreStart.application.navigateToApp('rules');
+                break;
               case 'rule':
                 await coreStart.application.navigateToApp('rules', {
                   path: getRulesAppDetailsRoute(id),
