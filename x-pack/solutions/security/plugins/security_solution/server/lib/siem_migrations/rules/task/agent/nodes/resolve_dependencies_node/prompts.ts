@@ -159,7 +159,7 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
 
 - Think before providing the output, check if you have tried to resolve all the dependencies by making tool calls. DO NOT respond if there an UNRESOLVED dependency and it you have not tried to RESOLVE it. If you made a tool call but nothing was found, in that case you can consider it UNRESOLVED and move on with the output. We DO NOT need to suspend the processing.
 - Try to minimize the tool calls and make parallel tool calls if needed.
-- Downstream systems do not understand rule dependencies, so ideally you need to create a natural description which interpret the rule and its dependencies in its entirity.
+- Downstream systems do not understand rule dependencies, so ideally you need to create a natural description which interpret the rule and its dependencies in its entirety.
 - Flattened Detection Logic mentioned should be the unwrapped list of commands/test conditions in current rule and all the rules, the current rule is dependent on.
 
 </objective>

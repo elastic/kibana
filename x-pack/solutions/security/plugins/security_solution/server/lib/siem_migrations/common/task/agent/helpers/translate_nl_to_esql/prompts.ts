@@ -16,7 +16,7 @@ Try to translate to ESQL as much as possible. Keep in mind below when translatin
 
 - Make assumptions on the fields based on ECS mapping if no explicit mapping is provided.
 - If the query is asking to search for something in event payload, source payload and no specific field is mentioned, use KQL or QSTR command to search in the entire payload. For example, if instruction is search for "malware*" in event payload when use KQL command like so: \`where kql\("malware*"\)\`.
-- Correctness and completeness of the translation is more important that the performance of the query.
+- Correctness and completeness of the translation is more important than the performance of the query.
 - If even 20% of the detection logic can be translated, provide the ESQL query for that part and explain in the summary which parts of the query were not translated and why.
 - If not even 20% of the detection logic can be translated, you must:
   - Provide a summary of the reasons why it cannot be translated.

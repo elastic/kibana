@@ -26,7 +26,7 @@ export const getResolveDepsNode = ({ model }: GetCreateResolveDepsNodeParams): G
     const isUnsupported = hasUnsupportedFunctions([query, ...currentMessages].join('\n'));
 
     if (isUnsupported) {
-      const unsupportedComment = `This rules cannot be translated to a Custom Rule because current rule logic contains one of the unsupported functions: \n \n  - ${UNSUPPORTED_FUNCTIONS.join(
+      const unsupportedComment = `This rule cannot be translated to a Custom Rule because current rule logic contains one of the unsupported functions: \n \n  - ${UNSUPPORTED_FUNCTIONS.join(
         '\n  - '
       )}`;
 
