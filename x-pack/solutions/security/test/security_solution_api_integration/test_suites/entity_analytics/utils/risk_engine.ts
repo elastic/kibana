@@ -250,69 +250,6 @@ const getRiskScoreIndices = (namespace = 'default'): string[] => [
   `risk-score.risk-score-latest-${namespace}`,
 ];
 
-const waitForRiskScoreIndicesToBeGone = async ({
-  es,
-  log,
-  namespace = 'default',
-}: {
-  es: Client;
-  log: ToolingLog;
-  namespace?: string;
-}): Promise<void> => {
-  const indices = getRiskScoreIndices(namespace);
-
-  await waitFor(
-    async () => {
-      for (const index of indices) {
-        await es.indices.deleteDataStream({ name: index }).catch(() => {});
-        await es.indices.delete({ index, allow_no_indices: true }).catch(() => {});
-      }
-
-      const existing = await Promise.all(
-        indices.map(async (name) => {
-          try {
-            const resolved = await es.indices.resolveIndex({
-              name,
-              expand_wildcards: 'all',
-            });
-            const hasMatchingIndex =
-              resolved.indices?.some((index) => index.name === name) ?? false;
-            const hasMatchingDataStream =
-              resolved.data_streams?.some((dataStream) => dataStream.name === name) ?? false;
-            return hasMatchingIndex || hasMatchingDataStream;
-          } catch (e) {
-            // If Elasticsearch cannot resolve due to a conflict (index + datastream with same name),
-            // treat it as still present and keep retrying cleanup.
-            const statusCode = (e as { statusCode?: number })?.statusCode;
-            if (statusCode === 404) {
-              return false;
-            }
-            log.debug(
-              `waitForRiskScoreIndicesToBeGone: resolveIndex failed for ${name} with status ${
-                statusCode ?? 'unknown'
-              }`
-            );
-            return true;
-          }
-        })
-      );
-
-      const remainingIndices = indices.filter((_, index) => existing[index]);
-      if (remainingIndices.length > 0) {
-        log.debug(
-          `waitForRiskScoreIndicesToBeGone: still present after cleanup retry: ${remainingIndices.join(
-            ', '
-          )}`
-        );
-      }
-
-      return remainingIndices.length === 0;
-    },
-    'waitForRiskScoreIndicesToBeGone',
-    log
-  );
-};
-
 export const cleanupRiskEngineV2 = async ({
   riskEngineRoutes,
   log,
@@ -325,9 +262,7 @@ export const cleanupRiskEngineV2 = async ({
   namespace?: string;
 }): Promise<void> => {
   await riskEngineRoutes.cleanUp();
-  await waitForRiskEngineTaskToBeGone({ es, log });
   await deleteAllRiskScores(log, es, getRiskScoreIndices(namespace), true);
-  await waitForRiskScoreIndicesToBeGone({ es, log, namespace });
   await deleteAllEntityStoreEntities(log, es, namespace);
 };
 
@@ -458,23 +393,6 @@ export const waitForRiskEngineTaskToBeGone = async ({
       return task == null;
     },
     'waitForRiskEngineTaskToBeGone',
-    log
-  );
-};
-
-export const waitForSavedObjectToBeGone = async ({
-  log,
-  kibanaServer,
-}: {
-  log: ToolingLog;
-  kibanaServer: KbnClient;
-}): Promise<void> => {
-  await waitFor(
-    async () => {
-      const savedObject = await getRiskEngineConfigSO({ kibanaServer });
-      return savedObject == null;
-    },
-    'waitForSavedObjectToBeGone',
     log
   );
 };

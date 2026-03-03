@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
 import {
@@ -56,6 +57,26 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         es,
         namespace
       );
+      const updatePageSizeForNamespace = async (pageSize: number) => {
+        await es.updateByQuery({
+          index: '.kibana_security_solution_*',
+          query: {
+            bool: {
+              must: [
+                { term: { type: { value: riskEngineConfigurationTypeName } } },
+                { term: { namespaces: { value: namespace } } },
+              ],
+            },
+          },
+          script: {
+            source: 'ctx._source["risk-engine-configuration"].pageSize = params.pageSize',
+            lang: 'painless',
+            params: { pageSize },
+          },
+          conflicts: 'proceed',
+          refresh: true,
+        });
+      };
 
       before(async () => {
         await cleanupRiskEngineV2({
@@ -166,6 +187,35 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
           expect(risk).to.be.ok();
           expect(risk!.calculated_score_norm).to.be.greaterThan(0);
           expect(risk!.calculated_level).to.be.ok();
+        });
+      });
+
+      describe('modifying configuration', () => {
+        beforeEach(async () => {
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 10, index });
+          await riskEngineRoutesForNamespace.disable();
+        });
+
+        describe('when page size is smaller than the number of entities', () => {
+          beforeEach(async () => {
+            await updatePageSizeForNamespace(2);
+            await riskEngineRoutesForNamespace.enable();
+          });
+
+          it('@skipInServerlessMKI pages through all entities via composite aggregation', async () => {
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 20, index });
+            const scores = await readRiskScores(es, index);
+
+            const expectedIds = Array(10)
+              .fill(0)
+              .map((_, _index) => `host:host-${_index}`);
+
+            expect(
+              normalizeScores(scores)
+                .map(({ id_value: idValue }) => idValue)
+                .sort()
+            ).to.eql([...expectedIds, ...expectedIds].sort());
+          });
         });
       });
     });

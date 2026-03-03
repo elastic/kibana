@@ -16,7 +16,6 @@ import {
   waitForRiskScoresToBePresent,
   normalizeScores,
   riskEngineRouteHelpersFactory,
-  updateRiskEngineConfigSO,
   getRiskEngineTask,
   waitForRiskEngineTaskToBeGone,
   enableEntityStoreV2,
@@ -41,6 +40,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const entityStoreRoutes = entityStoreV2RouteHelpersFactory(supertest, es);
 
+  // DEV NOTE: this file is intended as a smoke test in the default space
+  // for more complex tests, see task_execution_nondefault_spaces_v2.ts
+  // having tests in their own space reduces flakiness in serverless runs
   describe('@ess @serverless @serverlessQA Risk Scoring Task Execution - V2 (id-based)', () => {
     before(async () => {
       await setupEntityStoreV2({
@@ -190,59 +192,6 @@ export default ({ getService }: FtrProviderContext): void => {
               const disabledTask = await getRiskEngineTask({ es });
 
               expect(disabledTask).to.eql(undefined);
-            });
-          });
-
-          describe('modifying configuration', () => {
-            beforeEach(async () => {
-              await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
-              await riskEngineRoutes.disable();
-            });
-
-            describe('when task interval is modified', () => {
-              beforeEach(async () => {
-                await updateRiskEngineConfigSO({
-                  attributes: {
-                    interval: '1s',
-                  },
-                  kibanaServer,
-                });
-                await riskEngineRoutes.enable();
-              });
-
-              it('executes multiple times', async () => {
-                await waitForRiskScoresToBePresent({ es, log, scoreCount: 30 });
-                const riskScores = await readRiskScores(es);
-
-                expect(riskScores.length).to.be.greaterThan(29);
-              });
-            });
-
-            describe('when page size is smaller than the number of entities', () => {
-              beforeEach(async () => {
-                await updateRiskEngineConfigSO({
-                  attributes: {
-                    pageSize: 2,
-                  },
-                  kibanaServer,
-                });
-                await riskEngineRoutes.enable();
-              });
-
-              it('@skipInServerlessMKI pages through all entities via composite aggregation', async () => {
-                await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
-                const scores = await readRiskScores(es);
-
-                const expectedIds = Array(10)
-                  .fill(0)
-                  .map((_, index) => `host:host-${index}`);
-
-                expect(
-                  normalizeScores(scores)
-                    .map(({ id_value: idValue }) => idValue)
-                    .sort()
-                ).to.eql([...expectedIds, ...expectedIds].sort());
-              });
             });
           });
         });
