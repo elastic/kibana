@@ -279,4 +279,30 @@ describe('useAnonymizationProfilesSectionState', () => {
       profile: { id: 'profile-1', name: 'Profile 1' },
     });
   });
+
+  it('resets form values when canceling create flyout', () => {
+    const reset = jest.fn();
+    jest.mocked(useProfileForm).mockReturnValue(createProfileFormMock(undefined, undefined, reset));
+
+    const { result } = renderHook(() =>
+      useAnonymizationProfilesSectionState({
+        fetch,
+        spaceId: 'default',
+        canShow: true,
+        canManage: true,
+      })
+    );
+
+    act(() => {
+      result.current.onCreateProfile();
+    });
+    expect(result.current.flyoutState).toEqual({ mode: 'create' });
+
+    act(() => {
+      result.current.closeFlyout();
+    });
+
+    expect(reset).toHaveBeenCalledTimes(1);
+    expect(result.current.flyoutState).toBeNull();
+  });
 });

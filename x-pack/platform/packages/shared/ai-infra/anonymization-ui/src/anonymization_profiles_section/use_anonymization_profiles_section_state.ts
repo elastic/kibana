@@ -118,9 +118,10 @@ export const useAnonymizationProfilesSectionState = ({
   }, [createConflict, currentTargetKey]);
 
   const closeFlyout = useCallback(() => {
+    form.reset();
     setFlyoutState(null);
     setCreateConflict(null);
-  }, []);
+  }, [form]);
 
   const closeDeleteModal = useCallback(() => deleteFlow.cancel(), [deleteFlow]);
 
