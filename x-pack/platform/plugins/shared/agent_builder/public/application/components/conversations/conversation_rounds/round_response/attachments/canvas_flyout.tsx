@@ -77,7 +77,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   }
 
   const { attachment, isSidebar } = canvasState;
-  const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   const flyoutStyles = !isSidebar
     ? css`
