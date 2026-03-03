@@ -9,16 +9,12 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import { securityAttacksAlignmentServerArgs } from '../shared';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'enableAlertsAndAttacksAlignment',
-      ])}`,
-    ],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...securityAttacksAlignmentServerArgs],
   },
 };

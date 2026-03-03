@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../../../../types';
-import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
-import { securityAttacksAlignmentServerArgs } from '../shared';
-
-export const servers: ScoutServerConfig = {
-  ...defaultConfig,
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...securityAttacksAlignmentServerArgs],
-  },
-};
+export const securityAttacksAlignmentServerArgs = [
+  `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+    'enableAlertsAndAttacksAlignment',
+  ])}`,
+];

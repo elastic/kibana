@@ -12,6 +12,7 @@ import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
+import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
@@ -19,6 +20,7 @@ export interface SecurityPageObjects extends PageObjects {
   entityAnalyticsDashboardsPage: EntityAnalyticsDashboardsPage;
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
+  detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
@@ -29,5 +31,6 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Se
     entityAnalyticsDashboardsPage: createLazyPageObject(EntityAnalyticsDashboardsPage, page),
     cspmIntegrationPage: createLazyPageObject(CspmIntegrationPage, page),
     timelinePage: createLazyPageObject(TimelinePage, page),
+    detectionsAttackDiscoveryPage: createLazyPageObject(DetectionsAttackDiscoveryPage, page),
   };
 }
