@@ -151,7 +151,6 @@ export const getPolicySettingsFormTestSubjects = (
       warningCallout: advancedSectionTestSubj('warning'),
       search: advancedSectionTestSubj('search'),
       osFilter: advancedSectionTestSubj('osFilter'),
-      categoryFilter: advancedSectionTestSubj('categoryFilter'),
       emptyState: advancedSectionTestSubj('emptyState'),
       settingRowTestSubjects: (settingKeyPath: string) => {
         const testSubjForSetting = advancedSectionTestSubj.withPrefix(settingKeyPath);

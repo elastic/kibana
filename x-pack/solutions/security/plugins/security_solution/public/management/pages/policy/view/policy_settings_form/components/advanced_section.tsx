@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiFieldTextProps } from '@elastic/eui';
@@ -21,7 +21,6 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   useEuiBackgroundColorCSS,
@@ -177,7 +176,6 @@ const CATEGORY_LABELS: Record<AdvancedSettingCategory, string> = {
 };
 
 type OSFilterValue = 'all' | 'linux' | 'mac' | 'windows';
-type CategoryFilterValue = 'all' | AdvancedSettingCategory;
 
 export type AdvancedSectionProps = PolicyFormComponentCommonProps;
 
@@ -187,7 +185,8 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedOS, setSelectedOS] = useState<OSFilterValue>('all');
-    const [selectedCategory, setSelectedCategory] = useState<CategoryFilterValue>('all');
+    const openCategoriesRef = useRef<Set<AdvancedSettingCategory>>(new Set());
+    const [, setAccordionUpdateCounter] = useState(0);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const euiBackgroundColorCSS = useEuiBackgroundColorCSS();
 
@@ -195,6 +194,16 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
 
     const handleAdvancedSettingsButtonClick = useCallback(() => {
       setShowAdvancedPolicy((prevState) => !prevState);
+    }, []);
+
+    const handleCategoryToggle = useCallback((category: AdvancedSettingCategory) => {
+      const next = openCategoriesRef.current;
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      setAccordionUpdateCounter((c) => c + 1);
     }, []);
 
     const handleAdvancedSettingUpdate = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
@@ -226,9 +235,6 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
               : 'windows.advanced.';
           if (!entry.key.startsWith(prefix)) return false;
         }
-        if (selectedCategory !== 'all' && getCategory(entry.key) !== selectedCategory) {
-          return false;
-        }
         if (query) {
           const keyMatch = entry.key.toLowerCase().includes(query);
           const docMatch = entry.documentation.toLowerCase().includes(query);
@@ -246,7 +252,7 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
         byCategory.get(cat)!.push(entry);
       }
       return byCategory;
-    }, [policy, isPlatinumPlus, selectedOS, selectedCategory, searchQuery]);
+    }, [policy, isPlatinumPlus, selectedOS, searchQuery]);
 
     const totalFilteredCount = useMemo(() => {
       let count = 0;
@@ -385,24 +391,6 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                   data-test-subj={getTestId('osFilter')}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ minWidth: 180 }}>
-                <EuiSelect
-                  id={getTestId('categoryFilter')}
-                  options={[
-                    { value: 'all', text: FILTER_ALL },
-                    { value: 'performance', text: CATEGORY_PERFORMANCE },
-                    { value: 'product_features', text: CATEGORY_PRODUCT_FEATURES },
-                    { value: 'logs', text: CATEGORY_LOGS },
-                    { value: 'configs', text: CATEGORY_CONFIGS },
-                    { value: 'others', text: CATEGORY_OTHERS },
-                  ]}
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value as CategoryFilterValue)}
-                  fullWidth
-                  compressed
-                  data-test-subj={getTestId('categoryFilter')}
-                />
-              </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
@@ -454,7 +442,8 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                           arrowProps={{
                             style: { marginLeft: 16 },
                           }}
-                          initialIsOpen={true}
+                          forceState={openCategoriesRef.current.has(category) ? 'open' : 'closed'}
+                          onToggle={() => handleCategoryToggle(category)}
                         >
                           <div css={euiBackgroundColorCSS.subdued} style={{ padding: 12 }}>
                             {entries.map((entry) => renderSettingRow(entry))}

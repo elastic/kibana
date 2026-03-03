@@ -86,7 +86,6 @@ describe('Policy Advanced Settings section', () => {
 
     expect(getByTestId(testSubj.search)).toBeInTheDocument();
     expect(getByTestId(testSubj.osFilter)).toBeInTheDocument();
-    expect(getByTestId(testSubj.categoryFilter)).toBeInTheDocument();
   });
 
   it('should filter settings when search query is entered', async () => {
