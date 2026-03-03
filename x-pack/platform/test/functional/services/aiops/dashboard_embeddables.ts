@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-type AiopsEmbeddableType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE | typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
+type AiopsEmbeddableType =
+  | typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE
+  | typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
 export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');
