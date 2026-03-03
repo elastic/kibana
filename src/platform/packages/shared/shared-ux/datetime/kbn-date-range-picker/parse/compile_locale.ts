@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UNIVERSAL_ABSOLUTE_FORMATS } from '../constants';
 import type { ParserLocale } from '../types';
 
 interface CompiledTemplate {
@@ -52,7 +51,7 @@ function compileLocale(locale: ParserLocale): CompiledLocale {
     durationFuture: locale.naturalDuration.future.map(compileTemplate),
     instantPast: locale.naturalInstant.past.map(compileTemplate),
     instantFuture: locale.naturalInstant.future.map(compileTemplate),
-    absoluteFormats: [...locale.absoluteFormats, ...UNIVERSAL_ABSOLUTE_FORMATS],
+    absoluteFormats: locale.absoluteFormats,
   };
 }
 

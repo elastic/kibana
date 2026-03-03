@@ -19,14 +19,6 @@ export const DATE_TYPE_NOW = 'NOW' as const;
 /** Default Moment.js format for displaying dates (e.g. "Feb 3 2025, 14:30") */
 export const DEFAULT_DATE_FORMAT = 'MMM D YYYY, HH:mm';
 
-/** Absolute date formats that are always accepted regardless of locale */
-export const UNIVERSAL_ABSOLUTE_FORMATS = [
-  'YYYY-MM-DD',
-  'YYYY-MM-DDTHH:mm:ss.SSSZ',
-  'YYYY-MM-DDTHH:mm:ssZ',
-  'YYYY-MM-DDTHH:mm',
-];
-
 /** Time-only format, used when start and end fall on the same day (e.g. "14:30") */
 export const FORMAT_TIME_ONLY = 'HH:mm';
 

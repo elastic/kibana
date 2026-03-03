@@ -169,8 +169,16 @@ function instantToDateString(
 /**
  * Resolves a {@link DateString} to a `Date`, returning `null` if unrecognised.
  *
- * Tried in order: ms-precision datemath (`now±Nms`), locale display formats
- * (moment strict), unix timestamps (10/13-digit), and datemath / ISO 8601.
+ * How "forgivingness" is handled per format category:
+ *
+ * - **ISO 8601** — forgiving. Partial values like `2025-11` work
+ *   (via the dateMath / ISO fallback at the end).
+ * - **Locale display formats** (including RFC 2822 for English) —
+ *   forgiving. Partial values like `Nov` or `Nov 10 2025 12:34` are
+ *   accepted as long as the input is not already valid ISO 8601.
+ *   This guard prevents ambiguity; without it an ISO date like
+ *   `1970-01-01` could be garbled by a non-strict `MMM D, YYYY` parse.
+ * - **Unix timestamp** — not forgiving (must be exactly 10 or 13 digits).
  */
 function resolveDateString(
   dateString: DateString,
@@ -185,6 +193,13 @@ function resolveDateString(
 
   const strict = moment(dateString, formats, true);
   if (strict.isValid()) return strict.toDate();
+
+  // Forgiving: try locale formats with non-strict matching, but only
+  // when the input is not valid ISO 8601 (to avoid cross-format ambiguity)
+  if (formats.length && !moment(dateString, moment.ISO_8601, true).isValid()) {
+    const forgiving = moment(dateString, formats);
+    if (forgiving.isValid()) return forgiving.toDate();
+  }
 
   const unixDate = unixTimestampToDate(dateString);
   if (unixDate) return unixDate;

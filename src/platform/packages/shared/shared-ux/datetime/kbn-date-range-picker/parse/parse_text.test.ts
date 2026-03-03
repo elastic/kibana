@@ -241,6 +241,54 @@ describe('textToTimeRange', () => {
     });
   });
 
+  // --- Forgiving absolute dates ---
+
+  describe('forgiving absolute dates', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2025-07-15T12:00:00.000Z'));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it.each([
+      ['Nov 10 2025 12:34', { year: 2025, month: 10, day: 10, hour: 12, minute: 34 }],
+      ['Nov 10 2025', { year: 2025, month: 10, day: 10, hour: 0, minute: 0 }],
+      ['Nov 10', { year: 2025, month: 10, day: 10, hour: 0, minute: 0 }],
+      ['Nov', { year: 2025, month: 10, day: 1, hour: 0, minute: 0 }],
+    ])('parses partial locale input "%s"', (text, expected) => {
+      const range = textToTimeRange(text);
+
+      expect(range.start).toBe(text);
+      expect(range.end).toBe('now');
+      expect(range.type).toEqual([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]);
+
+      const d = range.startDate!;
+      expect(d).toBeInstanceOf(Date);
+      expect(d.getFullYear()).toBe(expected.year);
+      expect(d.getMonth()).toBe(expected.month);
+      expect(d.getDate()).toBe(expected.day);
+      expect(d.getHours()).toBe(expected.hour);
+      expect(d.getMinutes()).toBe(expected.minute);
+    });
+
+    it('does not mangle ISO dates with non-strict locale parsing', () => {
+      const range = textToTimeRange('1970-01-01');
+
+      expect(range.isInvalid).toBe(false);
+      expect(range.startDate!.getFullYear()).toBe(1970);
+      expect(range.startDate!.getMonth()).toBe(0);
+      expect(range.startDate!.getDate()).toBe(1);
+    });
+
+    it('still rejects gibberish', () => {
+      expect(textToTimeRange('hello world').isInvalid).toBe(true);
+      expect(textToTimeRange('not a date').isInvalid).toBe(true);
+    });
+  });
+
   // --- DateOffset assertions ---
 
   describe('DateOffset', () => {

@@ -70,6 +70,7 @@ export const en: ParserLocale = {
     past: ['{count} {unit} ago'],
     future: ['{count} {unit} from now', 'in {count} {unit}'],
   },
+  // RFC 2822 (order matters)
   absoluteFormats: [
     'MMM D YYYY, HH:mm',
     'MMM D, HH:mm',
