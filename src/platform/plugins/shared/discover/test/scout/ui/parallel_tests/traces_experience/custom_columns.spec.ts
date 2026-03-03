@@ -56,7 +56,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
-        for (const column of pageObjects.tracesExperience.expectedColumns) {
+        for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
           await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
         }
       });

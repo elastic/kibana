@@ -20,7 +20,7 @@ export class TracesExperiencePage {
   public readonly grid: TracesGrid;
   public readonly charts: TracesCharts;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(page: ScoutPage) {
     this.flyout = createTracesFlyout(page);
     this.grid = createTracesGrid();
     this.charts = createTracesCharts(page);
