@@ -32,8 +32,8 @@ const MIN_REQUESTS_PER_SESSION = 3;
 const MAX_REQUESTS_PER_SESSION = 25;
 const DEFAULT_POOL_SIZE = 50;
 
-let sessionPool: ActiveSession[] = [];
-let poolSize = DEFAULT_POOL_SIZE;
+let sessionPool: Map<string, ActiveSession[]> = new Map();
+let perRegionPoolSize = DEFAULT_POOL_SIZE;
 
 function createSession(cloudRegion?: string): ActiveSession {
   const { ip, geo, isIPv6 } = generateIPWithGeo(cloudRegion);
@@ -53,36 +53,49 @@ function createSession(cloudRegion?: string): ActiveSession {
 
 /**
  * Initialize the session pool. Call once at scenario startup.
- * Pool size defaults to 50 and scales mildly with the scale parameter.
+ *
+ * Creates a separate pool of sessions per cloud region so that each region's
+ * sessions carry the correct geo bias (80 % same-continent traffic).
+ * Pool size per region defaults to 50 and scales mildly with the scale parameter.
  */
-export function initSessionPool(scale: number = 1, cloudRegion?: string): void {
-  poolSize = Math.min(Math.max(DEFAULT_POOL_SIZE, scale * 20), 500);
-  sessionPool = [];
-  for (let i = 0; i < poolSize; i++) {
-    sessionPool.push(createSession(cloudRegion));
+export function initSessionPool(scale: number = 1, cloudRegions: string[] = []): void {
+  perRegionPoolSize = Math.min(Math.max(DEFAULT_POOL_SIZE, scale * 20), 500);
+  sessionPool = new Map();
+  for (const region of cloudRegions) {
+    const regionSessions: ActiveSession[] = [];
+    for (let i = 0; i < perRegionPoolSize; i++) {
+      regionSessions.push(createSession(region));
+    }
+    sessionPool.set(region, regionSessions);
   }
 }
 
 /**
- * Get an active session from the pool.
+ * Get an active session from the region-specific pool.
  *
- * Picks a random session, decrements its remaining request count,
- * and replaces it with a fresh session once it expires. This produces
- * realistic session lifecycles: each session ID appears in multiple
- * log lines before disappearing.
+ * Picks a random session whose geo bias matches the given cloud region,
+ * decrements its remaining request count, and replaces it with a fresh
+ * session (same region bias) once it expires.
  */
 export function getActiveSession(cloudRegion?: string): ActiveSession {
-  if (sessionPool.length === 0) {
-    initSessionPool(1, cloudRegion);
+  const key = cloudRegion ?? '';
+
+  let pool = sessionPool.get(key);
+  if (!pool || pool.length === 0) {
+    pool = [];
+    for (let i = 0; i < perRegionPoolSize; i++) {
+      pool.push(createSession(cloudRegion));
+    }
+    sessionPool.set(key, pool);
   }
 
-  const index = Math.floor(Math.random() * sessionPool.length);
-  const session = sessionPool[index];
+  const index = Math.floor(Math.random() * pool.length);
+  const session = pool[index];
 
   session.remainingRequests--;
 
   if (session.remainingRequests <= 0) {
-    sessionPool[index] = createSession(cloudRegion);
+    pool[index] = createSession(cloudRegion);
   }
 
   return session;
@@ -92,5 +105,5 @@ export function getActiveSession(cloudRegion?: string): ActiveSession {
  * Reset the session pool (useful for tests).
  */
 export function resetSessionPool(): void {
-  sessionPool = [];
+  sessionPool = new Map();
 }

@@ -66,9 +66,8 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
     } (${infraPool.cloudConfig.regions.join(', ')})`
   );
 
-  // Initialize session pool for user continuity across requests
-  const primaryRegion = infraPool.cloudConfig.regions[0];
-  initSessionPool(scale, primaryRegion);
+  // Initialize session pool with all regions so each gets correct geo bias
+  initSessionPool(scale, infraPool.cloudConfig.regions);
 
   // Calculate and display generation estimates
   const timeRangeMs = runOptions.to - runOptions.from;
