@@ -8,7 +8,7 @@
  */
 
 import { Parser } from '@kbn/esql-language';
-import { hasTransformationalCommand } from '../query_parsing_helpers';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 

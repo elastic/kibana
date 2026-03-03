@@ -9,7 +9,8 @@
 
 import { useEffect } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
