@@ -8,11 +8,13 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
+import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
+import { z } from '@kbn/zod/v4';
 import {
   getWorkflowContextSchema,
   type WorkflowDefinitionForContext,
 } from './get_workflow_context_schema';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
   it('should handle nested object inputs for variable validation', () => {
@@ -294,5 +296,200 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         expect(contextSchema).toBeDefined();
       }).not.toThrow();
     });
+  });
+});
+
+describe('getWorkflowContextSchema - Dynamic event schema based on triggers', () => {
+  const baseWorkflow: WorkflowYaml = {
+    version: '1',
+    name: 'Test Workflow',
+    description: undefined,
+    settings: undefined,
+    enabled: true,
+    tags: undefined,
+    triggers: [{ type: 'manual' }],
+    inputs: undefined,
+    consts: undefined,
+    steps: [{ name: 'step1', type: 'console' }],
+  };
+
+  it('should only include spaceId in event schema when workflow has only manual trigger', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [{ type: 'manual' }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toEqual(['spaceId']);
+    expect(eventKeys).not.toContain('alerts');
+    expect(eventKeys).not.toContain('rule');
+    expect(eventKeys).not.toContain('params');
+  });
+
+  it('should only include spaceId in event schema when workflow has only scheduled trigger', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toEqual(['spaceId']);
+    expect(eventKeys).not.toContain('alerts');
+    expect(eventKeys).not.toContain('rule');
+    expect(eventKeys).not.toContain('params');
+  });
+
+  it('should include alerts, rule, params, and spaceId in event schema when workflow has alert trigger', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [{ type: 'alert' }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toContain('spaceId');
+    expect(eventKeys).toContain('alerts');
+    expect(eventKeys).toContain('rule');
+    expect(eventKeys).toContain('params');
+  });
+
+  it('should include alert event properties when alert trigger is among multiple triggers', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [{ type: 'manual' }, { type: 'alert' }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toContain('spaceId');
+    expect(eventKeys).toContain('alerts');
+    expect(eventKeys).toContain('rule');
+    expect(eventKeys).toContain('params');
+  });
+
+  it('should not include alert properties with manual + scheduled triggers', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toEqual(['spaceId']);
+  });
+
+  it('should handle workflow with empty triggers array gracefully', () => {
+    const workflow: WorkflowDefinitionForContext = {
+      ...baseWorkflow,
+      triggers: [] as any,
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toEqual(['spaceId']);
+  });
+
+  it('should handle workflow with undefined triggers gracefully', () => {
+    const workflow: WorkflowDefinitionForContext = {
+      ...baseWorkflow,
+      triggers: undefined as any,
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+    const eventResult = getSchemaAtPath(contextSchema, 'event');
+    expect(eventResult.schema).toBeDefined();
+
+    const eventShape = getShape(eventResult.schema!);
+    const eventKeys = Object.keys(eventShape);
+    expect(eventKeys).toEqual(['spaceId']);
+  });
+
+  it('should allow accessing event.alerts sub-properties when alert trigger is present', () => {
+    const workflow: WorkflowYaml = {
+      ...baseWorkflow,
+      triggers: [{ type: 'alert' }],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    // event.rule.id should be accessible
+    const ruleIdResult = getSchemaAtPath(contextSchema, 'event.rule.id');
+    expect(ruleIdResult.schema).toBeDefined();
+
+    // event.rule.name should be accessible
+    const ruleNameResult = getSchemaAtPath(contextSchema, 'event.rule.name');
+    expect(ruleNameResult.schema).toBeDefined();
+
+    // event.spaceId should always be accessible
+    const spaceIdResult = getSchemaAtPath(contextSchema, 'event.spaceId');
+    expect(spaceIdResult.schema).toBeDefined();
+  });
+
+  it('should include custom trigger eventSchema properties when triggerSchemas.getTriggerDefinition returns a definition', () => {
+    const customEventSchema = z.object({
+      severity: z.string(),
+      message: z.string(),
+    });
+    // WorkflowYaml's trigger type union is built-in only; custom trigger types are supported at runtime
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'example.custom_trigger' }],
+    } as unknown as WorkflowYaml;
+    const mockTriggerDefinition = {
+      id: 'example.custom_trigger',
+      title: 'Example custom trigger',
+      description: 'Test trigger for event schema merge',
+      eventSchema: customEventSchema,
+    };
+    const getTriggerDefinitionSpy = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockImplementation((triggerType: string) =>
+        triggerType === 'example.custom_trigger' ? mockTriggerDefinition : undefined
+      );
+
+    try {
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const eventResult = getSchemaAtPath(contextSchema, 'event');
+      expect(eventResult.schema).toBeDefined();
+
+      const eventShape = getShape(eventResult.schema!);
+      const eventKeys = Object.keys(eventShape);
+      expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).toContain('severity');
+      expect(eventKeys).toContain('message');
+
+      const severityResult = getSchemaAtPath(contextSchema, 'event.severity');
+      expect(severityResult.schema).toBeDefined();
+      const messageResult = getSchemaAtPath(contextSchema, 'event.message');
+      expect(messageResult.schema).toBeDefined();
+    } finally {
+      getTriggerDefinitionSpy.mockRestore();
+    }
   });
 });

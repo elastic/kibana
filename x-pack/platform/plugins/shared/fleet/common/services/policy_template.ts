@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { DATASET_VAR_NAME } from '../constants';
+import { i18n } from '@kbn/i18n';
+
+import {
+  DATASET_VAR_NAME,
+  dataTypes,
+  OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
+} from '../constants';
 import type {
   RegistryPolicyTemplate,
   RegistryPolicyInputOnlyTemplate,
@@ -15,17 +22,38 @@ import type {
   RegistryVarsEntry,
   RegistryDataStream,
   InstallablePackage,
+  NewPackagePolicy,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
   type: 'text',
-  title: 'Dataset name',
-  description:
-    "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
+  title: i18n.translate('xpack.fleet.policyTemplate.datasetVar.title', {
+    defaultMessage: 'Dataset name',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.datasetVar.description', {
+    defaultMessage:
+      "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
+  }),
   multi: false,
   required: true,
   show_user: true,
+};
+
+const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
+  name: USE_APM_VAR_NAME,
+  type: 'bool',
+  title: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.title', {
+    defaultMessage: 'Enable Elastic APM Enrichment',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.description', {
+    defaultMessage:
+      "Include additional policy configuration to integrate trace data with Elastic's APM UI",
+  }),
+  multi: false,
+  required: false,
+  show_user: true,
+  default: true,
 };
 
 export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
@@ -56,11 +84,11 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   if (isIntegrationPolicyTemplate(policyTemplate)) {
     return policyTemplate.inputs || [];
   }
-
   const input: RegistryInput = {
     type: policyTemplate.input,
     title: policyTemplate.title,
     description: policyTemplate.description,
+    ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
   };
 
   return [input];
@@ -84,6 +112,14 @@ export const getNormalizedDataStreams = (
   return policyTemplates.map((policyTemplate) => {
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
+    let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
+    if (
+      policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
+      (dataStreamType || policyTemplate.type) === dataTypes.Traces
+    ) {
+      vars = addUseAPMVarIfNotPresent(vars);
+    }
+
     const dataStream: RegistryDataStream = {
       type: dataStreamType || policyTemplate.type,
       dataset,
@@ -95,7 +131,7 @@ export const getNormalizedDataStreams = (
       streams: [
         {
           input: policyTemplate.input,
-          vars: addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name),
+          vars,
           template_path: policyTemplate.template_path,
           title: policyTemplate.title,
           description: policyTemplate.title,
@@ -140,10 +176,34 @@ const addDatasetVarIfNotPresent = (
   }
 };
 
+const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
+  const newVars = vars ?? [];
+
+  const isUseAPMVarAlreadyAdded = newVars.find(
+    (varEntry) => varEntry.name === DATA_STREAM_USE_APM_VAR.name
+  );
+
+  if (isUseAPMVarAlreadyAdded) {
+    return newVars;
+  } else {
+    return [...newVars, DATA_STREAM_USE_APM_VAR];
+  }
+};
+
 const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
+  const enabledPolicyTemplates = new Set(
+    packagePolicy?.inputs
+      .filter((input) => input.enabled)
+      .map((input) => input.policy_template)
+      .filter((policyTemplate): policyTemplate is string => !!policyTemplate) ?? []
+  );
+  return enabledPolicyTemplates.size > 1;
+};
 
 export function filterPolicyTemplatesTiles<T>(
   templatesBehavior: string | undefined,

@@ -13,9 +13,10 @@ import {
   findNextNonWhitespaceChar,
   findPrevNonWhitespaceChar,
   getLocatedSourceItemsFromQuery,
+  getQueryWithoutLastPipe,
   getSourceCommandContextFromQuery,
 } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { IndicesBrowserOpenMode } from './types';
 
 describe('findPrevNonWhitespaceChar / findNextNonWhitespaceChar', () => {
   const text = 'a  ,  b';
@@ -281,6 +282,33 @@ describe('computeRemovalRange', () => {
     const range = computeRemovalRange(query, items, 'kibana_sample_data_logs');
     expect(range).toBeDefined();
     expect(query.slice(range!.start, range!.end)).toBe('kibana_sample_data_logs,');
+  });
+});
+
+describe('getQueryWithoutLastPipe', () => {
+  it('strips the last pipe and trailing command', () => {
+    expect(getQueryWithoutLastPipe('FROM kibana_sample_data_logs | STATS AVG(bytes) | KEEP')).toBe(
+      'FROM kibana_sample_data_logs | STATS AVG(bytes)'
+    );
+  });
+
+  it('returns full query when there is only one command', () => {
+    const query = 'FROM index';
+    expect(getQueryWithoutLastPipe(query)).toBe(query);
+  });
+
+  it('strips the last pipe when there are two commands (e.g. FROM ... | KEEP)', () => {
+    expect(getQueryWithoutLastPipe('FROM kibana_sample_data_logs | KEEP')).toBe(
+      'FROM kibana_sample_data_logs'
+    );
+  });
+
+  it('returns query without last command when there are two commands', () => {
+    expect(getQueryWithoutLastPipe('FROM a | STATS count(*)')).toBe('FROM a');
+  });
+
+  it('trims trailing whitespace and strips last command', () => {
+    expect(getQueryWithoutLastPipe('FROM a | STATS x | KEEP  \n  ')).toBe('FROM a | STATS x');
   });
 });
 

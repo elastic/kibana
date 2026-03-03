@@ -28,6 +28,10 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
+import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { registerTaskDefinitions } from './services/execution';
+import { createModelProviderFactory } from './services/runner/model_provider';
 
 export class AgentBuilderPlugin
   implements
@@ -82,6 +86,17 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
+    registerTaskDefinitions({
+      taskManager: setupDeps.taskManager,
+      getTaskHandler: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getTaskHandler called before service init');
+        }
+        return services.taskHandler;
+      },
+    });
+
     registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
@@ -92,22 +107,32 @@ export class AgentBuilderPlugin
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
+    const getInternalServices = () => {
+      const services = this.serviceManager.internalStart;
+      if (!services) {
+        throw new Error('getInternalServices called before service init');
+      }
+      return services;
+    };
+
     const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
       pluginsSetup: setupDeps,
-      getInternalServices: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getInternalServices called before service init');
-        }
-        return services;
-      },
+      getInternalServices,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });
+
+    registerBeforeAgentWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerSkillToolsLoaderHook(serviceSetups);
 
     return {
       tools: {
@@ -122,15 +147,15 @@ export class AgentBuilderPlugin
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
-      skill: {
-        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      skills: {
+        register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
   }
 
   start(
-    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces, actions }: AgentBuilderStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags }: CoreStart,
+    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
@@ -141,23 +166,47 @@ export class AgentBuilderPlugin
       actions,
       uiSettings,
       savedObjects,
+      featureFlags,
+      dataStreams,
+      taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, agents, skills, runnerFactory, execution } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
       registerSampleData(this.home, this.logger);
     }
+
+    const modelProviderFactory = createModelProviderFactory({
+      inference,
+      uiSettings,
+      savedObjects,
+      trackingService: this.trackingService,
+    });
+
     return {
       agents: {
-        runAgent: agents.execute.bind(agents),
+        getRegistry: ({ request }) => agents.getRegistry({ request }),
+        runAgent: runner.runAgent.bind(runner),
       },
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+      },
+      skills: {
+        getRegistry: skills.getRegistry.bind(skills),
+        register: skills.registerSkill.bind(skills),
+        unregister: skills.unregisterSkill.bind(skills),
+      },
+      execution: {
+        executeAgent: execution.executeAgent.bind(execution),
+        getExecution: execution.getExecution.bind(execution),
+      },
+      runtime: {
+        createModelProvider: modelProviderFactory,
       },
     };
   }

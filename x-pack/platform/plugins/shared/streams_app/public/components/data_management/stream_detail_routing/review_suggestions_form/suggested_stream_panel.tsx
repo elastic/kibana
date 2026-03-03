@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type Streams } from '@kbn/streams-schema';
-import { isCondition } from '@kbn/streamlang';
+import { type Condition, isCondition } from '@kbn/streamlang';
 import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useMatchRate } from './use_match_rate';
 import {
@@ -50,18 +50,29 @@ export function SuggestedStreamPanel({
   onPreview(toggle: boolean): void;
   index: number;
   onEdit(index: number, suggestion: PartitionSuggestion): void;
-  onSave?: () => void;
+  onSave?: (suggestion: PartitionSuggestion) => void;
 }) {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
-    useStreamRoutingEvents();
+  const {
+    changeSuggestionNameDebounced,
+    changeSuggestionCondition,
+    reviewSuggestedRule,
+    setConditionEditorValidity,
+  } = useStreamRoutingEvents();
 
-  const editedSuggestion = routingSnapshot.context.editedSuggestion;
-  const isEditing =
-    routingSnapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
-    routingSnapshot.context.editingSuggestionIndex === index;
+  const isEditing = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+      snapshot.context.editingSuggestionIndex === index
+  );
+  const editedSuggestionForPanel = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+    snapshot.context.editingSuggestionIndex === index
+      ? snapshot.context.editedSuggestion
+      : null
+  );
 
-  const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
+  const currentSuggestion =
+    isEditing && editedSuggestionForPanel ? editedSuggestionForPanel : partition;
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
@@ -91,7 +102,7 @@ export function SuggestedStreamPanel({
     changeSuggestionNameDebounced(name);
   };
 
-  const handleConditionChange = (condition: any) => {
+  const handleConditionChange = (condition: Condition) => {
     if (!isEditing) return;
     changeSuggestionCondition(condition);
   };
@@ -117,11 +128,12 @@ export function SuggestedStreamPanel({
             status="enabled"
             condition={currentSuggestion.condition}
             onConditionChange={handleConditionChange}
+            onValidityChange={setConditionEditorValidity}
             onStatusChange={() => {}}
             isSuggestionRouting={true}
           />
           <EditSuggestedRuleControls
-            onSave={onSave}
+            onSave={onSave ? () => onSave(currentSuggestion) : undefined}
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
             conditionError={conditionError}
             isStreamNameValid={isStreamNameValid}

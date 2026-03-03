@@ -38,15 +38,17 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
     );
   }
 
+  const ruleTypeIdConsumersPairs = params.ruleTypes.map((ruleType) => ({
+    ruleTypeId: ruleType.type,
+    consumers: [ruleType.consumer],
+  }));
+
   try {
-    for (const ruleType of params.ruleTypes) {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation: WriteOperations.CreateGapAutoFillScheduler,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation: WriteOperations.CreateGapAutoFillScheduler,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
   } catch (error) {
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({

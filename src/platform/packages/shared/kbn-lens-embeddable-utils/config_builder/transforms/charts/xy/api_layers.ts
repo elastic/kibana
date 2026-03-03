@@ -19,6 +19,7 @@ import type {
 import { AvailableReferenceLineIcons } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
+import { isRangeAnnotationConfig, isQueryAnnotationConfig } from '@kbn/event-annotation-common';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import type { DatasetType } from '../../../schema/dataset';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
@@ -239,13 +240,21 @@ function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>
 ): Pick<
   ReferenceLineDef,
-  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'fill' | 'axis' | 'text'
+  | 'color'
+  | 'stroke_dash'
+  | 'stroke_width'
+  | 'icon'
+  | 'decoration_position'
+  | 'fill'
+  | 'axis'
+  | 'text'
 > {
   return stripUndefined({
     color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
     icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
+    decoration_position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
     text: yConfig.textVisibility != null ? (yConfig.textVisibility ? 'label' : 'none') : undefined,
@@ -401,7 +410,7 @@ export function buildAPIAnnotationsLayer(
     dataset,
     ignore_global_filters,
     events: visualization.annotations.map((annotation) => {
-      if (annotation.type === 'query') {
+      if (isQueryAnnotationConfig(annotation)) {
         return {
           type: 'query',
           label: annotation.label,
@@ -418,9 +427,19 @@ export function buildAPIAnnotationsLayer(
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
           ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
+          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          // lineWidth isn't allowed to be zero, so the truthy check is valid here
+          ...(annotation.lineWidth || annotation.lineStyle
+            ? {
+                line: {
+                  stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
+                  stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
+                },
+              }
+            : {}),
         };
       }
-      if (annotation.key.type === 'range') {
+      if (isRangeAnnotationConfig(annotation)) {
         return {
           type: 'range',
           interval: {
@@ -428,22 +447,32 @@ export function buildAPIAnnotationsLayer(
             to: annotation.key.endTimestamp,
           },
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-          fill: 'outside' in annotation && annotation.outside ? 'outside' : 'inside',
+          fill: annotation.outside ? 'outside' : 'inside',
           ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
-          ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
+          ...(annotation.label ? { label: annotation.label } : {}),
         };
       }
+
       return {
         type: 'point',
         timestamp: annotation.key.timestamp,
         color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
         ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
-        ...('textVisibility' in annotation && annotation.textVisibility != null
+        ...(annotation.textVisibility != null
           ? {
               text: annotation.textVisibility ? 'label' : 'none',
             }
           : {}),
-        ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
+        ...(annotation.label ? { label: annotation.label } : {}),
+        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.lineWidth || annotation.lineStyle
+          ? {
+              line: {
+                stroke_width: annotation.lineWidth ? annotation.lineWidth : 1,
+                stroke_dash: annotation.lineStyle ? annotation.lineStyle : 'solid',
+              },
+            }
+          : {}),
       };
     }),
   };

@@ -51,6 +51,8 @@ export function plugin() {
 //     line 24 - InterfaceWithIndexSignature
 //     line 28 - ClassConstructorWithStaticProperties
 //     line 30 - config
+//   missing returns (1):
+//     line 30 - new
 //   any usage (1):
 //     line 20 - imAnAny
 //   no references (9):

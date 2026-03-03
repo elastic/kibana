@@ -48,13 +48,17 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useAppStateSelector } from '../../state_management/redux';
+import {
+  selectTabCombinedFilters,
+  useAppStateSelector,
+  useCurrentTabRuntimeState,
+} from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -73,11 +77,7 @@ import type {
   OpenInNewTabParams,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  useAdditionalCellActions,
-  useProfileAccessor,
-} from '../../../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -170,8 +170,7 @@ function DiscoverDocumentsComponent({
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
     useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
-  const isEmptyDataResult =
-    isEsqlMode || !documentState.result || documentState.result.length === 0;
+  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
@@ -306,7 +305,7 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
-  const { filters } = useQuerySubscriber({ data: services.data });
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const extensionActions = useMemo(
     () => ({
@@ -490,13 +489,17 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
-  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
+  );
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -506,6 +509,7 @@ function DiscoverDocumentsComponent({
     }
 
     return {
+      cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
       esqlQuery: query,
@@ -517,12 +521,10 @@ function DiscoverDocumentsComponent({
       },
       onUpdateESQLQuery,
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
-      registerCascadeRequestsInspectorAdapter: (requestAdapter) => {
-        stateContainer.dataState.inspectorAdapters.cascadeRequests = requestAdapter;
-      },
     };
   }, [
     availableCascadeGroups,
+    cascadedDocumentsFetcher,
     dispatch,
     esqlVariables,
     onUpdateESQLQuery,
@@ -530,7 +532,6 @@ function DiscoverDocumentsComponent({
     requestParams.timeRangeAbsolute,
     selectedCascadeGroups,
     setSelectedCascadeGroups,
-    stateContainer.dataState.inspectorAdapters,
     viewModeToggle,
   ]);
 
@@ -548,8 +549,11 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
+    <EuiFlexItem
+      data-test-subj="discoverDocumentsTable"
+      aria-labelledby="documentsAriaLabel"
+      css={styles.container}
+    >
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -609,7 +613,7 @@ function DiscoverDocumentsComponent({
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}
             query={query}
-            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             initialState={dataGridUiState}

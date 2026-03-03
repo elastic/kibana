@@ -105,6 +105,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
+  toolManager.setEventEmitter(eventEmitter);
+
   // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
@@ -117,6 +119,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
     abortSignal,
     nextInput: processedConversation.nextInput,
+    agentId,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
@@ -134,29 +137,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
+  // First add static tools
   await Promise.all([
     toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger,
-      eventEmitter,
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
     }),
-    toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-        eventEmitter,
-      },
-      {
-        dynamic: true,
-      }
-    ),
   ]);
+
+  // Then add dynamic tools
+  await toolManager.addTools(
+    {
+      type: ToolManagerToolType.executable,
+      tools: dynamicTools,
+      logger,
+    },
+    {
+      dynamic: true,
+    }
+  );
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
@@ -164,6 +168,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Create unified result transformer for tool result optimization
   const resultTransformer = createResultTransformer({
     toolRegistry,
+    toolManager,
     filestore,
     filestoreEnabled: experimentalFeatures.filestore,
   });

@@ -66,7 +66,8 @@ export {
   hasOnlySourceCommand,
   isComputedColumn,
   getQuerySummary,
+  getEsqlControls,
   type ESQLStatsQueryMeta,
 } from './src';
 
-export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';
+export { ENABLE_ESQL } from './constants';

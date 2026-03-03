@@ -17,12 +17,14 @@ import type {
   linksGetResultSchema,
   linksSearchOptionsSchema,
   linksUpdateOptionsSchema,
+  externalLinkOptionsSchema,
 } from './cm_services';
 
 export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
 export type ExternalLink = TypeOf<typeof externalLinkSchema>;
+export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
 export type Link = DashboardLink | ExternalLink;
-export type LinkOptions = DashboardLink['options'] | ExternalLink['options'];
+export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
 
 export type LinksState = TypeOf<typeof linksSchema>;
 export type StoredLinksState = Omit<LinksState, 'links'> & {

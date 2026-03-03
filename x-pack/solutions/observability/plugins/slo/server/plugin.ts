@@ -21,6 +21,7 @@ import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
+import { registerOverviewEmbeddableTransforms } from './lib/embeddables/register_overview_embeddable_transforms';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -56,6 +57,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
+import { registerDataProviders } from './agent_builder/register_data_provider';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -162,6 +164,8 @@ export class SLOPlugin
           }),
       };
     }) as SLORoutesDependencies['plugins'];
+
+    registerDataProviders({ core, plugins, logger: this.logger });
 
     registerServerRoutes({
       core,
@@ -277,6 +281,8 @@ export class SLOPlugin
       logFactory: this.initContext.logger,
       config: this.config,
     });
+
+    registerOverviewEmbeddableTransforms(plugins.embeddable);
 
     return {};
   }

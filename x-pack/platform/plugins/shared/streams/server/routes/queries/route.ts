@@ -12,7 +12,6 @@ import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
-import { assertFeatureNotChanged } from '../utils/assert_feature_not_changed';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -96,19 +95,11 @@ const upsertQueryRoute = createServerRoute({
     } = params;
     await assertEnterpriseLicense(licensing);
 
-    await streamsClient.ensureStream(streamName);
-    await assertFeatureNotChanged({
-      queryClient,
-      streamName,
-      queries: [{ id: queryId, feature: body.feature }],
-    });
-    await queryClient.upsert(streamName, {
+    const definition = await streamsClient.getStream(streamName);
+    await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
-      feature: body.feature,
-      kql: {
-        query: body.kql.query,
-      },
+      esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
     });
@@ -150,14 +141,14 @@ const deleteQueryRoute = createServerRoute({
       path: { queryId, name: streamName },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
 
     const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
     if (queryLink.length === 0) {
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
 
-    await queryClient.delete(streamName, queryId);
+    await queryClient.delete(definition, queryId);
 
     logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
@@ -213,14 +204,9 @@ const bulkQueriesRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
 
-    const indexOperations = operations.flatMap((op) =>
-      'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
-    );
-    await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
-
-    await queryClient.bulk(streamName, operations);
+    await queryClient.bulk(definition, operations);
 
     logger
       .get('significant_events')

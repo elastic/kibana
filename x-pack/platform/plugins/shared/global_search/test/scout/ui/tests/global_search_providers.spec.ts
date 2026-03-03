@@ -31,33 +31,29 @@ test.describe('GlobalSearch providers', { tag: tags.stateful.classic }, () => {
   test('SavedObject provider - can search for data views', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:index-pattern logstash');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(1);
-    expect(results[0].label).toBe('logstash-*');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels).toHaveText(['logstash-*']);
   });
 
   test('SavedObject provider - can search for visualizations', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:visualization pie');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(1);
-    expect(results[0].label).toBe('A Pie');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels).toHaveText(['A Pie']);
   });
 
   test('SavedObject provider - can search for maps', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:map just');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(1);
-    expect(results[0].label).toBe('just a map');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels).toHaveText(['just a map']);
   });
 
   test('SavedObject provider - can search for dashboards', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:dashboard Amazing');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(1);
-    expect(results[0].label).toBe('Amazing Dashboard');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels).toHaveText(['Amazing Dashboard']);
   });
 
   test('SavedObject provider - returns all objects matching the search', async ({
@@ -65,19 +61,17 @@ test.describe('GlobalSearch providers', { tag: tags.stateful.classic }, () => {
   }) => {
     await pageObjects.globalSearch.searchFor('type:dashboard dashboard');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(2);
-    const labels = results.map((r) => r.label);
-    expect(labels).toContain('dashboard with map');
-    expect(labels).toContain('Amazing Dashboard');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels).toHaveCount(2);
+    await expect(resultLabels.filter({ hasText: 'dashboard with map' })).toBeVisible();
+    await expect(resultLabels.filter({ hasText: 'Amazing Dashboard' })).toBeVisible();
   });
 
   test('SavedObject provider - can search by prefix', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:dashboard Amaz');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(1);
-    expect(results[0].label).toBe('Amazing Dashboard');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels).toHaveText(['Amazing Dashboard']);
   });
 
   test('Applications provider - can search for root-level applications', async ({
@@ -85,15 +79,14 @@ test.describe('GlobalSearch providers', { tag: tags.stateful.classic }, () => {
   }) => {
     await pageObjects.globalSearch.searchFor('discover');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results[0].label).toBe('Discover');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels.filter({ hasText: /^Discover$/ })).toBeVisible();
   });
 
   test('Applications provider - can search for application deep links', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('saved objects');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results).toHaveLength(1);
-    expect(results[0].label).toBe('Kibana / Saved Objects');
+    const { resultLabels } = pageObjects.globalSearch;
+    await expect(resultLabels.filter({ hasText: 'Kibana / Saved Objects' })).toBeVisible();
   });
 });
