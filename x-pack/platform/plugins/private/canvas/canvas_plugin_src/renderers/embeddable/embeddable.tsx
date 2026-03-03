@@ -130,6 +130,11 @@ export const embeddableRendererFactory = (
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
       const uuid = handlers.getElementId();
       const api = children[uuid];
+
+      if (embeddableType === 'lens') {
+        input.ref_id = input.savedObjectId;
+      }
+
       if (!api) {
         ReactDOM.render(
           renderReactEmbeddable({

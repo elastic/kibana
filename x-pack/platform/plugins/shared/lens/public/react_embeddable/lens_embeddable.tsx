@@ -34,14 +34,9 @@ import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 import type { LensEmbeddableStartServices } from './types';
 
-type EmbeddableInput = LensSerializedAPIConfig & {
-  // for backwards compatibility with existing canvas workpads
-  savedObjectId?: string;
-};
-
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<EmbeddableInput, LensApi> => {
+): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
   return {
     type: DOC_TYPE,
     /**
@@ -66,10 +61,6 @@ export const createLensEmbeddableFactory = (
       parentApi,
       uuid,
     }) => {
-      if (initialState.savedObjectId) {
-        initialState.ref_id = initialState.savedObjectId;
-      }
-
       const titleManager = initializeTitleManager(initialState);
 
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);

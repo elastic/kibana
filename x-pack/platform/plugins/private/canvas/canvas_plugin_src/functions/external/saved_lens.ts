@@ -75,7 +75,7 @@ export function savedLens(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
-          ref_id: id,
+          savedObjectId: id,
           filters: getQueryFilters(filters),
           timeRange: timerange || defaultTimeRange,
           title: title === null ? undefined : title,
