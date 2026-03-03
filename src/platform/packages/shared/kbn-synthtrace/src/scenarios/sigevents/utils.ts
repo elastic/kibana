@@ -15,13 +15,15 @@ import type {
   ServiceGraph,
   ServiceNamesOf,
   ServiceDependenciesOf,
-} from '../../lib/sigevents/types';
+} from '../../lib/service_graph_logs/types';
 import type {
+  ChannelEntry,
   ChannelVolume,
+  FailureMap,
   FailuresOrFn,
   NoiseConfig,
-} from '../../lib/sigevents/build_logs_generator';
-import { sigEvents } from '../../lib/sigevents';
+} from '../../lib/service_graph_logs/types';
+import { sigEvents } from '../../lib/service_graph_logs';
 import { withClient } from '../../lib/utils/with_client';
 /** Parsed `--scenarioOpts` keys for sigevents scenarios. */
 interface ScenarioOpts {
@@ -40,33 +42,42 @@ export function parseOpts(raw: Record<string, unknown> | undefined): {
   baseRate: number;
 } {
   const opts = (raw ?? {}) as ScenarioOpts;
+  const seed = opts.seed !== undefined ? Number(opts.seed) : Math.floor(Math.random() * 100000);
+  if (!Number.isFinite(seed)) {
+    throw new Error(`Invalid scenario option "seed": expected a finite number, got "${opts.seed}"`);
+  }
+  const baselineMinutes = opts.baselineMinutes !== undefined ? Number(opts.baselineMinutes) : 0;
+  if (!Number.isFinite(baselineMinutes) || baselineMinutes < 0) {
+    throw new Error(
+      `Invalid scenario option "baselineMinutes": expected a non-negative number of minutes, got "${opts.baselineMinutes}"`
+    );
+  }
+  const baseRate = opts.baseRate !== undefined ? Number(opts.baseRate) : 1;
+  if (!Number.isFinite(baseRate) || baseRate <= 0) {
+    throw new Error(
+      `Invalid scenario option "baseRate": expected a positive number, got "${opts.baseRate}"`
+    );
+  }
   return {
-    seed: opts.seed ? parseInt(opts.seed, 10) : Math.floor(Math.random() * 100000),
-    baselineMinutes: opts.baselineMinutes ? parseFloat(opts.baselineMinutes) : 0,
+    seed,
+    baselineMinutes,
     mockApp: opts.mockApp ?? 'default',
     scenario: opts.scenario,
-    baseRate: opts.baseRate ? parseInt(opts.baseRate, 10) : 1,
+    baseRate,
   };
 }
 
-/**
- * Converts a human-readable duration string to milliseconds.
- * Delegates parsing to `parseInterval` (same format as synthtrace `interval`: `30s`, `5m`, `1h`, `2d`).
- * @example ms('5m') // 300_000 ; ms('30s') // 30_000 ; ms('1h') // 3_600_000
- */
+/** Converts a duration string to milliseconds (`'30s'`, `'5m'`, `'1h'`, `'2d'`). */
 export const duration = (s: string): number => {
   const { intervalAmount, intervalUnit } = parseInterval(s);
   return moment.duration(intervalAmount, intervalUnit).asMilliseconds();
 };
 
-/**
- * Returns `(offsetMin) => absoluteTimestamp` anchored to the incident start.
- * @example const at = incidentAt(from, baselineWindowMs); at(-5) // pre-incident; at(0) // start; at(20) // recovery
- */
+/** Returns `(offset) => absoluteTimestamp` anchored to the incident start (`'0m'`). */
 export const incidentAt =
   (from: number, baselineWindowMs: number) =>
-  (offsetMin: number): number =>
-    from + baselineWindowMs + offsetMin * 60 * 1_000;
+  (offset: string): number =>
+    from + baselineWindowMs + duration(offset);
 
 /** Return value of `ScenarioDefinition.build`; drives log generation for one scenario run. */
 export interface ScenarioBuildResult<TServiceGraph extends ServiceGraph = ServiceGraph> {
@@ -77,19 +88,157 @@ export interface ScenarioBuildResult<TServiceGraph extends ServiceGraph = Servic
   failures?: FailuresOrFn<ServiceNamesOf<TServiceGraph>, ServiceDependenciesOf<TServiceGraph>>;
   volume?: ChannelVolume<ServiceNamesOf<TServiceGraph> | ServiceDependenciesOf<TServiceGraph>>;
   noise?: NoiseConfig;
+  /** Red-herring messages for technologies absent from the service graph. Fires every tick — not time-scoped. */
+  ghostMentions?: NoiseConfig['ghostMentions'];
 }
 
-/** A named failure scenario with metadata and a `build` factory. */
+export interface PhaseVolumeEntry {
+  /** 0 = silence, 1 = normal, N = N× burst. */
+  scale: number;
+}
+
+/** Volume spike per service or infra dep key, scoped to the phase window. */
+export type PhaseVolumeConfig<TName extends string = string> = Partial<
+  Record<TName, PhaseVolumeEntry>
+>;
+
+/** Failures, volume, and noise for a single time-bounded phase — all scoped to `[start, end)`. */
+export interface PhaseConfig<TServiceGraph extends ServiceGraph = ServiceGraph> {
+  failures?: FailureMap<ServiceNamesOf<TServiceGraph>, ServiceDependenciesOf<TServiceGraph>>;
+  volume?: PhaseVolumeConfig<ServiceNamesOf<TServiceGraph> | ServiceDependenciesOf<TServiceGraph>>;
+  /** 0 = silence, 1 = normal, N = N× burst. */
+  noise?: { scale: number };
+}
+
+/** Context injected into `ScenarioDefinition.build`. */
+export interface PhaseContext<TServiceGraph extends ServiceGraph = ServiceGraph> {
+  /** Converts a duration string offset from the incident start to an absolute timestamp. `'0m'` = incident start. */
+  at: (offset: string) => number;
+  /** Builds a result fragment with all config scoped to `[start, end)`. */
+  phase: (
+    start: string,
+    end: string,
+    config: PhaseConfig<TServiceGraph>
+  ) => ScenarioBuildResult<TServiceGraph>;
+  /** Merges multiple phase fragments into one result. */
+  phases: (list: Array<ScenarioBuildResult<TServiceGraph>>) => ScenarioBuildResult<TServiceGraph>;
+}
+
+/** Builds a `PhaseContext` anchored to a given `at` function. */
+export const makePhaseContext = <TServiceGraph extends ServiceGraph = ServiceGraph>(
+  atFn: (offset: string) => number
+): PhaseContext<TServiceGraph> => {
+  const phase = (
+    start: string,
+    end: string,
+    config: PhaseConfig<TServiceGraph>
+  ): ScenarioBuildResult<TServiceGraph> => {
+    const startTs = atFn(start);
+    const endTs = atFn(end);
+    const result: ScenarioBuildResult<TServiceGraph> = {};
+
+    if (config.failures) {
+      const failureMap = config.failures;
+      result.failures = (ts: number) => (ts >= startTs && ts < endTs ? failureMap : undefined);
+    }
+
+    if (config.volume) {
+      const volumeResult: ChannelVolume<string> = {};
+      for (const [key, entry] of Object.entries(config.volume) as Array<
+        [string, PhaseVolumeEntry | undefined]
+      >) {
+        if (entry !== undefined) {
+          volumeResult[key] = {
+            spikes: [{ start: startTs, end: endTs, scale: entry.scale }],
+          };
+        }
+      }
+      result.volume = volumeResult;
+    }
+
+    if (config.noise !== undefined) {
+      result.noise = {
+        volume: { spikes: [{ start: startTs, end: endTs, scale: config.noise.scale }] },
+      };
+    }
+
+    return result as ScenarioBuildResult<TServiceGraph>;
+  };
+
+  const phases = (
+    list: Array<ScenarioBuildResult<TServiceGraph>>
+  ): ScenarioBuildResult<TServiceGraph> => {
+    const merged: ScenarioBuildResult = {};
+
+    const failureFns = list
+      .filter((r) => r.failures !== undefined)
+      .map((r) => r.failures as FailuresOrFn);
+
+    if (failureFns.length > 0) {
+      merged.failures = (ts: number) => {
+        for (const fn of failureFns) {
+          const result = typeof fn === 'function' ? fn(ts) : fn;
+          if (result !== undefined) return result;
+        }
+        return undefined;
+      };
+    }
+
+    const volumeMap: Record<string, ChannelEntry> = {};
+    for (const r of list) {
+      if (!r.volume) continue;
+      for (const [key, entry] of Object.entries(r.volume) as Array<
+        [string, ChannelEntry | undefined]
+      >) {
+        if (!entry) continue;
+        if (!volumeMap[key]) {
+          volumeMap[key] = { ...entry };
+        } else {
+          volumeMap[key] = {
+            ...volumeMap[key],
+            rate: entry.rate ?? volumeMap[key].rate,
+            every: entry.every ?? volumeMap[key].every,
+            spikes: [...(volumeMap[key].spikes ?? []), ...(entry.spikes ?? [])],
+          };
+        }
+      }
+    }
+    if (Object.keys(volumeMap).length > 0) {
+      merged.volume = volumeMap;
+    }
+
+    const noiseSpikes = list.flatMap((r) => r.noise?.volume?.spikes ?? []);
+    if (noiseSpikes.length > 0) {
+      merged.noise = { volume: { spikes: noiseSpikes } };
+    }
+
+    const seenMessages = new Set<string>();
+    const ghostMentions = list
+      .flatMap((r) => r.ghostMentions ?? [])
+      .filter((g) => {
+        if (seenMessages.has(g.message)) return false;
+        seenMessages.add(g.message);
+        return true;
+      });
+    if (ghostMentions.length > 0) {
+      merged.ghostMentions = ghostMentions;
+    }
+
+    return merged as ScenarioBuildResult<TServiceGraph>;
+  };
+
+  return { at: atFn, phase, phases };
+};
+
+/** A failure scenario with a `build` factory. */
 export interface ScenarioDefinition<TServiceGraph extends ServiceGraph = ServiceGraph> {
-  name: string;
-  description: string;
-  build(ctx: { at: (offsetMin: number) => number }): ScenarioBuildResult<TServiceGraph>;
+  /** When set, the scenario loops every N minutes in `--live` mode. Omit for open-ended scenarios. */
+  cycleDurationMinutes?: number;
+  build(ctx: PhaseContext<TServiceGraph>): ScenarioBuildResult<TServiceGraph>;
 }
 
 /** Bundles a service topology, entry service, and failure scenario registry for a mock application. */
 export interface MockAppDefinition<TServiceGraph extends ServiceGraph = ServiceGraph> {
-  name: string;
-  description: string;
   serviceGraph: TServiceGraph;
   entryService: ServiceNamesOf<TServiceGraph>;
   scenarios: Record<string, ScenarioDefinition<TServiceGraph>>;
@@ -108,8 +257,7 @@ export const defineMockApp = <TServiceGraph extends ServiceGraph>(
  * export default createSigEventsScenario({ default: CLAIMS_APP, ecommerce: ECOMMERCE_APP });
  */
 export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
-  mockApps: Record<string, MockAppDefinition<TServiceGraph>>,
-  opts?: { baseRate?: number }
+  mockApps: Record<string, MockAppDefinition<TServiceGraph>>
 ): Scenario<LogDocument> {
   return async (runOptions) => {
     const {
@@ -139,35 +287,55 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
     return {
       generate: ({ range, clients: { logsEsClient } }) => {
         const { logger } = runOptions;
-        const baseRate = parsedBaseRate ?? opts?.baseRate ?? 1;
+        const baseRate = parsedBaseRate ?? 1;
         const from = runOptions.from as number;
-        const baselineWindowMs = baselineMinutes * 60 * 1000;
+        const baselineWindowMs = duration('1m') * baselineMinutes;
+
+        const activeScenario = scenarioId ? mockApp.scenarios[scenarioId] : undefined;
 
         const {
-          failures,
+          failures: rawFailures,
           volume,
-          noise,
+          noise: scenarioNoise,
+          ghostMentions,
           serviceGraph: scenarioGraph,
           entryService: scenarioEntryService,
-        } = scenarioId
-          ? mockApp.scenarios[scenarioId].build({
-              at: incidentAt(from, baselineWindowMs),
-            })
-          : {
-              failures: undefined,
-              volume: undefined,
-              noise: undefined,
-              serviceGraph: undefined,
-              entryService: undefined,
-            };
+        } = activeScenario
+          ? activeScenario.build(
+              makePhaseContext<TServiceGraph>(incidentAt(from, baselineWindowMs))
+            )
+          : {};
+
+        const noise: NoiseConfig | undefined =
+          scenarioNoise || ghostMentions
+            ? { ...scenarioNoise, ...(ghostMentions ? { ghostMentions } : {}) }
+            : undefined;
+
+        const cycleDurationMs = activeScenario?.cycleDurationMinutes
+          ? activeScenario.cycleDurationMinutes * duration('1m')
+          : undefined;
+
+        const incidentStartMs = from + baselineWindowMs;
+
+        const failures = (() => {
+          if (!rawFailures || !cycleDurationMs || typeof rawFailures !== 'function') {
+            return rawFailures;
+          }
+          return (ts: number) => {
+            const elapsed = ts - incidentStartMs;
+            const cycleRelative = ((elapsed % cycleDurationMs) + cycleDurationMs) % cycleDurationMs;
+            return rawFailures(incidentStartMs + cycleRelative);
+          };
+        })();
 
         const serviceGraph = scenarioGraph ?? mockApp.serviceGraph;
 
         const { generator: tick } = sigEvents.buildLogsGenerator({
-          // one tick per minute per synthtrace interval; spacing = 60 000 ms / baseRate.
-          tickIntervalMs: Math.round(60_000 / baseRate),
+          tickIntervalMs: duration('1m'),
           seed,
           serviceGraph,
+          cycleMs: cycleDurationMs,
+          cycleOriginMs: cycleDurationMs != null ? incidentStartMs : undefined,
           entryService: scenarioEntryService ?? mockApp.entryService,
           failures,
           volume,
@@ -176,7 +344,9 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
 
         return withClient(
           logsEsClient,
-          logger.perf('generating_sigevents', () => range.interval('1m').rate(1).generator(tick))
+          logger.perf('generating_sigevents', () =>
+            range.interval('1m').rate(baseRate).generator(tick)
+          )
         );
       },
     };

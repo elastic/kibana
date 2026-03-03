@@ -31,4 +31,4 @@ export {
 export { indexAll } from './src/lib/utils/with_client';
 export * from './src/scenarios/agent_builder';
 
-export { sigEvents } from './src/lib/sigevents';
+export { sigEvents } from './src/lib/service_graph_logs';

@@ -14,10 +14,7 @@
  * baseline. Pass --scenarioOpts to inject a failure scenario:
  *
  *   node scripts/synthtrace.js sigevents \
- *     --scenarioOpts="scenario=db_timeout,seed=42"
- *
- * Available scenarios: db_timeout, multi_failure, k8s_oom, k8s_crash_loop_back,
- *   volume_skew, cascading_payment, db_oom_crashloop
+ *     --scenarioOpts="scenario=postgres_timeout,seed=42"
  *
  */
 
