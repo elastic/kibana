@@ -29,6 +29,12 @@ const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
       hide_exists: true,
     },
   },
+  {
+    title: 'Attack ID',
+    field_name: 'kibana.alert.attack_ids',
+    exists_selected: true,
+    persist: true,
+  },
 ];
 
 const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];

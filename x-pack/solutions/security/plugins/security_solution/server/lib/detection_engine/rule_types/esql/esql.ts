@@ -33,6 +33,7 @@ import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 import type { ExcludedDocument, EsqlState } from './types';
@@ -89,6 +90,9 @@ export const esqlExecutor = async ({
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
     const isRuleAggregating = computeIsESQLQueryAggregating(ruleParams.query);
     const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
@@ -131,7 +135,7 @@ export const esqlExecutor = async ({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
-          filters: dataTiersFilters,
+          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,

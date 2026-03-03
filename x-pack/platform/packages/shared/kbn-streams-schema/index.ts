@@ -27,7 +27,7 @@ export {
 
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
-export { isRootStreamDefinition } from './src/helpers/is_root';
+export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
@@ -62,12 +62,19 @@ export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
 export {
   isChildOf,
   isDescendantOf,
+  isParentName,
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  getRoot,
   MAX_NESTING_LEVEL,
   isRoot,
+  ROOT_STREAM_NAMES,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+  type RootStreamName,
 } from './src/shared/hierarchy';
 
 export {
@@ -169,6 +176,8 @@ export {
   COMPUTED_FEATURE_TYPES,
   isFeature,
   isComputedFeature,
+  isDuplicateFeature,
+  hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,

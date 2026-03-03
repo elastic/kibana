@@ -704,6 +704,82 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('defaults X axis title to hidden for date histogram when no existing state', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    // X axis title should be hidden by default for date histogram
+    // to reduce redundant information (timestamp per bucket size is shown in the chart)
+    expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+      x: false,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
+  test('defaults X axis title to visible for non-date histogram when no existing state', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [strCol('category'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    // X axis title should be visible for non-date histogram (ordinal scale)
+    expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
+  test('preserves existing X axis title setting for date histogram when state exists', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar',
+          splitAccessors: undefined,
+          xAccessor: 'date',
+        },
+      ],
+    };
+
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    // Should preserve the existing user preference (x: true)
+    expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
   test('passes annotation layer for date histogram data layer', () => {
     const annotationLayer: XYAnnotationLayerConfig = {
       layerId: 'second',

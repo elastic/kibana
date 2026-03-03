@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
@@ -26,10 +27,13 @@ import type {
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
+import type { SkillRegistry } from './services/skills/skill_registry';
+import type { AgentExecutionService } from './services/execution';
+import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -62,7 +66,8 @@ export interface AttachmentsSetup {
 
 export interface SkillsSetup {
   /**
-   * Register a skill to be available in agentBuilder.
+   * Register a built-in skill to be available in agentBuilder.
+   * Registration is synchronous; validation is deferred to start.
    */
   register: SkillServiceSetup['registerSkill'];
 }
@@ -81,6 +86,11 @@ export interface ToolsSetup {
  * AgentBuilder skills service's start contract
  */
 export interface SkillsStart {
+  /**
+   * Create a skill registry scoped to the current user and context.
+   * The registry provides access to both built-in and persisted skills.
+   */
+  getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
   /**
    * Register a skill dynamically after plugin start.
    * Only affects future conversations (existing ones snapshot skills at creation time).
@@ -114,6 +124,32 @@ export interface AgentsSetup {
   register: (definition: BuiltInAgentDefinition) => void;
 }
 
+export interface AgentsStart {
+  /**
+   * Executes an agent with the given parameters.
+   * @deprecated use execution service instead.
+   */
+  runAgent: RunAgentFn;
+  /**
+   * Return an agent registry scoped to the current user and context.
+   */
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+}
+
+/**
+ * AgentBuilder execution service's start contract
+ */
+export interface ExecutionStart {
+  /**
+   * Execute an agent.
+   */
+  executeAgent: AgentExecutionService['executeAgent'];
+  /**
+   * Retrieve an agent execution by its ID.
+   */
+  getExecution: AgentExecutionService['getExecution'];
+}
+
 /**
  * Setup contract of the agentBuilder plugin.
  */
@@ -141,21 +177,40 @@ export interface AgentBuilderPluginSetup {
 }
 
 /**
+ * AgentBuilder runtime service's start contract.
+ */
+export interface RuntimeStart {
+  /**
+   * Creates a model provider for the given request context.
+   * The model provider can be used to obtain a {@link ScopedModel} for use
+   * with utilities like `generateEsql` from `@kbn/agent-builder-genai-utils`.
+   */
+  createModelProvider: ModelProviderFactoryFn;
+}
+
+/**
  * Start contract of the agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
   /**
    * Agents service, to execute agents.
    */
-  agents: {
-    runAgent: RunAgentFn;
-  };
+  agents: AgentsStart;
   /**
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
   /**
-   * Skills service, to register or unregister skills dynamically.
+   * Skills service, to manage and access skills.
    */
   skills: SkillsStart;
+  /**
+   * Execution service, to execute agents and retrieve execution status.
+   */
+  execution: ExecutionStart;
+  /**
+   * Runtime utilities for consumers that need to interact with LLM models
+   * outside of the agent builder's built-in tool/agent execution flow.
+   */
+  runtime: RuntimeStart;
 }

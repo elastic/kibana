@@ -1,10 +1,5 @@
 x-on-merge-gates: &on_merge_gates
 - build
-- quick_checks
-- checks
-- linting
-- linting_with_types
-- check_types
 
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh

@@ -15,11 +15,14 @@ import {
   EuiHorizontalRule,
   EuiIcon,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { RoundFlyout } from './round_flyout';
+import { TraceFlyout } from './trace_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 import { RoundIcon } from './round_icon';
@@ -28,6 +31,10 @@ import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const rawResponseButtonLabel = i18n.translate('xpack.agentBuilder.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
+});
+
+const viewTraceButtonLabel = i18n.translate('xpack.agentBuilder.conversation.viewTraceButton', {
+  defaultMessage: 'View Trace',
 });
 
 const closePanelLabel = i18n.translate('xpack.agentBuilder.conversation.closePanel', {
@@ -52,7 +59,23 @@ export const RoundThinkingPanel = ({
   onClose,
 }: RoundThinkingPanelProps) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
   const [showFlyout, setShowFlyout] = useState(false);
+  const [showTraceFlyout, setShowTraceFlyout] = useState(false);
+
+  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
+  const isExperimentalEnabled = services.uiSettings.get<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+    false
+  );
+
+  const traceId = useMemo(() => {
+    const id = rawRound.trace_id;
+    if (!id) return undefined;
+    return Array.isArray(id) ? id[0] : id;
+  }, [rawRound.trace_id]);
+
+  const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
 
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -106,16 +129,37 @@ export const RoundThinkingPanel = ({
                 <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
                 <InputOutputTokensDisplay modelUsage={rawRound.model_usage} />
               </EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType={'code'} color="text" iconSide="left" onClick={toggleFlyout}>
-                  {rawResponseButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
+              <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd">
+                {showTraceButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="apmTrace"
+                      color="text"
+                      iconSide="left"
+                      onClick={() => setShowTraceFlyout(true)}
+                    >
+                      {viewTraceButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="code" color="text" iconSide="left" onClick={toggleFlyout}>
+                    {rawResponseButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexGroup>
           </EuiFlexGroup>
         )}
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
+      {showTraceFlyout && TraceWaterfallComponent && traceId && (
+        <TraceFlyout
+          traceId={traceId}
+          onClose={() => setShowTraceFlyout(false)}
+          TraceWaterfall={TraceWaterfallComponent}
+        />
+      )}
     </>
   );
 };
