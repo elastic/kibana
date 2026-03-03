@@ -32,6 +32,9 @@ jest.mock('../kibana_services', () => ({
   logger: {
     error: jest.fn(),
   },
+  expressionsService: {
+    inject: jest.fn().mockImplementation((ast, references) => ast),
+  },
 }));
 
 describe('transformWorkpadOut', () => {
