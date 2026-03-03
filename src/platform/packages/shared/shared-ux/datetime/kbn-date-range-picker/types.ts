@@ -28,12 +28,13 @@ export interface TimeRangeBounds {
   start: DateString;
 }
 
-export interface TimeRangeBoundsPreset extends TimeRangeBounds {
-  label: string;
+/** Used for presets and recent options */
+export interface TimeRangeBoundsOption extends TimeRangeBounds {
+  label?: string;
 }
 
 export interface TimeRangeTransformOptions {
-  presets?: TimeRangeBoundsPreset[];
+  presets?: TimeRangeBoundsOption[];
   delimiter?: string;
   dateFormat?: string;
 }

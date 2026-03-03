@@ -276,3 +276,11 @@ export const estimateTokens = (data: unknown): number => {
   const str = JSON.stringify(data);
   return Math.ceil(str.length / 4);
 };
+
+/**
+ * Response from the update origin API endpoint.
+ */
+export interface UpdateOriginResponse {
+  success: boolean;
+  attachment: VersionedAttachment;
+}
