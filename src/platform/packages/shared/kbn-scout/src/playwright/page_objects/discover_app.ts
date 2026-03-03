@@ -203,6 +203,11 @@ export class DiscoverApp {
     await expect(docViewer).toBeVisible({ timeout: 30_000 });
   }
 
+  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
+    await this.openDocumentDetails({ rowIndex });
+    await this.waitForDocViewerFlyoutOpen();
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
