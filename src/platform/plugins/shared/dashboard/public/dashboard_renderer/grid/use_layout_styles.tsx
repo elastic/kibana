@@ -63,13 +63,13 @@ export const useLayoutStyles = () => {
 
       // styles for the panel grid size gauge that appears when resizing
       .kbnGridPanel--resizeGauge {
-        padding: ${euiTheme.size.xs};
+        padding: ${euiTheme.size.xxs};
         z-index: ${euiTheme.levels.menu};
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-radius: ${euiTheme.border.radius.small};
+        border-bottom-left-radius: ${euiTheme.border.radius.small};
 
         & .kbnGridPanel--resizeGauge--inner {
-          padding: ${euiTheme.size.s};
+          padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
           height: ${euiTheme.size.l};
           display: flex;
           justify-content: center;
