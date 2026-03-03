@@ -29,6 +29,7 @@ import {
   FEATURE_EXPIRES_AT,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_DELETED_AT,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -57,32 +58,42 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
-    const filteredOperations = await this.filterValidOperations(stream, operations);
+    const { indexOps, deleteFeatures } = await this.resolveValidBulkOperations(stream, operations);
 
-    return await this.clients.storageClient.bulk({
-      operations: filteredOperations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(stream, operation.index.feature);
-          return {
-            index: {
-              document,
-              _id: document[FEATURE_UUID],
-            },
-          };
-        }
+    const now = new Date().toISOString();
+    const softDeleteIndexOps = deleteFeatures.map((feature) => {
+      const document = toStorage(stream, { ...feature, deleted_at: now, expires_at: undefined });
+      return { index: { document, _id: document[FEATURE_UUID] } };
+    });
 
-        return { delete: { _id: operation.delete.id } };
-      }),
+    const regularIndexOps = indexOps.map((op) => {
+      const document = toStorage(stream, op.index.feature);
+      return { index: { document, _id: document[FEATURE_UUID] } };
+    });
+
+    return this.clients.storageClient.bulk({
+      operations: [...regularIndexOps, ...softDeleteIndexOps],
       throwOnFail: true,
     });
   }
 
   async getFeatures(
-    stream: string,
-    filters?: { type?: string[]; id?: string[]; minConfidence?: number; limit?: number }
+    streams: string | string[],
+    filters?: {
+      type?: string[];
+      id?: string[];
+      minConfidence?: number;
+      limit?: number;
+      includeDeleted?: boolean;
+    }
   ): Promise<{ hits: Feature[]; total: number }> {
+    const streamNames = Array.isArray(streams) ? streams : [streams];
+    if (streamNames.length === 0) {
+      return { hits: [], total: 0 };
+    }
+
     const filterClauses: QueryDslQueryContainer[] = [
-      ...termQuery(STREAM_NAME, stream),
+      ...termsQuery(STREAM_NAME, streamNames),
       ...(filters?.id?.length ? termsQuery(FEATURE_ID, filters.id) : []),
       {
         bool: {
@@ -94,6 +105,12 @@ export class FeatureClient {
         },
       },
     ];
+
+    if (!filters?.includeDeleted) {
+      filterClauses.push({
+        bool: { must_not: { exists: { field: FEATURE_DELETED_AT } } },
+      });
+    }
 
     if (filters?.type?.length) {
       filterClauses.push({
@@ -131,7 +148,7 @@ export class FeatureClient {
     };
   }
 
-  async getFeature(stream: string, uuid: string) {
+  async getFeature(stream: string, uuid: string, options?: { includeDeleted?: boolean }) {
     const hit = await this.clients.storageClient.get({ id: uuid }).catch((err) => {
       if (isNotFoundError(err)) {
         throw new StatusError(`Feature ${uuid} not found`, 404);
@@ -143,49 +160,27 @@ export class FeatureClient {
     if (source[STREAM_NAME] !== stream) {
       throw new StatusError(`Feature ${uuid} not found`, 404);
     }
+
+    if (!options?.includeDeleted && source[FEATURE_DELETED_AT]) {
+      throw new StatusError(`Feature ${uuid} not found`, 404);
+    }
+
     return fromStorage(source);
   }
 
-  async deleteFeature(stream: string, uuid: string) {
-    const feature = await this.getFeature(stream, uuid);
-    return await this.clients.storageClient.delete({ id: feature.uuid });
-  }
-
-  async deleteFeatures(stream: string) {
-    const features = await this.getFeatures(stream);
-    return await this.clients.storageClient.bulk({
-      operations: features.hits.map((feature) => ({
-        delete: { _id: feature.uuid },
-      })),
-    });
-  }
-
-  async getAllFeatures(streams: string[]): Promise<{ hits: Feature[]; total: number }> {
-    if (streams.length === 0) {
-      return { hits: [], total: 0 };
-    }
-
-    const filterClauses: QueryDslQueryContainer[] = [
-      ...termsQuery(STREAM_NAME, streams),
-      {
-        bool: {
-          should: [
-            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
-            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ];
-
+  async getDeletedFeatures(
+    stream: string,
+    options?: { limit?: number }
+  ): Promise<{ hits: Feature[]; total: number }> {
     const featuresResponse = await this.clients.storageClient.search({
-      size: 10_000,
+      size: options?.limit ?? 10_000,
       track_total_hits: true,
       query: {
         bool: {
-          filter: filterClauses,
+          filter: [...termsQuery(STREAM_NAME, [stream]), { exists: { field: FEATURE_DELETED_AT } }],
         },
       },
+      sort: [{ [FEATURE_DELETED_AT]: { order: 'desc' } }],
     });
 
     return {
@@ -194,32 +189,53 @@ export class FeatureClient {
     };
   }
 
-  private async filterValidOperations(
+  async softDeleteFeature(stream: string, uuid: string) {
+    const feature = await this.getFeature(stream, uuid);
+    const softDeleted: Feature = {
+      ...feature,
+      deleted_at: new Date().toISOString(),
+      expires_at: undefined,
+    };
+    const document = toStorage(stream, softDeleted);
+    return this.clients.storageClient.bulk({
+      operations: [{ index: { document, _id: document[FEATURE_UUID] } }],
+      throwOnFail: true,
+    });
+  }
+
+  async hardDeleteFeatures(stream: string) {
+    const features = await this.getFeatures(stream, { includeDeleted: true });
+    return this.clients.storageClient.bulk({
+      operations: features.hits.map((feature) => ({
+        delete: { _id: feature.uuid },
+      })),
+    });
+  }
+
+  private async resolveValidBulkOperations(
     stream: string,
     operations: FeatureBulkOperation[]
-  ): Promise<FeatureBulkOperation[]> {
+  ): Promise<{ indexOps: FeatureBulkIndexOperation[]; deleteFeatures: Feature[] }> {
+    const indexOps = operations.filter((op): op is FeatureBulkIndexOperation => 'index' in op);
     const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
 
-    const validDeleteIds =
+    const deleteFeatures: Feature[] =
       deleteIds.length > 0
-        ? new Set(
-            (
-              await this.clients.storageClient.search({
-                size: deleteIds.length,
-                track_total_hits: false,
-                query: {
-                  bool: {
-                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
-                  },
+        ? (
+            await this.clients.storageClient.search({
+              size: deleteIds.length,
+              track_total_hits: false,
+              query: {
+                bool: {
+                  filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+                  must_not: [{ exists: { field: FEATURE_DELETED_AT } }],
                 },
-              })
-            ).hits.hits.flatMap((hit) => hit._id ?? [])
-          )
-        : new Set<string>();
+              },
+            })
+          ).hits.hits.map((hit) => fromStorage(hit._source))
+        : [];
 
-    return operations.filter(
-      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
-    );
+    return { indexOps, deleteFeatures };
   }
 
   findDuplicateFeature({
@@ -250,6 +266,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
+    [FEATURE_DELETED_AT]: feature.deleted_at,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
   };
@@ -272,6 +289,7 @@ function fromStorage(feature: StoredFeature): Feature {
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
+    deleted_at: feature[FEATURE_DELETED_AT],
     title: feature[FEATURE_TITLE],
     filter: feature[FEATURE_FILTER],
   };
