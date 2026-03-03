@@ -23,9 +23,9 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     const createPromises = Array.from({ length: TOTAL_MARKDOWNS }, (_, i) =>
       kbnClient.savedObjects.create({
         type: 'markdown',
-        id: `test-search-markdown-${String(i).padStart(2, '0')}`,
+        id: `test-search-markdown-${String(i)}`,
         attributes: {
-          title: `Search Markdown ${String(i).padStart(2, '0')}`,
+          title: `Search Markdown ${String(i)}`,
           description: `Description for markdown ${i}`,
           content: `# Content ${i}`,
         },
@@ -106,6 +106,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
       expect(response).toHaveStatusCode(200);
       expect(response.body.total).toBe(TOTAL_MARKDOWNS);
       expect(response.body.markdowns).toHaveLength(10);
+      expect(response.body.markdowns[0].id).toBe(`test-search-markdown-10`);
     }
   );
 });
