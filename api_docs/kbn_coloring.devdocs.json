@@ -3221,7 +3221,7 @@
         "label": "ColorStop",
         "description": [],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-        "lineNumber": 160,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3234,7 +3234,7 @@
             "label": "color",
             "description": [],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 161,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3247,7 +3247,7 @@
             "label": "stop",
             "description": [],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 162,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3343,7 +3343,9 @@
             "parentPluginId": "@kbn/coloring",
             "id": "def-common.CustomPaletteParams.progression",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "progression",
             "description": [],
             "signature": [
@@ -3352,8 +3354,138 @@
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "lineNumber": 144,
             "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/lens-common",
+                "path": "src/platform/packages/shared/kbn-lens-common/visualizations/heatmap/constants.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/lib/configurations/palette.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/coloring.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/shared_components/coloring/constants.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/synthetics/single_metric_config.ts"
+              },
+              {
+                "plugin": "exploratoryView",
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/synthetics/single_metric_config.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
+              },
+              {
+                "plugin": "expressionHeatmap",
+                "path": "src/platform/plugins/shared/chart_expressions/expression_heatmap/public/constants.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/platform/plugins/shared/vis_types/timeseries/public/convert_to_lens/lib/configurations/palette/index.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/gauge/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/legacy_metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/absolute.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/absolute.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/absolute.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/absolute.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/bad_max_step.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/bad_max_step.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/bad_max_step.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/percentage.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/percentage.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/percentage.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/percentage.mocks.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/coloring",
@@ -3366,7 +3498,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 145,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3382,7 +3514,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 146,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3394,7 +3526,7 @@
             "tags": [],
             "label": "stops",
             "description": [
-              "lower color stops"
+              "upper bounds of color stops ranges"
             ],
             "signature": [
               {
@@ -3407,7 +3539,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 147,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3419,7 +3551,7 @@
             "tags": [],
             "label": "colorStops",
             "description": [
-              "upper color stops"
+              "lower bounds of color stops ranges"
             ],
             "signature": [
               {
@@ -3432,7 +3564,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 149,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3448,7 +3580,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 151,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3464,7 +3596,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-            "lineNumber": 152,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4251,7 +4383,7 @@
           "\"complementary\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4268,7 +4400,7 @@
           "\"custom\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4285,7 +4417,7 @@
           "5"
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4294,15 +4426,15 @@
       {
         "parentPluginId": "@kbn/coloring",
         "id": "def-common.DEFAULT_CONTINUITY",
-        "type": "string",
+        "type": "CompoundType",
         "tags": [],
         "label": "DEFAULT_CONTINUITY",
         "description": [],
         "signature": [
-          "\"above\""
+          "\"none\" | \"all\" | \"above\" | \"below\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4319,7 +4451,7 @@
           "\"default\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4336,7 +4468,7 @@
           "100"
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 16,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4353,7 +4485,7 @@
           "0"
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 15,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4387,7 +4519,7 @@
           "\"positive\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4404,7 +4536,7 @@
           "\"percent\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 14,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4421,7 +4553,7 @@
           "\"fixed\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4438,7 +4570,7 @@
           "\"complimentary\""
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4496,7 +4628,7 @@
           "[]; maxSteps?: number | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
-        "lineNumber": 155,
+        "lineNumber": 158,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
