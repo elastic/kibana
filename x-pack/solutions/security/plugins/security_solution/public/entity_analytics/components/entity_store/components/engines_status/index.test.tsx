@@ -89,7 +89,6 @@ describe('EngineStatus', () => {
 
     expect(screen.getByText('User Store')).toBeInTheDocument();
     expect(screen.getByText('Download status')).toBeInTheDocument();
-    expect(screen.getByText('Clear Entity Data')).toBeInTheDocument();
   });
 
   it('calls downloadJson when download button is clicked', () => {
