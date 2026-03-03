@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
-
-export default createPlaywrightConfig({
-  testDir: './parallel_tests/metrics_experience',
-  workers: 2,
-  runGlobalSetup: true,
-});
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-lint-cli'],
+};

@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
-
-export default createPlaywrightConfig({
-  testDir: './parallel_tests/traces_experience',
-  workers: 2,
-  runGlobalSetup: true,
-});
+require('@kbn/babel-register').install();
+require('../src/manage_source_embedding_cluster_config').uploadToVault();

@@ -114,9 +114,6 @@ describe('createStackConnector', () => {
           },
           secrets: {
             apiKey: 'api-key-123',
-            secretHeaders: {
-              'X-API-Key': 'api-key-123',
-            },
           },
         },
       });
@@ -162,6 +159,54 @@ describe('createStackConnector', () => {
           secrets: {
             user: 'username',
             password: 'password',
+          },
+        },
+      });
+    });
+
+    it('should create MCP connector with apiKey auth and valueTemplate (e.g. PagerDuty)', async () => {
+      const mockStackConnector = {
+        id: 'mcp-connector-pagerduty',
+        name: '.mcp',
+        actionTypeId: '.mcp',
+      };
+
+      const connectorConfigPagerDuty: StackConnectorConfig = {
+        type: '.mcp',
+        config: {
+          serverUrl: 'https://mcp.pagerduty.com/mcp',
+          hasAuth: true,
+          authType: 'apiKey' as const,
+          apiKeyHeaderName: 'Authorization',
+          apiKeyHeaderValue: 'Token token={{apiKey}}',
+        },
+        importedTools: undefined,
+      };
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        connectorConfigPagerDuty,
+        'pagerduty-token-abc'
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.mcp',
+          config: {
+            serverUrl: 'https://mcp.pagerduty.com/mcp',
+            hasAuth: true,
+            authType: 'apiKey',
+            apiKeyHeaderName: 'Authorization',
+            apiKeyHeaderValue: 'Token token={{apiKey}}',
+          },
+          secrets: {
+            apiKey: 'pagerduty-token-abc',
           },
         },
       });
