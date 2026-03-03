@@ -11,6 +11,8 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import { isLiteral } from '@elastic/esql';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -31,11 +33,9 @@ import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import { buildFieldsBrowserCommandArgs } from '../../../language/autocomplete/autocomplete_utils';
 import { createFieldsBrowserSuggestion } from '../../registry/complete_items';
-import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
-import { isLiteral } from '../../../ast/is';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
